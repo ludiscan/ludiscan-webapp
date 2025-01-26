@@ -1,13 +1,20 @@
 {
   "name": "ludiscan-webapp",
   "private": true,
+  "engines": {
+    "node": "23.6.x",
+    "npm": "10.x"
+  },
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "release:patch": "npm version patch --message 'v%s' && git push && git push origin --tags",
+    "release:minor": "npm version minor --message 'v%s' && git push && git push origin --tags",
+    "release:major": "npm version major --message 'v%s' && git push && git push origin --tags"
   },
   "dependencies": {
     "react": "^18.3.1",
