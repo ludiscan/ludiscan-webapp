@@ -1,0 +1,12 @@
+{
+  "extends": [
+    "stylelint-config-standard",
+    "stylelint-config-recess-order"
+  ],
+  "overrides": [
+    {
+      "files": ["src/**/*.tsx"],
+      "customSyntax": "postcss-styled-syntax"
+    }
+  ]
+}
