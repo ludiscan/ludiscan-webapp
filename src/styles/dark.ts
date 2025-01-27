@@ -1,15 +1,17 @@
-import type {Theme} from '@emotion/react';
+import { Colors } from './index.ts';
+
+import type { Theme } from '@emotion/react';
 
 const darkTheme: Theme = {
   colors: {
-    primary: '#3498db',
-    background: '#171717',
-    surface: '#333333',
-    text: '#f1f1f1',
-    secondary: '#a5a5a5',
-    border: '#333333',
-    error: '#ff0000',
+    primary: Colors.primary,
+    background: Colors.stone11,
+    surface: Colors.stone10,
+    text: Colors.white,
+    secondary: Colors.stone06,
+    border: Colors.stone09,
+    error: Colors.error,
   },
-};
+} as const;
 
 export default darkTheme;

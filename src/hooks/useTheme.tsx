@@ -6,7 +6,7 @@ import darkTheme from '../styles/dark.ts';
 import lightTheme from '../styles/light.ts';
 
 import type { Theme } from '@emotion/react';
-import type { FC, ReactNode} from 'react';
+import type { FC, ReactNode } from 'react';
 
 export type ThemeName = 'light' | 'dark';
 
@@ -19,13 +19,11 @@ interface SharedThemeContextType {
 
 export const SharedThemeContext = createContext<SharedThemeContextType | undefined>(undefined);
 
-export const SharedThemeProvider: FC<{ children: ReactNode }> = ({
-  children
-}) => {
+export const SharedThemeProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [theme, setTheme] = useState(lightTheme);
 
   const toggleTheme = useCallback(() => {
-    setTheme(currentTheme => currentTheme === lightTheme ? darkTheme : lightTheme);
+    setTheme((currentTheme) => (currentTheme === lightTheme ? darkTheme : lightTheme));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -39,11 +37,7 @@ export const SharedThemeProvider: FC<{ children: ReactNode }> = ({
 
   const value = useMemo(() => ({ theme, toggleTheme, setupTheme }), [setupTheme, theme, toggleTheme]);
 
-  return (
-    <SharedThemeContext.Provider value={value}>
-      {children}
-    </SharedThemeContext.Provider>
-  );
+  return <SharedThemeContext.Provider value={value}>{children}</SharedThemeContext.Provider>;
 };
 
 // 基本アプリ内ではuseThemeSwitcherを使ってthemeの呼び出しを行う
