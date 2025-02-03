@@ -8,7 +8,6 @@ import { fontSizes } from '../../styles/style';
 import type { Session } from '../../modeles/session';
 import type { FC } from 'react';
 
-
 export type SessionItemRowProps = {
   className?: string | undefined;
   session: Session;

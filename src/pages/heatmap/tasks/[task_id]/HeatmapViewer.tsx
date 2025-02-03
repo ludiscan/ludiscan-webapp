@@ -10,7 +10,6 @@ import { query } from '../../../../modeles/qeury';
 import type { HeatmapTask } from '../../../../modeles/heatmaptask';
 import type { FC } from 'react';
 
-
 type HeatMapViewerProps = {
   modelPath: string | null;
   modelType: 'gltf' | 'glb' | 'obj' | null;

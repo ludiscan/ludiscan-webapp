@@ -11,7 +11,6 @@ import { colors } from './style';
 import type { Meta, StoryObj } from '@storybook/react';
 import type { FC } from 'react';
 
-
 export default {
   component: undefined,
   controls: { hideNoControlsWarning: true },

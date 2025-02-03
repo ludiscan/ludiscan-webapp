@@ -4,8 +4,6 @@ import { colors, fontSizes } from '../../styles/style';
 
 import type { ReactNode } from 'react';
 
-
-
 export type ButtonProps = {
   className?: string | undefined;
   onClick: () => Promise<void> | void;
