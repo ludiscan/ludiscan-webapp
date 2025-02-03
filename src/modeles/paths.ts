@@ -15,7 +15,7 @@ export const PageRoutes = [
     path: '/heatmap/tasks/:task_id',
     Component: HeatMapTaskIdPage,
     params: ['task_id'] as const,
-  }
+  },
 ] as const;
 
 // PageRoutes 配列の各要素の型を PagePathWithParams として定義

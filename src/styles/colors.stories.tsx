@@ -1,17 +1,16 @@
-// Tooltip.stories.tsx
-
-import { Card } from '../component/atoms/Card.tsx';
-import { FlexColumn } from '../component/atoms/Flex.tsx';
-import { Text } from '../component/atoms/Text.tsx';
-import { SharedThemeProvider, useSharedTheme } from '../hooks/useSharedTheme.tsx';
-import { flattenObject } from '../utils/flattenObject.ts';
+import { Card } from '../component/atoms/Card';
+import { FlexColumn } from '../component/atoms/Flex';
+import { Text } from '../component/atoms/Text';
+import { SharedThemeProvider, useSharedTheme } from '../hooks/useSharedTheme';
+import { flattenObject } from '../utils/flattenObject';
 
 import darkTheme from './dark.ts';
-import { colors } from './index.ts';
 import lightTheme from './light.ts';
+import { colors } from './style';
 
 import type { Meta, StoryObj } from '@storybook/react';
 import type { FC } from 'react';
+
 
 export default {
   component: undefined,
@@ -35,7 +34,7 @@ const Template: Story = {
     return (
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
-      <SharedThemeProvider initialTheme={args.type === 'light' ? lightTheme : darkTheme}  >
+      <SharedThemeProvider initialTheme={args.type === 'light' ? lightTheme : darkTheme}>
         <Card color={colors.honey02}>
           <Item />
         </Card>
@@ -43,7 +42,6 @@ const Template: Story = {
     );
   },
 };
-
 
 export const Default: Story = {
   ...Template,

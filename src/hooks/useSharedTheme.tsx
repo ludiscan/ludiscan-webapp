@@ -22,7 +22,7 @@ export const SharedThemeContext = createContext<SharedThemeContextType | undefin
 export type SharedThemeProviderProps = {
   children: ReactNode;
   initialTheme?: Theme;
-}
+};
 
 export const SharedThemeProvider: FC<SharedThemeProviderProps> = ({ children, initialTheme }) => {
   const [theme, setTheme] = useState(initialTheme || lightTheme);
@@ -50,9 +50,7 @@ export const SharedThemeProvider: FC<SharedThemeProviderProps> = ({ children, in
 
   return (
     <SharedThemeContext.Provider value={value}>
-      <ThemeProvider theme={theme}>
-        {children}
-      </ThemeProvider>
+      <ThemeProvider theme={theme}>{children}</ThemeProvider>
     </SharedThemeContext.Provider>
   );
 };

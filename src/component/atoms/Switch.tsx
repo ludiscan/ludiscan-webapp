@@ -5,25 +5,18 @@ import type { FC } from 'react';
 
 export type SwitchProps = {
   className?: string;
-  'label': string;
+  label: string;
   checked?: boolean | undefined;
   size?: 'small' | 'medium' | 'large';
   onChange: (checked: boolean) => void;
   disabled?: boolean;
 };
 
-const SwitchComponent: FC<SwitchProps> = ({
-  className, label, checked, onChange, disabled = false
-}: SwitchProps) => {
+const SwitchComponent: FC<SwitchProps> = ({ className, label, checked, onChange, disabled = false }: SwitchProps) => {
   return (
     <label className={className} aria-label={label}>
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
-        disabled={disabled}
-      />
-      <span className="slider" />
+      <input type='checkbox' checked={checked} onChange={(e) => onChange(e.target.checked)} disabled={disabled} />
+      <span className='slider' />
     </label>
   );
 };
@@ -58,7 +51,7 @@ export const Switch = styled(SwitchComponent)`
 
   .slider:before {
     position: absolute;
-    content: "";
+    content: '';
     height: 20px;
     width: 20px;
     left: 2px;

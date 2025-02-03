@@ -45,6 +45,7 @@
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^3.2.4",
+    "@react-three/eslint-plugin": "^0.1.2",
     "@storybook/addon-essentials": "^8.5.1",
     "@storybook/addon-interactions": "^8.5.1",
     "@storybook/addon-onboarding": "^8.5.1",
@@ -54,6 +55,7 @@
     "@storybook/test": "^8.5.1",
     "@tanstack/eslint-plugin-query": "^5.64.2",
     "@types/jest": "^29.5.14",
+    "@types/module-alias": "^2.0.4",
     "@types/three": "^0.173.0",
     "@typescript-eslint/eslint-plugin": "^8.21.0",
     "@typescript-eslint/parser": "^8.21.0",
@@ -63,7 +65,7 @@
     "eslint-config-next": "^14.1.4",
     "eslint-config-prettier": "^9.1.0",
     "eslint-config-standard": "^17.1.0",
-    "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-import-resolver-typescript": "^3.7.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-jest": "^28.11.0",
     "eslint-plugin-jsx-a11y": "^6.8.0",
@@ -87,6 +89,7 @@
     "ts-node": "^10.9.2",
     "typescript": "~5.6.2",
     "typescript-eslint": "^8.18.2",
-    "vite": "^6.0.5"
+    "vite": "^6.0.5",
+    "vite-tsconfig-paths": "^5.1.4"
   }
 }

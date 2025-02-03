@@ -1,8 +1,10 @@
 import styled from '@emotion/styled';
 
-import { colors, fontSizes } from '../../styles';
+import { colors, fontSizes } from '../../styles/style';
 
 import type { ReactNode } from 'react';
+
+
 
 export type ButtonProps = {
   className?: string | undefined;

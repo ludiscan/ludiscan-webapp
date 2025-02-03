@@ -10,10 +10,7 @@ export interface FlattenObject {
  * @param prefix キーの接頭辞（再帰的に利用）
  * @returns フラットな { name, value } の配列
  */
-export const flattenObject = (
-  colors: object,
-  prefix: string = ''
-): FlattenObject[] => {
+export const flattenObject = (colors: object, prefix: string = ''): FlattenObject[] => {
   return Object.entries(colors).reduce<FlattenObject[]>((acc, [key, value]) => {
     const newKey = prefix ? `${prefix}.${key}` : key;
     if (typeof value === 'object' && value !== null) {

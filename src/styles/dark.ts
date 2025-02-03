@@ -1,5 +1,5 @@
 // darkTheme.ts
-import { colors } from './index.ts';
+import { colors } from './style';
 
 import type { Theme } from '@emotion/react';
 

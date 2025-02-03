@@ -20,7 +20,7 @@ const Template: Story = {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
       <SharedThemeProvider initialTheme={args.type === 'light' ? lightTheme : darkTheme}>
-        <Tooltip {...args} >
+        <Tooltip {...args}>
           <Text text={'Hover over me'} />
         </Tooltip>
       </SharedThemeProvider>
@@ -71,4 +71,3 @@ export const Top: Story = {
     placement: 'top',
   },
 };
-
