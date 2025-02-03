@@ -8,9 +8,28 @@ export const fontSizes = {
   largest: '24px',
 } as const;
 
-export const Colors = {
+export const fontWeights = {
+  lighter: 200,
+  light: 300,
+  normal: 400,
+  bold: 700,
+  bolder: 800,
+  black: 900,
+} as const;
+
+export const zIndexes = {
+  header: 100,
+  modal: 200,
+  dropdown: 300,
+  tooltip: 400,
+  loader: 500,
+} as const;
+
+export const colors = {
   primary: '#0070f3',
-  secondary: '#ff0080',
+  primaryVariant: '#ff0080',
+  primaryDark: '#005c9e',
+  primaryLight: '#3291ff',
   white: '#fff',
   black: '#000',
   neutral01: '#f8f8f8',
@@ -34,6 +53,7 @@ export const Colors = {
   stone09: '#333',
   stone10: '#222',
   stone11: '#111',
+  stone12: '#0b0b0b',
   honey01: '#fffdf8',
   honey02: '#fff7e1',
   honey03: '#fff0b9',

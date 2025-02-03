@@ -1,5 +1,4 @@
 import type { Preview } from '@storybook/react';
-import { ThemeProvider } from '@emotion/react';
 
 const preview: Preview = {
   parameters: {
@@ -10,6 +9,18 @@ const preview: Preview = {
       },
     },
   },
+  argTypes: {
+    type: {
+      control: {
+        type: 'select',
+        labels: { light: 'lightTheme', dark: 'darkTheme' },
+      },
+      options: ['light', 'dark'],
+    },
+  },
+  args: {
+    type: 'light',
+  }
 };
 
 export default preview;
