@@ -1,5 +1,5 @@
 // lightTheme.ts
-import { colors } from './index.ts';
+import { colors } from './style';
 
 import type { Theme } from '@emotion/react';
 
@@ -15,7 +15,7 @@ const lightTheme: Theme = {
     surface: {
       main: colors.neutral01,
       dark: colors.neutral02, // やや暗いバリエーション
-      light: colors.white,    // 明るいバリエーション
+      light: colors.white, // 明るいバリエーション
     },
     text: colors.stone11,
     secondary: {

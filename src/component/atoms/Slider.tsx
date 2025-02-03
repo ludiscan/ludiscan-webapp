@@ -14,19 +14,11 @@ export type SliderProps = {
 };
 
 const SliderComponent: FC<SliderProps> = (args) => {
-  const {
-    className,
-    value,
-    onChange,
-    min = 0,
-    max = 100,
-    step = 1,
-    disabled = false,
-  } = args;
+  const { className, value, onChange, min = 0, max = 100, step = 1, disabled = false } = args;
   return (
     <input
       {...args}
-      type="range"
+      type='range'
       className={className}
       value={value}
       min={min}

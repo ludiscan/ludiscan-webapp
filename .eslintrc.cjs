@@ -14,6 +14,7 @@ module.exports = {
     'plugin:import/recommended',
     'plugin:import/typescript',
     'prettier',
+    'plugin:@react-three/recommended'
   ],
   overrides: [
     {
@@ -85,5 +86,12 @@ module.exports = {
     '@typescript-eslint/no-empty-function': 0,
     '@typescript-eslint/no-unused-vars': [2, { argsIgnorePattern: '^_' }],
     '@typescript-eslint/no-use-before-define': 2,
+  },
+  settings: {
+    'import/resolver': {
+      typescript: {
+        project: './tsconfig.json'
+      }
+    }
   },
 };

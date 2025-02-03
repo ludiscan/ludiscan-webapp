@@ -22,7 +22,10 @@ const Template: Story = {
       <div style={{ width: '300px', padding: '16px' }}>
         <Slider
           {...args}
-          onChange={(value) => console.log('Slider value:', value)}
+          onChange={(value) => {
+            /* eslint-disable-next-line no-console */
+            console.log('Slider value:', value);
+          }}
         />
         <Text text={`Value: ${args.value}`} />
       </div>

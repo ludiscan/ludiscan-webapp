@@ -1,7 +1,7 @@
 // atoms/Tooltip.tsx
 import styled from '@emotion/styled';
 
-import { zIndexes } from '../../styles';
+import { zIndexes } from '../../styles/style';
 
 import type { FC, ReactNode } from 'react';
 

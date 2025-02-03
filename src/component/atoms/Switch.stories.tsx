@@ -20,7 +20,10 @@ const Template: Story = {
     <SharedThemeProvider initialTheme={args.type === 'light' ? lightTheme : darkTheme}>
       <Switch
         {...args}
-        onChange={(value) => console.log('Switch toggled:', value)}
+        onChange={(value) =>
+          /* eslint-disable-next-line no-console */
+          console.log('Switch toggled:', value)
+        }
       />
     </SharedThemeProvider>
   ),
@@ -29,8 +32,7 @@ const Template: Story = {
 export const Default: Story = {
   ...Template,
   name: 'Default Switch',
-  args: {
-  },
+  args: {},
 };
 
 export const Checked: Story = {

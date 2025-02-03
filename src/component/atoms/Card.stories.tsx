@@ -1,7 +1,7 @@
 import { SharedThemeProvider } from '../../hooks/useSharedTheme.tsx';
-import { colors } from '../../styles';
 import darkTheme from '../../styles/dark.ts';
 import lightTheme from '../../styles/light.ts';
+import { colors } from '../../styles/style.ts';
 
 import { Card } from './Card.tsx';
 import { Text } from './Text.tsx';

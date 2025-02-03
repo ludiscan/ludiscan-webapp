@@ -9,7 +9,7 @@ const query = createClient<paths>({
   mode: 'cors',
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
+    Accept: 'application/json',
   },
 });
 
@@ -21,7 +21,6 @@ const myMiddleware: Middleware = {
     return request;
   },
 };
-
 
 query.use(myMiddleware);
 
