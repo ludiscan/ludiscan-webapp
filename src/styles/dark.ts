@@ -1,16 +1,34 @@
-import { Colors } from './index.ts';
+// darkTheme.ts
+import { colors } from './index.ts';
 
 import type { Theme } from '@emotion/react';
 
 const darkTheme: Theme = {
   colors: {
-    primary: Colors.primary,
-    background: Colors.stone11,
-    surface: Colors.stone10,
-    text: Colors.white,
-    secondary: Colors.stone06,
-    border: Colors.stone09,
-    error: Colors.error,
+    primary: {
+      main: colors.primary,
+      dark: colors.primaryDark,
+      light: colors.primaryLight,
+    },
+    primaryVariant: colors.primaryVariant,
+    background: colors.stone12,
+    surface: {
+      main: colors.stone09,
+      dark: colors.stone11, // surfaceの暗いバリエーション
+      light: colors.stone07, // surfaceの明るいバリエーション
+    },
+    text: colors.white,
+    secondary: {
+      main: colors.stone03,
+      dark: colors.stone05,
+      light: colors.stone01,
+    },
+    border: {
+      main: colors.stone09,
+      dark: colors.stone10,
+      light: colors.stone08,
+    },
+    error: colors.error,
   },
 } as const;
 

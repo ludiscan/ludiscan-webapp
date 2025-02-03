@@ -1,34 +1,31 @@
-import { useState } from 'react';
+import styled from '@emotion/styled';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useMemo } from 'react';
+import ReactModal from 'react-modal';
 import { BrowserRouter } from 'react-router-dom';
 
-import reactLogo from './assets/react.svg';
-import './App.css';
-import { SharedThemeProvider } from './hooks/useTheme.tsx';
+import { SharedThemeProvider } from './hooks/useSharedTheme.tsx';
 import { Pages } from './pages/Pages.tsx';
 
+const Content = styled.div`
+  background: ${({ theme }) => theme.colors.background};
+  width: 100vw;
+  height: 100vh;
+  color: ${({ theme }) => theme.colors.text};
+`;
+
 function App() {
-  const [count, setCount] = useState(0);
+  ReactModal.setAppElement('#root');
+  const queryClient = useMemo(() => new QueryClient(), []);
   return (
     <BrowserRouter>
-      <SharedThemeProvider>
-        <Pages />
-        <div>
-          <a href='https://vite.dev' target='_blank' rel='noreferrer'>
-            <img src={'/vite.svg'} className='logo' alt='Vite logo' />
-          </a>
-          <a href='https://react.dev' target='_blank' rel='noreferrer'>
-            <img src={reactLogo} className='logo react' alt='React logo' />
-          </a>
-        </div>
-        <h1>Vite + React</h1>
-        <div className='card'>
-          <button onClick={() => setCount((count) => count + 1)}>count is {count}</button>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test HMR
-          </p>
-        </div>
-        <p className='read-the-docs'>Click on the Vite and React logos to learn more</p>
-      </SharedThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <SharedThemeProvider>
+          <Content>
+            <Pages />
+          </Content>
+        </SharedThemeProvider>
+      </QueryClientProvider>
     </BrowserRouter>
   );
 }

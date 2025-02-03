@@ -7,13 +7,32 @@ declare module '@emotion/react' {
 }
 
 export interface Colors {
-  primary: string;
+  primary: {
+    main: string;
+    dark: string;
+    light: string;
+  }
+  primaryVariant: string;
   background: string;
-  surface: string;
+  surface: {
+    main: string;
+    dark: string;
+    light: string;
+  }
   text: string;
-  secondary: string;
-  border: string;
+  secondary: {
+    main: string;
+    dark: string;
+    light: string;
+  }
+  border: {
+    main: string;
+    dark: string;
+    light: string;
+  }
   error: string;
 }
 
 export {};
+
+export type colorType = keyof Colors;

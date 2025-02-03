@@ -23,8 +23,8 @@ export const Flex = styled(Component)`
   display: flex;
   flex-wrap: ${({ wrap }) => wrap || 'wrap'};
   gap: ${({ gap }) => gap || 0}px;
-  align-content: ${({ align }) => align || 'center'};
-  align-items: ${({ align }) => align || 'center'};
+  align-content: ${({ align }) => align || 'flex-start'};
+  align-items: ${({ align }) => align || 'flex-start'};
 `;
 
 export const FlexRow = styled(Flex)`

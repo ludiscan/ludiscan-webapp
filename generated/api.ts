@@ -601,7 +601,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                id: string;
+                id: number;
             };
             cookie?: never;
         };
@@ -629,7 +629,10 @@ export interface operations {
     };
     ProjectsController_findAll: {
         parameters: {
-            query?: never;
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -694,7 +697,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                id: string;
+                id: number;
             };
             cookie?: never;
         };
@@ -725,7 +728,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                id: string;
+                id: number;
             };
             cookie?: never;
         };
@@ -754,13 +757,13 @@ export interface operations {
     PlaySessionController_findAll: {
         parameters: {
             query?: {
-                limit?: string;
-                offset?: string;
+                limit?: number;
+                offset?: number;
                 isFinished?: boolean;
             };
             header?: never;
             path: {
-                project_id: string;
+                project_id: number;
             };
             cookie?: never;
         };
@@ -791,7 +794,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                project_id: string;
+                project_id: number;
             };
             cookie?: never;
         };
@@ -826,7 +829,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                project_id: string;
+                project_id: number;
             };
             cookie?: never;
         };
@@ -857,8 +860,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                project_id: string;
-                session_id: string;
+                project_id: number;
+                session_id: number;
             };
             cookie?: never;
         };
@@ -889,8 +892,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                project_id: string;
-                session_id: string;
+                project_id: number;
+                session_id: number;
             };
             cookie?: never;
         };
@@ -925,8 +928,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                project_id: string;
-                session_id: string;
+                project_id: number;
+                session_id: number;
             };
             cookie?: never;
         };
@@ -955,8 +958,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                project_id: string;
-                session_id: string;
+                project_id: number;
+                session_id: number;
             };
             cookie?: never;
         };
@@ -987,7 +990,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                project_id: string;
+                project_id: number;
             };
             cookie?: never;
         };
@@ -1022,8 +1025,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                project_id: string;
-                session_id: string;
+                project_id: number;
+                session_id: number;
             };
             cookie?: never;
         };
@@ -1054,8 +1057,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                project_id: string;
-                session_id: string;
+                project_id: number;
+                session_id: number;
             };
             cookie?: never;
         };
@@ -1094,8 +1097,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                project_id: string;
-                session_id: string;
+                project_id: number;
+                session_id: number;
             };
             cookie?: never;
         };
@@ -1130,7 +1133,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                project_id: string;
+                project_id: number;
             };
             cookie?: never;
         };
@@ -1165,7 +1168,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                task_id: string;
+                task_id: number;
             };
             cookie?: never;
         };

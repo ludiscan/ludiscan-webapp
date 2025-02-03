@@ -1,5 +1,5 @@
-import { ThemeProvider } from '@emotion/react';
-
+import { SharedThemeProvider } from '../../hooks/useSharedTheme.tsx';
+import darkTheme from '../../styles/dark.ts';
 import lightTheme from '../../styles/light.ts';
 
 import { Button } from './Button';
@@ -8,14 +8,26 @@ import type { Meta, StoryObj } from '@storybook/react';
 
 const meta: Meta<typeof Button> = {
   component: Button,
-
 };
 
 export default meta;
 
 type Story = StoryObj<typeof Button>;
 
+const Template: Story = {
+  render: (args) => {
+    return (
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      <SharedThemeProvider initialTheme={args.type === 'light' ? lightTheme : darkTheme}>
+        <Button {...args}>Plain Text</Button>
+      </SharedThemeProvider>
+    );
+  },
+};
+
 export const Primary: Story = {
+  ...Template,
   name: 'primary style',
   args: {
     scheme: 'primary',
@@ -24,16 +36,10 @@ export const Primary: Story = {
       alert('click');
     },
   },
-  render: (args) => {
-    return (
-      <ThemeProvider theme={lightTheme}>
-        <Button {...args}>Plain Text</Button>
-      </ThemeProvider>
-    );
-  }
 };
 
 export const PrimarySmall: Story = {
+  ...Template,
   name: 'primary style small',
   args: {
     scheme: 'primary',
@@ -42,16 +48,10 @@ export const PrimarySmall: Story = {
       alert('click');
     },
   },
-  render: (args) => {
-    return (
-      <ThemeProvider theme={lightTheme}>
-        <Button {...args}>Plain Text</Button>
-      </ThemeProvider>
-    );
-  }
 };
 
 export const PrimaryLarge: Story = {
+  ...Template,
   name: 'primary style large',
   args: {
     scheme: 'primary',
@@ -60,16 +60,10 @@ export const PrimaryLarge: Story = {
       alert('click');
     },
   },
-  render: (args) => {
-    return (
-      <ThemeProvider theme={lightTheme}>
-        <Button {...args}>Plain Text</Button>
-      </ThemeProvider>
-    );
-  }
 };
 
 export const PrimaryFillLarge: Story = {
+  ...Template,
   name: 'primary style fill',
   args: {
     scheme: 'primary',
@@ -79,16 +73,10 @@ export const PrimaryFillLarge: Story = {
       alert('click');
     },
   },
-  render: (args) => {
-    return (
-      <ThemeProvider theme={lightTheme}>
-        <Button {...args}>Plain Text</Button>
-      </ThemeProvider>
-    );
-  }
 };
 
 export const Surface: Story = {
+  ...Template,
   name: 'surface style',
   args: {
     scheme: 'surface',
@@ -97,16 +85,10 @@ export const Surface: Story = {
       alert('click');
     },
   },
-  render: (args) => {
-    return (
-      <ThemeProvider theme={lightTheme}>
-        <Button {...args}>Plain Text</Button>
-      </ThemeProvider>
-    );
-  }
 };
 
 export const Warning: Story = {
+  ...Template,
   name: 'warning style',
   args: {
     scheme: 'warning',
@@ -115,16 +97,10 @@ export const Warning: Story = {
       alert('click');
     },
   },
-  render: (args) => {
-    return (
-      <ThemeProvider theme={lightTheme}>
-        <Button {...args}>Plain Text</Button>
-      </ThemeProvider>
-    );
-  }
 };
 
 export const None: Story = {
+  ...Template,
   name: 'none style',
   args: {
     scheme: 'none',
@@ -133,16 +109,10 @@ export const None: Story = {
       alert('click');
     },
   },
-  render: (args) => {
-    return (
-      <ThemeProvider theme={lightTheme}>
-        <Button {...args}>Plain Text</Button>
-      </ThemeProvider>
-    );
-  }
 };
 
 export const Error: Story = {
+  ...Template,
   name: 'error style',
   args: {
     scheme: 'error',
@@ -151,11 +121,4 @@ export const Error: Story = {
       alert('click');
     },
   },
-  render: (args) => {
-    return (
-      <ThemeProvider theme={lightTheme}>
-        <Button {...args}>Plain Text</Button>
-      </ThemeProvider>
-    );
-  }
 };
