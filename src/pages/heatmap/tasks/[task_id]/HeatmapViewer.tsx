@@ -1,52 +1,54 @@
-import { OrbitControls } from '@react-three/drei';
-import { Canvas } from '@react-three/fiber';
-import { useQuery } from '@tanstack/react-query';
-import { useMemo } from 'react';
+import styled from '@emotion/styled';
+import { useState } from 'react';
 
-import { ModelViewer } from '../../../../component/molecules/ModelViewer';
-import PointMarkers from '../../../../component/molecules/PointMarkers';
-import { query } from '../../../../modeles/qeury';
+import type { HeatmapTask } from '@/modeles/heatmaptask.ts';
+import type { FC} from 'react';
 
-import type { HeatmapTask } from '../../../../modeles/heatmaptask';
-import type { FC } from 'react';
+import { HeatMapCanvas } from '@/pages/heatmap/tasks/[task_id]/HeatmapCanvas.tsx';
 
-type HeatMapViewerProps = {
-  modelPath: string | null;
-  modelType: 'gltf' | 'glb' | 'obj' | null;
-  taskId: string;
-};
 
-const Component: FC<HeatMapViewerProps> = ({ modelPath, modelType, taskId }) => {
-  const { data: task } = useQuery({
-    queryKey: ['heatmap', taskId],
-    queryFn: async (): Promise<HeatmapTask | undefined> => {
-      const { data, error } = await query.GET('/api/v0/heatmap/tasks/{task_id}', {
-        params: { path: { task_id: Number(taskId) } },
-      });
-      if (error) return undefined;
-      return data;
-    },
-  });
+export type HeatmapViewerProps = {
+  className?: string | undefined;
+  task: HeatmapTask;
+}
 
-  const points = useMemo(() => {
-    if (!task) return [];
-    return task.result?.map((point) => ({
-      x: point.x,
-      y: point.z ?? 0,
-      z: point.y,
-      density: point.density,
-    }));
-  }, [task]);
+const Component: FC<HeatmapViewerProps> = ({ className, task }) => {
+  const [modelPath, setModelPath] = useState<string | null>(null);
+  const [modelType, setModelType] = useState<'gltf' | 'glb' | 'obj' | null>(null);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    let mainFile: File | null = null;
+    const additionalFiles: File[] = [];
+
+    // ファイルリストを走査
+    Array.from(files).forEach((file) => {
+      const ext = file.name.split('.').pop()?.toLowerCase();
+
+      if (ext === 'gltf' || ext === 'glb' || ext === 'obj') {
+        mainFile = file;
+        setModelType(ext as 'gltf' | 'glb' | 'obj');
+      } else {
+        additionalFiles.push(file);
+      }
+    });
+
+    if (!mainFile) return;
+
+    const objectURL = URL.createObjectURL(mainFile);
+    setModelPath(objectURL);
+  };
 
   return (
-    <Canvas camera={{ position: [5, 5, 5], fov: 50 }}>
-      <ambientLight intensity={0.5} /> {/* eslint-disable-line react/no-unknown-property */}
-      <directionalLight position={[10, 10, 10]} intensity={1} /> {/* eslint-disable-line react/no-unknown-property */}
-      {modelPath && modelType && <ModelViewer modelPath={modelPath} modelType={modelType} />}
-      {points && <PointMarkers points={points} />}
-      <OrbitControls enableZoom enablePan enableRotate />
-    </Canvas>
+    <div className={className}>
+      <input type='file' accept='.gltf,.glb,.obj,.bin,.png' multiple onChange={handleFileChange} />
+      <HeatMapCanvas modelPath={modelPath} modelType={modelType} pointList={task?.result ?? []} />
+    </div>
   );
 };
 
-export const HeatMapViewer = Component;
+export const HeatMapViewer = styled(Component)`
+`
+;

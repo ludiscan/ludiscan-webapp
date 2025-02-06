@@ -1,42 +1,57 @@
 import styled from '@emotion/styled';
-import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { HeatMapViewer } from './HeatmapViewer';
+
+import type { HeatmapTask } from '@/modeles/heatmaptask.ts';
+import type { FC} from 'react';
+
+import { query } from '@/modeles/qeury.ts';
 
 export type HeatMapTaskIdPageProps = {
   className?: string;
 };
 
-const Component: React.FC<HeatMapTaskIdPageProps> = ({ className }) => {
+const Component: FC<HeatMapTaskIdPageProps> = ({ className }) => {
   const { task_id: taskId } = useParams();
-  const [modelPath, setModelPath] = useState<string | null>(null);
-  const [modelType, setModelType] = useState<'gltf' | 'glb' | 'obj' | null>(null);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files || files.length === 0) return;
+  const timer = useRef<NodeJS.Timeout>();
 
-    let mainFile: File | null = null;
-    const additionalFiles: File[] = [];
+  const {
+    data: task,
+    refetch: refetchTask,
+  } = useQuery({
+    queryKey: ['heatmap', taskId],
+    queryFn: async (): Promise<HeatmapTask | undefined> => {
+      const { data, error } = await query.GET('/api/v0/heatmap/tasks/{task_id}', {
+        params: { path: { task_id: Number(taskId) } },
+      });
+      if (error) return undefined;
+      return data;
+    },
+  });
 
-    // ファイルリストを走査
-    Array.from(files).forEach((file) => {
-      const ext = file.name.split('.').pop()?.toLowerCase();
+  useEffect(() => {
+    if (!task) return;
 
-      if (ext === 'gltf' || ext === 'glb' || ext === 'obj') {
-        mainFile = file;
-        setModelType(ext as 'gltf' | 'glb' | 'obj');
-      } else {
-        additionalFiles.push(file);
+    if (task.status === 'pending' || task.status === 'processing') {
+      timer.current = setInterval(() => {
+        refetchTask();
+      }, 700);
+    }
+  }, [refetchTask, task]);
+
+  useEffect(() => {
+    return () => {
+      if (timer.current) {
+        clearInterval(timer.current);
       }
-    });
+    };
+  }, []);
 
-    if (!mainFile) return;
 
-    const objectURL = URL.createObjectURL(mainFile);
-    setModelPath(objectURL);
-  };
 
   if (!taskId || isNaN(Number(taskId))) {
     return <div>Invalid Task ID</div>;
@@ -45,8 +60,7 @@ const Component: React.FC<HeatMapTaskIdPageProps> = ({ className }) => {
   return (
     <div className={className}>
       <h1>Task ID: {taskId}</h1>
-      <input type='file' accept='.gltf,.glb,.obj,.bin,.png' multiple onChange={handleFileChange} />
-      <HeatMapViewer modelPath={modelPath} modelType={modelType} taskId={taskId} />
+      {task?.status === 'completed' && <HeatMapViewer task={task} className={`${className}__viewer`} />}
     </div>
   );
 };
@@ -54,7 +68,7 @@ const Component: React.FC<HeatMapTaskIdPageProps> = ({ className }) => {
 export const HeatMapTaskIdPage = styled(Component)`
   overflow-x: hidden;
   overflow-y: auto;
-  input {
-    margin-bottom: 10px;
+  &__viewer {
+
   }
 `;

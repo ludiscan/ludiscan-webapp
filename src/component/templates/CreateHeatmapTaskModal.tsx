@@ -2,8 +2,6 @@ import styled from '@emotion/styled';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useState } from 'react';
 
-import { query } from '../../modeles/qeury.ts';
-import { fontSizes } from '../../styles/style.ts';
 import { Button } from '../atoms/Button.tsx';
 import { FlexRow, InlineFlexColumn, InlineFlexRow } from '../atoms/Flex.tsx';
 import { Slider } from '../atoms/Slider.tsx';
@@ -17,6 +15,9 @@ import { Modal } from '../molecules/Modal';
 import { RouterNavigate } from './RouterNavigate.tsx';
 
 import type { FC } from 'react';
+
+import { query } from '@/modeles/qeury.ts';
+import { fontSizes } from '@/styles/style.ts';
 
 type CreateHeatmapTaskModalProps = {
   className?: string | undefined;
