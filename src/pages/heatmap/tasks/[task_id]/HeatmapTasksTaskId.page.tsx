@@ -6,7 +6,7 @@ import { useParams } from 'react-router-dom';
 import { HeatMapViewer } from './HeatmapViewer';
 
 import type { HeatmapTask } from '@/modeles/heatmaptask.ts';
-import type { FC} from 'react';
+import type { FC } from 'react';
 
 import { query } from '@/modeles/qeury.ts';
 
@@ -19,10 +19,7 @@ const Component: FC<HeatMapTaskIdPageProps> = ({ className }) => {
 
   const timer = useRef<NodeJS.Timeout>();
 
-  const {
-    data: task,
-    refetch: refetchTask,
-  } = useQuery({
+  const { data: task, refetch: refetchTask } = useQuery({
     queryKey: ['heatmap', taskId],
     queryFn: async (): Promise<HeatmapTask | undefined> => {
       const { data, error } = await query.GET('/api/v0/heatmap/tasks/{task_id}', {
@@ -51,8 +48,6 @@ const Component: FC<HeatMapTaskIdPageProps> = ({ className }) => {
     };
   }, []);
 
-
-
   if (!taskId || isNaN(Number(taskId))) {
     return <div>Invalid Task ID</div>;
   }
@@ -69,6 +64,5 @@ export const HeatMapTaskIdPage = styled(Component)`
   overflow-x: hidden;
   overflow-y: auto;
   &__viewer {
-
   }
 `;

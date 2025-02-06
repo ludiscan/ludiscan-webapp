@@ -2,15 +2,14 @@ import styled from '@emotion/styled';
 import { useState } from 'react';
 
 import type { HeatmapTask } from '@/modeles/heatmaptask.ts';
-import type { FC} from 'react';
+import type { FC } from 'react';
 
 import { HeatMapCanvas } from '@/pages/heatmap/tasks/[task_id]/HeatmapCanvas.tsx';
-
 
 export type HeatmapViewerProps = {
   className?: string | undefined;
   task: HeatmapTask;
-}
+};
 
 const Component: FC<HeatmapViewerProps> = ({ className, task }) => {
   const [modelPath, setModelPath] = useState<string | null>(null);
@@ -49,6 +48,4 @@ const Component: FC<HeatmapViewerProps> = ({ className, task }) => {
   );
 };
 
-export const HeatMapViewer = styled(Component)`
-`
-;
+export const HeatMapViewer = styled(Component)``;

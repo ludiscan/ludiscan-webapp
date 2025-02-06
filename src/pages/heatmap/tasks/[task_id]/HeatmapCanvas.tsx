@@ -14,7 +14,6 @@ type HeatmapCanvasProps = {
 };
 
 const Component: FC<HeatmapCanvasProps> = ({ modelPath, modelType, pointList }) => {
-
   const points = useMemo(() => {
     return pointList.map((point) => ({
       x: point.x,
