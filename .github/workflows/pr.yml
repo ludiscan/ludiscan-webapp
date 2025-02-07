@@ -17,7 +17,9 @@ jobs:
       - name: Format check
         run: npm run test
       - name: Lint
-        run: npm run check
+        run: npm run lint
+      - name: Format check
+        run: npm run format:check
 #      - name: Test
 #        run: npm test
 #        env:

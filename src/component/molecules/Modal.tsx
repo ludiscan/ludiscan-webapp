@@ -71,10 +71,10 @@ const Component = ({ className, isOpen, onClose, children, title }: ModalProps) 
 };
 
 export const Modal = styled(Component)`
-  transition: all 0.5s ease-in-out;
   z-index: ${zIndexes.modal};
+  transition: all 0.5s ease-in-out;
 
   &__innerContent {
-    padding: 0 16px 16px 16px;
+    padding: 0 16px 16px;
   }
 `;

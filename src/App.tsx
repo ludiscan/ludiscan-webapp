@@ -8,10 +8,10 @@ import { SharedThemeProvider } from './hooks/useSharedTheme.tsx';
 import { Pages } from './pages/Pages.tsx';
 
 const Content = styled.div`
-  background: ${({ theme }) => theme.colors.background};
   width: 100vw;
   height: 100vh;
   color: ${({ theme }) => theme.colors.text};
+  background: ${({ theme }) => theme.colors.background};
 `;
 
 function App() {

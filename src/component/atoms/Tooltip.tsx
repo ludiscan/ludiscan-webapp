@@ -1,9 +1,9 @@
 // atoms/Tooltip.tsx
 import styled from '@emotion/styled';
 
-import { zIndexes } from '../../styles/style';
-
 import type { FC, ReactNode } from 'react';
+
+import { zIndexes } from '@/styles/style.ts';
 
 export type TooltipProps = {
   className?: string;
@@ -13,11 +13,11 @@ export type TooltipProps = {
   placement?: 'top' | 'bottom' | 'left' | 'right';
 };
 
-const TooltipComponent: FC<TooltipProps> = ({ className, children, tooltip }) => {
+const TooltipComponent: FC<TooltipProps> = ({ className, children, tooltip, placement }) => {
   return (
     <div className={className}>
       {children}
-      <span className={`${className}__tooltip-text`}>{tooltip}</span>
+      <span className={`${className}__tooltip-text ${placement}`}>{tooltip}</span>
     </div>
   );
 };
@@ -27,53 +27,43 @@ export const Tooltip = styled(TooltipComponent)<TooltipProps>`
   display: inline-block;
 
   &__tooltip-text {
-    visibility: hidden;
-    width: max-content;
-    background-color: ${({ theme }) => theme.colors.surface.light || '#000'};
-    color: ${({ theme }) => theme.colors.text || '#fff'};
-    text-align: center;
-    border-radius: 4px;
-    padding: 4px 8px;
     position: absolute;
     z-index: ${zIndexes.tooltip};
+    visibility: hidden;
+    width: max-content;
+    padding: 4px 8px;
+    color: ${({ theme }) => theme.colors.text || '#fff'};
+    text-align: center;
     white-space: nowrap;
+    background-color: ${({ theme }) => theme.colors.surface.light || '#000'};
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgb(0 0 0 / 20%);
     opacity: 0;
     transition: opacity 0.3s ease-in-out;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    ${({ placement = 'top' }) => {
-  switch (placement) {
-    case 'top':
-      return `
-            bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%);
-          `;
-    case 'bottom':
-      return `
-            top: 125%;
-            left: 50%;
-            transform: translateX(-50%);
-          `;
-    case 'left':
-      return `
-            right: 125%;
-            top: 50%;
-            transform: translateY(-50%);
-          `;
-    case 'right':
-      return `
-            left: 125%;
-            top: 50%;
-            transform: translateY(-50%);
-          `;
-    default:
-      return `
-            bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%);
-          `;
   }
-}}
+
+  &___tooltip-text.top {
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  &___tooltip-text.bottom {
+    top: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  &___tooltip-text.left {
+    top: 50%;
+    right: 125%;
+    transform: translateY(-50%);
+  }
+
+  &___tooltip-text.right {
+    top: 50%;
+    left: 125%;
+    transform: translateY(-50%);
   }
 
   &:hover &__tooltip-text {

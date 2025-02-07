@@ -31,13 +31,13 @@ const DividerComponent = ({ className }: DividerProps) => {
 export const Divider = styled(DividerComponent)<DividerProps>`
   background-color: ${({ color, theme }) => color || theme.colors.border.main || '#e0e0e0'};
   ${({ orientation, thickness, margin }) =>
-  orientation === 'vertical'
-    ? `
+    orientation === 'vertical'
+      ? `
       width: ${thickness || '1px'};
       height: 100%;
       margin: ${margin || '0 8px'};
     `
-    : `
+      : `
       height: ${thickness || '1px'};
       width: 100%;
       margin: ${margin || '8px 0'};

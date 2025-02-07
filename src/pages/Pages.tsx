@@ -24,6 +24,6 @@ const Components: FC<PagesProps> = ({ className }) => {
 export const Pages = styled(Components)`
   min-width: 320px;
   max-width: 900px;
-  margin: 0 auto;
   padding: 16px;
+  margin: 0 auto;
 `;

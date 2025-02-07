@@ -31,36 +31,35 @@ const SliderComponent: FC<SliderProps> = (args) => {
 };
 
 export const Slider = styled(SliderComponent)`
-  -webkit-appearance: none;
   width: 100%;
   height: 4px;
-  background: #ddd;
-  outline: none;
-  border-radius: 2px;
   margin: 8px 0;
+  appearance: none;
+  outline: none;
+  background: #ddd;
+  border-radius: 2px;
 
   &::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
     width: 16px;
     height: 16px;
-    border-radius: 50%;
-    background: ${({ theme }) => theme.colors.primary.main || '#2196F3'};
+    appearance: none;
     cursor: pointer;
+    background: ${({ theme }) => theme.colors.primary.main || '#2196F3'};
+    border-radius: 50%;
     transition: background 0.3s;
   }
 
   &::-moz-range-thumb {
     width: 16px;
     height: 16px;
-    border-radius: 50%;
-    background: ${({ theme }) => theme.colors.primary.main || '#2196F3'};
     cursor: pointer;
+    background: ${({ theme }) => theme.colors.primary.main || '#2196F3'};
+    border-radius: 50%;
     transition: background 0.3s;
   }
 
   &:disabled {
-    opacity: 0.6;
     cursor: not-allowed;
+    opacity: 0.6;
   }
 `;

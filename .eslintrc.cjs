@@ -14,7 +14,7 @@ module.exports = {
     'plugin:import/recommended',
     'plugin:import/typescript',
     'prettier',
-    'plugin:@react-three/recommended'
+    'plugin:@react-three/recommended',
   ],
   overrides: [
     {
@@ -47,17 +47,11 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
-  plugins: ['@typescript-eslint', 'react'],
+  plugins: ['@typescript-eslint', 'react', 'prettier'],
   rules: {
+    'prettier/prettier': 'error',
     'default-param-last': 0,
-    indent: [
-      2,
-      2,
-      {
-        ignoredNodes: ['TemplateLiteral'],
-        SwitchCase: 1,
-      },
-    ],
+    indent: [2, 2],
     'key-spacing': 0,
     'jsx-a11y/no-onchange': 0,
     'no-case-declarations': 0,
@@ -90,8 +84,8 @@ module.exports = {
   settings: {
     'import/resolver': {
       typescript: {
-        project: './tsconfig.json'
-      }
-    }
+        project: './tsconfig.json',
+      },
+    },
   },
 };
