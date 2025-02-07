@@ -16,9 +16,9 @@ const Component: FC<ClampTextProps> = (props) => {
 
 export const ClampText = styled(Component)`
   display: -webkit-box;
-  -webkit-box-orient: vertical;
-  line-clamp: ${({ lines }) => lines || 1};
-  -webkit-line-clamp: ${({ lines }) => lines || 1};
-  overflow: hidden;
   width: ${({ width }) => width || 'fit-content'};
+  overflow: hidden;
+  -webkit-line-clamp: ${({ lines }) => lines || 1};
+  line-clamp: ${({ lines }) => lines || 1};
+  -webkit-box-orient: vertical;
 `;

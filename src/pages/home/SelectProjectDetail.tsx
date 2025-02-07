@@ -86,6 +86,7 @@ const Component: FC<SelectProjectDetailProps> = ({ className, project }) => {
 
 export const SelectProjectDetail = styled(Component)`
   width: 100%;
+
   &__session {
     margin-bottom: 2px;
     border-bottom: 1px solid ${({ theme }) => theme.colors.border.main};

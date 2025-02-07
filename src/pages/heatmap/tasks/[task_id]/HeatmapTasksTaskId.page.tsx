@@ -61,8 +61,10 @@ const Component: FC<HeatMapTaskIdPageProps> = ({ className }) => {
 };
 
 export const HeatMapTaskIdPage = styled(Component)`
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden auto;
+
   &__viewer {
+    width: 100%;
+    height: 100%;
   }
 `;

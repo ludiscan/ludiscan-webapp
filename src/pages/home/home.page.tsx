@@ -101,25 +101,26 @@ export const HomePage = styled(Component)`
   &__card {
     margin: 0 20px;
   }
+
   &__nolist {
-    list-style: none;
-    margin-block: 0;
-    padding: 0;
     width: 100%;
+    padding: 0;
+    margin-block: 0;
+    list-style: none;
   }
 
   &__listItem {
-    margin-bottom: 8px;
-    padding: 0;
     width: 100%;
+    padding: 0;
+    margin-bottom: 8px;
     border-bottom: 1px solid ${({ theme }) => theme.colors.border.light};
   }
 
   &__selectProjectDetail {
-    height: 0;
-    overflow: hidden;
-    margin: 0 16px;
     width: calc(100% - 32px);
+    height: 0;
+    margin: 0 16px;
+    overflow: hidden;
     transition: height 0.3s ease-in-out;
   }
 

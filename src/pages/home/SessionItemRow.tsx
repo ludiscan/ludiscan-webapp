@@ -27,7 +27,7 @@ const Component: FC<SessionItemRowProps> = ({ className, session }) => {
 };
 
 export const SessionItemRow = styled(Component)`
+  width: 100%;
   height: fit-content;
   min-height: 32px;
-  width: 100%;
 `;

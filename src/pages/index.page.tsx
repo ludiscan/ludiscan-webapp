@@ -44,15 +44,18 @@ const Component: FC<IndexPageProps> = ({ className }) => {
 export const IndexPage = styled(Component)`
   padding: 2rem;
   text-align: center;
+
   &__logo {
     height: 6em;
     padding: 1.5em;
-    will-change: filter;
     transition: filter 300ms;
+    will-change: filter;
   }
+
   &__logo:hover {
     filter: drop-shadow(0 0 2em #646cffaa);
   }
+
   &__logo.react:hover {
     filter: drop-shadow(0 0 2em #61dafbaa);
   }
@@ -61,6 +64,7 @@ export const IndexPage = styled(Component)`
     from {
       transform: rotate(0deg);
     }
+
     to {
       transform: rotate(360deg);
     }

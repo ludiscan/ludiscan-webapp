@@ -40,6 +40,34 @@ type CreateTask = {
   projectId: number;
   sessionId?: number | undefined;
 };
+async function sessionCreateTask(projectId: number, sessionId: number, stepSize: number, zVisible: boolean) {
+  return await query.POST('/api/v0/heatmap/projects/{project_id}/play_session/{session_id}/tasks', {
+    params: {
+      path: {
+        project_id: projectId,
+        session_id: sessionId,
+      },
+    },
+    body: {
+      stepSize: stepSize,
+      zVisible: zVisible,
+    },
+  });
+}
+
+async function projectCreateTask(projectId: number, stepSize: number, zVisible: boolean) {
+  return await query.POST('/api/v0/heatmap/projects/{project_id}/tasks', {
+    params: {
+      path: {
+        project_id: projectId,
+      },
+    },
+    body: {
+      stepSize: stepSize,
+      zVisible: zVisible,
+    },
+  });
+}
 
 const Component: FC<CreateHeatmapTaskSessionModalProps | CreateHeatmapTaskProjectModalProps> = (props) => {
   const [stepSize, setStepSize] = useState(100);
@@ -57,31 +85,11 @@ const Component: FC<CreateHeatmapTaskSessionModalProps | CreateHeatmapTaskProjec
       if (!projectId || projectId === 0) {
         return undefined;
       }
+
       const { data, error } =
         sessionId && sessionId !== 0
-          ? await query.POST('/api/v0/heatmap/projects/{project_id}/play_session/{session_id}/tasks', {
-            params: {
-              path: {
-                project_id: projectId,
-                session_id: sessionId,
-              },
-            },
-            body: {
-              stepSize: stepSize,
-              zVisible: zVisible,
-            },
-          })
-          : await query.POST('/api/v0/heatmap/projects/{project_id}/tasks', {
-            params: {
-              path: {
-                project_id: projectId,
-              },
-            },
-            body: {
-              stepSize: stepSize,
-              zVisible: zVisible,
-            },
-          });
+          ? await sessionCreateTask(projectId, sessionId, stepSize, zVisible)
+          : await projectCreateTask(projectId, stepSize, zVisible);
       if (error) return undefined;
       return data;
     },
@@ -150,6 +158,7 @@ export const CreateHeatmapTaskModal = styled(Component)`
   &__content {
     padding: 16px;
   }
+
   &__inputRow {
     width: 300px;
   }

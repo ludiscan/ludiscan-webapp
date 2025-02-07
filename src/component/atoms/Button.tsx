@@ -23,30 +23,30 @@ const Component = ({ className, onClick, scheme, children, disabled = false }: B
 };
 
 export const Button = styled(Component)`
-  color: ${({ theme }) => theme.colors.text};
-  border: none;
-  border-radius: ${(props) => (props.fontSize === 'small' ? '16px' : props.fontSize === 'large' ? '22px' : '18px')};
-  height: ${(props) => (props.scheme === 'none' ? 'fit-content' : props.fontSize === 'small' ? '32px' : props.fontSize === 'large' ? '44px' : '36px')};
   width: ${(props) => (props.width === 'full' ? '100%' : 'fit-content')};
-  cursor: pointer;
+  height: ${(props) => (props.scheme === 'none' ? 'fit-content' : props.fontSize === 'small' ? '32px' : props.fontSize === 'large' ? '44px' : '36px')};
+  padding: ${(props) => (props.scheme === 'none' ? 0 : props.fontSize === 'small' ? '0 16px' : props.fontSize === 'large' ? '0 22px' : '0 18px')};
   font-size: ${(props) => (props.fontSize === 'small' ? fontSizes.small : props.fontSize === 'large' ? fontSizes.large1 : fontSizes.medium)};
   font-weight: bold;
+  color: ${({ theme }) => theme.colors.text};
+  cursor: pointer;
+  border: none;
+  border-radius: ${(props) => (props.fontSize === 'small' ? '16px' : props.fontSize === 'large' ? '22px' : '18px')};
   transition: opacity 0.2s;
-  padding: ${(props) => (props.scheme === 'none' ? 0 : props.fontSize === 'small' ? '0 16px' : props.fontSize === 'large' ? '0 22px' : '0 18px')};
 
   &:hover {
     opacity: 0.6;
   }
 
   &:disabled {
-    background-color: #ccc;
     color: #666;
     cursor: not-allowed;
+    background-color: #ccc;
   }
 
   &.primary {
-    background-color: ${({ theme }) => theme.colors.primary.main};
     color: ${colors.white};
+    background-color: ${({ theme }) => theme.colors.primary.main};
   }
 
   &.surface {
@@ -55,18 +55,18 @@ export const Button = styled(Component)`
   }
 
   &.warning {
-    background-color: ${colors.honey05};
     color: ${colors.white};
+    background-color: ${colors.honey05};
   }
 
   &.none {
-    background-color: transparent;
     color: ${({ theme }) => theme.colors.text};
+    background-color: transparent;
     border: none;
   }
 
   &.error {
-    background-color: ${colors.error};
     color: ${colors.white};
+    background-color: ${colors.error};
   }
 `;

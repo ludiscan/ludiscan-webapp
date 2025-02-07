@@ -48,4 +48,6 @@ const Component: FC<HeatmapViewerProps> = ({ className, task }) => {
   );
 };
 
-export const HeatMapViewer = styled(Component)``;
+export const HeatMapViewer = styled(Component)`
+  display: flex;
+`;

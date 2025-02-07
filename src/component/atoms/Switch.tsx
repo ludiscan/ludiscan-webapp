@@ -28,45 +28,42 @@ export const Switch = styled(SwitchComponent)`
   height: 24px;
 
   input {
-    opacity: 0;
     width: 0;
     height: 0;
+    opacity: 0;
   }
 
   .slider {
     position: absolute;
+    inset: 0;
     cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
     background-color: #ccc;
-    transition: 0.4s;
     border-radius: 24px;
+    transition: 0.4s;
   }
 
   input:checked + .slider {
     background-color: ${({ theme }) => theme.colors.primary.main || '#2196F3'};
   }
 
-  .slider:before {
+  .slider::before {
     position: absolute;
-    content: '';
-    height: 20px;
-    width: 20px;
-    left: 2px;
     bottom: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    content: '';
     background-color: white;
-    transition: 0.4s;
     border-radius: 50%;
+    transition: 0.4s;
   }
 
-  input:checked + .slider:before {
+  input:checked + .slider::before {
     transform: translateX(26px);
   }
 
   &:disabled {
-    opacity: 0.6;
     cursor: not-allowed;
+    opacity: 0.6;
   }
 `;
