@@ -9,14 +9,17 @@ import { Observer } from '../../component/atoms/Observer.tsx';
 import { VerticalSpacer } from '../../component/atoms/Spacer.tsx';
 import { Text } from '../../component/atoms/Text.tsx';
 import { useSharedTheme } from '../../hooks/useSharedTheme.tsx';
-import { query } from '../../modeles/qeury';
-import { fontSizes, fontWeights } from '../../styles/style.ts';
 
 import { ProjectItemRow } from './ProjectItemRow.tsx';
 import { SelectProjectDetail } from './SelectProjectDetail.tsx';
 
-import type { Project } from '../../modeles/project.ts';
+import type { Project } from '@/modeles/project.ts';
 import type { FC } from 'react';
+
+import { RouterNavigate } from '@/component/templates/RouterNavigate.tsx';
+import { useAuth } from '@/hooks/useAuth.ts';
+import { query } from '@/modeles/qeury.ts';
+import { fontSizes, fontWeights } from '@/styles/style.ts';
 
 const fetchCount = 20;
 
@@ -26,6 +29,7 @@ export type HomePageProps = {
 
 const Component: FC<HomePageProps> = ({ className }) => {
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
+  const { isAuthorized } = useAuth();
   const {
     data: projects,
     hasNextPage: hasNextPageProjects,
@@ -60,6 +64,9 @@ const Component: FC<HomePageProps> = ({ className }) => {
     [selectedProject],
   );
   const { theme } = useSharedTheme();
+  if (!isAuthorized) {
+    return <RouterNavigate to={'/'} />;
+  }
   return (
     <div className={className}>
       <Text text={'Home'} fontSize={fontSizes.largest} color={theme.colors.text} fontWeight={fontWeights.bolder} />

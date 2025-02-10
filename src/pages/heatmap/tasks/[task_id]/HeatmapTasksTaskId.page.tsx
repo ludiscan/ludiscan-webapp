@@ -8,6 +8,8 @@ import { HeatMapViewer } from './HeatmapViewer';
 import type { HeatmapTask } from '@/modeles/heatmaptask.ts';
 import type { FC } from 'react';
 
+import { RouterNavigate } from '@/component/templates/RouterNavigate.tsx';
+import { useAuth } from '@/hooks/useAuth.ts';
 import { query } from '@/modeles/qeury.ts';
 
 export type HeatMapTaskIdPageProps = {
@@ -18,6 +20,8 @@ const Component: FC<HeatMapTaskIdPageProps> = ({ className }) => {
   const { task_id: taskId } = useParams();
 
   const timer = useRef<NodeJS.Timeout>();
+
+  const { isAuthorized } = useAuth();
 
   const { data: task, refetch: refetchTask } = useQuery({
     queryKey: ['heatmap', taskId],
@@ -50,6 +54,10 @@ const Component: FC<HeatMapTaskIdPageProps> = ({ className }) => {
 
   if (!taskId || isNaN(Number(taskId))) {
     return <div>Invalid Task ID</div>;
+  }
+
+  if (!isAuthorized) {
+    return <RouterNavigate to={'/'} />;
   }
 
   return (
