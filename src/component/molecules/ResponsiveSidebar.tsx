@@ -41,18 +41,18 @@ const ToggleButtonComponent = ({ className, onClick, isOpen }: { className?: str
 const ToggleButton = styled(ToggleButtonComponent)`
   position: relative;
   top: 2px;
-  height: 32px;
-  width: 46px;
   left: ${dimensions.sidebarWidth - 40}px;
-  transform: translateX(-50%);
   z-index: ${zIndexes.sidebar + 1};
-  transition: all 0.25s ease-in-out;
+  width: 46px;
+  height: 32px;
   border-radius: 0 8px 8px 0;
+  transform: translateX(-50%);
+  transition: all 0.25s ease-in-out;
 
   &.closed {
     left: ${dimensions.sidebarWidth}px;
     background: ${({ theme }) => theme.colors.surface.main};
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 4px rgb(0 0 0 / 20%);
   }
 
   &__button {
@@ -60,6 +60,8 @@ const ToggleButton = styled(ToggleButtonComponent)`
   }
 
   /* デスクトップ環境ではトグルボタンを非表示にする */
+
+  /* stylelint-disable-next-line */
   @media (min-width: ${dimensions.mobileWidth}px) {
     display: none;
   }
@@ -106,15 +108,15 @@ export const ResponsiveSidebar = styled(Component)`
   position: fixed;
   top: 0;
   left: 0;
+  z-index: ${zIndexes.sidebar};
+  box-sizing: border-box;
   width: ${dimensions.sidebarWidth}px;
   height: 100%;
-  background-color: ${({ theme }) => theme.colors.surface.main};
   padding: 16px;
-  box-sizing: border-box;
-  transition: transform 0.4s ease-in-out;
-  z-index: ${zIndexes.sidebar};
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  background-color: ${({ theme }) => theme.colors.surface.main};
+  box-shadow: 0 2px 4px rgb(0 0 0 / 30%);
   transform: translateX(-100%);
+  transition: transform 0.4s ease-in-out;
 
   &.visible {
     transform: translateX(0);

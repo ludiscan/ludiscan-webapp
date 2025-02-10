@@ -16,4 +16,6 @@ const Component: FC<SidebarProps> = ({ className }) => {
   );
 };
 
-export const Sidebar = styled(Component)``;
+export const Sidebar = styled(Component)`
+  display: flex;
+`;

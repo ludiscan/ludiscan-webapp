@@ -30,7 +30,7 @@ export const dimensions = {
   sidebarWidth: 240,
   headerHeight: 64,
   mobileWidth: 768,
-};
+} as const;
 
 export const colors = {
   primary: '#0070f3',
