@@ -26,7 +26,7 @@
     "release:major": "npm version major --message 'v%s' && git push && git push origin --tags",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "generate:api-schemes": "npx openapi-typescript https://yuhi.tokyo/api-json --output generated/api.ts"
+    "generate:api-schemes": "npx openapi-typescript https://matuyuhi.com/api-json --output generated/api.d.ts"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
