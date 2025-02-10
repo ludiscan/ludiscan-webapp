@@ -24,9 +24,9 @@ const lightTheme: Theme = {
       light: colors.stone04,
     },
     border: {
-      main: colors.neutral06,
+      main: colors.neutral05,
       dark: colors.neutral07,
-      light: colors.neutral05,
+      light: colors.neutral03,
     },
     error: colors.error,
   },

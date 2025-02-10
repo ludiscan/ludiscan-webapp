@@ -7,6 +7,8 @@ import { BrowserRouter } from 'react-router-dom';
 import { SharedThemeProvider } from './hooks/useSharedTheme.tsx';
 import { Pages } from './pages/Pages.tsx';
 
+import { Sidebar } from '@/component/templates/Sidebar.tsx';
+
 const Content = styled.div`
   width: 100vw;
   height: 100vh;
@@ -22,6 +24,7 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <SharedThemeProvider>
           <Content>
+            <Sidebar />
             <Pages />
           </Content>
         </SharedThemeProvider>
