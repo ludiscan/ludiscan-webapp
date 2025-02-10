@@ -19,10 +19,17 @@ export const fontWeights = {
 
 export const zIndexes = {
   header: 100,
+  sidebar: 150,
   modal: 200,
   dropdown: 300,
   tooltip: 400,
   loader: 500,
+} as const;
+
+export const dimensions = {
+  sidebarWidth: 240,
+  headerHeight: 64,
+  mobileWidth: 768,
 } as const;
 
 export const colors = {
