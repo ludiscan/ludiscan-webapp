@@ -33,12 +33,10 @@ const Content: FC<LoginPageProps> = ({ className }) => {
     setPassword(e);
   }, []);
 
-  const { isLoading, login, isAuthorized } = useAuth({
+  const { isLoading, login } = useAuth({
     onSuccessLogin: () => {
-      if (!isLoading && isAuthorized) {
-        showToast('Login success', 1, 'success');
-        onClose();
-      }
+      showToast('Login success', 1, 'success');
+      onClose();
     },
   });
   const handleLogin = useCallback(async () => {
