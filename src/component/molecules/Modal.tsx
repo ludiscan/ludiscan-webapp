@@ -1,22 +1,27 @@
 import styled from '@emotion/styled';
+import { IoCloseOutline } from 'react-icons/io5';
 import ReactModal, { defaultStyles } from 'react-modal';
 
 import { useSharedTheme } from '../../hooks/useSharedTheme.tsx';
-import { fontSizes, fontWeights, zIndexes } from '../../styles/style.ts';
 import { Divider } from '../atoms/Divider.tsx';
 import { FlexColumn } from '../atoms/Flex.tsx';
 import { Text } from '../atoms/Text.tsx';
 
 import type { Theme } from '@emotion/react';
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import type { Styles } from 'react-modal';
+
+import { Button } from '@/component/atoms/Button.tsx';
+import { fontSizes, fontWeights, zIndexes } from '@/styles/style.ts';
 
 export type ModalProps = {
   className?: string | undefined;
   isOpen: boolean;
   title?: string | undefined;
+  closeOutside?: boolean | undefined;
   onClose?: (() => void | Promise<void>) | undefined;
   children: ReactNode;
+  style?: CSSProperties;
 };
 
 function defaultStyle(theme: Theme): Styles {
@@ -44,6 +49,7 @@ function defaultStyle(theme: Theme): Styles {
       maxWidth: '80%',
       maxHeight: '90vh',
       height: 'fit-content',
+      position: 'relative',
       borderRadius: '8px',
       backgroundColor: theme.colors.surface.main,
       border: `1px solid ${theme.colors.border.main}`,
@@ -53,15 +59,26 @@ function defaultStyle(theme: Theme): Styles {
   };
 }
 
-const Component = ({ className, isOpen, onClose, children, title }: ModalProps) => {
+const Component = ({ className, isOpen, onClose, children, title, closeOutside, style }: ModalProps) => {
   const { theme } = useSharedTheme();
   return (
-    <ReactModal className={className} isOpen={isOpen} style={defaultStyle(theme)} onRequestClose={onClose}>
+    <ReactModal
+      className={className}
+      isOpen={isOpen}
+      style={{ ...defaultStyle(theme), content: { ...defaultStyle(theme).content, ...style } }}
+      onRequestClose={onClose}
+      shouldCloseOnOverlayClick={closeOutside}
+    >
       {title && (
         <FlexColumn align={'center'} gap={2}>
           <Text text={title} fontSize={fontSizes.large1} fontWeight={fontWeights.black} />
           <Divider orientation={'horizontal'} thickness={'2px'} />
         </FlexColumn>
+      )}
+      {onClose && (
+        <Button className={`${className}__closeButton`} onClick={onClose} scheme={'none'} fontSize={'medium'}>
+          <IoCloseOutline size={24} />
+        </Button>
       )}
       <FlexColumn className={`${className}__innerContent`} align={'center'}>
         {children}
@@ -76,5 +93,11 @@ export const Modal = styled(Component)`
 
   &__innerContent {
     padding: 0 16px 16px;
+  }
+
+  &__closeButton {
+    position: absolute;
+    top: 8px;
+    right: 12px;
   }
 `;
