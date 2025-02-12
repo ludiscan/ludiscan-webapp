@@ -12,9 +12,6 @@ export default defineConfig(() => {
         '@/': path.resolve(__dirname, './src'),
       },
     },
-    build: {
-      assetsDir: 'ludiscan/view/assets',
-    },
-    base: '/',
+    base: '/ludiscan/view/',
   };
 });

@@ -1,10 +1,11 @@
 import styled from '@emotion/styled';
 import { useState } from 'react';
-import { NavLink } from 'react-router-dom';
 
 import { Button } from '../component/atoms/Button.tsx';
 
 import type { FC } from 'react';
+
+import { RouterNavLink } from '@/component/templates/RouterNavigate.tsx';
 
 export type IndexPageProps = {
   className?: string;
@@ -15,12 +16,12 @@ const Component: FC<IndexPageProps> = ({ className }) => {
   return (
     <div className={className}>
       <h1>Index Page</h1>
-      <NavLink to={'/home'} end className={(props) => `${className}__link ${props.isActive ? 'active' : ''}`}>
+      <RouterNavLink to={'/ludiscan/view/home'} end className={(props) => `${className}__link ${props.isActive ? 'active' : ''}`}>
         <span>Go to Home</span>
-      </NavLink>
+      </RouterNavLink>
       <div>
         <a href='https://vite.dev' target='_blank' rel='noreferrer'>
-          <img src={'/vite.svg'} className={`${className}__logo`} alt='Vite logo' />
+          <img src={'/ludiscan/view/vite.svg'} className={`${className}__logo`} alt='Vite logo' />
         </a>
         <a href='https://react.dev' target='_blank' rel='noreferrer'>
           <img src={'/ludiscan/view/react.svg'} className={`${className}__logo react`} alt='React logo' />
