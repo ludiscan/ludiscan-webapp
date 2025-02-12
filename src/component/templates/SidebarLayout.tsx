@@ -14,7 +14,7 @@ const Component: FC<SidebarLayoutProps> = ({ className }) => {
   return (
     <ResponsiveSidebar>
       <div className={className}>
-        <RouterNavLink to={'home'}>
+        <RouterNavLink to={'/ludiscan/view/home'}>
           <Text text='Home' />
         </RouterNavLink>
       </div>

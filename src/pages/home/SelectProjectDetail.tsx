@@ -61,7 +61,7 @@ const Component: FC<SelectProjectDetailProps> = ({ className, project }) => {
     setSelectedItem({ projectId: project.id });
   }, [project.id]);
   if (project.id <= 0) {
-    return <RouterNavigate to={'home'} />;
+    return <RouterNavigate to={'/ludiscan/view/home'} />;
   }
   return (
     <FlexColumn className={className}>

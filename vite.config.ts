@@ -4,7 +4,7 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 import * as path from 'node:path';
 
 // https://vite.dev/config/
-export default defineConfig(({ mode }) => {
+export default defineConfig(() => {
   return {
     plugins: [react(), tsconfigPaths()],
     resolve: {
@@ -12,6 +12,9 @@ export default defineConfig(({ mode }) => {
         '@/': path.resolve(__dirname, './src'),
       },
     },
-    base: mode === 'production' ? '/ludiscan/view/' : '/',
+    build: {
+      assetsDir: 'ludiscan/view/assets',
+    },
+    base: '/',
   };
 });

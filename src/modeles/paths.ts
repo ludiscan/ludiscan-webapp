@@ -6,20 +6,20 @@ import { LoginPage } from '@/pages/login/login.page.tsx';
 
 export const PageRoutes = [
   {
-    path: '/',
+    path: '/ludiscan/view',
     Component: IndexPage,
   },
   {
-    path: 'home',
+    path: '/ludiscan/view/home',
     Component: HomePage,
   },
   {
-    path: 'heatmap/tasks/:task_id',
+    path: '/ludiscan/view/heatmap/tasks/:task_id',
     Component: HeatMapTaskIdPage,
     params: ['task_id'] as const,
   },
   {
-    path: 'login',
+    path: '/ludiscan/view/login',
     Component: LoginPage,
   },
 ] as const;

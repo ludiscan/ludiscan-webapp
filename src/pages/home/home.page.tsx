@@ -66,7 +66,7 @@ const Component: FC<HomePageProps> = ({ className }) => {
   );
   const { theme } = useSharedTheme();
   if (!isAuthorized && !isLoading) {
-    return <RouterNavigate to={'/'} />;
+    return <RouterNavigate to={'/ludiscan/view'} />;
   }
   return (
     <div className={className}>

@@ -60,7 +60,7 @@ const Component: FC<HeatMapTaskIdPageProps> = ({ className }) => {
   }
 
   if (!isAuthorized && !isLoading) {
-    return <RouterNavigate to={'/'} />;
+    return <RouterNavigate to={'/ludiscan/view'} />;
   }
 
   return (

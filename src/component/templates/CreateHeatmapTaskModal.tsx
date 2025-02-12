@@ -119,7 +119,7 @@ const Component: FC<CreateHeatmapTaskSessionModalProps | CreateHeatmapTaskProjec
     }
   }, [createTaskMutation, props]);
   if (isSuccess && task && task.taskId > 0 && task.status !== 'failed') {
-    return <RouterNavigate to={'heatmap/tasks/:task_id'} params={{ task_id: String(task.taskId) }} />;
+    return <RouterNavigate to={'/ludiscan/view/heatmap/tasks/:task_id'} params={{ task_id: String(task.taskId) }} />;
   }
   return (
     <Modal className={className} isOpen={isOpen} onClose={onClose} title={'Create Heatmap'}>
