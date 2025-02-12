@@ -31,6 +31,7 @@ export interface Colors {
     light: string;
   };
   error: string;
+  disabled: string;
 }
 
 export {};

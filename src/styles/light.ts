@@ -29,6 +29,7 @@ const lightTheme: Theme = {
       light: colors.neutral03,
     },
     error: colors.error,
+    disabled: colors.stone01,
   },
 } as const;
 

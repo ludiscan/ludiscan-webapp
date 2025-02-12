@@ -12,6 +12,7 @@ export const fontWeights = {
   lighter: 200,
   light: 300,
   normal: 400,
+  medium: 500,
   bold: 700,
   bolder: 800,
   black: 900,
@@ -24,6 +25,7 @@ export const zIndexes = {
   dropdown: 300,
   tooltip: 400,
   loader: 500,
+  toast: 600,
 } as const;
 
 export const dimensions = {
