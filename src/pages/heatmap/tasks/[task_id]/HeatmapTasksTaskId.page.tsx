@@ -8,6 +8,7 @@ import { HeatMapViewer } from './HeatmapViewer';
 import type { HeatmapTask } from '@/modeles/heatmaptask.ts';
 import type { FC } from 'react';
 
+import { Text } from '@/component/atoms/Text.tsx';
 import { RouterNavigate } from '@/component/templates/RouterNavigate.tsx';
 import { useAuth } from '@/hooks/useAuth.ts';
 import { query } from '@/modeles/qeury.ts';
@@ -21,7 +22,7 @@ const Component: FC<HeatMapTaskIdPageProps> = ({ className }) => {
 
   const timer = useRef<NodeJS.Timeout>();
 
-  const { isAuthorized } = useAuth();
+  const { isAuthorized, isLoading } = useAuth();
 
   const { data: task, refetch: refetchTask } = useQuery({
     queryKey: ['heatmap', taskId],
@@ -56,23 +57,19 @@ const Component: FC<HeatMapTaskIdPageProps> = ({ className }) => {
     return <div>Invalid Task ID</div>;
   }
 
-  if (!isAuthorized) {
+  if (!isAuthorized && !isLoading) {
     return <RouterNavigate to={'/'} />;
   }
 
   return (
     <div className={className}>
-      <h1>Task ID: {taskId}</h1>
+      <Text text={`Task ID: ${taskId}`} />
       {task?.status === 'completed' && <HeatMapViewer task={task} className={`${className}__viewer`} />}
     </div>
   );
 };
 
 export const HeatMapTaskIdPage = styled(Component)`
-  overflow: hidden auto;
-
-  &__viewer {
-    width: 100%;
-    height: 100%;
-  }
+  height: calc(100vh - 64px);
+  background: ${({ theme }) => theme.colors.surface.dark};
 `;

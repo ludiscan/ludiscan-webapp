@@ -1,10 +1,13 @@
 import styled from '@emotion/styled';
+import { Canvas } from '@react-three/fiber';
 import { useState } from 'react';
 
 import type { HeatmapTask } from '@/modeles/heatmaptask.ts';
 import type { FC } from 'react';
 
+import { FlexColumn } from '@/component/atoms/Flex.tsx';
 import { HeatMapCanvas } from '@/pages/heatmap/tasks/[task_id]/HeatmapCanvas.tsx';
+import { dimensions } from '@/styles/style.ts';
 
 export type HeatmapViewerProps = {
   className?: string | undefined;
@@ -41,13 +44,27 @@ const Component: FC<HeatmapViewerProps> = ({ className, task }) => {
   };
 
   return (
-    <div className={className}>
-      <input type='file' accept='.gltf,.glb,.obj,.bin,.png' multiple onChange={handleFileChange} />
-      <HeatMapCanvas modelPath={modelPath} modelType={modelType} pointList={task?.result ?? []} />
-    </div>
+    <FlexColumn className={className} align={'center'}>
+      <input className={`${className}__inputfile`} type='file' accept='.gltf,.glb,.obj,.bin,.png' multiple onChange={handleFileChange} />
+      <div className={`${className}__canvas`}>
+        <Canvas camera={{ position: [500, 500, 500], fov: 50, near: 0.1, far: 10000 }}>
+          <HeatMapCanvas modelPath={modelPath} modelType={modelType} pointList={task?.result ?? []} />
+        </Canvas>
+      </div>
+    </FlexColumn>
   );
 };
 
 export const HeatMapViewer = styled(Component)`
-  display: flex;
+  width: 100%;
+
+  &__inputfile {
+    width: 100%;
+    height: 40px;
+  }
+
+  &__canvas {
+    width: 100%;
+    height: calc(90vh - ${dimensions.headerHeight}px);
+  }
 `;
