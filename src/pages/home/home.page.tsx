@@ -1,7 +1,6 @@
 import styled from '@emotion/styled';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useCallback, useState } from 'react';
-import { Navigate } from 'react-router-dom';
 
 import { Button } from '../../component/atoms/Button.tsx';
 import { Card } from '../../component/atoms/Card.tsx';
@@ -17,6 +16,7 @@ import { SelectProjectDetail } from './SelectProjectDetail.tsx';
 import type { Project } from '@/modeles/project.ts';
 import type { FC } from 'react';
 
+import { RouterNavigate } from '@/component/templates/RouterNavigate.tsx';
 import { useAuth } from '@/hooks/useAuth.ts';
 import { query } from '@/modeles/qeury.ts';
 import { fontSizes, fontWeights } from '@/styles/style.ts';
@@ -65,7 +65,7 @@ const Component: FC<HomePageProps> = ({ className }) => {
   );
   const { theme } = useSharedTheme();
   if (!isAuthorized && !isLoading) {
-    return <Navigate to={import.meta.env.BASE_URL} />;
+    return <RouterNavigate to={'/'} />;
   }
   return (
     <div className={className}>

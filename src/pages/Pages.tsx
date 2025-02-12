@@ -5,7 +5,6 @@ import { PageRoutes } from '../modeles/paths';
 
 import type { FC } from 'react';
 
-import { IndexPage } from '@/pages/index.page.tsx';
 import { dimensions } from '@/styles/style.ts';
 
 export type PagesProps = {
@@ -17,7 +16,6 @@ const Components: FC<PagesProps> = ({ className }) => {
     <div className={className}>
       <div className={`${className}__content`}>
         <Routes>
-          <Route index element={<IndexPage />} />
           {PageRoutes.map((page) => (
             <Route key={page.path} path={page.path} element={<page.Component />} />
           ))}

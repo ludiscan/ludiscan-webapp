@@ -1,9 +1,14 @@
 import { HeatMapTaskIdPage } from '../pages/heatmap/tasks/[task_id]/HeatmapTasksTaskId.page.tsx';
 import { HomePage } from '../pages/home/home.page';
+import { IndexPage } from '../pages/index.page';
 
 import { LoginPage } from '@/pages/login/login.page.tsx';
 
 export const PageRoutes = [
+  {
+    path: '/',
+    Component: IndexPage,
+  },
   {
     path: 'home',
     Component: HomePage,
