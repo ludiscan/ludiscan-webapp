@@ -23,7 +23,7 @@ function App() {
   ReactModal.setAppElement('#root');
   const queryClient = useMemo(() => new QueryClient(), []);
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <QueryClientProvider client={queryClient}>
         <ToastProvider position={'top-right'}>
           <SharedThemeProvider>

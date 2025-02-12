@@ -1,3 +1,5 @@
+import * as path from 'node:path';
+
 import { Navigate, NavLink } from 'react-router-dom';
 
 import type { PagePathWithParams } from '@/modeles/paths.ts';
@@ -39,7 +41,7 @@ export function RouterNavigate<Path extends PagePathWithParams['path']>(props: R
   // params プロパティが存在する場合は URL の :○○ を置換する
   const params = 'params' in props ? (props.params as Record<string, string> | undefined) : undefined;
   const resolvedPath = params ? Object.keys(params).reduce((path, key) => path.replace(`:${key}`, params[key]), to) : to;
-  return <Navigate to={resolvedPath} />;
+  return <Navigate to={`${path.join(import.meta.env.BASE_URL, resolvedPath)}`} />;
 }
 
 export const RouterNavLink: FC<NavLinkProps & RouterNavigateProps<PagePathWithParams['path']>> = (props) => {
@@ -47,5 +49,5 @@ export const RouterNavLink: FC<NavLinkProps & RouterNavigateProps<PagePathWithPa
   // params プロパティが存在する場合は URL の :○○ を置換する
   const params = 'params' in props ? (props.params as Record<string, string> | undefined) : undefined;
   const resolvedPath = params ? Object.keys(params).reduce((path, key) => path.replace(`:${key}`, params[key]), to) : to;
-  return <NavLink {...props} to={resolvedPath} />;
+  return <NavLink {...props} to={`${path.join(import.meta.env.BASE_URL, resolvedPath)}`} />;
 };
