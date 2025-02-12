@@ -2,7 +2,6 @@ import styled from '@emotion/styled';
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 
-import reactLogo from '../assets/react.svg';
 import { Button } from '../component/atoms/Button.tsx';
 
 import type { FC } from 'react';
@@ -24,7 +23,7 @@ const Component: FC<IndexPageProps> = ({ className }) => {
           <img src={'/vite.svg'} className={`${className}__logo`} alt='Vite logo' />
         </a>
         <a href='https://react.dev' target='_blank' rel='noreferrer'>
-          <img src={reactLogo} className={`${className}__logo react`} alt='React logo' />
+          <img src={'/ludiscan/view/react.svg'} className={`${className}__logo react`} alt='React logo' />
         </a>
       </div>
       <h1>Vite + React</h1>
