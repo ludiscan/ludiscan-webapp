@@ -6,8 +6,7 @@ export function saveToken(token: string): void {
   const storage = localStorage.getItem(STORAGE_KEY);
   if (storage) {
     const data = JSON.parse(storage);
-    data.token = token;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...data, token }));
   } else {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ token }));
   }
@@ -21,12 +20,11 @@ export function getToken(): string | null {
   return null;
 }
 
-export function saveUser(user: User): void {
+export function saveUser(user: User | null): void {
   const storage = localStorage.getItem(STORAGE_KEY);
   if (storage) {
     const data = JSON.parse(storage);
-    data.user = user;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...data, user }));
   } else {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ user }));
   }

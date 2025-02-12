@@ -1,6 +1,8 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, NavLink } from 'react-router-dom';
 
-import type { PagePathWithParams } from '../../modeles/paths';
+import type { PagePathWithParams } from '@/modeles/paths.ts';
+import type { FC } from 'react';
+import type { NavLinkProps } from 'react-router-dom';
 
 // --------------------------
 // 1. ヘルパー型: params 配列からオブジェクト型を生成
@@ -39,3 +41,11 @@ export function RouterNavigate<Path extends PagePathWithParams['path']>(props: R
   const resolvedPath = params ? Object.keys(params).reduce((path, key) => path.replace(`:${key}`, params[key]), to) : to;
   return <Navigate to={resolvedPath} />;
 }
+
+export const RouterNavLink: FC<NavLinkProps & RouterNavigateProps<PagePathWithParams['path']>> = (props) => {
+  const { to } = props;
+  // params プロパティが存在する場合は URL の :○○ を置換する
+  const params = 'params' in props ? (props.params as Record<string, string> | undefined) : undefined;
+  const resolvedPath = params ? Object.keys(params).reduce((path, key) => path.replace(`:${key}`, params[key]), to) : to;
+  return <NavLink {...props} to={resolvedPath} />;
+};

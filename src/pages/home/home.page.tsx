@@ -29,7 +29,7 @@ export type HomePageProps = {
 
 const Component: FC<HomePageProps> = ({ className }) => {
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
-  const { isAuthorized } = useAuth();
+  const { isAuthorized, isLoading } = useAuth();
   const {
     data: projects,
     hasNextPage: hasNextPageProjects,
@@ -64,7 +64,7 @@ const Component: FC<HomePageProps> = ({ className }) => {
     [selectedProject],
   );
   const { theme } = useSharedTheme();
-  if (!isAuthorized) {
+  if (!isAuthorized && !isLoading) {
     return <RouterNavigate to={'/'} />;
   }
   return (

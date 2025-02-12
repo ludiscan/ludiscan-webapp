@@ -318,7 +318,7 @@ export interface components {
       email: string;
     };
     LoginResponseDto: {
-      access_token: string;
+      accessToken: string;
       user: components['schemas']['UserResponseDto'];
     };
     ProjectResponseDto: {

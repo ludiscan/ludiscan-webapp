@@ -7,11 +7,14 @@ import { BrowserRouter } from 'react-router-dom';
 import { SharedThemeProvider } from './hooks/useSharedTheme.tsx';
 import { Pages } from './pages/Pages.tsx';
 
-import { Sidebar } from '@/component/templates/Sidebar.tsx';
+import { Header } from '@/component/templates/Header.tsx';
+import { SidebarLayout } from '@/component/templates/SidebarLayout.tsx';
+import { ToastProvider } from '@/component/templates/ToastContext.tsx';
 
 const Content = styled.div`
   width: 100vw;
   height: 100vh;
+  overflow: hidden;
   color: ${({ theme }) => theme.colors.text};
   background: ${({ theme }) => theme.colors.background};
 `;
@@ -22,12 +25,15 @@ function App() {
   return (
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
-        <SharedThemeProvider>
-          <Content>
-            <Sidebar />
-            <Pages />
-          </Content>
-        </SharedThemeProvider>
+        <ToastProvider position={'top-right'}>
+          <SharedThemeProvider>
+            <Content>
+              <SidebarLayout />
+              <Header />
+              <Pages />
+            </Content>
+          </SharedThemeProvider>
+        </ToastProvider>
       </QueryClientProvider>
     </BrowserRouter>
   );
