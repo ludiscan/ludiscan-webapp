@@ -64,9 +64,10 @@ export function useAuth(props?: UseAuthOptions): UseAuthType {
       setToken(res.data.accessToken);
       saveUser(res.data.user);
       setUser(res.data.user);
+      return res.data;
     },
-    onSuccess: () => {
-      if (props?.onSuccessLogin) {
+    onSuccess: (data) => {
+      if (props?.onSuccessLogin && data.accessToken && data.user) {
         props.onSuccessLogin();
       }
     },
@@ -74,7 +75,7 @@ export function useAuth(props?: UseAuthOptions): UseAuthType {
 
   const onLogin = useCallback(
     async (email: string, password: string) => {
-      return loginMutation({ email, password });
+      await loginMutation({ email, password });
     },
     [loginMutation],
   );
