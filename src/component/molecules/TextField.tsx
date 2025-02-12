@@ -34,6 +34,6 @@ export const TextField = styled(Component)`
   ${({ fontSize = fontSizes.medium }) => `font-size: ${fontSize}`};
   font-weight: ${({ fontWeight }) => fontWeight || 'normal'};
   text-shadow: ${({ shadow }) => (shadow ? '0 0 4px rgba(0, 0, 0, 0.2)' : 'none')};
-  border: none;
   background: unset;
+  border: none;
 `;

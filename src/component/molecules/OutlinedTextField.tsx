@@ -42,20 +42,21 @@ const BaseTextFieldOutlined: FC<TextFieldOutlinedProps> = ({ className, value, o
 
 export const OutlinedTextField = styled(BaseTextFieldOutlined)`
   &__fieldset {
-    background: ${({ backgroundColor }) => backgroundColor || 'unset'};
     position: relative;
+    padding: 4px 16px;
+    background: ${({ backgroundColor }) => backgroundColor || 'unset'};
     border: ${({ border = true, theme }) => (border ? `1px solid ${theme.colors.border.dark}` : 'none')};
     border-radius: 4px;
-    padding: 4px 16px;
   }
 
   /* legend は初期状態だと fieldset の枠と干渉することが多いので工夫が必要 */
   &__legend {
     width: fit-content;
+    padding: 0 4px;
+    margin: 0 -4px;
     font-size: ${fontSizes.small};
     font-weight: ${fontWeights.bold};
-    margin: 0 -4px;
-    padding: 0 4px;
+
     /* デフォルトだとラベルが両端に余白を取るので必要に応じて調整 */
   }
 
@@ -63,13 +64,13 @@ export const OutlinedTextField = styled(BaseTextFieldOutlined)`
   &__input {
     display: block;
     width: 100%;
+    padding: 0;
     font-size: ${({ fontSize = fontSizes.medium }) => fontSize};
     font-weight: ${({ fontWeight }) => fontWeight || 'normal'};
-    text-shadow: ${({ shadow }) => (shadow ? '0 0 4px rgba(0, 0, 0, 0.2)' : 'none')};
     color: ${({ color }) => color || 'inherit'};
-    border: none;
+    text-shadow: ${({ shadow }) => (shadow ? '0 0 4px rgba(0, 0, 0, 0.2)' : 'none')};
     outline: none;
     background: unset;
-    padding: 0;
+    border: none;
   }
 `;
