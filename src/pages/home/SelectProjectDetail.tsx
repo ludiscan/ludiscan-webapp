@@ -8,13 +8,14 @@ import { Observer } from '../../component/atoms/Observer';
 import { Text } from '../../component/atoms/Text';
 import { CreateHeatmapTaskModal } from '../../component/templates/CreateHeatmapTaskModal';
 import { RouterNavigate } from '../../component/templates/RouterNavigate';
-import { query } from '../../modeles/qeury.ts';
 
 import { SessionItemRow } from './SessionItemRow.tsx';
 
 import type { CreateHeatmapItemData } from '../../component/templates/CreateHeatmapTaskModal';
-import type { Project } from '../../modeles/project.ts';
+import type { Project } from '@/modeles/project.ts';
 import type { FC } from 'react';
+
+import { query } from '@/modeles/qeury.ts';
 
 const fetchCount = 20;
 
@@ -60,7 +61,7 @@ const Component: FC<SelectProjectDetailProps> = ({ className, project }) => {
     setSelectedItem({ projectId: project.id });
   }, [project.id]);
   if (project.id <= 0) {
-    return <RouterNavigate to={'/home'} />;
+    return <RouterNavigate to={'home'} />;
   }
   return (
     <FlexColumn className={className}>

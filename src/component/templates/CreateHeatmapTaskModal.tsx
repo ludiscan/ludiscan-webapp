@@ -119,7 +119,7 @@ const Component: FC<CreateHeatmapTaskSessionModalProps | CreateHeatmapTaskProjec
     }
   }, [createTaskMutation, props]);
   if (isSuccess && task && task.taskId > 0 && task.status !== 'failed') {
-    return <RouterNavigate to={'/heatmap/tasks/:task_id'} params={{ task_id: String(task.taskId) }} />;
+    return <RouterNavigate to={'heatmap/tasks/:task_id'} params={{ task_id: String(task.taskId) }} />;
   }
   return (
     <Modal className={className} isOpen={isOpen} onClose={onClose} title={'Create Heatmap'}>
@@ -139,7 +139,7 @@ const Component: FC<CreateHeatmapTaskSessionModalProps | CreateHeatmapTaskProjec
             <Text text='50' fontSize={fontSizes.small} />
             <div style={{ width: '70%' }}>
               <Tooltip tooltip={String(stepSize)} placement={'top'}>
-                <Slider onChange={handleStepSizeSliderChange} min={50} max={500} step={10} value={stepSize} />
+                <Slider onChange={handleStepSizeSliderChange} min={50} max={500} step={10} />
               </Tooltip>
             </div>
             <Text text='500' fontSize={fontSizes.small} />

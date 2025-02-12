@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 
 import { HeatMapViewer } from './HeatmapViewer';
 
@@ -9,7 +9,6 @@ import type { HeatmapTask } from '@/modeles/heatmaptask.ts';
 import type { FC } from 'react';
 
 import { Text } from '@/component/atoms/Text.tsx';
-import { RouterNavigate } from '@/component/templates/RouterNavigate.tsx';
 import { useAuth } from '@/hooks/useAuth.ts';
 import { query } from '@/modeles/qeury.ts';
 
@@ -58,7 +57,7 @@ const Component: FC<HeatMapTaskIdPageProps> = ({ className }) => {
   }
 
   if (!isAuthorized && !isLoading) {
-    return <RouterNavigate to={'/'} />;
+    return <Navigate to={import.meta.env.BASE_URL} />;
   }
 
   return (

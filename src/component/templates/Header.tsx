@@ -16,7 +16,7 @@ const Component: FC<HeaderProps> = ({ className }) => {
     <header className={className}>
       <Text text='Header' fontSize={fontSizes.largest} />
       <Text text='Header' fontSize={fontSizes.largest} />
-      <RouterNavLink to={'/login'}>
+      <RouterNavLink to={'login'}>
         <CiUser size={24} />
       </RouterNavLink>
     </header>
