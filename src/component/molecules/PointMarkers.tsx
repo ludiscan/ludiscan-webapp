@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Vector3 } from 'three';
+import { Color, Vector3 } from 'three';
 
 import type { FC } from 'react';
 
@@ -9,21 +9,25 @@ export type PointMarkersProps = {
 };
 
 class Point extends Vector3 {
-  density: number;
+  color: Color;
 
-  constructor(x: number, y: number, z: number, density: number) {
+  constructor(x: number, y: number, z: number, color: Color) {
     super(x, y, z);
-    this.density = density;
+    this.color = color;
   }
 }
 
 const PointMarkers: FC<PointMarkersProps> = ({ points, scale = 0.2 }) => {
-  const memoizedPoints = useMemo(() => points.map(({ x, y, z, density }) => new Point(x * scale, y * scale, z * scale, density)), [points, scale]);
+  const memoizedPoints = useMemo(() => {
+    return points.map(({ x, y, z, density }) => {
+      return new Point(x * scale, y * scale, z * scale, new Color().setHSL((1 - density) * 0.33, 1, 0.5));
+    });
+  }, [points, scale]);
 
   return memoizedPoints.map((pos, index) => (
     <mesh key={index} position={new Vector3(pos.x, pos.y, pos.z)} /* eslint-disable-line react/no-unknown-property */>
       <boxGeometry args={[8, 8, 8]} /> {/* eslint-disable-line react/no-unknown-property */}
-      <meshStandardMaterial color={pos.density > 1 ? 'green' : 'red'} />
+      <meshStandardMaterial color={pos.color} />
     </mesh>
   ));
 };

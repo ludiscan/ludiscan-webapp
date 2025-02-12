@@ -72,6 +72,7 @@ const Component: FC<HeatMapTaskIdPageProps> = ({ className }) => {
 };
 
 export const HeatMapTaskIdPage = styled(Component)`
+  width: 100%;
   height: calc(100vh - 64px);
   background: ${({ theme }) => theme.colors.surface.dark};
 `;

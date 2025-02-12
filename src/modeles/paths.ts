@@ -17,6 +17,7 @@ export const PageRoutes = [
     path: '/ludiscan/view/heatmap/tasks/:task_id',
     Component: HeatMapTaskIdPage,
     params: ['task_id'] as const,
+    style: { margin: '0 auto', maxWidth: '1200px' },
   },
   {
     path: '/ludiscan/view/login',

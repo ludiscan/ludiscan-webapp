@@ -25,7 +25,7 @@ const Component: FC<HeatmapCanvasProps> = ({ modelPath, modelType, pointList }) 
   return (
     <>
       <ambientLight /> {/* eslint-disable-line react/no-unknown-property */}
-      <directionalLight position={[10, 10, 10]} intensity={1} /> {/* eslint-disable-line react/no-unknown-property */}
+      <directionalLight position={[400, 400, 400]} intensity={2} /> {/* eslint-disable-line react/no-unknown-property */}
       {modelPath && modelType && <ModelViewer modelPath={modelPath} modelType={modelType} />}
       {points && <PointMarkers points={points} />}
       <OrbitControls enableZoom enablePan enableRotate />
