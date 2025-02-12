@@ -2,6 +2,8 @@ import { HeatMapTaskIdPage } from '../pages/heatmap/tasks/[task_id]/HeatmapTasks
 import { HomePage } from '../pages/home/home.page';
 import { IndexPage } from '../pages/index.page';
 
+import { LoginPage } from '@/pages/login/login.page.tsx';
+
 export const PageRoutes = [
   {
     path: '/',
@@ -15,6 +17,10 @@ export const PageRoutes = [
     path: '/heatmap/tasks/:task_id',
     Component: HeatMapTaskIdPage,
     params: ['task_id'] as const,
+  },
+  {
+    path: '/login',
+    Component: LoginPage,
   },
 ] as const;
 

@@ -28,6 +28,7 @@ export interface ToastContextValue {
 // =======================
 const ToastContext = createContext<ToastContextValue>({
   showToast: () => {
+    // eslint-disable-next-line no-console
     console.warn('ToastContext not found');
   },
 });

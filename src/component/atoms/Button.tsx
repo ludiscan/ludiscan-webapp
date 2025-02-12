@@ -24,7 +24,7 @@ const Component = ({ className, onClick, scheme, children, disabled = false }: B
 
 export const Button = styled(Component)`
   width: ${(props) => (props.width === 'full' ? '100%' : 'fit-content')};
-  height: ${(props) => (props.scheme === 'none' ? 'fit-content' : props.fontSize === 'small' ? '32px' : props.fontSize === 'large' ? '44px' : '36px')};
+  height: ${(props) => (props.scheme === 'none' ? 'fit-content' : props.fontSize === 'small' ? '28px' : props.fontSize === 'large' ? '36px' : '32px')};
   padding: ${(props) => (props.scheme === 'none' ? 0 : props.fontSize === 'small' ? '0 16px' : props.fontSize === 'large' ? '0 22px' : '0 18px')};
   font-size: ${(props) => (props.fontSize === 'small' ? fontSizes.small : props.fontSize === 'large' ? fontSizes.large1 : fontSizes.medium)};
   font-weight: bold;
@@ -33,16 +33,6 @@ export const Button = styled(Component)`
   border: none;
   border-radius: ${(props) => (props.fontSize === 'small' ? '16px' : props.fontSize === 'large' ? '22px' : '18px')};
   transition: opacity 0.2s;
-
-  &:hover {
-    opacity: 0.6;
-  }
-
-  &:disabled {
-    color: #666;
-    cursor: not-allowed;
-    background-color: #ccc;
-  }
 
   &.primary {
     color: ${colors.white};
@@ -68,5 +58,15 @@ export const Button = styled(Component)`
   &.error {
     color: ${colors.white};
     background-color: ${colors.error};
+  }
+
+  &:disabled {
+    color: ${colors.white};
+    cursor: not-allowed;
+    background-color: ${({ theme }) => theme.colors.disabled};
+  }
+
+  &:hover &:not(:disabled) {
+    opacity: 0.6;
   }
 `;

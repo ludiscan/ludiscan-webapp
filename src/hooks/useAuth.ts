@@ -11,7 +11,9 @@ export type UseAuthType = {
   user: User | null;
   isLoading: boolean;
   isAuthorized: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+  error: Error | null;
 };
 
 type LoginType = {
@@ -19,9 +21,14 @@ type LoginType = {
   password: string;
 };
 
-export function useAuth(): UseAuthType {
+export type UseAuthOptions = {
+  onSuccessLogin?: () => void | Promise<void>;
+};
+
+export function useAuth(props?: UseAuthOptions): UseAuthType {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     const token = getToken();
@@ -30,13 +37,19 @@ export function useAuth(): UseAuthType {
       setToken(token);
       setUser(user);
     }
+    setIsInitialized(true);
   }, []);
 
-  const { mutateAsync: loginMutation, isPending: isLoading } = useMutation({
+  const {
+    mutateAsync: loginMutation,
+    isPending: isLoading,
+    error,
+  } = useMutation({
+    mutationKey: ['login'],
     mutationFn: async (login: LoginType) => {
       const { email, password } = login;
       if (!email || !password) {
-        return false;
+        throw new Error('Please enter email and password');
       }
       const res = await query.POST('/api/v0/login', {
         body: {
@@ -45,13 +58,17 @@ export function useAuth(): UseAuthType {
         },
       });
       if (res.error) {
-        return false;
+        throw new Error(res.error.message);
       }
-      saveToken(res.data.access_token);
-      setToken(res.data.access_token);
+      saveToken(res.data.accessToken);
+      setToken(res.data.accessToken);
       saveUser(res.data.user);
       setUser(res.data.user);
-      return true;
+    },
+    onSuccess: () => {
+      if (props?.onSuccessLogin) {
+        props.onSuccessLogin();
+      }
     },
   });
 
@@ -62,5 +79,20 @@ export function useAuth(): UseAuthType {
     [loginMutation],
   );
 
-  return { token, user, isLoading, isAuthorized: !!token, login: onLogin };
+  const onLogout = useCallback(async () => {
+    setToken(null);
+    saveToken('');
+    setUser(null);
+    saveUser(null);
+  }, []);
+
+  return {
+    token,
+    user,
+    isLoading: isLoading || !isInitialized,
+    isAuthorized: token !== null && token !== '',
+    login: onLogin,
+    logout: onLogout,
+    error,
+  };
 }

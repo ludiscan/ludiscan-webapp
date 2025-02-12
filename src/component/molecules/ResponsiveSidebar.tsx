@@ -21,6 +21,8 @@ export type ResponsiveSidebarProps = {
   className?: string;
   /** サイドバー内に表示する内容。指定がなければデフォルトで「Sidebar」と表示します。 */
   children: ReactNode;
+
+  onChange?: (isOpen: boolean) => void;
 };
 /**
  * トグルボタンのスタイルコンポーネント
@@ -32,7 +34,7 @@ const ToggleButtonComponent = ({ className, onClick, isOpen }: { className?: str
   const { theme } = useSharedTheme();
   return (
     <FlexRow className={`${className} ${isOpen ? '' : 'closed'}`} align={'center'}>
-      <Button className={`${className}__button`} onClick={onClick} scheme={'none'} fontSize={'medium'} width={'fit-content'}>
+      <Button className={`${className}__button`} onClick={onClick} scheme={'none'} fontSize={'medium'} width={'full'}>
         {isOpen ? <RiMenu3Fill size={28} color={theme.colors.text} /> : <RiMenu2Fill size={28} color={theme.colors.text} />}
       </Button>
     </FlexRow>
@@ -67,7 +69,7 @@ const ToggleButton = styled(ToggleButtonComponent)`
   }
 `;
 
-const Component: FC<ResponsiveSidebarProps> = ({ className, children }) => {
+const Component: FC<ResponsiveSidebarProps> = ({ className, children, onChange }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   useEffect(() => {
@@ -87,6 +89,12 @@ const Component: FC<ResponsiveSidebarProps> = ({ className, children }) => {
       window.removeEventListener('resize', handleResize);
     };
   }, []);
+
+  useEffect(() => {
+    if (onChange) {
+      onChange(isOpen);
+    }
+  }, [isOpen, onChange]);
 
   /**
    * トグルボタンのクリックイベントハンドラ
