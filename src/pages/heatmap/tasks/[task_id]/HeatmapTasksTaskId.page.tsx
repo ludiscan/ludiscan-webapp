@@ -25,8 +25,10 @@ const Component: FC<HeatMapTaskIdPageProps> = ({ className }) => {
   const { isAuthorized, isLoading } = useAuth();
 
   const { data: task, refetch: refetchTask } = useQuery({
-    queryKey: ['heatmap', taskId],
+    queryKey: ['heatmap', taskId, isAuthorized],
     queryFn: async (): Promise<HeatmapTask | undefined> => {
+      if (!taskId || isNaN(Number(taskId))) return undefined;
+      if (!isAuthorized) return undefined;
       const { data, error } = await query.GET('/api/v0/heatmap/tasks/{task_id}', {
         params: { path: { task_id: Number(taskId) } },
       });
