@@ -81,8 +81,8 @@ export const HeatmapMenu = styled(Component)`
   }
 
   &__content {
-    overflow-y: auto;
     width: 100%;
+    overflow-y: auto;
   }
 
   &__row {
