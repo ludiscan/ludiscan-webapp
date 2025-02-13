@@ -1,19 +1,20 @@
-import { useMutation } from '@tanstack/react-query';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
+import { useSelector } from 'react-redux';
 
 import type { User } from '@/modeles/user.ts';
+import type { RootState } from '@/store.ts';
 
-import { query } from '@/modeles/qeury.ts';
-import { getToken, getUser, saveToken, saveUser } from '@/utils/localstrage.ts';
+import { login, logout } from '@/slices/authSlice.ts';
+import { useAppDispatch } from '@/store.ts';
 
 export type UseAuthType = {
   token: string | null;
   user: User | null;
   isLoading: boolean;
   isAuthorized: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (values: LoginType) => Promise<void>;
   logout: () => Promise<void>;
-  error: Error | null;
+  error: string | null;
 };
 
 type LoginType = {
@@ -23,77 +24,41 @@ type LoginType = {
 
 export type UseAuthOptions = {
   onSuccessLogin?: () => void | Promise<void>;
+  onErrorLogin?: (error: string) => void | Promise<void>;
 };
 
 export function useAuth(props?: UseAuthOptions): UseAuthType {
-  const [token, setToken] = useState<string | null>(null);
-  const [user, setUser] = useState<User | null>(null);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const dispatch = useAppDispatch();
+  const { token, user, isLoading, error } = useSelector((state: RootState) => state.auth);
 
-  useEffect(() => {
-    const token = getToken();
-    const user = getUser();
-    if (token && user) {
-      setToken(token);
-      setUser(user);
-    }
-    setIsInitialized(true);
-  }, []);
-
-  const {
-    mutateAsync: loginMutation,
-    isPending: isLoading,
-    error,
-  } = useMutation({
-    mutationKey: ['login'],
-    mutationFn: async (login: LoginType) => {
-      const { email, password } = login;
-      if (!email || !password) {
-        throw new Error('Please enter email and password');
-      }
-      const res = await query.POST('/api/v0/login', {
-        body: {
-          email,
-          password,
-        },
-      });
-      if (res.error) {
-        throw new Error(res.error.message);
-      }
-      saveToken(res.data.accessToken);
-      setToken(res.data.accessToken);
-      saveUser(res.data.user);
-      setUser(res.data.user);
-      return res.data;
-    },
-    onSuccess: (data) => {
-      if (props?.onSuccessLogin && data.accessToken && data.user) {
-        props.onSuccessLogin();
+  const handleLogin = useCallback(
+    async (values: LoginType) => {
+      const { email, password } = values;
+      // login アクションを dispatch し、成功時には追加の処理（onSuccessLogin 相当）も行えます
+      const resultAction = await dispatch(login({ email, password }));
+      if (login.fulfilled.match(resultAction)) {
+        if (props?.onSuccessLogin) {
+          await props.onSuccessLogin();
+        }
+      } else {
+        if (props?.onErrorLogin) {
+          await props.onErrorLogin(resultAction.payload as string);
+        }
       }
     },
-  });
-
-  const onLogin = useCallback(
-    async (email: string, password: string) => {
-      await loginMutation({ email, password });
-    },
-    [loginMutation],
+    [dispatch, props],
   );
 
-  const onLogout = useCallback(async () => {
-    setToken(null);
-    saveToken('');
-    setUser(null);
-    saveUser(null);
-  }, []);
-
+  const handleLogout = useCallback(async () => {
+    dispatch(logout());
+  }, [dispatch]);
   return {
     token,
     user,
-    isLoading: isLoading || !isInitialized,
+    isLoading: isLoading,
     isAuthorized: token !== null && token !== '',
-    login: onLogin,
-    logout: onLogout,
+    login: handleLogin,
+    logout: handleLogout,
     error,
   };
 }

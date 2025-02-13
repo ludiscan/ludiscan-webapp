@@ -14,13 +14,22 @@ export type PagesProps = {
 const Components: FC<PagesProps> = ({ className }) => {
   return (
     <div className={className}>
-      <div className={`${className}__content`}>
-        <Routes>
-          {PageRoutes.map((page) => (
-            <Route key={page.path} path={page.path} element={<page.Component />} />
-          ))}
-        </Routes>
-      </div>
+      <Routes>
+        {PageRoutes.map((page) => {
+          const style = 'style' in page && { style: page.style };
+          return (
+            <Route
+              key={page.path}
+              path={page.path}
+              element={
+                <div className={`${className}__content`} {...style}>
+                  <page.Component />
+                </div>
+              }
+            />
+          );
+        })}
+      </Routes>
     </div>
   );
 };

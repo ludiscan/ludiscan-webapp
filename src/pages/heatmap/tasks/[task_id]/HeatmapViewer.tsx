@@ -1,12 +1,13 @@
 import styled from '@emotion/styled';
 import { Canvas } from '@react-three/fiber';
-import { useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
 import type { HeatmapTask } from '@/modeles/heatmaptask.ts';
 import type { FC } from 'react';
 
-import { FlexColumn } from '@/component/atoms/Flex.tsx';
+import { FlexColumn, FlexRow } from '@/component/atoms/Flex.tsx';
 import { HeatMapCanvas } from '@/pages/heatmap/tasks/[task_id]/HeatmapCanvas.tsx';
+import { HeatmapMenu } from '@/pages/heatmap/tasks/[task_id]/HeatmapMenu.tsx';
 import { dimensions } from '@/styles/style.ts';
 
 export type HeatmapViewerProps = {
@@ -17,6 +18,10 @@ export type HeatmapViewerProps = {
 const Component: FC<HeatmapViewerProps> = ({ className, task }) => {
   const [modelPath, setModelPath] = useState<string | null>(null);
   const [modelType, setModelType] = useState<'gltf' | 'glb' | 'obj' | null>(null);
+
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  const [isMenuOpen, setIsMenuOpen] = useState(true);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -43,14 +48,32 @@ const Component: FC<HeatmapViewerProps> = ({ className, task }) => {
     setModelPath(objectURL);
   };
 
+  const pointList = useMemo(() => {
+    return (
+      task?.result?.map((point) => ({
+        x: point.x - task.stepSize / 2,
+        y: point.y - task.stepSize / 2,
+        z: (point.z ?? 0) - task.stepSize / 2,
+        density: point.density,
+      })) ?? []
+    );
+  }, [task]);
+
+  const handleMenuClose = useCallback((value: boolean) => {
+    setIsMenuOpen(value);
+  }, []);
+
   return (
     <FlexColumn className={className} align={'center'}>
       <input className={`${className}__inputfile`} type='file' accept='.gltf,.glb,.obj,.bin,.png' multiple onChange={handleFileChange} />
-      <div className={`${className}__canvas`}>
-        <Canvas camera={{ position: [500, 500, 500], fov: 50, near: 0.1, far: 10000 }}>
-          <HeatMapCanvas modelPath={modelPath} modelType={modelType} pointList={task?.result ?? []} />
-        </Canvas>
-      </div>
+      <FlexRow className={`${className}__canvasBox`} wrap={'nowrap'}>
+        <HeatmapMenu isMenuOpen={isMenuOpen} toggleMenu={handleMenuClose} />
+        <div className={`${className}__canvas`}>
+          <Canvas camera={{ position: [500, 500, 500], fov: 50, near: 10, far: 10000 }} ref={canvasRef}>
+            <HeatMapCanvas modelPath={modelPath} modelType={modelType} pointList={pointList} />
+          </Canvas>
+        </div>
+      </FlexRow>
     </FlexColumn>
   );
 };
@@ -61,6 +84,11 @@ export const HeatMapViewer = styled(Component)`
   &__inputfile {
     width: 100%;
     height: 40px;
+  }
+
+  &__canvasBox {
+    width: 100%;
+    border: ${({ theme }) => `1px solid ${theme.colors.border.main}`};
   }
 
   &__canvas {
