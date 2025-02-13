@@ -42,25 +42,25 @@ export const Tooltip = styled(TooltipComponent)<TooltipProps>`
     transition: opacity 0.3s ease-in-out;
   }
 
-  &___tooltip-text.top {
+  &__tooltip-text.top {
     bottom: 125%;
     left: 50%;
     transform: translateX(-50%);
   }
 
-  &___tooltip-text.bottom {
+  &__tooltip-text.bottom {
     top: 125%;
     left: 50%;
     transform: translateX(-50%);
   }
 
-  &___tooltip-text.left {
+  &__tooltip-text.left {
     top: 50%;
     right: 125%;
     transform: translateY(-50%);
   }
 
-  &___tooltip-text.right {
+  &__tooltip-text.right {
     top: 50%;
     left: 125%;
     transform: translateY(-50%);
