@@ -10,6 +10,8 @@ import { getCanvasValues, saveCanvasValues } from '@/utils/localstrage'; // loca
 export type CanvasEventValues = {
   upZ: boolean;
   scale: number;
+  showHeatmap: boolean;
+  blockSize: number;
 };
 
 // localStorage に保存されている値を初期状態として利用
@@ -29,8 +31,20 @@ const canvasSlice = createSlice({
       state.scale = action.payload;
       saveCanvasValues(state);
     },
+
+    // Heatmap の表示非表示
+    setShowHeatmap(state, action: PayloadAction<boolean>) {
+      state.showHeatmap = action.payload;
+      saveCanvasValues(state);
+    },
+
+    // ブロックサイズの更新
+    setBlockSize(state, action: PayloadAction<number>) {
+      state.blockSize = action.payload;
+      saveCanvasValues(state);
+    },
   },
 });
 
-export const { setUpZ, setScale } = canvasSlice.actions;
+export const { setUpZ, setScale, setShowHeatmap, setBlockSize } = canvasSlice.actions;
 export const canvasReducer = canvasSlice.reducer;

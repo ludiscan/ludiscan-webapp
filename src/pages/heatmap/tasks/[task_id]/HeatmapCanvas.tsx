@@ -1,12 +1,13 @@
 import { OrbitControls } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 import type { FC } from 'react';
 
 import { ModelViewer } from '@/component/molecules/ModelViewer.tsx';
 import PointMarkers from '@/component/molecules/PointMarkers';
 import { useCanvasState } from '@/hooks/useCanvasState.ts';
+import PointCircles from '@/pages/heatmap/tasks/[task_id]/PointCircles.tsx';
 import { canvasEventBus } from '@/utils/canvasEventBus.ts';
 
 type HeatmapCanvasProps = {
@@ -17,7 +18,7 @@ type HeatmapCanvasProps = {
 
 const Component: FC<HeatmapCanvasProps> = ({ modelPath, modelType, pointList }) => {
   const { invalidate } = useThree();
-  const { upZ } = useCanvasState();
+  const { showHeatmap } = useCanvasState();
   const orbitControlsRef = useRef(null);
 
   useEffect(() => {
@@ -31,21 +32,14 @@ const Component: FC<HeatmapCanvasProps> = ({ modelPath, modelType, pointList }) 
       canvasEventBus.removeListener('invalidate', handleInvalidate);
     };
   }, [invalidate]);
-  const points = useMemo(() => {
-    return pointList.map((point) => ({
-      x: point.x,
-      y: upZ ? (point.z ?? 0) : point.y,
-      z: upZ ? point.y : (point.z ?? 0),
-      density: point.density,
-    }));
-  }, [pointList, upZ]);
 
   return (
     <>
-      <ambientLight /> {/* eslint-disable-line react/no-unknown-property */}
-      <directionalLight position={[400, 400, 400]} intensity={2} /> {/* eslint-disable-line react/no-unknown-property */}
+      <ambientLight intensity={0.3} /> {/* eslint-disable-line react/no-unknown-property */}
+      <directionalLight position={[10, 10, 10]} intensity={3} castShadow /> {/* eslint-disable-line react/no-unknown-property */}
       {modelPath && modelType && <ModelViewer modelPath={modelPath} modelType={modelType} />}
-      {points && <PointMarkers points={points} />}
+      {pointList && showHeatmap && <PointMarkers points={pointList} />}
+      {pointList && showHeatmap && <PointCircles points={pointList} />}
       <OrbitControls enableZoom enablePan enableRotate ref={orbitControlsRef} />
     </>
   );

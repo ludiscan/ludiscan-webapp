@@ -18,6 +18,7 @@ export const ClampText = styled(Component)`
   display: -webkit-box;
   width: ${({ width }) => width || 'fit-content'};
   overflow: hidden;
+  text-overflow: ellipsis;
   -webkit-line-clamp: ${({ lines }) => lines || 1};
   line-clamp: ${({ lines }) => lines || 1};
   -webkit-box-orient: vertical;

@@ -51,8 +51,8 @@ export function saveCanvasValues(canvas: CanvasEventValues) {
 
 export function getCanvasValues(): CanvasEventValues {
   const storage = localStorage.getItem(STORAGE_KEY);
-  if (storage) {
-    return JSON.parse(storage).canvas || { upZ: false, scale: 1 };
+  if (storage && JSON.parse(storage).canvas) {
+    return JSON.parse(storage).canvas;
   }
-  return { upZ: false, scale: 1 };
+  return { blockSize: 100, showHeatmap: true, upZ: false, scale: 1 };
 }
