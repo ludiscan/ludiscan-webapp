@@ -1,5 +1,3 @@
-import styled from '@emotion/styled';
-
 import type { PerformanceMonitorApi } from '@react-three/drei';
 import type { FC } from 'react';
 
@@ -20,4 +18,4 @@ const Component: FC<PerformanceListProps> = ({ className, api }) => {
   );
 };
 
-export const PerformanceList = styled(Component)``;
+export const PerformanceList = Component;
