@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { Canvas } from '@react-three/fiber';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
 import type { HeatmapTask } from '@/modeles/heatmaptask.ts';
 import type { FC } from 'react';
@@ -18,6 +18,8 @@ export type HeatmapViewerProps = {
 const Component: FC<HeatmapViewerProps> = ({ className, task }) => {
   const [modelPath, setModelPath] = useState<string | null>(null);
   const [modelType, setModelType] = useState<'gltf' | 'glb' | 'obj' | null>(null);
+
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const [isMenuOpen, setIsMenuOpen] = useState(true);
 
@@ -67,7 +69,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, task }) => {
       <FlexRow className={`${className}__canvasBox`} wrap={'nowrap'}>
         <HeatmapMenu isMenuOpen={isMenuOpen} toggleMenu={handleMenuClose} />
         <div className={`${className}__canvas`}>
-          <Canvas camera={{ position: [500, 500, 500], fov: 50, near: 10, far: 10000 }}>
+          <Canvas camera={{ position: [500, 500, 500], fov: 50, near: 10, far: 10000 }} ref={canvasRef}>
             <HeatMapCanvas modelPath={modelPath} modelType={modelType} pointList={pointList} />
           </Canvas>
         </div>

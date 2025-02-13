@@ -2,10 +2,12 @@ import styled from '@emotion/styled';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import ReactModal from 'react-modal';
+import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 
 import { SharedThemeProvider } from './hooks/useSharedTheme.tsx';
 import { Pages } from './pages/Pages.tsx';
+import { store } from './store.ts';
 
 import { Header } from '@/component/templates/Header.tsx';
 import { SidebarLayout } from '@/component/templates/SidebarLayout.tsx';
@@ -23,19 +25,21 @@ function App() {
   ReactModal.setAppElement('#root');
   const queryClient = useMemo(() => new QueryClient(), []);
   return (
-    <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
-        <ToastProvider position={'top-right'}>
-          <SharedThemeProvider>
-            <Content>
-              <SidebarLayout />
-              <Header />
-              <Pages />
-            </Content>
-          </SharedThemeProvider>
-        </ToastProvider>
-      </QueryClientProvider>
-    </BrowserRouter>
+    <Provider store={store}>
+      <BrowserRouter>
+        <QueryClientProvider client={queryClient}>
+          <ToastProvider position={'top-right'}>
+            <SharedThemeProvider>
+              <Content>
+                <SidebarLayout />
+                <Header />
+                <Pages />
+              </Content>
+            </SharedThemeProvider>
+          </ToastProvider>
+        </QueryClientProvider>
+      </BrowserRouter>
+    </Provider>
   );
 }
 

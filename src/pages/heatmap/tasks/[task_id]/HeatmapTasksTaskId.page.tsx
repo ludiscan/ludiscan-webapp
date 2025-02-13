@@ -26,13 +26,13 @@ const Component: FC<HeatMapTaskIdPageProps> = ({ className }) => {
 
   const { data: task, refetch: refetchTask } = useQuery({
     queryKey: ['heatmap', taskId, isAuthorized],
-    queryFn: async (): Promise<HeatmapTask | undefined> => {
-      if (!taskId || isNaN(Number(taskId))) return undefined;
-      if (!isAuthorized) return undefined;
+    queryFn: async (): Promise<HeatmapTask | null> => {
+      if (!taskId || isNaN(Number(taskId))) return null;
+      if (!isAuthorized) return null;
       const { data, error } = await query.GET('/api/v0/heatmap/tasks/{task_id}', {
         params: { path: { task_id: Number(taskId) } },
       });
-      if (error) return undefined;
+      if (error) throw error;
       return data;
     },
   });

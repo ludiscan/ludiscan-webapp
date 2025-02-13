@@ -1,10 +1,13 @@
 import { OrbitControls } from '@react-three/drei';
-import { useMemo } from 'react';
+import { useThree } from '@react-three/fiber';
+import { useEffect, useMemo, useRef } from 'react';
 
 import type { FC } from 'react';
 
 import { ModelViewer } from '@/component/molecules/ModelViewer.tsx';
 import PointMarkers from '@/component/molecules/PointMarkers';
+import { useCanvasState } from '@/hooks/useCanvasState.ts';
+import { canvasEventBus } from '@/utils/canvasEventBus.ts';
 
 type HeatmapCanvasProps = {
   modelPath: string | null;
@@ -13,14 +16,29 @@ type HeatmapCanvasProps = {
 };
 
 const Component: FC<HeatmapCanvasProps> = ({ modelPath, modelType, pointList }) => {
+  const { invalidate } = useThree();
+  const { upZ } = useCanvasState();
+  const orbitControlsRef = useRef(null);
+
+  useEffect(() => {
+    const handleInvalidate = () => {
+      invalidate();
+    };
+
+    canvasEventBus.addListener('invalidate', handleInvalidate);
+
+    return () => {
+      canvasEventBus.removeListener('invalidate', handleInvalidate);
+    };
+  }, [invalidate]);
   const points = useMemo(() => {
     return pointList.map((point) => ({
       x: point.x,
-      y: point.z ?? 0,
-      z: point.y,
+      y: upZ ? (point.z ?? 0) : point.y,
+      z: upZ ? point.y : (point.z ?? 0),
       density: point.density,
     }));
-  }, [pointList]);
+  }, [pointList, upZ]);
 
   return (
     <>
@@ -28,7 +46,7 @@ const Component: FC<HeatmapCanvasProps> = ({ modelPath, modelType, pointList }) 
       <directionalLight position={[400, 400, 400]} intensity={2} /> {/* eslint-disable-line react/no-unknown-property */}
       {modelPath && modelType && <ModelViewer modelPath={modelPath} modelType={modelType} />}
       {points && <PointMarkers points={points} />}
-      <OrbitControls enableZoom enablePan enableRotate />
+      <OrbitControls enableZoom enablePan enableRotate ref={orbitControlsRef} />
     </>
   );
 };
