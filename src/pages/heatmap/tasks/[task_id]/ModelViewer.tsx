@@ -11,7 +11,9 @@ type ModelViewerProps = {
 };
 
 const Component: React.FC<ModelViewerProps> = ({ modelPath, modelType }) => {
-  const { scale } = useCanvasState();
+  const {
+    general: { scale },
+  } = useCanvasState();
   const model = useLoader(modelType == 'obj' ? OBJLoader : GLTFLoader, modelPath);
   return (
     <Suspense fallback={null}>

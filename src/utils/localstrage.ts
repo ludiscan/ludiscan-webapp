@@ -49,10 +49,10 @@ export function saveCanvasValues(canvas: CanvasEventValues) {
   }
 }
 
-export function getCanvasValues(): CanvasEventValues {
+export function getCanvasValues(): CanvasEventValues | null {
   const storage = localStorage.getItem(STORAGE_KEY);
   if (storage && JSON.parse(storage).canvas) {
     return JSON.parse(storage).canvas;
   }
-  return { blockSize: 100, showHeatmap: true, upZ: false, scale: 1 };
+  return null;
 }

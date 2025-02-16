@@ -11,7 +11,7 @@ import { FlexColumn, FlexRow } from '@/component/atoms/Flex.tsx';
 import { HeatMapCanvas } from '@/pages/heatmap/tasks/[task_id]/HeatmapCanvas.tsx';
 import { HeatmapMenu } from '@/pages/heatmap/tasks/[task_id]/HeatmapMenu.tsx';
 import { PerformanceList } from '@/pages/heatmap/tasks/[task_id]/PerformanceList.tsx';
-import { dimensions } from '@/styles/style.ts';
+import { dimensions, zIndexes } from '@/styles/style.ts';
 
 export type HeatmapViewerProps = {
   className?: string | undefined;
@@ -77,9 +77,11 @@ const Component: FC<HeatmapViewerProps> = ({ className, task }) => {
     <FlexColumn className={className} align={'center'}>
       <input className={`${className}__inputfile`} type='file' accept='.gltf,.glb,.obj,.bin,.png' multiple onChange={handleFileChange} />
       <FlexRow className={`${className}__canvasBox`} wrap={'nowrap'}>
-        <HeatmapMenu isMenuOpen={isMenuOpen} toggleMenu={handleMenuClose} />
+        <div className={`${className}__canvasMenu`}>
+          <HeatmapMenu isMenuOpen={isMenuOpen} toggleMenu={handleMenuClose} />
+        </div>
         <div className={`${className}__canvas`}>
-          <Canvas camera={{ position: [500, 500, 500], fov: 50, near: 10, far: 10000 }} ref={canvasRef} dpr={dpr}>
+          <Canvas camera={{ position: [2500, 2500, 2500], fov: 50, near: 10, far: 10000 }} ref={canvasRef} dpr={dpr}>
             <PerformanceMonitor factor={1} onChange={handleOnPerformance} />
             <HeatMapCanvas modelPath={modelPath} modelType={modelType} pointList={pointList} />
           </Canvas>
@@ -99,8 +101,18 @@ export const HeatMapViewer = styled(Component)`
   }
 
   &__canvasBox {
+    position: relative;
     width: 100%;
     border: ${({ theme }) => `1px solid ${theme.colors.border.main}`};
+  }
+
+  &__canvasMenu {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: ${zIndexes.content + 2};
+    max-width: 300px;
+    max-height: 100%;
   }
 
   &__canvas {

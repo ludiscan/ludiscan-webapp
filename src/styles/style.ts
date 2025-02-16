@@ -19,6 +19,7 @@ export const fontWeights = {
 } as const;
 
 export const zIndexes = {
+  content: 0,
   header: 100,
   sidebar: 150,
   modal: 200,

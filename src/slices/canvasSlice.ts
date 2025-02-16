@@ -2,49 +2,69 @@
 
 import { createSlice } from '@reduxjs/toolkit';
 
+import packageJson from '../../package.json';
+
 import type { PayloadAction } from '@reduxjs/toolkit';
 
-import { getCanvasValues, saveCanvasValues } from '@/utils/localstrage'; // localStorage から読み込む関数
+import { getCanvasValues, saveCanvasValues } from '@/utils/localstrage';
 
 // Canvas の状態の型定義
 export type CanvasEventValues = {
-  upZ: boolean;
-  scale: number;
-  showHeatmap: boolean;
-  blockSize: number;
+  version?: string;
+  general: {
+    upZ: boolean;
+    scale: number;
+    showHeatmap: boolean;
+    blockSize: number;
+  };
+  hotspotMode: {
+    visible: boolean;
+    cellRadius: number;
+    thresholdCount: number;
+    skipNearDuplication: boolean;
+  };
 };
 
-// localStorage に保存されている値を初期状態として利用
-const initialState: CanvasEventValues = getCanvasValues();
+const initializeValues: CanvasEventValues = {
+  version: packageJson.version,
+  general: {
+    upZ: false,
+    scale: 1,
+    showHeatmap: false,
+    blockSize: 1,
+  },
+  hotspotMode: {
+    visible: false,
+    cellRadius: 400,
+    thresholdCount: 6,
+    skipNearDuplication: true,
+  },
+};
+
+function initialState(): CanvasEventValues {
+  const saveState = getCanvasValues();
+  if (saveState) {
+    if (saveState.version === initializeValues.version) {
+      return saveState;
+    }
+  }
+  return initializeValues;
+}
 
 const canvasSlice = createSlice({
   name: 'heatmapCanvas',
   initialState,
   reducers: {
-    // 引数で指定された値に更新
-    setUpZ(state, action: PayloadAction<boolean>) {
-      state.upZ = action.payload;
+    setGeneral: (state, action: PayloadAction<CanvasEventValues['general']>) => {
+      state.general = action.payload;
       saveCanvasValues(state);
     },
-    // scale の更新
-    setScale(state, action: PayloadAction<number>) {
-      state.scale = action.payload;
-      saveCanvasValues(state);
-    },
-
-    // Heatmap の表示非表示
-    setShowHeatmap(state, action: PayloadAction<boolean>) {
-      state.showHeatmap = action.payload;
-      saveCanvasValues(state);
-    },
-
-    // ブロックサイズの更新
-    setBlockSize(state, action: PayloadAction<number>) {
-      state.blockSize = action.payload;
+    setHotspotMode: (state, action: PayloadAction<CanvasEventValues['hotspotMode']>) => {
+      state.hotspotMode = action.payload;
       saveCanvasValues(state);
     },
   },
 });
 
-export const { setUpZ, setScale, setShowHeatmap, setBlockSize } = canvasSlice.actions;
+export const { setGeneral, setHotspotMode } = canvasSlice.actions;
 export const canvasReducer = canvasSlice.reducer;

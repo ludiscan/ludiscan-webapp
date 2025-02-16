@@ -1,11 +1,12 @@
 import { SharedThemeProvider } from '../../hooks/useSharedTheme.tsx';
 import darkTheme from '../../styles/dark.ts';
 import lightTheme from '../../styles/light.ts';
-import { colors, fontSizes } from '../../styles/style.ts';
 
 import { Text } from './Text.tsx';
 
 import type { Meta, StoryObj } from '@storybook/react';
+
+import { colors, fontSizes } from '@/styles/style.ts';
 
 export default {
   component: Text,

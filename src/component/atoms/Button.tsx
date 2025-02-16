@@ -7,7 +7,7 @@ import type { ReactNode } from 'react';
 export type ButtonProps = {
   className?: string | undefined;
   onClick: () => Promise<void> | void;
-  scheme: 'primary' | 'surface' | 'warning' | 'none' | 'error';
+  scheme: 'primary' | 'surface' | 'warning' | 'none' | 'error' | 'secondary';
   fontSize: 'small' | 'medium' | 'large';
   width?: 'full' | 'fit-content';
   children: ReactNode;
@@ -25,7 +25,7 @@ const Component = ({ className, onClick, scheme, children, disabled = false }: B
 export const Button = styled(Component)`
   width: ${(props) => (props.width === 'full' ? '100%' : 'fit-content')};
   height: ${(props) => (props.scheme === 'none' ? 'fit-content' : props.fontSize === 'small' ? '28px' : props.fontSize === 'large' ? '36px' : '32px')};
-  padding: ${(props) => (props.scheme === 'none' ? 0 : props.fontSize === 'small' ? '0 16px' : props.fontSize === 'large' ? '0 22px' : '0 18px')};
+  padding: ${(props) => (props.scheme === 'none' ? '2px' : props.fontSize === 'small' ? '0 16px' : props.fontSize === 'large' ? '0 22px' : '0 18px')};
   font-size: ${(props) => (props.fontSize === 'small' ? fontSizes.small : props.fontSize === 'large' ? fontSizes.large1 : fontSizes.medium)};
   font-weight: bold;
   color: ${({ theme }) => theme.colors.text};
@@ -58,6 +58,12 @@ export const Button = styled(Component)`
   &.error {
     color: ${colors.white};
     background-color: ${colors.error};
+  }
+
+  &.secondary {
+    color: ${({ theme }) => theme.colors.primary.main};
+    background-color: ${({ theme }) => theme.colors.secondary.main};
+    border: 1px solid ${({ theme }) => theme.colors.primary.main};
   }
 
   &:disabled {
