@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 
-import type { FC } from 'react';
+import type { CSSProperties, FC } from 'react';
 
 export type TextProps = {
   className?: string | undefined;
@@ -9,10 +9,15 @@ export type TextProps = {
   color?: string;
   shadow?: boolean;
   fontWeight?: number | 'bolder' | 'lighter' | 'normal' | 'bold';
+  style?: CSSProperties;
 };
 
-const Component: FC<TextProps> = ({ className, text }) => {
-  return <span className={className}>{text}</span>;
+const Component: FC<TextProps> = ({ className, text, style }) => {
+  return (
+    <span className={className} style={style}>
+      {text}
+    </span>
+  );
 };
 
 export const Text = styled(Component)`

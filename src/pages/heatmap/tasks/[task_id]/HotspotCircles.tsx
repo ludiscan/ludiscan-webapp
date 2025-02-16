@@ -7,14 +7,13 @@ import { useCanvasState } from '@/hooks/useCanvasState.ts';
 
 export type PointCirclesProps = {
   points: { x: number; y: number; z?: number | undefined; density: number }[];
-  thresholdCount?: number; // **上位N%を可視化**
-  circleSize?: number; // **円の基本サイズ**
-  radius?: number; // **近傍探索の半径**
 };
 
-const PointCircles: FC<PointCirclesProps> = ({ points, thresholdCount = 6, circleSize = 200, radius = 600 }) => {
-  const { scale, upZ } = useCanvasState();
-  const clearNearDuplication = true;
+const Component: FC<PointCirclesProps> = ({ points }) => {
+  const {
+    general: { scale, upZ },
+    hotspotMode: { visible, skipNearDuplication, thresholdCount, cellRadius },
+  } = useCanvasState();
 
   // **各ポイントの周囲の密度を集計**
   const areaDensities = useMemo(() => {
@@ -31,14 +30,14 @@ const PointCircles: FC<PointCirclesProps> = ({ points, thresholdCount = 6, circl
       // **現在のポイントを半径内にある他のポイントと一緒に集計**
       points.forEach((other) => {
         const otherPos = new Vector3(other.x * scale, upZ ? (other.z ?? 0) * scale : other.y * scale, upZ ? other.y * scale : (other.z ?? 0) * scale);
-        if (pos.distanceTo(otherPos) <= radius) {
+        if (pos.distanceTo(otherPos) <= cellRadius) {
           areaMap.get(key)!.totalDensity += other.density;
         }
       });
     });
 
     return Array.from(areaMap.values());
-  }, [points, scale, upZ, radius]);
+  }, [points, scale, upZ, cellRadius]);
 
   // **密度の上位N%のしきい値を決定**
   const sorted = useMemo(() => areaDensities.sort((a, b) => b.totalDensity - a.totalDensity), [areaDensities]);
@@ -48,8 +47,8 @@ const PointCircles: FC<PointCirclesProps> = ({ points, thresholdCount = 6, circl
     for (let i = 0; i < sorted.length; i++) {
       const area = sorted[i];
       // clearNearDuplicationなら半径/2の近さのareaを排除する
-      const sameAreaIndex = areas.findIndex(({ position }) => area.position.distanceTo(position) < radius / 2);
-      if (clearNearDuplication && sameAreaIndex != -1) {
+      const sameAreaIndex = areas.findIndex(({ position }) => area.position.distanceTo(position) < cellRadius);
+      if (skipNearDuplication && sameAreaIndex != -1) {
         areas[sameAreaIndex] = {
           ...areas[sameAreaIndex],
           force: areas[sameAreaIndex].force + 0.001,
@@ -58,7 +57,7 @@ const PointCircles: FC<PointCirclesProps> = ({ points, thresholdCount = 6, circl
       }
       areas.push({
         position: area.position,
-        size: circleSize,
+        size: cellRadius,
         force: area.totalDensity * 0.1,
       });
       if (areas.length == thresholdCount) {
@@ -66,7 +65,11 @@ const PointCircles: FC<PointCirclesProps> = ({ points, thresholdCount = 6, circl
       }
     }
     return areas;
-  }, [circleSize, clearNearDuplication, radius, sorted, thresholdCount]);
+  }, [cellRadius, skipNearDuplication, sorted, thresholdCount]);
+
+  if (!visible) {
+    return null;
+  }
 
   return highDensityAreas.map((area, index) => (
     <mesh key={index} position={area.position} /* eslint-disable-line react/no-unknown-property */>
@@ -76,4 +79,4 @@ const PointCircles: FC<PointCirclesProps> = ({ points, thresholdCount = 6, circl
   ));
 };
 
-export default PointCircles;
+export const HotspotCircles = Component;

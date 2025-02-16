@@ -1,8 +1,10 @@
-// atoms/Tooltip.tsx
 import styled from '@emotion/styled';
+import { useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 
 import type { FC, ReactNode } from 'react';
 
+import { Text } from '@/component/atoms/Text.tsx';
 import { zIndexes } from '@/styles/style.ts';
 
 export type TooltipProps = {
@@ -13,61 +15,74 @@ export type TooltipProps = {
   placement?: 'top' | 'bottom' | 'left' | 'right';
 };
 
-const TooltipComponent: FC<TooltipProps> = ({ className, children, tooltip, placement }) => {
+// ツールチップテキストのスタイル
+const TooltipText = styled(Text)<{ placement: 'top' | 'bottom' | 'left' | 'right' }>`
+  position: absolute;
+  z-index: ${zIndexes.tooltip};
+  padding: 4px 8px;
+  color: ${({ theme }) => theme.colors.text || '#fff'};
+  white-space: nowrap;
+  pointer-events: none; /* ユーザーの操作に影響させない */
+  background-color: ${({ theme }) => theme.colors.surface.light || '#000'};
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgb(0 0 0 / 20%);
+  opacity: 1;
+  transform: translate(-50%, -100%);
+  transition: opacity 0.3s ease-in-out;
+`;
+
+const TooltipComponent: FC<TooltipProps> = ({ className, children, tooltip, placement = 'top' }) => {
+  // ツールチップの表示・非表示状態
+  const [visible, setVisible] = useState(false);
+  // ツールチップの位置情報
+  const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0 });
+  // ホバー対象のラッパー参照
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  // マウスホバー時のハンドラ
+  const handleMouseEnter = () => {
+    if (wrapperRef.current) {
+      const rect = wrapperRef.current.getBoundingClientRect();
+      let top = 0;
+      let left = 0;
+      // 配置（placement）に応じた位置計算
+      if (placement === 'top') {
+        top = rect.top - 8; // 8px分上にずらす（微調整）
+        left = rect.left + rect.width / 2;
+      } else if (placement === 'bottom') {
+        top = rect.bottom + 8;
+        left = rect.left + rect.width / 2;
+      } else if (placement === 'left') {
+        top = rect.top + rect.height / 2;
+        left = rect.left - 8;
+      } else if (placement === 'right') {
+        top = rect.top + rect.height / 2;
+        left = rect.right + 8;
+      }
+      setTooltipPos({ top, left });
+    }
+    setVisible(true);
+  };
+
+  // マウスリーブ時のハンドラ
+  const handleMouseLeave = () => {
+    setVisible(false);
+  };
+
   return (
-    <div className={className}>
+    <div
+      ref={wrapperRef}
+      className={className}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      style={{ display: 'inline-block' }} // 親要素として必要
+    >
       {children}
-      <span className={`${className}__tooltip-text ${placement}`}>{tooltip}</span>
+      {visible && createPortal(<TooltipText placement={placement} style={{ top: tooltipPos.top, left: tooltipPos.left }} text={tooltip} />, document.body)}
     </div>
   );
 };
 
-export const Tooltip = styled(TooltipComponent)<TooltipProps>`
+export const Tooltip = styled(TooltipComponent)`
   position: relative;
-  display: inline-block;
-
-  &__tooltip-text {
-    position: absolute;
-    z-index: ${zIndexes.tooltip};
-    visibility: hidden;
-    width: max-content;
-    padding: 4px 8px;
-    color: ${({ theme }) => theme.colors.text || '#fff'};
-    text-align: center;
-    white-space: nowrap;
-    background-color: ${({ theme }) => theme.colors.surface.light || '#000'};
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgb(0 0 0 / 20%);
-    opacity: 0;
-    transition: opacity 0.3s ease-in-out;
-  }
-
-  &__tooltip-text.top {
-    bottom: 125%;
-    left: 50%;
-    transform: translateX(-50%);
-  }
-
-  &__tooltip-text.bottom {
-    top: 125%;
-    left: 50%;
-    transform: translateX(-50%);
-  }
-
-  &__tooltip-text.left {
-    top: 50%;
-    right: 125%;
-    transform: translateY(-50%);
-  }
-
-  &__tooltip-text.right {
-    top: 50%;
-    left: 125%;
-    transform: translateY(-50%);
-  }
-
-  &:hover &__tooltip-text {
-    visibility: visible;
-    opacity: 1;
-  }
 `;

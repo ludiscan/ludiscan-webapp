@@ -1,13 +1,13 @@
 import { OrbitControls } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 
-import { SharedThemeProvider } from '../../hooks/useSharedTheme.tsx';
-import darkTheme from '../../styles/dark.ts';
-import lightTheme from '../../styles/light.ts';
-
-import PointMarkers from './PointMarkers.tsx';
+import { PointMarkers } from './PointMarkers.tsx';
 
 import type { Meta, StoryObj } from '@storybook/react';
+
+import { SharedThemeProvider } from '@/hooks/useSharedTheme.tsx';
+import darkTheme from '@/styles/dark.ts';
+import lightTheme from '@/styles/light.ts';
 
 export default {
   component: PointMarkers,

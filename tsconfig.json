@@ -28,7 +28,7 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
   },
-  "include": ["src/**/*", "src/*", "public/**/*", "public/*", "generated/**/*", "generated/*", "vite.config.ts"],
+  "include": ["src/**/*", "src/*", "public/**/*", "public/*", "generated/**/*", "generated/*", "vite.config.ts", "package.json"],
   "exclude": [
     "node_modules",
     "dist",

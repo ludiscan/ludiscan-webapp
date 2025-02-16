@@ -21,8 +21,10 @@ class Point extends Vector3 {
   }
 }
 
-const PointMarkers: FC<PointMarkersProps> = ({ points, minThreshold = 0.5, maxThreshold = 1.0, colorIntensity = 0.6 }) => {
-  const { scale, upZ } = useCanvasState();
+const Component: FC<PointMarkersProps> = ({ points, minThreshold = 0.5, maxThreshold = 1.0, colorIntensity = 0.6 }) => {
+  const {
+    general: { upZ, scale },
+  } = useCanvasState();
 
   const pointList = useMemo(() => {
     return points.map((point) => ({
@@ -67,4 +69,4 @@ const PointMarkers: FC<PointMarkersProps> = ({ points, minThreshold = 0.5, maxTh
   ));
 };
 
-export default PointMarkers;
+export const PointMarkers = Component;
