@@ -47,17 +47,17 @@ const TooltipComponent: FC<TooltipProps> = ({ className, children, tooltip, plac
       let left = 0;
       // 配置（placement）に応じた位置計算
       if (placement === 'top') {
-        top = rect.top - 8; // 8px分上にずらす（微調整）
+        top = rect.top - rect.height;
         left = rect.left + rect.width / 2;
       } else if (placement === 'bottom') {
-        top = rect.bottom + 8;
+        top = rect.bottom + rect.height;
         left = rect.left + rect.width / 2;
       } else if (placement === 'left') {
         top = rect.top + rect.height / 2;
         left = rect.left - 8;
       } else if (placement === 'right') {
         top = rect.top + rect.height / 2;
-        left = rect.right + 8;
+        left = rect.right + rect.width;
       }
       setTooltipPos({ top, left });
     }
