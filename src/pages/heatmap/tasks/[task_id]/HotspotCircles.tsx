@@ -19,6 +19,10 @@ const Component: FC<PointCirclesProps> = ({ points }) => {
   const areaDensities = useMemo(() => {
     const areaMap = new Map<string, { position: Vector3; totalDensity: number }>();
 
+    if (!visible) {
+      return [];
+    }
+
     points.forEach(({ x, y, z }) => {
       const pos = new Vector3(x * scale, upZ ? (z ?? 0) * scale : y * scale, upZ ? y * scale : (z ?? 0) * scale);
       const key = `${pos.x}, ${pos.y}, ${pos.z}`;
@@ -37,12 +41,15 @@ const Component: FC<PointCirclesProps> = ({ points }) => {
     });
 
     return Array.from(areaMap.values());
-  }, [points, scale, upZ, cellRadius]);
+  }, [visible, points, scale, upZ, cellRadius]);
 
   // **密度の上位N%のしきい値を決定**
   const sorted = useMemo(() => areaDensities.sort((a, b) => b.totalDensity - a.totalDensity), [areaDensities]);
 
   const highDensityAreas = useMemo(() => {
+    if (!visible) {
+      return [];
+    }
     const areas: { position: Vector3; size: number; force: number }[] = [];
     for (let i = 0; i < sorted.length; i++) {
       const area = sorted[i];
@@ -65,7 +72,7 @@ const Component: FC<PointCirclesProps> = ({ points }) => {
       }
     }
     return areas;
-  }, [cellRadius, skipNearDuplication, sorted, thresholdCount]);
+  }, [cellRadius, skipNearDuplication, sorted, thresholdCount, visible]);
 
   if (!visible) {
     return null;
