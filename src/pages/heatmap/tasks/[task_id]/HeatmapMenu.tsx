@@ -109,7 +109,7 @@ const Component: FC<HeatmapMenuProps> = ({ className, isMenuOpen, toggleMenu }) 
               </Tooltip>
             </InlineFlexRow>
             <InlineFlexRow align={'center'} gap={4} className={`${className}__row`}>
-              <Tooltip tooltip={'近接するスポットをスキップします'} placement={'right'} className={`${className}__label`}>
+              <Tooltip tooltip={'近接するスポットをスキップします'} className={`${className}__label`}>
                 <Text text='重複をスキップ' fontSize={fontSizes.medium} />
               </Tooltip>
               <Switch
