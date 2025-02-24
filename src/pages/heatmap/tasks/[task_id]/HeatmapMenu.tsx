@@ -32,7 +32,6 @@ const Component: FC<HeatmapMenuProps> = ({ className, isMenuOpen, toggleMenu, ma
   }, []);
 
   useEffect(() => {
-    console.log(general.mapName);
     if ((!general.mapName || general.mapName === '') && mapOptions.length > 0) {
       setGeneral({ ...general, mapName: mapOptions[0] });
     }

@@ -54,8 +54,9 @@ export function useOBJFromArrayBuffer(arrayBuffer: ArrayBuffer | null): Group | 
     try {
       const obj = loader.parse(text);
       setObject3d(obj);
-    } catch (error) {
-      console.error('OBJ parsing error:', error);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (_error) {
+      /* empty */
     }
   }, [arrayBuffer]);
 

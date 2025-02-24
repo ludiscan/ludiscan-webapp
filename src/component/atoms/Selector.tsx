@@ -28,10 +28,10 @@ const Component: FC<SelectorProps> = ({ className, options, value, onChange, dis
 
 export const Selector = styled(Component)`
   padding: 8px;
-  border-radius: 4px;
-  border: 1px solid ${({ theme }) => theme.colors.border.main};
   color: ${({ theme }) => theme.colors.text};
   background-color: ${({ theme }) => theme.colors.surface.light};
+  border: 1px solid ${({ theme }) => theme.colors.border.main};
+  border-radius: 4px;
 
   &:disabled {
     opacity: 0.5;
