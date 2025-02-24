@@ -1,11 +1,12 @@
 import styled from '@emotion/styled';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 
 import type { FC } from 'react';
 
 import { Button } from '@/component/atoms/Button.tsx';
 import { Card } from '@/component/atoms/Card.tsx';
 import { FlexColumn, InlineFlexRow } from '@/component/atoms/Flex.tsx';
+import { Selector } from '@/component/atoms/Selector.tsx';
 import { Slider } from '@/component/atoms/Slider.tsx';
 import { Switch } from '@/component/atoms/Switch.tsx';
 import { Text } from '@/component/atoms/Text.tsx';
@@ -20,14 +21,21 @@ export type HeatmapMenuProps = {
   className?: string | undefined;
   isMenuOpen: boolean;
   toggleMenu: (value: boolean) => void;
+  mapOptions: string[];
 };
 
-const Component: FC<HeatmapMenuProps> = ({ className, isMenuOpen, toggleMenu }) => {
+const Component: FC<HeatmapMenuProps> = ({ className, isMenuOpen, toggleMenu, mapOptions }) => {
   const { theme } = useSharedTheme();
   const { general, setGeneral, version, setHotspotMode, hotspotMode } = useCanvasState();
   const handleReload = useCallback(() => {
     canvasEventBus.emit('invalidate');
   }, []);
+
+  useEffect(() => {
+    if ((!general.mapName || general.mapName === '') && mapOptions.length > 0) {
+      setGeneral({ ...general, mapName: mapOptions[0] });
+    }
+  }, [general, general.mapName, mapOptions, setGeneral]);
   return (
     <div>
       <Card className={`${className} ${!isMenuOpen && 'closed'}`} color={theme.colors.surface.light}>
@@ -39,12 +47,22 @@ const Component: FC<HeatmapMenuProps> = ({ className, isMenuOpen, toggleMenu }) 
               <Text text={'Close'} />
             </Button>
           </InlineFlexRow>
-          <InlineFlexRow align={'center'} gap={4} className={`${className}__row`}>
-            <Text text={`version: ${version}`} />
+          <InlineFlexRow align={'flex-end'} gap={4} className={`${className}__row`}>
+            <Text text={`version: ${version}`} fontSize={fontSizes.small} />
             <div style={{ flex: 1 }} />
             <Button onClick={handleReload} scheme={'surface'} fontSize={'small'}>
-              <Text text={'Reload'} />
+              <Text text={'Reload'} fontSize={fontSizes.small} />
             </Button>
+          </InlineFlexRow>
+          <InlineFlexRow align={'flex-end'} gap={4} className={`${className}__row`}>
+            <Text text={'visualize map'} fontSize={fontSizes.small} />
+            <div style={{ flex: 1 }} />
+            <Selector
+              className={`${className}__input`}
+              onChange={(mapName) => setGeneral({ ...general, mapName })}
+              options={mapOptions}
+              value={general.mapName}
+            />
           </InlineFlexRow>
           <Toggle label={<Text text={'general'} />} className={`${className}__toggle`}>
             <InlineFlexRow align={'center'} gap={4} className={`${className}__row`}>

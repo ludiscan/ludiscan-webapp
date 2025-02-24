@@ -2,22 +2,22 @@ import { OrbitControls } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
 import { useEffect, useRef } from 'react';
 
-import { ModelViewer } from './ModelViewer.tsx';
 import { PointMarkers } from './PointMarkers.tsx';
 
 import type { FC } from 'react';
 
 import { useCanvasState } from '@/hooks/useCanvasState.ts';
 import { HotspotCircles } from '@/pages/heatmap/tasks/[task_id]/HotspotCircles.tsx';
+import { LocalModelLoader, StreamModelLoader } from '@/pages/heatmap/tasks/[task_id]/ModelLoader.tsx';
 import { canvasEventBus } from '@/utils/canvasEventBus.ts';
 
 type HeatmapCanvasProps = {
-  modelPath: string | null;
-  modelType: 'gltf' | 'glb' | 'obj' | null;
+  map?: string | ArrayBuffer | null;
+  modelType?: 'gltf' | 'glb' | 'obj' | 'server' | null;
   pointList: { x: number; y: number; z?: number; density: number }[];
 };
 
-const Component: FC<HeatmapCanvasProps> = ({ modelPath, modelType, pointList }) => {
+const Component: FC<HeatmapCanvasProps> = ({ map, modelType, pointList }) => {
   const { invalidate } = useThree();
   const {
     general: { showHeatmap },
@@ -40,7 +40,8 @@ const Component: FC<HeatmapCanvasProps> = ({ modelPath, modelType, pointList }) 
     <>
       <ambientLight intensity={0.3} /> {/* eslint-disable-line react/no-unknown-property */}
       <directionalLight position={[10, 10, 10]} intensity={3} castShadow /> {/* eslint-disable-line react/no-unknown-property */}
-      {modelPath && modelType && <ModelViewer modelPath={modelPath} modelType={modelType} />}
+      {modelType && map && modelType !== 'server' && typeof map === 'string' && <LocalModelLoader modelPath={map} modelType={modelType} />}
+      {modelType && map && modelType === 'server' && typeof map !== 'string' && <StreamModelLoader stream={map} />}
       {pointList && showHeatmap && <PointMarkers points={pointList} />}
       {pointList && showHeatmap && <HotspotCircles points={pointList} />}
       <OrbitControls enableZoom enablePan enableRotate ref={orbitControlsRef} />

@@ -16,6 +16,7 @@ export type CanvasEventValues = {
     scale: number;
     showHeatmap: boolean;
     blockSize: number;
+    mapName: string;
   };
   hotspotMode: {
     visible: boolean;
@@ -32,6 +33,7 @@ const initializeValues: CanvasEventValues = {
     scale: 1,
     showHeatmap: false,
     blockSize: 1,
+    mapName: '',
   },
   hotspotMode: {
     visible: false,
