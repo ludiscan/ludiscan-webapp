@@ -27,4 +27,4 @@ jobs:
       - name: Type check
         run: npm run type
       - name: Build
-        run: npm run build
+        run: npm run build:prod
