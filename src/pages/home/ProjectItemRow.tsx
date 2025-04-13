@@ -8,7 +8,6 @@ import { ClampText } from '@src/component/molecules/ClampText';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { fontSizes } from '@src/styles/style';
 
-
 export type ProjectItemRowProps = {
   className?: string;
   project: Project;
