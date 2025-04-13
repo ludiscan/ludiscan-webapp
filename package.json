@@ -8,7 +8,8 @@
   "version": "0.1.0",
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build:dev": "next build --turbopack",
+    "build:prod": "next build",
     "start": "next start",
     "lint:eslint": "eslint 'src/**/*.{ts,tsx}'",
     "fix:eslint": "eslint --fix 'src/**/*.{ts,tsx}'",
