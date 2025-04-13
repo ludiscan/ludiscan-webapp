@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { SharedThemeProvider } from '@/hooks/useSharedTheme.tsx';
-import { ObjectToggleList } from '@/pages/heatmap/tasks/[task_id]/ObjectToggleList.tsx';
-import darkTheme from '@/styles/dark.ts';
-import lightTheme from '@/styles/light.ts';
+import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
+import { ObjectToggleList } from '@src/pages/heatmap/tasks/[task_id]/ObjectToggleList';
+import darkTheme from '@src/styles/dark';
+import lightTheme from '@src/styles/light';
 
 export default {
   component: ObjectToggleList,

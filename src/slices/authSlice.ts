@@ -1,10 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
-import type { User } from '@/modeles/user.ts';
 import type { PayloadAction } from '@reduxjs/toolkit';
+import type { Env } from '@src/modeles/env';
+import type { User } from '@src/modeles/user';
 
-import { query } from '@/modeles/qeury.ts';
-import { getToken, getUser, saveToken, saveUser } from '@/utils/localstrage.ts';
+import { createClient } from '@src/modeles/qeury';
+import { saveToken, saveUser } from '@src/utils/localstrage';
 
 /**
  * Redux の state で管理する認証情報の型
@@ -12,6 +13,7 @@ import { getToken, getUser, saveToken, saveUser } from '@/utils/localstrage.ts';
 export interface AuthState {
   token: string | null;
   user: User | null;
+  ready: boolean;
   isLoading: boolean;
   error: string | null;
 }
@@ -21,8 +23,9 @@ export interface AuthState {
  * ローカルストレージから既存のトークンとユーザー情報を取得
  */
 export const initialState: AuthState = {
-  token: getToken() || null,
-  user: getUser() || null,
+  token: null,
+  user: null,
+  ready: false,
   isLoading: false,
   error: null,
 };
@@ -31,6 +34,7 @@ export const initialState: AuthState = {
  * ログイン時に使用するペイロードの型
  */
 export interface LoginPayload {
+  env: Env;
   email: string;
   password: string;
 }
@@ -38,10 +42,11 @@ export interface LoginPayload {
 /**
  * createAsyncThunk を使ってログイン処理を非同期アクションとして定義
  */
-export const login = createAsyncThunk('auth/login', async ({ email, password }: LoginPayload, { rejectWithValue }) => {
+export const login = createAsyncThunk('auth/login', async ({ env, email, password }: LoginPayload, { rejectWithValue }) => {
   if (!email || !password) {
     return rejectWithValue('メールアドレスとパスワードを入力してください');
   }
+  const query = createClient(env);
   try {
     const res = await query.POST('/api/v0/login', {
       body: { email, password },
@@ -74,6 +79,15 @@ const authSlice = createSlice({
       saveToken('');
       saveUser(null);
     },
+    setToken(state, action: PayloadAction<string>) {
+      state.token = action.payload;
+    },
+    setUser(state, action: PayloadAction<User>) {
+      state.user = action.payload;
+    },
+    setReady(state, action: PayloadAction<boolean>) {
+      state.ready = action.payload;
+    }
   },
   extraReducers: (builder) => {
     // ログイン開始時の処理
@@ -96,7 +110,7 @@ const authSlice = createSlice({
 });
 
 // ログアウト用のアクションをエクスポート
-export const { logout } = authSlice.actions;
+export const { logout, setToken, setUser, setReady } = authSlice.actions;
 
 // reducer をエクスポート（Redux store に登録してください）
 export const authReducer = authSlice.reducer;

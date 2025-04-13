@@ -1,8 +1,8 @@
 import styled from '@emotion/styled';
 
-import { FlexColumn } from '@/component/atoms/Flex.tsx';
-import { Text } from '@/component/atoms/Text.tsx';
-import { fontSizes, fontWeights } from '@/styles/style.ts';
+import { FlexColumn } from '@src/component/atoms/Flex';
+import { Text } from '@src/component/atoms/Text';
+import { fontSizes, fontWeights } from '@src/styles/style';
 
 export type TextFieldProps = {
   className?: string | undefined;

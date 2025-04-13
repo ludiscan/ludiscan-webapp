@@ -11,10 +11,10 @@ import { RiMenu2Fill, RiMenu3Fill } from 'react-icons/ri';
 
 import type { FC, ReactNode } from 'react';
 
-import { Button } from '@/component/atoms/Button.tsx';
-import { FlexRow } from '@/component/atoms/Flex.tsx';
-import { useSharedTheme } from '@/hooks/useSharedTheme.tsx';
-import { dimensions, zIndexes } from '@/styles/style.ts';
+import { Button } from '@src/component/atoms/Button';
+import { FlexRow } from '@src/component/atoms/Flex';
+import { useSharedTheme } from '@src/hooks/useSharedTheme';
+import { dimensions, zIndexes } from '@src/styles/style';
 
 export type ResponsiveSidebarProps = {
   /** 外部からスタイルを上書きするための className（必要に応じてご利用ください） */

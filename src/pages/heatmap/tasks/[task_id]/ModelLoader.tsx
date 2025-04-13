@@ -6,7 +6,7 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import type { FC } from 'react';
 import type { Group } from 'three';
 
-import { useCanvasState } from '@/hooks/useCanvasState.ts';
+import { useCanvasState } from '@src/hooks/useCanvasState';
 
 type LocalModelLoaderProps = {
   modelPath: string;
@@ -23,7 +23,7 @@ const LocalModelLoaderContent: FC<LocalModelLoaderProps> = ({ modelPath, modelTy
       <primitive
         object={'scene' in model ? model.scene : model} // eslint-disable-line react/no-unknown-property
         position={[0, 1, 0]} // eslint-disable-line react/no-unknown-property
-        scale={[scale, scale, scale]} // eslint-disable-line react/no-unknown-property
+        scale={[scale, scale, scale]}
         castShadow={true} // eslint-disable-line react/no-unknown-property
       />
       <shadowMaterial opacity={1} />
@@ -73,7 +73,7 @@ const StreamModelLoaderComponent: FC<StreamModelLoaderProps> = ({ model }) => {
         <primitive
           object={model} // eslint-disable-line react/no-unknown-property
           position={[0, 1, 0]} // eslint-disable-line react/no-unknown-property
-          scale={[scale, scale, scale]} // eslint-disable-line react/no-unknown-property
+          scale={[scale, scale, scale]}
           castShadow={true} // eslint-disable-line react/no-unknown-property
         />
       )}

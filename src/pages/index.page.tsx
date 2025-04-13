@@ -1,30 +1,38 @@
 import styled from '@emotion/styled';
+import Image from 'next/image';
+import Link from 'next/link';
 import { useState } from 'react';
-
-import { Button } from '../component/atoms/Button.tsx';
 
 import type { FC } from 'react';
 
-import { RouterNavLink } from '@/component/templates/RouterNavigate.tsx';
+import { Button } from '@src/component/atoms/Button';
 
 export type IndexPageProps = {
   className?: string;
 };
+
+export async function getServerSideProps() {
+  return {
+    props: {
+      title: 'Index Page',
+    },
+  };
+}
 
 const Component: FC<IndexPageProps> = ({ className }) => {
   const [count, setCount] = useState(0);
   return (
     <div className={className}>
       <h1>Index Page</h1>
-      <RouterNavLink to={'/ludiscan/view/home'} end className={(props) => `${className}__link ${props.isActive ? 'active' : ''}`}>
+      <Link href={'/home'}>
         <span>Go to Home</span>
-      </RouterNavLink>
+      </Link>
       <div>
         <a href='https://vite.dev' target='_blank' rel='noreferrer'>
-          <img src={'/ludiscan/view/vite.svg'} className={`${className}__logo`} alt='Vite logo' />
+          <Image src={'/ludiscan/view/vite.svg'} className={`${className}__logo`} alt='Vite logo' width={120} height={120} />
         </a>
         <a href='https://react.dev' target='_blank' rel='noreferrer'>
-          <img src={'/ludiscan/view/react.svg'} className={`${className}__logo react`} alt='React logo' />
+          <Image src={'/ludiscan/view/react.svg'} className={`${className}__logo react`} alt='React logo'  width={120}  height={120}/>
         </a>
       </div>
       <h1>Vite + React</h1>
@@ -41,7 +49,7 @@ const Component: FC<IndexPageProps> = ({ className }) => {
   );
 };
 
-export const IndexPage = styled(Component)`
+const IndexPage = styled(Component)`
   padding: 2rem;
   text-align: center;
 
@@ -84,3 +92,11 @@ export const IndexPage = styled(Component)`
     color: #888;
   }
 `;
+
+export default function App() {
+  return (
+    <div>
+      <IndexPage />
+    </div>
+  );
+}

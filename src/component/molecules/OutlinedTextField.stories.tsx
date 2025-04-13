@@ -1,11 +1,11 @@
 // TextField.stories.tsx
-import { SharedThemeProvider } from '../../hooks/useSharedTheme.tsx';
-import darkTheme from '../../styles/dark.ts';
-import lightTheme from '../../styles/light.ts';
+import darkTheme from '../../styles/dark';
+import lightTheme from '../../styles/light';
 
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { OutlinedTextField } from '@/component/molecules/OutlinedTextField.tsx';
+import { OutlinedTextField } from '@src/component/molecules/OutlinedTextField';
+import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
 
 export default {
   component: OutlinedTextField,

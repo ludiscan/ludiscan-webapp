@@ -1,11 +1,11 @@
 // atoms/Divider.stories.tsx
-import { SharedThemeProvider } from '../../hooks/useSharedTheme.tsx';
-import darkTheme from '../../styles/dark.ts';
-import lightTheme from '../../styles/light.ts';
-
-import { Divider } from './Divider.tsx';
+import { Divider } from './Divider';
 
 import type { Meta, StoryObj } from '@storybook/react';
+
+import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
+import darkTheme from '@src/styles/dark';
+import lightTheme from '@src/styles/light';
 
 export default {
   component: Divider,

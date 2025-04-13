@@ -1,5 +1,5 @@
-import type { User } from '@/modeles/user.ts';
-import type { CanvasEventValues } from '@/slices/canvasSlice.ts';
+import type { User } from '@src/modeles/user';
+import type { CanvasEventValues } from '@src/slices/canvasSlice';
 
 const STORAGE_KEY = 'ludiscan';
 

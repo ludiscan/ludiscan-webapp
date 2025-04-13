@@ -1,8 +1,8 @@
 import type { PerformanceMonitorApi } from '@react-three/drei';
 import type { FC } from 'react';
 
-import { FlexColumn } from '@/component/atoms/Flex.tsx';
-import { Text } from '@/component/atoms/Text.tsx';
+import { FlexColumn } from '@src/component/atoms/Flex';
+import { Text } from '@src/component/atoms/Text';
 
 export type PerformanceListProps = {
   className?: string;

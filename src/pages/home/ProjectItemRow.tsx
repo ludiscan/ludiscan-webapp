@@ -1,11 +1,11 @@
 import styled from '@emotion/styled';
 
-import { FlexColumn, FlexRow } from '../../component/atoms/Flex.tsx';
+import { FlexColumn, FlexRow } from '../../component/atoms/Flex';
 import { ClampText } from '../../component/molecules/ClampText';
 import { useSharedTheme } from '../../hooks/useSharedTheme';
-import { fontSizes } from '../../styles/style.ts';
+import { fontSizes } from '../../styles/style';
 
-import type { Project } from '../../modeles/project.ts';
+import type { Project } from '../../modeles/project';
 import type { FC } from 'react';
 
 export type ProjectItemRowProps = {

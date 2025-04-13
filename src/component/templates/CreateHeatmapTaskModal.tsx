@@ -1,28 +1,29 @@
 import styled from '@emotion/styled';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useState } from 'react';
+import { useRouter} from 'next/navigation';
+import {useCallback, useEffect, useState} from 'react';
 
-import { Button } from '../atoms/Button.tsx';
-import { FlexRow, InlineFlexColumn, InlineFlexRow } from '../atoms/Flex.tsx';
-import { Slider } from '../atoms/Slider.tsx';
-import { VerticalSpacer } from '../atoms/Spacer.tsx';
-import { Switch } from '../atoms/Switch.tsx';
-import { Text } from '../atoms/Text.tsx';
-import { Tooltip } from '../atoms/Tooltip.tsx';
-import { ClampText } from '../molecules/ClampText.tsx';
+import { Button } from '../atoms/Button';
+import { FlexRow, InlineFlexColumn, InlineFlexRow } from '../atoms/Flex';
+import { Slider } from '../atoms/Slider';
+import { VerticalSpacer } from '../atoms/Spacer';
+import { Switch } from '../atoms/Switch';
+import { Text } from '../atoms/Text';
+import { Tooltip } from '../atoms/Tooltip';
+import { ClampText } from '../molecules/ClampText';
 import { Modal } from '../molecules/Modal';
 
-import { RouterNavigate } from './RouterNavigate.tsx';
-
+import type { Env } from '@src/modeles/env';
 import type { FC } from 'react';
 
-import { query } from '@/modeles/qeury.ts';
-import { fontSizes } from '@/styles/style.ts';
+import { createClient } from '@src/modeles/qeury';
+import { fontSizes } from '@src/styles/style';
 
 type CreateHeatmapTaskModalProps = {
   className?: string | undefined;
   onClose: () => void | Promise<void>;
   isOpen: boolean;
+  env?: Env | undefined;
 };
 
 export type CreateHeatmapTaskProjectModalProps = CreateHeatmapTaskModalProps & {
@@ -40,8 +41,8 @@ type CreateTask = {
   projectId: number;
   sessionId?: number | undefined;
 };
-async function sessionCreateTask(projectId: number, sessionId: number, stepSize: number, zVisible: boolean) {
-  return await query.POST('/api/v0/heatmap/projects/{project_id}/play_session/{session_id}/tasks', {
+async function sessionCreateTask(env: Env, projectId: number, sessionId: number, stepSize: number, zVisible: boolean) {
+  return await createClient(env).POST('/api/v0/heatmap/projects/{project_id}/play_session/{session_id}/tasks', {
     params: {
       path: {
         project_id: projectId,
@@ -55,8 +56,8 @@ async function sessionCreateTask(projectId: number, sessionId: number, stepSize:
   });
 }
 
-async function projectCreateTask(projectId: number, stepSize: number, zVisible: boolean) {
-  return await query.POST('/api/v0/heatmap/projects/{project_id}/tasks', {
+async function projectCreateTask(env: Env, projectId: number, stepSize: number, zVisible: boolean) {
+  return await createClient(env).POST('/api/v0/heatmap/projects/{project_id}/tasks', {
     params: {
       path: {
         project_id: projectId,
@@ -72,6 +73,7 @@ async function projectCreateTask(projectId: number, stepSize: number, zVisible: 
 const Component: FC<CreateHeatmapTaskSessionModalProps | CreateHeatmapTaskProjectModalProps> = (props) => {
   const [stepSize, setStepSize] = useState(100);
   const [zVisible, setZVisible] = useState(true);
+  const router = useRouter();
   const queryClient = useQueryClient();
   const {
     mutate: createTaskMutation,
@@ -82,14 +84,14 @@ const Component: FC<CreateHeatmapTaskSessionModalProps | CreateHeatmapTaskProjec
     mutationKey: ['createProjectTask', props, stepSize, zVisible],
     mutationFn: async (dto: CreateTask) => {
       const { projectId, sessionId } = dto;
-      if (!projectId || projectId === 0) {
+      if (!projectId || projectId === 0 || !props.env) {
         return undefined;
       }
 
       const { data, error } =
         sessionId && sessionId !== 0
-          ? await sessionCreateTask(projectId, sessionId, stepSize, zVisible)
-          : await projectCreateTask(projectId, stepSize, zVisible);
+          ? await sessionCreateTask(props.env, projectId, sessionId, stepSize, zVisible)
+          : await projectCreateTask(props.env, projectId, stepSize, zVisible);
       if (error) return undefined;
       return data;
     },
@@ -118,9 +120,11 @@ const Component: FC<CreateHeatmapTaskSessionModalProps | CreateHeatmapTaskProjec
       createTaskMutation({ projectId: props.projectId });
     }
   }, [createTaskMutation, props]);
-  if (isSuccess && task && task.taskId > 0 && task.status !== 'failed') {
-    return <RouterNavigate to={'/ludiscan/view/heatmap/tasks/:task_id'} params={{ task_id: String(task.taskId) }} />;
-  }
+  useEffect(() => {
+    if (isSuccess && task && task.taskId > 0 && task.status !== 'failed') {
+      return router.push('/heatmap/tasks/:task_id'.replace(':task_id', String(task.taskId)));
+    }
+  }, [isSuccess, task, router]);
   return (
     <Modal className={className} isOpen={isOpen} onClose={onClose} title={'Create Heatmap'}>
       <ClampText text={'詳細な設定'} lines={2} fontSize={fontSizes.medium} width={'100%'} />

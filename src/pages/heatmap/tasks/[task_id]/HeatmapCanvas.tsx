@@ -2,15 +2,15 @@ import { OrbitControls } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
 import { useEffect, useRef } from 'react';
 
-import { PointMarkers } from './PointMarkers.tsx';
+import { PointMarkers } from './PointMarkers';
 
 import type { FC } from 'react';
 import type { Group } from 'three';
 
-import { useCanvasState } from '@/hooks/useCanvasState.ts';
-import { HotspotCircles } from '@/pages/heatmap/tasks/[task_id]/HotspotCircles.tsx';
-import { LocalModelLoader, StreamModelLoader } from '@/pages/heatmap/tasks/[task_id]/ModelLoader.tsx';
-import { canvasEventBus } from '@/utils/canvasEventBus.ts';
+import { useCanvasState } from '@src/hooks/useCanvasState';
+import { HotspotCircles } from '@src/pages/heatmap/tasks/[task_id]/HotspotCircles';
+import { LocalModelLoader, StreamModelLoader } from '@src/pages/heatmap/tasks/[task_id]/ModelLoader';
+import { canvasEventBus } from '@src/utils/canvasEventBus';
 
 type HeatmapCanvasProps = {
   model: Group | null;
@@ -41,7 +41,7 @@ const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList })
   return (
     <>
       <ambientLight intensity={0.3} /> {/* eslint-disable-line react/no-unknown-property */}
-      <directionalLight position={[10, 10, 10]} intensity={3} castShadow /> {/* eslint-disable-line react/no-unknown-property */}
+      <directionalLight position={[10, 10, 10]} intensity={3} castShadow={true} /> {/* eslint-disable-line react/no-unknown-property */}
       {modelType && map && modelType !== 'server' && typeof map === 'string' && <LocalModelLoader modelPath={map} modelType={modelType} />}
       {modelType && model && modelType === 'server' && typeof map !== 'string' && <StreamModelLoader model={model} />}
       {pointList && showHeatmap && <PointMarkers points={pointList} />}

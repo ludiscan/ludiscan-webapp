@@ -4,8 +4,8 @@ import { Text } from '../component/atoms/Text';
 import { SharedThemeProvider, useSharedTheme } from '../hooks/useSharedTheme';
 import { flattenObject } from '../utils/flattenObject';
 
-import darkTheme from './dark.ts';
-import lightTheme from './light.ts';
+import darkTheme from './dark';
+import lightTheme from './light';
 import { colors } from './style';
 
 import type { Meta, StoryObj } from '@storybook/react';

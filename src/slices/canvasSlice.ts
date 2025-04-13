@@ -6,7 +6,7 @@ import packageJson from '../../package.json';
 
 import type { PayloadAction } from '@reduxjs/toolkit';
 
-import { getCanvasValues, saveCanvasValues } from '@/utils/localstrage';
+import { getCanvasValues, saveCanvasValues } from '@src/utils/localstrage';
 
 // Canvas の状態の型定義
 export type CanvasEventValues = {
@@ -24,9 +24,10 @@ export type CanvasEventValues = {
     thresholdCount: number;
     skipNearDuplication: boolean;
   };
+  initialized: boolean;
 };
 
-const initializeValues: CanvasEventValues = {
+export const initializeValues: CanvasEventValues = {
   version: packageJson.version,
   general: {
     upZ: false,
@@ -41,9 +42,10 @@ const initializeValues: CanvasEventValues = {
     thresholdCount: 6,
     skipNearDuplication: true,
   },
+  initialized: false,
 };
 
-function initialState(): CanvasEventValues {
+export function getInitialState() {
   const saveState = getCanvasValues();
   if (saveState) {
     if (saveState.version === initializeValues.version) {
@@ -55,8 +57,13 @@ function initialState(): CanvasEventValues {
 
 const canvasSlice = createSlice({
   name: 'heatmapCanvas',
-  initialState,
+  initialState: initializeValues,
   reducers: {
+    set: (state, action: PayloadAction<CanvasEventValues>) => {
+      state.version = action.payload.version;
+      state.general = action.payload.general;
+      state.hotspotMode = action.payload.hotspotMode;
+    },
     setGeneral: (state, action: PayloadAction<CanvasEventValues['general']>) => {
       state.general = action.payload;
       saveCanvasValues(state);
@@ -68,5 +75,5 @@ const canvasSlice = createSlice({
   },
 });
 
-export const { setGeneral, setHotspotMode } = canvasSlice.actions;
+export const { setGeneral, setHotspotMode, set } = canvasSlice.actions;
 export const canvasReducer = canvasSlice.reducer;

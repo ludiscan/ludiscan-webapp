@@ -4,8 +4,8 @@ import { createPortal } from 'react-dom';
 
 import type { FC, ReactNode } from 'react';
 
-import { Text } from '@/component/atoms/Text.tsx';
-import { zIndexes } from '@/styles/style.ts';
+import { Text } from '@src/component/atoms/Text';
+import { zIndexes } from '@src/styles/style';
 
 export type TooltipProps = {
   className?: string;

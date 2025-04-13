@@ -1,31 +1,42 @@
 import styled from '@emotion/styled';
+import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
+import type {Env} from '@src/modeles/env';
 import type { FC } from 'react';
 
-import { Button } from '@/component/atoms/Button.tsx';
-import { InlineFlexColumn } from '@/component/atoms/Flex.tsx';
-import { VerticalSpacer } from '@/component/atoms/Spacer.tsx';
-import { Text } from '@/component/atoms/Text.tsx';
-import { Modal } from '@/component/molecules/Modal.tsx';
-import { OutlinedTextField } from '@/component/molecules/OutlinedTextField.tsx';
-import { useToast } from '@/component/templates/ToastContext.tsx';
-import { useAuth } from '@/hooks/useAuth.ts';
-import { fontSizes } from '@/styles/style.ts';
+import { Button } from '@src/component/atoms/Button';
+import { InlineFlexColumn } from '@src/component/atoms/Flex';
+import { VerticalSpacer } from '@src/component/atoms/Spacer';
+import { Text } from '@src/component/atoms/Text';
+import { Modal } from '@src/component/molecules/Modal';
+import { OutlinedTextField } from '@src/component/molecules/OutlinedTextField';
+import { useToast } from '@src/component/templates/ToastContext';
+import { useAuth } from '@src/hooks/useAuth';
+import { fontSizes } from '@src/styles/style';
 
 export type LoginPageProps = {
   className?: string | undefined;
+  env?: Env | undefined;
 };
 
-const Content: FC<LoginPageProps> = ({ className }) => {
-  const navigate = useNavigate();
+export const getServerSideProps = async () => {
+  const { env } = await import('@src/config/env');
+  return {
+    props: {
+      env
+    },
+  };
+};
+
+const Content: FC<LoginPageProps> = ({ className, env }) => {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { showToast } = useToast();
   const onClose = useCallback(() => {
-    navigate(-1);
-  }, [navigate]);
+    router.back();
+  }, [router]);
   const handleInputEmail = useCallback((e: string) => {
     setEmail(e);
   }, []);
@@ -34,6 +45,7 @@ const Content: FC<LoginPageProps> = ({ className }) => {
   }, []);
 
   const { isLoading, login } = useAuth({
+    env,
     onSuccessLogin: () => {
       showToast('Login success', 1, 'success');
       onClose();
@@ -91,7 +103,7 @@ const Component: FC<LoginPageProps> = (props) => {
   );
 };
 
-export const LoginPage = styled(Component)`
+const IndexPage = styled(Component)`
   &__content {
     width: 100%;
   }
@@ -101,3 +113,7 @@ export const LoginPage = styled(Component)`
     margin: 0 auto;
   }
 `;
+
+export default function Index(props: LoginPageProps) {
+  return <IndexPage {...props} />;
+}

@@ -1,12 +1,13 @@
-import { SharedThemeProvider } from '../../hooks/useSharedTheme.tsx';
-import darkTheme from '../../styles/dark.ts';
-import lightTheme from '../../styles/light.ts';
-import { Button } from '../atoms/Button.tsx';
-import { Text } from '../atoms/Text.tsx';
+import darkTheme from '../../styles/dark';
+import lightTheme from '../../styles/light';
+import { Button } from '../atoms/Button';
+import { Text } from '../atoms/Text';
 
-import { CreateHeatmapTaskModal } from './CreateHeatmapTaskModal.tsx';
+import { CreateHeatmapTaskModal } from './CreateHeatmapTaskModal';
 
 import type { Meta, StoryObj } from '@storybook/react';
+
+import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
 
 export default {
   component: CreateHeatmapTaskModal,
@@ -35,6 +36,10 @@ export const Default: Story = {
   name: 'default style',
   args: {
     isOpen: true,
+    env: {
+      HOSTNAME: 'https://localhost',
+      API_BASE_URL: 'https://localhost:8080',
+    },
     onClose: () => {
       /* eslint-disable-next-line no-console */
       console.log('onClose');

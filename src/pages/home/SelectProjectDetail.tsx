@@ -1,31 +1,33 @@
 import styled from '@emotion/styled';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { useCallback, useState } from 'react';
+import { useRouter} from 'next/navigation';
+import {useCallback, useEffect, useState} from 'react';
 
-import { Button } from '../../component/atoms/Button';
-import { FlexColumn, InlineFlexRow } from '../../component/atoms/Flex';
-import { Observer } from '../../component/atoms/Observer';
-import { Text } from '../../component/atoms/Text';
-import { CreateHeatmapTaskModal } from '../../component/templates/CreateHeatmapTaskModal';
-import { RouterNavigate } from '../../component/templates/RouterNavigate';
+import { SessionItemRow } from './SessionItemRow';
 
-import { SessionItemRow } from './SessionItemRow.tsx';
-
-import type { CreateHeatmapItemData } from '../../component/templates/CreateHeatmapTaskModal';
-import type { Project } from '@/modeles/project.ts';
+import type { CreateHeatmapItemData } from '@src/component/templates/CreateHeatmapTaskModal';
+import type { Env } from '@src/modeles/env';
+import type { Project } from '@src/modeles/project';
 import type { FC } from 'react';
 
-import { query } from '@/modeles/qeury.ts';
+import { Button } from '@src/component/atoms/Button';
+import { FlexColumn, InlineFlexRow } from '@src/component/atoms/Flex';
+import { Observer } from '@src/component/atoms/Observer';
+import { Text } from '@src/component/atoms/Text';
+import { CreateHeatmapTaskModal } from '@src/component/templates/CreateHeatmapTaskModal';
+import { createClient } from '@src/modeles/qeury';
 
 const fetchCount = 20;
 
 export type SelectProjectDetailProps = {
   className?: string;
+  env?: Env | undefined;
   project: Project;
 };
 
-const Component: FC<SelectProjectDetailProps> = ({ className, project }) => {
+const Component: FC<SelectProjectDetailProps> = ({ className, project, env }) => {
   const [selectItem, setSelectedItem] = useState<undefined | CreateHeatmapItemData>(undefined);
+  const router = useRouter();
   const {
     data: sessions,
     hasNextPage: hasNextPageSessions,
@@ -33,10 +35,10 @@ const Component: FC<SelectProjectDetailProps> = ({ className, project }) => {
     isLoading: isLoadingSessions,
     isError: isErrorSessions,
   } = useInfiniteQuery({
-    queryKey: ['sessions', project.id],
+    queryKey: ['sessions', project.id, env],
     queryFn: async ({ pageParam }) => {
-      if (!project.id || project.id === 0) return [];
-      const { data, error } = await query.GET('/api/v0/projects/{project_id}/play_session', {
+      if (!project.id || project.id === 0 || !env) return [];
+      const { data, error } = await createClient(env).GET('/api/v0/projects/{project_id}/play_session', {
         params: {
           query: {
             limit: fetchCount,
@@ -60,9 +62,11 @@ const Component: FC<SelectProjectDetailProps> = ({ className, project }) => {
   const onClickCreateProjectTask = useCallback(async () => {
     setSelectedItem({ projectId: project.id });
   }, [project.id]);
-  if (project.id <= 0) {
-    return <RouterNavigate to={'/ludiscan/view/home'} />;
-  }
+  useEffect(() => {
+    if (project.id <= 0) {
+      return router.replace('/home');
+    }
+  }, [project.id, router]);
   return (
     <FlexColumn className={className}>
       <InlineFlexRow>
@@ -80,7 +84,7 @@ const Component: FC<SelectProjectDetailProps> = ({ className, project }) => {
           </div>
         ))}
       {hasNextPageSessions && !isLoadingSessions && <Observer callback={fetchNextPageSessions} />}
-      <CreateHeatmapTaskModal isOpen={selectItem !== undefined} onClose={() => setSelectedItem(undefined)} projectId={project.id} />
+      <CreateHeatmapTaskModal env={env} isOpen={selectItem !== undefined} onClose={() => setSelectedItem(undefined)} projectId={project.id} />
     </FlexColumn>
   );
 };

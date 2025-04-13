@@ -1,9 +1,9 @@
 import styled from '@emotion/styled';
 
-import { Text } from '../atoms/Text.tsx';
-
-import type { TextProps } from '../atoms/Text.tsx';
+import type { TextProps } from '../atoms/Text';
 import type { FC } from 'react';
+
+import { Text } from '@src/component/atoms/Text';
 
 export type ClampTextProps = TextProps & {
   width?: string;

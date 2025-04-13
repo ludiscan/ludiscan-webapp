@@ -1,12 +1,13 @@
-import { SharedThemeProvider } from '../../hooks/useSharedTheme.tsx';
-import darkTheme from '../../styles/dark.ts';
-import lightTheme from '../../styles/light.ts';
-import { Button } from '../atoms/Button.tsx';
-import { Text } from '../atoms/Text.tsx';
+import darkTheme from '../../styles/dark';
+import lightTheme from '../../styles/light';
+import { Button } from '../atoms/Button';
+import { Text } from '../atoms/Text';
 
-import { Modal } from './Modal.tsx';
+import { Modal } from './Modal';
 
 import type { Meta, StoryObj } from '@storybook/react';
+
+import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
 
 export default {
   component: Modal,

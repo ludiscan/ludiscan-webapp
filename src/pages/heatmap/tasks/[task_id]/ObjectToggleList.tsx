@@ -5,10 +5,10 @@ import { IoMdEye, IoMdEyeOff } from 'react-icons/io';
 import type { FC } from 'react';
 import type { Group, Material } from 'three';
 
-import { Button } from '@/component/atoms/Button.tsx';
-import { InlineFlexRow } from '@/component/atoms/Flex.tsx';
-import { Text } from '@/component/atoms/Text.tsx';
-import { fontSizes } from '@/styles/style.ts';
+import { Button } from '@src/component/atoms/Button';
+import { InlineFlexRow } from '@src/component/atoms/Flex';
+import { Text } from '@src/component/atoms/Text';
+import { fontSizes } from '@src/styles/style';
 
 export type ObjectToggleListProps = {
   className?: string;

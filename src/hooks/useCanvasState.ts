@@ -1,15 +1,16 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
-import type { CanvasEventValues } from '@/slices/canvasSlice.ts';
-import type { RootState } from '@/store.ts';
+import { useAppDispatch } from '../store';
 
-import { setGeneral, setHotspotMode } from '@/slices/canvasSlice.ts';
-import { useAppDispatch } from '@/store.ts';
+import type { RootState } from '../store';
+import type { CanvasEventValues } from '@src/slices/canvasSlice';
+
+import { getInitialState, set, setGeneral, setHotspotMode } from '@src/slices/canvasSlice';
 
 export function useCanvasState() {
   const dispatch = useAppDispatch();
-  const { hotspotMode, general, version } = useSelector((state: RootState) => state.canvas);
+  const { hotspotMode, general, version, initialized } = useSelector((state: RootState) => state.canvas);
 
   const handleSetGeneral = useCallback(
     (value: CanvasEventValues['general']) => {
@@ -23,6 +24,12 @@ export function useCanvasState() {
     },
     [dispatch],
   );
+
+  useEffect(() => {
+    if (initialized) return;
+    const state = getInitialState();
+    dispatch(set(state));
+  }, [dispatch, initialized]);
   return {
     version,
     general,
