@@ -221,17 +221,17 @@ export const HeatmapMenu = styled(Component)`
   }
 
   &__content {
-    padding: 16px;
-    width: 100%;
     flex: 1;
-    border-right: 1px solid ${({ theme }) => theme.colors.border.main};
+    width: 100%;
+    padding: 16px;
     overflow: hidden auto;
+    border-right: 1px solid ${({ theme }) => theme.colors.border.main};
   }
 
   &__toggle {
     width: 100%;
-    border: none;
     background: none;
+    border: none;
   }
 
   &__meshesRow {

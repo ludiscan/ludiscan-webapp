@@ -137,30 +137,30 @@ export const ObjectToggleList = styled(Component)`
 
   /* 親ラベル ("Mesh") のスタイル */
   &__parent-label {
-    font-weight: bold;
-    padding: 4px 0;
+    position: relative;
     left: 6px;
     height: 20px;
-    position: relative;
+    padding: 4px 0;
+    font-weight: bold;
   }
 
   /* 親ラベルから子リストへ続く短い横線 */
   &__parent-label::after {
-    content: '';
     position: absolute;
-    left: -20px;
     top: 50%;
+    left: -20px;
     width: 20px;
     height: 2px;
+    content: '';
     background: #ccc;
   }
 
   /* 子リスト */
   &__child-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
     position: relative;
+    padding: 0;
+    margin: 0;
+    list-style: none;
   }
 
   /* 各子要素 (li) */
@@ -172,34 +172,34 @@ export const ObjectToggleList = styled(Component)`
 
   /* 横線 */
   &__child-list li::before {
-    content: '';
     position: absolute;
-    left: 0;
     top: 50%;
+    left: 0;
     width: 18px;
     height: 2px;
+    content: '';
     background: #ccc;
-  }
-
-  /* 1行目の場合、上寄りに線を調整する */
-  &__child-list li:first-of-type::after {
-    top: -8px;
   }
 
   /* 縦線 */
   &__child-list li::after {
-    content: '';
     position: absolute;
-    left: -2px;
     top: 0;
     bottom: 0;
+    left: -2px;
     width: 2px;
+    content: '';
     background: #ccc;
   }
 
   /* 最後の li 要素だけは縦線を途中で止める */
   &__child-list li:last-child::after {
     bottom: calc(50% - 2px);
+  }
+
+  /* 1行目の場合、上寄りに線を調整する */
+  &__child-list li:first-of-type::after {
+    top: -8px;
   }
 
   /* ボタン（眼アイコン） */
