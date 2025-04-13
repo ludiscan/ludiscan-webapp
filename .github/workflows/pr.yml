@@ -14,16 +14,14 @@ jobs:
           node-version: '23.6.x'
       - name: Install dependencies
         run: npm install
-      - name: Format check
-        run: npm run test
       - name: Lint
         run: npm run lint
       - name: Format check
         run: npm run format:check
-#      - name: Test
-#        run: npm test
-#        env:
-#          CI: true
+      - name: Test
+        run: npm test
+        env:
+          CI: true
       - name: Type check
         run: npm run type
       - name: Build
