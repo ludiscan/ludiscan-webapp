@@ -1,10 +1,10 @@
-import { SharedThemeProvider } from '../../hooks/useSharedTheme.tsx';
-import darkTheme from '../../styles/dark.ts';
-import lightTheme from '../../styles/light.ts';
-
 import { Button } from './Button';
 
 import type { Meta, StoryObj } from '@storybook/react';
+
+import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
+import darkTheme from '@src/styles/dark';
+import lightTheme from '@src/styles/light';
 
 const meta: Meta<typeof Button> = {
   component: Button,

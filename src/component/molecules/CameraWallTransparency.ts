@@ -19,7 +19,6 @@ export const CameraWallTransparency: FC<CameraWallTransparencyProps> = ({ contro
   useFrame(() => {
     if (!camera || !scene || !controlsRef.current) return;
 
-    // eslint-disable-next-line @react-three/no-clone-in-loop
     const target = controlsRef.current.target.clone();
     raycaster.current.set(camera.position, target.sub(camera.position).normalize());
 
@@ -30,7 +29,6 @@ export const CameraWallTransparency: FC<CameraWallTransparencyProps> = ({ contro
       return hit.object !== camera && hit.object !== controlsRef.current?.target;
     });
 
-    // eslint-disable-next-line @react-three/no-new-in-loop
     const newHits: TransparentObjects = new Map();
 
     if (intersects.length > 0) {

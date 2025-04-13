@@ -1,10 +1,10 @@
 import styled from '@emotion/styled';
+import Link from 'next/link';
 
 import type { FC } from 'react';
 
-import { Text } from '@/component/atoms/Text.tsx';
-import { ResponsiveSidebar } from '@/component/molecules/ResponsiveSidebar.tsx';
-import { RouterNavLink } from '@/component/templates/RouterNavigate.tsx';
+import { Text } from '@src/component/atoms/Text';
+import { ResponsiveSidebar } from '@src/component/molecules/ResponsiveSidebar';
 
 export type SidebarLayoutProps = {
   className?: string | undefined;
@@ -14,9 +14,9 @@ const Component: FC<SidebarLayoutProps> = ({ className }) => {
   return (
     <ResponsiveSidebar>
       <div className={className}>
-        <RouterNavLink to={'/ludiscan/view/home'}>
+        <Link href={'/home'}>
           <Text text='Home' />
-        </RouterNavLink>
+        </Link>
       </div>
     </ResponsiveSidebar>
   );

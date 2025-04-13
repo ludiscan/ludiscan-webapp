@@ -3,8 +3,8 @@
 import { ThemeProvider } from '@emotion/react';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
-import darkTheme from '../styles/dark.ts';
-import lightTheme from '../styles/light.ts';
+import darkTheme from '../styles/dark';
+import lightTheme from '../styles/light';
 
 import type { Theme } from '@emotion/react';
 import type { FC, ReactNode } from 'react';
@@ -29,7 +29,6 @@ export const SharedThemeProvider: FC<SharedThemeProviderProps> = ({ children, in
 
   const toggleTheme = useCallback(() => {
     setTheme((currentTheme) => (currentTheme === lightTheme ? darkTheme : lightTheme));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const setupTheme = useCallback((themeName: ThemeName) => {

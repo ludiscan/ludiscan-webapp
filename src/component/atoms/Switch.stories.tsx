@@ -1,11 +1,11 @@
 // Switch.stories.tsx
-import { SharedThemeProvider } from '../../hooks/useSharedTheme.tsx';
-import darkTheme from '../../styles/dark.ts';
-import lightTheme from '../../styles/light.ts';
-
-import { Switch } from './Switch.tsx';
+import { Switch } from './Switch';
 
 import type { Meta, StoryObj } from '@storybook/react';
+
+import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
+import darkTheme from '@src/styles/dark';
+import lightTheme from '@src/styles/light';
 
 export default {
   component: Switch,

@@ -1,11 +1,11 @@
 // TextField.stories.tsx
-import { SharedThemeProvider } from '../../hooks/useSharedTheme.tsx';
-import darkTheme from '../../styles/dark.ts';
-import lightTheme from '../../styles/light.ts';
+import darkTheme from '../../styles/dark';
+import lightTheme from '../../styles/light';
 
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { TextField } from '@/component/molecules/TextField.tsx';
+import { TextField } from '@src/component/molecules/TextField';
+import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
 
 export default {
   component: TextField,

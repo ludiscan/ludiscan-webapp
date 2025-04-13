@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { Text } from '@/component/atoms/Text.tsx';
-import { ResponsiveSidebar } from '@/component/molecules/ResponsiveSidebar.tsx';
-import { SharedThemeProvider } from '@/hooks/useSharedTheme.tsx';
-import darkTheme from '@/styles/dark.ts';
-import lightTheme from '@/styles/light.ts';
+import { Text } from '@src/component/atoms/Text';
+import { ResponsiveSidebar } from '@src/component/molecules/ResponsiveSidebar';
+import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
+import darkTheme from '@src/styles/dark';
+import lightTheme from '@src/styles/light';
 
 export default {
   component: ResponsiveSidebar,

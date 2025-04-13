@@ -1,35 +1,49 @@
 import styled from '@emotion/styled';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { useCallback, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 
-import { Button } from '../../component/atoms/Button.tsx';
-import { Card } from '../../component/atoms/Card.tsx';
-import { FlexColumn } from '../../component/atoms/Flex.tsx';
-import { Observer } from '../../component/atoms/Observer.tsx';
-import { VerticalSpacer } from '../../component/atoms/Spacer.tsx';
-import { Text } from '../../component/atoms/Text.tsx';
-import { useSharedTheme } from '../../hooks/useSharedTheme.tsx';
+import { ProjectItemRow } from './ProjectItemRow';
+import { SelectProjectDetail } from './SelectProjectDetail';
 
-import { ProjectItemRow } from './ProjectItemRow.tsx';
-import { SelectProjectDetail } from './SelectProjectDetail.tsx';
-
-import type { Project } from '@/modeles/project.ts';
+import type { Env } from '@src/modeles/env';
+import type { Project } from '@src/modeles/project';
+import type { GetServerSideProps } from 'next';
 import type { FC } from 'react';
 
-import { RouterNavigate } from '@/component/templates/RouterNavigate.tsx';
-import { useAuth } from '@/hooks/useAuth.ts';
-import { query } from '@/modeles/qeury.ts';
-import { fontSizes, fontWeights } from '@/styles/style.ts';
+import { Button } from '@src/component/atoms/Button';
+import { Card } from '@src/component/atoms/Card';
+import { FlexColumn } from '@src/component/atoms/Flex';
+import { Observer } from '@src/component/atoms/Observer';
+import { VerticalSpacer } from '@src/component/atoms/Spacer';
+import { Text } from '@src/component/atoms/Text';
+import { useAuth } from '@src/hooks/useAuth';
+import { useSharedTheme } from '@src/hooks/useSharedTheme';
+import { createClient } from '@src/modeles/qeury';
+import { fontSizes, fontWeights } from '@src/styles/style';
 
 const fetchCount = 20;
 
 export type HomePageProps = {
   className?: string | undefined;
+  env?: Env;
 };
 
-const Component: FC<HomePageProps> = ({ className }) => {
+export const getServerSideProps: GetServerSideProps<HomePageProps> = async () => {
+  // This function is not used in the component, but it's here to demonstrate how you might fetch data server-side.
+  // You can replace this with actual server-side logic if needed.
+  const { env } = await import('@src/config/env');
+  return {
+    props: {
+      env,
+    },
+  };
+};
+
+const Component: FC<HomePageProps> = ({ className, env }) => {
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
-  const { isAuthorized, isLoading } = useAuth();
+  const { isAuthorized, isLoading, ready } = useAuth({ env });
+  const router = useRouter();
   const {
     data: projects,
     hasNextPage: hasNextPageProjects,
@@ -37,10 +51,10 @@ const Component: FC<HomePageProps> = ({ className }) => {
     isError: isErrorProjects,
     fetchNextPage: fetchNextPageProjects,
   } = useInfiniteQuery({
-    queryKey: ['projects', isAuthorized],
+    queryKey: ['projects', isAuthorized, env],
     queryFn: async ({ pageParam }): Promise<Project[] | undefined> => {
-      if (!isAuthorized) return undefined;
-      const { data, error } = await query.GET('/api/v0/projects', {
+      if (!isAuthorized || !env) return undefined;
+      const { data, error } = await createClient(env).GET('/api/v0/projects', {
         params: {
           query: {
             limit: fetchCount,
@@ -65,9 +79,12 @@ const Component: FC<HomePageProps> = ({ className }) => {
     [selectedProject],
   );
   const { theme } = useSharedTheme();
-  if (!isAuthorized && !isLoading) {
-    return <RouterNavigate to={'/ludiscan/view'} />;
-  }
+
+  useEffect(() => {
+    if (!isAuthorized && !isLoading && ready) {
+      return router.replace('/');
+    }
+  }, [isAuthorized, isLoading, router, ready]);
   return (
     <div className={className}>
       <Text text={'Home'} fontSize={fontSizes.largest} color={theme.colors.text} fontWeight={fontWeights.bolder} />
@@ -89,7 +106,7 @@ const Component: FC<HomePageProps> = ({ className }) => {
                         <div className={`${className}__selectProjectDetail ${selectedProject === project.id ? 'active' : ''}`}>
                           {selectedProject === project.id && (
                             <Card key={project.id} shadow={'large'} color={'transparent'}>
-                              <SelectProjectDetail project={project} />
+                              <SelectProjectDetail project={project} env={env} />
                             </Card>
                           )}
                         </div>
@@ -105,7 +122,7 @@ const Component: FC<HomePageProps> = ({ className }) => {
   );
 };
 
-export const HomePage = styled(Component)`
+const IndexPage = styled(Component)`
   &__card {
     margin: 0 20px;
   }
@@ -136,3 +153,5 @@ export const HomePage = styled(Component)`
     height: 500px;
   }
 `;
+
+export default IndexPage;

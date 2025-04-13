@@ -5,7 +5,7 @@ import { createContext, useContext, useState, useCallback } from 'react';
 
 import type { ReactNode, FC, CSSProperties } from 'react';
 
-import { colors, zIndexes } from '@/styles/style.ts';
+import { colors, zIndexes } from '@src/styles/style';
 
 // =======================
 // 型定義

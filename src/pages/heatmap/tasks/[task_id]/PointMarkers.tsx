@@ -3,7 +3,7 @@ import { Color, Vector3 } from 'three';
 
 import type { FC } from 'react';
 
-import { useCanvasState } from '@/hooks/useCanvasState.ts';
+import { useCanvasState } from '@src/hooks/useCanvasState';
 
 export type PointMarkersProps = {
   points: { x: number; y: number; z?: number | undefined; density: number }[];

@@ -3,7 +3,7 @@ import { Color, Vector3 } from 'three';
 
 import type { FC } from 'react';
 
-import { useCanvasState } from '@/hooks/useCanvasState.ts';
+import { useCanvasState } from '@src/hooks/useCanvasState';
 
 export type PointCirclesProps = {
   points: { x: number; y: number; z?: number | undefined; density: number }[];
@@ -81,7 +81,11 @@ const Component: FC<PointCirclesProps> = ({ points }) => {
   return highDensityAreas.map((area, index) => (
     <mesh key={index} position={area.position} /* eslint-disable-line react/no-unknown-property */>
       <sphereGeometry args={[area.size, 32]} /* eslint-disable-line react/no-unknown-property */ />
-      <meshBasicMaterial color={new Color().setHSL(area.force * 0.1, 1, 0.5)} transparent opacity={0.7} /* eslint-disable-line react/no-unknown-property */ />
+      <meshBasicMaterial
+        color={new Color().setHSL(area.force * 0.1, 1, 0.5)}
+        transparent={true} /* eslint-disable-line react/no-unknown-property */
+        opacity={0.7}
+      />
     </mesh>
   ));
 };

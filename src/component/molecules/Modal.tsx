@@ -2,17 +2,17 @@ import styled from '@emotion/styled';
 import { IoCloseOutline } from 'react-icons/io5';
 import ReactModal, { defaultStyles } from 'react-modal';
 
-import { useSharedTheme } from '../../hooks/useSharedTheme.tsx';
-import { Divider } from '../atoms/Divider.tsx';
-import { FlexColumn } from '../atoms/Flex.tsx';
-import { Text } from '../atoms/Text.tsx';
+import { Divider } from '../atoms/Divider';
+import { FlexColumn } from '../atoms/Flex';
+import { Text } from '../atoms/Text';
 
 import type { Theme } from '@emotion/react';
 import type { CSSProperties, ReactNode } from 'react';
 import type { Styles } from 'react-modal';
 
-import { Button } from '@/component/atoms/Button.tsx';
-import { fontSizes, fontWeights, zIndexes } from '@/styles/style.ts';
+import { Button } from '@src/component/atoms/Button';
+import { useSharedTheme } from '@src/hooks/useSharedTheme';
+import { fontSizes, fontWeights, zIndexes } from '@src/styles/style';
 
 export type ModalProps = {
   className?: string | undefined;

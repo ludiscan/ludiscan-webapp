@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 
 import type { FC } from 'react';
 
-import { fontSizes, fontWeights } from '@/styles/style.ts';
+import { fontSizes, fontWeights } from '@src/styles/style';
 
 type TextFieldOutlinedProps = {
   className?: string;

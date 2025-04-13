@@ -1,18 +1,10 @@
-import createClient from 'openapi-fetch';
+import createClientFetch from 'openapi-fetch';
 
-import type { paths } from '../../generated/api.ts';
+import type { paths } from '@generated/api';
+import type { Env } from '@src/modeles/env';
 import type { Middleware } from 'openapi-fetch';
 
-import { getToken } from '@/utils/localstrage.ts';
-
-const query = createClient<paths>({
-  baseUrl: import.meta.env.VITE_API_HOSTNAME || 'http://localhost',
-  credentials: 'include',
-  mode: 'cors',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+import { getToken } from '@src/utils/localstrage';
 
 const myMiddleware: Middleware = {
   async onRequest({ request }) {
@@ -36,6 +28,17 @@ const myMiddleware: Middleware = {
   },
 };
 
-query.use(myMiddleware);
+export const createClient = (env: Env) => {
+  const apiClient = createClientFetch<paths>({
+    baseUrl: env.API_BASE_URL || 'http://localhost',
+    credentials: 'include',
+    mode: 'cors',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 
-export { query };
+  apiClient.use(myMiddleware);
+
+  return apiClient;
+};

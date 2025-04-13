@@ -1,12 +1,12 @@
 // Slider.stories.tsx
-import { SharedThemeProvider } from '../../hooks/useSharedTheme.tsx';
-import darkTheme from '../../styles/dark.ts';
-import lightTheme from '../../styles/light.ts';
-
-import { Slider } from './Slider.tsx';
-import { Text } from './Text.tsx';
+import { Slider } from './Slider';
+import { Text } from './Text';
 
 import type { Meta, StoryObj } from '@storybook/react';
+
+import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
+import darkTheme from '@src/styles/dark';
+import lightTheme from '@src/styles/light';
 
 export default {
   component: Slider,

@@ -4,7 +4,7 @@ import { IoIosArrowDown } from 'react-icons/io';
 
 import type { FC, ReactNode, CSSProperties } from 'react';
 
-import { FlexColumn, InlineFlexRow } from '@/component/atoms/Flex.tsx';
+import { FlexColumn, InlineFlexRow } from '@src/component/atoms/Flex';
 
 export type ToggleProps = {
   className?: string;

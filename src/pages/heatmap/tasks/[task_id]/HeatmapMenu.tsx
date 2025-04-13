@@ -8,20 +8,20 @@ import type { Theme } from '@emotion/react';
 import type { FC, CSSProperties } from 'react';
 import type { Group } from 'three';
 
-import { Button } from '@/component/atoms/Button.tsx';
-import { Card } from '@/component/atoms/Card.tsx';
-import { FlexColumn, FlexRow, InlineFlexColumn, InlineFlexRow } from '@/component/atoms/Flex.tsx';
-import { Selector } from '@/component/atoms/Selector.tsx';
-import { Slider } from '@/component/atoms/Slider.tsx';
-import { Switch } from '@/component/atoms/Switch.tsx';
-import { Text } from '@/component/atoms/Text.tsx';
-import { Toggle } from '@/component/atoms/Toggle.tsx';
-import { Tooltip } from '@/component/atoms/Tooltip.tsx';
-import { useCanvasState } from '@/hooks/useCanvasState.ts';
-import { useSharedTheme } from '@/hooks/useSharedTheme.tsx';
-import { ObjectToggleList } from '@/pages/heatmap/tasks/[task_id]/ObjectToggleList.tsx';
-import { fontSizes, fontWeights } from '@/styles/style.ts';
-import { canvasEventBus } from '@/utils/canvasEventBus.ts';
+import { Button } from '@src/component/atoms/Button';
+import { Card } from '@src/component/atoms/Card';
+import { FlexColumn, FlexRow, InlineFlexColumn, InlineFlexRow } from '@src/component/atoms/Flex';
+import { Selector } from '@src/component/atoms/Selector';
+import { Slider } from '@src/component/atoms/Slider';
+import { Switch } from '@src/component/atoms/Switch';
+import { Text } from '@src/component/atoms/Text';
+import { Toggle } from '@src/component/atoms/Toggle';
+import { Tooltip } from '@src/component/atoms/Tooltip';
+import { useCanvasState } from '@src/hooks/useCanvasState';
+import { useSharedTheme } from '@src/hooks/useSharedTheme';
+import { ObjectToggleList } from '@src/pages/heatmap/tasks/[task_id]/ObjectToggleList';
+import { fontSizes, fontWeights } from '@src/styles/style';
+import { canvasEventBus } from '@src/utils/canvasEventBus';
 
 export type HeatmapMenuProps = {
   model: Group | null;

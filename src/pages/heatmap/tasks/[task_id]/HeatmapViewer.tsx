@@ -4,25 +4,27 @@ import { Canvas } from '@react-three/fiber';
 import { useQuery } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import type { HeatmapTask } from '@/modeles/heatmaptask.ts';
 import type { PerformanceMonitorApi } from '@react-three/drei';
+import type { Env } from '@src/modeles/env';
+import type { HeatmapTask } from '@src/modeles/heatmaptask';
 import type { FC } from 'react';
 
-import { FlexColumn, FlexRow } from '@/component/atoms/Flex.tsx';
-import { useCanvasState } from '@/hooks/useCanvasState.ts';
-import { query } from '@/modeles/qeury.ts';
-import { HeatMapCanvas } from '@/pages/heatmap/tasks/[task_id]/HeatmapCanvas.tsx';
-import { HeatmapMenu } from '@/pages/heatmap/tasks/[task_id]/HeatmapMenu.tsx';
-import { useOBJFromArrayBuffer } from '@/pages/heatmap/tasks/[task_id]/ModelLoader.tsx';
-import { PerformanceList } from '@/pages/heatmap/tasks/[task_id]/PerformanceList.tsx';
-import { dimensions, zIndexes } from '@/styles/style.ts';
+import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
+import { useCanvasState } from '@src/hooks/useCanvasState';
+import { createClient } from '@src/modeles/qeury';
+import { HeatMapCanvas } from '@src/pages/heatmap/tasks/[task_id]/HeatmapCanvas';
+import { HeatmapMenu } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenu';
+import { useOBJFromArrayBuffer } from '@src/pages/heatmap/tasks/[task_id]/ModelLoader';
+import { PerformanceList } from '@src/pages/heatmap/tasks/[task_id]/PerformanceList';
+import { dimensions, zIndexes } from '@src/styles/style';
 
 export type HeatmapViewerProps = {
   className?: string | undefined;
   task: HeatmapTask;
+  env?: Env | undefined;
 };
 
-const Component: FC<HeatmapViewerProps> = ({ className, task }) => {
+const Component: FC<HeatmapViewerProps> = ({ className, task, env }) => {
   const [map, setMap] = useState<string | ArrayBuffer | null>(null);
   const [modelType, setModelType] = useState<'gltf' | 'glb' | 'obj' | 'server' | null>(null);
   const [dpr, setDpr] = useState(2);
@@ -39,10 +41,10 @@ const Component: FC<HeatmapViewerProps> = ({ className, task }) => {
   const taskId = useMemo(() => task.taskId, [task]);
 
   const { data: mapList } = useQuery({
-    queryKey: ['mapList', taskId],
+    queryKey: ['mapList', taskId, env],
     queryFn: async () => {
-      if (!taskId) return;
-      const { data, error } = await query.GET('/api/v0/heatmap/tasks/{task_id}/maps', {
+      if (!taskId || !env) return [];
+      const { data, error } = await createClient(env).GET('/api/v0/heatmap/tasks/{task_id}/maps', {
         params: {
           path: {
             task_id: taskId,
@@ -55,10 +57,10 @@ const Component: FC<HeatmapViewerProps> = ({ className, task }) => {
   });
 
   const { data: mapContent } = useQuery({
-    queryKey: ['mapData', mapName],
+    queryKey: ['mapData', mapName, env],
     queryFn: async () => {
-      if (!mapName) return undefined;
-      const { data, error } = await query.GET('/api/v0/heatmap/map_data/{map_name}', {
+      if (!mapName || !env) return null;
+      const { data, error } = await createClient(env).GET('/api/v0/heatmap/map_data/{map_name}', {
         params: {
           path: {
             map_name: mapName,

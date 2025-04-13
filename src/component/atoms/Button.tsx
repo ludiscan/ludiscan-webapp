@@ -1,9 +1,9 @@
 import styled from '@emotion/styled';
 
-import type { FontSize } from '@/styles/style.ts';
+import type { FontSize } from '@src/styles/style';
 import type { ReactNode } from 'react';
 
-import { colors, fontSizes } from '@/styles/style.ts';
+import { colors, fontSizes } from '@src/styles/style';
 
 export type ButtonProps = {
   className?: string | undefined;

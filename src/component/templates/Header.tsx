@@ -1,11 +1,11 @@
 import styled from '@emotion/styled';
+import Link from 'next/link';
 import { CiUser } from 'react-icons/ci';
 
 import type { FC } from 'react';
 
-import { Text } from '@/component/atoms/Text.tsx';
-import { RouterNavLink } from '@/component/templates/RouterNavigate.tsx';
-import { dimensions, fontSizes } from '@/styles/style.ts';
+import { Text } from '@src/component/atoms/Text';
+import { dimensions, fontSizes } from '@src/styles/style';
 
 export type HeaderProps = {
   className?: string | undefined;
@@ -16,9 +16,9 @@ const Component: FC<HeaderProps> = ({ className }) => {
     <header className={className}>
       <Text text='Header' fontSize={fontSizes.largest} />
       <Text text='Header' fontSize={fontSizes.largest} />
-      <RouterNavLink to={'/ludiscan/view/login'}>
+      <Link href={'/login'}>
         <CiUser size={24} />
-      </RouterNavLink>
+      </Link>
     </header>
   );
 };

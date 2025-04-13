@@ -1,4 +1,4 @@
-import { flattenObject } from './flattenObject';
+import { flattenObject } from '@src/utils/flattenObject';
 
 describe(`${flattenObject.name}`, () => {
   test('オブジェクトをフラット化する', () => {

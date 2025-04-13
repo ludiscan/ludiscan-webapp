@@ -1,0 +1,14 @@
+services:
+  ludiscan-webapp:
+    networks:
+      - ludiscan-network
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile
+    image: ludiscan-webapp
+    ports:
+      - "3003:3000"
+
+networks:
+  ludiscan-network:
+    driver: bridge
