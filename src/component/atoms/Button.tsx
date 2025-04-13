@@ -1,14 +1,15 @@
 import styled from '@emotion/styled';
 
-import { colors, fontSizes } from '../../styles/style';
-
+import type { FontSize } from '@/styles/style.ts';
 import type { ReactNode } from 'react';
+
+import { colors, fontSizes } from '@/styles/style.ts';
 
 export type ButtonProps = {
   className?: string | undefined;
   onClick: () => Promise<void> | void;
   scheme: 'primary' | 'surface' | 'warning' | 'none' | 'error' | 'secondary';
-  fontSize: 'small' | 'medium' | 'large';
+  fontSize: FontSize;
   width?: 'full' | 'fit-content';
   children: ReactNode;
   disabled?: boolean | undefined;
@@ -22,16 +23,88 @@ const Component = ({ className, onClick, scheme, children, disabled = false }: B
   );
 };
 
+const ButtonHeight = (props: ButtonProps) => {
+  if (props.scheme === 'none') {
+    return 'fit-content';
+  }
+  if (props.fontSize === 'smallest') {
+    return '24px';
+  }
+  if (props.fontSize === 'small') {
+    return '28px';
+  }
+  if (props.fontSize === 'medium') {
+    return '32px';
+  }
+  if (props.fontSize === 'large1') {
+    return '36px';
+  }
+  if (props.fontSize === 'large2') {
+    return '40px';
+  }
+  if (props.fontSize === 'large3') {
+    return '44px';
+  }
+  if (props.fontSize === 'largest') {
+    return '48px';
+  }
+};
+
+const ButtonWidth = (props: ButtonProps) => {
+  if (props.width === 'full') {
+    return '100%';
+  }
+  return 'fit-content';
+};
+
+const ButtonPadding = (props: ButtonProps) => {
+  if (props.scheme === 'none') {
+    return '2px';
+  }
+  if (props.fontSize === 'smallest') {
+    return '0 12px';
+  }
+  if (props.fontSize === 'small') {
+    return '0 12px';
+  }
+  if (props.fontSize === 'medium') {
+    return '0 16px';
+  }
+  return '0 22px';
+};
+
+const ButtonBorderRadius = (props: ButtonProps) => {
+  if (props.fontSize === 'small') {
+    return '16px';
+  }
+  if (props.fontSize === 'medium') {
+    return '18px';
+  }
+  if (props.fontSize === 'large1') {
+    return '20px';
+  }
+  if (props.fontSize === 'large2') {
+    return '22px';
+  }
+  if (props.fontSize === 'large3') {
+    return '24px';
+  }
+  if (props.fontSize === 'largest') {
+    return '26px';
+  }
+  return '18px';
+};
+
 export const Button = styled(Component)`
-  width: ${(props) => (props.width === 'full' ? '100%' : 'fit-content')};
-  height: ${(props) => (props.scheme === 'none' ? 'fit-content' : props.fontSize === 'small' ? '28px' : props.fontSize === 'large' ? '36px' : '32px')};
-  padding: ${(props) => (props.scheme === 'none' ? '2px' : props.fontSize === 'small' ? '0 16px' : props.fontSize === 'large' ? '0 22px' : '0 18px')};
-  font-size: ${(props) => (props.fontSize === 'small' ? fontSizes.small : props.fontSize === 'large' ? fontSizes.large1 : fontSizes.medium)};
+  width: ${(props) => ButtonWidth(props)};
+  height: ${(props) => ButtonHeight(props)};
+  padding: ${(props) => ButtonPadding(props)};
+  font-size: ${(props) => fontSizes[props.fontSize] || fontSizes.medium};
   font-weight: bold;
   color: ${({ theme }) => theme.colors.text};
   cursor: pointer;
   border: none;
-  border-radius: ${(props) => (props.fontSize === 'small' ? '16px' : props.fontSize === 'large' ? '22px' : '18px')};
+  border-radius: ${(props) => ButtonBorderRadius(props)};
   transition: opacity 0.2s;
 
   &.primary {

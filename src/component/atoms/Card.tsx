@@ -8,6 +8,7 @@ export type CartProps = {
   shadow?: 'none' | 'small' | 'medium' | 'large';
   color?: string;
   border?: string;
+  padding?: string;
 };
 
 const Component = ({ className, children }: CartProps) => {
@@ -15,7 +16,7 @@ const Component = ({ className, children }: CartProps) => {
 };
 
 export const Card = styled(Component)`
-  padding: 16px;
+  padding: ${({ padding }) => padding || '16px'};
   background-color: ${({ color, theme }) => color || theme.colors.surface.main};
   border: ${({ border }) => `1px solid ${border}`};
   border-radius: 8px;
