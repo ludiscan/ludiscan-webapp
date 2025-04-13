@@ -1,14 +1,14 @@
-import {useCallback, useEffect} from 'react';
+import { useCallback, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
 import { useAppDispatch } from '../store';
 
 import type { RootState } from '../store';
-import type {Env} from '@src/modeles/env';
+import type { Env } from '@src/modeles/env';
 import type { User } from '@src/modeles/user';
 
-import {login, logout, setReady, setToken, setUser} from '@src/slices/authSlice';
-import {getToken, getUser} from '@src/utils/localstrage';
+import { login, logout, setReady, setToken, setUser } from '@src/slices/authSlice';
+import { getToken, getUser } from '@src/utils/localstrage';
 
 export type UseAuthType = {
   token: string | null;
@@ -38,7 +38,7 @@ export function useAuth(props?: UseAuthOptions): UseAuthType {
 
   const handleLogin = useCallback(
     async (values: LoginType) => {
-      const { email, password} = values;
+      const { email, password } = values;
       if (!props?.env) return;
       // login アクションを dispatch し、成功時には追加の処理（onSuccessLogin 相当）も行えます
       const resultAction = await dispatch(login({ env: props.env, email, password }));
@@ -77,6 +77,6 @@ export function useAuth(props?: UseAuthOptions): UseAuthType {
     login: handleLogin,
     logout: handleLogout,
     error,
-    ready
+    ready,
   };
 }

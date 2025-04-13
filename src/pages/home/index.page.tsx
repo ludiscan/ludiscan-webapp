@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { useRouter} from 'next/navigation';
-import {useCallback, useEffect, useState} from 'react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 
 import { ProjectItemRow } from './ProjectItemRow';
 import { SelectProjectDetail } from './SelectProjectDetail';
@@ -84,7 +84,7 @@ const Component: FC<HomePageProps> = ({ className, env }) => {
     if (!isAuthorized && !isLoading && ready) {
       return router.replace('/');
     }
-  }, [isAuthorized, isLoading, router]);
+  }, [isAuthorized, isLoading, router, ready]);
   return (
     <div className={className}>
       <Text text={'Home'} fontSize={fontSizes.largest} color={theme.colors.text} fontWeight={fontWeights.bolder} />

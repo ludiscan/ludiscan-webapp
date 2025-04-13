@@ -87,7 +87,7 @@ const authSlice = createSlice({
     },
     setReady(state, action: PayloadAction<boolean>) {
       state.ready = action.payload;
-    }
+    },
   },
   extraReducers: (builder) => {
     // ログイン開始時の処理

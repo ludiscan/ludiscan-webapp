@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
-import { useRouter} from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 
 import { HeatMapViewer } from './HeatmapViewer';
@@ -83,7 +83,6 @@ const Component: FC<HeatMapTaskIdPageProps> = ({ className, env, taskId }) => {
     return <div>Invalid Task ID</div>;
   }
 
-
   return (
     <div className={className}>
       <Text text={`Task ID: ${taskId}`} />
@@ -94,8 +93,8 @@ const Component: FC<HeatMapTaskIdPageProps> = ({ className, env, taskId }) => {
 
 export const HeatMapTaskIdPage = styled(Component)`
   max-width: 1200px;
-  margin: 0 auto;
   height: calc(100vh - 64px);
+  margin: 0 auto;
   background: ${({ theme }) => theme.colors.surface.dark};
 `;
 

@@ -33,5 +33,5 @@ export const Card = styled(Component)`
   background-color: ${({ color, theme }) => color || theme.colors.surface.main};
   border: ${({ border }) => `1px solid ${border}`};
   border-radius: 8px;
-  box-shadow: ${props => shadowStyle(props)};
+  box-shadow: ${(props) => shadowStyle(props)};
 `;

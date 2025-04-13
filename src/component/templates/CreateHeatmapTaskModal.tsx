@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useRouter} from 'next/navigation';
-import {useCallback, useEffect, useState} from 'react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 
 import { Button } from '../atoms/Button';
 import { FlexRow, InlineFlexColumn, InlineFlexRow } from '../atoms/Flex';

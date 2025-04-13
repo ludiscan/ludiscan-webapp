@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { useRouter} from 'next/navigation';
-import {useCallback, useEffect, useState} from 'react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 
 import { SessionItemRow } from './SessionItemRow';
 

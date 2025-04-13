@@ -32,7 +32,7 @@ const Component: FC<IndexPageProps> = ({ className }) => {
           <Image src={'/ludiscan/view/vite.svg'} className={`${className}__logo`} alt='Vite logo' width={120} height={120} />
         </a>
         <a href='https://react.dev' target='_blank' rel='noreferrer'>
-          <Image src={'/ludiscan/view/react.svg'} className={`${className}__logo react`} alt='React logo'  width={120}  height={120}/>
+          <Image src={'/ludiscan/view/react.svg'} className={`${className}__logo react`} alt='React logo' width={120} height={120} />
         </a>
       </div>
       <h1>Vite + React</h1>

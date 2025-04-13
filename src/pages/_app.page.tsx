@@ -8,10 +8,10 @@ import type { AppProps } from 'next/app';
 
 import { Header } from '@src/component/templates/Header';
 import { SidebarLayout } from '@src/component/templates/SidebarLayout';
-import {ToastProvider} from '@src/component/templates/ToastContext';
+import { ToastProvider } from '@src/component/templates/ToastContext';
 import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
 import { store } from '@src/pages/store';
-import {dimensions} from '@src/styles/style';
+import { dimensions } from '@src/styles/style';
 
 const Content = styled.div`
   overflow: hidden;
@@ -21,6 +21,8 @@ const Content = styled.div`
 
 const InnerContent = styled.div`
   padding: 16px;
+
+  /* stylelint-disable-next-line */
   @media (min-width: ${dimensions.mobileWidth}px) {
     margin-left: ${dimensions.sidebarWidth}px;
   }
@@ -44,7 +46,6 @@ export default function App({ Component, pageProps }: AppProps) {
           </SharedThemeProvider>
         </QueryClientProvider>
       </ToastProvider>
-
     </Provider>
   );
 }

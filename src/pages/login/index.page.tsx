@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
 
-import type {Env} from '@src/modeles/env';
+import type { Env } from '@src/modeles/env';
 import type { FC } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
@@ -24,7 +24,7 @@ export const getServerSideProps = async () => {
   const { env } = await import('@src/config/env');
   return {
     props: {
-      env
+      env,
     },
   };
 };
