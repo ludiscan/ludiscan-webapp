@@ -81,7 +81,7 @@ const Component: FC<PointCirclesProps> = ({ points }) => {
   return highDensityAreas.map((area, index) => (
     <mesh key={index} position={area.position} /* eslint-disable-line react/no-unknown-property */>
       <sphereGeometry args={[area.size, 32]} /* eslint-disable-line react/no-unknown-property */ />
-      <meshBasicMaterial color={new Color().setHSL(area.force * 0.1, 1, 0.5)} transparent opacity={0.7} /* eslint-disable-line react/no-unknown-property */ />
+      <meshBasicMaterial color={new Color().setHSL(area.force * 0.1, 1, 0.5)} transparent={true} opacity={0.7} /* eslint-disable-line react/no-unknown-property */ />
     </mesh>
   ));
 };
