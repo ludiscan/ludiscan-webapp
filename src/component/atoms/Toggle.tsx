@@ -1,13 +1,14 @@
 import styled from '@emotion/styled';
 import { useCallback, useState } from 'react';
-import { IoMdArrowDropdown } from 'react-icons/io';
+import { IoIosArrowDown } from 'react-icons/io';
 
-import type { FC, ReactNode } from 'react';
+import type { FC, ReactNode, CSSProperties } from 'react';
 
 import { FlexColumn, InlineFlexRow } from '@/component/atoms/Flex.tsx';
 
 export type ToggleProps = {
   className?: string;
+  buttonStyle?: CSSProperties;
   label?: ReactNode;
   opened?: boolean;
   onChange?: (opened: boolean) => void;
@@ -15,7 +16,7 @@ export type ToggleProps = {
   maxHeight?: number;
 };
 
-const Component: FC<ToggleProps> = ({ className, label, opened, onChange, children }) => {
+const Component: FC<ToggleProps> = ({ className, buttonStyle, label, opened, onChange, children }) => {
   const [visible, setVisible] = useState(opened || false);
   const handleToggle = useCallback(() => {
     setVisible(!visible);
@@ -25,10 +26,11 @@ const Component: FC<ToggleProps> = ({ className, label, opened, onChange, childr
   }, [onChange, visible]);
   return (
     <FlexColumn className={className}>
-      <button onClick={handleToggle} className={`${className}__button`}>
+      <button onClick={handleToggle} className={`${className}__button`} style={buttonStyle}>
         <InlineFlexRow align={'center'} style={{ width: '100%' }}>
-          <IoMdArrowDropdown className={`${className}__arrow ${visible ? 'open' : ''}`} size={20} />
-          <div style={{ flex: 1 }}>{label}</div>
+          {label}
+          <div style={{ flex: 1 }} />
+          <IoIosArrowDown className={`${className}__arrow ${visible ? 'open' : ''}`} size={16} />
         </InlineFlexRow>
       </button>
       <div className={`${className}__content ${visible ? 'open' : ''}`}>{children}</div>
@@ -42,7 +44,6 @@ export const Toggle = styled(Component)`
     width: 100%;
     padding: 2px 16px 2px 2px;
     font-size: unset;
-    background: ${({ theme }) => theme.colors.surface.dark};
     border: none;
   }
 
@@ -55,12 +56,12 @@ export const Toggle = styled(Component)`
   &__arrow {
     width: fit-content;
     height: fit-content;
-    transform: rotate(-90deg);
+    transform: rotate(0deg);
     transition: transform 0.3s ease;
   }
 
   &__arrow.open {
-    transform: rotate(0deg);
+    transform: rotate(180deg);
   }
 
   &__content.open {

@@ -13,6 +13,7 @@ import { useCanvasState } from '@/hooks/useCanvasState.ts';
 import { query } from '@/modeles/qeury.ts';
 import { HeatMapCanvas } from '@/pages/heatmap/tasks/[task_id]/HeatmapCanvas.tsx';
 import { HeatmapMenu } from '@/pages/heatmap/tasks/[task_id]/HeatmapMenu.tsx';
+import { useOBJFromArrayBuffer } from '@/pages/heatmap/tasks/[task_id]/ModelLoader.tsx';
 import { PerformanceList } from '@/pages/heatmap/tasks/[task_id]/PerformanceList.tsx';
 import { dimensions, zIndexes } from '@/styles/style.ts';
 
@@ -121,17 +122,25 @@ const Component: FC<HeatmapViewerProps> = ({ className, task }) => {
     setPerformance(api);
   }, []);
 
+  const buffer = useMemo(() => {
+    if (typeof map === 'string') {
+      return null;
+    }
+    return map;
+  }, [map]);
+  const model = useOBJFromArrayBuffer(buffer);
+
   return (
     <FlexColumn className={className} align={'center'}>
       {/*<input className={`${className}__inputfile`} type='file' accept='.gltf,.glb,.obj,.bin,.png' multiple onChange={handleFileChange} />*/}
       <FlexRow className={`${className}__canvasBox`} wrap={'nowrap'}>
         <div className={`${className}__canvasMenu`}>
-          <HeatmapMenu isMenuOpen={isMenuOpen} toggleMenu={handleMenuClose} mapOptions={mapList ?? []} />
+          <HeatmapMenu isMenuOpen={isMenuOpen} toggleMenu={handleMenuClose} mapOptions={mapList ?? []} model={model} />
         </div>
         <div className={`${className}__canvas`}>
           <Canvas camera={{ position: [2500, 2500, 2500], fov: 50, near: 10, far: 10000 }} ref={canvasRef} dpr={dpr}>
             <PerformanceMonitor factor={1} onChange={handleOnPerformance} />
-            <HeatMapCanvas pointList={pointList} map={map} modelType={modelType} />
+            <HeatMapCanvas pointList={pointList} map={map} modelType={modelType} model={model} />
           </Canvas>
           {performance && <PerformanceList api={performance} className={`${className}__performance`} />}
         </div>
@@ -157,7 +166,7 @@ export const HeatMapViewer = styled(Component)`
   &__canvasMenu {
     position: absolute;
     top: 0;
-    left: 0;
+    right: 0;
     z-index: ${zIndexes.content + 2};
     max-width: 300px;
     max-height: 100%;

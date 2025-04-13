@@ -8,6 +8,8 @@ export const fontSizes = {
   largest: '24px',
 } as const;
 
+export type FontSize = keyof typeof fontSizes;
+
 export const fontWeights = {
   lighter: 200,
   light: 300,

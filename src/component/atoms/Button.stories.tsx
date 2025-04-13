@@ -38,6 +38,18 @@ export const Primary: Story = {
   },
 };
 
+export const PrimarySmallest: Story = {
+  ...Template,
+  name: 'primary style smallest',
+  args: {
+    scheme: 'primary',
+    fontSize: 'smallest',
+    onClick: () => {
+      alert('click');
+    },
+  },
+};
+
 export const PrimarySmall: Story = {
   ...Template,
   name: 'primary style small',
@@ -50,12 +62,60 @@ export const PrimarySmall: Story = {
   },
 };
 
-export const PrimaryLarge: Story = {
+export const PrimaryMedium: Story = {
   ...Template,
-  name: 'primary style large',
+  name: 'primary style medium',
   args: {
     scheme: 'primary',
-    fontSize: 'large',
+    fontSize: 'medium',
+    onClick: () => {
+      alert('click');
+    },
+  },
+};
+
+export const PrimaryLarge1: Story = {
+  ...Template,
+  name: 'primary style large1',
+  args: {
+    scheme: 'primary',
+    fontSize: 'large1',
+    onClick: () => {
+      alert('click');
+    },
+  },
+};
+
+export const PrimaryLarge2: Story = {
+  ...Template,
+  name: 'primary style large2',
+  args: {
+    scheme: 'primary',
+    fontSize: 'large2',
+    onClick: () => {
+      alert('click');
+    },
+  },
+};
+
+export const PrimaryLarge3: Story = {
+  ...Template,
+  name: 'primary style large3',
+  args: {
+    scheme: 'primary',
+    fontSize: 'large3',
+    onClick: () => {
+      alert('click');
+    },
+  },
+};
+
+export const PrimaryLargest: Story = {
+  ...Template,
+  name: 'primary style largest',
+  args: {
+    scheme: 'primary',
+    fontSize: 'largest',
     onClick: () => {
       alert('click');
     },

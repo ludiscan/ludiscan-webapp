@@ -34,7 +34,7 @@ const LocalModelLoaderContent: FC<LocalModelLoaderProps> = ({ modelPath, modelTy
 export const LocalModelLoader = LocalModelLoaderContent;
 
 type StreamModelLoaderProps = {
-  stream: ArrayBuffer;
+  model: Group;
 };
 /**
  * ArrayBuffer から OBJ ファイルをパースして Three.js の Group を返すカスタムフック
@@ -63,14 +63,13 @@ export function useOBJFromArrayBuffer(arrayBuffer: ArrayBuffer | null): Group | 
   return object3d;
 }
 
-const StreamModelLoaderComponent: FC<StreamModelLoaderProps> = ({ stream }) => {
+const StreamModelLoaderComponent: FC<StreamModelLoaderProps> = ({ model }) => {
   const {
     general: { scale },
   } = useCanvasState();
-  const model = useOBJFromArrayBuffer(stream);
   return (
     <Suspense fallback={null}>
-      {stream && model && (
+      {model && (
         <primitive
           object={model} // eslint-disable-line react/no-unknown-property
           position={[0, 1, 0]} // eslint-disable-line react/no-unknown-property
