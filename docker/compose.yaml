@@ -8,6 +8,8 @@ services:
     image: ludiscan-webapp
     ports:
       - "3003:3000"
+    restart: always
+    tty: true
 
 networks:
   ludiscan-network:

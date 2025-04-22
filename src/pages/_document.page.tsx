@@ -4,7 +4,6 @@ export default function Document() {
   return (
     <Html prefix='og: http://ogp.me/ns#' lang={'ja'}>
       <Head>
-        <meta name='viewport' content='width=device-width, initial-scale=1' />
         <meta name='format-detection' content='telephone=no' />
         <meta charSet={'utf-8'} />
         <meta name='msapplication-TileColor' content='#da532c' />
