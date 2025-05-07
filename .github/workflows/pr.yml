@@ -2,18 +2,24 @@ name: pr.yml
 on:
   pull_request:
     branches: [main, develop]
+    paths:
+      - 'src/**'
+      - '.github/workflows/pr.yml'
+      - 'package.json'
+      - 'package-lock.json'
   workflow_dispatch:
 
 jobs:
   check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '23.6.x'
+          cache: 'npm'
       - name: Install dependencies
-        run: npm install
+        run: npm ci
       - name: Lint
         run: npm run lint
       - name: Format check
