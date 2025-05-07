@@ -1,10 +1,13 @@
 import styled from '@emotion/styled';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BsPerson } from 'react-icons/bs';
+import { CiMap, CiMapPin, CiStreamOn } from 'react-icons/ci';
 import { IoIosInformationCircleOutline } from 'react-icons/io';
 import { MdKeyboardDoubleArrowRight, MdKeyboardDoubleArrowLeft } from 'react-icons/md';
 
 import type { Theme } from '@emotion/react';
+import type { HeatmapTask } from '@src/modeles/heatmaptask';
+import type { EventLogData } from '@src/slices/canvasSlice';
 import type { FC, CSSProperties } from 'react';
 import type { Group } from 'three';
 
@@ -28,6 +31,8 @@ export type HeatmapMenuProps = {
   className?: string | undefined;
   isMenuOpen: boolean;
   toggleMenu: (value: boolean) => void;
+  eventLogKeys?: string[] | undefined;
+  task: HeatmapTask;
   mapOptions: string[];
 };
 
@@ -47,7 +52,7 @@ function toggleButtonStyle(theme: Theme): CSSProperties {
 
 const InputRow = ({ className, label, children }: { className?: string; label: string; children: React.ReactNode }) => {
   return (
-    <InlineFlexRow align={'flex-end'} gap={4} className={`${className}__row`}>
+    <InlineFlexRow align={'flex-end'} wrap={'wrap'} gap={4} className={`${className}__row`}>
       <Text text={label} fontSize={fontSizes.small} />
       <div style={{ flex: 1 }} />
       {children}
@@ -55,42 +60,101 @@ const InputRow = ({ className, label, children }: { className?: string; label: s
   );
 };
 
-const InfoContent: FC<HeatmapMenuProps> = ({ className }) => {
+const InfoContent: FC<HeatmapMenuProps> = ({ className, task }) => {
   const { version } = useCanvasState();
 
   return (
-    <InlineFlexColumn gap={8}>
+    <InlineFlexColumn gap={4}>
       <InlineFlexRow className={`${className}__row`} align={'center'} gap={4}>
         <Text text={`version: ${version}`} fontSize={fontSizes.small} />
+      </InlineFlexRow>
+      <InlineFlexRow className={`${className}__row`} align={'center'} gap={4}>
+        <Text text={`taskId: ${task.taskId}`} fontSize={fontSizes.small} />
+      </InlineFlexRow>
+      <InlineFlexRow className={`${className}__row`} align={'center'} gap={4}>
+        <Text text={`project: ${task.project.name}`} fontSize={fontSizes.small} />
+      </InlineFlexRow>
+      {task.session && (
+        <InlineFlexRow className={`${className}__row`} align={'center'} gap={4}>
+          <Text text={`session: ${task.session.name}`} fontSize={fontSizes.small} />
+        </InlineFlexRow>
+      )}
+      <InlineFlexRow className={`${className}__row`} align={'center'} gap={4}>
+        <Text text={`step size: ${task.stepSize}`} fontSize={fontSizes.small} />
+      </InlineFlexRow>
+      <InlineFlexRow className={`${className}__row`} align={'center'} gap={4}>
+        <Text text={`mode: ${task.zVisible ? '3D' : '2D'}`} fontSize={fontSizes.small} />
       </InlineFlexRow>
     </InlineFlexColumn>
   );
 };
 
-const GeneralContent: FC<HeatmapMenuProps> = ({ model, className, mapOptions }) => {
+const HotspotContent: FC<HeatmapMenuProps> = ({ className }) => {
+  const { setHotspotMode, hotspotMode } = useCanvasState();
+  return (
+    <InlineFlexColumn gap={8}>
+      <Switch label={'visible'} onChange={(visible) => setHotspotMode({ ...hotspotMode, visible })} checked={hotspotMode.visible} size={'small'} />
+      <InputRow label={'cellRadius'}>
+        <Tooltip tooltip={String(hotspotMode.cellRadius)} className={`${className}__input`} placement={'left'}>
+          <Slider value={hotspotMode.cellRadius} onChange={(cellRadius) => setHotspotMode({ ...hotspotMode, cellRadius })} min={50} step={50} max={1000} />
+        </Tooltip>
+      </InputRow>
+      <InputRow label={'表示数'}>
+        <Tooltip tooltip={String(hotspotMode.thresholdCount)} className={`${className}__input`} placement={'left'}>
+          <Slider
+            value={hotspotMode.thresholdCount}
+            onChange={(thresholdCount) => setHotspotMode({ ...hotspotMode, thresholdCount })}
+            min={1}
+            step={1}
+            max={20}
+          />
+        </Tooltip>
+      </InputRow>
+      <InputRow label={'重複'}>
+        <Switch
+          label={'skipDuplication'}
+          onChange={(skipNearDuplication) => setHotspotMode({ ...hotspotMode, skipNearDuplication })}
+          checked={hotspotMode.skipNearDuplication}
+          size={'small'}
+        />
+      </InputRow>
+    </InlineFlexColumn>
+  );
+};
+
+const MapContent: FC<HeatmapMenuProps> = ({ className, mapOptions, model }) => {
   const { theme } = useSharedTheme();
-  const { general, setGeneral, setHotspotMode, hotspotMode } = useCanvasState();
+  const { setGeneral, general } = useCanvasState();
+  return (
+    <InlineFlexColumn gap={8}>
+      <InputRow label={'visualize map'}>
+        <Selector
+          className={`${className}__inputNewLine`}
+          onChange={(mapName) => setGeneral({ ...general, mapName })}
+          options={mapOptions}
+          value={general.mapName}
+          disabled={mapOptions.length === 0}
+        />
+      </InputRow>
+      {model && (
+        <Toggle label={<Text text={'map'} />} className={`${className}__toggle`} buttonStyle={toggleButtonStyle(theme)}>
+          <div className={`${className}__meshesRow`}>
+            <ObjectToggleList model={model} />
+          </div>
+        </Toggle>
+      )}
+    </InlineFlexColumn>
+  );
+};
+
+const GeneralContent: FC<HeatmapMenuProps> = ({ className }) => {
+  const { theme } = useSharedTheme();
+  const { general, setGeneral } = useCanvasState();
   const handleReload = useCallback(() => {
     canvasEventBus.emit('invalidate');
   }, []);
   return (
     <InlineFlexColumn gap={8}>
-      <Toggle label={<Text text={'map'} />} className={`${className}__toggle`} buttonStyle={toggleButtonStyle(theme)}>
-        <InputRow label={'visualize map'}>
-          <Selector
-            className={`${className}__input`}
-            onChange={(mapName) => setGeneral({ ...general, mapName })}
-            options={mapOptions}
-            value={general.mapName}
-          />
-        </InputRow>
-        {model && (
-          <div className={`${className}__meshesRow`}>
-            <ObjectToggleList model={model} />
-          </div>
-        )}
-      </Toggle>
-
       <Toggle label={<Text text={'general'} />} className={`${className}__toggle`} buttonStyle={toggleButtonStyle(theme)}>
         <InputRow label={'上向ベクトル'}>
           <InlineFlexRow gap={8} align={'center'}>
@@ -113,33 +177,6 @@ const GeneralContent: FC<HeatmapMenuProps> = ({ model, className, mapOptions }) 
           </Tooltip>
         </InputRow>
       </Toggle>
-      <Toggle label={<Text text={'hotspot'} />} className={`${className}__toggle`} buttonStyle={toggleButtonStyle(theme)}>
-        <Switch label={'visible'} onChange={(visible) => setHotspotMode({ ...hotspotMode, visible })} checked={hotspotMode.visible} size={'small'} />
-        <InputRow label={'cellRadius'}>
-          <Tooltip tooltip={String(hotspotMode.cellRadius)} className={`${className}__input`} placement={'left'}>
-            <Slider value={hotspotMode.cellRadius} onChange={(cellRadius) => setHotspotMode({ ...hotspotMode, cellRadius })} min={50} step={50} max={1000} />
-          </Tooltip>
-        </InputRow>
-        <InputRow label={'表示数'}>
-          <Tooltip tooltip={String(hotspotMode.thresholdCount)} className={`${className}__input`} placement={'left'}>
-            <Slider
-              value={hotspotMode.thresholdCount}
-              onChange={(thresholdCount) => setHotspotMode({ ...hotspotMode, thresholdCount })}
-              min={1}
-              step={1}
-              max={20}
-            />
-          </Tooltip>
-        </InputRow>
-        <InputRow label={'重複'}>
-          <Switch
-            label={'skipDuplication'}
-            onChange={(skipNearDuplication) => setHotspotMode({ ...hotspotMode, skipNearDuplication })}
-            checked={hotspotMode.skipNearDuplication}
-            size={'small'}
-          />
-        </InputRow>
-      </Toggle>
       <InputRow label={''}>
         <div style={{ flex: 1 }} />
         <Button onClick={handleReload} scheme={'surface'} fontSize={'small'}>
@@ -150,11 +187,88 @@ const GeneralContent: FC<HeatmapMenuProps> = ({ model, className, mapOptions }) 
   );
 };
 
-type Menus = 'info' | 'map' | 'general' | 'hotspot';
+const EventLogContent: FC<HeatmapMenuProps> = ({ className, eventLogKeys }) => {
+  const { eventLogs, setEventLogs } = useCanvasState();
+
+  useEffect(() => {
+    if (eventLogKeys) {
+      // 現在のキー列を取り出す
+      const currentKeys = eventLogs.map((e) => e.key);
+
+      const setA = new Set(eventLogKeys);
+      const setB = new Set(currentKeys);
+      const isSameSet = setA.size === setB.size && [...setA].every((k) => setB.has(k));
+      if (isSameSet) {
+        return;
+      }
+      const eventLogDats: EventLogData[] = eventLogKeys.map((key) => {
+        const index = eventLogs.findIndex((e) => e.key === key);
+        return {
+          key,
+          visible: index !== -1 ? eventLogs[index].visible : false,
+          color: eventLogs[index]?.color || '#000000',
+        };
+      });
+      setEventLogs(eventLogDats);
+    }
+  }, [eventLogKeys, eventLogs, setEventLogs]);
+
+  return (
+    <InlineFlexColumn gap={8}>
+      <InlineFlexRow className={`${className}__row`} align={'center'} gap={4}>
+        <Text text={'Event Log'} fontSize={fontSizes.large1} fontWeight={fontWeights.bold} />
+      </InlineFlexRow>
+      <InlineFlexRow className={`${className}__row`} align={'center'} gap={4}>
+        <Text text={'Event Log Keys'} fontSize={fontSizes.small} />
+      </InlineFlexRow>
+      <InlineFlexRow className={`${className}__row`} align={'center'} gap={4}>
+        {eventLogKeys?.map((key) => {
+          const index = eventLogs.findIndex((e) => e.key === key);
+          return (
+            <InputRow key={key} label={key}>
+              <Switch
+                label={key}
+                onChange={(checked) => {
+                  const newEventLogs = eventLogs.map((e) => ({ ...e }));
+                  if (index !== -1) {
+                    newEventLogs[index].visible = checked;
+                  } else {
+                    newEventLogs.push({ key, visible: checked, color: '#000000' });
+                  }
+                  setEventLogs(newEventLogs);
+                }}
+                checked={index !== -1 ? eventLogs[index].visible : false}
+                size={'small'}
+              />
+              <input
+                type={'color'}
+                color={eventLogs[index]?.color}
+                onChange={(e) => {
+                  const newEventLogs = eventLogs.map((e) => ({ ...e }));
+                  if (index !== -1) {
+                    newEventLogs[index].color = e.target.value;
+                  } else {
+                    newEventLogs.push({ key, visible: false, color: e.target.value });
+                  }
+                  setEventLogs(newEventLogs);
+                }}
+              />
+            </InputRow>
+          );
+        })}
+      </InlineFlexRow>
+    </InlineFlexColumn>
+  );
+};
+
+type Menus = 'info' | 'map' | 'general' | 'hotspot' | 'eventlog';
 
 const Contents = [
   { name: 'info', Component: InfoContent },
   { name: 'general', Component: GeneralContent },
+  { name: 'map', Component: MapContent },
+  { name: 'hotspot', Component: HotspotContent },
+  { name: 'eventlog', Component: EventLogContent },
 ];
 
 const Component: FC<HeatmapMenuProps> = (props) => {
@@ -167,6 +281,8 @@ const Component: FC<HeatmapMenuProps> = (props) => {
   useEffect(() => {
     if ((!general.mapName || general.mapName === '') && mapOptions.length > 0) {
       setGeneral({ ...general, mapName: mapOptions[0] });
+    } else if (mapOptions.length === 0 && general.mapName) {
+      setGeneral({ ...general, mapName: '' });
     }
   }, [general, general.mapName, mapOptions, setGeneral]);
   const content = useMemo(() => Contents.find((content) => content.name === menu), [menu]);
@@ -189,14 +305,35 @@ const Component: FC<HeatmapMenuProps> = (props) => {
               </Button>
             </div>
             <div className={`${className}__menuButton`}>
-              <Button onClick={() => setMenu('info')} scheme={'none'} fontSize={'large1'}>
+              <Button onClick={() => setMenu('info')} scheme={'none'} fontSize={'large3'}>
                 <IoIosInformationCircleOutline />
               </Button>
             </div>
             <div className={`${className}__menuButton`}>
-              <Button onClick={() => setMenu('general')} scheme={'none'} fontSize={'large1'}>
+              <Button onClick={() => setMenu('general')} scheme={'none'} fontSize={'large3'}>
                 <BsPerson />
               </Button>
+            </div>
+            <div className={`${className}__menuButton`}>
+              <Tooltip tooltip={'map'}>
+                <Button onClick={() => setMenu('map')} scheme={'none'} fontSize={'largest'}>
+                  <CiMap />
+                </Button>
+              </Tooltip>
+            </div>
+            <div className={`${className}__menuButton`}>
+              <Tooltip tooltip={'hotspot'}>
+                <Button onClick={() => setMenu('hotspot')} scheme={'none'} fontSize={'largest'}>
+                  <CiMapPin />
+                </Button>
+              </Tooltip>
+            </div>
+            <div className={`${className}__menuButton`}>
+              <Tooltip tooltip={'custom event'}>
+                <Button onClick={() => setMenu('eventlog')} scheme={'none'} fontSize={'largest'}>
+                  <CiStreamOn />
+                </Button>
+              </Tooltip>
             </div>
           </FlexColumn>
         </FlexRow>
@@ -206,7 +343,7 @@ const Component: FC<HeatmapMenuProps> = (props) => {
 };
 
 export const HeatmapMenu = styled(Component)`
-  max-width: 280px;
+  max-width: 380px;
   max-height: 60vh;
 
   &__menu {
@@ -222,6 +359,7 @@ export const HeatmapMenu = styled(Component)`
 
   &__content {
     flex: 1;
+    align-items: start;
     width: 100%;
     padding: 16px;
     overflow: hidden auto;
@@ -251,6 +389,11 @@ export const HeatmapMenu = styled(Component)`
   &__input {
     flex: 1;
     width: fit-content;
+    padding: 0 8px;
+  }
+
+  &__inputNewLine {
+    width: 100%;
     padding: 0 8px;
   }
 `;

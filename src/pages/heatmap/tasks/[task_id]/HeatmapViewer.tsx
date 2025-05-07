@@ -73,6 +73,23 @@ const Component: FC<HeatmapViewerProps> = ({ className, task, env }) => {
     },
   });
 
+  const { data: generalLogKeys } = useQuery({
+    queryKey: ['general', task, env],
+    queryFn: async () => {
+      if (!task || !env) return null;
+      const { data, error } = await createClient(env).GET('/api/v0/general_log/position/keys', {
+        params: {
+          query: {
+            project_id: task.project.id,
+            session_id: task.session?.sessionId,
+          },
+        },
+      });
+      if (error) throw error;
+      return data.keys;
+    },
+  });
+
   useEffect(() => {
     if (!mapContent) return;
     setMap(mapContent);
@@ -137,12 +154,19 @@ const Component: FC<HeatmapViewerProps> = ({ className, task, env }) => {
       {/*<input className={`${className}__inputfile`} type='file' accept='.gltf,.glb,.obj,.bin,.png' multiple onChange={handleFileChange} />*/}
       <FlexRow className={`${className}__canvasBox`} wrap={'nowrap'}>
         <div className={`${className}__canvasMenu`}>
-          <HeatmapMenu isMenuOpen={isMenuOpen} toggleMenu={handleMenuClose} mapOptions={mapList ?? []} model={model} />
+          <HeatmapMenu
+            task={task}
+            isMenuOpen={isMenuOpen}
+            toggleMenu={handleMenuClose}
+            mapOptions={mapList ?? []}
+            model={model}
+            eventLogKeys={generalLogKeys ?? undefined}
+          />
         </div>
         <div className={`${className}__canvas`}>
           <Canvas camera={{ position: [2500, 2500, 2500], fov: 50, near: 10, far: 10000 }} ref={canvasRef} dpr={dpr}>
             <PerformanceMonitor factor={1} onChange={handleOnPerformance} />
-            <HeatMapCanvas pointList={pointList} map={map} modelType={modelType} model={model} />
+            <HeatMapCanvas task={task} pointList={pointList} map={map} modelType={modelType} model={model} env={env} />
           </Canvas>
           {performance && <PerformanceList api={performance} className={`${className}__performance`} />}
         </div>

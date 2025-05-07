@@ -143,7 +143,7 @@ const Component: FC<CreateHeatmapTaskSessionModalProps | CreateHeatmapTaskProjec
             <Text text='50' fontSize={fontSizes.small} />
             <div style={{ width: '70%' }}>
               <Tooltip tooltip={String(stepSize)} placement={'top'}>
-                <Slider onChange={handleStepSizeSliderChange} min={50} max={500} step={10} />
+                <Slider value={stepSize} onChange={handleStepSizeSliderChange} min={50} max={500} step={10} />
               </Tooltip>
             </div>
             <Text text='500' fontSize={fontSizes.small} />

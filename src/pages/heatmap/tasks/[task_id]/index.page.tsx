@@ -10,7 +10,6 @@ import type { HeatmapTask } from '@src/modeles/heatmaptask';
 import type { GetServerSideProps } from 'next';
 import type { FC } from 'react';
 
-import { Text } from '@src/component/atoms/Text';
 import { useAuth } from '@src/hooks/useAuth';
 import { createClient } from '@src/modeles/qeury';
 
@@ -83,12 +82,7 @@ const Component: FC<HeatMapTaskIdPageProps> = ({ className, env, taskId }) => {
     return <div>Invalid Task ID</div>;
   }
 
-  return (
-    <div className={className}>
-      <Text text={`Task ID: ${taskId}`} />
-      {task?.status === 'completed' && <HeatMapViewer task={task} className={`${className}__viewer`} env={env} />}
-    </div>
-  );
+  return <div className={className}>{task?.status === 'completed' && <HeatMapViewer task={task} className={`${className}__viewer`} env={env} />}</div>;
 };
 
 export const HeatMapTaskIdPage = styled(Component)`
