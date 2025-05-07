@@ -25,30 +25,30 @@ const Component: FC<EventLogMarkersProps> = ({ logName, env, task, color }) => {
       // Fetch event log markers data from the server
       const { data, error } = task.session
         ? await createClient(env).GET('/api/v0/projects/{project_id}/play_session/{session_id}/general_log/position/{event_type}', {
-            params: {
-              path: {
-                project_id: task.project.id,
-                session_id: task.session.sessionId,
-                event_type: logName,
-              },
-              query: {
-                limit: 1000,
-                offset: 0,
-              },
+          params: {
+            path: {
+              project_id: task.project.id,
+              session_id: task.session.sessionId,
+              event_type: logName,
             },
-          })
+            query: {
+              limit: 1000,
+              offset: 0,
+            },
+          },
+        })
         : await createClient(env).GET('/api/v0/projects/{id}/general_log/position/{event_type}', {
-            params: {
-              path: {
-                id: task.project.id,
-                event_type: logName,
-              },
-              query: {
-                limit: 1000,
-                offset: 0,
-              },
+          params: {
+            path: {
+              id: task.project.id,
+              event_type: logName,
             },
-          });
+            query: {
+              limit: 1000,
+              offset: 0,
+            },
+          },
+        });
       if (error) throw error;
       return data;
     },
