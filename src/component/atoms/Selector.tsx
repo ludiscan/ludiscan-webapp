@@ -34,6 +34,7 @@ export const Selector = styled(Component)`
   border-radius: 4px;
 
   &:disabled {
+    cursor: not-allowed;
     opacity: 0.5;
   }
 

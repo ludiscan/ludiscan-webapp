@@ -6,11 +6,11 @@ import { useAppDispatch } from '../store';
 import type { RootState } from '../store';
 import type { CanvasEventValues } from '@src/slices/canvasSlice';
 
-import { getInitialState, set, setGeneral, setHotspotMode } from '@src/slices/canvasSlice';
+import { setEventLogs, getInitialState, set, setGeneral, setHotspotMode } from '@src/slices/canvasSlice';
 
 export function useCanvasState() {
   const dispatch = useAppDispatch();
-  const { hotspotMode, general, version, initialized } = useSelector((state: RootState) => state.canvas);
+  const { hotspotMode, general, version, initialized, eventLogs } = useSelector((state: RootState) => state.canvas);
 
   const handleSetGeneral = useCallback(
     (value: CanvasEventValues['general']) => {
@@ -24,6 +24,12 @@ export function useCanvasState() {
     },
     [dispatch],
   );
+  const handleSetEventLogs = useCallback(
+    (value: CanvasEventValues['eventLogs']) => {
+      dispatch(setEventLogs(value));
+    },
+    [dispatch],
+  );
 
   useEffect(() => {
     if (initialized) return;
@@ -34,7 +40,9 @@ export function useCanvasState() {
     version,
     general,
     hotspotMode,
+    eventLogs,
     setGeneral: handleSetGeneral,
     setHotspotMode: handleSetHotspotMode,
+    setEventLogs: handleSetEventLogs,
   };
 }
