@@ -8,6 +8,11 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 
 import { getCanvasValues, saveCanvasValues } from '@src/utils/localstrage';
 
+export type EventLogData = {
+  key: string;
+  visible: boolean;
+  color: string;
+};
 // Canvas の状態の型定義
 export type CanvasEventValues = {
   version?: string;
@@ -24,6 +29,7 @@ export type CanvasEventValues = {
     thresholdCount: number;
     skipNearDuplication: boolean;
   };
+  eventLogs: EventLogData[];
   initialized: boolean;
 };
 
@@ -42,6 +48,7 @@ export const initializeValues: CanvasEventValues = {
     thresholdCount: 6,
     skipNearDuplication: true,
   },
+  eventLogs: [],
   initialized: false,
 };
 
@@ -63,6 +70,7 @@ const canvasSlice = createSlice({
       state.version = action.payload.version;
       state.general = action.payload.general;
       state.hotspotMode = action.payload.hotspotMode;
+      state.eventLogs = action.payload.eventLogs;
     },
     setGeneral: (state, action: PayloadAction<CanvasEventValues['general']>) => {
       state.general = action.payload;
@@ -72,8 +80,12 @@ const canvasSlice = createSlice({
       state.hotspotMode = action.payload;
       saveCanvasValues(state);
     },
+    setEventLogs: (state, action: PayloadAction<CanvasEventValues['eventLogs']>) => {
+      state.eventLogs = action.payload;
+      saveCanvasValues(state);
+    },
   },
 });
 
-export const { setGeneral, setHotspotMode, set } = canvasSlice.actions;
+export const { setGeneral, setHotspotMode, set, setEventLogs } = canvasSlice.actions;
 export const canvasReducer = canvasSlice.reducer;
