@@ -3,7 +3,7 @@ import { useThree } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
 import { Vector3 } from 'three';
 
-import { PointMarkers } from './PointMarkers';
+import { PositionPointMarkers } from './PositionPointMarkers';
 
 import type { Env } from '@src/modeles/env';
 import type { HeatmapTask } from '@src/modeles/heatmaptask';
@@ -53,7 +53,7 @@ const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, t
       <directionalLight position={[10, 10, 10]} intensity={3} castShadow={true} /> {/* eslint-disable-line react/no-unknown-property */}
       {modelType && map && modelType !== 'server' && typeof map === 'string' && <LocalModelLoader modelPath={map} modelType={modelType} />}
       {modelType && model && modelType === 'server' && typeof map !== 'string' && <StreamModelLoader model={model} />}
-      {pointList && showHeatmap && <PointMarkers points={pointList} />}
+      {pointList && showHeatmap && <PositionPointMarkers points={pointList} />}
       {pointList && showHeatmap && <HotspotCircles points={pointList} />}
       {visibleEventLogs.length > 0 &&
         visibleEventLogs.map((event) => <EventLogMarkers key={event.key} logName={event.key} task={task} env={env} color={event.color} />)}

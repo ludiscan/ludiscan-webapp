@@ -176,6 +176,11 @@ const GeneralContent: FC<HeatmapMenuProps> = ({ className }) => {
             <Slider value={general.blockSize} onChange={(blockSize) => setGeneral({ ...general, blockSize })} min={50} step={50} max={500} />
           </Tooltip>
         </InputRow>
+        <InputRow label={'minThreshold'}>
+          <Tooltip tooltip={String(general.minThreshold)} className={`${className}__input`} placement={'left'}>
+            <Slider value={general.minThreshold} onChange={(minThreshold) => setGeneral({ ...general, minThreshold })} min={0} step={0.001} max={0.3} />
+          </Tooltip>
+        </InputRow>
       </Toggle>
       <InputRow label={''}>
         <div style={{ flex: 1 }} />

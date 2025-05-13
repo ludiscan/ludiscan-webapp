@@ -22,6 +22,8 @@ export type CanvasEventValues = {
     showHeatmap: boolean;
     blockSize: number;
     mapName: string;
+    minThreshold: number;
+    maxThreshold: number;
   };
   hotspotMode: {
     visible: boolean;
@@ -36,11 +38,13 @@ export type CanvasEventValues = {
 export const initializeValues: CanvasEventValues = {
   version: packageJson.version,
   general: {
-    upZ: false,
+    upZ: true,
     scale: 1,
     showHeatmap: false,
     blockSize: 1,
     mapName: '',
+    minThreshold: 0.0,
+    maxThreshold: 1,
   },
   hotspotMode: {
     visible: false,
