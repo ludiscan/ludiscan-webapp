@@ -1,7 +1,7 @@
 import { OrbitControls } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 
-import { PointMarkers } from './PointMarkers';
+import { PositionPointMarkers } from './PositionPointMarkers';
 
 import type { Meta, StoryObj } from '@storybook/react';
 
@@ -10,10 +10,10 @@ import darkTheme from '@src/styles/dark';
 import lightTheme from '@src/styles/light';
 
 export default {
-  component: PointMarkers,
+  component: PositionPointMarkers,
   controls: { hideNoControlsWarning: true },
 } as Meta;
-type Story = StoryObj<typeof PointMarkers>;
+type Story = StoryObj<typeof PositionPointMarkers>;
 
 const Template: Story = {
   render: (args) => {
@@ -25,7 +25,7 @@ const Template: Story = {
           <Canvas camera={{ position: [3, 3, 3], fov: 75 }}>
             <ambientLight intensity={0.5} /> {/* eslint-disable-line react/no-unknown-property */}
             <directionalLight position={[10, 10, 10]} intensity={1} /> {/* eslint-disable-line react/no-unknown-property */}
-            <PointMarkers {...args} />
+            <PositionPointMarkers {...args} />
             {/* カメラ移動・回転を可能にする */}
             <OrbitControls
               enableZoom={true} // ズーム可能
