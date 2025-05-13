@@ -6,7 +6,7 @@ import type { FC } from 'react';
 import type { Group, Material } from 'three';
 
 import { Button } from '@src/component/atoms/Button';
-import { InlineFlexRow } from '@src/component/atoms/Flex';
+import { FlexRow, InlineFlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { fontSizes } from '@src/styles/style';
 
@@ -75,6 +75,9 @@ const Component: FC<ObjectToggleListProps> = ({ className, model }) => {
   // displayState は各子要素の状態を uuid ごとに管理する
   const [displayState, setDisplayState] = useState<Record<string, number>>({});
 
+  // 0: フル表示, 1: 半透明表示, 2: 非表示, 3: custom(個別設定)
+  const [allToggleState, setAllToggleState] = useState<number>(0);
+
   // 初回または model が変更された際、各子要素の状態（0: フル表示）を一括で設定する
   useEffect(() => {
     const initState: Record<string, number> = {};
@@ -99,14 +102,41 @@ const Component: FC<ObjectToggleListProps> = ({ className, model }) => {
         }
         return { ...prev, [uuid]: newState };
       });
+      setAllToggleState(3);
     },
     [model.children],
   );
 
+  useEffect(() => {
+    if (allToggleState === 3) return;
+    model.children.forEach((child) => {
+      updateChildDisplay(child, allToggleState);
+      setDisplayState((prev) => ({ ...prev, [child.uuid]: allToggleState }));
+    });
+  }, [allToggleState, model]);
+
   return (
     <div className={className}>
       {/* 親ラベル */}
-      <Text className={`${className}__parent-label`} text={(model as Group).name || 'Mesh'} fontSize={fontSizes.medium} />
+      <FlexRow className={`${className}__parent-label`} align={'center'} gap={8}>
+        <Text text={(model as Group).name || 'Mesh'} fontSize={fontSizes.medium} />
+        <Button
+          scheme={'none'}
+          fontSize={'large1'}
+          className={`${className}__visibleButton`}
+          onClick={() => setAllToggleState((allToggleState + 1) % 3)}
+        >
+          {allToggleState === 0 ? (
+            <IoMdEye />
+          ) : allToggleState === 1 ? (
+            <Text text={'0.5'} fontSize={fontSizes.small} fontWeight={'bold'} />
+          ) : allToggleState === 2 ? (
+            <IoMdEyeOff />
+          ) : (
+            <Text text={'--'} fontSize={fontSizes.small} fontWeight={'bold'} />
+          )}
+        </Button>
+      </FlexRow>
 
       {/* 子要素リスト */}
       <ul className={`${className}__child-list`}>
