@@ -120,12 +120,7 @@ const Component: FC<ObjectToggleListProps> = ({ className, model }) => {
       {/* 親ラベル */}
       <FlexRow className={`${className}__parent-label`} align={'center'} gap={8}>
         <Text text={(model as Group).name || 'Mesh'} fontSize={fontSizes.medium} />
-        <Button
-          scheme={'none'}
-          fontSize={'large1'}
-          className={`${className}__visibleButton`}
-          onClick={() => setAllToggleState((allToggleState + 1) % 3)}
-        >
+        <Button scheme={'none'} fontSize={'large1'} className={`${className}__visibleButton`} onClick={() => setAllToggleState((allToggleState + 1) % 3)}>
           {allToggleState === 0 ? (
             <IoMdEye />
           ) : allToggleState === 1 ? (
