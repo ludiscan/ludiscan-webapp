@@ -43,7 +43,7 @@ class Point extends Vector3 {
 
 const Component: FC<PointMarkersProps> = ({ points, colorIntensity = 0.9, colorScale = 1 }) => {
   const {
-    general: { upZ, scale, minThreshold = 0.00, maxThreshold = 1.0 },
+    general: { upZ, scale, minThreshold = 0.0, maxThreshold = 1.0 },
   } = useCanvasState();
 
   // Z-up / Y-up の変換
