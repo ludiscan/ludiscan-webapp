@@ -10,7 +10,7 @@ import { Header } from '@src/component/templates/Header';
 import { SidebarLayout } from '@src/component/templates/SidebarLayout';
 import { ToastProvider } from '@src/component/templates/ToastContext';
 import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
-import { store } from '@src/pages/store';
+import { store } from '@src/store';
 import { dimensions } from '@src/styles/style';
 
 const Content = styled.div`

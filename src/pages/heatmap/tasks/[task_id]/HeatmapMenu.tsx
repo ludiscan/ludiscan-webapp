@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BsPerson } from 'react-icons/bs';
 import { CiMap, CiMapPin, CiStreamOn } from 'react-icons/ci';
+import { FaFileExport } from 'react-icons/fa';
 import { IoIosInformationCircleOutline } from 'react-icons/io';
 import { MdKeyboardDoubleArrowRight, MdKeyboardDoubleArrowLeft } from 'react-icons/md';
 
@@ -33,6 +34,7 @@ export type HeatmapMenuProps = {
   toggleMenu: (value: boolean) => void;
   eventLogKeys?: string[] | undefined;
   task: HeatmapTask;
+  handleExportView: () => Promise<void>;
   mapOptions: string[];
 };
 
@@ -60,8 +62,12 @@ const InputRow = ({ className, label, children }: { className?: string; label: s
   );
 };
 
-const InfoContent: FC<HeatmapMenuProps> = ({ className, task }) => {
+const InfoContent: FC<HeatmapMenuProps> = ({ className, task, handleExportView }) => {
   const { version } = useCanvasState();
+
+  const handleExportHeatmap = useCallback(async () => {
+    await handleExportView();
+  }, [handleExportView]);
 
   return (
     <InlineFlexColumn gap={4}>
@@ -84,6 +90,12 @@ const InfoContent: FC<HeatmapMenuProps> = ({ className, task }) => {
       </InlineFlexRow>
       <InlineFlexRow className={`${className}__row`} align={'center'} gap={4}>
         <Text text={`mode: ${task.zVisible ? '3D' : '2D'}`} fontSize={fontSizes.small} />
+      </InlineFlexRow>
+      <InlineFlexRow className={`${className}__row`} align={'center'} gap={8} style={{ marginTop: 8, justifyContent: 'center' }}>
+        <Button onClick={handleExportHeatmap} scheme={'primary'} fontSize={'small'}>
+          <FaFileExport style={{ marginRight: 4 }} />
+          <Text text={'エクスポート'} fontSize={fontSizes.small} fontWeight={fontWeights.bold} />
+        </Button>
       </InlineFlexRow>
     </InlineFlexColumn>
   );
