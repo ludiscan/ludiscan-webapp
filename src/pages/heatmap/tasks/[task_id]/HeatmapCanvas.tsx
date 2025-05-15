@@ -5,8 +5,7 @@ import { Vector3 } from 'three';
 
 import { PositionPointMarkers } from './PositionPointMarkers';
 
-import type { Env } from '@src/modeles/env';
-import type { HeatmapTask } from '@src/modeles/heatmaptask';
+import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC } from 'react';
 import type { Group } from 'three';
 
@@ -18,14 +17,13 @@ import { canvasEventBus } from '@src/utils/canvasEventBus';
 
 type HeatmapCanvasProps = {
   model: Group | null;
-  task: HeatmapTask;
-  env: Env | undefined;
+  service: HeatmapDataService;
   map?: string | ArrayBuffer | null;
   modelType?: 'gltf' | 'glb' | 'obj' | 'server' | null;
   pointList: { x: number; y: number; z?: number; density: number }[];
 };
 
-const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, task, env }) => {
+const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, service }) => {
   const { invalidate } = useThree();
   const {
     general: { showHeatmap },
@@ -56,7 +54,7 @@ const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, t
       {pointList && showHeatmap && <PositionPointMarkers points={pointList} />}
       {pointList && showHeatmap && <HotspotCircles points={pointList} />}
       {visibleEventLogs.length > 0 &&
-        visibleEventLogs.map((event) => <EventLogMarkers key={event.key} logName={event.key} task={task} env={env} color={event.color} />)}
+        visibleEventLogs.map((event) => <EventLogMarkers key={event.key} logName={event.key} service={service} color={event.color} />)}
       <OrbitControls enableZoom enablePan enableRotate ref={orbitControlsRef} position0={new Vector3(1, 1, 3000)} />
     </>
   );

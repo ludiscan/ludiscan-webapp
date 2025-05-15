@@ -24,8 +24,17 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=deps ./app/node_modules ./node_modules
 COPY . .
+
+# publicディレクトリが存在することを確認
+RUN mkdir -p public
+
 # This will do the trick, use the corresponding env file for each environment.
 COPY .env.production .env.production
+
+# HeatMapViewerコンポーネントのバンドルを生成
+RUN npm run build:heatmap-bundle
+
+# ビルド処理
 RUN npm run build:prod
 
 # 3. Production image, copy all the files and run next
@@ -37,6 +46,7 @@ ENV NODE_ENV=production
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nextjs -u 1001
 
+# publicフォルダをコピー（heatmap-viewer-bundle.jsを含む）
 COPY --from=builder /app/public ./public
 
 # Automatically leverage output traces to reduce image size
@@ -44,6 +54,8 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# APIルートがファイルシステムにアクセスできるようにするため
+COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
 
 USER nextjs
 

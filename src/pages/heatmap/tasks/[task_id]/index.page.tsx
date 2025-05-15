@@ -12,6 +12,7 @@ import type { FC } from 'react';
 
 import { useAuth } from '@src/hooks/useAuth';
 import { createClient } from '@src/modeles/qeury';
+import { useOnlineHeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 
 export type HeatMapTaskIdPageProps = {
   className?: string;
@@ -52,7 +53,10 @@ const Component: FC<HeatMapTaskIdPageProps> = ({ className, env, taskId }) => {
       if (error) throw error;
       return data;
     },
+    initialData: null,
   });
+
+  const service = useOnlineHeatmapDataService(env, task);
 
   useEffect(() => {
     if (!task) return;
@@ -82,7 +86,11 @@ const Component: FC<HeatMapTaskIdPageProps> = ({ className, env, taskId }) => {
     return <div>Invalid Task ID</div>;
   }
 
-  return <div className={className}>{task?.status === 'completed' && <HeatMapViewer task={task} className={`${className}__viewer`} env={env} />}</div>;
+  return (
+    <div className={className}>
+      {task?.status === 'completed' && service && service.isInitialized && <HeatMapViewer className={`${className}__viewer`} dataService={service} />}
+    </div>
+  );
 };
 
 export const HeatMapTaskIdPage = styled(Component)`

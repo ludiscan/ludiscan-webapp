@@ -5,7 +5,7 @@
     "node": "23.6.x",
     "npm": "10.x"
   },
-  "version": "0.2.0",
+  "version": "0.3.0",
   "scripts": {
     "dev": "next dev --turbopack",
     "build:dev": "next build --turbopack",
@@ -26,7 +26,9 @@
     "release:major": "npm version major --message 'v%s' && git push && git push origin --tags",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "generate:api-schemes": "npx openapi-typescript https://matuyuhi.com/api-json --output generated/api.d.ts"
+    "generate:api-schemes": "npx openapi-typescript https://matuyuhi.com/api-json --output generated/api.d.ts",
+    "build:heatmap-bundle": "node scripts/create-heatmap-bundle.js",
+    "prebuild:prod": "npm run build:heatmap-bundle"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -34,7 +36,11 @@
     "@react-three/fiber": "^9.1.2",
     "@reduxjs/toolkit": "^2.6.1",
     "@tanstack/react-query": "^5.73.3",
+    "@types/file-saver": "^2.0.7",
+    "esbuild": "^0.25.4",
+    "file-saver": "^2.0.5",
     "framer-motion": "^12.6.5",
+    "jszip": "^3.10.1",
     "next": "15.3.0",
     "npm-run-all2": "^7.0.2",
     "openapi-fetch": "^0.13.5",
