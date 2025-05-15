@@ -88,7 +88,7 @@ const Component: FC<HeatMapTaskIdPageProps> = ({ className, env, taskId }) => {
 
   return (
     <div className={className}>
-      {task?.status === 'completed' && service && service.isInitialized && <HeatMapViewer className={`${className}__viewer`} env={env} dataService={service} />}
+      {task?.status === 'completed' && service && service.isInitialized && <HeatMapViewer className={`${className}__viewer`} dataService={service} />}
     </div>
   );
 };

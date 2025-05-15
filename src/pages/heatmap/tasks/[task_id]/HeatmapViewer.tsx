@@ -7,7 +7,6 @@ import JSZip from 'jszip';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { PerformanceMonitorApi } from '@react-three/drei';
-import type { Env } from '@src/modeles/env';
 import type { HeatmapDataService, OfflineHeatmapData } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC } from 'react';
 
@@ -22,11 +21,10 @@ import { getOfflineHeatmapTemplate } from '@src/utils/heatmap/getOfflineHeatmapT
 
 export type HeatmapViewerProps = {
   className?: string | undefined;
-  env?: Env | undefined;
   dataService: HeatmapDataService;
 };
 
-const Component: FC<HeatmapViewerProps> = ({ className, env, dataService }) => {
+const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
   const [map, setMap] = useState<string | ArrayBuffer | null>(null);
   const [modelType, setModelType] = useState<'gltf' | 'glb' | 'obj' | 'server' | null>(null);
   const [dpr, setDpr] = useState(2);
@@ -53,7 +51,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, env, dataService }) => {
   });
 
   const { data: mapContent } = useQuery({
-    queryKey: ['mapData', state.general.mapName, env, dataService],
+    queryKey: ['mapData', state.general.mapName, dataService, taskId],
     queryFn: async () => {
       if (!state.general.mapName) return null;
       return dataService.getMapContent(state.general.mapName);
@@ -61,7 +59,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, env, dataService }) => {
   });
 
   const { data: generalLogKeys } = useQuery({
-    queryKey: ['general'],
+    queryKey: ['general', taskId],
     queryFn: async () => {
       return dataService.getGeneralLogKeys();
     },
