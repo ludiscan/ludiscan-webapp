@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
 
 import type { HeatmapTask, PositionEventLog } from '@src/modeles/heatmaptask';
 import type { HeatmapDataService, OfflineHeatmapData } from '@src/utils/heatmap/HeatmapDataService';
@@ -6,45 +6,16 @@ import type { HeatmapDataService, OfflineHeatmapData } from '@src/utils/heatmap/
 /**
  * React向けのオフラインデータサービスフック
  */
-export function useOfflineHeatmapDataService(dataPath: string = './data.json'): HeatmapDataService {
-  const [offlineData, setOfflineData] = useState<OfflineHeatmapData | null>(null);
-  const [isInitialized, setIsInitialized] = useState(false);
-
-  // データロード処理
-  const loadOfflineData = useCallback(async (): Promise<OfflineHeatmapData | null> => {
-    if (offlineData) return offlineData;
-
-    try {
-      const response = await fetch(dataPath);
-      const data = await response.json();
-      setOfflineData(data);
-      setIsInitialized(true);
-      return data;
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('オフラインデータの読み込みに失敗しました:', error);
-      return null;
-    }
-  }, [dataPath, offlineData]);
-
-  // 初期ロード
-  useEffect(() => {
-    loadOfflineData().catch((err) => {
-      // eslint-disable-next-line no-console
-      console.error('データロードエラー:', err);
-    });
-  }, [loadOfflineData]);
-
+export function useOfflineHeatmapDataService(offlineData: OfflineHeatmapData | null): HeatmapDataService {
   // APIの実装
   const getMapList = useCallback(async (): Promise<string[]> => {
-    const data = await loadOfflineData();
-    if (!data) return [];
-    return data.mapList;
-  }, [loadOfflineData]);
+    if (!offlineData) return [];
+    return offlineData.mapList;
+  }, [offlineData]);
 
   const getMapContent = useCallback(
     async (_mapName: string): Promise<ArrayBuffer | null> => {
-      const data = await loadOfflineData();
+      const data = offlineData;
       if (!data || !data.mapContentBase64) return null;
 
       try {
@@ -82,14 +53,14 @@ export function useOfflineHeatmapDataService(dataPath: string = './data.json'): 
         return null;
       }
     },
-    [loadOfflineData],
+    [offlineData],
   );
 
   const getGeneralLogKeys = useCallback(async (): Promise<string[] | null> => {
-    const data = await loadOfflineData();
+    const data = offlineData;
     if (!data) return null;
     return data.generalLogKeys;
-  }, [loadOfflineData]);
+  }, [offlineData]);
 
   const getTask = useCallback((): HeatmapTask | null => {
     if (!offlineData) return null;
@@ -98,15 +69,15 @@ export function useOfflineHeatmapDataService(dataPath: string = './data.json'): 
 
   const getEventLog = useCallback(
     async (logName: string): Promise<PositionEventLog[] | null> => {
-      const data = await loadOfflineData();
+      const data = offlineData;
       if (!data) return null;
       return data.eventLogs[logName] || null;
     },
-    [loadOfflineData],
+    [offlineData],
   );
 
   return {
-    isInitialized,
+    isInitialized: offlineData != null,
     getMapList,
     getMapContent,
     getGeneralLogKeys,
