@@ -163,7 +163,6 @@ const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
       } catch (bundleError) {
         // eslint-disable-next-line
         console.error('バンドルJSの取得中にエラーが発生しました:', bundleError);
-        alert('バンドルJSの取得に失敗しました。');
         return;
       }
 

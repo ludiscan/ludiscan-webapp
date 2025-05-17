@@ -57,19 +57,27 @@ export const Component: FC<OfflineHeatmapProviderProps> = ({ className }) => {
   }, []);
 
   useEffect(() => {
-    document.addEventListener('dragover', (e) => {
+    const dragOverHandler = (e: DragEvent) => {
       e.preventDefault();
       e.stopPropagation();
-    });
+    };
+    document.addEventListener('dragover', dragOverHandler);
 
-    document.addEventListener('drop', async (e) => {
+    const dropHandler = async (e: DragEvent) => {
       e.preventDefault();
       e.stopPropagation();
 
       const file = e.dataTransfer?.files[0];
 
       await loadData(file);
-    });
+    };
+
+    document.addEventListener('drop', dropHandler);
+
+    return () => {
+      document.removeEventListener('dragover', dragOverHandler);
+      document.removeEventListener('drop', dropHandler);
+    };
   }, [loadData]);
   return (
     <Provider store={store}>
@@ -78,7 +86,7 @@ export const Component: FC<OfflineHeatmapProviderProps> = ({ className }) => {
           <SharedThemeProvider initialTheme={lightTheme}>
             <Modal isOpen={data == null} title={'ヒートマップデータの読み込み'} onClose={() => {}}>
               <div className={`${className}__fileInputWrapper`}>
-                <Button onClick={() => document.getElementById('data-file')?.click()} scheme={'primary'} fontSize={'medium'} disabled={isLoading}>
+                <Button onClick={() => dataInput.current?.click()} scheme={'primary'} fontSize={'medium'} disabled={isLoading}>
                   ファイルを選択
                   <input
                     ref={dataInput}
