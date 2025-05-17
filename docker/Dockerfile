@@ -32,7 +32,7 @@ RUN mkdir -p public
 COPY .env.production .env.production
 
 # HeatMapViewerコンポーネントのバンドルを生成
-RUN npm run build:heatmap-bundle
+RUN npm run prebuild:prod
 
 # ビルド処理
 RUN npm run build:prod
