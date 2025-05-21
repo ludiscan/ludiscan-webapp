@@ -34,7 +34,7 @@ export const Default: Story = {
     onClick: () => {
       /* eslint-disable-next-line no-console */
       console.log('onClick');
-    }
+    },
   },
 };
 
@@ -53,15 +53,15 @@ export const AddIconTitleEnd: Story = {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
       <SharedThemeProvider initialTheme={args.type === 'light' ? lightTheme : darkTheme}>
-        <Header {...args}
+        <Header
+          {...args}
           iconTitleEnd={
-            <Button onClick={() => {}} fontSize={'medium'} scheme={'primary'} width={'fit-content'} >
+            <Button onClick={() => {}} fontSize={'medium'} scheme={'primary'} width={'fit-content'}>
               <Text text={'Add'} />
             </Button>
           }
         />
       </SharedThemeProvider>
     );
-  }
+  },
 };
-

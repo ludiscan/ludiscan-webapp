@@ -2,11 +2,10 @@ import styled from '@emotion/styled';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
-import { CiUser , CiLight, CiDark } from 'react-icons/ci';
+import { CiUser, CiLight, CiDark } from 'react-icons/ci';
 import { FiChevronLeft } from 'react-icons/fi';
 
-import type { FC, ReactNode} from 'react';
-
+import type { FC, ReactNode } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
 import { FlexRow } from '@src/component/atoms/Flex';
@@ -42,14 +41,10 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd })
         {iconTitleEnd && <>{iconTitleEnd}</>}
         <div style={{ flex: 1 }} />
         <Button fontSize={'large2'} onClick={toggleTheme} scheme={'none'}>
-          {theme.colors.isLight ? (
-            <CiDark size={24} color={theme.colors.text} />
-          ) : (
-            <CiLight size={24} color={theme.colors.text} />
-          )}
+          {theme.colors.isLight ? <CiDark size={24} color={theme.colors.text} /> : <CiLight size={24} color={theme.colors.text} />}
         </Button>
         <Link href={'/login'} style={{ display: 'flex', alignItems: 'center' }}>
-          <CiUser size={24} color={theme.colors.text}/>
+          <CiUser size={24} color={theme.colors.text} />
         </Link>
       </FlexRow>
     </header>
@@ -59,15 +54,15 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd })
 export const Header = styled(Component)`
   display: flex;
   height: ${dimensions.headerHeight}px;
-  background-color: ${({ theme }) => theme.colors.surface.main};
   color: ${({ theme }) => theme.colors.text};
+  background-color: ${({ theme }) => theme.colors.surface.main};
   transition: margin-left 0.3s ease-in-out;
 
   &__innerHeader {
-    width: 100%;
-    margin: 0 auto;
-    padding: 8px 16px;
     align-items: center;
     justify-content: space-between;
+    width: 100%;
+    padding: 8px 16px;
+    margin: 0 auto;
   }
 `;
