@@ -11,6 +11,7 @@ export type ButtonProps = {
   scheme: 'primary' | 'surface' | 'warning' | 'none' | 'error' | 'secondary';
   fontSize: FontSize;
   width?: 'full' | 'fit-content';
+  radius?: 'small' | 'default';
   children: ReactNode;
   disabled?: boolean | undefined;
 };
@@ -65,7 +66,7 @@ const ButtonPadding = (props: ButtonProps) => {
     return '0 12px';
   }
   if (props.fontSize === 'small') {
-    return '0 12px';
+    return '0 14px';
   }
   if (props.fontSize === 'medium') {
     return '0 16px';
@@ -75,22 +76,22 @@ const ButtonPadding = (props: ButtonProps) => {
 
 const ButtonBorderRadius = (props: ButtonProps) => {
   if (props.fontSize === 'small') {
-    return '16px';
+    return props.radius === 'default' ? '16px' : '8px';
   }
   if (props.fontSize === 'medium') {
-    return '18px';
+    return props.radius === 'default' ? '18px' : '9px';
   }
   if (props.fontSize === 'large1') {
-    return '20px';
+    return props.radius === 'default' ? '20px' : '10px';
   }
   if (props.fontSize === 'large2') {
-    return '22px';
+    return props.radius === 'default' ? '22px' : '11px';
   }
   if (props.fontSize === 'large3') {
-    return '24px';
+    return props.radius === 'default' ? '24px' : '12px';
   }
   if (props.fontSize === 'largest') {
-    return '26px';
+    return props.radius === 'default' ? '26px' : '13px';
   }
   return '18px';
 };
