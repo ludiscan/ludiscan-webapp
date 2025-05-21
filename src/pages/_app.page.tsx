@@ -6,7 +6,6 @@ import { Provider } from 'react-redux';
 
 import type { AppProps } from 'next/app';
 
-import { Header } from '@src/component/templates/Header';
 import { SidebarLayout } from '@src/component/templates/SidebarLayout';
 import { ToastProvider } from '@src/component/templates/ToastContext';
 import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
@@ -19,9 +18,7 @@ const Content = styled.div`
   background: ${({ theme }) => theme.colors.background};
 `;
 
-const InnerContent = styled.div`
-  padding: 16px;
-
+export const InnerContent = styled.div`
   /* stylelint-disable-next-line */
   @media (min-width: ${dimensions.mobileWidth}px) {
     margin-left: ${dimensions.sidebarWidth}px;
@@ -38,10 +35,7 @@ export default function App({ Component, pageProps }: AppProps) {
           <SharedThemeProvider>
             <Content>
               <SidebarLayout />
-              <Header />
-              <InnerContent>
-                <Component {...pageProps} />
-              </InnerContent>
+              <Component {...pageProps} />
             </Content>
           </SharedThemeProvider>
         </QueryClientProvider>

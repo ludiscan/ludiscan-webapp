@@ -10,8 +10,13 @@ import type { HeatmapTask } from '@src/modeles/heatmaptask';
 import type { GetServerSideProps } from 'next';
 import type { FC } from 'react';
 
+import { Text } from '@src/component/atoms/Text';
+import { Header } from '@src/component/templates/Header';
 import { useAuth } from '@src/hooks/useAuth';
+import { useCanvasState } from '@src/hooks/useCanvasState';
 import { createClient } from '@src/modeles/qeury';
+import { InnerContent } from '@src/pages/_app.page';
+import { fontSizes } from '@src/styles/style';
 import { useOnlineHeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 
 export type HeatMapTaskIdPageProps = {
@@ -40,6 +45,7 @@ const Component: FC<HeatMapTaskIdPageProps> = ({ className, env, taskId }) => {
   const timer = useRef<NodeJS.Timeout>(undefined);
 
   const router = useRouter();
+  const { version } = useCanvasState();
   const { isAuthorized, isLoading, ready } = useAuth({ env });
 
   const { data: task, refetch: refetchTask } = useQuery({
@@ -87,9 +93,13 @@ const Component: FC<HeatMapTaskIdPageProps> = ({ className, env, taskId }) => {
   }
 
   return (
-    <div className={className}>
-      {task?.status === 'completed' && service && service.isInitialized && <HeatMapViewer className={`${className}__viewer`} dataService={service} />}
-    </div>
+    <InnerContent>
+      <Header
+        title={'Heatmap'}
+        iconTitleEnd={<Text className={`${className}__headerV`} text={`v${version || 'debug'}`} fontSize={fontSizes.small} fontWeight={'bold'} />}
+      />
+      <div className={className}>{task?.status === 'completed' && service && service.isInitialized && <HeatMapViewer dataService={service} />}</div>
+    </InnerContent>
   );
 };
 
@@ -98,6 +108,14 @@ export const HeatMapTaskIdPage = styled(Component)`
   height: calc(100vh - 64px);
   margin: 0 auto;
   background: ${({ theme }) => theme.colors.surface.dark};
+
+  &__headerV {
+    align-self: end;
+    padding: 4px 12px;
+    color: ${({ theme }) => theme.colors.primary.main};
+    border: 1px solid ${({ theme }) => theme.colors.primary.main};
+    border-radius: 16px;
+  }
 `;
 
 export default HeatMapTaskIdPage;

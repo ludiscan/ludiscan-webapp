@@ -33,7 +33,7 @@ export const zIndexes = {
 
 export const dimensions = {
   sidebarWidth: 240,
-  headerHeight: 64,
+  headerHeight: 60,
   mobileWidth: 768,
 } as const;
 
