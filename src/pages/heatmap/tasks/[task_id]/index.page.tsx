@@ -10,6 +10,7 @@ import type { HeatmapTask } from '@src/modeles/heatmaptask';
 import type { GetServerSideProps } from 'next';
 import type { FC } from 'react';
 
+import { Button } from '@src/component/atoms/Button';
 import { Text } from '@src/component/atoms/Text';
 import { Header } from '@src/component/templates/Header';
 import { useAuth } from '@src/hooks/useAuth';
@@ -97,6 +98,19 @@ const Component: FC<HeatMapTaskIdPageProps> = ({ className, env, taskId }) => {
       <Header
         title={'Heatmap'}
         iconTitleEnd={<Text className={`${className}__headerV`} text={`v${version || 'debug'}`} fontSize={fontSizes.small} fontWeight={'bold'} />}
+        iconEnd={
+          <>
+            <Button fontSize={'small'} onClick={() => {}} scheme={'surface'}>
+              <Text text={'Discord'} fontWeight={'bold'} />
+            </Button>
+            <Button fontSize={'small'} onClick={() => {}} scheme={'surface'}>
+              <Text text={'Save'} fontWeight={'bold'} />
+            </Button>
+            <Button fontSize={'small'} onClick={() => {}} scheme={'primary'}>
+              <Text text={'Export'} fontWeight={'bold'} />
+            </Button>
+          </>
+        }
       />
       <div className={className}>{task?.status === 'completed' && service && service.isInitialized && <HeatMapViewer dataService={service} />}</div>
     </InnerContent>
