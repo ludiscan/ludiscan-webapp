@@ -238,6 +238,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
 
 export const HeatMapViewer = styled(Component)`
   width: 100%;
+  height: 100%;
 
   &__inputfile {
     width: 100%;

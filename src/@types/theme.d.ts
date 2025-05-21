@@ -32,6 +32,7 @@ export interface Colors {
   };
   error: string;
   disabled: string;
+  isLight: boolean;
 }
 
 export {};

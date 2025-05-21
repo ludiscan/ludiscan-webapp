@@ -9,7 +9,7 @@ export default function Document() {
         <meta name='msapplication-TileColor' content='#da532c' />
         <meta name='theme-color' content='#ffffff' />
       </Head>
-      <body>
+      <body style={{ padding: 0, margin: 0 }}>
         <Main />
         <NextScript />
       </body>
