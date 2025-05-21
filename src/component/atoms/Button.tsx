@@ -96,6 +96,8 @@ const ButtonBorderRadius = (props: ButtonProps) => {
 };
 
 export const Button = styled(Component)`
+  display: flex;
+  align-items: center;
   width: ${(props) => ButtonWidth(props)};
   height: ${(props) => ButtonHeight(props)};
   padding: ${(props) => ButtonPadding(props)};
