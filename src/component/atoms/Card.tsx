@@ -1,9 +1,6 @@
 import styled from '@emotion/styled';
 
-import type { ButtonProps } from '@src/component/atoms/Button';
 import type { ReactNode } from 'react';
-
-import { Button } from '@src/component/atoms/Button';
 
 export type CardProps = {
   className?: string;
@@ -12,15 +9,29 @@ export type CardProps = {
   color?: string;
   border?: string;
   padding?: string;
-  onClick?: ButtonProps['onClick'];
+  stopPropagate?: boolean;
 };
 
-const Component = ({ className, children, onClick }: CardProps) => {
-  if (onClick) {
+const Component = ({ className, children, stopPropagate = false }: CardProps) => {
+  if (stopPropagate) {
     return (
-      <Button scheme={'none'} fontSize={'medium'} className={className} onClick={onClick}>
+      <div
+        role={'button'}
+        className={className}
+        tabIndex={0}
+        onClick={(e) => {
+          // stopping propagation to prevent parent click event by default
+          e.stopPropagation();
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            // Enter or Space で実行
+            e.stopPropagation();
+          }
+        }}
+      >
         {children}
-      </Button>
+      </div>
     );
   }
   return <div className={className}>{children}</div>;

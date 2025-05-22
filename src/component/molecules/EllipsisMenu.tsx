@@ -59,7 +59,13 @@ const Component: FC<EllipsisMenuProps> = ({ className, children, scheme = 'surfa
       <Button className={className} onClick={handleClick} scheme={scheme} fontSize={fontSize} radius={'default'} width={'fit-content'}>
         <IoEllipsisHorizontal />
       </Button>
-      <Card className={`${className}__menuContent ${isOpen ? 'open' : ''}`} shadow={'medium'} border={theme.colors.border.light} padding={'8px'}>
+      <Card
+        className={`${className}__menuContent ${isOpen ? 'open' : ''}`}
+        shadow={'medium'}
+        border={theme.colors.border.light}
+        padding={'8px'}
+        stopPropagate={true}
+      >
         {children}
       </Card>
     </>
