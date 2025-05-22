@@ -1,21 +1,32 @@
 import styled from '@emotion/styled';
 
+import type { ButtonProps } from '@src/component/atoms/Button';
 import type { ReactNode } from 'react';
 
-export type CartProps = {
+import { Button } from '@src/component/atoms/Button';
+
+export type CardProps = {
   className?: string;
   children: ReactNode;
   shadow?: 'none' | 'small' | 'medium' | 'large';
   color?: string;
   border?: string;
   padding?: string;
+  onClick?: ButtonProps['onClick'];
 };
 
-const Component = ({ className, children }: CartProps) => {
+const Component = ({ className, children, onClick }: CardProps) => {
+  if (onClick) {
+    return (
+      <Button scheme={'none'} fontSize={'medium'} className={className} onClick={onClick}>
+        {children}
+      </Button>
+    );
+  }
   return <div className={className}>{children}</div>;
 };
 
-const shadowStyle = (props: CartProps) => {
+const shadowStyle = (props: CardProps) => {
   if (props.shadow === 'small') {
     return '0 2px 4px rgba(0, 0, 0, 0.1)';
   }

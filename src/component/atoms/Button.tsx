@@ -1,13 +1,14 @@
 import styled from '@emotion/styled';
+import React, { useCallback } from 'react';
 
 import type { FontSize } from '@src/styles/style';
-import type { ReactNode } from 'react';
+import type { MouseEventHandler, ReactNode } from 'react';
 
 import { colors, fontSizes } from '@src/styles/style';
 
 export type ButtonProps = {
   className?: string | undefined;
-  onClick: () => Promise<void> | void;
+  onClick: (() => Promise<void> | void) | MouseEventHandler<HTMLButtonElement>;
   scheme: 'primary' | 'surface' | 'warning' | 'none' | 'error' | 'secondary';
   fontSize: FontSize;
   width?: 'full' | 'fit-content';
@@ -17,14 +18,25 @@ export type ButtonProps = {
 };
 
 const Component = ({ className, onClick, scheme, children, disabled = false }: ButtonProps) => {
+  const handleClick = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      // stopping propagation to prevent parent click event by default
+      e.stopPropagation();
+      if (disabled) {
+        return;
+      }
+      onClick(e);
+    },
+    [disabled, onClick],
+  );
   return (
-    <button className={`${className} ${scheme}`} onClick={onClick} disabled={disabled}>
+    <button className={`${className} ${scheme}`} onClick={handleClick} disabled={disabled}>
       {children}
     </button>
   );
 };
 
-const ButtonHeight = (props: ButtonProps) => {
+export const ButtonHeight = (props: Pick<ButtonProps, 'fontSize' | 'scheme'>) => {
   if (props.scheme === 'none') {
     return 'fit-content';
   }
