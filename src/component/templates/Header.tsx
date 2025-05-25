@@ -11,6 +11,8 @@ import { Button } from '@src/component/atoms/Button';
 import { Divider } from '@src/component/atoms/Divider';
 import { FlexRow, InlineFlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
+import { EllipsisMenu } from '@src/component/molecules/EllipsisMenu';
+import { DesktopLayout, MobileLayout } from '@src/component/molecules/responsive';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { dimensions, fontSizes, fontWeights } from '@src/styles/style';
 
@@ -42,22 +44,31 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
         <Text text={title} fontSize={fontSizes.large2} fontWeight={fontWeights.bold} />
         {iconTitleEnd && <>{iconTitleEnd}</>}
         <div style={{ flex: 1 }} />
-        <InlineFlexRow align={'center'} gap={8} style={{ height: '100%' }} wrap={'nowrap'}>
-          {iconEnd && (
-            <>
+
+        {iconEnd && (
+          <DesktopLayout>
+            <InlineFlexRow align={'center'} gap={8} style={{ height: '100%' }} wrap={'nowrap'}>
               {iconEnd}
-              <Divider orientation={'vertical'} />
-            </>
-          )}
-          <InlineFlexRow align={'center'} gap={4} style={{ height: '100%' }} wrap={'nowrap'}>
-            <Button fontSize={'large2'} onClick={toggleTheme} scheme={'none'}>
-              {theme.colors.isLight ? <CiDark size={24} color={theme.colors.text} /> : <CiLight size={24} color={theme.colors.text} />}
-            </Button>
-            <Divider orientation={'vertical'} />
-            <Link href={'/login'} style={{ display: 'flex', alignItems: 'center' }}>
-              <CiUser size={24} color={theme.colors.text} />
-            </Link>
-          </InlineFlexRow>
+            </InlineFlexRow>
+          </DesktopLayout>
+        )}
+        {iconEnd && (
+          <MobileLayout>
+            <EllipsisMenu fontSize={'large2'} scheme={'none'}>
+              <EllipsisMenu.ContentRow>{iconEnd}</EllipsisMenu.ContentRow>
+            </EllipsisMenu>
+          </MobileLayout>
+        )}
+
+        <Divider orientation={'vertical'} />
+        <InlineFlexRow align={'center'} gap={4} style={{ height: '100%' }} wrap={'nowrap'}>
+          <Button fontSize={'large2'} onClick={toggleTheme} scheme={'none'}>
+            {theme.colors.isLight ? <CiDark size={24} color={theme.colors.text} /> : <CiLight size={24} color={theme.colors.text} />}
+          </Button>
+          <Divider orientation={'vertical'} />
+          <Link href={'/login'} style={{ display: 'flex', alignItems: 'center' }}>
+            <CiUser size={24} color={theme.colors.text} />
+          </Link>
         </InlineFlexRow>
       </FlexRow>
     </header>

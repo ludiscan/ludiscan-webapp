@@ -8,7 +8,7 @@ import type { FC, ReactNode, MouseEvent } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
 import { Card } from '@src/component/atoms/Card';
-import { InlineFlexColumn, InlineFlexRow } from '@src/component/atoms/Flex';
+import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { zIndexes } from '@src/styles/style';
 
@@ -62,12 +62,12 @@ const Component: FC<EllipsisMenuProps> = ({ className, children, scheme = 'surfa
     [closeMenu, isOpen, onClick, openMenu],
   );
   return (
-    <>
-      <Button className={className} onClick={handleClick} scheme={scheme} fontSize={fontSize} radius={'default'} width={'fit-content'}>
+    <div className={className}>
+      <Button onClick={handleClick} scheme={scheme} fontSize={fontSize} radius={'default'} width={'fit-content'}>
         <IoEllipsisHorizontal />
       </Button>
       <EllipsisMenuContext.Provider value={{ isOpen }}>{children}</EllipsisMenuContext.Provider>
-    </>
+    </div>
   );
 };
 
@@ -81,9 +81,9 @@ const ContentRowComponent: FC<EllipsisMenuContentProps> = ({ className, children
   const { isOpen } = useEllipsisMenuContext();
   return (
     <Card className={`${className} ${isOpen ? 'open' : ''}`} shadow={'medium'} border={theme.colors.border.light} padding={'8px'} stopPropagate={true}>
-      <InlineFlexRow align={'center'} gap={8}>
+      <FlexRow align={'center'} gap={8} wrap={'nowrap'}>
         {children}
-      </InlineFlexRow>
+      </FlexRow>
     </Card>
   );
 };
@@ -93,16 +93,16 @@ const ContentColumnComponent: FC<EllipsisMenuContentProps> = ({ className, child
   const { isOpen } = useEllipsisMenuContext();
   return (
     <Card className={`${className} ${isOpen ? 'open' : ''}`} shadow={'medium'} border={theme.colors.border.light} padding={'8px'} stopPropagate={true}>
-      <InlineFlexColumn align={'flex-start'} gap={8}>
+      <FlexColumn align={'flex-start'} gap={8} wrap={'nowrap'}>
         {children}
-      </InlineFlexColumn>
+      </FlexColumn>
     </Card>
   );
 };
 
 const ContentRow = styled(ContentRowComponent)`
   position: absolute;
-  left: 0;
+  right: 0;
   z-index: ${zIndexes.dropdown};
   display: none;
 
@@ -113,7 +113,6 @@ const ContentRow = styled(ContentRowComponent)`
 
 const ContentColumn = styled(ContentColumnComponent)`
   position: absolute;
-  left: 0;
   z-index: ${zIndexes.dropdown};
   display: none;
 
