@@ -23,15 +23,17 @@ const Template: Story = {
       // @ts-expect-error
       <SharedThemeProvider initialTheme={args.type === 'light' ? lightTheme : darkTheme}>
         <EllipsisMenu {...args}>
-          <Button fontSize={'small'} onClick={() => {}} scheme={'surface'}>
-            <Text text={'Discord'} fontWeight={'bold'} />
-          </Button>
-          <Button fontSize={'small'} onClick={() => {}} scheme={'surface'}>
-            <Text text={'Save'} fontWeight={'bold'} />
-          </Button>
-          <Button fontSize={'small'} onClick={() => {}} scheme={'primary'}>
-            <Text text={'Export'} fontWeight={'bold'} />
-          </Button>
+          <EllipsisMenu.ContentRow>
+            <Button fontSize={'small'} onClick={() => {}} scheme={'surface'}>
+              <Text text={'Discord'} fontWeight={'bold'} />
+            </Button>
+            <Button fontSize={'small'} onClick={() => {}} scheme={'surface'}>
+              <Text text={'Save'} fontWeight={'bold'} />
+            </Button>
+            <Button fontSize={'small'} onClick={() => {}} scheme={'primary'}>
+              <Text text={'Export'} fontWeight={'bold'} />
+            </Button>
+          </EllipsisMenu.ContentRow>
         </EllipsisMenu>
       </SharedThemeProvider>
     );
@@ -44,5 +46,45 @@ export const Default: Story = {
   args: {
     ...Template.args,
     fontSize: 'medium',
+  },
+};
+
+export const type1: Story = {
+  ...Template,
+  name: 'fontSize: small scheme: surface',
+  args: {
+    ...Template.args,
+    fontSize: 'medium',
+    scheme: 'none'
+  },
+};
+
+export const Column: Story = {
+  ...Template,
+  name: 'ContentColumn',
+  args: {
+    ...Template.args,
+    fontSize: 'medium',
+  },
+  render: (args) => {
+    return (
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      <SharedThemeProvider initialTheme={args.type === 'light' ? lightTheme : darkTheme}>
+        <EllipsisMenu {...args}>
+          <EllipsisMenu.ContentColumn>
+            <Button fontSize={'small'} onClick={() => {}} scheme={'surface'}>
+              <Text text={'Discord'} fontWeight={'bold'} />
+            </Button>
+            <Button fontSize={'small'} onClick={() => {}} scheme={'surface'}>
+              <Text text={'Save'} fontWeight={'bold'} />
+            </Button>
+            <Button fontSize={'small'} onClick={() => {}} scheme={'primary'}>
+              <Text text={'Export'} fontWeight={'bold'} />
+            </Button>
+          </EllipsisMenu.ContentColumn>
+        </EllipsisMenu>
+      </SharedThemeProvider>
+    );
   },
 };
