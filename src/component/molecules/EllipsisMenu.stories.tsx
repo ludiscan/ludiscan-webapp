@@ -55,7 +55,7 @@ export const type1: Story = {
   args: {
     ...Template.args,
     fontSize: 'medium',
-    scheme: 'none'
+    scheme: 'none',
   },
 };
 
