@@ -2,20 +2,42 @@ import styled from '@emotion/styled';
 
 import type { ReactNode } from 'react';
 
-export type CartProps = {
+export type CardProps = {
   className?: string;
   children: ReactNode;
   shadow?: 'none' | 'small' | 'medium' | 'large';
   color?: string;
   border?: string;
   padding?: string;
+  stopPropagate?: boolean;
 };
 
-const Component = ({ className, children }: CartProps) => {
+const Component = ({ className, children, stopPropagate = false }: CardProps) => {
+  if (stopPropagate) {
+    return (
+      <div
+        role={'button'}
+        className={className}
+        tabIndex={0}
+        onClick={(e) => {
+          // stopping propagation to prevent parent click event by default
+          e.stopPropagation();
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            // Enter or Space で実行
+            e.stopPropagation();
+          }
+        }}
+      >
+        {children}
+      </div>
+    );
+  }
   return <div className={className}>{children}</div>;
 };
 
-const shadowStyle = (props: CartProps) => {
+const shadowStyle = (props: CardProps) => {
   if (props.shadow === 'small') {
     return '0 2px 4px rgba(0, 0, 0, 0.1)';
   }

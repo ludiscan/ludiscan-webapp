@@ -1,15 +1,17 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
 import { HeatMapViewer } from './HeatmapViewer';
 
 import type { Env } from '@src/modeles/env';
 import type { HeatmapTask } from '@src/modeles/heatmaptask';
+import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { GetServerSideProps } from 'next';
 import type { FC } from 'react';
 
+import { Button } from '@src/component/atoms/Button';
 import { Text } from '@src/component/atoms/Text';
 import { Header } from '@src/component/templates/Header';
 import { useAuth } from '@src/hooks/useAuth';
@@ -39,6 +41,38 @@ export const getServerSideProps: GetServerSideProps<HeatMapTaskIdPageProps> = as
       taskId: params.task_id as string,
     },
   };
+};
+
+export type HeatmapIdPageLayoutProps = {
+  className?: string;
+  version: string;
+  service: HeatmapDataService;
+};
+
+export const HeatmapIdPageLayout: FC<HeatmapIdPageLayoutProps> = ({ className, version, service }) => {
+  const task = useMemo(() => service.getTask(), [service]);
+  return (
+    <InnerContent>
+      <Header
+        title={'Heatmap'}
+        iconTitleEnd={<Text className={`${className}__headerV`} text={`v${version || 'debug'}`} fontSize={fontSizes.small} fontWeight={'bold'} />}
+        iconEnd={
+          <>
+            <Button fontSize={'small'} onClick={() => {}} scheme={'surface'}>
+              <Text text={'Discord'} fontWeight={'bold'} />
+            </Button>
+            <Button fontSize={'small'} onClick={() => {}} scheme={'surface'}>
+              <Text text={'Save'} fontWeight={'bold'} />
+            </Button>
+            <Button fontSize={'small'} onClick={() => {}} scheme={'primary'}>
+              <Text text={'Export'} fontWeight={'bold'} />
+            </Button>
+          </>
+        }
+      />
+      <div className={className}>{task?.status === 'completed' && service && service.isInitialized && <HeatMapViewer dataService={service} />}</div>
+    </InnerContent>
+  );
 };
 
 const Component: FC<HeatMapTaskIdPageProps> = ({ className, env, taskId }) => {
@@ -92,15 +126,7 @@ const Component: FC<HeatMapTaskIdPageProps> = ({ className, env, taskId }) => {
     return <div>Invalid Task ID</div>;
   }
 
-  return (
-    <InnerContent>
-      <Header
-        title={'Heatmap'}
-        iconTitleEnd={<Text className={`${className}__headerV`} text={`v${version || 'debug'}`} fontSize={fontSizes.small} fontWeight={'bold'} />}
-      />
-      <div className={className}>{task?.status === 'completed' && service && service.isInitialized && <HeatMapViewer dataService={service} />}</div>
-    </InnerContent>
-  );
+  return <HeatmapIdPageLayout className={className} service={service} version={version || '---'} />;
 };
 
 export const HeatMapTaskIdPage = styled(Component)`

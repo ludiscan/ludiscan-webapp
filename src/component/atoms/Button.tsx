@@ -1,29 +1,42 @@
 import styled from '@emotion/styled';
+import React, { useCallback } from 'react';
 
 import type { FontSize } from '@src/styles/style';
-import type { ReactNode } from 'react';
+import type { MouseEventHandler, ReactNode } from 'react';
 
 import { colors, fontSizes } from '@src/styles/style';
 
 export type ButtonProps = {
   className?: string | undefined;
-  onClick: () => Promise<void> | void;
+  onClick: (() => Promise<void> | void) | MouseEventHandler<HTMLButtonElement>;
   scheme: 'primary' | 'surface' | 'warning' | 'none' | 'error' | 'secondary';
   fontSize: FontSize;
   width?: 'full' | 'fit-content';
+  radius?: 'small' | 'default';
   children: ReactNode;
   disabled?: boolean | undefined;
 };
 
 const Component = ({ className, onClick, scheme, children, disabled = false }: ButtonProps) => {
+  const handleClick = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      // stopping propagation to prevent parent click event by default
+      e.stopPropagation();
+      if (disabled) {
+        return;
+      }
+      onClick(e);
+    },
+    [disabled, onClick],
+  );
   return (
-    <button className={`${className} ${scheme}`} onClick={onClick} disabled={disabled}>
+    <button className={`${className} ${scheme}`} onClick={handleClick} disabled={disabled}>
       {children}
     </button>
   );
 };
 
-const ButtonHeight = (props: ButtonProps) => {
+export const ButtonHeight = (props: Pick<ButtonProps, 'fontSize' | 'scheme'>) => {
   if (props.scheme === 'none') {
     return 'fit-content';
   }
@@ -65,7 +78,7 @@ const ButtonPadding = (props: ButtonProps) => {
     return '0 12px';
   }
   if (props.fontSize === 'small') {
-    return '0 12px';
+    return '0 14px';
   }
   if (props.fontSize === 'medium') {
     return '0 16px';
@@ -75,22 +88,22 @@ const ButtonPadding = (props: ButtonProps) => {
 
 const ButtonBorderRadius = (props: ButtonProps) => {
   if (props.fontSize === 'small') {
-    return '16px';
+    return props.radius === 'default' ? '16px' : '8px';
   }
   if (props.fontSize === 'medium') {
-    return '18px';
+    return props.radius === 'default' ? '18px' : '9px';
   }
   if (props.fontSize === 'large1') {
-    return '20px';
+    return props.radius === 'default' ? '20px' : '10px';
   }
   if (props.fontSize === 'large2') {
-    return '22px';
+    return props.radius === 'default' ? '22px' : '11px';
   }
   if (props.fontSize === 'large3') {
-    return '24px';
+    return props.radius === 'default' ? '24px' : '12px';
   }
   if (props.fontSize === 'largest') {
-    return '26px';
+    return props.radius === 'default' ? '26px' : '13px';
   }
   return '18px';
 };
