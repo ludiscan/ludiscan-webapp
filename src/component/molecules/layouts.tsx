@@ -8,18 +8,16 @@ const Component: FC<{ desktop: ReactNode; mobile: ReactNode }> = ({ desktop, mob
   const [isDesktopLayout, setIsDesktopLayout] = useState(true);
 
   const matchMedia = useCallback(() => {
-    if (window.matchMedia(`(max-width: ${dimensions.mobileWidth}px)`).matches) {
+    if (typeof window !== 'undefined' && window.matchMedia(`(max-width: ${dimensions.mobileWidth}px)`).matches) {
       setIsDesktopLayout(false);
     } else {
       setIsDesktopLayout(true);
     }
   }, []);
   useEffect(() => {
-    document.addEventListener('DOMContentLoaded', matchMedia);
     window.addEventListener('resize', matchMedia);
     matchMedia();
     return () => {
-      document.removeEventListener('DOMContentLoaded', matchMedia);
       window.removeEventListener('resize', matchMedia);
     };
   }, [matchMedia]);
