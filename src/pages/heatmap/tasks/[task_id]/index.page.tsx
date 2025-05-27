@@ -46,16 +46,18 @@ export const getServerSideProps: GetServerSideProps<HeatMapTaskIdPageProps> = as
 export type HeatmapIdPageLayoutProps = {
   className?: string;
   version: string;
+  onBackClick?: () => void;
   service: HeatmapDataService;
 };
 
-export const HeatmapIdPageLayout: FC<HeatmapIdPageLayoutProps> = ({ className, version, service }) => {
+export const HeatmapIdPageLayout: FC<HeatmapIdPageLayoutProps> = ({ className, version, service, onBackClick }) => {
   const task = useMemo(() => service.getTask(), [service]);
   return (
     <InnerContent>
       <Header
         title={'Heatmap'}
-        iconTitleEnd={<Text className={`${className}__headerV`} text={`v${version || 'debug'}`} fontSize={fontSizes.small} fontWeight={'bold'} />}
+        onClick={onBackClick}
+        iconTitleEnd={<Text className={`${className}__headerV`} text={`${version || 'debug'}`} fontSize={fontSizes.small} fontWeight={'bold'} />}
         iconEnd={
           <>
             <Button fontSize={'small'} onClick={() => {}} scheme={'surface'}>
@@ -126,7 +128,7 @@ const Component: FC<HeatMapTaskIdPageProps> = ({ className, env, taskId }) => {
     return <div>Invalid Task ID</div>;
   }
 
-  return <HeatmapIdPageLayout className={className} service={service} version={version || '---'} />;
+  return <HeatmapIdPageLayout className={className} service={service} version={version ? `v${version}` : '---'} />;
 };
 
 export const HeatMapTaskIdPage = styled(Component)`
