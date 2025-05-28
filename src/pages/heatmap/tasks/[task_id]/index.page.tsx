@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { HeatMapViewer } from './HeatmapViewer';
 
@@ -98,6 +98,10 @@ const Component: FC<HeatMapTaskIdPageProps> = ({ className, env, taskId }) => {
     initialData: null,
   });
 
+  const handleBackClick = useCallback(() => {
+    router.back();
+  }, [router]);
+
   const service = useOnlineHeatmapDataService(env, task);
 
   useEffect(() => {
@@ -106,7 +110,7 @@ const Component: FC<HeatMapTaskIdPageProps> = ({ className, env, taskId }) => {
     if (task.status === 'pending' || task.status === 'processing') {
       timer.current = setInterval(() => {
         refetchTask();
-      }, 700);
+      }, 200);
     }
   }, [refetchTask, task]);
 
@@ -128,7 +132,7 @@ const Component: FC<HeatMapTaskIdPageProps> = ({ className, env, taskId }) => {
     return <div>Invalid Task ID</div>;
   }
 
-  return <HeatmapIdPageLayout className={className} service={service} version={version ? `v${version}` : '---'} />;
+  return <HeatmapIdPageLayout className={className} service={service} version={version ? `v${version}` : '---'} onBackClick={handleBackClick} />;
 };
 
 export const HeatMapTaskIdPage = styled(Component)`
