@@ -110,17 +110,14 @@ const Component: FC<HeatMapTaskIdPageProps> = ({ className, env, taskId }) => {
     if (task.status === 'pending' || task.status === 'processing') {
       timer.current = setInterval(() => {
         refetchTask();
-      }, 200);
+      }, 500);
     }
-  }, [refetchTask, task]);
-
-  useEffect(() => {
     return () => {
       if (timer.current) {
         clearInterval(timer.current);
       }
     };
-  }, []);
+  }, [refetchTask, task]);
 
   useEffect(() => {
     if (!isAuthorized && !isLoading && ready) {
