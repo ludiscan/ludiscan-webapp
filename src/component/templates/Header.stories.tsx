@@ -3,9 +3,6 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { Button } from '@src/component/atoms/Button';
 import { Text } from '@src/component/atoms/Text';
 import { Header } from '@src/component/templates/Header';
-import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
-import darkTheme from '@src/styles/dark';
-import lightTheme from '@src/styles/light';
 
 export default {
   component: Header,
@@ -16,13 +13,7 @@ type Story = StoryObj<typeof Header>;
 
 const Template: Story = {
   render: (args) => {
-    return (
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      <SharedThemeProvider initialTheme={args.type === 'light' ? lightTheme : darkTheme}>
-        <Header {...args} />
-      </SharedThemeProvider>
-    );
+    return <Header {...args} />;
   },
 };
 
@@ -50,18 +41,14 @@ export const AddIconTitleEnd: Story = {
   },
   render: (args) => {
     return (
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      <SharedThemeProvider initialTheme={args.type === 'light' ? lightTheme : darkTheme}>
-        <Header
-          {...args}
-          iconTitleEnd={
-            <Button onClick={() => {}} fontSize={'medium'} scheme={'primary'} width={'fit-content'}>
-              <Text text={'Add'} />
-            </Button>
-          }
-        />
-      </SharedThemeProvider>
+      <Header
+        {...args}
+        iconTitleEnd={
+          <Button onClick={() => {}} fontSize={'medium'} scheme={'primary'} width={'fit-content'}>
+            <Text text={'Add'} />
+          </Button>
+        }
+      />
     );
   },
 };

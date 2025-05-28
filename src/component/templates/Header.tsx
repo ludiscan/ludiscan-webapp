@@ -1,8 +1,9 @@
 import styled from '@emotion/styled';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
 import { CiUser, CiLight, CiDark } from 'react-icons/ci';
 import { FiChevronLeft } from 'react-icons/fi';
+import { MdLogin } from 'react-icons/md';
 
 import type { FC, ReactNode } from 'react';
 
@@ -10,8 +11,10 @@ import { Button } from '@src/component/atoms/Button';
 import { Divider } from '@src/component/atoms/Divider';
 import { FlexRow, InlineFlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
-import { EllipsisMenu } from '@src/component/molecules/EllipsisMenu';
+import { IconLabelRow } from '@src/component/molecules/IconLabelRow';
+import { EllipsisMenu, Menu } from '@src/component/molecules/Menu';
 import { DesktopLayout, MobileLayout } from '@src/component/molecules/responsive';
+import { useAuth } from '@src/hooks/useAuth';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { dimensions, fontSizes, fontWeights } from '@src/styles/style';
 
@@ -27,11 +30,18 @@ export type HeaderProps = {
 const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, iconEnd, isOffline = false }) => {
   const { theme, toggleTheme } = useSharedTheme();
 
+  const { isAuthorized, logout } = useAuth();
+  const router = useRouter();
+
   const backIconHandle = useCallback(() => {
     if (onClick) {
       onClick();
     }
   }, [onClick]);
+  const handleLogout = useCallback(async () => {
+    await logout();
+    router.push('/');
+  }, [logout, router]);
   return (
     <header className={className}>
       <FlexRow align={'center'} gap={12} className={`${className}__innerHeader`} wrap={'nowrap'}>
@@ -54,7 +64,7 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
         {iconEnd && (
           <MobileLayout>
             <EllipsisMenu fontSize={'large2'} scheme={'none'}>
-              <EllipsisMenu.ContentRow>{iconEnd}</EllipsisMenu.ContentRow>
+              <Menu.ContentRow>{iconEnd}</Menu.ContentRow>
             </EllipsisMenu>
           </MobileLayout>
         )}
@@ -64,11 +74,20 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
           <Button fontSize={'large2'} onClick={toggleTheme} scheme={'none'}>
             {theme.colors.isLight ? <CiDark size={24} color={theme.colors.text} /> : <CiLight size={24} color={theme.colors.text} />}
           </Button>
-          <Divider orientation={'vertical'} />
           {!isOffline && (
-            <Link href={'/login'} style={{ display: 'flex', alignItems: 'center' }}>
-              <CiUser size={24} color={theme.colors.text} />
-            </Link>
+            <>
+              <Divider orientation={'vertical'} />
+              {isAuthorized ? (
+                <Menu fontSize={'large2'} scheme={'none'} icon={<CiUser size={24} color={theme.colors.text} />}>
+                  <Menu.ContentColumn gap={4}>
+                    <Divider orientation={'horizontal'} margin={'0'} />
+                    <IconLabelRow className={`${className}__iconLabelRow`} label={'Logout'} icon={<MdLogin />} onClick={handleLogout} />
+                  </Menu.ContentColumn>
+                </Menu>
+              ) : (
+                <Text text={'Sign in'} href={'/login'} target={'_self'} fontSize={fontSizes.medium} fontWeight={fontWeights.bold} />
+              )}
+            </>
           )}
         </InlineFlexRow>
       </FlexRow>
@@ -89,5 +108,9 @@ export const Header = styled(Component)`
     width: 100%;
     padding: 16px;
     margin: 0 auto;
+  }
+
+  &__iconLabelRow {
+    padding: 0 2px;
   }
 `;

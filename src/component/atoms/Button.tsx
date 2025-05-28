@@ -1,8 +1,9 @@
 import styled from '@emotion/styled';
 import React, { useCallback } from 'react';
+import { IconContext } from 'react-icons';
 
 import type { FontSize } from '@src/styles/style';
-import type { MouseEventHandler, ReactNode } from 'react';
+import type { MouseEventHandler, ReactNode, FC } from 'react';
 
 import { colors, fontSizes } from '@src/styles/style';
 
@@ -17,7 +18,32 @@ export type ButtonProps = {
   disabled?: boolean | undefined;
 };
 
-const Component = ({ className, onClick, scheme, children, disabled = false }: ButtonProps) => {
+export const ButtonIconSize = (props: Pick<ButtonProps, 'fontSize'>) => {
+  if (props.fontSize === 'smallest') {
+    return '14px';
+  }
+  if (props.fontSize === 'small') {
+    return '16px';
+  }
+  if (props.fontSize === 'medium') {
+    return '18px';
+  }
+  if (props.fontSize === 'large1') {
+    return '20px';
+  }
+  if (props.fontSize === 'large2') {
+    return '22px';
+  }
+  if (props.fontSize === 'large3') {
+    return '24px';
+  }
+  if (props.fontSize === 'largest') {
+    return '26px';
+  }
+};
+
+const Component: FC<ButtonProps> = (props) => {
+  const { className, onClick, scheme, children, disabled = false } = props;
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       // stopping propagation to prevent parent click event by default
@@ -30,9 +56,11 @@ const Component = ({ className, onClick, scheme, children, disabled = false }: B
     [disabled, onClick],
   );
   return (
-    <button className={`${className} ${scheme}`} onClick={handleClick} disabled={disabled}>
-      {children}
-    </button>
+    <IconContext.Provider value={{ size: ButtonIconSize(props) }}>
+      <button className={`${className} ${scheme}`} onClick={handleClick} disabled={disabled}>
+        {children}
+      </button>
+    </IconContext.Provider>
   );
 };
 
