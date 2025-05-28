@@ -132,6 +132,6 @@ export const Menu = styled(Component)`
 Menu.ContentRow = ContentRow;
 Menu.ContentColumn = ContentColumn;
 
-export const EllipsisMenu: FC<Exclude<MenuProps, 'icon'>> = (props) => {
+export const EllipsisMenu: FC<Omit<MenuProps, 'icon'>> = (props) => {
   return <Menu {...props} icon={<IoEllipsisHorizontal />} />;
 };

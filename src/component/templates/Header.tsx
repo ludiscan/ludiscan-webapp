@@ -10,7 +10,7 @@ import { Button } from '@src/component/atoms/Button';
 import { Divider } from '@src/component/atoms/Divider';
 import { FlexRow, InlineFlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
-import { EllipsisMenu } from '@src/component/molecules/EllipsisMenu';
+import { EllipsisMenu, Menu } from '@src/component/molecules/Menu';
 import { DesktopLayout, MobileLayout } from '@src/component/molecules/responsive';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { dimensions, fontSizes, fontWeights } from '@src/styles/style';
@@ -54,7 +54,7 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
         {iconEnd && (
           <MobileLayout>
             <EllipsisMenu fontSize={'large2'} scheme={'none'}>
-              <EllipsisMenu.ContentRow>{iconEnd}</EllipsisMenu.ContentRow>
+              <Menu.ContentRow>{iconEnd}</Menu.ContentRow>
             </EllipsisMenu>
           </MobileLayout>
         )}
