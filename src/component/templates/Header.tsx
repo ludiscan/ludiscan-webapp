@@ -1,6 +1,5 @@
 import styled from '@emotion/styled';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
 import { CiUser, CiLight, CiDark } from 'react-icons/ci';
 import { FiChevronLeft } from 'react-icons/fi';
@@ -21,26 +20,26 @@ export type HeaderProps = {
   iconTitleEnd?: ReactNode;
   title: string;
   iconEnd?: ReactNode;
+  isOffline?: boolean;
   onClick?: () => void | Promise<void>;
 };
 
-const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, iconEnd }) => {
+const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, iconEnd, isOffline = false }) => {
   const { theme, toggleTheme } = useSharedTheme();
 
-  const router = useRouter();
   const backIconHandle = useCallback(() => {
     if (onClick) {
       onClick();
-    } else {
-      router.back();
     }
-  }, [onClick, router]);
+  }, [onClick]);
   return (
     <header className={className}>
       <FlexRow align={'center'} gap={12} className={`${className}__innerHeader`} wrap={'nowrap'}>
-        <Button fontSize={'large2'} onClick={backIconHandle} scheme={'none'}>
-          <FiChevronLeft />
-        </Button>
+        {onClick && (
+          <Button fontSize={'large2'} onClick={backIconHandle} scheme={'none'}>
+            <FiChevronLeft />
+          </Button>
+        )}
         <Text text={title} fontSize={fontSizes.large2} fontWeight={fontWeights.bold} />
         {iconTitleEnd && <>{iconTitleEnd}</>}
         <div style={{ flex: 1 }} />
@@ -66,9 +65,11 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
             {theme.colors.isLight ? <CiDark size={24} color={theme.colors.text} /> : <CiLight size={24} color={theme.colors.text} />}
           </Button>
           <Divider orientation={'vertical'} />
-          <Link href={'/login'} style={{ display: 'flex', alignItems: 'center' }}>
-            <CiUser size={24} color={theme.colors.text} />
-          </Link>
+          {!isOffline && (
+            <Link href={'/login'} style={{ display: 'flex', alignItems: 'center' }}>
+              <CiUser size={24} color={theme.colors.text} />
+            </Link>
+          )}
         </InlineFlexRow>
       </FlexRow>
     </header>
@@ -88,10 +89,5 @@ export const Header = styled(Component)`
     width: 100%;
     padding: 16px;
     margin: 0 auto;
-
-    /* stylelint-disable media-query-no-invalid */
-    @media (max-width: ${dimensions.mobileWidth}px) {
-      display: none;
-    }
   }
 `;

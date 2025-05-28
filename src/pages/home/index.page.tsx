@@ -17,9 +17,11 @@ import { FlexColumn } from '@src/component/atoms/Flex';
 import { Observer } from '@src/component/atoms/Observer';
 import { VerticalSpacer } from '@src/component/atoms/Spacer';
 import { Text } from '@src/component/atoms/Text';
+import { Header } from '@src/component/templates/Header';
 import { useAuth } from '@src/hooks/useAuth';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { createClient } from '@src/modeles/qeury';
+import { InnerContent } from '@src/pages/_app.page';
 import { fontSizes, fontWeights } from '@src/styles/style';
 
 const fetchCount = 20;
@@ -80,6 +82,10 @@ const Component: FC<HomePageProps> = ({ className, env }) => {
   );
   const { theme } = useSharedTheme();
 
+  const handleBack = useCallback(() => {
+    router.back();
+  }, [router]);
+
   useEffect(() => {
     if (!isAuthorized && !isLoading && ready) {
       return router.replace('/');
@@ -87,37 +93,40 @@ const Component: FC<HomePageProps> = ({ className, env }) => {
   }, [isAuthorized, isLoading, router, ready]);
   return (
     <div className={className}>
-      <Text text={'Home'} fontSize={fontSizes.largest} color={theme.colors.text} fontWeight={fontWeights.bolder} />
-      <VerticalSpacer size={24} />
-      <Card className={`${className}__card`} shadow={'medium'} color={theme.colors.surface.main} border={theme.colors.border.main}>
-        <FlexColumn gap={20}>
-          <Text text={'Projects'} fontSize={fontSizes.large1} color={theme.colors.secondary.main} fontWeight={fontWeights.bold} />
-          {!isErrorProjects &&
-            !isLoadingProjects &&
-            projects?.pages?.map((page, i) => (
-              <ol key={i} className={`${className}__nolist`}>
-                {page &&
-                  page.map((project) => (
-                    <li key={project.id} className={`${className}__listItem`}>
-                      <FlexColumn>
-                        <Button onClick={() => onProjectClick(project.id)} scheme={'none'} fontSize={'medium'} width={'full'}>
-                          <ProjectItemRow key={project.id} project={project} />
-                        </Button>
-                        <div className={`${className}__selectProjectDetail ${selectedProject === project.id ? 'active' : ''}`}>
-                          {selectedProject === project.id && (
-                            <Card key={project.id} shadow={'large'} color={'transparent'}>
-                              <SelectProjectDetail project={project} env={env} />
-                            </Card>
-                          )}
-                        </div>
-                      </FlexColumn>
-                    </li>
-                  ))}
-                {hasNextPageProjects && !isLoadingProjects && <Observer callback={fetchNextPageProjects} />}
-              </ol>
-            ))}
-        </FlexColumn>
-      </Card>
+      <InnerContent>
+        <Header title={'Heatmap'} onClick={handleBack} />
+        <Text text={'Home'} fontSize={fontSizes.largest} color={theme.colors.text} fontWeight={fontWeights.bolder} />
+        <VerticalSpacer size={24} />
+        <Card className={`${className}__card`} shadow={'medium'} color={theme.colors.surface.main} border={theme.colors.border.main}>
+          <FlexColumn gap={20}>
+            <Text text={'Projects'} fontSize={fontSizes.large1} color={theme.colors.secondary.main} fontWeight={fontWeights.bold} />
+            {!isErrorProjects &&
+              !isLoadingProjects &&
+              projects?.pages?.map((page, i) => (
+                <ol key={i} className={`${className}__nolist`}>
+                  {page &&
+                    page.map((project) => (
+                      <li key={project.id} className={`${className}__listItem`}>
+                        <FlexColumn>
+                          <Button onClick={() => onProjectClick(project.id)} scheme={'none'} fontSize={'medium'} width={'full'}>
+                            <ProjectItemRow key={project.id} project={project} />
+                          </Button>
+                          <div className={`${className}__selectProjectDetail ${selectedProject === project.id ? 'active' : ''}`}>
+                            {selectedProject === project.id && (
+                              <Card key={project.id} shadow={'large'} color={'transparent'}>
+                                <SelectProjectDetail project={project} env={env} />
+                              </Card>
+                            )}
+                          </div>
+                        </FlexColumn>
+                      </li>
+                    ))}
+                  {hasNextPageProjects && !isLoadingProjects && <Observer callback={fetchNextPageProjects} />}
+                </ol>
+              ))}
+          </FlexColumn>
+        </Card>
+      </InnerContent>
     </div>
   );
 };

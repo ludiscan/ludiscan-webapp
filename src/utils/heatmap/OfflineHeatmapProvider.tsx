@@ -7,12 +7,15 @@ import type { OfflineHeatmapData } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
+import { Text } from '@src/component/atoms/Text';
 import { Modal } from '@src/component/molecules/Modal';
+import { Header } from '@src/component/templates/Header';
 import { ToastProvider } from '@src/component/templates/ToastContext';
 import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
 import { HeatMapViewer } from '@src/pages/heatmap/tasks/[task_id]/HeatmapViewer';
 import { store } from '@src/store';
 import lightTheme from '@src/styles/light';
+import { fontSizes } from '@src/styles/style';
 import { useOfflineHeatmapDataService } from '@src/utils/heatmap/useOfflineHeatmapDataService';
 
 // Providerプロパティ
@@ -29,7 +32,7 @@ export const Component: FC<OfflineHeatmapProviderProps> = ({ className }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   // オフライン用のデータサービスを作成
-  const dataService = useOfflineHeatmapDataService(data);
+  const service = useOfflineHeatmapDataService(data);
 
   const loadData = useCallback(async (file: File | undefined) => {
     if (!file) return;
@@ -104,7 +107,26 @@ export const Component: FC<OfflineHeatmapProviderProps> = ({ className }) => {
                 </Button>
               </div>
             </Modal>
-            {data && !isLoading && <HeatMapViewer dataService={dataService} />}
+            <Header
+              title={'Heatmap'}
+              onClick={() => {}}
+              isOffline={true}
+              iconTitleEnd={<Text className={`${className}__headerV`} text={'offline'} fontSize={fontSizes.small} fontWeight={'bold'} />}
+              iconEnd={
+                <>
+                  <Button fontSize={'small'} onClick={() => {}} scheme={'surface'}>
+                    <Text text={'Discord'} fontWeight={'bold'} />
+                  </Button>
+                  <Button fontSize={'small'} onClick={() => {}} scheme={'surface'}>
+                    <Text text={'Save'} fontWeight={'bold'} />
+                  </Button>
+                  <Button fontSize={'small'} onClick={() => {}} scheme={'primary'}>
+                    <Text text={'Export'} fontWeight={'bold'} />
+                  </Button>
+                </>
+              }
+            />
+            {data && !isLoading && service && service.isInitialized && <HeatMapViewer dataService={service} />}
           </SharedThemeProvider>
         </QueryClientProvider>
       </ToastProvider>
