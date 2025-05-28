@@ -13,6 +13,7 @@ import type { FC } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
 import { Text } from '@src/component/atoms/Text';
+import { StatusContent } from '@src/component/molecules/StatusContent';
 import { Header } from '@src/component/templates/Header';
 import { useAuth } from '@src/hooks/useAuth';
 import { useCanvasState } from '@src/hooks/useCanvasState';
@@ -52,6 +53,11 @@ export type HeatmapIdPageLayoutProps = {
 
 export const HeatmapIdPageLayout: FC<HeatmapIdPageLayoutProps> = ({ className, version, service, onBackClick }) => {
   const task = useMemo(() => service.getTask(), [service]);
+
+  const statusContentStatus = useMemo(() => {
+    if (!task) return 'loading';
+    return task.status === 'completed' ? 'success' : task.status === 'failed' ? 'error' : 'loading';
+  }, [task]);
   return (
     <InnerContent>
       <Header
@@ -72,7 +78,9 @@ export const HeatmapIdPageLayout: FC<HeatmapIdPageLayoutProps> = ({ className, v
           </>
         }
       />
-      <div className={className}>{task?.status === 'completed' && service && service.isInitialized && <HeatMapViewer dataService={service} />}</div>
+      <StatusContent className={className} status={statusContentStatus}>
+        {task?.status === 'completed' && service && service.isInitialized && <HeatMapViewer dataService={service} />}
+      </StatusContent>
     </InnerContent>
   );
 };
@@ -110,17 +118,14 @@ const Component: FC<HeatMapTaskIdPageProps> = ({ className, env, taskId }) => {
     if (task.status === 'pending' || task.status === 'processing') {
       timer.current = setInterval(() => {
         refetchTask();
-      }, 200);
+      }, 500);
     }
-  }, [refetchTask, task]);
-
-  useEffect(() => {
     return () => {
       if (timer.current) {
         clearInterval(timer.current);
       }
     };
-  }, []);
+  }, [refetchTask, task]);
 
   useEffect(() => {
     if (!isAuthorized && !isLoading && ready) {
