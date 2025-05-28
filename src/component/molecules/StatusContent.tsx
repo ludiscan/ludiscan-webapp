@@ -14,12 +14,28 @@ export type StatusContentProps = {
   onRetry?: () => void;
 };
 
+const spin = keyframes`
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+`;
+
+const Spinner = styled.div`
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgb(255 255 255 / 30%);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: ${spin} 1s linear infinite;
+`;
+
 const Component: FC<StatusContentProps> = ({ className, status, errorMessage, children, onRetry }) => {
   switch (status) {
     case 'loading':
       return (
         <div className={className}>
-          <Spinner />
+          <div className={`${className}__content`}>
+            <Spinner />
+          </div>
         </div>
       );
 
@@ -44,28 +60,16 @@ const Component: FC<StatusContentProps> = ({ className, status, errorMessage, ch
   }
 };
 
-const spin = keyframes`
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-`;
-
-const Spinner = styled.div`
-  width: 48px;
-  height: 48px;
-  border: 4px solid rgb(255 255 255 / 30%);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: ${spin} 1s linear infinite;
-`;
-
 export const StatusContent = styled(Component)`
-  position: fixed;
-  top: 0;
-  left: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  background-color: rgb(0 0 0 / 40%);
+  &__content {
+    position: relative;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(0 0 0 / 40%);
+  }
 `;
