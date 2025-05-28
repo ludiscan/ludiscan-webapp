@@ -12,8 +12,9 @@ import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { zIndexes } from '@src/styles/style';
 
-export type EllipsisMenuProps = Pick<ButtonProps, 'fontSize' | 'scheme'> & {
+export type MenuProps = Pick<ButtonProps, 'fontSize' | 'scheme'> & {
   className?: string | undefined;
+  icon: ReactNode;
   children: ReactNode;
   onClick?: ButtonProps['onClick'];
 };
@@ -22,7 +23,7 @@ export const EllipsisMenuContext = createContext<{ isOpen: boolean }>({ isOpen: 
 
 export const useEllipsisMenuContext = () => useContext(EllipsisMenuContext);
 
-const Component: FC<EllipsisMenuProps> = ({ className, children, scheme = 'surface', fontSize = 'medium', onClick }) => {
+const Component: FC<MenuProps> = ({ className, icon, children, scheme = 'surface', fontSize = 'medium', onClick }) => {
   const [isOpen, setIsOpen] = useState(false);
   const closeMenu = useCallback(() => {
     setIsOpen(false);
@@ -64,7 +65,7 @@ const Component: FC<EllipsisMenuProps> = ({ className, children, scheme = 'surfa
   return (
     <div className={className}>
       <Button onClick={handleClick} scheme={scheme} fontSize={fontSize} radius={'default'} width={'fit-content'}>
-        <IoEllipsisHorizontal />
+        {icon}
       </Button>
       <EllipsisMenuContext.Provider value={{ isOpen }}>{children}</EllipsisMenuContext.Provider>
     </div>
@@ -102,7 +103,6 @@ const ContentColumnComponent: FC<EllipsisMenuContentProps> = ({ className, child
 
 const ContentRow = styled(ContentRowComponent)`
   position: absolute;
-  right: 0;
   z-index: ${zIndexes.dropdown};
   display: none;
 
@@ -121,13 +121,17 @@ const ContentColumn = styled(ContentColumnComponent)`
   }
 `;
 
-type EllipsisMenuType = StyledComponent<EllipsisMenuProps> & {
+type EllipsisMenuType = StyledComponent<MenuProps> & {
   ContentRow: typeof ContentRow;
   ContentColumn: typeof ContentColumn;
 };
 
-export const EllipsisMenu = styled(Component)`
+export const Menu = styled(Component)`
   position: relative;
 ` as EllipsisMenuType;
-EllipsisMenu.ContentRow = ContentRow;
-EllipsisMenu.ContentColumn = ContentColumn;
+Menu.ContentRow = ContentRow;
+Menu.ContentColumn = ContentColumn;
+
+export const EllipsisMenu: FC<Exclude<MenuProps, 'icon'>> = (props) => {
+  return <Menu {...props} icon={<IoEllipsisHorizontal />} />;
+};
