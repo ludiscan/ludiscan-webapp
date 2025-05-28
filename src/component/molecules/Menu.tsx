@@ -74,27 +74,29 @@ const Component: FC<MenuProps> = ({ className, icon, children, scheme = 'surface
 
 export type EllipsisMenuContentProps = {
   className?: string | undefined;
+  align?: 'left' | 'right';
+  gap?: number;
   children: ReactNode;
 };
 
-const ContentRowComponent: FC<EllipsisMenuContentProps> = ({ className, children }) => {
+const ContentRowComponent: FC<EllipsisMenuContentProps> = ({ className, gap, children }) => {
   const { theme } = useSharedTheme();
   const { isOpen } = useEllipsisMenuContext();
   return (
     <Card className={`${className} ${isOpen ? 'open' : ''}`} shadow={'medium'} border={theme.colors.border.light} padding={'8px'} stopPropagate={true}>
-      <FlexRow align={'center'} gap={8} wrap={'nowrap'}>
+      <FlexRow align={'center'} gap={gap} wrap={'nowrap'}>
         {children}
       </FlexRow>
     </Card>
   );
 };
 
-const ContentColumnComponent: FC<EllipsisMenuContentProps> = ({ className, children }) => {
+const ContentColumnComponent: FC<EllipsisMenuContentProps> = ({ className, gap, children }) => {
   const { theme } = useSharedTheme();
   const { isOpen } = useEllipsisMenuContext();
   return (
     <Card className={`${className} ${isOpen ? 'open' : ''}`} shadow={'medium'} border={theme.colors.border.light} padding={'8px'} stopPropagate={true}>
-      <FlexColumn align={'flex-start'} gap={8} wrap={'nowrap'}>
+      <FlexColumn align={'flex-start'} gap={gap} wrap={'nowrap'}>
         {children}
       </FlexColumn>
     </Card>
@@ -103,6 +105,7 @@ const ContentColumnComponent: FC<EllipsisMenuContentProps> = ({ className, child
 
 const ContentRow = styled(ContentRowComponent)`
   position: absolute;
+  ${({ align }) => (align === 'left' ? 'left: 0;' : 'right: 0;')}
   z-index: ${zIndexes.dropdown};
   display: none;
 
@@ -113,6 +116,7 @@ const ContentRow = styled(ContentRowComponent)`
 
 const ContentColumn = styled(ContentColumnComponent)`
   position: absolute;
+  ${({ align }) => (align === 'left' ? 'left: 0;' : 'right: 0;')}
   z-index: ${zIndexes.dropdown};
   display: none;
 

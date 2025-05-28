@@ -12,6 +12,7 @@ import { fontSizes } from '@src/styles/style';
 type IconLabelRowProps = {
   className?: string;
   icon: ReactNode;
+  gap?: number;
   label: string;
 };
 
@@ -26,21 +27,21 @@ export type IconLabelRowLinkProps = IconLabelRowProps & {
 
 const Component: FC<IconLabelRowButtonProps | IconLabelRowLinkProps> = (props) => {
   if ('onClick' in props) {
-    const { className, icon, label, onClick } = props as IconLabelRowButtonProps;
+    const { className, icon, label, onClick, gap } = props as IconLabelRowButtonProps;
     return (
       <Button className={className} onClick={onClick} scheme={'none'} fontSize={'medium'}>
-        <FlexRow gap={16} align={'center'} wrap={'nowrap'} className={`${className}__buttonRow`}>
+        <FlexRow gap={gap} align={'center'} wrap={'nowrap'} className={`${className}__buttonRow`}>
           {icon}
           <Text text={label} />
         </FlexRow>
       </Button>
     );
   }
-  const { className, icon, label, href, target = '_self' } = props as IconLabelRowLinkProps;
+  const { className, icon, label, href, target = '_self', gap } = props as IconLabelRowLinkProps;
   return (
     <a className={`${className} a`} href={href} target={target} rel='noopener noreferrer'>
       <IconContext.Provider value={{ size: ButtonIconSize({ fontSize: 'medium' }) }}>
-        <FlexRow gap={16} align={'center'} wrap={'nowrap'} className={`${className}__linkedRow`}>
+        <FlexRow gap={gap} align={'center'} wrap={'nowrap'} className={`${className}__linkedRow`}>
           {icon}
           <Text className={`${className}__linkedText`} text={label} fontSize={fontSizes.medium} />
         </FlexRow>
@@ -50,7 +51,6 @@ const Component: FC<IconLabelRowButtonProps | IconLabelRowLinkProps> = (props) =
 };
 
 export const IconLabelRow = styled(Component)`
-  padding: 6px 16px;
   color: inherit;
   text-decoration: none;
 
