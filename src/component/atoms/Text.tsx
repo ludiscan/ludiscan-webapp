@@ -21,8 +21,8 @@ const Component: FC<TextProps> = ({ className, text, style }) => {
 };
 
 export const Text = styled(Component)`
-  ${({ fontSize }) => `font-size: ${fontSize}`};
-  ${({ color }) => `color: ${color}`};
+  ${({ fontSize }) => fontSize && `font-size: ${fontSize}`};
+  ${({ color }) => color && `color: ${color}`};
   font-weight: ${({ fontWeight }) => fontWeight || 'normal'};
   text-shadow: ${({ shadow }) => (shadow ? '0 0 4px rgba(0, 0, 0, 0.2)' : 'none')};
 `;
