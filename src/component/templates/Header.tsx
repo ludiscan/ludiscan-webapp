@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
 import { CiUser, CiLight, CiDark } from 'react-icons/ci';
 import { FiChevronLeft } from 'react-icons/fi';
-import { MdLogin } from 'react-icons/md';
+import { MdLogout } from 'react-icons/md';
 
 import type { FC, ReactNode } from 'react';
 
@@ -40,7 +40,7 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
   }, [onClick]);
   const handleLogout = useCallback(async () => {
     await logout();
-    router.push('/');
+    router.push('/login');
   }, [logout, router]);
   return (
     <header className={className}>
@@ -81,7 +81,7 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
                 <Menu fontSize={'large2'} scheme={'none'} icon={<CiUser size={24} color={theme.colors.text} />}>
                   <Menu.ContentColumn gap={4}>
                     <Divider orientation={'horizontal'} margin={'0'} />
-                    <IconLabelRow className={`${className}__iconLabelRow`} label={'Logout'} icon={<MdLogin />} onClick={handleLogout} />
+                    <IconLabelRow className={`${className}__iconLabelRow accent`} gap={8} label={'Logout'} icon={<MdLogout />} onClick={handleLogout} />
                   </Menu.ContentColumn>
                 </Menu>
               ) : (
@@ -112,5 +112,9 @@ export const Header = styled(Component)`
 
   &__iconLabelRow {
     padding: 0 2px;
+  }
+
+  &__iconLabelRow.accent {
+    color: ${({ theme }) => theme.colors.error};
   }
 `;

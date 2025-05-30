@@ -129,7 +129,7 @@ const Component: FC<HeatMapTaskIdPageProps> = ({ className, env, taskId }) => {
 
   useEffect(() => {
     if (!isAuthorized && !isLoading && ready) {
-      return router.replace('/');
+      return router.push('/login');
     }
   }, [isAuthorized, isLoading, ready, router]);
 
