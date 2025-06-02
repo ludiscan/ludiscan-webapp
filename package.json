@@ -5,9 +5,9 @@
     "node": "23.6.x",
     "npm": "10.x"
   },
-  "version": "0.6.0",
+  "version": "0.6.1",
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev --turbopack -p 5173",
     "build:dev": "next build --turbopack",
     "build:prod": "next build",
     "start": "next start",

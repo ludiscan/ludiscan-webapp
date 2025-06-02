@@ -62,8 +62,8 @@ export function useAuth(props?: UseAuthOptions): UseAuthType {
     if (t && u) {
       dispatch(setUser(u));
       dispatch(setToken(t));
-      dispatch(setReady(true));
     }
+    dispatch(setReady(true));
   }, [dispatch, token, user]);
 
   const handleLogout = useCallback(async () => {
