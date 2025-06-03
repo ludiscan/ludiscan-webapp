@@ -6,7 +6,6 @@ import { Provider } from 'react-redux';
 
 import type { AppProps } from 'next/app';
 
-import { SidebarLayout } from '@src/component/templates/SidebarLayout';
 import { ToastProvider } from '@src/component/templates/ToastContext';
 import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
 import { store } from '@src/store';
@@ -34,7 +33,6 @@ export default function App({ Component, pageProps }: AppProps) {
         <QueryClientProvider client={queryClient}>
           <SharedThemeProvider>
             <Content>
-              <SidebarLayout />
               <Component {...pageProps} />
             </Content>
           </SharedThemeProvider>

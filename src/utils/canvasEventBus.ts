@@ -1,20 +1,22 @@
-export type CanvasEventMap = {
-  invalidate: void;
-};
+import type { Menus } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenuContent';
 
-class CanvasEventBus<T extends CanvasEventMap> extends EventTarget {
+export interface HeatMapEventMap {
+  'click-menu-icon': { name: Menus };
+}
+
+class EventBus<T> extends EventTarget {
   emit<K extends keyof T>(eventName: K, detail?: T[K]) {
     this.dispatchEvent(new CustomEvent<T[K]>(eventName as string, { detail }));
   }
 
-  addListener<K extends keyof T>(eventName: K, callback: (event: CustomEvent<T[K]>) => void) {
+  on<K extends keyof T>(eventName: K, callback: (event: CustomEvent<T[K]>) => void) {
     this.addEventListener(eventName as string, callback as EventListener);
   }
 
-  removeListener<K extends keyof T>(eventName: K, callback: (event: CustomEvent<T[K]>) => void) {
+  off<K extends keyof T>(eventName: K, callback: (event: CustomEvent<T[K]>) => void) {
     this.removeEventListener(eventName as string, callback as EventListener);
   }
 }
 
 // 型安全なイベントバスのインスタンスを作成
-export const canvasEventBus = new CanvasEventBus();
+export const heatMapEventBus = new EventBus<HeatMapEventMap>();

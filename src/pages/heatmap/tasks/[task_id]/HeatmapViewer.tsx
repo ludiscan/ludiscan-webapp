@@ -7,16 +7,19 @@ import JSZip from 'jszip';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { PerformanceMonitorApi } from '@react-three/drei';
+import type { Menus } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenuContent';
 import type { HeatmapDataService, OfflineHeatmapData } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC } from 'react';
 
-import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
+import { FlexRow } from '@src/component/atoms/Flex';
 import { useCanvasState } from '@src/hooks/useCanvasState';
 import { HeatMapCanvas } from '@src/pages/heatmap/tasks/[task_id]/HeatmapCanvas';
-import { HeatmapMenu } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenu';
+import { HeatmapMenuContent } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenuContent';
+import { HeatmapMenuSideBar } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenuSideBar';
 import { useOBJFromArrayBuffer } from '@src/pages/heatmap/tasks/[task_id]/ModelLoader';
 import { PerformanceList } from '@src/pages/heatmap/tasks/[task_id]/PerformanceList';
-import { dimensions, zIndexes } from '@src/styles/style';
+import { zIndexes } from '@src/styles/style';
+import { heatMapEventBus } from '@src/utils/canvasEventBus';
 import { getOfflineHeatmapTemplate } from '@src/utils/heatmap/getOfflineHeatmapTemplate';
 
 export type HeatmapViewerProps = {
@@ -31,7 +34,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
   const [performance, setPerformance] = useState<PerformanceMonitorApi>();
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isMenuOpen, setIsMenuOpen] = useState(true);
+  const [openMenu, setOpenMenu] = useState<Menus | undefined>(undefined);
 
   const state = useCanvasState();
 
@@ -85,7 +88,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
   }, [task]);
 
   const handleMenuClose = useCallback((value: boolean) => {
-    setIsMenuOpen(value);
+    setOpenMenu(undefined);
   }, []);
 
   const handleOnPerformance = useCallback((api: PerformanceMonitorApi) => {
@@ -208,37 +211,63 @@ const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
     }
   }, [dataService.eventLogs, generalLogKeys, mapContent, mapList, state, task]);
 
+  useEffect(() => {
+    const clickMenuIconHandler = (event: CustomEvent<{ name: string }>) => {
+      setOpenMenu(event.detail.name);
+    };
+    heatMapEventBus.on('click-menu-icon', clickMenuIconHandler);
+    return () => {
+      heatMapEventBus.off('click-menu-icon', clickMenuIconHandler);
+    };
+  }, []);
+
   return (
-    <FlexColumn className={className} align={'center'}>
-      <FlexRow className={`${className}__canvasBox`} wrap={'nowrap'}>
-        {task && (
-          <div className={`${className}__canvasMenu`}>
-            <HeatmapMenu
-              task={task}
-              isMenuOpen={isMenuOpen}
-              toggleMenu={handleMenuClose}
-              mapOptions={mapList ?? []}
-              model={model}
-              handleExportView={handleExportView}
-              eventLogKeys={generalLogKeys ?? undefined}
-            />
-          </div>
-        )}
-        <div className={`${className}__canvas`}>
-          <Canvas camera={{ position: [2500, 2500, 2500], fov: 50, near: 10, far: 10000 }} ref={canvasRef} dpr={dpr}>
-            <PerformanceMonitor factor={1} onChange={handleOnPerformance} />
-            <HeatMapCanvas service={dataService} pointList={pointList} map={map} modelType={modelType} model={model} />
-          </Canvas>
-          {performance && <PerformanceList api={performance} className={`${className}__performance`} />}
+    <FlexRow className={className} align={'center'} wrap={'nowrap'}>
+      <HeatmapMenuSideBar className={`${className}__sideMenu`} service={dataService} currentMenu={openMenu} />
+      {task && (
+        <div className={`${className}__canvasMenuBox`}>
+          <HeatmapMenuContent
+            task={task}
+            name={openMenu}
+            toggleMenu={handleMenuClose}
+            mapOptions={mapList ?? []}
+            model={model}
+            handleExportView={handleExportView}
+            eventLogKeys={generalLogKeys ?? undefined}
+          />
         </div>
-      </FlexRow>
-    </FlexColumn>
+      )}
+      <div className={`${className}__canvasBox`}>
+        <Canvas camera={{ position: [2500, 2500, 2500], fov: 50, near: 10, far: 10000 }} ref={canvasRef} dpr={dpr}>
+          <PerformanceMonitor factor={1} onChange={handleOnPerformance} />
+          <HeatMapCanvas service={dataService} pointList={pointList} map={map} modelType={modelType} model={model} />
+        </Canvas>
+        {performance && <PerformanceList api={performance} className={`${className}__performance`} />}
+      </div>
+    </FlexRow>
   );
 };
 
 export const HeatMapViewer = styled(Component)`
-  width: 100%;
+  width: calc(100% - 2px);
   height: 100%;
+  overflow: hidden;
+
+  &__sideMenu {
+    z-index: ${zIndexes.content + 2};
+    display: flex;
+    flex-shrink: 0;
+    height: 100%;
+    overflow-y: auto;
+    background: ${({ theme }) => theme.colors.surface.dark};
+  }
+
+  &__canvasMenuBox {
+    position: relative;
+    z-index: ${zIndexes.content + 2};
+    display: flex;
+    height: 100%;
+  }
 
   &__inputfile {
     width: 100%;
@@ -247,23 +276,12 @@ export const HeatMapViewer = styled(Component)`
 
   &__canvasBox {
     position: relative;
+    flex: 1;
     width: 100%;
+    max-width: 1700px;
+    height: 100%;
+    margin: 0 auto;
     border: ${({ theme }) => `1px solid ${theme.colors.border.main}`};
-  }
-
-  &__canvasMenu {
-    position: absolute;
-    top: 0;
-    right: 0;
-    z-index: ${zIndexes.content + 2};
-    max-width: 300px;
-    max-height: 100%;
-  }
-
-  &__canvas {
-    position: relative;
-    width: 100%;
-    height: calc(90vh - ${dimensions.headerHeight}px);
   }
 
   &__performance {

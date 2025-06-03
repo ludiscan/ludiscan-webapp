@@ -18,6 +18,7 @@ import { Observer } from '@src/component/atoms/Observer';
 import { VerticalSpacer } from '@src/component/atoms/Spacer';
 import { Text } from '@src/component/atoms/Text';
 import { Header } from '@src/component/templates/Header';
+import { SidebarLayout } from '@src/component/templates/SidebarLayout';
 import { useAuth } from '@src/hooks/useAuth';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { createClient } from '@src/modeles/qeury';
@@ -93,6 +94,7 @@ const Component: FC<HomePageProps> = ({ className, env }) => {
   }, [isAuthorized, isLoading, router, ready]);
   return (
     <div className={className}>
+      <SidebarLayout />
       <InnerContent>
         <Header title={'Heatmap'} onClick={handleBack} />
         <Text text={'Home'} fontSize={fontSizes.largest} color={theme.colors.text} fontWeight={fontWeights.bolder} />

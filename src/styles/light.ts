@@ -19,8 +19,8 @@ const lightTheme: Theme = {
     },
     text: colors.stone11,
     secondary: {
-      main: colors.stone05,
-      dark: colors.stone06,
+      main: colors.stone06,
+      dark: colors.stone07,
       light: colors.stone04,
     },
     border: {

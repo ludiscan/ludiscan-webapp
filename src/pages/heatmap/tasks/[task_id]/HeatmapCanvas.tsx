@@ -1,6 +1,5 @@
 import { OrbitControls } from '@react-three/drei';
-import { useThree } from '@react-three/fiber';
-import { useEffect, useMemo, useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import { Vector3 } from 'three';
 
 import { PositionPointMarkers } from './PositionPointMarkers';
@@ -13,7 +12,6 @@ import { useCanvasState } from '@src/hooks/useCanvasState';
 import { EventLogMarkers } from '@src/pages/heatmap/tasks/[task_id]/EventLogMarkers';
 import { HotspotCircles } from '@src/pages/heatmap/tasks/[task_id]/HotspotCircles';
 import { LocalModelLoader, StreamModelLoader } from '@src/pages/heatmap/tasks/[task_id]/ModelLoader';
-import { canvasEventBus } from '@src/utils/canvasEventBus';
 
 type HeatmapCanvasProps = {
   model: Group | null;
@@ -24,7 +22,7 @@ type HeatmapCanvasProps = {
 };
 
 const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, service }) => {
-  const { invalidate } = useThree();
+  // const { invalidate } = useThree();
   const {
     general: { showHeatmap },
     eventLogs,
@@ -33,17 +31,17 @@ const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, s
 
   const visibleEventLogs = useMemo(() => eventLogs.filter((event) => event.visible), [eventLogs]);
 
-  useEffect(() => {
-    const handleInvalidate = () => {
-      invalidate();
-    };
-
-    canvasEventBus.addListener('invalidate', handleInvalidate);
-
-    return () => {
-      canvasEventBus.removeListener('invalidate', handleInvalidate);
-    };
-  }, [invalidate]);
+  // useEffect(() => {
+  //   const handleInvalidate = () => {
+  //     invalidate();
+  //   };
+  //
+  //   canvasEventBus.on('invalidate', handleInvalidate);
+  //
+  //   return () => {
+  //     canvasEventBus.off('invalidate', handleInvalidate);
+  //   };
+  // }, [invalidate]);
 
   return (
     <>

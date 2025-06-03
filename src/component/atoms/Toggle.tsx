@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { useCallback, useState } from 'react';
-import { IoIosArrowDown } from 'react-icons/io';
+import { IoIosArrowDown, IoIosArrowForward } from 'react-icons/io';
 
 import type { FC, ReactNode, CSSProperties } from 'react';
 
@@ -27,10 +27,9 @@ const Component: FC<ToggleProps> = ({ className, buttonStyle, label, opened, onC
   return (
     <FlexColumn className={className}>
       <button onClick={handleToggle} className={`${className}__button`} style={buttonStyle}>
-        <InlineFlexRow align={'center'} style={{ width: '100%' }}>
+        <InlineFlexRow align={'center'} style={{ width: '100%' }} gap={8}>
+          <IoIosArrowForward className={`${className}__arrow ${visible ? 'open' : ''}`} size={16} />
           {label}
-          <div style={{ flex: 1 }} />
-          <IoIosArrowDown className={`${className}__arrow ${visible ? 'open' : ''}`} size={16} />
         </InlineFlexRow>
       </button>
       <div className={`${className}__content ${visible ? 'open' : ''}`}>{children}</div>
@@ -61,7 +60,7 @@ export const Toggle = styled(Component)`
   }
 
   &__arrow.open {
-    transform: rotate(180deg);
+    transform: rotate(90deg);
   }
 
   &__content.open {
