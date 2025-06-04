@@ -317,7 +317,7 @@ export const MenuContents = [
 export type Menus = (typeof MenuContents)[number]['name'];
 
 const Component: FC<HeatmapMenuProps> = (props) => {
-  const { className, name, mapOptions } = props;
+  const { className, name, mapOptions, toggleMenu } = props;
   const { general, setGeneral } = useCanvasState();
 
   useEffect(() => {
@@ -342,13 +342,7 @@ const Component: FC<HeatmapMenuProps> = (props) => {
               <BiSearch />
             </FlexRow>
           </div>
-          <Button
-            onClick={function (): Promise<void> | void {
-              throw new Error('Function not implemented.');
-            }}
-            scheme={'none'}
-            fontSize={'small'}
-          >
+          <Button onClick={() => toggleMenu(false)} scheme={'none'} fontSize={'small'}>
             <IoClose />
           </Button>
         </InlineFlexRow>

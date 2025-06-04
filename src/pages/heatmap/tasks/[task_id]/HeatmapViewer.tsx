@@ -252,6 +252,7 @@ export const HeatMapViewer = styled(Component)`
   width: calc(100% - 2px);
   height: 100%;
   overflow: hidden;
+  border-top: ${({ theme }) => `1px solid ${theme.colors.border.main}`};
 
   &__sideMenu {
     z-index: ${zIndexes.content + 2};
