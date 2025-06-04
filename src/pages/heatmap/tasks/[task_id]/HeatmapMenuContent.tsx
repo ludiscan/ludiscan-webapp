@@ -14,13 +14,13 @@ import type { FC, CSSProperties } from 'react';
 import type { Group } from 'three';
 
 import { Button } from '@src/component/atoms/Button';
-import { Card } from '@src/component/atoms/Card';
 import { FlexColumn, FlexRow, InlineFlexColumn, InlineFlexRow } from '@src/component/atoms/Flex';
 import { Slider } from '@src/component/atoms/Slider';
 import { Switch } from '@src/component/atoms/Switch';
 import { Text } from '@src/component/atoms/Text';
 import { Toggle } from '@src/component/atoms/Toggle';
 import { Tooltip } from '@src/component/atoms/Tooltip';
+import { SegmentedSwitch } from '@src/component/molecules/SegmentedSwitch';
 import { Selector } from '@src/component/molecules/Selector';
 import { TextField } from '@src/component/molecules/TextField';
 import { useCanvasState } from '@src/hooks/useCanvasState';
@@ -168,40 +168,40 @@ const MapContent: FC<HeatmapMenuProps> = ({ className, mapOptions, model }) => {
 };
 
 const GeneralContent: FC<HeatmapMenuProps> = ({ className }) => {
-  const { theme } = useSharedTheme();
   const { general, setGeneral } = useCanvasState();
   const handleReload = useCallback(() => {}, []);
   return (
     <InlineFlexColumn gap={8}>
-      <Toggle label={<Text text={'general'} />} className={`${className}__toggle`} buttonStyle={toggleButtonStyle(theme)}>
-        <InputRow label={'上向ベクトル'}>
-          <InlineFlexRow gap={8} align={'center'} wrap={'nowrap'}>
-            <Text text='y' fontSize={fontSizes.medium} />
-            <Switch label={'z up'} onChange={(value) => setGeneral({ ...general, upZ: value })} checked={general.upZ} size={'small'} />
-            <Text text='z' fontSize={fontSizes.medium} />
-          </InlineFlexRow>
-        </InputRow>
-        <InputRow label={'scale'}>
-          <Tooltip tooltip={String(general.scale)} className={`${className}__input`} placement={'left'}>
-            <Slider value={general.scale} onChange={(scale) => setGeneral({ ...general, scale })} min={0.1} step={0.05} max={1.0} />
-          </Tooltip>
-        </InputRow>
-        <InputRow label={'showHeatmap'}>
-          <div>
-            <Switch label={'showHeatmap'} onChange={(showHeatmap) => setGeneral({ ...general, showHeatmap })} checked={general.showHeatmap} size={'small'} />
-          </div>
-        </InputRow>
-        <InputRow label={'blockSize'}>
-          <Tooltip tooltip={String(general.blockSize)} className={`${className}__input`} placement={'left'}>
-            <Slider value={general.blockSize} onChange={(blockSize) => setGeneral({ ...general, blockSize })} min={50} step={50} max={500} />
-          </Tooltip>
-        </InputRow>
-        <InputRow label={'minThreshold'}>
-          <Tooltip tooltip={String(general.minThreshold)} className={`${className}__input`} placement={'left'}>
-            <Slider value={general.minThreshold} onChange={(minThreshold) => setGeneral({ ...general, minThreshold })} min={0} step={0.001} max={0.3} />
-          </Tooltip>
-        </InputRow>
-      </Toggle>
+      <InputRow label={'上向ベクトル'}>
+        <SegmentedSwitch
+          fontSize={'smallest'}
+          value={general.upZ ? 'Z' : 'Y'}
+          options={['Y', 'Z']}
+          onChange={(v) => {
+            setGeneral({ ...general, upZ: v === 'Z' });
+          }}
+        />
+      </InputRow>
+      <InputRow label={'scale'}>
+        <Tooltip tooltip={String(general.scale)} className={`${className}__input`} placement={'left'}>
+          <Slider value={general.scale} onChange={(scale) => setGeneral({ ...general, scale })} min={0.1} step={0.05} max={1.0} />
+        </Tooltip>
+      </InputRow>
+      <InputRow label={'showHeatmap'}>
+        <div>
+          <Switch label={'showHeatmap'} onChange={(showHeatmap) => setGeneral({ ...general, showHeatmap })} checked={general.showHeatmap} size={'small'} />
+        </div>
+      </InputRow>
+      <InputRow label={'blockSize'}>
+        <Tooltip tooltip={String(general.blockSize)} className={`${className}__input`} placement={'left'}>
+          <Slider value={general.blockSize} onChange={(blockSize) => setGeneral({ ...general, blockSize })} min={50} step={50} max={500} />
+        </Tooltip>
+      </InputRow>
+      <InputRow label={'minThreshold'}>
+        <Tooltip tooltip={String(general.minThreshold)} className={`${className}__input`} placement={'left'}>
+          <Slider value={general.minThreshold} onChange={(minThreshold) => setGeneral({ ...general, minThreshold })} min={0} step={0.001} max={0.3} />
+        </Tooltip>
+      </InputRow>
       <InputRow label={''}>
         <div style={{ flex: 1 }} />
         <Button onClick={handleReload} scheme={'surface'} fontSize={'small'}>
@@ -319,7 +319,6 @@ export type Menus = (typeof MenuContents)[number]['name'];
 const Component: FC<HeatmapMenuProps> = (props) => {
   const { className, name, mapOptions } = props;
   const { general, setGeneral } = useCanvasState();
-  const { theme } = useSharedTheme();
 
   useEffect(() => {
     if ((!general.mapName || general.mapName === '') && mapOptions.length > 0) {
@@ -338,12 +337,10 @@ const Component: FC<HeatmapMenuProps> = (props) => {
       <FlexColumn gap={8} align={'flex-start'} className={`${className}__content`}>
         <InlineFlexRow align={'center'} gap={16} style={{ width: '100%' }}>
           <div style={{ flex: 1 }}>
-            <Card padding={'2px'} shadow={'none'} color={theme.colors.surface.dark}>
-              <FlexRow>
-                <TextField onChange={() => {}} />
-                <BiSearch />
-              </FlexRow>
-            </Card>
+            <FlexRow align={'space-between'} className={`${className}__searchBox`}>
+              <TextField fontSize={fontSizes.medium} onChange={() => {}} placeholder={'search menu...'} />
+              <BiSearch />
+            </FlexRow>
           </div>
           <Button
             onClick={function (): Promise<void> | void {
@@ -362,7 +359,7 @@ const Component: FC<HeatmapMenuProps> = (props) => {
 };
 
 export const HeatmapMenuContent = styled(Component)`
-  width: 300px;
+  width: 280px;
   height: 100%;
   color: ${({ theme }) => theme.colors.text};
   background: ${({ theme }) => theme.colors.surface.main};
@@ -376,6 +373,27 @@ export const HeatmapMenuContent = styled(Component)`
     width: 100%;
     background: none;
     border: none;
+  }
+
+  &__searchBox {
+    width: 100%;
+    padding: 2px 8px;
+    border-radius: 12px;
+    background: ${({ theme }) => theme.colors.surface.dark};
+    color: ${({ theme }) => theme.colors.text};
+    font-size: ${fontSizes.small};
+    font-weight: ${fontWeights.bold};
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    & input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: ${({ theme }) => theme.colors.text};
+    }
   }
 
   &__meshesRow {
