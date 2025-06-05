@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { useCallback, useState } from 'react';
-import { IoIosArrowDown, IoIosArrowForward } from 'react-icons/io';
+import { IoIosArrowForward } from 'react-icons/io';
 
 import type { FC, ReactNode, CSSProperties } from 'react';
 
