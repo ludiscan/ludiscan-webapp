@@ -130,39 +130,41 @@ const SegmentButtonWidth = (props: SegmentedSwitchProps) => {
 };
 
 export const SegmentedSwitch = styled(Component)`
-  display: inline-flex;
   position: relative; /* English comment: for absolute positioning of Indicator */
-  background-color: ${({ theme }) => theme.colors.surface.main};
-  border-radius: 9999px; /* English comment: fully rounded corners */
+  display: inline-flex;
   overflow: hidden; /* English comment: clip child elements */
+  background-color: ${({ theme }) => theme.colors.surface.main};
   border: 1px solid ${({ theme }) => theme.colors.border.main};
+  border-radius: 9999px; /* English comment: fully rounded corners */
 
   &.disable {
+    pointer-events: none;
+
     /* English comment: dim and prevent interaction when disabled */
     opacity: 0.5;
-    pointer-events: none;
   }
+
   &__indicator {
     position: absolute;
     top: 0;
     left: 0; /* English comment: overridden inline based on active index */
+    z-index: 0; /* English comment: behind Segment texts */
     width: 50%;
     height: 100%;
     background-color: ${({ theme }) => theme.colors.primary.dark};
     border-radius: 9999px; /* English comment: fully rounded corners */
     transition: left 0.2s ease; /* English comment: smooth animation */
-    z-index: 0; /* English comment: behind Segment texts */
   }
 
   &__segment {
+    position: relative;
     flex: 1;
     min-width: ${SegmentButtonWidth};
     padding: 6px !important;
     font-size: 14px;
     text-align: center;
-    user-select: none; /* English comment: prevent text selection */
     cursor: pointer;
-    position: relative;
+    user-select: none; /* English comment: prevent text selection */
     transition: color 0.2s ease;
   }
 `;

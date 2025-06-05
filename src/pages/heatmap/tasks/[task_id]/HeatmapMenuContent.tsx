@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useCallback, useEffect, useMemo } from 'react';
 import { BiSearch } from 'react-icons/bi';
-import { BsPerson } from 'react-icons/bs';
+import { BsGrid, BsPerson } from 'react-icons/bs';
 import { CiMap, CiMapPin, CiStreamOn } from 'react-icons/ci';
 import { FaFileExport } from 'react-icons/fa';
 import { IoIosInformationCircleOutline } from 'react-icons/io';
@@ -27,6 +27,8 @@ import { useCanvasState } from '@src/hooks/useCanvasState';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { ObjectToggleList } from '@src/pages/heatmap/tasks/[task_id]/ObjectToggleList';
 import { fontSizes, fontWeights } from '@src/styles/style';
+import { heatMapEventBus } from '@src/utils/canvasEventBus';
+import { getRandomPrimitiveColor } from '@src/utils/color';
 
 export type HeatmapMenuProps = {
   model: Group | null;
@@ -58,10 +60,24 @@ const InputRow = styled(({ className, label, children }: { className?: string; l
   return (
     <div className={className}>
       <InlineFlexRow align={'center'} wrap={'nowrap'} gap={4}>
-        <Text text={label} fontSize={fontSizes.small} style={{ width: '110px' }} color={theme.colors.secondary.light} />
+        <Text text={label} fontSize={fontSizes.small} style={{ width: '90px' }} color={theme.colors.secondary.light} />
         <div style={{ flex: 1 }}>{children}</div>
       </InlineFlexRow>
     </div>
+  );
+})`
+  position: relative;
+  width: 100%;
+  padding: 4px 8px;
+`;
+
+const InputColumn = styled(({ className, label, children }: { className?: string; label: string; children: React.ReactNode }) => {
+  const { theme } = useSharedTheme();
+  return (
+    <InlineFlexColumn className={className} align={'flex-start'} wrap={'nowrap'} gap={2}>
+      <Text text={label} fontSize={fontSizes.small} style={{ width: '110px' }} color={theme.colors.secondary.light} />
+      <div style={{ width: '100%' }}>{children}</div>
+    </InlineFlexColumn>
   );
 })`
   position: relative;
@@ -144,6 +160,9 @@ const HotspotContent: FC<HeatmapMenuProps> = ({ className }) => {
 const MapContent: FC<HeatmapMenuProps> = ({ className, mapOptions, model }) => {
   const { theme } = useSharedTheme();
   const { setGeneral, general } = useCanvasState();
+  const handleAddWaypoint = useCallback(() => {
+    heatMapEventBus.emit('add-waypoint');
+  }, []);
   return (
     <InlineFlexColumn gap={8}>
       <InputRow label={'visualize map'}>
@@ -156,6 +175,9 @@ const MapContent: FC<HeatmapMenuProps> = ({ className, mapOptions, model }) => {
           disabled={mapOptions.length === 0}
         />
       </InputRow>
+      <Button scheme={'surface'} fontSize={'medium'} onClick={handleAddWaypoint}>
+        <Text text={'add waypoint'} />
+      </Button>
       {model && (
         <Toggle label={<Text text={'map'} />} className={`${className}__toggle`} buttonStyle={toggleButtonStyle(theme)}>
           <div className={`${className}__meshesRow`}>
@@ -167,11 +189,11 @@ const MapContent: FC<HeatmapMenuProps> = ({ className, mapOptions, model }) => {
   );
 };
 
-const GeneralContent: FC<HeatmapMenuProps> = ({ className }) => {
+const GeneralContent: FC<HeatmapMenuProps> = () => {
   const { general, setGeneral } = useCanvasState();
   const handleReload = useCallback(() => {}, []);
   return (
-    <InlineFlexColumn gap={8}>
+    <InlineFlexColumn gap={4}>
       <InputRow label={'上向ベクトル'}>
         <SegmentedSwitch
           fontSize={'smallest'}
@@ -182,26 +204,28 @@ const GeneralContent: FC<HeatmapMenuProps> = ({ className }) => {
           }}
         />
       </InputRow>
-      <InputRow label={'scale'}>
-        <Tooltip tooltip={String(general.scale)} className={`${className}__input`} placement={'left'}>
-          <Slider value={general.scale} onChange={(scale) => setGeneral({ ...general, scale })} min={0.1} step={0.05} max={1.0} />
-        </Tooltip>
-      </InputRow>
+      <InputColumn label={'scale'}>
+        <Slider value={general.scale} onChange={(scale) => setGeneral({ ...general, scale })} min={0.1} step={0.05} max={1.0} sideLabel textField />
+      </InputColumn>
       <InputRow label={'showHeatmap'}>
         <div>
           <Switch label={'showHeatmap'} onChange={(showHeatmap) => setGeneral({ ...general, showHeatmap })} checked={general.showHeatmap} size={'small'} />
         </div>
       </InputRow>
-      <InputRow label={'blockSize'}>
-        <Tooltip tooltip={String(general.blockSize)} className={`${className}__input`} placement={'left'}>
-          <Slider value={general.blockSize} onChange={(blockSize) => setGeneral({ ...general, blockSize })} min={50} step={50} max={500} />
-        </Tooltip>
-      </InputRow>
-      <InputRow label={'minThreshold'}>
-        <Tooltip tooltip={String(general.minThreshold)} className={`${className}__input`} placement={'left'}>
-          <Slider value={general.minThreshold} onChange={(minThreshold) => setGeneral({ ...general, minThreshold })} min={0} step={0.001} max={0.3} />
-        </Tooltip>
-      </InputRow>
+      <InputColumn label={'blockSize'}>
+        <Slider value={general.blockSize} onChange={(blockSize) => setGeneral({ ...general, blockSize })} min={50} step={50} max={500} sideLabel textField />
+      </InputColumn>
+      <InputColumn label={'minThreshold'}>
+        <Slider
+          value={general.minThreshold}
+          onChange={(minThreshold) => setGeneral({ ...general, minThreshold })}
+          min={0}
+          step={0.001}
+          max={0.3}
+          sideLabel
+          textField
+        />
+      </InputColumn>
       <InputRow label={''}>
         <div style={{ flex: 1 }} />
         <Button onClick={handleReload} scheme={'surface'} fontSize={'small'}>
@@ -228,10 +252,11 @@ const EventLogContent: FC<HeatmapMenuProps> = ({ eventLogKeys }) => {
       }
       const eventLogDats: EventLogData[] = eventLogKeys.map((key) => {
         const index = eventLogs.findIndex((e) => e.key === key);
+        // console.log(eventLogs[index]?.color);
         return {
           key,
           visible: index !== -1 ? eventLogs[index].visible : false,
-          color: eventLogs[index]?.color || '#000000',
+          color: eventLogs[index]?.color || getRandomPrimitiveColor(),
         };
       });
       setEventLogs(eventLogDats);
@@ -267,7 +292,7 @@ const EventLogContent: FC<HeatmapMenuProps> = ({ eventLogKeys }) => {
               />
               <input
                 type={'color'}
-                color={eventLogs[index]?.color}
+                color={eventLogs[index].color}
                 onChange={(e) => {
                   const newEventLogs = eventLogs.map((e) => ({ ...e }));
                   if (index !== -1) {
@@ -311,6 +336,11 @@ export const MenuContents = [
     name: 'eventlog',
     icon: <CiStreamOn />,
     Component: EventLogContent,
+  },
+  {
+    name: 'more',
+    icon: <BsGrid />,
+    Component: () => <Text text={'More'} fontSize={fontSizes.large1} fontWeight={fontWeights.bold} />,
   },
 ];
 
@@ -370,23 +400,23 @@ export const HeatmapMenuContent = styled(Component)`
   }
 
   &__searchBox {
+    display: flex;
+    gap: 8px;
+    align-items: center;
     width: 100%;
     padding: 2px 8px;
-    border-radius: 12px;
-    background: ${({ theme }) => theme.colors.surface.dark};
-    color: ${({ theme }) => theme.colors.text};
     font-size: ${fontSizes.small};
     font-weight: ${fontWeights.bold};
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    color: ${({ theme }) => theme.colors.text};
+    background: ${({ theme }) => theme.colors.surface.dark};
+    border-radius: 12px;
 
     & input {
       flex: 1;
+      color: ${({ theme }) => theme.colors.text};
+      outline: none;
       background: transparent;
       border: none;
-      outline: none;
-      color: ${({ theme }) => theme.colors.text};
     }
   }
 

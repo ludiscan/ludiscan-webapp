@@ -2,6 +2,7 @@ import type { Menus } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenuConten
 
 export interface HeatMapEventMap {
   'click-menu-icon': { name: Menus };
+  'add-waypoint': { waypoint: { x: number; y: number; z: number } };
 }
 
 class EventBus<T> extends EventTarget {

@@ -152,6 +152,6 @@ const Component: FC<HeatMapTaskIdPageProps> = ({ className, env, taskId }) => {
   return <HeatmapIdPageLayout className={className} service={service} version={version ? `v${version}` : '---'} onBackClick={handleBackClick} />;
 };
 
-export const HeatMapTaskIdPage = styled(Component)``;
+export const HeatMapTaskIdPage = styled(Component);
 
 export default HeatMapTaskIdPage;

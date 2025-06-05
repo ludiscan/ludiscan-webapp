@@ -87,7 +87,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
     );
   }, [task]);
 
-  const handleMenuClose = useCallback((value: boolean) => {
+  const handleMenuClose = useCallback(() => {
     setOpenMenu(undefined);
   }, []);
 

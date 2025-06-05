@@ -5,6 +5,7 @@ import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
+import { Divider } from '@src/component/atoms/Divider';
 import { FlexColumn } from '@src/component/atoms/Flex';
 import { Tooltip } from '@src/component/atoms/Tooltip';
 import { MenuContents } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenuContent';
@@ -20,23 +21,22 @@ export type MenuSideBarProps = {
 const Component: FC<MenuSideBarProps> = ({ className, currentMenu }) => {
   return (
     <FlexColumn className={className} gap={12}>
+      <Divider orientation={'horizontal'} />
       {MenuContents.map(({ name, icon }) => (
-        <>
-          <Button
-            className={`${className}__button ${name === currentMenu ? 'active' : ''}`}
-            key={name}
-            scheme={'none'}
-            onClick={() => {
-              heatMapEventBus.emit('click-menu-icon', { name });
-            }}
-            fontSize={'large2'}
-            radius={'small'}
-          >
-            <Tooltip tooltip={name} placement={'bottom'} fontSize={fontSizes.small}>
-              {icon}
-            </Tooltip>
-          </Button>
-        </>
+        <Button
+          className={`${className}__button ${name === currentMenu ? 'active' : ''}`}
+          key={name}
+          scheme={'none'}
+          onClick={() => {
+            heatMapEventBus.emit('click-menu-icon', { name });
+          }}
+          fontSize={'large2'}
+          radius={'small'}
+        >
+          <Tooltip tooltip={name} placement={'bottom'} fontSize={fontSizes.small}>
+            {icon}
+          </Tooltip>
+        </Button>
       ))}
     </FlexColumn>
   );
