@@ -2,12 +2,13 @@ import styled from '@emotion/styled';
 import { useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 
+import type { TextProps } from '@src/component/atoms/Text';
 import type { FC, ReactNode } from 'react';
 
 import { Text } from '@src/component/atoms/Text';
 import { zIndexes } from '@src/styles/style';
 
-export type TooltipProps = {
+export type TooltipProps = Pick<TextProps, 'fontSize' | 'fontWeight' | 'color'> & {
   className?: string;
   children: ReactNode;
   tooltip: string;
@@ -31,7 +32,8 @@ const TooltipText = styled(Text)<{ placement: 'top' | 'bottom' | 'left' | 'right
   transition: opacity 0.3s ease-in-out;
 `;
 
-const TooltipComponent: FC<TooltipProps> = ({ className, children, tooltip, placement = 'top' }) => {
+const TooltipComponent: FC<TooltipProps> = (props) => {
+  const { className, children, tooltip, placement = 'top' } = props;
   // ツールチップの表示・非表示状態
   const [visible, setVisible] = useState(false);
   // ツールチップの位置情報
@@ -78,7 +80,11 @@ const TooltipComponent: FC<TooltipProps> = ({ className, children, tooltip, plac
       style={{ display: 'inline-block' }} // 親要素として必要
     >
       {children}
-      {visible && createPortal(<TooltipText placement={placement} style={{ top: tooltipPos.top, left: tooltipPos.left }} text={tooltip} />, document.body)}
+      {visible &&
+        createPortal(
+          <TooltipText fontSize={props.fontSize} placement={placement} style={{ top: tooltipPos.top, left: tooltipPos.left }} text={tooltip} />,
+          document.body,
+        )}
     </div>
   );
 };

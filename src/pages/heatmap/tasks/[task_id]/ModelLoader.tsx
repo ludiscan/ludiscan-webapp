@@ -3,7 +3,7 @@ import { Suspense, useState, useEffect } from 'react';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 
-import type { FC } from 'react';
+import type { FC, RefObject } from 'react';
 import type { Group } from 'three';
 
 import { useCanvasState } from '@src/hooks/useCanvasState';
@@ -11,15 +11,19 @@ import { useCanvasState } from '@src/hooks/useCanvasState';
 type LocalModelLoaderProps = {
   modelPath: string;
   modelType: 'gltf' | 'glb' | 'obj';
+  ref: RefObject<Group | null>;
 };
 
-const LocalModelLoaderContent: FC<LocalModelLoaderProps> = ({ modelPath, modelType }) => {
+const LocalModelLoaderContent: FC<LocalModelLoaderProps> = ({ modelPath, modelType, ref }) => {
   const {
     general: { scale },
   } = useCanvasState();
   const model = useLoader(modelType == 'obj' ? OBJLoader : GLTFLoader, modelPath);
   return (
-    <Suspense fallback={null}>
+    <group
+      ref={ref}
+      dispose={null} // eslint-disable-line react/no-unknown-property
+    >
       <primitive
         object={'scene' in model ? model.scene : model} // eslint-disable-line react/no-unknown-property
         position={[0, 1, 0]} // eslint-disable-line react/no-unknown-property
@@ -27,7 +31,7 @@ const LocalModelLoaderContent: FC<LocalModelLoaderProps> = ({ modelPath, modelTy
         castShadow={true} // eslint-disable-line react/no-unknown-property
       />
       <shadowMaterial opacity={1} />
-    </Suspense>
+    </group>
   );
 };
 
@@ -35,6 +39,7 @@ export const LocalModelLoader = LocalModelLoaderContent;
 
 type StreamModelLoaderProps = {
   model: Group;
+  ref: RefObject<Group | null>;
 };
 /**
  * ArrayBuffer から OBJ ファイルをパースして Three.js の Group を返すカスタムフック
@@ -63,21 +68,26 @@ export function useOBJFromArrayBuffer(arrayBuffer: ArrayBuffer | null): Group | 
   return object3d;
 }
 
-const StreamModelLoaderComponent: FC<StreamModelLoaderProps> = ({ model }) => {
+const StreamModelLoaderComponent: FC<StreamModelLoaderProps> = ({ model, ref }) => {
   const {
     general: { scale },
   } = useCanvasState();
   return (
     <Suspense fallback={null}>
-      {model && (
-        <primitive
-          object={model} // eslint-disable-line react/no-unknown-property
-          position={[0, 1, 0]} // eslint-disable-line react/no-unknown-property
-          scale={[scale, scale, scale]}
-          castShadow={true} // eslint-disable-line react/no-unknown-property
-        />
-      )}
-      <shadowMaterial opacity={1} />
+      <group
+        ref={ref}
+        dispose={null} // eslint-disable-line react/no-unknown-property
+      >
+        {model && (
+          <primitive
+            object={model} // eslint-disable-line react/no-unknown-property
+            position={[0, 1, 0]} // eslint-disable-line react/no-unknown-property
+            scale={[scale, scale, scale]}
+            castShadow={true} // eslint-disable-line react/no-unknown-property
+          />
+        )}
+        <shadowMaterial opacity={1} />
+      </group>
     </Suspense>
   );
 };
