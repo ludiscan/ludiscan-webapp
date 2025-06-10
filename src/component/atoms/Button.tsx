@@ -14,6 +14,7 @@ export type ButtonProps = {
   fontSize: FontSize;
   width?: 'full' | 'fit-content';
   radius?: 'small' | 'default';
+  border?: boolean;
   children: ReactNode;
   disabled?: boolean | undefined;
 };
@@ -169,7 +170,7 @@ export const Button = styled(Component)`
   &.none {
     color: ${({ theme }) => theme.colors.text};
     background-color: transparent;
-    border: none;
+    ${({ theme, border }) => border && `border: 1px solid ${theme.colors.border.main};`}
   }
 
   &.error {

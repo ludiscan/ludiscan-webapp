@@ -18,8 +18,7 @@ import { Header } from '@src/component/templates/Header';
 import { useAuth } from '@src/hooks/useAuth';
 import { useCanvasState } from '@src/hooks/useCanvasState';
 import { createClient } from '@src/modeles/qeury';
-import { InnerContent } from '@src/pages/_app.page';
-import { fontSizes } from '@src/styles/style';
+import { dimensions, fontSizes } from '@src/styles/style';
 import { useOnlineHeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 
 export type HeatMapTaskIdPageProps = {
@@ -51,7 +50,7 @@ export type HeatmapIdPageLayoutProps = {
   service: HeatmapDataService;
 };
 
-export const HeatmapIdPageLayout: FC<HeatmapIdPageLayoutProps> = ({ className, version, service, onBackClick }) => {
+const HeatmapIdPageLayoutComponent: FC<HeatmapIdPageLayoutProps> = ({ className, version, service, onBackClick }) => {
   const task = useMemo(() => service.getTask(), [service]);
 
   const statusContentStatus = useMemo(() => {
@@ -59,7 +58,7 @@ export const HeatmapIdPageLayout: FC<HeatmapIdPageLayoutProps> = ({ className, v
     return task.status === 'completed' ? 'success' : task.status === 'failed' ? 'error' : 'loading';
   }, [task]);
   return (
-    <InnerContent>
+    <>
       <Header
         title={'Heatmap'}
         onClick={onBackClick}
@@ -81,9 +80,22 @@ export const HeatmapIdPageLayout: FC<HeatmapIdPageLayoutProps> = ({ className, v
       <StatusContent className={className} status={statusContentStatus}>
         {task?.status === 'completed' && service && service.isInitialized && <HeatMapViewer dataService={service} />}
       </StatusContent>
-    </InnerContent>
+    </>
   );
 };
+
+export const HeatmapIdPageLayout = styled(HeatmapIdPageLayoutComponent)`
+  height: calc(100vh - ${dimensions.headerHeight}px);
+  background: ${({ theme }) => theme.colors.surface.dark};
+
+  &__headerV {
+    align-self: end;
+    padding: 4px 12px;
+    color: ${({ theme }) => theme.colors.primary.main};
+    border: 1px solid ${({ theme }) => theme.colors.primary.main};
+    border-radius: 16px;
+  }
+`;
 
 const Component: FC<HeatMapTaskIdPageProps> = ({ className, env, taskId }) => {
   const timer = useRef<NodeJS.Timeout>(undefined);
@@ -140,19 +152,6 @@ const Component: FC<HeatMapTaskIdPageProps> = ({ className, env, taskId }) => {
   return <HeatmapIdPageLayout className={className} service={service} version={version ? `v${version}` : '---'} onBackClick={handleBackClick} />;
 };
 
-export const HeatMapTaskIdPage = styled(Component)`
-  max-width: 1200px;
-  height: calc(100vh - 64px);
-  margin: 0 auto;
-  background: ${({ theme }) => theme.colors.surface.dark};
-
-  &__headerV {
-    align-self: end;
-    padding: 4px 12px;
-    color: ${({ theme }) => theme.colors.primary.main};
-    border: 1px solid ${({ theme }) => theme.colors.primary.main};
-    border-radius: 16px;
-  }
-`;
+export const HeatMapTaskIdPage = styled(Component);
 
 export default HeatMapTaskIdPage;

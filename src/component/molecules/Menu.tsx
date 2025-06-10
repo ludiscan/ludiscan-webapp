@@ -4,6 +4,7 @@ import { IoEllipsisHorizontal } from 'react-icons/io5';
 
 import type { StyledComponent } from '@emotion/styled';
 import type { ButtonProps } from '@src/component/atoms/Button';
+import type { CardProps } from '@src/component/atoms/Card';
 import type { FC, ReactNode, MouseEvent } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
@@ -12,18 +13,19 @@ import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { zIndexes } from '@src/styles/style';
 
-export type MenuProps = Pick<ButtonProps, 'fontSize' | 'scheme'> & {
+export type MenuProps = Omit<ButtonProps, 'onClick'> & {
   className?: string | undefined;
   icon: ReactNode;
   children: ReactNode;
   onClick?: ButtonProps['onClick'];
 };
 
-export const EllipsisMenuContext = createContext<{ isOpen: boolean }>({ isOpen: false });
+export const EllipsisMenuContext = createContext<{ isOpen: boolean; onClose: () => void }>({ isOpen: false, onClose: () => {} });
 
 export const useEllipsisMenuContext = () => useContext(EllipsisMenuContext);
 
-const Component: FC<MenuProps> = ({ className, icon, children, scheme = 'surface', fontSize = 'medium', onClick }) => {
+const Component: FC<MenuProps> = (props) => {
+  const { className, icon, children, onClick } = props;
   const [isOpen, setIsOpen] = useState(false);
   const closeMenu = useCallback(() => {
     setIsOpen(false);
@@ -64,26 +66,27 @@ const Component: FC<MenuProps> = ({ className, icon, children, scheme = 'surface
   );
   return (
     <div className={className}>
-      <Button onClick={handleClick} scheme={scheme} fontSize={fontSize} radius={'default'} width={'fit-content'}>
+      <Button {...props} onClick={handleClick}>
         {icon}
       </Button>
-      <EllipsisMenuContext.Provider value={{ isOpen }}>{children}</EllipsisMenuContext.Provider>
+      <EllipsisMenuContext.Provider value={{ isOpen, onClose: closeMenu }}>{children}</EllipsisMenuContext.Provider>
     </div>
   );
 };
 
-export type EllipsisMenuContentProps = {
+export type EllipsisMenuContentProps = CardProps & {
   className?: string | undefined;
   align?: 'left' | 'right';
   gap?: number;
   children: ReactNode;
 };
 
-const ContentRowComponent: FC<EllipsisMenuContentProps> = ({ className, gap, children }) => {
+const ContentRowComponent: FC<EllipsisMenuContentProps> = (props) => {
   const { theme } = useSharedTheme();
   const { isOpen } = useEllipsisMenuContext();
+  const { className, gap, children, shadow = 'medium', border = theme.colors.border.light, padding = '8px', stopPropagate = true } = props;
   return (
-    <Card className={`${className} ${isOpen ? 'open' : ''}`} shadow={'medium'} border={theme.colors.border.light} padding={'8px'} stopPropagate={true}>
+    <Card {...props} className={`${className} ${isOpen ? 'open' : ''}`} shadow={shadow} border={border} padding={padding} stopPropagate={stopPropagate}>
       <FlexRow align={'center'} gap={gap} wrap={'nowrap'}>
         {children}
       </FlexRow>
@@ -91,11 +94,12 @@ const ContentRowComponent: FC<EllipsisMenuContentProps> = ({ className, gap, chi
   );
 };
 
-const ContentColumnComponent: FC<EllipsisMenuContentProps> = ({ className, gap, children }) => {
+const ContentColumnComponent: FC<EllipsisMenuContentProps> = (props) => {
   const { theme } = useSharedTheme();
   const { isOpen } = useEllipsisMenuContext();
+  const { className, gap, children, shadow = 'medium', border = theme.colors.border.light, padding = '8px', stopPropagate = true } = props;
   return (
-    <Card className={`${className} ${isOpen ? 'open' : ''}`} shadow={'medium'} border={theme.colors.border.light} padding={'8px'} stopPropagate={true}>
+    <Card {...props} className={`${className} ${isOpen ? 'open' : ''}`} shadow={shadow} border={border} padding={padding} stopPropagate={stopPropagate}>
       <FlexColumn align={'flex-start'} gap={gap} wrap={'nowrap'}>
         {children}
       </FlexColumn>
@@ -103,14 +107,33 @@ const ContentColumnComponent: FC<EllipsisMenuContentProps> = ({ className, gap, 
   );
 };
 
+const ContentButton: FC<ButtonProps> = (props) => {
+  const { onClick } = props;
+  const { onClose } = useEllipsisMenuContext();
+  const handleClick = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      event.stopPropagation();
+      if (onClick) {
+        onClick(event);
+      }
+      onClose();
+    },
+    [onClose, onClick],
+  );
+  return <Button {...props} onClick={handleClick} />;
+};
+
 const ContentRow = styled(ContentRowComponent)`
   position: absolute;
   ${({ align }) => (align === 'left' ? 'left: 0;' : 'right: 0;')}
   z-index: ${zIndexes.dropdown};
-  display: none;
+  visibility: hidden;
+  opacity: 0;
+  transition: 0.3s;
 
   &.open {
-    display: block;
+    visibility: visible;
+    opacity: 1;
   }
 `;
 
@@ -118,16 +141,20 @@ const ContentColumn = styled(ContentColumnComponent)`
   position: absolute;
   ${({ align }) => (align === 'left' ? 'left: 0;' : 'right: 0;')}
   z-index: ${zIndexes.dropdown};
-  display: none;
+  visibility: hidden;
+  opacity: 0;
+  transition: 0.3s;
 
   &.open {
-    display: block;
+    visibility: visible;
+    opacity: 1;
   }
 `;
 
 type EllipsisMenuType = StyledComponent<MenuProps> & {
   ContentRow: typeof ContentRow;
   ContentColumn: typeof ContentColumn;
+  ContentButton: typeof ContentButton;
 };
 
 export const Menu = styled(Component)`
@@ -135,6 +162,7 @@ export const Menu = styled(Component)`
 ` as EllipsisMenuType;
 Menu.ContentRow = ContentRow;
 Menu.ContentColumn = ContentColumn;
+Menu.ContentButton = ContentButton;
 
 export const EllipsisMenu: FC<Omit<MenuProps, 'icon'>> = (props) => {
   return <Menu {...props} icon={<IoEllipsisHorizontal />} />;

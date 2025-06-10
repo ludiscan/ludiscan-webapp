@@ -14,8 +14,8 @@ const darkTheme: Theme = {
     background: colors.stone08,
     surface: {
       main: colors.stone09,
-      dark: colors.stone11, // surfaceの暗いバリエーション
-      light: colors.stone07, // surfaceの明るいバリエーション
+      dark: colors.stone11,
+      light: colors.stone07,
     },
     text: colors.white,
     secondary: {
@@ -24,9 +24,9 @@ const darkTheme: Theme = {
       light: colors.neutral09,
     },
     border: {
-      main: colors.stone09,
-      dark: colors.stone10,
-      light: colors.stone08,
+      main: colors.stone06,
+      dark: colors.stone05,
+      light: colors.stone04,
     },
     error: colors.error,
     disabled: colors.stone01,

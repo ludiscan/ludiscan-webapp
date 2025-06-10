@@ -1,10 +1,11 @@
 import styled from '@emotion/styled';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { BsPerson } from 'react-icons/bs';
+import { useCallback, useEffect, useMemo } from 'react';
+import { BiSearch } from 'react-icons/bi';
+import { BsGrid, BsPerson } from 'react-icons/bs';
 import { CiMap, CiMapPin, CiStreamOn } from 'react-icons/ci';
 import { FaFileExport } from 'react-icons/fa';
 import { IoIosInformationCircleOutline } from 'react-icons/io';
-import { MdKeyboardDoubleArrowRight, MdKeyboardDoubleArrowLeft } from 'react-icons/md';
+import { IoClose } from 'react-icons/io5';
 
 import type { Theme } from '@emotion/react';
 import type { HeatmapTask } from '@src/modeles/heatmaptask';
@@ -13,24 +14,26 @@ import type { FC, CSSProperties } from 'react';
 import type { Group } from 'three';
 
 import { Button } from '@src/component/atoms/Button';
-import { Card } from '@src/component/atoms/Card';
 import { FlexColumn, FlexRow, InlineFlexColumn, InlineFlexRow } from '@src/component/atoms/Flex';
-import { Selector } from '@src/component/atoms/Selector';
 import { Slider } from '@src/component/atoms/Slider';
 import { Switch } from '@src/component/atoms/Switch';
 import { Text } from '@src/component/atoms/Text';
 import { Toggle } from '@src/component/atoms/Toggle';
 import { Tooltip } from '@src/component/atoms/Tooltip';
+import { SegmentedSwitch } from '@src/component/molecules/SegmentedSwitch';
+import { Selector } from '@src/component/molecules/Selector';
+import { TextField } from '@src/component/molecules/TextField';
 import { useCanvasState } from '@src/hooks/useCanvasState';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { ObjectToggleList } from '@src/pages/heatmap/tasks/[task_id]/ObjectToggleList';
 import { fontSizes, fontWeights } from '@src/styles/style';
-import { canvasEventBus } from '@src/utils/canvasEventBus';
+import { heatMapEventBus } from '@src/utils/canvasEventBus';
+import { getRandomPrimitiveColor } from '@src/utils/color';
 
 export type HeatmapMenuProps = {
   model: Group | null;
   className?: string | undefined;
-  isMenuOpen: boolean;
+  name: Menus | undefined;
   toggleMenu: (value: boolean) => void;
   eventLogKeys?: string[] | undefined;
   task: HeatmapTask;
@@ -52,17 +55,37 @@ function toggleButtonStyle(theme: Theme): CSSProperties {
   };
 }
 
-const InputRow = ({ className, label, children }: { className?: string; label: string; children: React.ReactNode }) => {
+const InputRow = styled(({ className, label, children }: { className?: string; label: string; children: React.ReactNode }) => {
+  const { theme } = useSharedTheme();
   return (
-    <InlineFlexRow align={'flex-end'} wrap={'wrap'} gap={4} className={`${className}__row`}>
-      <Text text={label} fontSize={fontSizes.small} />
-      <div style={{ flex: 1 }} />
-      {children}
-    </InlineFlexRow>
+    <div className={className}>
+      <InlineFlexRow align={'center'} wrap={'nowrap'} gap={4}>
+        <Text text={label} fontSize={fontSizes.small} style={{ width: '90px' }} color={theme.colors.secondary.light} />
+        <div style={{ flex: 1 }}>{children}</div>
+      </InlineFlexRow>
+    </div>
   );
-};
+})`
+  position: relative;
+  width: 100%;
+  padding: 4px 8px;
+`;
 
-const InfoContent: FC<HeatmapMenuProps> = ({ className, task, handleExportView }) => {
+const InputColumn = styled(({ className, label, children }: { className?: string; label: string; children: React.ReactNode }) => {
+  const { theme } = useSharedTheme();
+  return (
+    <InlineFlexColumn className={className} align={'flex-start'} wrap={'nowrap'} gap={2}>
+      <Text text={label} fontSize={fontSizes.small} style={{ width: '110px' }} color={theme.colors.secondary.light} />
+      <div style={{ width: '100%' }}>{children}</div>
+    </InlineFlexColumn>
+  );
+})`
+  position: relative;
+  width: 100%;
+  padding: 4px 8px;
+`;
+
+const InfoContent: FC<HeatmapMenuProps> = ({ task, handleExportView }) => {
   const { version } = useCanvasState();
 
   const handleExportHeatmap = useCallback(async () => {
@@ -71,27 +94,27 @@ const InfoContent: FC<HeatmapMenuProps> = ({ className, task, handleExportView }
 
   return (
     <InlineFlexColumn gap={4}>
-      <InlineFlexRow className={`${className}__row`} align={'center'} gap={4}>
+      <InlineFlexRow align={'center'} gap={4}>
         <Text text={`version: ${version}`} fontSize={fontSizes.small} />
       </InlineFlexRow>
-      <InlineFlexRow className={`${className}__row`} align={'center'} gap={4}>
+      <InlineFlexRow align={'center'} gap={4}>
         <Text text={`taskId: ${task.taskId}`} fontSize={fontSizes.small} />
       </InlineFlexRow>
-      <InlineFlexRow className={`${className}__row`} align={'center'} gap={4}>
+      <InlineFlexRow align={'center'} gap={4}>
         <Text text={`project: ${task.project.name}`} fontSize={fontSizes.small} />
       </InlineFlexRow>
       {task.session && (
-        <InlineFlexRow className={`${className}__row`} align={'center'} gap={4}>
+        <InlineFlexRow align={'center'} gap={4}>
           <Text text={`session: ${task.session.name}`} fontSize={fontSizes.small} />
         </InlineFlexRow>
       )}
-      <InlineFlexRow className={`${className}__row`} align={'center'} gap={4}>
+      <InlineFlexRow align={'center'} gap={4}>
         <Text text={`step size: ${task.stepSize}`} fontSize={fontSizes.small} />
       </InlineFlexRow>
-      <InlineFlexRow className={`${className}__row`} align={'center'} gap={4}>
+      <InlineFlexRow align={'center'} gap={4}>
         <Text text={`mode: ${task.zVisible ? '3D' : '2D'}`} fontSize={fontSizes.small} />
       </InlineFlexRow>
-      <InlineFlexRow className={`${className}__row`} align={'center'} gap={8} style={{ marginTop: 8, justifyContent: 'center' }}>
+      <InlineFlexRow align={'center'} gap={8} style={{ marginTop: 8, justifyContent: 'center' }}>
         <Button onClick={handleExportHeatmap} scheme={'primary'} fontSize={'small'}>
           <FaFileExport style={{ marginRight: 4 }} />
           <Text text={'エクスポート'} fontSize={fontSizes.small} fontWeight={fontWeights.bold} />
@@ -137,6 +160,9 @@ const HotspotContent: FC<HeatmapMenuProps> = ({ className }) => {
 const MapContent: FC<HeatmapMenuProps> = ({ className, mapOptions, model }) => {
   const { theme } = useSharedTheme();
   const { setGeneral, general } = useCanvasState();
+  const handleAddWaypoint = useCallback(() => {
+    heatMapEventBus.emit('add-waypoint');
+  }, []);
   return (
     <InlineFlexColumn gap={8}>
       <InputRow label={'visualize map'}>
@@ -145,9 +171,13 @@ const MapContent: FC<HeatmapMenuProps> = ({ className, mapOptions, model }) => {
           onChange={(mapName) => setGeneral({ ...general, mapName })}
           options={mapOptions}
           value={general.mapName}
+          fontSize={'small'}
           disabled={mapOptions.length === 0}
         />
       </InputRow>
+      <Button scheme={'surface'} fontSize={'medium'} onClick={handleAddWaypoint}>
+        <Text text={'add waypoint'} />
+      </Button>
       {model && (
         <Toggle label={<Text text={'map'} />} className={`${className}__toggle`} buttonStyle={toggleButtonStyle(theme)}>
           <div className={`${className}__meshesRow`}>
@@ -159,41 +189,43 @@ const MapContent: FC<HeatmapMenuProps> = ({ className, mapOptions, model }) => {
   );
 };
 
-const GeneralContent: FC<HeatmapMenuProps> = ({ className }) => {
-  const { theme } = useSharedTheme();
+const GeneralContent: FC<HeatmapMenuProps> = () => {
   const { general, setGeneral } = useCanvasState();
-  const handleReload = useCallback(() => {
-    canvasEventBus.emit('invalidate');
-  }, []);
+  const handleReload = useCallback(() => {}, []);
   return (
-    <InlineFlexColumn gap={8}>
-      <Toggle label={<Text text={'general'} />} className={`${className}__toggle`} buttonStyle={toggleButtonStyle(theme)}>
-        <InputRow label={'上向ベクトル'}>
-          <InlineFlexRow gap={8} align={'center'}>
-            <Text text='y' fontSize={fontSizes.medium} />
-            <Switch label={'z up'} onChange={(value) => setGeneral({ ...general, upZ: value })} checked={general.upZ} size={'small'} />
-            <Text text='z' fontSize={fontSizes.medium} />
-          </InlineFlexRow>
-        </InputRow>
-        <InputRow label={'scale'}>
-          <Tooltip tooltip={String(general.scale)} className={`${className}__input`} placement={'left'}>
-            <Slider value={general.scale} onChange={(scale) => setGeneral({ ...general, scale })} min={0.1} step={0.05} max={1.0} />
-          </Tooltip>
-        </InputRow>
-        <InputRow label={'showHeatmap'}>
+    <InlineFlexColumn gap={4}>
+      <InputRow label={'上向ベクトル'}>
+        <SegmentedSwitch
+          fontSize={'smallest'}
+          value={general.upZ ? 'Z' : 'Y'}
+          options={['Y', 'Z']}
+          onChange={(v) => {
+            setGeneral({ ...general, upZ: v === 'Z' });
+          }}
+        />
+      </InputRow>
+      <InputColumn label={'scale'}>
+        <Slider value={general.scale} onChange={(scale) => setGeneral({ ...general, scale })} min={0.1} step={0.05} max={1.0} sideLabel textField />
+      </InputColumn>
+      <InputRow label={'showHeatmap'}>
+        <div>
           <Switch label={'showHeatmap'} onChange={(showHeatmap) => setGeneral({ ...general, showHeatmap })} checked={general.showHeatmap} size={'small'} />
-        </InputRow>
-        <InputRow label={'blockSize'}>
-          <Tooltip tooltip={String(general.blockSize)} className={`${className}__input`} placement={'left'}>
-            <Slider value={general.blockSize} onChange={(blockSize) => setGeneral({ ...general, blockSize })} min={50} step={50} max={500} />
-          </Tooltip>
-        </InputRow>
-        <InputRow label={'minThreshold'}>
-          <Tooltip tooltip={String(general.minThreshold)} className={`${className}__input`} placement={'left'}>
-            <Slider value={general.minThreshold} onChange={(minThreshold) => setGeneral({ ...general, minThreshold })} min={0} step={0.001} max={0.3} />
-          </Tooltip>
-        </InputRow>
-      </Toggle>
+        </div>
+      </InputRow>
+      <InputColumn label={'blockSize'}>
+        <Slider value={general.blockSize} onChange={(blockSize) => setGeneral({ ...general, blockSize })} min={50} step={50} max={500} sideLabel textField />
+      </InputColumn>
+      <InputColumn label={'minThreshold'}>
+        <Slider
+          value={general.minThreshold}
+          onChange={(minThreshold) => setGeneral({ ...general, minThreshold })}
+          min={0}
+          step={0.001}
+          max={0.3}
+          sideLabel
+          textField
+        />
+      </InputColumn>
       <InputRow label={''}>
         <div style={{ flex: 1 }} />
         <Button onClick={handleReload} scheme={'surface'} fontSize={'small'}>
@@ -204,7 +236,7 @@ const GeneralContent: FC<HeatmapMenuProps> = ({ className }) => {
   );
 };
 
-const EventLogContent: FC<HeatmapMenuProps> = ({ className, eventLogKeys }) => {
+const EventLogContent: FC<HeatmapMenuProps> = ({ eventLogKeys }) => {
   const { eventLogs, setEventLogs } = useCanvasState();
 
   useEffect(() => {
@@ -220,10 +252,11 @@ const EventLogContent: FC<HeatmapMenuProps> = ({ className, eventLogKeys }) => {
       }
       const eventLogDats: EventLogData[] = eventLogKeys.map((key) => {
         const index = eventLogs.findIndex((e) => e.key === key);
+        // console.log(eventLogs[index]?.color);
         return {
           key,
           visible: index !== -1 ? eventLogs[index].visible : false,
-          color: eventLogs[index]?.color || '#000000',
+          color: eventLogs[index]?.color || getRandomPrimitiveColor(),
         };
       });
       setEventLogs(eventLogDats);
@@ -232,13 +265,13 @@ const EventLogContent: FC<HeatmapMenuProps> = ({ className, eventLogKeys }) => {
 
   return (
     <InlineFlexColumn gap={8}>
-      <InlineFlexRow className={`${className}__row`} align={'center'} gap={4}>
+      <InlineFlexRow align={'center'} gap={4}>
         <Text text={'Event Log'} fontSize={fontSizes.large1} fontWeight={fontWeights.bold} />
       </InlineFlexRow>
-      <InlineFlexRow className={`${className}__row`} align={'center'} gap={4}>
+      <InlineFlexRow align={'center'} gap={4}>
         <Text text={'Event Log Keys'} fontSize={fontSizes.small} />
       </InlineFlexRow>
-      <InlineFlexRow className={`${className}__row`} align={'center'} gap={4}>
+      <InlineFlexRow align={'center'} gap={4}>
         {eventLogKeys?.map((key) => {
           const index = eventLogs.findIndex((e) => e.key === key);
           return (
@@ -259,7 +292,7 @@ const EventLogContent: FC<HeatmapMenuProps> = ({ className, eventLogKeys }) => {
               />
               <input
                 type={'color'}
-                color={eventLogs[index]?.color}
+                color={eventLogs[index].color}
                 onChange={(e) => {
                   const newEventLogs = eventLogs.map((e) => ({ ...e }));
                   if (index !== -1) {
@@ -278,22 +311,44 @@ const EventLogContent: FC<HeatmapMenuProps> = ({ className, eventLogKeys }) => {
   );
 };
 
-type Menus = 'info' | 'map' | 'general' | 'hotspot' | 'eventlog';
-
-const Contents = [
-  { name: 'info', Component: InfoContent },
-  { name: 'general', Component: GeneralContent },
-  { name: 'map', Component: MapContent },
-  { name: 'hotspot', Component: HotspotContent },
-  { name: 'eventlog', Component: EventLogContent },
+export const MenuContents = [
+  {
+    name: 'info',
+    icon: <IoIosInformationCircleOutline />,
+    Component: InfoContent,
+  },
+  {
+    name: 'general',
+    icon: <BsPerson />,
+    Component: GeneralContent,
+  },
+  {
+    name: 'map',
+    icon: <CiMap />,
+    Component: MapContent,
+  },
+  {
+    name: 'hotspot',
+    icon: <CiMapPin />,
+    Component: HotspotContent,
+  },
+  {
+    name: 'eventlog',
+    icon: <CiStreamOn />,
+    Component: EventLogContent,
+  },
+  {
+    name: 'more',
+    icon: <BsGrid />,
+    Component: () => <Text text={'More'} fontSize={fontSizes.large1} fontWeight={fontWeights.bold} />,
+  },
 ];
 
-const Component: FC<HeatmapMenuProps> = (props) => {
-  const { theme } = useSharedTheme();
-  const { className, isMenuOpen, toggleMenu, mapOptions } = props;
-  const { general, setGeneral } = useCanvasState();
+export type Menus = (typeof MenuContents)[number]['name'];
 
-  const [menu, setMenu] = useState<Menus>('info');
+const Component: FC<HeatmapMenuProps> = (props) => {
+  const { className, name, mapOptions, toggleMenu } = props;
+  const { general, setGeneral } = useCanvasState();
 
   useEffect(() => {
     if ((!general.mapName || general.mapName === '') && mapOptions.length > 0) {
@@ -302,85 +357,40 @@ const Component: FC<HeatmapMenuProps> = (props) => {
       setGeneral({ ...general, mapName: '' });
     }
   }, [general, general.mapName, mapOptions, setGeneral]);
-  const content = useMemo(() => Contents.find((content) => content.name === menu), [menu]);
+  const content = useMemo(() => MenuContents.find((content) => content.name === name), [name]);
+
+  if (!content) {
+    return null;
+  }
   return (
-    <div>
-      <Card className={`${className}`} color={theme.colors.surface.light} shadow={'medium'} padding={'0'}>
-        <FlexRow>
-          {isMenuOpen && (
-            <FlexColumn className={`${className}__content`} gap={8} align={'center'}>
-              <InlineFlexRow className={`${className}__row`} align={'center'} gap={4}>
-                <Text text={'Edit'} fontSize={fontSizes.large1} fontWeight={fontWeights.bold} />
-              </InlineFlexRow>
-              {content && <content.Component {...props} />}
-            </FlexColumn>
-          )}
-          <FlexColumn className={`${className}__menu`} gap={4} align={'center'}>
-            <div className={`${className}__menuButton`}>
-              <Button onClick={() => toggleMenu(!isMenuOpen)} scheme={'none'} fontSize={'large3'}>
-                {isMenuOpen ? <MdKeyboardDoubleArrowRight /> : <MdKeyboardDoubleArrowLeft />}
-              </Button>
-            </div>
-            <div className={`${className}__menuButton`}>
-              <Button onClick={() => setMenu('info')} scheme={'none'} fontSize={'large3'}>
-                <IoIosInformationCircleOutline />
-              </Button>
-            </div>
-            <div className={`${className}__menuButton`}>
-              <Button onClick={() => setMenu('general')} scheme={'none'} fontSize={'large3'}>
-                <BsPerson />
-              </Button>
-            </div>
-            <div className={`${className}__menuButton`}>
-              <Tooltip tooltip={'map'}>
-                <Button onClick={() => setMenu('map')} scheme={'none'} fontSize={'largest'}>
-                  <CiMap />
-                </Button>
-              </Tooltip>
-            </div>
-            <div className={`${className}__menuButton`}>
-              <Tooltip tooltip={'hotspot'}>
-                <Button onClick={() => setMenu('hotspot')} scheme={'none'} fontSize={'largest'}>
-                  <CiMapPin />
-                </Button>
-              </Tooltip>
-            </div>
-            <div className={`${className}__menuButton`}>
-              <Tooltip tooltip={'custom event'}>
-                <Button onClick={() => setMenu('eventlog')} scheme={'none'} fontSize={'largest'}>
-                  <CiStreamOn />
-                </Button>
-              </Tooltip>
-            </div>
-          </FlexColumn>
-        </FlexRow>
-      </Card>
+    <div className={className}>
+      <FlexColumn gap={8} align={'flex-start'} className={`${className}__content`}>
+        <InlineFlexRow align={'center'} gap={16} style={{ width: '100%' }}>
+          <div style={{ flex: 1 }}>
+            <FlexRow align={'space-between'} className={`${className}__searchBox`}>
+              <TextField fontSize={fontSizes.medium} onChange={() => {}} placeholder={'search menu...'} />
+              <BiSearch />
+            </FlexRow>
+          </div>
+          <Button onClick={() => toggleMenu(false)} scheme={'none'} fontSize={'small'}>
+            <IoClose />
+          </Button>
+        </InlineFlexRow>
+        {content && <content.Component {...props} />}
+      </FlexColumn>
     </div>
   );
 };
 
-export const HeatmapMenu = styled(Component)`
-  max-width: 380px;
-  max-height: 60vh;
-
-  &__menu {
-    width: 20px;
-    height: 100%;
-    padding: 8px;
-    overflow: hidden auto;
-  }
-
-  &__menuButton {
-    border-bottom: 1px solid ${({ theme }) => theme.colors.border.main};
-  }
+export const HeatmapMenuContent = styled(Component)`
+  width: 280px;
+  height: 100%;
+  color: ${({ theme }) => theme.colors.text};
+  background: ${({ theme }) => theme.colors.surface.main};
 
   &__content {
-    flex: 1;
-    align-items: start;
-    width: 100%;
     padding: 16px;
     overflow: hidden auto;
-    border-right: 1px solid ${({ theme }) => theme.colors.border.main};
   }
 
   &__toggle {
@@ -389,14 +399,31 @@ export const HeatmapMenu = styled(Component)`
     border: none;
   }
 
+  &__searchBox {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+    padding: 2px 8px;
+    font-size: ${fontSizes.small};
+    font-weight: ${fontWeights.bold};
+    color: ${({ theme }) => theme.colors.text};
+    background: ${({ theme }) => theme.colors.surface.dark};
+    border-radius: 12px;
+
+    & input {
+      flex: 1;
+      color: ${({ theme }) => theme.colors.text};
+      outline: none;
+      background: transparent;
+      border: none;
+    }
+  }
+
   &__meshesRow {
     max-height: 200px;
     padding: 0 8px;
     overflow: hidden auto;
-  }
-
-  &__row {
-    width: 100%;
   }
 
   &__label {
