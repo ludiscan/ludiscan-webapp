@@ -149,7 +149,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
       try {
         // 現在のホストからAPIエンドポイントのURLを作成
         const currentUrl = window.location.origin;
-        const bundleUrl = `${currentUrl}/ludiscan/view/api/export-heatmap-bundle`;
+        const bundleUrl = `${currentUrl}/api/export-heatmap-bundle`;
         // eslint-disable-next-line
         console.log('バンドルJSを取得します:', bundleUrl);
 
