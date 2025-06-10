@@ -290,19 +290,21 @@ const EventLogContent: FC<HeatmapMenuProps> = ({ eventLogKeys }) => {
                 checked={index !== -1 ? eventLogs[index].visible : false}
                 size={'small'}
               />
-              <input
-                type={'color'}
-                color={eventLogs[index].color}
-                onChange={(e) => {
-                  const newEventLogs = eventLogs.map((e) => ({ ...e }));
-                  if (index !== -1) {
-                    newEventLogs[index].color = e.target.value;
-                  } else {
-                    newEventLogs.push({ key, visible: false, color: e.target.value });
-                  }
-                  setEventLogs(newEventLogs);
-                }}
-              />
+              {eventLogs[index] && eventLogs[index].color && (
+                <input
+                  type={'color'}
+                  color={eventLogs[index].color}
+                  onChange={(e) => {
+                    const newEventLogs = eventLogs.map((e) => ({ ...e }));
+                    if (index !== -1) {
+                      newEventLogs[index].color = e.target.value;
+                    } else {
+                      newEventLogs.push({ key, visible: false, color: e.target.value });
+                    }
+                    setEventLogs(newEventLogs);
+                  }}
+                />
+              )}
             </InputRow>
           );
         })}

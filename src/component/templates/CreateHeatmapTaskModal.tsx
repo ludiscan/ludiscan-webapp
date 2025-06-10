@@ -71,6 +71,7 @@ async function projectCreateTask(env: Env, projectId: number, stepSize: number, 
 }
 
 const Component: FC<CreateHeatmapTaskSessionModalProps | CreateHeatmapTaskProjectModalProps> = (props) => {
+  const { env, isOpen, onClose, className } = props;
   const [stepSize, setStepSize] = useState(100);
   const [zVisible, setZVisible] = useState(true);
   const router = useRouter();
@@ -81,17 +82,17 @@ const Component: FC<CreateHeatmapTaskSessionModalProps | CreateHeatmapTaskProjec
     isSuccess,
     data: task,
   } = useMutation({
-    mutationKey: ['createProjectTask', props, stepSize, zVisible],
+    mutationKey: ['createProjectTask', env, stepSize, zVisible],
     mutationFn: async (dto: CreateTask) => {
       const { projectId, sessionId } = dto;
-      if (!projectId || projectId === 0 || !props.env) {
+      if (!projectId || projectId === 0 || !env) {
         return undefined;
       }
 
       const { data, error } =
         sessionId && sessionId !== 0
-          ? await sessionCreateTask(props.env, projectId, sessionId, stepSize, zVisible)
-          : await projectCreateTask(props.env, projectId, stepSize, zVisible);
+          ? await sessionCreateTask(env, projectId, sessionId, stepSize, zVisible)
+          : await projectCreateTask(env, projectId, stepSize, zVisible);
       if (error) return undefined;
       return data;
     },
@@ -102,8 +103,6 @@ const Component: FC<CreateHeatmapTaskSessionModalProps | CreateHeatmapTaskProjec
       }
     },
   });
-
-  const { className, onClose, isOpen } = props;
 
   const handleZVisibleChange = useCallback((checked: boolean) => {
     setZVisible(checked);

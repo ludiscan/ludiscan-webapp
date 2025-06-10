@@ -1,5 +1,5 @@
-import darkTheme from '../../styles/dark';
-import lightTheme from '../../styles/light';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
 import { Button } from '../atoms/Button';
 import { Text } from '../atoms/Text';
 
@@ -7,26 +7,29 @@ import { CreateHeatmapTaskModal } from './CreateHeatmapTaskModal';
 
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
+const queryClient = new QueryClient();
 
 export default {
   component: CreateHeatmapTaskModal,
   controls: { hideNoControlsWarning: true },
+  decorators: [
+    (Story) => (
+      <QueryClientProvider client={queryClient}>
+        <Story />
+      </QueryClientProvider>
+    ),
+  ],
 } as Meta;
 type Story = StoryObj<typeof CreateHeatmapTaskModal>;
 
 const Template: Story = {
   render: (args) => {
     return (
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      <SharedThemeProvider initialTheme={args.type === 'light' ? lightTheme : darkTheme}>
-        <CreateHeatmapTaskModal {...args}>
-          <Button onClick={() => {}} scheme={'primary'} fontSize={'medium'}>
-            <Text text={'Close'} />
-          </Button>
-        </CreateHeatmapTaskModal>
-      </SharedThemeProvider>
+      <CreateHeatmapTaskModal {...args}>
+        <Button onClick={() => {}} scheme={'primary'} fontSize={'medium'}>
+          <Text text={'Close'} />
+        </Button>
+      </CreateHeatmapTaskModal>
     );
   },
 };

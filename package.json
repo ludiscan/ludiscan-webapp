@@ -5,7 +5,7 @@
     "node": "23.6.x",
     "npm": "10.x"
   },
-  "version": "0.7.1",
+  "version": "0.7.2",
   "scripts": {
     "dev": "next dev --turbopack -p 5173",
     "build:dev": "next build --turbopack",
@@ -26,6 +26,7 @@
     "release:major": "npm version major --message 'v%s' && git push && git push origin --tags",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
+    "test-storybook": "test-storybook --config-dir .storybook",
     "generate:api-schemes": "npx openapi-typescript https://matuyuhi.com/api-json --output generated/api.d.ts",
     "build:heatmap-bundle": "node scripts/create-heatmap-bundle.js",
     "prebuild:prod": "npm run build:heatmap-bundle"
@@ -65,9 +66,11 @@
     "@storybook/addon-onboarding": "^8.6.12",
     "@storybook/blocks": "^8.6.12",
     "@storybook/experimental-addon-test": "^8.6.12",
+    "@storybook/jest": "0.2.2",
     "@storybook/nextjs": "^8.6.12",
     "@storybook/react": "^8.6.12",
     "@storybook/test": "^8.6.12",
+    "@storybook/test-runner": "^0.22.1",
     "@swc/core": "^1.11.20",
     "@tanstack/eslint-plugin-query": "^5.64.2",
     "@types/jest": "^29.5.14",
