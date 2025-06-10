@@ -97,7 +97,7 @@ export const HeatmapIdPageLayout = styled(HeatmapIdPageLayoutComponent)`
   }
 `;
 
-const Component: FC<HeatMapTaskIdPageProps> = ({ className, env, taskId }) => {
+const HeatMapTaskIdPage: FC<HeatMapTaskIdPageProps> = ({ className, env, taskId }) => {
   const timer = useRef<NodeJS.Timeout>(undefined);
 
   const router = useRouter();
@@ -151,7 +151,5 @@ const Component: FC<HeatMapTaskIdPageProps> = ({ className, env, taskId }) => {
 
   return <HeatmapIdPageLayout className={className} service={service} version={version ? `v${version}` : '---'} onBackClick={handleBackClick} />;
 };
-
-export const HeatMapTaskIdPage = styled(Component);
 
 export default HeatMapTaskIdPage;
