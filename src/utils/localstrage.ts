@@ -56,3 +56,21 @@ export function getCanvasValues(): CanvasEventValues | null {
   }
   return null;
 }
+
+export function saveThemeName(theme: 'light' | 'dark'): void {
+  const storage = localStorage.getItem(STORAGE_KEY);
+  if (storage) {
+    const data = JSON.parse(storage);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...data, theme }));
+  } else {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ theme }));
+  }
+}
+
+export function getThemeName(): 'light' | 'dark' | null {
+  const storage = localStorage.getItem(STORAGE_KEY);
+  if (storage) {
+    return JSON.parse(storage).theme || null;
+  }
+  return null;
+}
