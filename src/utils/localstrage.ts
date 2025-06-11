@@ -69,3 +69,21 @@ export function loadCanvasPartial<T>(key: keyof HeatmapDataState): T {
   if (storage) return storage[key] as T;
   throw new Error(`No data for key: ${key}`);
 }
+
+export function saveThemeName(theme: 'light' | 'dark'): void {
+  const storage = localStorage.getItem(STORAGE_KEY);
+  if (storage) {
+    const data = JSON.parse(storage);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...data, theme }));
+  } else {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ theme }));
+  }
+}
+
+export function getThemeName(): 'light' | 'dark' | null {
+  const storage = localStorage.getItem(STORAGE_KEY);
+  if (storage) {
+    return JSON.parse(storage).theme || null;
+  }
+  return null;
+}
