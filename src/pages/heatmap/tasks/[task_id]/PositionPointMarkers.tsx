@@ -3,7 +3,7 @@ import { Color, Vector3 } from 'three';
 
 import type { FC } from 'react';
 
-import { useCanvasState } from '@src/hooks/useCanvasState';
+import { useGeneralState } from '@src/hooks/useHeatmapState';
 
 export type PointMarkersProps = {
   points: { x: number; y: number; z?: number | undefined; density: number }[];
@@ -43,8 +43,8 @@ class Point extends Vector3 {
 
 const Component: FC<PointMarkersProps> = ({ points, colorIntensity = 0.9, colorScale = 1 }) => {
   const {
-    general: { upZ, scale, minThreshold = 0.0, maxThreshold = 1.0 },
-  } = useCanvasState();
+    data: { upZ, scale, minThreshold = 0.0, maxThreshold = 1.0 },
+  } = useGeneralState();
 
   // Z-up / Y-up の変換
   const pointList = useMemo(

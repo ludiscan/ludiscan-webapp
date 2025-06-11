@@ -12,7 +12,7 @@ import type { HeatmapDataService, OfflineHeatmapData } from '@src/utils/heatmap/
 import type { FC } from 'react';
 
 import { FlexRow } from '@src/component/atoms/Flex';
-import { useCanvasState } from '@src/hooks/useCanvasState';
+import { useHeatmapState } from '@src/hooks/useHeatmapState';
 import { HeatMapCanvas } from '@src/pages/heatmap/tasks/[task_id]/HeatmapCanvas';
 import { HeatmapMenuContent } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenuContent';
 import { HeatmapMenuSideBar } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenuSideBar';
@@ -36,7 +36,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [openMenu, setOpenMenu] = useState<Menus | undefined>(undefined);
 
-  const state = useCanvasState();
+  const state = useHeatmapState();
 
   const task = useMemo(() => dataService.getTask(), [dataService]);
 
@@ -133,10 +133,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
       // 3. データJSONの作成（mapContentをBase64で埋め込み）
       const heatmapData: OfflineHeatmapData = {
         task: task,
-        canvasState: {
-          ...state,
-          initialized: true,
-        },
+        canvasState: state,
         mapList: mapList ?? [],
         mapContentBase64: mapContentBase64, // Base64エンコードしたモデルデータ
         generalLogKeys: generalLogKeys ?? null,
