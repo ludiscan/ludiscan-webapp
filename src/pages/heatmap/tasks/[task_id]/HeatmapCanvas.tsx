@@ -10,7 +10,7 @@ import type { FC } from 'react';
 import type { Group } from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 
-import { useCanvasState } from '@src/hooks/useCanvasState';
+import { useEventLogsState, useGeneralState } from '@src/hooks/useHeatmapState';
 import { EventLogMarkers } from '@src/pages/heatmap/tasks/[task_id]/EventLogMarkers';
 import { HotspotCircles } from '@src/pages/heatmap/tasks/[task_id]/HotspotCircles';
 import { LocalModelLoader, StreamModelLoader } from '@src/pages/heatmap/tasks/[task_id]/ModelLoader';
@@ -33,9 +33,9 @@ type Waypoint = {
 const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, service }) => {
   // const { invalidate } = useThree();
   const {
-    general: { showHeatmap },
-    eventLogs,
-  } = useCanvasState();
+    data: { showHeatmap },
+  } = useGeneralState();
+  const { data: eventLogs } = useEventLogsState();
   const orbitControlsRef = useRef<OrbitControlsImpl>(null);
 
   const visibleEventLogs = useMemo(() => eventLogs.filter((event) => event.visible), [eventLogs]);
