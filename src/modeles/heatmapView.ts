@@ -4,6 +4,7 @@ export type EventLogData = {
   key: string;
   visible: boolean;
   color: string;
+  iconName: string;
 };
 
 export type GeneralSettings = {

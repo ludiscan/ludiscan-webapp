@@ -187,8 +187,7 @@ const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, s
       {modelType && model && modelType === 'server' && typeof map !== 'string' && <StreamModelLoader ref={modelRef} model={model} />}
       {pointList && showHeatmap && <PositionPointMarkers points={pointList} />}
       {pointList && showHeatmap && <HotspotCircles points={pointList} />}
-      {visibleEventLogs.length > 0 &&
-        visibleEventLogs.map((event) => <EventLogMarkers key={event.key} logName={event.key} service={service} color={event.color} />)}
+      {visibleEventLogs.length > 0 && visibleEventLogs.map((event) => <EventLogMarkers key={event.key} logName={event.key} service={service} pref={event} />)}
       {/* --- 追加：ウェイポイントを map して表示 --- */}
       {waypoints.map((wp) => (
         <WaypointMarker
