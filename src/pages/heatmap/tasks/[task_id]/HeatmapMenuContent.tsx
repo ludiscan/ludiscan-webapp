@@ -8,8 +8,8 @@ import { IoIosInformationCircleOutline } from 'react-icons/io';
 import { IoClose } from 'react-icons/io5';
 
 import type { Theme } from '@emotion/react';
+import type { EventLogData } from '@src/modeles/heatmapView';
 import type { HeatmapTask } from '@src/modeles/heatmaptask';
-import type { EventLogData } from '@src/slices/canvasSlice';
 import type { FC, CSSProperties } from 'react';
 import type { Group } from 'three';
 
@@ -23,7 +23,7 @@ import { Tooltip } from '@src/component/atoms/Tooltip';
 import { SegmentedSwitch } from '@src/component/molecules/SegmentedSwitch';
 import { Selector } from '@src/component/molecules/Selector';
 import { TextField } from '@src/component/molecules/TextField';
-import { useCanvasState } from '@src/hooks/useCanvasState';
+import { useEventLogsState, useGeneralState, useHotspotModeState, useVersion } from '@src/hooks/useHeatmapState';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { ObjectToggleList } from '@src/pages/heatmap/tasks/[task_id]/ObjectToggleList';
 import { fontSizes, fontWeights } from '@src/styles/style';
@@ -86,7 +86,7 @@ const InputColumn = styled(({ className, label, children }: { className?: string
 `;
 
 const InfoContent: FC<HeatmapMenuProps> = ({ task, handleExportView }) => {
-  const { version } = useCanvasState();
+  const { data: version } = useVersion();
 
   const handleExportHeatmap = useCallback(async () => {
     await handleExportView();
@@ -125,30 +125,24 @@ const InfoContent: FC<HeatmapMenuProps> = ({ task, handleExportView }) => {
 };
 
 const HotspotContent: FC<HeatmapMenuProps> = ({ className }) => {
-  const { setHotspotMode, hotspotMode } = useCanvasState();
+  const { data: hotspotMode, setData } = useHotspotModeState();
   return (
     <InlineFlexColumn gap={8}>
-      <Switch label={'visible'} onChange={(visible) => setHotspotMode({ ...hotspotMode, visible })} checked={hotspotMode.visible} size={'small'} />
+      <Switch label={'visible'} onChange={(visible) => setData({ ...hotspotMode, visible })} checked={hotspotMode.visible} size={'small'} />
       <InputRow label={'cellRadius'}>
         <Tooltip tooltip={String(hotspotMode.cellRadius)} className={`${className}__input`} placement={'left'}>
-          <Slider value={hotspotMode.cellRadius} onChange={(cellRadius) => setHotspotMode({ ...hotspotMode, cellRadius })} min={50} step={50} max={1000} />
+          <Slider value={hotspotMode.cellRadius} onChange={(cellRadius) => setData({ ...hotspotMode, cellRadius })} min={50} step={50} max={1000} />
         </Tooltip>
       </InputRow>
       <InputRow label={'表示数'}>
         <Tooltip tooltip={String(hotspotMode.thresholdCount)} className={`${className}__input`} placement={'left'}>
-          <Slider
-            value={hotspotMode.thresholdCount}
-            onChange={(thresholdCount) => setHotspotMode({ ...hotspotMode, thresholdCount })}
-            min={1}
-            step={1}
-            max={20}
-          />
+          <Slider value={hotspotMode.thresholdCount} onChange={(thresholdCount) => setData({ ...hotspotMode, thresholdCount })} min={1} step={1} max={20} />
         </Tooltip>
       </InputRow>
       <InputRow label={'重複'}>
         <Switch
           label={'skipDuplication'}
-          onChange={(skipNearDuplication) => setHotspotMode({ ...hotspotMode, skipNearDuplication })}
+          onChange={(skipNearDuplication) => setData({ ...hotspotMode, skipNearDuplication })}
           checked={hotspotMode.skipNearDuplication}
           size={'small'}
         />
@@ -159,7 +153,7 @@ const HotspotContent: FC<HeatmapMenuProps> = ({ className }) => {
 
 const MapContent: FC<HeatmapMenuProps> = ({ className, mapOptions, model }) => {
   const { theme } = useSharedTheme();
-  const { setGeneral, general } = useCanvasState();
+  const { data: general, setData } = useGeneralState();
   const handleAddWaypoint = useCallback(() => {
     heatMapEventBus.emit('add-waypoint');
   }, []);
@@ -168,7 +162,7 @@ const MapContent: FC<HeatmapMenuProps> = ({ className, mapOptions, model }) => {
       <InputRow label={'visualize map'}>
         <Selector
           className={`${className}__inputNewLine`}
-          onChange={(mapName) => setGeneral({ ...general, mapName })}
+          onChange={(mapName) => setData({ ...general, mapName })}
           options={mapOptions}
           value={general.mapName}
           fontSize={'small'}
@@ -190,7 +184,7 @@ const MapContent: FC<HeatmapMenuProps> = ({ className, mapOptions, model }) => {
 };
 
 const GeneralContent: FC<HeatmapMenuProps> = () => {
-  const { general, setGeneral } = useCanvasState();
+  const { data: general, setData } = useGeneralState();
   const handleReload = useCallback(() => {}, []);
   return (
     <InlineFlexColumn gap={4}>
@@ -200,25 +194,25 @@ const GeneralContent: FC<HeatmapMenuProps> = () => {
           value={general.upZ ? 'Z' : 'Y'}
           options={['Y', 'Z']}
           onChange={(v) => {
-            setGeneral({ ...general, upZ: v === 'Z' });
+            setData({ ...general, upZ: v === 'Z' });
           }}
         />
       </InputRow>
       <InputColumn label={'scale'}>
-        <Slider value={general.scale} onChange={(scale) => setGeneral({ ...general, scale })} min={0.1} step={0.05} max={1.0} sideLabel textField />
+        <Slider value={general.scale} onChange={(scale) => setData({ ...general, scale })} min={0.1} step={0.05} max={1.0} sideLabel textField />
       </InputColumn>
       <InputRow label={'showHeatmap'}>
         <div>
-          <Switch label={'showHeatmap'} onChange={(showHeatmap) => setGeneral({ ...general, showHeatmap })} checked={general.showHeatmap} size={'small'} />
+          <Switch label={'showHeatmap'} onChange={(showHeatmap) => setData({ ...general, showHeatmap })} checked={general.showHeatmap} size={'small'} />
         </div>
       </InputRow>
       <InputColumn label={'blockSize'}>
-        <Slider value={general.blockSize} onChange={(blockSize) => setGeneral({ ...general, blockSize })} min={50} step={50} max={500} sideLabel textField />
+        <Slider value={general.blockSize} onChange={(blockSize) => setData({ ...general, blockSize })} min={50} step={50} max={500} sideLabel textField />
       </InputColumn>
       <InputColumn label={'minThreshold'}>
         <Slider
           value={general.minThreshold}
-          onChange={(minThreshold) => setGeneral({ ...general, minThreshold })}
+          onChange={(minThreshold) => setData({ ...general, minThreshold })}
           min={0}
           step={0.001}
           max={0.3}
@@ -237,7 +231,7 @@ const GeneralContent: FC<HeatmapMenuProps> = () => {
 };
 
 const EventLogContent: FC<HeatmapMenuProps> = ({ eventLogKeys }) => {
-  const { eventLogs, setEventLogs } = useCanvasState();
+  const { data: eventLogs, setData: setEventLogs } = useEventLogsState();
 
   useEffect(() => {
     if (eventLogKeys) {
@@ -350,7 +344,7 @@ export type Menus = (typeof MenuContents)[number]['name'];
 
 const Component: FC<HeatmapMenuProps> = (props) => {
   const { className, name, mapOptions, toggleMenu } = props;
-  const { general, setGeneral } = useCanvasState();
+  const { data: general, setData: setGeneral } = useGeneralState();
 
   useEffect(() => {
     if ((!general.mapName || general.mapName === '') && mapOptions.length > 0) {

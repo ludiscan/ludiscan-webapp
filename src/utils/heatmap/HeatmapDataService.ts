@@ -1,8 +1,8 @@
 import { useCallback, useState } from 'react';
 
 import type { Env } from '@src/modeles/env';
+import type { HeatmapStates } from '@src/modeles/heatmapView';
 import type { HeatmapTask, PositionEventLog } from '@src/modeles/heatmaptask';
-import type { CanvasEventValues } from '@src/slices/canvasSlice';
 
 import { createClient } from '@src/modeles/qeury';
 
@@ -28,7 +28,7 @@ export type HeatmapDataService = {
 // データ型定義
 export type OfflineHeatmapData = {
   task: HeatmapTask;
-  canvasState: CanvasEventValues;
+  canvasState: HeatmapStates;
   mapList: string[];
   mapContentBase64: string | null; // mapFileNameをmapContentBase64に変更（Base64エンコードされたモデルデータ）
   generalLogKeys: string[] | null;

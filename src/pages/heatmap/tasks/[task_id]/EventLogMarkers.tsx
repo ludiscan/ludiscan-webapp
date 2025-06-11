@@ -4,7 +4,7 @@ import { Vector3 } from 'three';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC } from 'react';
 
-import { useCanvasState } from '@src/hooks/useCanvasState';
+import { useGeneralState } from '@src/hooks/useHeatmapState';
 
 export type EventLogMarkersProps = {
   service: HeatmapDataService;
@@ -14,8 +14,8 @@ export type EventLogMarkersProps = {
 
 const Component: FC<EventLogMarkersProps> = ({ logName, service, color }) => {
   const {
-    general: { upZ },
-  } = useCanvasState();
+    data: { upZ = false },
+  } = useGeneralState();
   const { data } = useQuery({
     queryKey: ['eventLogMarkers', logName],
     queryFn: async () => {

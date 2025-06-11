@@ -6,7 +6,7 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import type { FC, RefObject } from 'react';
 import type { Group } from 'three';
 
-import { useCanvasState } from '@src/hooks/useCanvasState';
+import { useGeneralState } from '@src/hooks/useHeatmapState';
 
 type LocalModelLoaderProps = {
   modelPath: string;
@@ -16,8 +16,8 @@ type LocalModelLoaderProps = {
 
 const LocalModelLoaderContent: FC<LocalModelLoaderProps> = ({ modelPath, modelType, ref }) => {
   const {
-    general: { scale },
-  } = useCanvasState();
+    data: { scale },
+  } = useGeneralState();
   const model = useLoader(modelType == 'obj' ? OBJLoader : GLTFLoader, modelPath);
   return (
     <group
@@ -70,8 +70,8 @@ export function useOBJFromArrayBuffer(arrayBuffer: ArrayBuffer | null): Group | 
 
 const StreamModelLoaderComponent: FC<StreamModelLoaderProps> = ({ model, ref }) => {
   const {
-    general: { scale },
-  } = useCanvasState();
+    data: { scale },
+  } = useGeneralState();
   return (
     <Suspense fallback={null}>
       <group
