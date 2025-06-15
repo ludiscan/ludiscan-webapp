@@ -104,10 +104,10 @@ const Component: FC<PointMarkersProps> = ({ points, colorIntensity = 0.9, colorS
         // interpolate between blue and red
         const color = getColor(t, MIN_COLOR, MAX_COLOR);
 
-        return new Point(x * scale, y * scale, z * scale, color);
+        return new Point(x, y, z, color);
       })
       .filter((s) => s != null);
-  }, [maxThreshold, minThreshold, normalizePoints, scale]);
+  }, [maxThreshold, minThreshold, normalizePoints]);
 
   return (
     <>

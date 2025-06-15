@@ -1,4 +1,4 @@
-import { OrbitControls } from '@react-three/drei';
+import { OrbitControls, Stats } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Raycaster, Vector2, Vector3 } from 'three';
@@ -187,8 +187,7 @@ const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, s
       {modelType && model && modelType === 'server' && typeof map !== 'string' && <StreamModelLoader ref={modelRef} model={model} />}
       {pointList && showHeatmap && <PositionPointMarkers points={pointList} />}
       {pointList && showHeatmap && <HotspotCircles points={pointList} />}
-      {visibleEventLogs.length > 0 &&
-        visibleEventLogs.map((event) => <EventLogMarkers key={event.key} logName={event.key} service={service} color={event.color} />)}
+      {visibleEventLogs.length > 0 && visibleEventLogs.map((event) => <EventLogMarkers key={event.key} logName={event.key} service={service} pref={event} />)}
       {/* --- 追加：ウェイポイントを map して表示 --- */}
       {waypoints.map((wp) => (
         <WaypointMarker
@@ -212,6 +211,7 @@ const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, s
         />
       ))}
       <OrbitControls enableZoom enablePan enableRotate ref={orbitControlsRef} position0={new Vector3(1, 1, 3000)} />
+      <Stats />
     </>
   );
 };

@@ -251,6 +251,7 @@ const EventLogContent: FC<HeatmapMenuProps> = ({ eventLogKeys }) => {
           key,
           visible: index !== -1 ? eventLogs[index].visible : false,
           color: eventLogs[index]?.color || getRandomPrimitiveColor(),
+          iconName: eventLogs[index]?.iconName || 'CiStreamOn',
         };
       });
       setEventLogs(eventLogDats);
@@ -277,7 +278,7 @@ const EventLogContent: FC<HeatmapMenuProps> = ({ eventLogKeys }) => {
                   if (index !== -1) {
                     newEventLogs[index].visible = checked;
                   } else {
-                    newEventLogs.push({ key, visible: checked, color: '#000000' });
+                    newEventLogs.push({ key, visible: checked, color: '#000000', iconName: 'CiStreamOn' });
                   }
                   setEventLogs(newEventLogs);
                 }}
@@ -293,7 +294,7 @@ const EventLogContent: FC<HeatmapMenuProps> = ({ eventLogKeys }) => {
                     if (index !== -1) {
                       newEventLogs[index].color = e.target.value;
                     } else {
-                      newEventLogs.push({ key, visible: false, color: e.target.value });
+                      newEventLogs.push({ key, visible: false, color: e.target.value, iconName: 'CiStreamOn' });
                     }
                     setEventLogs(newEventLogs);
                   }}

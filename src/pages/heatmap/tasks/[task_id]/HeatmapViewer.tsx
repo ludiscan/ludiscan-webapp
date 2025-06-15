@@ -17,7 +17,6 @@ import { HeatMapCanvas } from '@src/pages/heatmap/tasks/[task_id]/HeatmapCanvas'
 import { HeatmapMenuContent } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenuContent';
 import { HeatmapMenuSideBar } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenuSideBar';
 import { useOBJFromArrayBuffer } from '@src/pages/heatmap/tasks/[task_id]/ModelLoader';
-import { PerformanceList } from '@src/pages/heatmap/tasks/[task_id]/PerformanceList';
 import { zIndexes } from '@src/styles/style';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 import { getOfflineHeatmapTemplate } from '@src/utils/heatmap/getOfflineHeatmapTemplate';
@@ -31,7 +30,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
   const [map, setMap] = useState<string | ArrayBuffer | null>(null);
   const [modelType, setModelType] = useState<'gltf' | 'glb' | 'obj' | 'server' | null>(null);
   const [dpr, setDpr] = useState(2);
-  const [performance, setPerformance] = useState<PerformanceMonitorApi>();
+  // const [performance, setPerformance] = useState<PerformanceMonitorApi>();
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [openMenu, setOpenMenu] = useState<Menus | undefined>(undefined);
@@ -93,7 +92,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
 
   const handleOnPerformance = useCallback((api: PerformanceMonitorApi) => {
     setDpr(Math.floor(0.5 + 1.5 * api.factor));
-    setPerformance(api);
+    // setPerformance(api);
   }, []);
 
   const buffer = useMemo(() => {
@@ -239,7 +238,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
           <PerformanceMonitor factor={1} onChange={handleOnPerformance} />
           <HeatMapCanvas service={dataService} pointList={pointList} map={map} modelType={modelType} model={model} />
         </Canvas>
-        {performance && <PerformanceList api={performance} className={`${className}__performance`} />}
+        {/*{performance && <PerformanceList api={performance} className={`${className}__performance`} />}*/}
       </div>
     </FlexRow>
   );
