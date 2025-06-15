@@ -1,7 +1,7 @@
 import { Billboard, Center } from '@react-three/drei';
 import { useFrame, useLoader, useThree } from '@react-three/fiber';
 import { useQuery } from '@tanstack/react-query';
-import { Fragment, useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { Vector3, ShapeGeometry, DoubleSide } from 'three';
 import { SVGLoader } from 'three-stdlib';
 
@@ -30,10 +30,9 @@ const MarkerBillboard: FC<{
   pos: Vector3;
   id: number;
   color: string;
-  baseScale: number;
   geometries: ShapeGeometry[];
   onClick: (e: ThreeEvent<MouseEvent>, id: number) => void;
-}> = ({ pos, id, color, geometries, onClick, baseScale }) => {
+}> = ({ pos, id, color, geometries, onClick }) => {
   const ref = useRef<Group>(null);
   const { camera, gl } = useThree();
 
@@ -182,7 +181,7 @@ const EventLogMarkers: FC<EventLogMarkersProps> = ({ logName, service, pref }) =
     <>
       {data?.map((d, i) =>
         visibleIds.has(d.id) ? (
-          <MarkerBillboard key={d.id} pos={worldPositions[i]} id={d.id} color={color} geometries={geometries} onClick={handlePointClick} baseScale={scale} />
+          <MarkerBillboard key={d.id} pos={worldPositions[i]} id={d.id} color={color} geometries={geometries} onClick={handlePointClick} />
         ) : null,
       )}
     </>
