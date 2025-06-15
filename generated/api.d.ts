@@ -568,9 +568,7 @@ export interface paths {
     trace?: never;
   };
 }
-
 export type webhooks = Record<string, never>;
-
 export interface components {
   schemas: {
     UserResponseDto: {
@@ -630,6 +628,7 @@ export interface components {
       event_type: string;
       event_data: components['schemas']['StringGeneralLogDataDto'];
       offset_timestamp: number;
+      player: number;
     };
     GetGeneralLogKeysDto: {
       /** @description List of keys to retrieve */
@@ -648,6 +647,7 @@ export interface components {
       event_type: string;
       event_data: components['schemas']['Position'];
       offset_timestamp: number;
+      player: number;
     };
     PlaySessionResponseDto: {
       sessionId: number;
@@ -700,6 +700,7 @@ export interface components {
       text_data: string | null;
       position_data: components['schemas']['Position'] | null;
       offset_timestamp: number;
+      player: number;
     };
     PlayPositionLogDto: {
       /**
@@ -838,9 +839,7 @@ export interface components {
   headers: never;
   pathItems: never;
 }
-
 export type $defs = Record<string, never>;
-
 export interface operations {
   AppController_getHello: {
     parameters: {

@@ -27,7 +27,7 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "test-storybook": "test-storybook --config-dir .storybook",
-    "generate:api-schemes": "npx openapi-typescript https://matuyuhi.com/api-json --output generated/api.d.ts",
+    "generate:api-schemes": "npx openapi-typescript swagger.json --output generated/api.d.ts",
     "build:heatmap-bundle": "node scripts/create-heatmap-bundle.js",
     "prebuild:prod": "npm run build:heatmap-bundle"
   },
