@@ -36,6 +36,7 @@ export const Default: Story = {
       getTask: () => null,
       getEventLog: async () => [],
       eventLogs: {},
+      createClient: () => null,
     },
   },
 };

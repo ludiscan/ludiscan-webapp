@@ -10,6 +10,7 @@ import { IoClose } from 'react-icons/io5';
 import type { Theme } from '@emotion/react';
 import type { EventLogData } from '@src/modeles/heatmapView';
 import type { HeatmapTask } from '@src/modeles/heatmaptask';
+import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC, CSSProperties } from 'react';
 import type { Group } from 'three';
 
@@ -26,6 +27,8 @@ import { TextField } from '@src/component/molecules/TextField';
 import { useEventLogsState, useGeneralState, useHotspotModeState, useVersion } from '@src/hooks/useHeatmapState';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { ObjectToggleList } from '@src/pages/heatmap/tasks/[task_id]/ObjectToggleList';
+import { EventLogDetail } from '@src/pages/heatmap/tasks/[task_id]/menu/EventLogDetail';
+import { InputColumn, InputRow } from '@src/pages/heatmap/tasks/[task_id]/menu/InputRow';
 import { fontSizes, fontWeights } from '@src/styles/style';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 import { getRandomPrimitiveColor } from '@src/utils/color';
@@ -39,6 +42,8 @@ export type HeatmapMenuProps = {
   task: HeatmapTask;
   handleExportView: () => Promise<void>;
   mapOptions: string[];
+  service: HeatmapDataService;
+  extra?: object;
 };
 
 function toggleButtonStyle(theme: Theme): CSSProperties {
@@ -54,36 +59,6 @@ function toggleButtonStyle(theme: Theme): CSSProperties {
     alignItems: 'start',
   };
 }
-
-const InputRow = styled(({ className, label, children }: { className?: string; label: string; children: React.ReactNode }) => {
-  const { theme } = useSharedTheme();
-  return (
-    <div className={className}>
-      <InlineFlexRow align={'center'} wrap={'nowrap'} gap={4}>
-        <Text text={label} fontSize={fontSizes.small} style={{ width: '90px' }} color={theme.colors.secondary.light} />
-        <div style={{ flex: 1 }}>{children}</div>
-      </InlineFlexRow>
-    </div>
-  );
-})`
-  position: relative;
-  width: 100%;
-  padding: 4px 8px;
-`;
-
-const InputColumn = styled(({ className, label, children }: { className?: string; label: string; children: React.ReactNode }) => {
-  const { theme } = useSharedTheme();
-  return (
-    <InlineFlexColumn className={className} align={'flex-start'} wrap={'nowrap'} gap={2}>
-      <Text text={label} fontSize={fontSizes.small} style={{ width: '110px' }} color={theme.colors.secondary.light} />
-      <div style={{ width: '100%' }}>{children}</div>
-    </InlineFlexColumn>
-  );
-})`
-  position: relative;
-  width: 100%;
-  padding: 4px 8px;
-`;
 
 const InfoContent: FC<HeatmapMenuProps> = ({ task, handleExportView }) => {
   const { data: version } = useVersion();
@@ -339,8 +314,13 @@ export const MenuContents = [
     icon: <BsGrid />,
     Component: () => <Text text={'More'} fontSize={fontSizes.large1} fontWeight={fontWeights.bold} />,
   },
-];
+  {
+    name: 'eventLogDetail',
+    Component: EventLogDetail,
+  },
+] as const;
 
+export const SideBarMenus = MenuContents.filter((content) => 'icon' in content);
 export type Menus = (typeof MenuContents)[number]['name'];
 
 const Component: FC<HeatmapMenuProps> = (props) => {

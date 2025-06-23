@@ -77,9 +77,11 @@ const HeatmapIdPageLayoutComponent: FC<HeatmapIdPageLayoutProps> = ({ className,
           </>
         }
       />
-      <StatusContent className={className} status={statusContentStatus}>
-        {task?.status === 'completed' && service && service.isInitialized && <HeatMapViewer dataService={service} />}
-      </StatusContent>
+      <div className={className}>
+        <StatusContent status={statusContentStatus}>
+          {task?.status === 'completed' && service && service.isInitialized && <HeatMapViewer dataService={service} />}
+        </StatusContent>
+      </div>
     </>
   );
 };

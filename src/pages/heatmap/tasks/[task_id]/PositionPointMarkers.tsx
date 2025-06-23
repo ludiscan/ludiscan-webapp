@@ -70,7 +70,7 @@ const Component: FC<PointMarkersProps> = ({ points, colorIntensity = 0.9, colorS
         const raw = density / maxDensity;
         const normalized = Math.max(raw, 0);
 
-        // apply intensity curve
+        // apply an intensity curve
         let t = Math.pow(normalized, colorIntensity);
         t = t * colorScale;
         t = Math.min(t, 1);

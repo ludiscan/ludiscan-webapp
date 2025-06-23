@@ -13,6 +13,7 @@ import type { FC } from 'react';
 
 import { FlexRow } from '@src/component/atoms/Flex';
 import { useHeatmapState } from '@src/hooks/useHeatmapState';
+import { DefaultStaleTime } from '@src/modeles/qeury';
 import { HeatMapCanvas } from '@src/pages/heatmap/tasks/[task_id]/HeatmapCanvas';
 import { HeatmapMenuContent } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenuContent';
 import { HeatmapMenuSideBar } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenuSideBar';
@@ -34,6 +35,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [openMenu, setOpenMenu] = useState<Menus | undefined>(undefined);
+  const [menuExtra, setMenuExtra] = useState<object | undefined>(undefined);
 
   const state = useHeatmapState();
 
@@ -49,6 +51,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
     queryFn: async () => {
       return dataService.getMapList();
     },
+    staleTime: DefaultStaleTime, // 5 minutes
     enabled: !!taskId,
   });
 
@@ -58,6 +61,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
       if (!state.general.mapName) return null;
       return dataService.getMapContent(state.general.mapName);
     },
+    staleTime: 1000 * 60 * 20,
   });
 
   const { data: generalLogKeys } = useQuery({
@@ -65,6 +69,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
     queryFn: async () => {
       return dataService.getGeneralLogKeys();
     },
+    staleTime: DefaultStaleTime,
   });
 
   useEffect(() => {
@@ -208,12 +213,19 @@ const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
   }, [dataService.eventLogs, generalLogKeys, mapContent, mapList, state, task]);
 
   useEffect(() => {
-    const clickMenuIconHandler = (event: CustomEvent<{ name: string }>) => {
+    const clickMenuIconHandler = (event: CustomEvent<{ name: Menus }>) => {
       setOpenMenu(event.detail.name);
     };
+    const clickEventLogHandler = (event: CustomEvent<{ logName: string; id: number }>) => {
+      setMenuExtra(event.detail);
+      setOpenMenu('eventLogDetail');
+    };
     heatMapEventBus.on('click-menu-icon', clickMenuIconHandler);
+
+    heatMapEventBus.on('click-event-log', clickEventLogHandler);
     return () => {
       heatMapEventBus.off('click-menu-icon', clickMenuIconHandler);
+      heatMapEventBus.off('click-event-log', clickEventLogHandler);
     };
   }, []);
 
@@ -230,6 +242,8 @@ const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
             model={model}
             handleExportView={handleExportView}
             eventLogKeys={generalLogKeys ?? undefined}
+            extra={menuExtra}
+            service={dataService}
           />
         </div>
       )}

@@ -1,8 +1,8 @@
 import { Billboard, Center } from '@react-three/drei';
 import { useFrame, useLoader, useThree } from '@react-three/fiber';
 import { useQuery } from '@tanstack/react-query';
-import { useCallback, useMemo, useRef, useState } from 'react';
-import { Vector3, ShapeGeometry, DoubleSide } from 'three';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Vector3, ShapeGeometry, DoubleSide, BackSide } from 'three';
 import { SVGLoader } from 'three-stdlib';
 
 import type { ThreeEvent } from '@react-three/fiber';
@@ -12,6 +12,7 @@ import type { FC } from 'react';
 import type { Shape, Box3, Group } from 'three';
 
 import { useGeneralState } from '@src/hooks/useHeatmapState';
+import { DefaultStaleTime } from '@src/modeles/qeury';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
 export type EventLogMarkersProps = {
@@ -30,9 +31,10 @@ const MarkerBillboard: FC<{
   pos: Vector3;
   id: number;
   color: string;
+  selected?: boolean;
   geometries: ShapeGeometry[];
   onClick: (e: ThreeEvent<MouseEvent>, id: number) => void;
-}> = ({ pos, id, color, geometries, onClick }) => {
+}> = ({ pos, id, color, geometries, onClick, selected }) => {
   const ref = useRef<Group>(null);
   const { camera, gl } = useThree();
 
@@ -48,7 +50,7 @@ const MarkerBillboard: FC<{
   return (
     <Billboard
       ref={ref}
-      position={[pos.x, pos.y + 100, pos.z]}
+      position={[pos.x, pos.y + 20, pos.z]}
       follow
       lockX={false}
       lockY={false}
@@ -63,18 +65,29 @@ const MarkerBillboard: FC<{
     >
       <Center>
         {geometries.map((geo, idx) => (
-          <mesh
-            key={idx}
-            geometry={geo} /* eslint-disable-line react/no-unknown-property */
-            castShadow={false} /* eslint-disable-line react/no-unknown-property */
-            receiveShadow={false} /* eslint-disable-line react/no-unknown-property */
-          >
-            <meshBasicMaterial
-              color={color}
-              side={DoubleSide} /* eslint-disable-line react/no-unknown-property */
-              toneMapped={false} /* eslint-disable-line react/no-unknown-property */
-            />
-          </mesh>
+          <group key={idx}>
+            {selected && (
+              <mesh geometry={geo} /* eslint-disable-line react/no-unknown-property */ scale={[1.1, 1.1, 1.1]}>
+                <meshBasicMaterial
+                  side={BackSide} /* eslint-disable-line react/no-unknown-property */
+                  toneMapped={false} /* eslint-disable-line react/no-unknown-property */
+                  transparent /* eslint-disable-line react/no-unknown-property */
+                  opacity={1}
+                />
+              </mesh>
+            )}
+            <mesh
+              geometry={geo} /* eslint-disable-line react/no-unknown-property */
+              castShadow={false} /* eslint-disable-line react/no-unknown-property */
+              receiveShadow={false} /* eslint-disable-line react/no-unknown-property */
+            >
+              <meshBasicMaterial
+                color={color}
+                side={DoubleSide} /* eslint-disable-line react/no-unknown-property */
+                toneMapped={false} /* eslint-disable-line react/no-unknown-property */
+              />
+            </mesh>
+          </group>
         ))}
       </Center>
     </Billboard>
@@ -96,6 +109,8 @@ const EventLogMarkers: FC<EventLogMarkersProps> = ({ logName, service, pref }) =
     return arr;
   }, [svgData]);
 
+  const [selectedData, setSelectedData] = useState<number | undefined>(undefined);
+
   const geometries = useMemo<ShapeGeometry[]>(
     () =>
       shapes.map((shape) => {
@@ -116,6 +131,8 @@ const EventLogMarkers: FC<EventLogMarkersProps> = ({ logName, service, pref }) =
   const { data } = useQuery({
     queryKey: ['eventLogMarkers', logName],
     queryFn: () => service.getEventLog(logName),
+    staleTime: DefaultStaleTime,
+    refetchOnWindowFocus: false,
   });
 
   // Precompute world positions
@@ -170,18 +187,38 @@ const EventLogMarkers: FC<EventLogMarkersProps> = ({ logName, service, pref }) =
 
   // Click handler
   const handlePointClick = useCallback(
-    (e: ThreeEvent<MouseEvent>, id: number) => {
+    async (e: ThreeEvent<MouseEvent>, id: number) => {
       e.stopPropagation();
       heatMapEventBus.emit('click-event-log', { logName, id });
     },
     [logName],
   );
 
+  useEffect(() => {
+    const handleEventLogDetailLoaded = (event: CustomEvent<{ logName: string; id: number }>) => {
+      if (event.detail.logName === logName) {
+        setSelectedData(event.detail.id);
+      }
+    };
+    heatMapEventBus.on('event-log-detail-loaded', handleEventLogDetailLoaded);
+    return () => {
+      heatMapEventBus.off('event-log-detail-loaded', handleEventLogDetailLoaded);
+    };
+  }, [logName]);
+
   return (
     <>
       {data?.map((d, i) =>
         visibleIds.has(d.id) ? (
-          <MarkerBillboard key={d.id} pos={worldPositions[i]} id={d.id} color={color} geometries={geometries} onClick={handlePointClick} />
+          <MarkerBillboard
+            key={d.id}
+            selected={d.id == selectedData}
+            pos={worldPositions[i]}
+            id={d.id}
+            color={color}
+            geometries={geometries}
+            onClick={handlePointClick}
+          />
         ) : null,
       )}
     </>
