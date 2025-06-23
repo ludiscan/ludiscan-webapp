@@ -6,6 +6,8 @@ import type { Middleware } from 'openapi-fetch';
 
 import { getToken } from '@src/utils/localstrage';
 
+export const DefaultStaleTime = 1000 * 60 * 5; // 5 minutes
+
 const myMiddleware: Middleware = {
   async onRequest({ request }) {
     if (localStorage) {

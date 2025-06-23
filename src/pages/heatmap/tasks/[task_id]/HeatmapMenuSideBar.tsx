@@ -8,7 +8,7 @@ import { Button } from '@src/component/atoms/Button';
 import { Divider } from '@src/component/atoms/Divider';
 import { FlexColumn } from '@src/component/atoms/Flex';
 import { Tooltip } from '@src/component/atoms/Tooltip';
-import { MenuContents } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenuContent';
+import { SideBarMenus } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenuContent';
 import { fontSizes } from '@src/styles/style';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
@@ -22,7 +22,7 @@ const Component: FC<MenuSideBarProps> = ({ className, currentMenu }) => {
   return (
     <FlexColumn className={className} gap={12}>
       <Divider orientation={'horizontal'} />
-      {MenuContents.map(({ name, icon }) => (
+      {SideBarMenus.map(({ name, icon }) => (
         <Button
           className={`${className}__button ${name === currentMenu ? 'active' : ''}`}
           key={name}

@@ -23,6 +23,8 @@ export type HeatmapDataService = {
   getEventLog(logName: string): Promise<PositionEventLog[] | null>;
 
   eventLogs: Record<string, PositionEventLog[]>;
+
+  createClient: () => ReturnType<typeof createClient> | null;
 };
 
 // データ型定義
@@ -172,5 +174,6 @@ export function useOnlineHeatmapDataService(env: Env | undefined, task: HeatmapT
     getTask,
     getEventLog,
     eventLogs,
+    createClient: () => (env ? createClient(env) : null),
   };
 }

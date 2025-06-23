@@ -53,7 +53,7 @@ const Component: FC<StatusContentProps> = ({ className, status, errorMessage, ch
       );
 
     case 'success':
-      return <div className={className}>{children}</div>;
+      return <>{children}</>;
 
     default:
       return null;

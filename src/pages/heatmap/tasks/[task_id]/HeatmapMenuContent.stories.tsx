@@ -41,7 +41,7 @@ export const EventLog: Story = {
   ...General,
   args: {
     ...General.args,
-    name: 'eventLog',
+    name: 'eventlog',
   },
 };
 
@@ -50,5 +50,13 @@ export const Hotspot: Story = {
   args: {
     ...General.args,
     name: 'hotspot',
+  },
+};
+
+export const EventLogDetail: Story = {
+  ...General,
+  args: {
+    ...General.args,
+    name: 'eventLogDetail',
   },
 };
