@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 
 import type { CSSProperties, FC, ReactNode } from 'react';
 
-type FlexProps = {
+export type FlexProps = {
   className?: string | undefined;
   children: ReactNode;
   align?: 'center' | 'flex-start' | 'flex-end' | 'space-between';

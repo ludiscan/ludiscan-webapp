@@ -29,6 +29,7 @@ import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { ObjectToggleList } from '@src/pages/heatmap/tasks/[task_id]/ObjectToggleList';
 import { EventLogDetail } from '@src/pages/heatmap/tasks/[task_id]/menu/EventLogDetail';
 import { InputColumn, InputRow } from '@src/pages/heatmap/tasks/[task_id]/menu/InputRow';
+import { PlayerTimeline } from '@src/pages/heatmap/tasks/[task_id]/menu/PlayerTimeline';
 import { fontSizes, fontWeights } from '@src/styles/style';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 import { getRandomPrimitiveColor } from '@src/utils/color';
@@ -317,6 +318,10 @@ export const MenuContents = [
   {
     name: 'eventLogDetail',
     Component: EventLogDetail,
+  },
+  {
+    name: 'playerTimeline',
+    Component: PlayerTimeline,
   },
 ] as const;
 

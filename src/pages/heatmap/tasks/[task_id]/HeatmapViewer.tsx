@@ -216,16 +216,21 @@ const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
     const clickMenuIconHandler = (event: CustomEvent<{ name: Menus }>) => {
       setOpenMenu(event.detail.name);
     };
+    const clickTimelineHandler = (event: CustomEvent<{ project_id: number; session_id: number; player: number }>) => {
+      setOpenMenu('playerTimeline');
+      setMenuExtra(event.detail);
+    };
     const clickEventLogHandler = (event: CustomEvent<{ logName: string; id: number }>) => {
       setMenuExtra(event.detail);
       setOpenMenu('eventLogDetail');
     };
     heatMapEventBus.on('click-menu-icon', clickMenuIconHandler);
-
+    heatMapEventBus.on('player-timeline-click', clickTimelineHandler);
     heatMapEventBus.on('click-event-log', clickEventLogHandler);
     return () => {
       heatMapEventBus.off('click-menu-icon', clickMenuIconHandler);
       heatMapEventBus.off('click-event-log', clickEventLogHandler);
+      heatMapEventBus.off('player-timeline-click', clickTimelineHandler);
     };
   }, []);
 

@@ -14,6 +14,7 @@ import { useEventLogsState, useGeneralState } from '@src/hooks/useHeatmapState';
 import { EventLogMarkers } from '@src/pages/heatmap/tasks/[task_id]/EventLogMarkers';
 import { HotspotCircles } from '@src/pages/heatmap/tasks/[task_id]/HotspotCircles';
 import { LocalModelLoader, StreamModelLoader } from '@src/pages/heatmap/tasks/[task_id]/ModelLoader';
+import { PlayerTimelinePoints } from '@src/pages/heatmap/tasks/[task_id]/PlayerTimelinePoints';
 import { WaypointMarker } from '@src/pages/heatmap/tasks/[task_id]/WaypointMarker';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
@@ -181,13 +182,16 @@ const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, s
 
   return (
     <>
-      <ambientLight intensity={0.3} /> {/* eslint-disable-line react/no-unknown-property */}
-      <directionalLight position={[10, 10, 10]} intensity={3} castShadow={true} /> {/* eslint-disable-line react/no-unknown-property */}
+      <ambientLight intensity={0.3} />
+      { }
+      <directionalLight position={[10, 10, 10]} intensity={3} castShadow={true} />
+      { }
       {modelType && map && modelType !== 'server' && typeof map === 'string' && <LocalModelLoader ref={modelRef} modelPath={map} modelType={modelType} />}
       {modelType && model && modelType === 'server' && typeof map !== 'string' && <StreamModelLoader ref={modelRef} model={model} />}
       {pointList && showHeatmap && <PositionPointMarkers points={pointList} />}
       {pointList && showHeatmap && <HotspotCircles points={pointList} />}
       {visibleEventLogs.length > 0 && visibleEventLogs.map((event) => <EventLogMarkers key={event.key} logName={event.key} service={service} pref={event} />)}
+      {service && <PlayerTimelinePoints service={service} />}
       {/* --- 追加：ウェイポイントを map して表示 --- */}
       {waypoints.map((wp) => (
         <WaypointMarker

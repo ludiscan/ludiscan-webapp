@@ -38,6 +38,9 @@ const canvasSlice = createSlice({
     setEventLogs: (state, action: PayloadAction<HeatmapDataState['eventLogs']>) => {
       state.eventLogs = action.payload;
     },
+    setPlayerTimeline: (state, action: PayloadAction<HeatmapDataState['playerTimeline']>) => {
+      state.playerTimeline = action.payload;
+    },
   },
 });
 
