@@ -37,6 +37,7 @@ export const Default: Story = {
       getEventLog: async () => [],
       eventLogs: {},
       createClient: () => null,
+      getEnv: () => undefined,
     },
   },
 };
