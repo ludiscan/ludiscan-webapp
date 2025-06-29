@@ -1,10 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 
-
 import packageJson from '../../package.json';
 
 import type { paths } from '@generated/api';
-import type { QueryClient } from '@tanstack/react-query';
 import type { Client } from 'openapi-fetch';
 
 import { DefaultStaleTime } from '@src/modeles/qeury';
@@ -32,13 +30,16 @@ export type HotspotModeSettings = {
   skipNearDuplication: boolean;
 };
 
+export type PlayerTimelineDetail = {
+  player: number;
+  project_id: number;
+  session_id: number;
+  visible: boolean;
+};
+
 export type PlayerTimelineSettings = {
   visible: boolean;
-  detail: {
-    player: number;
-    project_id: number;
-    session_id: number;
-  } | null;
+  details: PlayerTimelineDetail[] | null;
 };
 
 export type HeatmapStates = {
@@ -73,7 +74,7 @@ export const initializeValues: HeatmapDataState = {
   eventLogs: [],
   playerTimeline: {
     visible: false,
-    detail: null,
+    details: null,
   },
 };
 

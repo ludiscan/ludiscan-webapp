@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import type { EventLogData, GeneralSettings, HeatmapDataState, HotspotModeSettings, PlayerTimelineSettings } from '@src/modeles/heatmapView';
 import type { RootState } from '@src/store';
 
-import { getInitialState, set } from '@src/slices/canvasSlice';
+import { getInitialState, canvasActions } from '@src/slices/canvasSlice';
 import { getCanvasValues } from '@src/utils/localstrage';
 import { capitalize } from '@src/utils/string';
 
@@ -28,10 +28,14 @@ function useHeatmapValuesState<T extends HeatmapDataState[keys]>(key: keys) {
   }, [data]);
 
   const handleSetData = useCallback(
-    (value: T) => {
-      dispatch({ type: `heatmapCanvas/set${capitalize(key)}`, payload: value });
+    (value: T | ((prevState: T) => T)) => {
+      if (typeof value === 'function') {
+        dispatch({ type: `heatmapCanvas/set${capitalize(key)}`, payload: value(sessionData) });
+      } else {
+        dispatch({ type: `heatmapCanvas/set${capitalize(key)}`, payload: value });
+      }
     },
-    [dispatch, key],
+    [dispatch, key, sessionData],
   );
 
   useEffect(() => {
@@ -109,7 +113,7 @@ export const useHeatmapState = () => {
   // session → storeへapply
   const apply = useCallback(() => {
     dispatch(
-      set({
+      canvasActions.set({
         general,
         hotspotMode,
         eventLogs,

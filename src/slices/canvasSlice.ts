@@ -44,5 +44,5 @@ const canvasSlice = createSlice({
   },
 });
 
-export const { setGeneral, setHotspotMode, set, setEventLogs } = canvasSlice.actions;
+export const canvasActions = canvasSlice.actions;
 export const canvasReducer = canvasSlice.reducer;

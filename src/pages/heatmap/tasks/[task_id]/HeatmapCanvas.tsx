@@ -10,7 +10,7 @@ import type { FC } from 'react';
 import type { Group } from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 
-import { useEventLogsState, useGeneralState } from '@src/hooks/useHeatmapState';
+import { useEventLogsState, useGeneralState, usePlayerTimelineState } from '@src/hooks/useHeatmapState';
 import { EventLogMarkers } from '@src/pages/heatmap/tasks/[task_id]/EventLogMarkers';
 import { HotspotCircles } from '@src/pages/heatmap/tasks/[task_id]/HotspotCircles';
 import { LocalModelLoader, StreamModelLoader } from '@src/pages/heatmap/tasks/[task_id]/ModelLoader';
@@ -37,6 +37,7 @@ const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, s
     data: { showHeatmap },
   } = useGeneralState();
   const { data: eventLogs } = useEventLogsState();
+  const { data: timelineState } = usePlayerTimelineState();
   const orbitControlsRef = useRef<OrbitControlsImpl>(null);
 
   const visibleEventLogs = useMemo(() => eventLogs.filter((event) => event.visible), [eventLogs]);
@@ -182,16 +183,19 @@ const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, s
 
   return (
     <>
-      <ambientLight intensity={0.3} />
-      { }
-      <directionalLight position={[10, 10, 10]} intensity={3} castShadow={true} />
-      { }
+      <ambientLight intensity={0.3} /* eslint-disable-line react/no-unknown-property */ />
+      <directionalLight position={[10, 10, 10]} intensity={3} castShadow={true} /* eslint-disable-line react/no-unknown-property */ />
       {modelType && map && modelType !== 'server' && typeof map === 'string' && <LocalModelLoader ref={modelRef} modelPath={map} modelType={modelType} />}
       {modelType && model && modelType === 'server' && typeof map !== 'string' && <StreamModelLoader ref={modelRef} model={model} />}
       {pointList && showHeatmap && <PositionPointMarkers points={pointList} />}
       {pointList && showHeatmap && <HotspotCircles points={pointList} />}
       {visibleEventLogs.length > 0 && visibleEventLogs.map((event) => <EventLogMarkers key={event.key} logName={event.key} service={service} pref={event} />)}
-      {service && <PlayerTimelinePoints service={service} />}
+      {service &&
+        timelineState &&
+        timelineState.visible &&
+        timelineState.details &&
+        timelineState.details.length > 0 &&
+        timelineState.details.map((tl, index) => <PlayerTimelinePoints key={index} service={service} state={tl} />)}
       {/* --- 追加：ウェイポイントを map して表示 --- */}
       {waypoints.map((wp) => (
         <WaypointMarker

@@ -5,7 +5,6 @@ export interface HeatMapEventMap {
   'add-waypoint': { waypoint: { x: number; y: number; z: number } };
   'click-event-log': { logName: string; id: number };
   'event-log-detail-loaded': { logName: string; id: number };
-  'player-timeline-click': { project_id: number; session_id: number; player: number };
 }
 
 class EventBus<T> extends EventTarget {

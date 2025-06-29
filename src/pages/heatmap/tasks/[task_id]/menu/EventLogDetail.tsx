@@ -14,6 +14,7 @@ import { InlineFlexColumn, InlineFlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { Toggle } from '@src/component/atoms/Toggle';
 import { StatusContent } from '@src/component/molecules/StatusContent';
+import { usePlayerTimelineState } from '@src/hooks/useHeatmapState';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { DefaultStaleTime } from '@src/modeles/qeury';
 import { fontSizes } from '@src/styles/style';
@@ -101,18 +102,34 @@ const Component: FC<HeatmapMenuProps> = ({ extra = {}, service, className }) => 
     return 'loading';
   }, [isLoading, isError, isSuccess, logDetail]);
 
-  const handleTimelineClick = useCallback(() => {
-    if (!logDetail || !logDetail.data || !project_id || !session_id) return;
-    heatMapEventBus.emit('player-timeline-click', {
-      project_id,
-      session_id,
-      player: logDetail.data.player,
-    });
-  }, [logDetail, project_id, session_id]);
+  const { data: timelineState, setData: setTimelineState } = usePlayerTimelineState();
 
   const timelineDisable = useMemo(() => {
-    return !logDetail?.data || !project_id || !session_id;
-  }, [logDetail, project_id, session_id]);
+    return (
+      !logDetail?.data ||
+      !project_id ||
+      !session_id ||
+      !(
+        timelineState.details?.every(
+          (detail) => detail.player !== logDetail.data.player && detail.project_id !== project_id && detail.session_id !== session_id,
+        ) ?? true
+      )
+    );
+  }, [logDetail, project_id, session_id, timelineState.details]);
+
+  const handleTimelineClick = useCallback(() => {
+    if (timelineDisable || !logDetail || !logDetail.data || !project_id || !session_id) return;
+    const newer = {
+      player: logDetail.data.player,
+      project_id: project_id,
+      session_id: session_id,
+      visible: true,
+    };
+    setTimelineState((prev) => ({
+      visible: true,
+      details: prev.details ? [...prev.details, newer] : [newer],
+    }));
+  }, [logDetail, project_id, session_id, setTimelineState, timelineDisable]);
 
   useEffect(() => {
     if (status === 'success' && logDetail && logDetail.data && typeof logName === 'string' && id) {

@@ -99,14 +99,16 @@ const Component: FC<HeatmapMenuProps> = ({ extra = {}, service, className }) => 
 
   useEffect(() => {
     if (!isSuccess || !data || !project_id || !session_id || player === undefined) return;
-    setData({
-      visible: false,
-      detail: {
-        player: player,
-        project_id: project_id,
-        session_id: session_id,
-      },
-    });
+    const newer = {
+      player: player,
+      project_id: project_id,
+      session_id: session_id,
+      visible: true,
+    };
+    setData((prev) => ({
+      visible: true,
+      details: prev.details ? [...prev.details, newer] : [newer],
+    }));
   }, [data, isSuccess, player, project_id, session_id, setData]);
 
   return (
