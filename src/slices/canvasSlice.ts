@@ -26,7 +26,7 @@ const canvasSlice = createSlice({
       state.version = action.payload.version;
       state.general = action.payload.general;
       state.hotspotMode = action.payload.hotspotMode;
-      state.eventLogs = action.payload.eventLogs;
+      state.eventLog = action.payload.eventLog;
       saveCanvasValues(state);
     },
     setGeneral: (state, action: PayloadAction<HeatmapDataState['general']>) => {
@@ -35,8 +35,8 @@ const canvasSlice = createSlice({
     setHotspotMode: (state, action: PayloadAction<HeatmapDataState['hotspotMode']>) => {
       state.hotspotMode = action.payload;
     },
-    setEventLogs: (state, action: PayloadAction<HeatmapDataState['eventLogs']>) => {
-      state.eventLogs = action.payload;
+    setEventLog: (state, action: PayloadAction<HeatmapDataState['eventLog']>) => {
+      state.eventLog = action.payload;
     },
     setPlayerTimeline: (state, action: PayloadAction<HeatmapDataState['playerTimeline']>) => {
       state.playerTimeline = action.payload;

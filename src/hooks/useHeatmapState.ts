@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import type { EventLogData, GeneralSettings, HeatmapDataState, HotspotModeSettings, PlayerTimelineSettings } from '@src/modeles/heatmapView';
+import type { EventLogSettings, GeneralSettings, HeatmapDataState, HotspotModeSettings, PlayerTimelineSettings } from '@src/modeles/heatmapView';
 import type { RootState } from '@src/store';
 
 import { getInitialState, canvasActions } from '@src/slices/canvasSlice';
@@ -59,7 +59,7 @@ function useHeatmapValuesState<T extends HeatmapDataState[keys]>(key: keys) {
 
 export const useGeneralState = () => useHeatmapValuesState<GeneralSettings>('general');
 export const useHotspotModeState = () => useHeatmapValuesState<HotspotModeSettings>('hotspotMode');
-export const useEventLogsState = () => useHeatmapValuesState<EventLogData[]>('eventLogs');
+export const useEventLogState = () => useHeatmapValuesState<EventLogSettings>('eventLog');
 export const useVersion = () => useHeatmapValuesState<string | undefined>('version');
 export const usePlayerTimelineState = () => useHeatmapValuesState<PlayerTimelineSettings>('playerTimeline');
 
@@ -69,8 +69,8 @@ export const useHeatmapState = () => {
   const [general, setGeneral] = useState<GeneralSettings>(generalData);
   const { data: hotspotModeData } = useHotspotModeState();
   const [hotspotMode, setHotspotMode] = useState<HotspotModeSettings>(hotspotModeData);
-  const { data: eventLogsData } = useEventLogsState();
-  const [eventLogs, setEventLogs] = useState<EventLogData[]>(eventLogsData);
+  const { data: eventLogsData } = useEventLogState();
+  const [eventLog, setEventLog] = useState<EventLogSettings>(eventLogsData);
   const { data: version } = useVersion();
   const { data: playerTimelineData } = usePlayerTimelineState();
   const [playerTimeline, setPlayerTimeline] = useState<PlayerTimelineSettings>(playerTimelineData);
@@ -81,7 +81,7 @@ export const useHeatmapState = () => {
     if (savedData) {
       setGeneral(savedData.general);
       setHotspotMode(savedData.hotspotMode);
-      setEventLogs(savedData.eventLogs);
+      setEventLog(savedData.eventLog);
       setPlayerTimeline(savedData.playerTimeline);
     }
   }, []);
@@ -100,7 +100,7 @@ export const useHeatmapState = () => {
 
   useEffect(() => {
     if (eventLogsData) {
-      setEventLogs(eventLogsData);
+      setEventLog(eventLogsData);
     }
   }, [eventLogsData]);
 
@@ -116,11 +116,11 @@ export const useHeatmapState = () => {
       canvasActions.set({
         general,
         hotspotMode,
-        eventLogs,
+        eventLog,
         playerTimeline,
       }),
     );
-  }, [dispatch, eventLogs, general, hotspotMode, playerTimeline]);
+  }, [dispatch, eventLog, general, hotspotMode, playerTimeline]);
 
   // discard → localStorageからロードしてsessionに反映
   const discard = useCallback(() => {
@@ -128,14 +128,14 @@ export const useHeatmapState = () => {
     if (savedData) {
       setGeneral(savedData.general);
       setHotspotMode(savedData.hotspotMode);
-      setEventLogs(savedData.eventLogs);
+      setEventLog(savedData.eventLog);
     }
   }, []);
 
   return {
     general,
     hotspotMode,
-    eventLogs,
+    eventLog,
     playerTimeline,
     version,
     apply,

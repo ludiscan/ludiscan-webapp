@@ -10,7 +10,7 @@ import type { FC } from 'react';
 import type { Group } from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 
-import { useEventLogsState, useGeneralState, usePlayerTimelineState } from '@src/hooks/useHeatmapState';
+import { useEventLogState, useGeneralState, usePlayerTimelineState } from '@src/hooks/useHeatmapState';
 import { EventLogMarkers } from '@src/pages/heatmap/tasks/[task_id]/EventLogMarkers';
 import { HotspotCircles } from '@src/pages/heatmap/tasks/[task_id]/HotspotCircles';
 import { LocalModelLoader, StreamModelLoader } from '@src/pages/heatmap/tasks/[task_id]/ModelLoader';
@@ -36,11 +36,11 @@ const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, s
   const {
     data: { showHeatmap },
   } = useGeneralState();
-  const { data: eventLogs } = useEventLogsState();
+  const { data: eventLog } = useEventLogState();
   const { data: timelineState } = usePlayerTimelineState();
   const orbitControlsRef = useRef<OrbitControlsImpl>(null);
 
-  const visibleEventLogs = useMemo(() => eventLogs.filter((event) => event.visible), [eventLogs]);
+  const visibleEventLogs = useMemo(() => eventLog.logs.filter((event) => event.visible), [eventLog]);
 
   // **1-1. State を追加**
   const [waypoints, setWaypoints] = useState<Waypoint[]>([]);
