@@ -8,7 +8,6 @@ import { IoIosInformationCircleOutline } from 'react-icons/io';
 import { IoClose } from 'react-icons/io5';
 
 import type { Theme } from '@emotion/react';
-import type { EventLogData } from '@src/modeles/heatmapView';
 import type { HeatmapTask } from '@src/modeles/heatmaptask';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC, CSSProperties } from 'react';
@@ -24,15 +23,15 @@ import { Tooltip } from '@src/component/atoms/Tooltip';
 import { SegmentedSwitch } from '@src/component/molecules/SegmentedSwitch';
 import { Selector } from '@src/component/molecules/Selector';
 import { TextField } from '@src/component/molecules/TextField';
-import { useEventLogsState, useGeneralState, useHotspotModeState, useVersion } from '@src/hooks/useHeatmapState';
+import { useGeneralState, useHotspotModeState, useVersion } from '@src/hooks/useHeatmapState';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { ObjectToggleList } from '@src/pages/heatmap/tasks/[task_id]/ObjectToggleList';
 import { EventLogDetail } from '@src/pages/heatmap/tasks/[task_id]/menu/EventLogDetail';
+import { EventLogContent } from '@src/pages/heatmap/tasks/[task_id]/menu/EventLogs';
 import { InputColumn, InputRow } from '@src/pages/heatmap/tasks/[task_id]/menu/InputRow';
 import { PlayerTimeline } from '@src/pages/heatmap/tasks/[task_id]/menu/PlayerTimeline';
 import { fontSizes, fontWeights } from '@src/styles/style';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
-import { getRandomPrimitiveColor } from '@src/utils/color';
 
 export type HeatmapMenuProps = {
   model: Group | null;
@@ -202,84 +201,6 @@ const GeneralContent: FC<HeatmapMenuProps> = () => {
           <Text text={'Reload'} fontSize={fontSizes.small} />
         </Button>
       </InputRow>
-    </InlineFlexColumn>
-  );
-};
-
-const EventLogContent: FC<HeatmapMenuProps> = ({ eventLogKeys }) => {
-  const { data: eventLogs, setData: setEventLogs } = useEventLogsState();
-
-  useEffect(() => {
-    if (eventLogKeys) {
-      // 現在のキー列を取り出す
-      const currentKeys = eventLogs.map((e) => e.key);
-
-      const setA = new Set(eventLogKeys);
-      const setB = new Set(currentKeys);
-      const isSameSet = setA.size === setB.size && [...setA].every((k) => setB.has(k));
-      if (isSameSet) {
-        return;
-      }
-      const eventLogDats: EventLogData[] = eventLogKeys.map((key) => {
-        const index = eventLogs.findIndex((e) => e.key === key);
-        // console.log(eventLogs[index]?.color);
-        return {
-          key,
-          visible: index !== -1 ? eventLogs[index].visible : false,
-          color: eventLogs[index]?.color || getRandomPrimitiveColor(),
-          iconName: eventLogs[index]?.iconName || 'CiStreamOn',
-        };
-      });
-      setEventLogs(eventLogDats);
-    }
-  }, [eventLogKeys, eventLogs, setEventLogs]);
-
-  return (
-    <InlineFlexColumn gap={8}>
-      <InlineFlexRow align={'center'} gap={4}>
-        <Text text={'Event Log'} fontSize={fontSizes.large1} fontWeight={fontWeights.bold} />
-      </InlineFlexRow>
-      <InlineFlexRow align={'center'} gap={4}>
-        <Text text={'Event Log Keys'} fontSize={fontSizes.small} />
-      </InlineFlexRow>
-      <InlineFlexRow align={'center'} gap={4}>
-        {eventLogKeys?.map((key) => {
-          const index = eventLogs.findIndex((e) => e.key === key);
-          return (
-            <InputRow key={key} label={key}>
-              <Switch
-                label={key}
-                onChange={(checked) => {
-                  const newEventLogs = eventLogs.map((e) => ({ ...e }));
-                  if (index !== -1) {
-                    newEventLogs[index].visible = checked;
-                  } else {
-                    newEventLogs.push({ key, visible: checked, color: '#000000', iconName: 'CiStreamOn' });
-                  }
-                  setEventLogs(newEventLogs);
-                }}
-                checked={index !== -1 ? eventLogs[index].visible : false}
-                size={'small'}
-              />
-              {eventLogs[index] && eventLogs[index].color && (
-                <input
-                  type={'color'}
-                  color={eventLogs[index].color}
-                  onChange={(e) => {
-                    const newEventLogs = eventLogs.map((e) => ({ ...e }));
-                    if (index !== -1) {
-                      newEventLogs[index].color = e.target.value;
-                    } else {
-                      newEventLogs.push({ key, visible: false, color: e.target.value, iconName: 'CiStreamOn' });
-                    }
-                    setEventLogs(newEventLogs);
-                  }}
-                />
-              )}
-            </InputRow>
-          );
-        })}
-      </InlineFlexRow>
     </InlineFlexColumn>
   );
 };

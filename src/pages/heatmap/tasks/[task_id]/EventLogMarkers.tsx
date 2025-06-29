@@ -11,7 +11,7 @@ import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC } from 'react';
 import type { Shape, Box3, Group } from 'three';
 
-import { useGeneralState } from '@src/hooks/useHeatmapState';
+import { useEventLogState, useGeneralState } from '@src/hooks/useHeatmapState';
 import { DefaultStaleTime } from '@src/modeles/qeury';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
@@ -99,6 +99,8 @@ const EventLogMarkers: FC<EventLogMarkersProps> = ({ logName, service, pref }) =
   const {
     data: { upZ = false, scale },
   } = useGeneralState();
+
+  const { data: eventLog } = useEventLogState();
   const { camera, size } = useThree();
 
   // Load and prepare SVG shapes
@@ -136,13 +138,20 @@ const EventLogMarkers: FC<EventLogMarkersProps> = ({ logName, service, pref }) =
   });
 
   // Precompute world positions
-  const worldPositions = useMemo<Vector3[]>(
+  const worldPositions = useMemo<{ pos: Vector3; id: number }[]>(
     () =>
-      (data ?? []).map((d) => {
-        const { x, y, z } = d.event_data;
-        return upZ ? new Vector3(x * scale, z * scale, y * scale) : new Vector3(x * scale, y * scale, z * scale);
-      }),
-    [data, upZ, scale],
+      (data ?? [])
+        .map((d) => {
+          const playerFilter = eventLog.filters['player'] || -1;
+          if (playerFilter !== -1 && d.player !== playerFilter) return null; // Filter by player if specified
+          const { x, y, z } = d.event_data;
+          return {
+            pos: upZ ? new Vector3(x * scale, z * scale, y * scale) : new Vector3(x * scale, y * scale, z * scale),
+            id: d.id,
+          };
+        })
+        .filter((d) => d != null),
+    [data, upZ, scale, eventLog],
   );
 
   // Overlap filtering state
@@ -152,15 +161,14 @@ const EventLogMarkers: FC<EventLogMarkersProps> = ({ logName, service, pref }) =
   const keptIndices: number[] = useRef<number[]>([]).current;
 
   useFrame(() => {
-    if (!data) return;
+    if (!worldPositions) return;
     const newSet = new Set<number>();
     screenCache.current = [];
     keptIndices.length = 0;
 
-    for (let i = 0; i < data.length; i++) {
-      const d = data[i];
+    for (let i = 0; i < worldPositions.length; i++) {
       const wp = worldPositions[i];
-      const ndc = wp.clone().project(camera);
+      const ndc = wp.pos.clone().project(camera);
       const px = ((ndc.x + 1) / 2) * size.width;
       const py = ((1 - ndc.y) / 2) * size.height;
 
@@ -173,7 +181,7 @@ const EventLogMarkers: FC<EventLogMarkersProps> = ({ logName, service, pref }) =
         }
       }
       if (!skip) {
-        newSet.add(d.id);
+        newSet.add(wp.id);
         keptIndices.push(i);
         screenCache.current[i] = { px, py };
       }
@@ -208,12 +216,12 @@ const EventLogMarkers: FC<EventLogMarkersProps> = ({ logName, service, pref }) =
 
   return (
     <>
-      {data?.map((d, i) =>
+      {worldPositions?.map((d, i) =>
         visibleIds.has(d.id) ? (
           <MarkerBillboard
             key={d.id}
             selected={d.id == selectedData}
-            pos={worldPositions[i]}
+            pos={worldPositions[i].pos}
             id={d.id}
             color={color}
             geometries={geometries}

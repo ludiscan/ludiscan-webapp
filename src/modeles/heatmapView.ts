@@ -14,6 +14,12 @@ export type EventLogData = {
   iconName: string;
 };
 
+export type EventLogSettings = {
+  visible: boolean;
+  logs: EventLogData[];
+  filters: Record<string, boolean | number>;
+};
+
 export type GeneralSettings = {
   upZ: boolean;
   scale: number;
@@ -45,7 +51,7 @@ export type PlayerTimelineSettings = {
 export type HeatmapStates = {
   general: GeneralSettings;
   hotspotMode: HotspotModeSettings;
-  eventLogs: EventLogData[];
+  eventLog: EventLogSettings;
   playerTimeline: PlayerTimelineSettings;
 };
 
@@ -71,7 +77,11 @@ export const initializeValues: HeatmapDataState = {
     thresholdCount: 6,
     skipNearDuplication: true,
   },
-  eventLogs: [],
+  eventLog: {
+    visible: false,
+    logs: [],
+    filters: {},
+  },
   playerTimeline: {
     visible: false,
     details: null,
