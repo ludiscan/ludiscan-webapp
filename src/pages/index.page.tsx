@@ -1,11 +1,13 @@
 import styled from '@emotion/styled';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useState } from 'react';
 
 import type { FC } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
+import { Header } from '@src/component/templates/Header';
 
 export type IndexPageProps = {
   className?: string;
@@ -21,37 +23,47 @@ export async function getServerSideProps() {
 
 const Component: FC<IndexPageProps> = ({ className }) => {
   const [count, setCount] = useState(0);
+  const router = useRouter();
+  const handleBackClick = useCallback(() => {
+    router.back();
+  }, [router]);
   return (
     <div className={className}>
-      <h1>Index Page</h1>
-      <Link href={'/home'}>
-        <span>Go to Home</span>
-      </Link>
-      <div>
-        <a href='https://vite.dev' target='_blank' rel='noreferrer'>
-          <Image src={'/vite.svg'} className={`${className}__logo`} alt='Vite logo' width={120} height={120} />
-        </a>
-        <a href='https://react.dev' target='_blank' rel='noreferrer'>
-          <Image src={'/react.svg'} className={`${className}__logo react`} alt='React logo' width={120} height={120} />
-        </a>
+      <Header title={'Index Page'} onClick={handleBackClick} />
+      <div className={`${className}__inner`}>
+        <Link href={'/home'}>
+          <span>Go to Home</span>
+        </Link>
+        <div>
+          <a href='https://vite.dev' target='_blank' rel='noreferrer'>
+            <Image src={'/vite.svg'} className={`${className}__logo`} alt='Vite logo' width={120} height={120} />
+          </a>
+          <a href='https://react.dev' target='_blank' rel='noreferrer'>
+            <Image src={'/react.svg'} className={`${className}__logo react`} alt='React logo' width={120} height={120} />
+          </a>
+        </div>
+        <h1>Vite + React</h1>
+        <div className={`${className}__card`}>
+          <Button onClick={() => setCount((count) => count + 1)} scheme={'surface'} fontSize={'medium'}>
+            count is {count}
+          </Button>
+          <p>
+            Edit <code>src/App.tsx</code> and save to test HMR
+          </p>
+        </div>
+        <p className={`${className}__read-the-docs`}>Click on the Vite and React logos to learn more</p>
       </div>
-      <h1>Vite + React</h1>
-      <div className={`${className}__card`}>
-        <Button onClick={() => setCount((count) => count + 1)} scheme={'surface'} fontSize={'medium'}>
-          count is {count}
-        </Button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className={`${className}__read-the-docs`}>Click on the Vite and React logos to learn more</p>
     </div>
   );
 };
 
 const IndexPage = styled(Component)`
-  padding: 2rem;
-  text-align: center;
+  height: 100vh;
+
+  &__inner {
+    padding: 2rem;
+    text-align: center;
+  }
 
   &__logo {
     height: 6em;

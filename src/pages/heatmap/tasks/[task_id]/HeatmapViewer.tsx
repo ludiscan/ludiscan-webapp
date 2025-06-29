@@ -221,7 +221,6 @@ const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
       setOpenMenu('eventLogDetail');
     };
     heatMapEventBus.on('click-menu-icon', clickMenuIconHandler);
-
     heatMapEventBus.on('click-event-log', clickEventLogHandler);
     return () => {
       heatMapEventBus.off('click-menu-icon', clickMenuIconHandler);

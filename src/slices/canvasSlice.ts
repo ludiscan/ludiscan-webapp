@@ -38,8 +38,11 @@ const canvasSlice = createSlice({
     setEventLogs: (state, action: PayloadAction<HeatmapDataState['eventLogs']>) => {
       state.eventLogs = action.payload;
     },
+    setPlayerTimeline: (state, action: PayloadAction<HeatmapDataState['playerTimeline']>) => {
+      state.playerTimeline = action.payload;
+    },
   },
 });
 
-export const { setGeneral, setHotspotMode, set, setEventLogs } = canvasSlice.actions;
+export const canvasActions = canvasSlice.actions;
 export const canvasReducer = canvasSlice.reducer;

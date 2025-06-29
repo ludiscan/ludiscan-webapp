@@ -1,18 +1,18 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import type { EventLogData, GeneralSettings, HeatmapDataState, HotspotModeSettings } from '@src/modeles/heatmapView';
+import type { EventLogData, GeneralSettings, HeatmapDataState, HotspotModeSettings, PlayerTimelineSettings } from '@src/modeles/heatmapView';
 import type { RootState } from '@src/store';
 
-import { getInitialState, set } from '@src/slices/canvasSlice';
+import { getInitialState, canvasActions } from '@src/slices/canvasSlice';
 import { getCanvasValues } from '@src/utils/localstrage';
 import { capitalize } from '@src/utils/string';
 
-type keys = keyof HeatmapDataState & keyof RootState['canvas'];
+type keys = keyof HeatmapDataState & keyof RootState['heatmapCanvas'];
 
 function useHeatmapValuesState<T extends HeatmapDataState[keys]>(key: keys) {
   // storeから現在のstate取得
-  const data = useSelector((state: RootState) => state.canvas[key]) as T;
+  const data = useSelector((state: RootState) => state.heatmapCanvas[key]) as T;
 
   const dispatch = useDispatch();
 
@@ -28,10 +28,14 @@ function useHeatmapValuesState<T extends HeatmapDataState[keys]>(key: keys) {
   }, [data]);
 
   const handleSetData = useCallback(
-    (value: T) => {
-      dispatch({ type: `heatmapCanvas/set${capitalize(key)}`, payload: value });
+    (value: T | ((prevState: T) => T)) => {
+      if (typeof value === 'function') {
+        dispatch({ type: `heatmapCanvas/set${capitalize(key)}`, payload: value(sessionData) });
+      } else {
+        dispatch({ type: `heatmapCanvas/set${capitalize(key)}`, payload: value });
+      }
     },
-    [dispatch, key],
+    [dispatch, key, sessionData],
   );
 
   useEffect(() => {
@@ -57,6 +61,7 @@ export const useGeneralState = () => useHeatmapValuesState<GeneralSettings>('gen
 export const useHotspotModeState = () => useHeatmapValuesState<HotspotModeSettings>('hotspotMode');
 export const useEventLogsState = () => useHeatmapValuesState<EventLogData[]>('eventLogs');
 export const useVersion = () => useHeatmapValuesState<string | undefined>('version');
+export const usePlayerTimelineState = () => useHeatmapValuesState<PlayerTimelineSettings>('playerTimeline');
 
 export const useHeatmapState = () => {
   const dispatch = useDispatch();
@@ -67,6 +72,8 @@ export const useHeatmapState = () => {
   const { data: eventLogsData } = useEventLogsState();
   const [eventLogs, setEventLogs] = useState<EventLogData[]>(eventLogsData);
   const { data: version } = useVersion();
+  const { data: playerTimelineData } = usePlayerTimelineState();
+  const [playerTimeline, setPlayerTimeline] = useState<PlayerTimelineSettings>(playerTimelineData);
 
   useEffect(() => {
     // 初期化時にlocalStorageから値をロード
@@ -75,19 +82,45 @@ export const useHeatmapState = () => {
       setGeneral(savedData.general);
       setHotspotMode(savedData.hotspotMode);
       setEventLogs(savedData.eventLogs);
+      setPlayerTimeline(savedData.playerTimeline);
     }
   }, []);
+
+  useEffect(() => {
+    if (generalData) {
+      setGeneral(generalData);
+    }
+  }, [generalData]);
+
+  useEffect(() => {
+    if (hotspotModeData) {
+      setHotspotMode(hotspotModeData);
+    }
+  }, [hotspotModeData]);
+
+  useEffect(() => {
+    if (eventLogsData) {
+      setEventLogs(eventLogsData);
+    }
+  }, [eventLogsData]);
+
+  useEffect(() => {
+    if (playerTimelineData) {
+      setPlayerTimeline(playerTimelineData);
+    }
+  }, [playerTimelineData]);
 
   // session → storeへapply
   const apply = useCallback(() => {
     dispatch(
-      set({
+      canvasActions.set({
         general,
         hotspotMode,
         eventLogs,
+        playerTimeline,
       }),
     );
-  }, [dispatch, eventLogs, general, hotspotMode]);
+  }, [dispatch, eventLogs, general, hotspotMode, playerTimeline]);
 
   // discard → localStorageからロードしてsessionに反映
   const discard = useCallback(() => {
@@ -103,6 +136,7 @@ export const useHeatmapState = () => {
     general,
     hotspotMode,
     eventLogs,
+    playerTimeline,
     version,
     apply,
     discard,
