@@ -15,7 +15,22 @@ const Template: Story = {
   render: (args) => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const [seekRatio, setSeekRatio] = useState(0);
-    return <TimelineControllerBlock {...args} maxTime={60 * 3 * 1000} currentTime={seekRatio} onSeek={setSeekRatio} />;
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [minTime, setMinTime] = useState(0);
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [maxTime, setMaxTime] = useState(60 * 3 * 1000); // 3 minutes in milliseconds
+    return (
+      <TimelineControllerBlock
+        {...args}
+        currentMaxTime={maxTime}
+        currentMinTime={minTime}
+        maxTime={60 * 3 * 1000}
+        currentTime={seekRatio}
+        onSeek={setSeekRatio}
+        onChangeMaxTime={setMaxTime}
+        onChangeMinTime={setMinTime}
+      />
+    );
   },
 };
 
@@ -24,6 +39,7 @@ export const Default: Story = {
   name: 'default style',
   args: {
     isPlaying: false,
+
     onClickMenu: () => {
       /* eslint-disable-next-line no-console */
       console.log('Menu clicked');

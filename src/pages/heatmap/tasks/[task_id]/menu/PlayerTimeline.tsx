@@ -106,6 +106,7 @@ const Component: FC<HeatmapMenuProps> = ({ extra = {}, service, className }) => 
       visible: true,
     };
     setData((prev) => ({
+      ...prev,
       visible: true,
       details: prev.details ? [...prev.details, newer] : [newer],
     }));

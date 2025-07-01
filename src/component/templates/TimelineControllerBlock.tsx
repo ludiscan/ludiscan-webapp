@@ -1,8 +1,9 @@
 import styled from '@emotion/styled';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BiPause, BiPlay } from 'react-icons/bi';
 import { IoEllipsisHorizontal } from 'react-icons/io5';
 
+import type { Theme } from '@emotion/react';
 import type { FC, ChangeEventHandler } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
@@ -14,66 +15,150 @@ export type TimelineControllerBlockProps = {
   className?: string;
   isPlaying: boolean;
   currentTime: number;
+  currentMinTime: number;
+  currentMaxTime: number;
   maxTime: number;
   onClickMenu: () => void;
   onClickPlay: () => void;
+  onChangeMinTime: (time: number) => void;
+  onChangeMaxTime: (time: number) => void;
   onSeek: (time: number) => void;
 };
 
-const Component: FC<TimelineControllerBlockProps> = ({ className, isPlaying, maxTime = 0, currentTime, onClickPlay, onClickMenu, onSeek }) => {
+const Component: FC<TimelineControllerBlockProps> = ({
+  className,
+  isPlaying,
+  currentTime,
+  currentMinTime,
+  currentMaxTime,
+  maxTime,
+  onClickPlay,
+  onClickMenu,
+  onChangeMinTime,
+  onChangeMaxTime,
+  onSeek,
+}) => {
   const { theme } = useSharedTheme();
+  const trackRef = useRef<HTMLDivElement>(null);
   const [isMenusOpen, setIsMenusOpen] = useState(false);
-  const handleSeekChange: ChangeEventHandler<HTMLInputElement> = useCallback(
-    (event) => {
-      onSeek(Number(event.currentTarget.value)); // Convert percentage to ratio
+  const gradEle = useRef<'min' | 'max' | null>(null);
+  const draggingElement = useRef<(EventTarget & HTMLElement) | null>(null);
+
+  const handleSeek = useCallback<ChangeEventHandler<HTMLInputElement>>(
+    (e) => {
+      const newTime = Number(e.currentTarget.value);
+      if (newTime < currentMinTime || newTime > currentMaxTime) {
+        return; // Seek outside the min-max range
+      }
+      onSeek(newTime);
     },
-    [onSeek],
+    [currentMaxTime, currentMinTime, onSeek],
   );
-  const currentRatio = maxTime > 0 ? currentTime / maxTime : 0;
+
+  // thumb の left を計算
+  const minPct = currentMinTime / maxTime;
+  const maxPct = currentMaxTime / maxTime;
 
   const currentTimeLabel = useMemo(() => {
-    if (maxTime <= 0 || currentTime <= 0) {
-      return '00:00:00';
-    }
+    if (maxTime <= 0) return '00:00';
     const sec = currentTime / 1000;
-    return `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(Math.floor(sec % 60)).padStart(2, '0')}:${String(Math.floor((sec % 1) * 100)).padStart(2, '0')}`;
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    // const cs = Math.floor((sec % 1) * 100);
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
   }, [currentTime, maxTime]);
+
+  const handleMinDown = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    gradEle.current = 'min';
+    draggingElement.current = event.currentTarget;
+  }, []);
+
+  const handleMaxDown = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    gradEle.current = 'max';
+    draggingElement.current = event.currentTarget;
+  }, []);
+
+  const handleMove = useCallback(
+    (e: MouseEvent): void => {
+      if (!draggingElement.current) return;
+      const trackRect = trackRef.current?.getBoundingClientRect();
+      if (!trackRect) return;
+      e.preventDefault();
+
+      const offsetX = e.clientX - trackRect.left;
+      const newTime = Math.max(0, Math.min(maxTime, (offsetX / trackRect.width) * maxTime));
+      if (gradEle.current === 'min' && newTime < currentTime - 500) {
+        onChangeMinTime(newTime);
+      } else if (gradEle.current === 'max' && newTime > currentTime + 500) {
+        onChangeMaxTime(newTime);
+      }
+    },
+    [maxTime, currentTime, onChangeMinTime, onChangeMaxTime],
+  );
+
+  // mouseupが発生したときに実行する関数
+  const handleUp = useCallback((_: MouseEvent): void => {
+    if (!draggingElement.current) return;
+
+    draggingElement.current = null;
+    gradEle.current = null;
+  }, []);
+
+  useEffect(() => {
+    document.body.addEventListener('mousemove', handleMove);
+    document.body.addEventListener('mouseup', handleUp);
+    document.body.addEventListener('mouseleave', handleUp);
+
+    return () => {
+      document.body.removeEventListener('mousemove', handleMove);
+      document.body.removeEventListener('mouseup', handleUp);
+      document.body.removeEventListener('mouseleave', handleUp);
+    };
+  }, [handleMove, handleUp]);
+
   return (
-    <Card color={theme.colors.surface.main} className={className} shadow={'medium'} border={theme.colors.border.main} stopPropagate>
+    <Card color={theme.colors.surface.main} className={className} shadow='medium' border={theme.colors.border.main} stopPropagate>
       <InlineFlexColumn>
         {isMenusOpen && (
           <InlineFlexRow>
-            <Button onClick={onClickMenu} scheme={'surface'} fontSize={'small'}>
+            <Button onClick={onClickMenu} scheme='surface' fontSize='small'>
               <IoEllipsisHorizontal />
             </Button>
-            {/* Additional menu items can be added here */}
           </InlineFlexRow>
         )}
-        <InlineFlexRow align={'center'} gap={12}>
-          <Button onClick={onClickPlay} scheme={'primary'} fontSize={'small'}>
+        <InlineFlexRow align='center' gap={12}>
+          <Button onClick={onClickPlay} scheme='primary' fontSize='small'>
             {isPlaying ? <BiPause /> : <BiPlay />}
           </Button>
-          <input
-            className={`${className}__seekBarInput`}
-            type={'range'}
-            value={currentTime}
-            onChange={handleSeekChange}
-            min={0}
-            max={maxTime}
-            step={100}
-            style={{
-              // English comment: generate gradient background dynamically
-              background: `linear-gradient(
-                to right,
-                ${theme.colors.primary.main} 0%,
-                ${theme.colors.primary.main} ${currentRatio * 100}%,
-                ${theme.colors.secondary.light} ${currentRatio * 100}%,
-                ${theme.colors.secondary.light} 100%
-              )`,
-            }}
-          />
+
+          <div className={`${className}__sliderWrapper`} ref={trackRef}>
+            <div className={`${className}__sliderBackground`} />
+
+            {/* min-thumnb */}
+            <div
+              role='button'
+              tabIndex={0}
+              id={'min-thumb'}
+              className={`${className}__thumb ${className}__thumb--min min-thumb draggable`}
+              style={{ left: `${minPct * 100}%` }}
+              onMouseDown={handleMinDown}
+            />
+
+            {/* 現在位置スライダー */}
+            <input type='range' className={`${className}__seekBarInput`} min={0} max={maxTime} value={currentTime} onChange={handleSeek} />
+            {/* max-thumb */}
+            <div
+              role='button'
+              tabIndex={0}
+              id={'max-thumb'}
+              className={`${className}__thumb ${className}__thumb--max max-thumb draggable`}
+              style={{ left: `${maxPct * 100}%` }}
+              onMouseDown={handleMaxDown}
+            />
+          </div>
+
           <div className={`${className}__time`}>{currentTimeLabel}</div>
-          <Button onClick={onClickMenu} scheme={'surface'} fontSize={'small'}>
+          <Button onClick={onClickMenu} scheme='surface' fontSize='small'>
             <IoEllipsisHorizontal />
           </Button>
         </InlineFlexRow>
@@ -82,23 +167,73 @@ const Component: FC<TimelineControllerBlockProps> = ({ className, isPlaying, max
   );
 };
 
+const createBackgroundGradient = (theme: Theme, currentMinTime: number, currentMaxTime: number, maxTime: number) => {
+  const minPct = (currentMinTime / maxTime) * 100;
+  const maxPct = (currentMaxTime / maxTime) * 100;
+  return `linear-gradient(
+    to right,
+    ${theme.colors.secondary.light} 0%,
+    ${theme.colors.secondary.light} ${minPct}%,
+    ${theme.colors.primary.main} ${minPct}%,
+    ${theme.colors.primary.main} ${maxPct}%,
+    ${theme.colors.secondary.light} ${maxPct}%,
+    ${theme.colors.secondary.light} 100%
+  )`;
+};
+
 export const TimelineControllerBlock = styled(Component)`
   min-width: 300px;
   width: fit-content;
   padding: 16px;
 
-  &__seekBarInput {
+  &__sliderWrapper {
+    position: relative;
     flex: 1;
     min-width: 200px;
+    height: 20px;
+  }
+  &__sliderBackground {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
     height: 4px;
-    padding: 0;
-    margin: 8px 0;
-    appearance: none;
-    outline: none;
-    background: ${({ theme }) => theme.colors.secondary.light};
+    width: 100%;
     border-radius: 2px;
+    /* 色分けグラデ */
+    background: ${({ theme, currentMinTime, currentMaxTime, maxTime }) => createBackgroundGradient(theme, currentMinTime, currentMaxTime, maxTime)};
+  }
 
+  /* thumb 共通 */
+  &__thumb {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: ${({ theme }) => theme.colors.primary.main};
+    cursor: pointer;
+    z-index: 5;
+  }
+  &__thumb--min {
+    /* 追加スタイリングがあれば */
+  }
+  &__thumb--max {
+    /* 追加スタイリングがあれば */
+  }
+
+  /* 現在位置スライダーは最前面 */
+  &__seekBarInput {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    appearance: none;
+    background: transparent;
+    z-index: 4;
     &::-webkit-slider-thumb {
+      /* English comment: taller thumb for current */
       width: 6px;
       height: 20px;
       appearance: none;
@@ -106,18 +241,14 @@ export const TimelineControllerBlock = styled(Component)`
       background: ${({ theme }) => theme.colors.surface.main};
       border: 1px solid ${({ theme }) => theme.colors.primary.main};
       border-radius: 8px;
-      transition: background 0.3s;
     }
-
     &::-moz-range-thumb {
       width: 6px;
       height: 20px;
-      appearance: none;
       cursor: pointer;
       background: ${({ theme }) => theme.colors.surface.main};
       border: 1px solid ${({ theme }) => theme.colors.primary.main};
       border-radius: 8px;
-      transition: background 0.3s;
     }
   }
 `;

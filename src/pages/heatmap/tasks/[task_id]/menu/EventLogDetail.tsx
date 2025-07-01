@@ -111,7 +111,7 @@ const Component: FC<HeatmapMenuProps> = ({ extra = {}, service, className }) => 
       !session_id ||
       !(
         timelineState.details?.every(
-          (detail) => detail.player !== logDetail.data.player && detail.project_id !== project_id && detail.session_id !== session_id,
+          (detail) => detail.player !== logDetail.data.player || detail.project_id !== project_id || detail.session_id !== session_id,
         ) ?? true
       )
     );
@@ -126,6 +126,7 @@ const Component: FC<HeatmapMenuProps> = ({ extra = {}, service, className }) => 
       visible: true,
     };
     setTimelineState((prev) => ({
+      ...prev,
       visible: true,
       details: prev.details ? [...prev.details, newer] : [newer],
     }));
