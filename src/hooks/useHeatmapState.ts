@@ -24,13 +24,17 @@ function useHeatmapValuesState<T extends HeatmapDataState[keys]>(key: keys) {
   const [isMounted, setIsMounted] = useState<boolean>(false);
 
   useEffect(() => {
-    setSessionData(data);
-  }, [data]);
+    if (sessionData !== data) {
+      setSessionData(data);
+    }
+  }, [data, sessionData]);
 
   const handleSetData = useCallback(
     (value: T | ((prevState: T) => T)) => {
       if (typeof value === 'function') {
-        dispatch({ type: `heatmapCanvas/set${capitalize(key)}`, payload: value(sessionData) });
+        const newData = value(sessionData);
+        if (newData === sessionData) return; // 値が変わらない場合は何もしない
+        dispatch({ type: `heatmapCanvas/set${capitalize(key)}`, payload: newData });
       } else {
         dispatch({ type: `heatmapCanvas/set${capitalize(key)}`, payload: value });
       }
