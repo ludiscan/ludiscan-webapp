@@ -20,7 +20,7 @@ export type MenuSideBarProps = {
 
 const Component: FC<MenuSideBarProps> = ({ className, currentMenu }) => {
   return (
-    <FlexColumn className={className} gap={12}>
+    <FlexColumn className={className} gap={12} wrap={'nowrap'}>
       <Divider orientation={'horizontal'} />
       {SideBarMenus.map(({ name, icon }) => (
         <Button
