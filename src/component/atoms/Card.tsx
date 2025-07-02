@@ -78,6 +78,5 @@ export const Card = styled(Component)`
     ${({ border }) => border && `border: 1px solid ${hexToRgba(border, 0.7)}`};
     /* 背景をぼかす */
     backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
   }
 `;
