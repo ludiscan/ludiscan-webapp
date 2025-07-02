@@ -1,13 +1,16 @@
 name: pr.yml
 on:
   pull_request:
-    branches: [main, develop]
     paths:
       - 'src/**'
       - '.github/workflows/pr.yml'
       - 'package.json'
       - 'package-lock.json'
   workflow_dispatch:
+
+concurrency:
+    group: 'pr-workflow-${{ github.head_ref }}'
+    cancel-in-progress: true
 
 jobs:
   check:

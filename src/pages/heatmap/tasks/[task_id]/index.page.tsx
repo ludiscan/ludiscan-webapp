@@ -16,7 +16,7 @@ import { Text } from '@src/component/atoms/Text';
 import { StatusContent } from '@src/component/molecules/StatusContent';
 import { Header } from '@src/component/templates/Header';
 import { useAuth } from '@src/hooks/useAuth';
-import { useCanvasState } from '@src/hooks/useCanvasState';
+import { useVersion } from '@src/hooks/useHeatmapState';
 import { createClient } from '@src/modeles/qeury';
 import { dimensions, fontSizes } from '@src/styles/style';
 import { useOnlineHeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
@@ -77,9 +77,11 @@ const HeatmapIdPageLayoutComponent: FC<HeatmapIdPageLayoutProps> = ({ className,
           </>
         }
       />
-      <StatusContent className={className} status={statusContentStatus}>
-        {task?.status === 'completed' && service && service.isInitialized && <HeatMapViewer dataService={service} />}
-      </StatusContent>
+      <div className={className}>
+        <StatusContent status={statusContentStatus}>
+          {task?.status === 'completed' && service && service.isInitialized && <HeatMapViewer dataService={service} />}
+        </StatusContent>
+      </div>
     </>
   );
 };
@@ -101,7 +103,7 @@ const HeatMapTaskIdPage: FC<HeatMapTaskIdPageProps> = ({ className, env, taskId 
   const timer = useRef<NodeJS.Timeout>(undefined);
 
   const router = useRouter();
-  const { version } = useCanvasState();
+  const { data: version } = useVersion();
   const { isAuthorized, isLoading, ready } = useAuth({ env });
 
   const { data: task, refetch: refetchTask } = useQuery({

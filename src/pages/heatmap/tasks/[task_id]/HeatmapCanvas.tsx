@@ -1,19 +1,21 @@
-import { OrbitControls } from '@react-three/drei';
+import { OrbitControls, Stats } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Raycaster, Vector2, Vector3 } from 'three';
 
 import { PositionPointMarkers } from './PositionPointMarkers';
 
+import type { PlayerTimelinePointsTimeRange } from '@src/pages/heatmap/tasks/[task_id]/PlayerTimelinePoints';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC } from 'react';
 import type { Group } from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 
-import { useCanvasState } from '@src/hooks/useCanvasState';
+import { useEventLogState, useGeneralState, usePlayerTimelineState } from '@src/hooks/useHeatmapState';
 import { EventLogMarkers } from '@src/pages/heatmap/tasks/[task_id]/EventLogMarkers';
 import { HotspotCircles } from '@src/pages/heatmap/tasks/[task_id]/HotspotCircles';
 import { LocalModelLoader, StreamModelLoader } from '@src/pages/heatmap/tasks/[task_id]/ModelLoader';
+import { PlayerTimelinePoints } from '@src/pages/heatmap/tasks/[task_id]/PlayerTimelinePoints';
 import { WaypointMarker } from '@src/pages/heatmap/tasks/[task_id]/WaypointMarker';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
@@ -23,6 +25,8 @@ type HeatmapCanvasProps = {
   map?: string | ArrayBuffer | null;
   modelType?: 'gltf' | 'glb' | 'obj' | 'server' | null;
   pointList: { x: number; y: number; z?: number; density: number }[];
+  currentTimelineSeek: number;
+  visibleTimelineRange: PlayerTimelinePointsTimeRange;
 };
 
 type Waypoint = {
@@ -30,15 +34,16 @@ type Waypoint = {
   position: Vector3; // x, y, z 座標（モデル表面に対して Y 座標を合わせたもの）
 };
 
-const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, service }) => {
+const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, service, currentTimelineSeek, visibleTimelineRange }) => {
   // const { invalidate } = useThree();
   const {
-    general: { showHeatmap },
-    eventLogs,
-  } = useCanvasState();
+    data: { showHeatmap },
+  } = useGeneralState();
+  const { data: eventLog } = useEventLogState();
+  const { data: timelineState } = usePlayerTimelineState();
   const orbitControlsRef = useRef<OrbitControlsImpl>(null);
 
-  const visibleEventLogs = useMemo(() => eventLogs.filter((event) => event.visible), [eventLogs]);
+  const visibleEventLogs = useMemo(() => eventLog.logs.filter((event) => event.visible), [eventLog]);
 
   // **1-1. State を追加**
   const [waypoints, setWaypoints] = useState<Waypoint[]>([]);
@@ -181,14 +186,21 @@ const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, s
 
   return (
     <>
-      <ambientLight intensity={0.3} /> {/* eslint-disable-line react/no-unknown-property */}
-      <directionalLight position={[10, 10, 10]} intensity={3} castShadow={true} /> {/* eslint-disable-line react/no-unknown-property */}
+      <ambientLight intensity={0.3} /* eslint-disable-line react/no-unknown-property */ />
+      <directionalLight position={[10, 10, 10]} intensity={3} castShadow={true} /* eslint-disable-line react/no-unknown-property */ />
       {modelType && map && modelType !== 'server' && typeof map === 'string' && <LocalModelLoader ref={modelRef} modelPath={map} modelType={modelType} />}
       {modelType && model && modelType === 'server' && typeof map !== 'string' && <StreamModelLoader ref={modelRef} model={model} />}
       {pointList && showHeatmap && <PositionPointMarkers points={pointList} />}
       {pointList && showHeatmap && <HotspotCircles points={pointList} />}
-      {visibleEventLogs.length > 0 &&
-        visibleEventLogs.map((event) => <EventLogMarkers key={event.key} logName={event.key} service={service} color={event.color} />)}
+      {visibleEventLogs.length > 0 && visibleEventLogs.map((event) => <EventLogMarkers key={event.key} logName={event.key} service={service} pref={event} />)}
+      {service &&
+        timelineState &&
+        timelineState.visible &&
+        timelineState.details &&
+        timelineState.details.length > 0 &&
+        timelineState.details.map((tl, index) => (
+          <PlayerTimelinePoints key={index} service={service} state={tl} currentTimelineSeek={currentTimelineSeek} visibleTimeRange={visibleTimelineRange} />
+        ))}
       {/* --- 追加：ウェイポイントを map して表示 --- */}
       {waypoints.map((wp) => (
         <WaypointMarker
@@ -212,6 +224,7 @@ const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, s
         />
       ))}
       <OrbitControls enableZoom enablePan enableRotate ref={orbitControlsRef} position0={new Vector3(1, 1, 3000)} />
+      <Stats />
     </>
   );
 };

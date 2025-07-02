@@ -1,5 +1,7 @@
+import type { HeatmapDataState } from '@src/modeles/heatmapView';
 import type { User } from '@src/modeles/user';
-import type { CanvasEventValues } from '@src/slices/canvasSlice';
+
+import { initializeValues } from '@src/modeles/heatmapView';
 
 const STORAGE_KEY = 'ludiscan';
 
@@ -39,7 +41,7 @@ export function getUser(): User | null {
   return null;
 }
 
-export function saveCanvasValues(canvas: CanvasEventValues) {
+export function saveCanvasValues(canvas: HeatmapDataState) {
   const storage = localStorage.getItem(STORAGE_KEY);
   if (storage) {
     const data = JSON.parse(storage);
@@ -49,10 +51,39 @@ export function saveCanvasValues(canvas: CanvasEventValues) {
   }
 }
 
-export function getCanvasValues(): CanvasEventValues | null {
+export function getCanvasValues(): HeatmapDataState | null {
   const storage = localStorage.getItem(STORAGE_KEY);
   if (storage && JSON.parse(storage).canvas) {
     return JSON.parse(storage).canvas;
+  }
+  return null;
+}
+
+export function saveCanvasPartial<T>(key: keyof HeatmapDataState, value: T) {
+  const storage = getCanvasValues() ?? initializeValues;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...storage, [key]: value }));
+}
+
+export function loadCanvasPartial<T>(key: keyof HeatmapDataState): T {
+  const storage = getCanvasValues();
+  if (storage) return storage[key] as T;
+  throw new Error(`No data for key: ${key}`);
+}
+
+export function saveThemeName(theme: 'light' | 'dark'): void {
+  const storage = localStorage.getItem(STORAGE_KEY);
+  if (storage) {
+    const data = JSON.parse(storage);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...data, theme }));
+  } else {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ theme }));
+  }
+}
+
+export function getThemeName(): 'light' | 'dark' | null {
+  const storage = localStorage.getItem(STORAGE_KEY);
+  if (storage) {
+    return JSON.parse(storage).theme || null;
   }
   return null;
 }

@@ -84,5 +84,7 @@ export function useOfflineHeatmapDataService(offlineData: OfflineHeatmapData | n
     getTask,
     getEventLog,
     eventLogs: offlineData?.eventLogs || {},
+    createClient: () => null, // オフラインではクライアントは不要
+    getEnv: () => undefined, // オフラインでは環境情報は不要
   };
 }

@@ -3,7 +3,7 @@ import { Color, Vector3 } from 'three';
 
 import type { FC } from 'react';
 
-import { useCanvasState } from '@src/hooks/useCanvasState';
+import { useGeneralState, useHotspotModeState } from '@src/hooks/useHeatmapState';
 
 export type PointCirclesProps = {
   points: { x: number; y: number; z?: number | undefined; density: number }[];
@@ -11,9 +11,12 @@ export type PointCirclesProps = {
 
 const Component: FC<PointCirclesProps> = ({ points }) => {
   const {
-    general: { scale, upZ },
-    hotspotMode: { visible, skipNearDuplication, thresholdCount, cellRadius },
-  } = useCanvasState();
+    data: { scale, upZ },
+  } = useGeneralState();
+
+  const {
+    data: { visible, cellRadius, thresholdCount, skipNearDuplication },
+  } = useHotspotModeState();
 
   // **各ポイントの周囲の密度を集計**
   const areaDensities = useMemo(() => {

@@ -1,3 +1,5 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { createMockHeatmapTask } from '@src/modeles/heatmaptask';
@@ -12,7 +14,11 @@ type Story = StoryObj<typeof HeatmapMenuContent>;
 
 const Template: Story = {
   render: (args) => {
-    return <HeatmapMenuContent {...args} />;
+    return (
+      <QueryClientProvider client={new QueryClient()}>
+        <HeatmapMenuContent {...args} />
+      </QueryClientProvider>
+    );
   },
 };
 
@@ -41,7 +47,7 @@ export const EventLog: Story = {
   ...General,
   args: {
     ...General.args,
-    name: 'eventLog',
+    name: 'eventlog',
   },
 };
 
@@ -50,5 +56,13 @@ export const Hotspot: Story = {
   args: {
     ...General.args,
     name: 'hotspot',
+  },
+};
+
+export const EventLogDetail: Story = {
+  ...General,
+  args: {
+    ...General.args,
+    name: 'eventLogDetail',
   },
 };

@@ -144,7 +144,8 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    get?: never;
+    /** Get project by ID */
+    get: operations['ProjectsController_findOne'];
     put?: never;
     post?: never;
     /** Delete a project */
@@ -280,6 +281,38 @@ export interface paths {
       cookie?: never;
     };
     get: operations['GeneralLogController_getPositionKeys'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/general_log/{event_type}/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['GeneralLogController_getLogDetail'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/general_log/position/{event_type}/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['GeneralLogController_getPositionLogDetail'];
     put?: never;
     post?: never;
     delete?: never;
@@ -630,6 +663,7 @@ export interface components {
       event_type: string;
       event_data: components['schemas']['StringGeneralLogDataDto'];
       offset_timestamp: number;
+      player: number;
     };
     GetGeneralLogKeysDto: {
       /** @description List of keys to retrieve */
@@ -648,6 +682,25 @@ export interface components {
       event_type: string;
       event_data: components['schemas']['Position'];
       offset_timestamp: number;
+      player: number;
+    };
+    StringGeneralLogDetailDto: {
+      id: number;
+      event_type: string;
+      event_data: components['schemas']['StringGeneralLogDataDto'];
+      offset_timestamp: number;
+      player: number;
+      project_id: number;
+      session_id: number;
+    };
+    PositionGeneralLogDetailDto: {
+      id: number;
+      event_type: string;
+      event_data: components['schemas']['Position'];
+      offset_timestamp: number;
+      player: number;
+      project_id: number;
+      session_id: number;
     };
     PlaySessionResponseDto: {
       sessionId: number;
@@ -700,6 +753,7 @@ export interface components {
       text_data: string | null;
       position_data: components['schemas']['Position'] | null;
       offset_timestamp: number;
+      player: number;
     };
     PlayPositionLogDto: {
       /**
@@ -1143,6 +1197,37 @@ export interface operations {
       };
     };
   };
+  ProjectsController_findOne: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProjectResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
   ProjectsController_delete: {
     parameters: {
       query?: never;
@@ -1420,6 +1505,70 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['GetGeneralLogKeysDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  GeneralLogController_getLogDetail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+        event_type: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['StringGeneralLogDetailDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  GeneralLogController_getPositionLogDetail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+        event_type: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PositionGeneralLogDetailDto'];
         };
       };
       /** @description Bad Request */
@@ -1911,7 +2060,14 @@ export interface operations {
   };
   PlayerPositionLogController_get: {
     parameters: {
-      query?: never;
+      query?: {
+        /** @description Filter by player ID (optional) */
+        player?: number;
+        /** @description Number of logs to return (default: 20) */
+        limit?: number;
+        /** @description Offset for pagination (default: 0) */
+        offset?: number;
+      };
       header?: never;
       path: {
         project_id: number;

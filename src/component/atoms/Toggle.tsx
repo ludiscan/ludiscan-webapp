@@ -5,6 +5,7 @@ import { IoIosArrowForward } from 'react-icons/io';
 import type { FC, ReactNode, CSSProperties } from 'react';
 
 import { FlexColumn, InlineFlexRow } from '@src/component/atoms/Flex';
+import { fontSizes } from '@src/styles/style';
 
 export type ToggleProps = {
   className?: string;
@@ -38,6 +39,8 @@ const Component: FC<ToggleProps> = ({ className, buttonStyle, label, opened, onC
 };
 
 export const Toggle = styled(Component)`
+  font-size: ${fontSizes.medium};
+
   &__button {
     display: flex;
     width: 100%;

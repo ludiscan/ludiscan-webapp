@@ -7,7 +7,7 @@ import { canvasReducer } from '@src/slices/canvasSlice';
 export const store = configureStore({
   reducer: {
     auth: authReducer,
-    canvas: canvasReducer,
+    heatmapCanvas: canvasReducer,
   },
 });
 

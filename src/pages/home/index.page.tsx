@@ -134,6 +134,8 @@ const Component: FC<HomePageProps> = ({ className, env }) => {
 };
 
 const IndexPage = styled(Component)`
+  height: 100vh;
+
   &__card {
     margin: 0 20px;
   }

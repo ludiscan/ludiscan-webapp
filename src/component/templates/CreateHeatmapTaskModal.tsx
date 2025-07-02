@@ -132,7 +132,7 @@ const Component: FC<CreateHeatmapTaskSessionModalProps | CreateHeatmapTaskProjec
         <Tooltip tooltip={'create a 2D/3D view'}>
           <FlexRow align={'center'} gap={12} className={`${className}__inputRow`}>
             <div className={`${className}__input`}>
-              <Switch onChange={handleZVisibleChange} label='ZVisible' checked={zVisible} />
+              <Switch size={'large'} onChange={handleZVisibleChange} label='ZVisible' checked={zVisible} />
             </div>
             <Text text='Z Visible' />
           </FlexRow>

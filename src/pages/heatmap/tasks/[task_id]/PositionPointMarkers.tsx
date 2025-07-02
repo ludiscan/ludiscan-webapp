@@ -3,7 +3,7 @@ import { Color, Vector3 } from 'three';
 
 import type { FC } from 'react';
 
-import { useCanvasState } from '@src/hooks/useCanvasState';
+import { useGeneralState } from '@src/hooks/useHeatmapState';
 
 export type PointMarkersProps = {
   points: { x: number; y: number; z?: number | undefined; density: number }[];
@@ -43,8 +43,8 @@ class Point extends Vector3 {
 
 const Component: FC<PointMarkersProps> = ({ points, colorIntensity = 0.9, colorScale = 1 }) => {
   const {
-    general: { upZ, scale, minThreshold = 0.0, maxThreshold = 1.0 },
-  } = useCanvasState();
+    data: { upZ, scale, minThreshold = 0.0, maxThreshold = 1.0 },
+  } = useGeneralState();
 
   // Z-up / Y-up の変換
   const pointList = useMemo(
@@ -70,7 +70,7 @@ const Component: FC<PointMarkersProps> = ({ points, colorIntensity = 0.9, colorS
         const raw = density / maxDensity;
         const normalized = Math.max(raw, 0);
 
-        // apply intensity curve
+        // apply an intensity curve
         let t = Math.pow(normalized, colorIntensity);
         t = t * colorScale;
         t = Math.min(t, 1);
@@ -104,10 +104,10 @@ const Component: FC<PointMarkersProps> = ({ points, colorIntensity = 0.9, colorS
         // interpolate between blue and red
         const color = getColor(t, MIN_COLOR, MAX_COLOR);
 
-        return new Point(x * scale, y * scale, z * scale, color);
+        return new Point(x, y, z, color);
       })
       .filter((s) => s != null);
-  }, [maxThreshold, minThreshold, normalizePoints, scale]);
+  }, [maxThreshold, minThreshold, normalizePoints]);
 
   return (
     <>

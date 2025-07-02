@@ -9,6 +9,8 @@ import lightTheme from '../styles/light';
 import type { Theme } from '@emotion/react';
 import type { FC, ReactNode } from 'react';
 
+import { getThemeName, saveThemeName } from '@src/utils/localstrage';
+
 export type ThemeName = 'light' | 'dark';
 
 // コンテキストの型
@@ -40,8 +42,17 @@ export const SharedThemeProvider: FC<SharedThemeProviderProps> = ({ children, in
   }, []);
 
   useEffect(() => {
-    if (initialTheme !== undefined && initialTheme !== theme) {
-      setTheme(initialTheme);
+    const updateTheme = initialTheme ?? (getThemeName() === 'dark' ? darkTheme : lightTheme);
+    if (updateTheme !== undefined) {
+      setTheme(updateTheme);
+    }
+  }, [initialTheme]);
+
+  useEffect(() => {
+    const savedTheme = getThemeName();
+    const name = theme === lightTheme ? 'light' : 'dark';
+    if (savedTheme != name && !initialTheme) {
+      saveThemeName(name);
     }
   }, [initialTheme, theme]);
 

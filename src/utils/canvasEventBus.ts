@@ -1,8 +1,10 @@
-import type { Menus } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenuContent';
+import type { Menus } from '@src/hooks/useHeatmapSideBarMenus';
 
 export interface HeatMapEventMap {
   'click-menu-icon': { name: Menus };
   'add-waypoint': { waypoint: { x: number; y: number; z: number } };
+  'click-event-log': { logName: string; id: number };
+  'event-log-detail-loaded': { logName: string; id: number };
 }
 
 class EventBus<T> extends EventTarget {

@@ -190,7 +190,7 @@ export const Button = styled(Component)`
     background-color: ${({ theme }) => theme.colors.disabled};
   }
 
-  &:hover &:not(:disabled) {
-    opacity: 0.6;
+  &:hover:not(:disabled) {
+    opacity: 0.7;
   }
 `;
