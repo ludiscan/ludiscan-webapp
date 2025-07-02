@@ -7,7 +7,7 @@
 - Node.js: 23.6.x
 - npm: 10.x
 
-## セットアップ
+### セットアップ
 
 ```bash
 fnm use
@@ -18,9 +18,40 @@ npm install
 npm run dev
 ```
 
-## デプロイ
+### API スキーマファイルの生成
+- `swagger.json` を rootに配置し以下を実行する
+```bash
+npm run generate:api-schemes
+```
 
-このプロジェクトはAWS Amplifyでデプロイを管理しています。
+### Storybook 起動
+
+```bash
+npm run storybook
+```
+
+## 開発・運用方針
+
+### 依存パッケージ
+
+使用するライブラリやパッケージは十分に運用実績があり, 今後も継続的なメンテナンスが見込まれるものを導入する.
+現時点では, 以下のフレームワーク・ライブラリを導入しています (主なものを以下に記載しています)
+
+- [Next.js](https://nextjs.org/)
+- [React](https://react.dev/)
+- [Redux Toolkit](https://redux-toolkit.js.org/)
+- [TanStack Query](https://tanstack.com/query/latest) (旧 React Query)
+- [Emotion](https://emotion.sh/docs/introduction)
+- [three.js](https://threejs.org/)
+
+### Emotion によるスタイリング
+
+[HTMLElement に対してスタイリングする](https://emotion.sh/docs/styled#styling-elements-and-components)実装は使用しません.  
+HTML タグがわかりづらい, 機能をもったコンポーネントと識別がしづらいなどがあげられます.
+
+[コンポーネントに対してスタイリングする](https://emotion.sh/docs/styled#styling-any-component)実装を採用しています.
+
+[styled-components の使用ルールを定める | styled-componentsの採用と既存資産を捨てた理由](https://blog.cybozu.io/entry/2020/06/25/105457)
 
 ### ブランチ戦略
 
@@ -31,6 +62,11 @@ npm run dev
 - `main`: 本番環境用ブランチ
   - プッシュ時に自動デプロイ
   - 本番環境として使用
+
+
+## デプロイ
+
+このプロジェクトはAWS Amplifyでデプロイを管理しています。
 
 ### デプロイフロー
 
