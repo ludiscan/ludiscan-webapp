@@ -5,6 +5,7 @@ import { Raycaster, Vector2, Vector3 } from 'three';
 
 import { PositionPointMarkers } from './PositionPointMarkers';
 
+import type { PlayerTimelinePointsTimeRange } from '@src/pages/heatmap/tasks/[task_id]/PlayerTimelinePoints';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC } from 'react';
 import type { Group } from 'three';
@@ -24,6 +25,8 @@ type HeatmapCanvasProps = {
   map?: string | ArrayBuffer | null;
   modelType?: 'gltf' | 'glb' | 'obj' | 'server' | null;
   pointList: { x: number; y: number; z?: number; density: number }[];
+  currentTimelineSeek: number;
+  visibleTimelineRange: PlayerTimelinePointsTimeRange;
 };
 
 type Waypoint = {
@@ -31,7 +34,7 @@ type Waypoint = {
   position: Vector3; // x, y, z 座標（モデル表面に対して Y 座標を合わせたもの）
 };
 
-const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, service }) => {
+const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, service, currentTimelineSeek, visibleTimelineRange }) => {
   // const { invalidate } = useThree();
   const {
     data: { showHeatmap },
@@ -195,7 +198,9 @@ const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, s
         timelineState.visible &&
         timelineState.details &&
         timelineState.details.length > 0 &&
-        timelineState.details.map((tl, index) => <PlayerTimelinePoints key={index} service={service} state={tl} />)}
+        timelineState.details.map((tl, index) => (
+          <PlayerTimelinePoints key={index} service={service} state={tl} currentTimelineSeek={currentTimelineSeek} visibleTimeRange={visibleTimelineRange} />
+        ))}
       {/* --- 追加：ウェイポイントを map して表示 --- */}
       {waypoints.map((wp) => (
         <WaypointMarker

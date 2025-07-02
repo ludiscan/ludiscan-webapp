@@ -1,4 +1,4 @@
-import type { Menus } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenuContent';
+import type { Menus } from '@src/hooks/useHeatmapSideBarMenus';
 
 export interface HeatMapEventMap {
   'click-menu-icon': { name: Menus };

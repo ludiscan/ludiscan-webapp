@@ -46,6 +46,8 @@ export type PlayerTimelineDetail = {
 export type PlayerTimelineSettings = {
   visible: boolean;
   details: PlayerTimelineDetail[] | null;
+  isPlaying: boolean;
+  maxTime: number;
 };
 
 export type HeatmapStates = {
@@ -85,6 +87,8 @@ export const initializeValues: HeatmapDataState = {
   playerTimeline: {
     visible: false,
     details: null,
+    isPlaying: false,
+    maxTime: 0,
   },
 };
 

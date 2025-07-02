@@ -1,37 +1,20 @@
 import styled from '@emotion/styled';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { BiSearch } from 'react-icons/bi';
-import { BsGrid, BsPerson } from 'react-icons/bs';
-import { CiMap, CiMapPin, CiStreamOn } from 'react-icons/ci';
-import { FaFileExport } from 'react-icons/fa';
-import { IoIosInformationCircleOutline } from 'react-icons/io';
 import { IoClose } from 'react-icons/io5';
 
-import type { Theme } from '@emotion/react';
+import type { Menus } from '@src/hooks/useHeatmapSideBarMenus';
 import type { HeatmapTask } from '@src/modeles/heatmaptask';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
-import type { FC, CSSProperties } from 'react';
+import type { FC } from 'react';
 import type { Group } from 'three';
 
 import { Button } from '@src/component/atoms/Button';
-import { FlexColumn, FlexRow, InlineFlexColumn, InlineFlexRow } from '@src/component/atoms/Flex';
-import { Slider } from '@src/component/atoms/Slider';
-import { Switch } from '@src/component/atoms/Switch';
-import { Text } from '@src/component/atoms/Text';
-import { Toggle } from '@src/component/atoms/Toggle';
-import { Tooltip } from '@src/component/atoms/Tooltip';
-import { SegmentedSwitch } from '@src/component/molecules/SegmentedSwitch';
-import { Selector } from '@src/component/molecules/Selector';
+import { FlexColumn, FlexRow, InlineFlexRow } from '@src/component/atoms/Flex';
 import { TextField } from '@src/component/molecules/TextField';
-import { useGeneralState, useHotspotModeState, useVersion } from '@src/hooks/useHeatmapState';
-import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { ObjectToggleList } from '@src/pages/heatmap/tasks/[task_id]/ObjectToggleList';
-import { EventLogDetail } from '@src/pages/heatmap/tasks/[task_id]/menu/EventLogDetail';
-import { EventLogContent } from '@src/pages/heatmap/tasks/[task_id]/menu/EventLogs';
-import { InputColumn, InputRow } from '@src/pages/heatmap/tasks/[task_id]/menu/InputRow';
-import { PlayerTimeline } from '@src/pages/heatmap/tasks/[task_id]/menu/PlayerTimeline';
+import { MenuContents } from '@src/hooks/useHeatmapSideBarMenus';
+import { useGeneralState } from '@src/hooks/useHeatmapState';
 import { fontSizes, fontWeights } from '@src/styles/style';
-import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
 export type HeatmapMenuProps = {
   model: Group | null;
@@ -45,209 +28,6 @@ export type HeatmapMenuProps = {
   service: HeatmapDataService;
   extra?: object;
 };
-
-function toggleButtonStyle(theme: Theme): CSSProperties {
-  return {
-    background: theme.colors.surface.main,
-    border: `1px solid ${theme.colors.surface.dark}`,
-    borderRadius: '8px',
-    padding: '8px 4px',
-    width: '100%',
-    height: 'fit-content',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'start',
-  };
-}
-
-const InfoContent: FC<HeatmapMenuProps> = ({ task, handleExportView }) => {
-  const { data: version } = useVersion();
-
-  const handleExportHeatmap = useCallback(async () => {
-    await handleExportView();
-  }, [handleExportView]);
-
-  return (
-    <InlineFlexColumn gap={4}>
-      <InlineFlexRow align={'center'} gap={4}>
-        <Text text={`version: ${version}`} fontSize={fontSizes.small} />
-      </InlineFlexRow>
-      <InlineFlexRow align={'center'} gap={4}>
-        <Text text={`taskId: ${task.taskId}`} fontSize={fontSizes.small} />
-      </InlineFlexRow>
-      <InlineFlexRow align={'center'} gap={4}>
-        <Text text={`project: ${task.project.name}`} fontSize={fontSizes.small} />
-      </InlineFlexRow>
-      {task.session && (
-        <InlineFlexRow align={'center'} gap={4}>
-          <Text text={`session: ${task.session.name}`} fontSize={fontSizes.small} />
-        </InlineFlexRow>
-      )}
-      <InlineFlexRow align={'center'} gap={4}>
-        <Text text={`step size: ${task.stepSize}`} fontSize={fontSizes.small} />
-      </InlineFlexRow>
-      <InlineFlexRow align={'center'} gap={4}>
-        <Text text={`mode: ${task.zVisible ? '3D' : '2D'}`} fontSize={fontSizes.small} />
-      </InlineFlexRow>
-      <InlineFlexRow align={'center'} gap={8} style={{ marginTop: 8, justifyContent: 'center' }}>
-        <Button onClick={handleExportHeatmap} scheme={'primary'} fontSize={'small'}>
-          <FaFileExport style={{ marginRight: 4 }} />
-          <Text text={'エクスポート'} fontSize={fontSizes.small} fontWeight={fontWeights.bold} />
-        </Button>
-      </InlineFlexRow>
-    </InlineFlexColumn>
-  );
-};
-
-const HotspotContent: FC<HeatmapMenuProps> = ({ className }) => {
-  const { data: hotspotMode, setData } = useHotspotModeState();
-  return (
-    <InlineFlexColumn gap={8}>
-      <Switch label={'visible'} onChange={(visible) => setData({ ...hotspotMode, visible })} checked={hotspotMode.visible} size={'small'} />
-      <InputRow label={'cellRadius'}>
-        <Tooltip tooltip={String(hotspotMode.cellRadius)} className={`${className}__input`} placement={'left'}>
-          <Slider value={hotspotMode.cellRadius} onChange={(cellRadius) => setData({ ...hotspotMode, cellRadius })} min={50} step={50} max={1000} />
-        </Tooltip>
-      </InputRow>
-      <InputRow label={'表示数'}>
-        <Tooltip tooltip={String(hotspotMode.thresholdCount)} className={`${className}__input`} placement={'left'}>
-          <Slider value={hotspotMode.thresholdCount} onChange={(thresholdCount) => setData({ ...hotspotMode, thresholdCount })} min={1} step={1} max={20} />
-        </Tooltip>
-      </InputRow>
-      <InputRow label={'重複'}>
-        <Switch
-          label={'skipDuplication'}
-          onChange={(skipNearDuplication) => setData({ ...hotspotMode, skipNearDuplication })}
-          checked={hotspotMode.skipNearDuplication}
-          size={'small'}
-        />
-      </InputRow>
-    </InlineFlexColumn>
-  );
-};
-
-const MapContent: FC<HeatmapMenuProps> = ({ className, mapOptions, model }) => {
-  const { theme } = useSharedTheme();
-  const { data: general, setData } = useGeneralState();
-  const handleAddWaypoint = useCallback(() => {
-    heatMapEventBus.emit('add-waypoint');
-  }, []);
-  return (
-    <InlineFlexColumn gap={8}>
-      <InputRow label={'visualize map'}>
-        <Selector
-          className={`${className}__inputNewLine`}
-          onChange={(mapName) => setData({ ...general, mapName })}
-          options={mapOptions}
-          value={general.mapName}
-          fontSize={'small'}
-          disabled={mapOptions.length === 0}
-        />
-      </InputRow>
-      <Button scheme={'surface'} fontSize={'medium'} onClick={handleAddWaypoint}>
-        <Text text={'add waypoint'} />
-      </Button>
-      {model && (
-        <Toggle label={<Text text={'map'} />} className={`${className}__toggle`} buttonStyle={toggleButtonStyle(theme)}>
-          <div className={`${className}__meshesRow`}>
-            <ObjectToggleList model={model} />
-          </div>
-        </Toggle>
-      )}
-    </InlineFlexColumn>
-  );
-};
-
-const GeneralContent: FC<HeatmapMenuProps> = () => {
-  const { data: general, setData } = useGeneralState();
-  const handleReload = useCallback(() => {}, []);
-  return (
-    <InlineFlexColumn gap={4}>
-      <InputRow label={'上向ベクトル'}>
-        <SegmentedSwitch
-          fontSize={'smallest'}
-          value={general.upZ ? 'Z' : 'Y'}
-          options={['Y', 'Z']}
-          onChange={(v) => {
-            setData({ ...general, upZ: v === 'Z' });
-          }}
-        />
-      </InputRow>
-      <InputColumn label={'scale'}>
-        <Slider value={general.scale} onChange={(scale) => setData({ ...general, scale })} min={0.1} step={0.05} max={1.0} sideLabel textField />
-      </InputColumn>
-      <InputRow label={'showHeatmap'}>
-        <div>
-          <Switch label={'showHeatmap'} onChange={(showHeatmap) => setData({ ...general, showHeatmap })} checked={general.showHeatmap} size={'small'} />
-        </div>
-      </InputRow>
-      <InputColumn label={'blockSize'}>
-        <Slider value={general.blockSize} onChange={(blockSize) => setData({ ...general, blockSize })} min={50} step={50} max={500} sideLabel textField />
-      </InputColumn>
-      <InputColumn label={'minThreshold'}>
-        <Slider
-          value={general.minThreshold}
-          onChange={(minThreshold) => setData({ ...general, minThreshold })}
-          min={0}
-          step={0.001}
-          max={0.3}
-          sideLabel
-          textField
-        />
-      </InputColumn>
-      <InputRow label={''}>
-        <div style={{ flex: 1 }} />
-        <Button onClick={handleReload} scheme={'surface'} fontSize={'small'}>
-          <Text text={'Reload'} fontSize={fontSizes.small} />
-        </Button>
-      </InputRow>
-    </InlineFlexColumn>
-  );
-};
-
-export const MenuContents = [
-  {
-    name: 'info',
-    icon: <IoIosInformationCircleOutline />,
-    Component: InfoContent,
-  },
-  {
-    name: 'general',
-    icon: <BsPerson />,
-    Component: GeneralContent,
-  },
-  {
-    name: 'map',
-    icon: <CiMap />,
-    Component: MapContent,
-  },
-  {
-    name: 'hotspot',
-    icon: <CiMapPin />,
-    Component: HotspotContent,
-  },
-  {
-    name: 'eventlog',
-    icon: <CiStreamOn />,
-    Component: EventLogContent,
-  },
-  {
-    name: 'more',
-    icon: <BsGrid />,
-    Component: () => <Text text={'More'} fontSize={fontSizes.large1} fontWeight={fontWeights.bold} />,
-  },
-  {
-    name: 'eventLogDetail',
-    Component: EventLogDetail,
-  },
-  {
-    name: 'playerTimeline',
-    Component: PlayerTimeline,
-  },
-] as const;
-
-export const SideBarMenus = MenuContents.filter((content) => 'icon' in content);
-export type Menus = (typeof MenuContents)[number]['name'];
 
 const Component: FC<HeatmapMenuProps> = (props) => {
   const { className, name, mapOptions, toggleMenu } = props;

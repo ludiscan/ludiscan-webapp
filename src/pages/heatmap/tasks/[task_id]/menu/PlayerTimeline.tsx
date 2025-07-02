@@ -1,20 +1,21 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useMemo } from 'react';
 
 import { InputRow } from './InputRow';
 
 import type { Theme } from '@emotion/react';
+import type { PlayerTimelineDetail } from '@src/modeles/heatmapView';
 import type { HeatmapMenuProps } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenuContent';
+import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC, CSSProperties } from 'react';
 
+import { Divider } from '@src/component/atoms/Divider';
 import { InlineFlexColumn, InlineFlexRow } from '@src/component/atoms/Flex';
+import { Switch } from '@src/component/atoms/Switch';
 import { Text } from '@src/component/atoms/Text';
 import { Toggle } from '@src/component/atoms/Toggle';
-import { StatusContent } from '@src/component/molecules/StatusContent';
 import { usePlayerTimelineState } from '@src/hooks/useHeatmapState';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { usePlayerPositionLogs } from '@src/modeles/heatmapView';
 import { DefaultStaleTime } from '@src/modeles/qeury';
 import { fontSizes } from '@src/styles/style';
 import { toISOAboutStringWithTimezone } from '@src/utils/locale';
@@ -33,34 +34,12 @@ function toggleButtonStyle(theme: Theme): CSSProperties {
   };
 }
 
-const Component: FC<HeatmapMenuProps> = ({ extra = {}, service, className }) => {
-  const { theme } = useSharedTheme();
+const DetailBlockInternal: FC<{ className?: string; detail: PlayerTimelineDetail; service: HeatmapDataService }> = ({ className, detail, service }) => {
   const { setData } = usePlayerTimelineState();
-  const playerParam = 'player' in extra ? extra.player : undefined;
-  const projectIdParam = 'project_id' in extra ? extra.project_id : undefined;
-  const sessionIdParam = 'session_id' in extra ? extra.session_id : undefined;
-
-  const player = useMemo(() => {
-    if (typeof playerParam === 'number') {
-      return playerParam;
-    }
-    return undefined;
-  }, [playerParam]);
-  const project_id = useMemo(() => {
-    if (typeof projectIdParam === 'number') {
-      return projectIdParam;
-    }
-    return undefined;
-  }, [projectIdParam]);
-  const session_id = useMemo(() => {
-    if (typeof sessionIdParam === 'number') {
-      return sessionIdParam;
-    }
-    return undefined;
-  }, [sessionIdParam]);
-
-  const { data, isLoading, isError, isSuccess } = usePlayerPositionLogs(player, project_id, session_id, service.createClient());
-
+  const { theme } = useSharedTheme();
+  // const player = detail.player;
+  const project_id = detail.project_id;
+  const session_id = detail.session_id;
   const { data: session } = useQuery({
     queryKey: ['session', session_id, project_id],
     queryFn: async () => {
@@ -75,7 +54,7 @@ const Component: FC<HeatmapMenuProps> = ({ extra = {}, service, className }) => 
       });
     },
     staleTime: DefaultStaleTime,
-    enabled: !!session_id && !!project_id && isSuccess,
+    enabled: !!session_id && !!project_id,
   });
 
   const { data: project } = useQuery({
@@ -87,41 +66,52 @@ const Component: FC<HeatmapMenuProps> = ({ extra = {}, service, className }) => 
       });
     },
     staleTime: DefaultStaleTime,
-    enabled: !!project_id && isSuccess,
+    enabled: !!project_id,
   });
 
-  const status = useMemo(() => {
-    if (isLoading) return 'loading';
-    if (isError) return 'error';
-    if (isSuccess) return 'success';
-    return 'loading';
-  }, [isLoading, isError, isSuccess]);
-
-  useEffect(() => {
-    if (!isSuccess || !data || !project_id || !session_id || player === undefined) return;
-    const newer = {
-      player: player,
-      project_id: project_id,
-      session_id: session_id,
-      visible: true,
-    };
-    setData((prev) => ({
-      visible: true,
-      details: prev.details ? [...prev.details, newer] : [newer],
-    }));
-  }, [data, isSuccess, player, project_id, session_id, setData]);
-
   return (
-    <StatusContent status={status}>
-      <InlineFlexColumn gap={4} style={{ width: '100%' }}>
-        {isSuccess && (
-          <>
-            <Text text={'successed'} />
-          </>
-        )}
-        {session && session.data && (
+    <InlineFlexColumn gap={4}>
+      <InputRow label={'visible'}>
+        <Switch
+          label={''}
+          size={'medium'}
+          checked={detail.visible}
+          onChange={() => {
+            setData((prev) => {
+              const newDetails =
+                prev.details?.map((d) => {
+                  if (d === detail) {
+                    return { ...d, visible: !d.visible };
+                  }
+                  return d;
+                }) || [];
+              return { ...prev, details: newDetails };
+            });
+          }}
+        />
+      </InputRow>
+      {project && project.data && (
+        <InlineFlexColumn>
+          <InputRow label={'projectId'}>
+            <Text text={String(project.data.id)} fontSize={fontSizes.small} />
+          </InputRow>
+          <Toggle buttonStyle={toggleButtonStyle(theme)} label={<Text text={'Project'} />}>
+            <InputRow label={'name'}>
+              <Text text={project.data.name} fontSize={fontSizes.small} />
+            </InputRow>
+            <InputRow label={'description'} align={'flex-start'}>
+              <Text text={project.data.description} fontSize={fontSizes.small} />
+            </InputRow>
+          </Toggle>
+        </InlineFlexColumn>
+      )}
+      {session && session.data && (
+        <InlineFlexColumn gap={2}>
+          <InputRow label={'SessionId'}>
+            <Text text={`${session.data.sessionId}`} fontSize={fontSizes.small} />
+          </InputRow>
           <Toggle buttonStyle={toggleButtonStyle(theme)} label={<Text text={'Sesssion'} />}>
-            <InputRow label={'SessionId'}>
+            <InputRow label={'name'}>
               <Text text={session.data.name} fontSize={fontSizes.small} />
             </InputRow>
             <InlineFlexRow wrap={'nowrap'} align={'center'} className={`${className}__row`} gap={4}>
@@ -136,22 +126,50 @@ const Component: FC<HeatmapMenuProps> = ({ extra = {}, service, className }) => 
               )}
             </InlineFlexRow>
           </Toggle>
-        )}
-        {project && project.data && (
-          <Toggle buttonStyle={toggleButtonStyle(theme)} label={<Text text={'Project'} />}>
-            <InputRow label={'id'}>
-              <Text text={String(project.data.id)} fontSize={fontSizes.small} />
-            </InputRow>
-            <InputRow label={'name'}>
-              <Text text={project.data.name} fontSize={fontSizes.small} />
-            </InputRow>
-            <InputRow label={'description'} align={'flex-start'}>
-              <Text text={project.data.description} fontSize={fontSizes.small} />
-            </InputRow>
-          </Toggle>
-        )}
-      </InlineFlexColumn>
-    </StatusContent>
+        </InlineFlexColumn>
+      )}
+    </InlineFlexColumn>
+  );
+};
+
+const DetailBlock = styled(DetailBlockInternal)`
+  &__weight1 {
+    flex: 1;
+  }
+
+  &__row {
+    position: relative;
+    width: 100%;
+    padding: 4px 8px;
+  }
+`;
+
+const Component: FC<HeatmapMenuProps> = ({ service }) => {
+  const { data } = usePlayerTimelineState();
+  //
+  //
+  // const { isLoading, isError, isSuccess } = usePlayerPositionLogs(player, project_id, session_id, service.createClient());
+  //
+  //
+  //
+  //
+  //
+  // const status = useMemo(() => {
+  //   if (isLoading) return 'loading';
+  //   if (isError) return 'error';
+  //   if (isSuccess) return 'success';
+  //   return 'loading';
+  // }, [isLoading, isError, isSuccess]);
+
+  return (
+    <InlineFlexColumn gap={8} style={{ width: '100%' }}>
+      {data.details?.map((detail, index) => (
+        <>
+          <DetailBlock key={index} detail={detail} service={service} />
+          <Divider orientation={'horizontal'} />
+        </>
+      ))}
+    </InlineFlexColumn>
   );
 };
 
