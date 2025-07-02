@@ -1,12 +1,12 @@
 import styled from '@emotion/styled';
 
-import { FlexRow, InlineFlexColumn } from '../../component/atoms/Flex';
-import { Tooltip } from '../../component/atoms/Tooltip';
-import { ClampText } from '../../component/molecules/ClampText';
-import { fontSizes } from '../../styles/style';
-
-import type { Session } from '../../modeles/session';
+import type { Session } from '@src/modeles/session';
 import type { FC } from 'react';
+
+import { FlexRow, InlineFlexColumn } from '@src/component/atoms/Flex';
+import { Tooltip } from '@src/component/atoms/Tooltip';
+import { ClampText } from '@src/component/molecules/ClampText';
+import { fontSizes } from '@src/styles/style';
 
 export type SessionItemRowProps = {
   className?: string | undefined;

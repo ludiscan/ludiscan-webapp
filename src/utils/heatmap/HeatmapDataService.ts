@@ -55,7 +55,7 @@ export function useOnlineHeatmapDataService(env: Env | undefined, task: HeatmapT
           },
         },
       });
-      if (error) throw error;
+      if (error) return [];
       return data?.maps || [];
     } catch {
       return [];
@@ -76,7 +76,7 @@ export function useOnlineHeatmapDataService(env: Env | undefined, task: HeatmapT
           },
           parseAs: 'arrayBuffer',
         });
-        if (error) throw error;
+        if (error) return null;
         return data;
       } catch {
         return null;
@@ -101,7 +101,7 @@ export function useOnlineHeatmapDataService(env: Env | undefined, task: HeatmapT
           },
         },
       });
-      if (error) throw error;
+      if (error) return null;
       return data.keys;
     } catch {
       return null;

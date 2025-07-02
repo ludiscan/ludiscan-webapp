@@ -131,7 +131,7 @@ const HeatMapTaskIdPage: FC<HeatMapTaskIdPageProps> = ({ className, env, taskId 
 
     if (task.status === 'pending' || task.status === 'processing') {
       timer.current = setInterval(() => {
-        refetchTask();
+        refetchTask().then(() => {});
       }, 500);
     }
     return () => {

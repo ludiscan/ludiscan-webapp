@@ -56,7 +56,7 @@ type ToastContainerProps = {
   position: ToastProviderProps['position'];
 };
 
-function getPositionStyle(position: ToastProviderProps['position']): React.CSSProperties {
+function getPositionStyle(position: ToastProviderProps['position']): CSSProperties {
   const baseStyle: CSSProperties = {
     position: 'fixed',
     zIndex: zIndexes.toast,
