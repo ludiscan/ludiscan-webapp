@@ -10,14 +10,15 @@ export type CardProps = {
   border?: string;
   padding?: string;
   stopPropagate?: boolean;
+  blur?: boolean;
 };
 
-const Component = ({ className, children, stopPropagate = false }: CardProps) => {
+const Component = ({ className, children, stopPropagate = false, blur }: CardProps) => {
   if (stopPropagate) {
     return (
       <div
         role={'button'}
-        className={className}
+        className={`${className} ${blur && 'blur'}`}
         tabIndex={0}
         onClick={(e) => {
           // stopping propagation to prevent parent click event by default
@@ -34,7 +35,7 @@ const Component = ({ className, children, stopPropagate = false }: CardProps) =>
       </div>
     );
   }
-  return <div className={className}>{children}</div>;
+  return <div className={`${className} ${blur && 'blur'}`}>{children}</div>;
 };
 
 const shadowStyle = (props: CardProps) => {
@@ -50,10 +51,33 @@ const shadowStyle = (props: CardProps) => {
   return 'none';
 };
 
+const hexToRgba = (hex: string, alpha: number) => {
+  let c = hex.replace('#', '');
+  if (c.length === 3)
+    c = c
+      .split('')
+      .map((ch) => ch + ch)
+      .join('');
+  const num = parseInt(c, 16);
+  const r = (num >> 16) & 0xff;
+  const g = (num >> 8) & 0xff;
+  const b = num & 0xff;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
+
 export const Card = styled(Component)`
   padding: ${({ padding }) => padding || '16px'};
   background-color: ${({ color, theme }) => color || theme.colors.surface.main};
   border: ${({ border }) => `1px solid ${border}`};
   border-radius: 8px;
   box-shadow: ${(props) => shadowStyle(props)};
+
+  &.blur {
+    background-color: ${({ color, theme }) => hexToRgba(color || theme.colors.surface.main, 0.7)};
+
+    ${({ border }) => border && `border: 1px solid ${hexToRgba(border, 0.7)}`};
+    /* 背景をぼかす */
+    backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+  }
 `;

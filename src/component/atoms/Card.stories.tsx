@@ -73,3 +73,12 @@ export const PrimaryColor: Story = {
     color: colors.primary,
   },
 };
+
+export const Blur: Story = {
+  ...Template,
+  name: 'blur style',
+  args: {
+    blur: true,
+    color: colors.primary,
+  },
+};
