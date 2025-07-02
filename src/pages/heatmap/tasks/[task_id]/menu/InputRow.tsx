@@ -1,13 +1,14 @@
 import styled from '@emotion/styled';
 
 import type { FlexProps } from '@src/component/atoms/Flex';
+import type { ReactNode } from 'react';
 
 import { InlineFlexColumn, InlineFlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { fontSizes } from '@src/styles/style';
 
-export const InputColumn = styled(({ className, label, children }: { className?: string; label: string; children: React.ReactNode }) => {
+export const InputColumn = styled(({ className, label, children }: { className?: string; label: string; children: ReactNode }) => {
   const { theme } = useSharedTheme();
   return (
     <InlineFlexColumn className={className} align={'flex-start'} wrap={'nowrap'} gap={2}>
@@ -22,7 +23,7 @@ export const InputColumn = styled(({ className, label, children }: { className?:
 `;
 
 export const InputRow = styled(
-  ({ className, label, children, align = 'center' }: { className?: string; label: string; children: React.ReactNode; align?: FlexProps['align'] }) => {
+  ({ className, label, children, align = 'center' }: { className?: string; label: string; children: ReactNode; align?: FlexProps['align'] }) => {
     const { theme } = useSharedTheme();
     return (
       <div className={className}>

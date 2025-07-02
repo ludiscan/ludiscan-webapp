@@ -164,7 +164,9 @@ const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
 
         const bundleResponse = await fetch(bundleUrl);
         if (!bundleResponse.ok) {
-          throw new Error(`バンドルJSの取得に失敗しました: ${bundleResponse.status}`);
+          // eslint-disable-next-line
+          console.error(`バンドルJSの取得に失敗しました: ${bundleResponse.status}`);
+          return;
         }
 
         const bundleJs = await bundleResponse.text();

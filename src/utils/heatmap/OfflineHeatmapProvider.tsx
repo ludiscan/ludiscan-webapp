@@ -100,7 +100,7 @@ export const Component: FC<OfflineHeatmapProviderProps> = ({ className }) => {
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) {
-                        loadData(file);
+                        loadData(file).then(() => {});
                       }
                     }}
                   />
