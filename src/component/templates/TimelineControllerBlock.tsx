@@ -182,8 +182,8 @@ const createBackgroundGradient = (theme: Theme, currentMinTime: number, currentM
 };
 
 export const TimelineControllerBlock = styled(Component)`
-  min-width: 300px;
   width: fit-content;
+  min-width: 300px;
   padding: 16px;
 
   &__sliderWrapper {
@@ -192,32 +192,36 @@ export const TimelineControllerBlock = styled(Component)`
     min-width: 200px;
     height: 20px;
   }
+
   &__sliderBackground {
     position: absolute;
     top: 50%;
-    transform: translateY(-50%);
-    height: 4px;
     width: 100%;
-    border-radius: 2px;
+    height: 4px;
+
     /* 色分けグラデ */
     background: ${({ theme, currentMinTime, currentMaxTime, maxTime }) => createBackgroundGradient(theme, currentMinTime, currentMaxTime, maxTime)};
+    border-radius: 2px;
+    transform: translateY(-50%);
   }
 
   /* thumb 共通 */
   &__thumb {
     position: absolute;
     top: 50%;
-    transform: translate(-50%, -50%);
+    z-index: 5;
     width: 12px;
     height: 12px;
-    border-radius: 50%;
-    background: ${({ theme }) => theme.colors.primary.main};
     cursor: pointer;
-    z-index: 5;
+    background: ${({ theme }) => theme.colors.primary.main};
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
   }
+
   &__thumb--min {
     /* 追加スタイリングがあれば */
   }
+
   &__thumb--max {
     /* 追加スタイリングがあれば */
   }
@@ -227,11 +231,12 @@ export const TimelineControllerBlock = styled(Component)`
     position: absolute;
     top: 0;
     left: 0;
+    z-index: 4;
     width: 100%;
     height: 100%;
     appearance: none;
     background: transparent;
-    z-index: 4;
+
     &::-webkit-slider-thumb {
       /* English comment: taller thumb for current */
       width: 6px;
@@ -242,6 +247,7 @@ export const TimelineControllerBlock = styled(Component)`
       border: 1px solid ${({ theme }) => theme.colors.primary.main};
       border-radius: 8px;
     }
+
     &::-moz-range-thumb {
       width: 6px;
       height: 20px;

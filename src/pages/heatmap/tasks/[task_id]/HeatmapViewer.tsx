@@ -327,8 +327,8 @@ export const HeatMapViewer = styled(Component)`
     position: relative;
     z-index: ${zIndexes.content + 2};
     display: flex;
-    height: 100%;
     width: max-content;
+    height: 100%;
   }
 
   &__inputfile {
@@ -352,12 +352,11 @@ export const HeatMapViewer = styled(Component)`
     right: 10px;
   }
 
-  // horizontal center
   &__player {
-    margin-left: 30px;
     position: absolute;
     bottom: 40px;
     left: 50%;
+    margin-left: 30px;
     transform: translateX(-50%);
   }
 `;
