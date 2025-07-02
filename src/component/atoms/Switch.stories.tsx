@@ -38,6 +38,16 @@ export const Disabled: Story = {
   },
 };
 
+export const DisableChecked: Story = {
+  ...Template,
+  name: 'Disable & checked Switch',
+  args: {
+    size: 'medium',
+    disabled: true,
+    checked: true,
+  },
+};
+
 export const Small: Story = {
   ...Template,
   name: 'small Switch',

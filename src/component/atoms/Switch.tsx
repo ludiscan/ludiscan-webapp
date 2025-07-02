@@ -16,7 +16,7 @@ const SwitchComponent: FC<SwitchProps> = ({ className, label, checked, size = 'm
   return (
     <label className={`${className} ${size}`} aria-label={label}>
       <input id={label ?? className} type='checkbox' checked={checked} onChange={(e) => onChange(e.target.checked)} disabled={disabled} />
-      <span className={`${className}__slider`} />
+      <span className={`${className}__slider ${disabled && 'disabled'}`} />
     </label>
   );
 };
@@ -42,6 +42,11 @@ export const Switch = styled(SwitchComponent)`
     height: 30px;
   }
 
+  .disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
   input {
     width: 0;
     height: 0;
@@ -53,8 +58,8 @@ export const Switch = styled(SwitchComponent)`
     inset: 0;
     cursor: pointer;
     background-color: ${({ theme }) => theme.colors.secondary.light};
-    border-radius: ${({ size }) => (size === 'small' ? '10px' : size === 'medium' ? '12px' : '14px')};
     border: 1px solid ${({ theme }) => theme.colors.border.light};
+    border-radius: ${({ size }) => (size === 'small' ? '10px' : size === 'medium' ? '12px' : '14px')};
     transition: 0.4s;
   }
 
@@ -76,10 +81,5 @@ export const Switch = styled(SwitchComponent)`
 
   input:checked + &__slider::before {
     transform: ${({ size }) => (size === 'small' ? 'translateX(20px)' : size === 'medium' ? 'translateX(26px)' : 'translateX(32px)')};
-  }
-
-  &__slider:disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
   }
 `;
