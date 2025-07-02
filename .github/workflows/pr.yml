@@ -1,7 +1,6 @@
 name: pr.yml
 on:
   pull_request:
-    branches: [main, develop]
     paths:
       - 'src/**'
       - '.github/workflows/pr.yml'
