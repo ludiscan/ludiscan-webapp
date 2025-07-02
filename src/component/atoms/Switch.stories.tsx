@@ -3,10 +3,6 @@ import { Switch } from './Switch';
 
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
-import darkTheme from '@src/styles/dark';
-import lightTheme from '@src/styles/light';
-
 export default {
   component: Switch,
   controls: { hideNoControlsWarning: true },
@@ -15,31 +11,21 @@ type Story = StoryObj<typeof Switch>;
 
 const Template: Story = {
   render: (args) => (
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    <SharedThemeProvider initialTheme={args.type === 'light' ? lightTheme : darkTheme}>
-      <Switch
-        {...args}
-        onChange={(value) =>
-          /* eslint-disable-next-line no-console */
-          console.log('Switch toggled:', value)
-        }
-      />
-    </SharedThemeProvider>
+    <Switch
+      {...args}
+      onChange={(value) =>
+        /* eslint-disable-next-line no-console */
+        console.log('Switch toggled:', value)
+      }
+    />
   ),
 };
 
 export const Default: Story = {
   ...Template,
   name: 'Default Switch',
-  args: {},
-};
-
-export const Checked: Story = {
-  ...Template,
-  name: 'Checked Switch',
   args: {
-    checked: true,
+    size: 'small',
   },
 };
 
@@ -47,15 +33,31 @@ export const Disabled: Story = {
   ...Template,
   name: 'Disabled Switch',
   args: {
-    checked: false,
+    size: 'medium',
     disabled: true,
   },
 };
 
-export const DarkThemeSwitch: Story = {
+export const Small: Story = {
   ...Template,
-  name: 'Dark Theme Switch',
+  name: 'small Switch',
   args: {
-    checked: true,
+    size: 'small',
+  },
+};
+
+export const Medium: Story = {
+  ...Template,
+  name: 'medium Switch',
+  args: {
+    size: 'medium',
+  },
+};
+
+export const Large: Story = {
+  ...Template,
+  name: 'large Switch',
+  args: {
+    size: 'large',
   },
 };

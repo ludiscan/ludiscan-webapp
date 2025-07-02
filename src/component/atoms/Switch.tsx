@@ -7,7 +7,7 @@ export type SwitchProps = {
   className?: string;
   label: string;
   checked?: boolean | undefined;
-  size?: 'small' | 'medium' | 'large';
+  size: 'small' | 'medium' | 'large';
   onChange: (checked: boolean) => void;
   disabled?: boolean;
 };
@@ -15,7 +15,7 @@ export type SwitchProps = {
 const SwitchComponent: FC<SwitchProps> = ({ className, label, checked, size = 'medium', onChange, disabled = false }: SwitchProps) => {
   return (
     <label className={`${className} ${size}`} aria-label={label}>
-      <input type='checkbox' checked={checked} onChange={(e) => onChange(e.target.checked)} disabled={disabled} />
+      <input id={label ?? className} type='checkbox' checked={checked} onChange={(e) => onChange(e.target.checked)} disabled={disabled} />
       <span className={`${className}__slider`} />
     </label>
   );
@@ -52,8 +52,9 @@ export const Switch = styled(SwitchComponent)`
     position: absolute;
     inset: 0;
     cursor: pointer;
-    background-color: #ccc;
+    background-color: ${({ theme }) => theme.colors.secondary.light};
     border-radius: ${({ size }) => (size === 'small' ? '10px' : size === 'medium' ? '12px' : '14px')};
+    border: 1px solid ${({ theme }) => theme.colors.border.light};
     transition: 0.4s;
   }
 
@@ -63,10 +64,10 @@ export const Switch = styled(SwitchComponent)`
 
   &__slider::before {
     position: absolute;
-    bottom: 2px;
-    left: 2px;
-    width: ${({ size }) => (size === 'small' ? '16px' : size === 'medium' ? '20px' : '24px')};
-    height: ${({ size }) => (size === 'small' ? '16px' : size === 'medium' ? '20px' : '24px')};
+    top: ${({ size }) => (size === 'small' ? '2px' : size === 'medium' ? '3px' : '4px')};
+    left: ${({ size }) => (size === 'small' ? '2px' : size === 'medium' ? '3px' : '4px')};
+    width: calc(${({ size }) => (size === 'small' ? '16px' : size === 'medium' ? '20px' : '24px')} - 4px);
+    height: calc(${({ size }) => (size === 'small' ? '16px' : size === 'medium' ? '20px' : '24px')} - 4px);
     content: '';
     background-color: white;
     border-radius: 50%;
@@ -77,7 +78,7 @@ export const Switch = styled(SwitchComponent)`
     transform: ${({ size }) => (size === 'small' ? 'translateX(20px)' : size === 'medium' ? 'translateX(26px)' : 'translateX(32px)')};
   }
 
-  &:disabled {
+  &__slider:disabled {
     cursor: not-allowed;
     opacity: 0.6;
   }

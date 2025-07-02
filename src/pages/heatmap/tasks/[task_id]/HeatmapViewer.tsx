@@ -7,7 +7,7 @@ import JSZip from 'jszip';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { PerformanceMonitorApi } from '@react-three/drei';
-import type { Menus } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenuContent';
+import type { Menus } from '@src/hooks/useHeatmapSideBarMenus';
 import type { PlayerTimelinePointsTimeRange } from '@src/pages/heatmap/tasks/[task_id]/PlayerTimelinePoints';
 import type { HeatmapDataService, OfflineHeatmapData } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC } from 'react';
@@ -18,8 +18,8 @@ import { useHeatmapState, usePlayerTimelineState } from '@src/hooks/useHeatmapSt
 import { DefaultStaleTime } from '@src/modeles/qeury';
 import { HeatMapCanvas } from '@src/pages/heatmap/tasks/[task_id]/HeatmapCanvas';
 import { HeatmapMenuContent } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenuContent';
-import { HeatmapMenuSideBar } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenuSideBar';
 import { useOBJFromArrayBuffer } from '@src/pages/heatmap/tasks/[task_id]/ModelLoader';
+import { HeatmapMenuSideBar } from '@src/pages/heatmap/tasks/[task_id]/menu/HeatmapMenuSideBar';
 import { zIndexes } from '@src/styles/style';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 import { getOfflineHeatmapTemplate } from '@src/utils/heatmap/getOfflineHeatmapTemplate';

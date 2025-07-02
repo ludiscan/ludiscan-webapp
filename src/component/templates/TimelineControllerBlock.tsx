@@ -158,7 +158,7 @@ const Component: FC<TimelineControllerBlockProps> = ({
           </div>
 
           <div className={`${className}__time`}>{currentTimeLabel}</div>
-          <Button onClick={onClickMenu} scheme='surface' fontSize='small'>
+          <Button onClick={() => setIsMenusOpen(!isMenusOpen)} scheme='surface' fontSize='small'>
             <IoEllipsisHorizontal />
           </Button>
         </InlineFlexRow>

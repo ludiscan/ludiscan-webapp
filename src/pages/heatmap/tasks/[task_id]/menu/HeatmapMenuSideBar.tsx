@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 
-import type { Menus } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenuContent';
+import type { Menus } from '@src/hooks/useHeatmapSideBarMenus';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC } from 'react';
 
@@ -8,7 +8,7 @@ import { Button } from '@src/component/atoms/Button';
 import { Divider } from '@src/component/atoms/Divider';
 import { FlexColumn } from '@src/component/atoms/Flex';
 import { Tooltip } from '@src/component/atoms/Tooltip';
-import { SideBarMenus } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenuContent';
+import { useHeatmapSideBarMenus } from '@src/hooks/useHeatmapSideBarMenus';
 import { fontSizes } from '@src/styles/style';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
@@ -19,10 +19,11 @@ export type MenuSideBarProps = {
 };
 
 const Component: FC<MenuSideBarProps> = ({ className, currentMenu }) => {
+  const menus = useHeatmapSideBarMenus();
   return (
     <FlexColumn className={className} gap={12} wrap={'nowrap'}>
       <Divider orientation={'horizontal'} />
-      {SideBarMenus.map(({ name, icon }) => (
+      {menus.map(({ name, icon }) => (
         <Button
           className={`${className}__button ${name === currentMenu ? 'active' : ''}`}
           key={name}
