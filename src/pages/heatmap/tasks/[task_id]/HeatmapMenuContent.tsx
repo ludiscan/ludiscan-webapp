@@ -10,10 +10,12 @@ import type { FC } from 'react';
 import type { Group } from 'three';
 
 import { Button } from '@src/component/atoms/Button';
+import { Card } from '@src/component/atoms/Card';
 import { FlexColumn, FlexRow, InlineFlexRow } from '@src/component/atoms/Flex';
 import { TextField } from '@src/component/molecules/TextField';
 import { MenuContents } from '@src/hooks/useHeatmapSideBarMenus';
 import { useGeneralState } from '@src/hooks/useHeatmapState';
+import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { fontSizes, fontWeights } from '@src/styles/style';
 
 export type HeatmapMenuProps = {
@@ -32,6 +34,7 @@ export type HeatmapMenuProps = {
 const Component: FC<HeatmapMenuProps> = (props) => {
   const { className, name, mapOptions, toggleMenu } = props;
   const { data: general, setData: setGeneral } = useGeneralState();
+  const { theme } = useSharedTheme();
 
   useEffect(() => {
     if ((!general.mapName || general.mapName === '') && mapOptions.length > 0) {
@@ -46,7 +49,7 @@ const Component: FC<HeatmapMenuProps> = (props) => {
     return null;
   }
   return (
-    <div className={className}>
+    <Card className={className} padding={'0px'} color={theme.colors.surface.main} blur>
       <FlexColumn gap={8} align={'flex-start'} className={`${className}__content`}>
         <InlineFlexRow align={'center'} gap={16} style={{ width: '100%' }}>
           <div style={{ flex: 1 }}>
@@ -61,7 +64,7 @@ const Component: FC<HeatmapMenuProps> = (props) => {
         </InlineFlexRow>
         {content && <content.Component {...props} />}
       </FlexColumn>
-    </div>
+    </Card>
   );
 };
 
@@ -69,7 +72,6 @@ export const HeatmapMenuContent = styled(Component)`
   width: 280px;
   height: 100%;
   color: ${({ theme }) => theme.colors.text};
-  background: ${({ theme }) => theme.colors.surface.main};
 
   &__content {
     padding: 16px;

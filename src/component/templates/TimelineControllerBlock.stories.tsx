@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import type { PlaySpeedType } from '@src/component/templates/TimelineControllerBlock';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { TimelineControllerBlock } from '@src/component/templates/TimelineControllerBlock';
@@ -19,6 +20,8 @@ const Template: Story = {
     const [minTime, setMinTime] = useState(0);
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const [maxTime, setMaxTime] = useState(60 * 3 * 1000); // 3 minutes in milliseconds
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [playSpeed, setPlaySpeed] = useState<PlaySpeedType>(1);
     return (
       <TimelineControllerBlock
         {...args}
@@ -26,9 +29,11 @@ const Template: Story = {
         currentMinTime={minTime}
         maxTime={60 * 3 * 1000}
         currentTime={seekRatio}
+        playSpeed={playSpeed}
         onSeek={setSeekRatio}
         onChangeMaxTime={setMaxTime}
         onChangeMinTime={setMinTime}
+        onChangePlaySpeed={setPlaySpeed}
       />
     );
   },
