@@ -21,7 +21,7 @@ const darkTheme: Theme = {
     secondary: {
       main: colors.stone01,
       dark: colors.stone03,
-      light: colors.neutral09,
+      light: colors.stone04,
     },
     border: {
       main: colors.stone06,
