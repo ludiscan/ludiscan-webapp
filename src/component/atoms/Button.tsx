@@ -179,9 +179,9 @@ export const Button = styled(Component)`
   }
 
   &.secondary {
-    color: ${({ theme }) => theme.colors.primary.main};
-    background-color: ${({ theme }) => theme.colors.secondary.main};
-    border: 1px solid ${({ theme }) => theme.colors.primary.main};
+    color: ${({ theme }) => theme.colors.text};
+    background-color: ${({ theme }) => theme.colors.secondary.light};
+    border: 1px solid ${({ theme }) => theme.colors.border.light};
   }
 
   &:disabled {
