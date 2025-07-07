@@ -104,12 +104,12 @@ export const HeatmapIdPageLayout = styled(HeatmapIdPageLayoutComponent)`
   }
 
   &__badgeButton.badge::after {
-    content: '';
     position: absolute;
     top: -4px;
     right: -4px;
     width: 10px;
     height: 10px;
+    content: '';
     background-color: ${({ theme }) => theme.colors.primary.main};
     border-radius: 50%;
     box-shadow: 2px 2px 12px ${({ theme }) => theme.colors.border.dark};

@@ -98,7 +98,6 @@ export const useHeatmapState = () => {
   // session → storeへapply
   const apply = useCallback(() => {
     if (!sessionData) return;
-    console.log('Applying session data to store:', sessionData);
     dispatch(canvasActions.set(sessionData));
   }, [dispatch, sessionData]);
 
