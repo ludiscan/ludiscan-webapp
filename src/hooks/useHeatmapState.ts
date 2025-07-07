@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import type { EventLogSettings, GeneralSettings, HeatmapDataState, HotspotModeSettings, PlayerTimelineSettings } from '@src/modeles/heatmapView';
 import type { RootState } from '@src/store';
 
+import { useAppDispatch, useAppSelector } from '@src/hooks/useDispatch';
 import { getInitialState, canvasActions } from '@src/slices/canvasSlice';
 import { getCanvasValues } from '@src/utils/localstrage';
 import { capitalize } from '@src/utils/string';
@@ -68,80 +69,55 @@ export const useVersion = () => useHeatmapValuesState<string | undefined>('versi
 export const usePlayerTimelineState = () => useHeatmapValuesState<PlayerTimelineSettings>('playerTimeline');
 
 export const useHeatmapState = () => {
-  const dispatch = useDispatch();
-  const { data: generalData } = useGeneralState();
-  const [general, setGeneral] = useState<GeneralSettings>(generalData);
-  const { data: hotspotModeData } = useHotspotModeState();
-  const [hotspotMode, setHotspotMode] = useState<HotspotModeSettings>(hotspotModeData);
-  const { data: eventLogsData } = useEventLogState();
-  const [eventLog, setEventLog] = useState<EventLogSettings>(eventLogsData);
-  const { data: version } = useVersion();
-  const { data: playerTimelineData } = usePlayerTimelineState();
-  const [playerTimeline, setPlayerTimeline] = useState<PlayerTimelineSettings>(playerTimelineData);
+  const dispatch = useAppDispatch();
+  const data = useAppSelector((state: RootState) => state.heatmapCanvas);
+  const [sessionData, setSessionData] = useState<HeatmapDataState>(data);
+
+  const [hasDiff, setHasDiff] = useState<boolean>(false);
 
   useEffect(() => {
     // 初期化時にlocalStorageから値をロード
     const savedData = getCanvasValues();
     if (savedData) {
-      setGeneral(savedData.general);
-      setHotspotMode(savedData.hotspotMode);
-      setEventLog(savedData.eventLog);
-      setPlayerTimeline(savedData.playerTimeline);
+      setSessionData(savedData);
     }
   }, []);
 
   useEffect(() => {
-    if (generalData) {
-      setGeneral(generalData);
+    if (data) {
+      setSessionData(data);
+      const savedData = getCanvasValues();
+      if (savedData && JSON.stringify(savedData) !== JSON.stringify(data)) {
+        setHasDiff(true);
+      } else {
+        setHasDiff(false);
+      }
     }
-  }, [generalData]);
-
-  useEffect(() => {
-    if (hotspotModeData) {
-      setHotspotMode(hotspotModeData);
-    }
-  }, [hotspotModeData]);
-
-  useEffect(() => {
-    if (eventLogsData) {
-      setEventLog(eventLogsData);
-    }
-  }, [eventLogsData]);
-
-  useEffect(() => {
-    if (playerTimelineData) {
-      setPlayerTimeline(playerTimelineData);
-    }
-  }, [playerTimelineData]);
+  }, [data]);
 
   // session → storeへapply
   const apply = useCallback(() => {
-    dispatch(
-      canvasActions.set({
-        general,
-        hotspotMode,
-        eventLog,
-        playerTimeline,
-      }),
-    );
-  }, [dispatch, eventLog, general, hotspotMode, playerTimeline]);
+    if (!sessionData) return;
+    console.log('Applying session data to store:', sessionData);
+    dispatch(canvasActions.set(sessionData));
+  }, [dispatch, sessionData]);
 
   // discard → localStorageからロードしてsessionに反映
   const discard = useCallback(() => {
     const savedData = getCanvasValues();
     if (savedData) {
-      setGeneral(savedData.general);
-      setHotspotMode(savedData.hotspotMode);
-      setEventLog(savedData.eventLog);
+      setSessionData(savedData);
+      setHasDiff(false);
     }
   }, []);
 
   return {
-    general,
-    hotspotMode,
-    eventLog,
-    playerTimeline,
-    version,
+    general: sessionData.general,
+    hotspotMode: sessionData.hotspotMode,
+    eventLog: sessionData.eventLog,
+    playerTimeline: sessionData.playerTimeline,
+    hasDiff,
+    version: sessionData.version,
     apply,
     discard,
   };

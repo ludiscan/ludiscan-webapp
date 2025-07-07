@@ -34,7 +34,7 @@ const preview: Preview = {
       // context.args.type からテーマを選択
       const theme = context.args.type === 'light' ? lightTheme : darkTheme;
       return (
-        <Provider store={store}>
+        <Provider store={store()}>
           <SharedThemeProvider initialTheme={theme}>
             <Story />
           </SharedThemeProvider>
