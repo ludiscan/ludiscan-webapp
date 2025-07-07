@@ -16,7 +16,7 @@ import { Text } from '@src/component/atoms/Text';
 import { StatusContent } from '@src/component/molecules/StatusContent';
 import { Header } from '@src/component/templates/Header';
 import { useAuth } from '@src/hooks/useAuth';
-import { useVersion } from '@src/hooks/useHeatmapState';
+import { useHeatmapState, useVersion } from '@src/hooks/useHeatmapState';
 import { createClient } from '@src/modeles/qeury';
 import { dimensions, fontSizes } from '@src/styles/style';
 import { useOnlineHeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
@@ -57,6 +57,7 @@ const HeatmapIdPageLayoutComponent: FC<HeatmapIdPageLayoutProps> = ({ className,
     if (!task) return 'loading';
     return task.status === 'completed' ? 'success' : task.status === 'failed' ? 'error' : 'loading';
   }, [task]);
+  const { apply, hasDiff, discard } = useHeatmapState();
   return (
     <>
       <Header
@@ -65,13 +66,13 @@ const HeatmapIdPageLayoutComponent: FC<HeatmapIdPageLayoutProps> = ({ className,
         iconTitleEnd={<Text className={`${className}__headerV`} text={`${version || 'debug'}`} fontSize={fontSizes.small} fontWeight={'bold'} />}
         iconEnd={
           <>
-            <Button fontSize={'small'} onClick={() => {}} scheme={'surface'}>
+            <Button fontSize={'small'} onClick={discard} scheme={'surface'} disabled={!hasDiff}>
               <Text text={'Discord'} fontWeight={'bold'} />
             </Button>
-            <Button fontSize={'small'} onClick={() => {}} scheme={'surface'}>
+            <Button fontSize={'small'} onClick={apply} scheme={'surface'} className={`${className}__badgeButton ${hasDiff ? 'badge' : ''}`}>
               <Text text={'Save'} fontWeight={'bold'} />
             </Button>
-            <Button fontSize={'small'} onClick={() => {}} scheme={'primary'}>
+            <Button fontSize={'small'} onClick={() => {}} scheme={'secondary'}>
               <Text text={'Export'} fontWeight={'bold'} />
             </Button>
           </>
@@ -96,6 +97,22 @@ export const HeatmapIdPageLayout = styled(HeatmapIdPageLayoutComponent)`
     color: ${({ theme }) => theme.colors.primary.main};
     border: 1px solid ${({ theme }) => theme.colors.primary.main};
     border-radius: 16px;
+  }
+
+  &__badgeButton {
+    position: relative;
+  }
+
+  &__badgeButton.badge::after {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 10px;
+    height: 10px;
+    content: '';
+    background-color: ${({ theme }) => theme.colors.primary.main};
+    border-radius: 50%;
+    box-shadow: 2px 2px 12px ${({ theme }) => theme.colors.border.dark};
   }
 `;
 

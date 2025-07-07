@@ -1,9 +1,10 @@
 import styled from '@emotion/styled';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import ReactModal from 'react-modal';
 import { Provider } from 'react-redux';
 
+import type { AppStore } from '@src/store';
 import type { AppProps } from 'next/app';
 
 import { ToastProvider } from '@src/component/templates/ToastContext';
@@ -27,8 +28,12 @@ export const InnerContent = styled.div`
 export default function App({ Component, pageProps }: AppProps) {
   ReactModal.setAppElement('#__next');
   const queryClient = useMemo(() => new QueryClient(), []);
+  const storeRef = useRef<AppStore>(undefined);
+  if (!storeRef.current) {
+    storeRef.current = store();
+  }
   return (
-    <Provider store={store}>
+    <Provider store={storeRef.current}>
       <ToastProvider position={'top-right'}>
         <QueryClientProvider client={queryClient}>
           <SharedThemeProvider>
