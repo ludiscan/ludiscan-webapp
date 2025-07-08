@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { PerformanceMonitor } from '@react-three/drei';
+import { PerformanceMonitor, Stats } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { useQuery } from '@tanstack/react-query';
 import { saveAs } from 'file-saver';
@@ -21,7 +21,7 @@ import { HeatMapCanvas } from '@src/pages/heatmap/tasks/[task_id]/HeatmapCanvas'
 import { HeatmapMenuContent } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenuContent';
 import { useOBJFromArrayBuffer } from '@src/pages/heatmap/tasks/[task_id]/ModelLoader';
 import { HeatmapMenuSideBar } from '@src/pages/heatmap/tasks/[task_id]/menu/HeatmapMenuSideBar';
-import { zIndexes } from '@src/styles/style';
+import { dimensions, zIndexes } from '@src/styles/style';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 import { getOfflineHeatmapTemplate } from '@src/utils/heatmap/getOfflineHeatmapTemplate';
 
@@ -37,6 +37,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
   // const [performance, setPerformance] = useState<PerformanceMonitorApi>();
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const divRef = useRef(document.createElement('div'));
   const [openMenu, setOpenMenu] = useState<Menus | undefined>(undefined);
   const [menuExtra, setMenuExtra] = useState<object | undefined>(undefined);
 
@@ -262,6 +263,21 @@ const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
     }
   }, [setTimelineState, timelinePlaySpeed, timelineState.isPlaying, visibleTimelineRange.end]);
 
+  useEffect(() => {
+    const div = divRef.current;
+    if (div) {
+      document.body.appendChild(div);
+      div.id = 'stats';
+      div.style.position = 'relative';
+      div.style.top = '0';
+      div.style.left = '0';
+    }
+
+    return () => {
+      document.body.removeChild(div);
+    };
+  }, []);
+
   return (
     <div className={`${className}__view`}>
       <FlexRow style={{ width: '100%', height: '100%' }} align={'center'} wrap={'nowrap'}>
@@ -278,6 +294,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
               currentTimelineSeek={currentTimelineSeek}
               visibleTimelineRange={visibleTimelineRange}
             />
+            <Stats parent={divRef} className={`${className}__stats`} />
           </Canvas>
           {/*{performance && <PerformanceList api={performance} className={`${className}__performance`} />}*/}
         </div>
@@ -397,5 +414,13 @@ export const HeatMapViewer = styled(Component)`
     left: 50%;
     margin-left: 30px;
     transform: translateX(-50%);
+  }
+
+  &__stats {
+    position: absolute;
+    top: ${dimensions.headerHeight}px !important;
+    left: 56px !important;
+    z-index: ${zIndexes.content + 1};
+    pointer-events: none;
   }
 `;
