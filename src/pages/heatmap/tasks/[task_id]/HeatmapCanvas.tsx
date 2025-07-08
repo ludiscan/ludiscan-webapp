@@ -3,7 +3,7 @@ import { useThree } from '@react-three/fiber';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Raycaster, Vector2, Vector3 } from 'three';
 
-import { PositionPointMarkers } from './PositionPointMarkers';
+import { HeatmapPointsMarker } from './HeatmapPointsMarker';
 
 import type { PlayerTimelinePointsTimeRange } from '@src/pages/heatmap/tasks/[task_id]/PlayerTimelinePoints';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
@@ -190,7 +190,7 @@ const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, s
       <directionalLight position={[10, 10, 10]} intensity={3} castShadow={true} /* eslint-disable-line react/no-unknown-property */ />
       {modelType && map && modelType !== 'server' && typeof map === 'string' && <LocalModelLoader ref={modelRef} modelPath={map} modelType={modelType} />}
       {modelType && model && modelType === 'server' && typeof map !== 'string' && <StreamModelLoader ref={modelRef} model={model} />}
-      {pointList && showHeatmap && <PositionPointMarkers points={pointList} />}
+      {pointList && showHeatmap && <HeatmapPointsMarker points={pointList} />}
       {pointList && showHeatmap && <HotspotCircles points={pointList} />}
       {visibleEventLogs.length > 0 && visibleEventLogs.map((event) => <EventLogMarkers key={event.key} logName={event.key} service={service} pref={event} />)}
       {service &&

@@ -36,6 +36,18 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = () => {
           <Switch label={'showHeatmap'} onChange={(showHeatmap) => setData({ ...general, showHeatmap })} checked={general.showHeatmap} size={'small'} />
         </div>
       </InputRow>
+      <InputRow label={'opacity'}>
+        <div>
+          <Slider
+            value={general.heatmapOpacity}
+            min={0.0}
+            max={1.0}
+            step={0.1}
+            onChange={(value) => setData({ ...general, heatmapOpacity: value })}
+            disabled={!general.showHeatmap}
+          />
+        </div>
+      </InputRow>
       <InputColumn label={'blockSize'}>
         <Slider value={general.blockSize} onChange={(blockSize) => setData({ ...general, blockSize })} min={50} step={50} max={500} sideLabel textField />
       </InputColumn>

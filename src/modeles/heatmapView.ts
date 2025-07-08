@@ -24,6 +24,7 @@ export type GeneralSettings = {
   upZ: boolean;
   scale: number;
   showHeatmap: boolean;
+  heatmapOpacity: number;
   blockSize: number;
   mapName: string;
   minThreshold: number;
@@ -68,6 +69,7 @@ export const initializeValues: HeatmapDataState = {
     upZ: true,
     scale: 1,
     showHeatmap: false,
+    heatmapOpacity: 1.0,
     blockSize: 1,
     mapName: '',
     minThreshold: 0.0,
