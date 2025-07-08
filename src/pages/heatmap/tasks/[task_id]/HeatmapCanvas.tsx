@@ -1,4 +1,4 @@
-import { OrbitControls, Stats } from '@react-three/drei';
+import { OrbitControls } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Raycaster, Vector2, Vector3 } from 'three';
@@ -224,7 +224,6 @@ const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, s
         />
       ))}
       <OrbitControls enableZoom enablePan enableRotate ref={orbitControlsRef} position0={new Vector3(1, 1, 3000)} />
-      <Stats />
     </>
   );
 };
