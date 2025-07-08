@@ -43,7 +43,7 @@ class Point extends Vector3 {
 
 const Component: FC<PointMarkersProps> = ({ points, colorIntensity = 0.9, colorScale = 1 }) => {
   const {
-    data: { upZ, scale, minThreshold = 0.0, maxThreshold = 1.0 },
+    data: { upZ, scale, minThreshold = 0.0, maxThreshold = 1.0, heatmapOpacity = 1.0 },
   } = useGeneralState();
 
   // Z-up / Y-up の変換
@@ -119,11 +119,11 @@ const Component: FC<PointMarkersProps> = ({ points, colorIntensity = 0.9, colorS
           receiveShadow={false} /* eslint-disable-line react/no-unknown-property */
         >
           <boxGeometry args={[50 * scale, 50 * scale, 50 * scale]} /> {/* eslint-disable-line react/no-unknown-property */}
-          <meshStandardMaterial color={pos.color} />
+          <meshStandardMaterial color={pos.color} opacity={heatmapOpacity} transparent={true} /> {/* eslint-disable-line react/no-unknown-property */}
         </mesh>
       ))}
     </>
   );
 };
 
-export const PositionPointMarkers = Component;
+export const HeatmapPointsMarker = Component;
