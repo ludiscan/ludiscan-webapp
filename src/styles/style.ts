@@ -35,6 +35,7 @@ export const dimensions = {
   sidebarWidth: 240,
   headerHeight: 60,
   mobileWidth: 768,
+  maxWidth: 1200,
 } as const;
 
 export const colors = {

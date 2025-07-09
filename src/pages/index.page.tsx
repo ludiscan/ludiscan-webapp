@@ -1,28 +1,39 @@
+import { promises as fs } from 'fs';
+
 import styled from '@emotion/styled';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
+import Markdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 import type { FC } from 'react';
 
-import { Button } from '@src/component/atoms/Button';
 import { Header } from '@src/component/templates/Header';
+import { dimensions } from '@src/styles/style';
 
 export type IndexPageProps = {
   className?: string;
+  readme?: string;
 };
 
 export async function getServerSideProps() {
-  return {
-    props: {
-      title: 'Index Page',
-    },
-  };
+  try {
+    const readmeRaw = await fs.readFile(process.cwd() + '/src/files/heatmapReadme.md', 'utf8');
+    return {
+      props: {
+        title: 'Index Page',
+        readme: readmeRaw,
+      },
+    };
+  } catch {
+    return {
+      notFound: true,
+    };
+  }
 }
 
-const Component: FC<IndexPageProps> = ({ className }) => {
-  const [count, setCount] = useState(0);
+const Component: FC<IndexPageProps> = ({ className, readme }) => {
   const router = useRouter();
   const handleBackClick = useCallback(() => {
     router.back();
@@ -34,24 +45,9 @@ const Component: FC<IndexPageProps> = ({ className }) => {
         <Link href={'/home'}>
           <span>Go to Home</span>
         </Link>
-        <div>
-          <a href='https://vite.dev' target='_blank' rel='noreferrer'>
-            <Image src={'/vite.svg'} className={`${className}__logo`} alt='Vite logo' width={120} height={120} />
-          </a>
-          <a href='https://react.dev' target='_blank' rel='noreferrer'>
-            <Image src={'/react.svg'} className={`${className}__logo react`} alt='React logo' width={120} height={120} />
-          </a>
+        <div className={`${className}__markdown`}>
+          <Markdown remarkPlugins={[remarkGfm]}>{readme}</Markdown>
         </div>
-        <h1>Vite + React</h1>
-        <div className={`${className}__card`}>
-          <Button onClick={() => setCount((count) => count + 1)} scheme={'surface'} fontSize={'medium'}>
-            count is {count}
-          </Button>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test HMR
-          </p>
-        </div>
-        <p className={`${className}__read-the-docs`}>Click on the Vite and React logos to learn more</p>
       </div>
     </div>
   );
@@ -63,6 +59,14 @@ const IndexPage = styled(Component)`
   &__inner {
     padding: 2rem;
     text-align: center;
+  }
+
+  &__markdown {
+    max-width: ${dimensions.maxWidth}px;
+    margin: 0 auto;
+    font-size: 1.2rem;
+    line-height: 1.6;
+    text-align: start;
   }
 
   &__logo {
@@ -105,10 +109,6 @@ const IndexPage = styled(Component)`
   }
 `;
 
-export default function App() {
-  return (
-    <div>
-      <IndexPage />
-    </div>
-  );
+export default function App(props: IndexPageProps) {
+  return <IndexPage {...props} />;
 }
