@@ -63,10 +63,10 @@ const IndexPage = styled(Component)`
 
   &__markdown {
     max-width: ${dimensions.maxWidth}px;
-    text-align: start;
     margin: 0 auto;
     font-size: 1.2rem;
     line-height: 1.6;
+    text-align: start;
   }
 
   &__logo {
