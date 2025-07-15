@@ -1,7 +1,7 @@
 import { OrbitControls } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 
-import { PositionPointMarkers } from './PositionPointMarkers';
+import { HeatmapPointsMarker } from './HeatmapPointsMarker';
 
 import type { Meta, StoryObj } from '@storybook/react';
 
@@ -10,10 +10,10 @@ import darkTheme from '@src/styles/dark';
 import lightTheme from '@src/styles/light';
 
 export default {
-  component: PositionPointMarkers,
+  component: HeatmapPointsMarker,
   controls: { hideNoControlsWarning: true },
 } as Meta;
-type Story = StoryObj<typeof PositionPointMarkers>;
+type Story = StoryObj<typeof HeatmapPointsMarker>;
 
 const Template: Story = {
   render: (args) => {
@@ -25,7 +25,7 @@ const Template: Story = {
           <Canvas camera={{ position: [3, 3, 3], fov: 75 }}>
             <ambientLight intensity={0.5} /> {/* eslint-disable-line react/no-unknown-property */}
             <directionalLight position={[10, 10, 10]} intensity={1} /> {/* eslint-disable-line react/no-unknown-property */}
-            <PositionPointMarkers {...args} />
+            <HeatmapPointsMarker {...args} />
             {/* カメラ移動・回転を可能にする */}
             <OrbitControls
               enableZoom={true} // ズーム可能

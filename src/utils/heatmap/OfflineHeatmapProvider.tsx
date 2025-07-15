@@ -13,7 +13,7 @@ import { Header } from '@src/component/templates/Header';
 import { ToastProvider } from '@src/component/templates/ToastContext';
 import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
 import { HeatMapViewer } from '@src/pages/heatmap/tasks/[task_id]/HeatmapViewer';
-import { store } from '@src/store';
+import { type AppStore, store } from '@src/store';
 import lightTheme from '@src/styles/light';
 import { fontSizes } from '@src/styles/style';
 import { useOfflineHeatmapDataService } from '@src/utils/heatmap/useOfflineHeatmapDataService';
@@ -82,8 +82,12 @@ export const Component: FC<OfflineHeatmapProviderProps> = ({ className }) => {
       document.removeEventListener('drop', dropHandler);
     };
   }, [loadData]);
+  const storeRef = useRef<AppStore>(undefined);
+  if (!storeRef.current) {
+    storeRef.current = store();
+  }
   return (
-    <Provider store={store}>
+    <Provider store={storeRef.current}>
       <ToastProvider position={'top-right'}>
         <QueryClientProvider client={queryClient}>
           <SharedThemeProvider initialTheme={lightTheme}>
@@ -100,7 +104,7 @@ export const Component: FC<OfflineHeatmapProviderProps> = ({ className }) => {
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) {
-                        loadData(file);
+                        loadData(file).then(() => {});
                       }
                     }}
                   />

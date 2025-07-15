@@ -29,12 +29,18 @@ export const zIndexes = {
   tooltip: 400,
   loader: 500,
   toast: 600,
+  renderOrder: {
+    heatmap: 100,
+    timelinePoints: 101,
+    timelineArrows: 102,
+  },
 } as const;
 
 export const dimensions = {
   sidebarWidth: 240,
   headerHeight: 60,
   mobileWidth: 768,
+  maxWidth: 1200,
 } as const;
 
 export const colors = {

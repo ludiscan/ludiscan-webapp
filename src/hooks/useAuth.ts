@@ -1,12 +1,11 @@
 import { useCallback, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
-import { useAppDispatch } from '../store';
-
 import type { RootState } from '../store';
 import type { Env } from '@src/modeles/env';
 import type { User } from '@src/modeles/user';
 
+import { useAppDispatch } from '@src/hooks/useDispatch';
 import { login, logout, setReady, setToken, setUser } from '@src/slices/authSlice';
 import { getToken, getUser } from '@src/utils/localstrage';
 

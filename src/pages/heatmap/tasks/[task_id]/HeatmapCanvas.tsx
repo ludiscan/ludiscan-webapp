@@ -1,9 +1,9 @@
-import { OrbitControls, Stats } from '@react-three/drei';
+import { OrbitControls } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Raycaster, Vector2, Vector3 } from 'three';
+import { AmbientLight, DirectionalLight, HemisphereLight, Raycaster, SpotLight, Vector2, Vector3 } from 'three';
 
-import { PositionPointMarkers } from './PositionPointMarkers';
+import { HeatmapPointsMarker } from './HeatmapPointsMarker';
 
 import type { PlayerTimelinePointsTimeRange } from '@src/pages/heatmap/tasks/[task_id]/PlayerTimelinePoints';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
@@ -12,7 +12,9 @@ import type { Group } from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 
 import { useEventLogState, useGeneralState, usePlayerTimelineState } from '@src/hooks/useHeatmapState';
+import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { EventLogMarkers } from '@src/pages/heatmap/tasks/[task_id]/EventLogMarkers';
+import { HeatmapCellOverlay } from '@src/pages/heatmap/tasks/[task_id]/HeatmapCellOverlay';
 import { HotspotCircles } from '@src/pages/heatmap/tasks/[task_id]/HotspotCircles';
 import { LocalModelLoader, StreamModelLoader } from '@src/pages/heatmap/tasks/[task_id]/ModelLoader';
 import { PlayerTimelinePoints } from '@src/pages/heatmap/tasks/[task_id]/PlayerTimelinePoints';
@@ -37,8 +39,9 @@ type Waypoint = {
 const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, service, currentTimelineSeek, visibleTimelineRange }) => {
   // const { invalidate } = useThree();
   const {
-    data: { showHeatmap },
+    data: { showHeatmap, heatmapOpacity, heatmapType },
   } = useGeneralState();
+  const { theme } = useSharedTheme();
   const { data: eventLog } = useEventLogState();
   const { data: timelineState } = usePlayerTimelineState();
   const orbitControlsRef = useRef<OrbitControlsImpl>(null);
@@ -52,7 +55,7 @@ const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, s
   const [draggingWaypointId, setDraggingWaypointId] = useState<string | null>(null);
 
   // Raycaster を使ってモデル表面上の正しい高さ（Y 座標）を求めるための準備
-  const { camera, gl } = useThree(); // size は canvas の幅・高さ、gl は renderer
+  const { camera, gl, scene } = useThree(); // size は canvas の幅・高さ、gl は renderer
   const raycaster = useMemo(() => new Raycaster(), []);
   const modelRef = useRef<Group>(null);
 
@@ -184,13 +187,43 @@ const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, s
     };
   }, [draggingWaypointId, camera, gl, raycaster, setWaypoints]);
 
+  useEffect(() => {
+    // 平行光源を作成
+    // new THREE.DirectionalLight(色, 光の強さ)
+    const ambientLight = new AmbientLight(0xffffff, 0.2);
+    scene.add(ambientLight);
+    // 平行光源を作成
+    // new THREE.DirectionalLight(色, 光の強さ)
+    const directionalLight = new DirectionalLight(0xffffff, 0.4);
+    scene.add(directionalLight);
+
+    const hemisphereLight = new HemisphereLight(theme.colors.background, theme.colors.surface.dark, 1);
+    scene.add(hemisphereLight);
+    // スポットライト光源を作成
+    // new THREE.SpotLight(色, 光の強さ, 距離, 照射角, ボケ具合, 減衰率)
+    const spotLight = new SpotLight(0xffffff, 4, 30, Math.PI / 4, 10, 0.5);
+    scene.add(spotLight);
+    return () => {
+      // コンポーネントのクリーンアップ時に光源を削除
+      scene.remove(ambientLight);
+      scene.remove(directionalLight);
+      scene.remove(hemisphereLight);
+      scene.remove(spotLight);
+    };
+  }, [scene, theme]);
+
   return (
     <>
-      <ambientLight intensity={0.3} /* eslint-disable-line react/no-unknown-property */ />
-      <directionalLight position={[10, 10, 10]} intensity={3} castShadow={true} /* eslint-disable-line react/no-unknown-property */ />
       {modelType && map && modelType !== 'server' && typeof map === 'string' && <LocalModelLoader ref={modelRef} modelPath={map} modelType={modelType} />}
-      {modelType && model && modelType === 'server' && typeof map !== 'string' && <StreamModelLoader ref={modelRef} model={model} />}
-      {pointList && showHeatmap && <PositionPointMarkers points={pointList} />}
+      {modelType && model && modelType === 'server' && typeof map !== 'string' && (
+        <>
+          <StreamModelLoader ref={modelRef} model={model} />
+          {modelRef.current && heatmapType === 'fill' && showHeatmap && (
+            <HeatmapCellOverlay group={modelRef.current} points={pointList} cellSize={(service.task?.stepSize || 50) / 2} opacity={heatmapOpacity} />
+          )}
+        </>
+      )}
+      {pointList && heatmapType === 'object' && showHeatmap && <HeatmapPointsMarker points={pointList} />}
       {pointList && showHeatmap && <HotspotCircles points={pointList} />}
       {visibleEventLogs.length > 0 && visibleEventLogs.map((event) => <EventLogMarkers key={event.key} logName={event.key} service={service} pref={event} />)}
       {service &&
@@ -224,7 +257,6 @@ const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, s
         />
       ))}
       <OrbitControls enableZoom enablePan enableRotate ref={orbitControlsRef} position0={new Vector3(1, 1, 3000)} />
-      <Stats />
     </>
   );
 };

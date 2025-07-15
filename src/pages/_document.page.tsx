@@ -14,7 +14,7 @@ export default function Document() {
         <meta name='twitter:description' content='' />
         <meta name='twitter:image' content='https://ludiapp.matuyuhi.com/ogp.png' />
         <meta name='theme-color' content='#000000' /> {/* WebViewやAndroid Chromeでのステータスバー色 */}
-        <meta name='apple-mobile-web-app-capable' content='yes' />
+        <meta name='mobile-web-app-capable' content='yes' />
         <meta name='apple-mobile-web-app-status-bar-style' content='default' />
         <meta name='apple-mobile-web-app-title' content='Ludiscan Web App' />
         <meta name='format-detection' content='telephone=no' />
@@ -29,7 +29,7 @@ export default function Document() {
         <link rel='preconnect' href='https://fonts.gstatic.com' crossOrigin='anonymous' />
         <link href='https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap' rel='stylesheet' />
       </Head>
-      <body style={{ padding: 0, margin: 0 }}>
+      <body style={{ padding: 0, margin: 0 }} suppressHydrationWarning>
         <Main />
         <NextScript />
       </body>

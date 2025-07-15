@@ -24,7 +24,7 @@ export const Default: Story = {
       getMapList: async () => [''],
       getMapContent: async () => null,
       getGeneralLogKeys: async () => null,
-      getTask: () => null,
+      task: undefined,
       getEventLog: async () => [],
       eventLogs: {},
       createClient: () => null,

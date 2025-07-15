@@ -97,9 +97,9 @@ const Component: FC<CreateHeatmapTaskSessionModalProps | CreateHeatmapTaskProjec
       return data;
     },
     retry: 2,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       if (data) {
-        queryClient.invalidateQueries({ queryKey: ['tasks', data.taskId] });
+        await queryClient.invalidateQueries({ queryKey: ['tasks', data.taskId] });
       }
     },
   });
