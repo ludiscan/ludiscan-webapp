@@ -58,7 +58,6 @@ export const MenuContents: MenuType[] = [
   {
     name: 'playerTimeline',
     icon: <SiSvgtrace />,
-    visible: (state) => state.playerTimeline.visible,
     Component: PlayerTimeline,
   },
   {

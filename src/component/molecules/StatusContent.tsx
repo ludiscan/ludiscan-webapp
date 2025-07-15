@@ -61,6 +61,9 @@ const Component: FC<StatusContentProps> = ({ className, status, errorMessage, ch
 };
 
 export const StatusContent = styled(Component)`
+  width: 100%;
+  height: 100%;
+
   &__content {
     position: relative;
     top: 0;

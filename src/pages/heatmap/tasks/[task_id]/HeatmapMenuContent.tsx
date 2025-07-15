@@ -74,6 +74,7 @@ export const HeatmapMenuContent = styled(Component)`
   color: ${({ theme }) => theme.colors.text};
 
   &__content {
+    height: calc(100% - 32px);
     padding: 16px;
     overflow: hidden auto;
   }

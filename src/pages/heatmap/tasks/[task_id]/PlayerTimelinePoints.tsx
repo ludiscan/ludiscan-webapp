@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unknown-property */
 import { useEffect, useMemo } from 'react';
-import { BufferGeometry, CatmullRomCurve3, Line, LineBasicMaterial, Vector3 } from 'three';
+import { BufferGeometry, CatmullRomCurve3, Color, Line, LineBasicMaterial, Vector3 } from 'three';
 import { Line2, LineGeometry, LineMaterial } from 'three-stdlib';
 
 import type { PlayerTimelineDetail } from '@src/modeles/heatmapView';
@@ -9,6 +9,7 @@ import type { FC } from 'react';
 
 import { useGeneralState, usePlayerTimelineState } from '@src/hooks/useHeatmapState';
 import { usePlayerPositionLogs } from '@src/modeles/heatmapView';
+import { zIndexes } from '@src/styles/style';
 
 export type PlayerTimelinePointsTimeRange = {
   start: number; // 開始時刻（ミリ秒）
@@ -80,9 +81,9 @@ const Component: FC<PlayerTimelinePointsProps> = ({ service, state, currentTimel
       {logs
         .filter((pt) => pt.offset_timestamp >= visibleTimeRange.start && pt.offset_timestamp <= visibleTimeRange.end)
         .map((pt, idx) => (
-          <mesh key={idx} position={new Vector3(pt.x, pt.y, pt.z)}>
+          <mesh key={idx} position={new Vector3(pt.x, pt.y, pt.z)} renderOrder={zIndexes.renderOrder.timelinePoints}>
             <sphereGeometry args={[10 * scale, 16, 16]} />
-            <meshStandardMaterial color={'rgba(161,198,255,0.4)'} transparent />
+            <meshStandardMaterial color={new Color(161 / 255, 198 / 255, 255 / 255)} transparent />
           </mesh>
         ))}
       {fullPathPoints.length > 1 && (
@@ -96,6 +97,7 @@ const Component: FC<PlayerTimelinePointsProps> = ({ service, state, currentTimel
         />
       )}
 
+      {/* 現在のタイムラインの位置までのパスを描画 */}
       {partialPathPoints.length > 1 &&
         (() => {
           const positions = partialPathPoints.slice(partialPathPoints.length - 3, partialPathPoints.length).flatMap((v) => [v.x, v.y, v.z]);
@@ -111,9 +113,11 @@ const Component: FC<PlayerTimelinePointsProps> = ({ service, state, currentTimel
             opacity: 0.7,
           });
 
+          material.depthTest = false;
+          material.transparent = true;
           material.resolution.set(window.innerWidth, window.innerHeight); // これ必須！
 
-          return <primitive object={new Line2(geometry, material)} />;
+          return <primitive renderOrder={zIndexes.renderOrder.timelineArrows} object={new Line2(geometry, material)} />;
         })()}
       {partialPathPoints.length >= 2 &&
         (() => {
@@ -148,9 +152,11 @@ const Component: FC<PlayerTimelinePointsProps> = ({ service, state, currentTimel
             dashed: false,
           });
 
+          material.depthTest = false; // 深度テストを無効化
+          material.transparent = true;
           material.resolution.set(window.innerWidth, window.innerHeight);
 
-          return <primitive object={new Line2(geometry, material)} />;
+          return <primitive renderOrder={zIndexes.renderOrder.timelineArrows} object={new Line2(geometry, material)} />;
         })()}
     </>
   );
