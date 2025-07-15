@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import type { FC } from 'react';
 
 import { useGeneralState } from '@src/hooks/useHeatmapState';
+import { zIndexes } from '@src/styles/style';
 
 export type PointWithDensity = {
   x: number;
@@ -84,7 +85,7 @@ export const HeatmapCellOverlay: FC<Props> = ({ group, points, cellSize, maxDens
             key={i}
             position={[pos.x, pos.y, pos.z]} /* eslint-disable-line react/no-unknown-property */
             quaternion={[q.x, q.y, q.z, q.w]} /* eslint-disable-line react/no-unknown-property */
-            renderOrder={999} /* eslint-disable-line react/no-unknown-property */
+            renderOrder={zIndexes.renderOrder.heatmap} /* eslint-disable-line react/no-unknown-property */
           >
             <planeGeometry args={[cellSize, cellSize]} /* eslint-disable-line react/no-unknown-property */ />
             <meshBasicMaterial

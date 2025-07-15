@@ -29,6 +29,11 @@ export const zIndexes = {
   tooltip: 400,
   loader: 500,
   toast: 600,
+  renderOrder: {
+    heatmap: 100,
+    timelinePoints: 101,
+    timelineArrows: 102,
+  },
 } as const;
 
 export const dimensions = {
