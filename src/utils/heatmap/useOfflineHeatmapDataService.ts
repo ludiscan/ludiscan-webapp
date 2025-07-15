@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 
-import type { HeatmapTask, PositionEventLog } from '@src/modeles/heatmaptask';
+import type { PositionEventLog } from '@src/modeles/heatmaptask';
 import type { HeatmapDataService, OfflineHeatmapData } from '@src/utils/heatmap/HeatmapDataService';
 
 /**

@@ -39,7 +39,7 @@ type Waypoint = {
 const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, service, currentTimelineSeek, visibleTimelineRange }) => {
   // const { invalidate } = useThree();
   const {
-    data: { showHeatmap },
+    data: { showHeatmap, heatmapOpacity, heatmapType },
   } = useGeneralState();
   const { theme } = useSharedTheme();
   const { data: eventLog } = useEventLogState();
@@ -218,10 +218,12 @@ const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, s
       {modelType && model && modelType === 'server' && typeof map !== 'string' && (
         <>
           <StreamModelLoader ref={modelRef} model={model} />
-          {modelRef.current && <HeatmapCellOverlay group={modelRef.current} points={pointList} cellSize={(service.task?.stepSize || 50) / 2} opacity={1} />}
+          {modelRef.current && heatmapType === 'fill' && showHeatmap && (
+            <HeatmapCellOverlay group={modelRef.current} points={pointList} cellSize={(service.task?.stepSize || 50) / 2} opacity={heatmapOpacity} />
+          )}
         </>
       )}
-      {pointList && showHeatmap && <HeatmapPointsMarker points={pointList} />}
+      {pointList && heatmapType === 'object' && showHeatmap && <HeatmapPointsMarker points={pointList} />}
       {pointList && showHeatmap && <HotspotCircles points={pointList} />}
       {visibleEventLogs.length > 0 && visibleEventLogs.map((event) => <EventLogMarkers key={event.key} logName={event.key} service={service} pref={event} />)}
       {service &&
