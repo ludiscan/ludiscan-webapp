@@ -73,6 +73,7 @@ const DetailBlockInternal: FC<{ className?: string; details: PlayerTimelineDetai
   //   enabled: !!project_id,
   // });
 
+  if (details.length === 0) return null;
   return (
     <InlineFlexColumn gap={4} className={className}>
       <FlexRow className={`${className}__row`} wrap={'nowrap'} align={'center'}>
@@ -234,7 +235,7 @@ const Component: FC<HeatmapMenuProps> = ({ service, task }) => {
         <Text text={'add'} />
       </Button>
       {sessionByDetail.size > 0 &&
-        sessionByDetail.values().map((details, index) => (
+        Array.from(sessionByDetail.values()).map((details, index) => (
           <>
             <Divider key={`${index}-divider`} />
             <DetailBlock key={`${index}-detail-block`} details={details} service={service} />
