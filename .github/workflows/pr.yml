@@ -8,6 +8,9 @@ on:
       - 'package-lock.json'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
     group: 'pr-workflow-${{ github.head_ref }}'
     cancel-in-progress: true
