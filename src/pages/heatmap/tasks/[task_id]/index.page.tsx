@@ -51,12 +51,10 @@ export type HeatmapIdPageLayoutProps = {
 };
 
 const HeatmapIdPageLayoutComponent: FC<HeatmapIdPageLayoutProps> = ({ className, version, service, onBackClick }) => {
-  const task = useMemo(() => service.getTask(), [service]);
-
   const statusContentStatus = useMemo(() => {
-    if (!task) return 'loading';
-    return task.status === 'completed' ? 'success' : task.status === 'failed' ? 'error' : 'loading';
-  }, [task]);
+    if (!service.task) return 'loading';
+    return service.task.status === 'completed' ? 'success' : service.task.status === 'failed' ? 'error' : 'loading';
+  }, [service.task]);
   const { apply, hasDiff, discard } = useHeatmapState();
   return (
     <>
@@ -80,7 +78,7 @@ const HeatmapIdPageLayoutComponent: FC<HeatmapIdPageLayoutProps> = ({ className,
       />
       <div className={className}>
         <StatusContent status={statusContentStatus}>
-          {task?.status === 'completed' && service && service.isInitialized && <HeatMapViewer dataService={service} />}
+          {service.task?.status === 'completed' && service && service.isInitialized && <HeatMapViewer dataService={service} />}
         </StatusContent>
       </div>
     </>

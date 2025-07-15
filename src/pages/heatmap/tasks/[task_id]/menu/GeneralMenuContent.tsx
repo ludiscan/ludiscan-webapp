@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 
+import type { GeneralSettings } from '@src/modeles/heatmapView';
 import type { HeatmapMenuProps } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenuContent';
 import type { FC } from 'react';
 
@@ -9,6 +10,7 @@ import { Slider } from '@src/component/atoms/Slider';
 import { Switch } from '@src/component/atoms/Switch';
 import { Text } from '@src/component/atoms/Text';
 import { SegmentedSwitch } from '@src/component/molecules/SegmentedSwitch';
+import { Selector } from '@src/component/molecules/Selector';
 import { useGeneralState } from '@src/hooks/useHeatmapState';
 import { InputColumn, InputRow } from '@src/pages/heatmap/tasks/[task_id]/menu/InputRow';
 import { fontSizes } from '@src/styles/style';
@@ -47,6 +49,16 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = () => {
             disabled={!general.showHeatmap}
           />
         </div>
+      </InputRow>
+      <InputRow label={'type'}>
+        <Selector
+          options={['object', 'fill']}
+          value={general.heatmapType}
+          onChange={(v) => {
+            setData({ ...general, heatmapType: v as GeneralSettings['heatmapType'] });
+          }}
+          fontSize={'medium'}
+        />
       </InputRow>
       <InputColumn label={'blockSize'}>
         <Slider value={general.blockSize} onChange={(blockSize) => setData({ ...general, blockSize })} min={50} step={50} max={500} sideLabel textField />
