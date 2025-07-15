@@ -18,7 +18,7 @@ export type HeatmapDataService = {
   // イベントログキーの取得
   getGeneralLogKeys(): Promise<string[] | null>;
 
-  getTask(): HeatmapTask | null;
+  task: HeatmapTask | undefined;
 
   getEventLog(logName: string): Promise<PositionEventLog[] | null>;
 
@@ -40,7 +40,7 @@ export type OfflineHeatmapData = {
 };
 
 // 通常のオンライン環境用の実装
-export function useOnlineHeatmapDataService(env: Env | undefined, task: HeatmapTask | null | undefined): HeatmapDataService {
+export function useOnlineHeatmapDataService(env: Env | undefined, task: HeatmapTask | undefined | null): HeatmapDataService {
   const [eventLogs, setEventLogs] = useState<Record<string, PositionEventLog[]>>({});
 
   const getMapList = useCallback(async () => {
@@ -108,10 +108,6 @@ export function useOnlineHeatmapDataService(env: Env | undefined, task: HeatmapT
     }
   }, [env, task]);
 
-  const getTask = useCallback(() => {
-    return task ? task : null;
-  }, [task]);
-
   const getProjectLogs = useCallback(
     async (logName: string) => {
       if (!env || !task) return null;
@@ -173,7 +169,7 @@ export function useOnlineHeatmapDataService(env: Env | undefined, task: HeatmapT
     getMapList,
     getMapContent,
     getGeneralLogKeys,
-    getTask,
+    task: task || undefined,
     getEventLog,
     eventLogs,
     createClient: () => (env ? createClient(env) : null),

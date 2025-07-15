@@ -48,12 +48,10 @@ const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
   const [timelinePlaySpeed, setTimelinePlaySpeed] = useState<PlaySpeedType>(1);
   const [visibleTimelineRange, setVisibleTimelineRange] = useState<PlayerTimelinePointsTimeRange>({ start: 0, end: timelineState.maxTime });
 
-  const task = useMemo(() => dataService.getTask(), [dataService]);
-
+  const task = dataService.task;
   const taskId = useMemo(() => {
-    const currentTask = dataService.getTask();
-    return currentTask?.taskId ?? 0;
-  }, [dataService]);
+    return task?.taskId;
+  }, [task]);
 
   const { data: mapList } = useQuery({
     queryKey: ['mapList', taskId, dataService],
@@ -247,6 +245,9 @@ const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
     if (timelineState.isPlaying) {
       const interval = setInterval(() => {
         setCurrentTimelineSeek((prev) => {
+          if (prev < visibleTimelineRange.start || prev >= visibleTimelineRange.end) {
+            return visibleTimelineRange.start;
+          }
           const nextSeek = prev + timelinePlaySpeed * 100; // 1秒ごとに進める
           if (nextSeek > visibleTimelineRange.end) {
             clearInterval(interval);
@@ -254,14 +255,14 @@ const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
               ...prev,
               isPlaying: false,
             }));
-            return visibleTimelineRange.end;
+            return visibleTimelineRange.start;
           }
           return nextSeek;
         });
       }, 100);
       return () => clearInterval(interval);
     }
-  }, [setTimelineState, timelinePlaySpeed, timelineState.isPlaying, visibleTimelineRange.end]);
+  }, [setTimelineState, timelinePlaySpeed, timelineState.isPlaying, visibleTimelineRange]);
 
   useEffect(() => {
     const div = divRef.current;
@@ -283,7 +284,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
       <FlexRow style={{ width: '100%', height: '100%' }} align={'center'} wrap={'nowrap'}>
         <HeatmapMenuSideBar className={`${className}__sideMenu`} service={dataService} currentMenu={openMenu} />
         <div className={`${className}__canvasBox`}>
-          <Canvas camera={{ position: [2500, 2500, 2500], fov: 50, near: 10, far: 10000 }} ref={canvasRef} dpr={dpr}>
+          <Canvas camera={{ position: [2500, 5000, -2500], fov: 50, near: 10, far: 10000 }} ref={canvasRef} dpr={dpr}>
             <PerformanceMonitor factor={1} onChange={handleOnPerformance} />
             <HeatMapCanvas
               service={dataService}
@@ -396,7 +397,7 @@ export const HeatMapViewer = styled(Component)`
     position: relative;
     flex: 1;
     width: 100%;
-    max-width: 1700px;
+    max-width: 1900px;
     height: 100%;
     margin: 0 auto;
     border: ${({ theme }) => `1px solid ${theme.colors.border.main}`};
@@ -418,8 +419,9 @@ export const HeatMapViewer = styled(Component)`
 
   &__stats {
     position: absolute;
-    top: ${dimensions.headerHeight}px !important;
-    left: 56px !important;
+    top: calc(${dimensions.headerHeight}px + 2px) !important;
+    right: 0 !important;
+    left: unset !important;
     z-index: ${zIndexes.content + 1};
     pointer-events: none;
   }

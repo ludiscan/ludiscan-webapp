@@ -62,11 +62,6 @@ export function useOfflineHeatmapDataService(offlineData: OfflineHeatmapData | n
     return data.generalLogKeys;
   }, [offlineData]);
 
-  const getTask = useCallback((): HeatmapTask | null => {
-    if (!offlineData) return null;
-    return offlineData.task;
-  }, [offlineData]);
-
   const getEventLog = useCallback(
     async (logName: string): Promise<PositionEventLog[] | null> => {
       const data = offlineData;
@@ -81,7 +76,7 @@ export function useOfflineHeatmapDataService(offlineData: OfflineHeatmapData | n
     getMapList,
     getMapContent,
     getGeneralLogKeys,
-    getTask,
+    task: offlineData?.task,
     getEventLog,
     eventLogs: offlineData?.eventLogs || {},
     createClient: () => null, // オフラインではクライアントは不要

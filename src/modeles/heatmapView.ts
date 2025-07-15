@@ -67,8 +67,8 @@ export const initializeValues: HeatmapDataState = {
   version: packageJson.version,
   general: {
     upZ: true,
-    scale: 1,
-    showHeatmap: false,
+    scale: 0.5,
+    showHeatmap: true,
     heatmapOpacity: 1.0,
     blockSize: 1,
     mapName: '',
