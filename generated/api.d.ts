@@ -781,6 +781,7 @@ export interface components {
       z?: number | null;
       offset_timestamp: number;
       location?: string | null;
+      status?: Record<string, never> | null;
     };
     CreateHeatmapDto: {
       /**
