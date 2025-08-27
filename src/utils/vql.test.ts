@@ -6,6 +6,8 @@ import type { ViewContext, HVQLProgram } from './vql';
 describe('HVQL - parse & compile', () => {
   const baseCtx: ViewContext = {
     player: 1,
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
     status: { team: 'yellow', hand: 'rock', hp: 82, flag: true },
     pos: { x: 10, y: 20, z: 0 },
     t: 1000,
@@ -71,6 +73,20 @@ describe('HVQL - parse & compile', () => {
     const style = apply(baseCtx);
     expect(style.color).toBe('#FFD400');
     expect(style.icon).toBe('hand-rock');
+  });
+
+  test('compileHVQL: player-icon プロパティ', () => {
+    const script = [
+      'map status.hand {',
+      '  rock   -> player-icon: hand-rock;',
+      '  paper  -> player-icon: hand-paper;',
+      '  *      -> player-icon: hand-unknown;',
+      '}',
+    ].join('\n');
+
+    const apply = compileHVQL(script);
+    const style = apply(baseCtx);
+    expect(style.playerIcon).toBe('hand-rock');
   });
 
   test('compileHVQL: デフォルト分岐（*）', () => {

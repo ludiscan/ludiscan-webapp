@@ -33,13 +33,13 @@ const Component = ({ className, value, onChange, placeholder, type = 'text', lab
 };
 
 export const TextField = styled(Component)`
+  padding: 6px;
   ${({ fontSize = fontSizes.medium }) => `font-size: ${fontSize}`};
   font-weight: ${({ fontWeight }) => fontWeight || 'normal'};
   text-shadow: ${({ shadow }) => (shadow ? '0 0 4px rgba(0, 0, 0, 0.2)' : 'none')};
   background: unset;
   border: 1px solid ${({ theme }) => theme.colors.border.dark};
   border-radius: 4px;
-  padding: 6px;
 
   &:focus {
     outline: none;

@@ -45,15 +45,15 @@ const Component: FC<TextAreaProps> = ({ className, value, onChange, placeholder,
 export const TextArea = styled(Component)`
   ${({ fontSize = fontSizes.medium }) => `font-size: ${fontSize}`};
   box-sizing: border-box; /* better resizing */
-  resize: vertical; /* vertical-only if you prefer */
+  min-width: 120px;
+  max-width: 100%;
+  padding: 6px;
   font-weight: ${({ fontWeight }) => fontWeight || 'normal'};
   text-shadow: ${({ shadow }) => (shadow ? '0 0 4px rgba(0, 0, 0, 0.2)' : 'none')};
+  resize: vertical;
   background: unset;
   border: 1px solid ${({ theme }) => theme.colors.border.dark};
   border-radius: 4px;
-  padding: 6px;
-  min-width: 120px;
-  max-width: 100%;
 
   &:focus {
     outline: none;

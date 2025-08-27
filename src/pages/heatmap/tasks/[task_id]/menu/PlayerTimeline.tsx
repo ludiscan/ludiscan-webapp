@@ -181,11 +181,16 @@ const Component: FC<HeatmapMenuProps> = ({ className, service, task }) => {
     (async () => {
       try {
         const res = await fetch('/heatmap/vqueryREADME.md', { cache: 'no-store' });
-        if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+
+        if (!res.ok) {
+          // noinspection ExceptionCaughtLocallyJS
+          throw new Error(`${res.status} ${res.statusText}`);
+        }
         const text = await res.text();
         if (!cancelled) setQueryReadme(text);
       } catch (e) {
         if (!cancelled) {
+          /* eslint-disable-next-line no-console */
           console.log('Failed to fetch query README:', e);
           setQueryReadme('Failed to load query README. Please check the console for details.');
         }
@@ -279,6 +284,14 @@ const Component: FC<HeatmapMenuProps> = ({ className, service, task }) => {
     }
   }, [queryText]);
 
+  // load-queryText
+  useEffect(() => {
+    const t = data.queryText;
+    if (t && t !== '') {
+      setQueryText(t);
+    }
+  }, [data.queryText]);
+
   useEffect(() => {
     if (queryText === '') {
       return;
@@ -288,6 +301,7 @@ const Component: FC<HeatmapMenuProps> = ({ className, service, task }) => {
         palette: { yellow: '#FFD400', blue: '#0057FF' },
         vars: {}, // 必要なら
       });
+      /* eslint-disable-next-line no-console */
       console.log('HVQL query:', applyStyle);
     } catch (error: unknown) {
       // eslint-disable-next-line no-console

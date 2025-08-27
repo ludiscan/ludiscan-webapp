@@ -1,6 +1,6 @@
 export type ViewContext = {
   player: number;
-  status: Record<string, never>;
+  status: Record<string, never | string | boolean | number>;
   pos: { x: number; y: number; z: number };
   t: number;
 };
@@ -12,6 +12,7 @@ export type ViewStyle = {
   trailColor?: string;
   opacity?: number;
   pointSize?: number;
+  playerIcon?: string;
 };
 
 export type Document = {
@@ -22,6 +23,7 @@ export type Document = {
 const propMap: Record<string, keyof ViewStyle> = {
   'player-color': 'color',
   'player-current-point-icon': 'icon',
+  'player-icon': 'playerIcon',
   label: 'label',
   'trail-color': 'trailColor',
   opacity: 'opacity',

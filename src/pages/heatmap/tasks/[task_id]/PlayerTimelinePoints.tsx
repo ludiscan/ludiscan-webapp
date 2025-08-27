@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unknown-property */
 import { useEffect, useMemo, useState } from 'react';
-import { BufferGeometry, CatmullRomCurve3, Color, Line, LineBasicMaterial, Vector3 } from 'three';
+import { BufferGeometry, CatmullRomCurve3, Color, Line, LineBasicMaterial, Vector3, Sprite, SpriteMaterial, TextureLoader } from 'three';
 import { Line2, LineGeometry, LineMaterial } from 'three-stdlib';
 
 import type { PlayerPositionLog, PlayerTimelineDetail } from '@src/modeles/heatmapView';
@@ -12,6 +12,7 @@ import { useHVQL } from '@src/hooks/useHVQuery';
 import { useGeneralState, usePlayerTimelineState } from '@src/hooks/useHeatmapState';
 import { usePlayerPositionLogs } from '@src/modeles/heatmapView';
 import { zIndexes } from '@src/styles/style';
+import { getIconPath } from '@src/utils/heatmapIconMap';
 
 export type PlayerTimelinePointsTimeRange = {
   start: number; // 開始時刻（ミリ秒）
@@ -24,24 +25,13 @@ export type PlayerTimelinePointsProps = {
   visibleTimeRange: PlayerTimelinePointsTimeRange;
 };
 
-class TimelineVector3 extends Vector3 {
-  player: number;
-  offset_timestamp: number;
-  status: Record<string, never> | null | undefined;
-  constructor(data: PlayerPositionLog) {
-    super(data.x, data.y, data.z);
-    this.player = data.player;
-    this.offset_timestamp = data.offset_timestamp;
-    this.status = data.status;
-  }
-}
-
 const Component: FC<PlayerTimelinePointsProps> = ({ service, state, currentTimelineSeek, visibleTimeRange }) => {
   const {
     data: { upZ, scale },
   } = useGeneralState();
   const { data: timelineState, setData } = usePlayerTimelineState();
   const [queryColor, setQueryColor] = useState<number | null>(null);
+  const [queryIcon, setQueryIcon] = useState<string | null>(null);
 
   const { data: fetchLogs, isLoading, isSuccess } = usePlayerPositionLogs(state?.player, state?.project_id, state?.session_id, service.createClient());
 
@@ -116,6 +106,11 @@ const Component: FC<PlayerTimelinePointsProps> = ({ service, state, currentTimel
     if (style.color) {
       setQueryColor(Number('0x' + style.color.slice(1)));
     }
+    if (style.playerIcon) {
+      setQueryIcon(style.playerIcon);
+    } else {
+      setQueryIcon(null);
+    }
   }, [compile, partialPathPoints, timelineState.queryText]);
   if (isLoading || !logs || !isSuccess || !state?.visible) return <></>;
   return (
@@ -161,6 +156,32 @@ const Component: FC<PlayerTimelinePointsProps> = ({ service, state, currentTimel
 
           return <primitive renderOrder={zIndexes.renderOrder.timelineArrows} object={new Line2(geometry, material)} />;
         })()}
+
+      {/* アイコン表示 */}
+      {queryIcon &&
+        partialPathPoints.length > 0 &&
+        (() => {
+          const lastPoint = partialPathPoints[partialPathPoints.length - 1];
+          const iconPath = getIconPath(queryIcon);
+
+          const textureLoader = new TextureLoader();
+          const texture = textureLoader.load(iconPath);
+          const spriteMaterial = new SpriteMaterial({
+            map: texture,
+            transparent: true,
+            opacity: 0.8,
+            sizeAttenuation: false,
+          });
+          spriteMaterial.depthTest = false;
+          spriteMaterial.transparent = true;
+          const sprite = new Sprite(spriteMaterial);
+          sprite.position.copy(lastPoint.vec);
+          sprite.position.y += 50 * scale; // arrowの上に表示
+          sprite.scale.set(0.07 * scale, 0.07 * scale, 1);
+
+          return <primitive renderOrder={zIndexes.renderOrder.timelineArrows} object={sprite} />;
+        })()}
+
       {/* 現在のタイムラインの位置までのパスの矢印を描画 */}
       {partialPathPoints.length >= 2 &&
         (() => {

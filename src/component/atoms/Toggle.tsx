@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { IoIosArrowForward } from 'react-icons/io';
 
-import type { FC, ReactNode, CSSProperties, MouseEvent } from 'react';
+import type { FC, ReactNode, CSSProperties } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
 import { FlexColumn, InlineFlexRow } from '@src/component/atoms/Flex';
@@ -96,8 +96,8 @@ export const Toggle = styled(Component)`
     width: 100%;
     padding: 2px 16px 2px 2px;
     font-size: unset;
-    border: none;
     background: none;
+    border: none;
   }
 
   &__content {
@@ -122,6 +122,5 @@ export const Toggle = styled(Component)`
   &__content.open {
     max-height: none;
     overflow: visible;
-    // max-height: ${({ maxHeight }) => (maxHeight ? `${maxHeight}px` : '300px')};
   }
 `;
