@@ -126,7 +126,7 @@ const Component: FC<PlayerTimelinePointsProps> = ({ service, state, currentTimel
         materialRef.current.dispose();
       }
       textureCache.current.forEach((texture) => texture.dispose());
-      textureCache.current.clear();
+      textureCache.current = new Map<string, Texture>();
     };
   }, []);
 
