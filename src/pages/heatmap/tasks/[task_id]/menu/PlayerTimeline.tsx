@@ -1,7 +1,10 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { BsInfoCircle } from 'react-icons/bs';
 import { IoClose } from 'react-icons/io5';
+import Markdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 import { InputRow } from './InputRow';
 
@@ -17,12 +20,16 @@ import { FlexRow, InlineFlexColumn, InlineFlexRow } from '@src/component/atoms/F
 import { Switch } from '@src/component/atoms/Switch';
 import { Text } from '@src/component/atoms/Text';
 import { Toggle } from '@src/component/atoms/Toggle';
+import { Modal } from '@src/component/molecules/Modal';
 import { Selector } from '@src/component/molecules/Selector';
+import { TextArea } from '@src/component/molecules/TextArea';
+import { useGetApi } from '@src/hooks/useGetApi';
 import { usePlayerTimelineState } from '@src/hooks/useHeatmapState';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { DefaultStaleTime } from '@src/modeles/qeury';
 import { fontSizes } from '@src/styles/style';
 import { toISOAboutStringWithTimezone } from '@src/utils/locale';
+import { compileHVQL, parseHVQL } from '@src/utils/vql';
 
 function toggleButtonStyle(theme: Theme): CSSProperties {
   return {
@@ -155,9 +162,39 @@ const DetailBlock = styled(DetailBlockInternal)`
   }
 `;
 
-const Component: FC<HeatmapMenuProps> = ({ service, task }) => {
+const queryPlaceholder =
+  'map status.hand {\n' +
+  '  rock    -> player-current-point-icon: hand-rock;\n' +
+  '  paper   -> player-current-point-icon: hand-paper;\n' +
+  '  scissor -> player-current-point-icon: hand-scissor;\n' +
+  '}';
+
+const Component: FC<HeatmapMenuProps> = ({ className, service, task }) => {
   const { data, setData } = usePlayerTimelineState();
   const [selectSessionId, setSelectSessionId] = useState<string | undefined>(undefined);
+  const [queryText, setQueryText] = useState<string>('');
+  const [isOpenQueryInfo, setIsOpenQueryInfo] = useState<boolean>(false);
+  const [queryReadme, setQueryReadme] = useState<string>('');
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/heatmap/vqueryREADME.md', { cache: 'no-store' });
+        if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+        const text = await res.text();
+        if (!cancelled) setQueryReadme(text);
+      } catch (e) {
+        if (!cancelled) {
+          console.log('Failed to fetch query README:', e);
+          setQueryReadme('Failed to load query README. Please check the console for details.');
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const sessionByDetail = useMemo(() => {
     const map = new Map<number, PlayerTimelineDetail[]>();
@@ -185,6 +222,9 @@ const Component: FC<HeatmapMenuProps> = ({ service, task }) => {
     enabled: task.project.id !== undefined && service.createClient() !== null,
   });
 
+  const getPlayers = useGetApi('/api/v0/projects/{project_id}/play_session/{session_id}/player_position_log/{session_id}/players', service.getEnv(), {
+    staleTime: DefaultStaleTime,
+  });
   const sessionIds = useMemo(() => {
     return sessions?.data?.map((session) => String(session.sessionId)) || [];
   }, [sessions]);
@@ -193,14 +233,16 @@ const Component: FC<HeatmapMenuProps> = ({ service, task }) => {
     if (!selectSessionId || service.createClient() === undefined) return;
     const project_id = task.project.id;
     const session_id = selectSessionId ? Number(selectSessionId) : 0;
-    const data = await service.createClient()?.GET('/api/v0/projects/{project_id}/play_session/{session_id}/player_position_log/{session_id}/players', {
-      params: {
-        path: {
-          project_id,
-          session_id,
+    const data = await getPlayers.fetch([
+      {
+        params: {
+          path: {
+            project_id,
+            session_id,
+          },
         },
       },
-    });
+    ]);
     const players = data?.data;
     if (!players) return;
     setData((prev) => {
@@ -223,24 +265,84 @@ const Component: FC<HeatmapMenuProps> = ({ service, task }) => {
         details: [...(prev.details || []), ...newDetails],
       };
     });
-  }, [selectSessionId, service, setData, task.project.id]);
+  }, [getPlayers, selectSessionId, service, setData, task.project.id]);
+
+  const queryDisable = useMemo(() => {
+    try {
+      if (queryText === '') {
+        return true;
+      }
+      parseHVQL(queryText);
+      return false;
+    } catch {
+      return true;
+    }
+  }, [queryText]);
+
+  useEffect(() => {
+    if (queryText === '') {
+      return;
+    }
+    try {
+      const applyStyle = compileHVQL(queryText, {
+        palette: { yellow: '#FFD400', blue: '#0057FF' },
+        vars: {}, // 必要なら
+      });
+      console.log('HVQL query:', applyStyle);
+    } catch (error: unknown) {
+      // eslint-disable-next-line no-console
+      console.log('HVQL parse error:', error);
+    }
+  }, [queryText]);
+
+  const onApplyQuery = useCallback(() => {
+    if (queryDisable) return;
+    setData((prev) => {
+      return {
+        ...prev,
+        queryText: queryText,
+      };
+    });
+  }, [queryDisable, queryText, setData]);
 
   return (
     <InlineFlexColumn gap={8} style={{ width: '100%' }}>
       <Text text={'create'} />
       <InputRow label={'select session'}>
-        <Selector options={sessionIds} value={selectSessionId} onChange={setSelectSessionId} />
+        <InlineFlexRow>
+          <Selector options={sessionIds} value={selectSessionId} onChange={setSelectSessionId} />
+          <Button fontSize={'small'} onClick={handleAddTimeline} scheme={'primary'} disabled={selectSessionId === undefined}>
+            <Text text={'add'} />
+          </Button>
+        </InlineFlexRow>
       </InputRow>
-      <Button fontSize={'small'} onClick={handleAddTimeline} scheme={'primary'} disabled={selectSessionId === undefined}>
-        <Text text={'add'} />
-      </Button>
-      {sessionByDetail.size > 0 &&
-        Array.from(sessionByDetail.values()).map((details, index) => (
-          <>
-            <Divider key={`${index}-divider`} />
-            <DetailBlock key={`${index}-detail-block`} details={details} service={service} />
-          </>
-        ))}
+      {sessionByDetail.size > 0 && (
+        <>
+          <Toggle
+            className={`${className}__queryTextFieldContainer`}
+            label={'filter query'}
+            maxHeight={600}
+            trailingIcon={<BsInfoCircle size={12} />}
+            onTrailingIconClick={() => setIsOpenQueryInfo(true)}
+          >
+            <TextArea placeholder={queryPlaceholder} className={`${className}__queryTextField`} value={queryText} onChange={setQueryText} />
+            <Button fontSize={'small'} scheme={'primary'} onClick={onApplyQuery} disabled={queryDisable}>
+              <Text text={'search'} />
+            </Button>
+          </Toggle>
+          {Array.from(sessionByDetail.values()).map((details, index) => (
+            <>
+              <Divider key={`${index}-divider`} />
+              <DetailBlock key={`${index}-detail-block`} details={details} service={service} />
+            </>
+          ))}
+        </>
+      )}
+      {isOpenQueryInfo && (
+        <Modal isOpen={isOpenQueryInfo} title={'VQL ガイド (Heatmap View Query Language)'} onClose={() => setIsOpenQueryInfo(false)} closeOutside={true}>
+          <Markdown remarkPlugins={[remarkGfm]}>{queryReadme}</Markdown>
+        </Modal>
+      )}
     </InlineFlexColumn>
   );
 };
@@ -254,5 +356,19 @@ export const PlayerTimeline = styled(Component)`
     position: relative;
     width: 100%;
     padding: 4px 8px;
+  }
+
+  &__queryTextFieldContainer {
+    display: flex;
+    width: 100%;
+  }
+
+  &__queryTextField {
+    flex: 1;
+    max-width: 90%;
+    min-height: 92px;
+    padding: 0;
+    margin: 0;
+    font-size: ${fontSizes.small};
   }
 `;

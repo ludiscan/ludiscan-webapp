@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import packageJson from '../../package.json';
 
-import type { paths } from '@generated/api';
+import type { components, paths } from '@generated/api';
 import type { Client } from 'openapi-fetch';
 
 import { DefaultStaleTime } from '@src/modeles/qeury';
@@ -50,6 +50,7 @@ export type PlayerTimelineSettings = {
   details: PlayerTimelineDetail[] | null;
   isPlaying: boolean;
   maxTime: number;
+  queryText: string;
 };
 
 export type HeatmapStates = {
@@ -62,6 +63,10 @@ export type HeatmapStates = {
 // Canvas の状態の型定義
 export type HeatmapDataState = HeatmapStates & {
   version?: string;
+};
+
+export type PlayerPositionLog = Omit<components['schemas']['PlayPositionLogDto'], 'location' | 'z'> & {
+  z: number; // z座標を明示的に定義
 };
 
 export const initializeValues: HeatmapDataState = {
@@ -93,6 +98,7 @@ export const initializeValues: HeatmapDataState = {
     details: null,
     isPlaying: false,
     maxTime: 0,
+    queryText: '',
   },
 };
 
