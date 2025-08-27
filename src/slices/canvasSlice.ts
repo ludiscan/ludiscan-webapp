@@ -44,5 +44,5 @@ const canvasSlice = createSlice({
   },
 });
 
-export const canvasActions = canvasSlice.actions;
+export const { set } = canvasSlice.actions;
 export const canvasReducer = canvasSlice.reducer;

@@ -1,15 +1,18 @@
 /* eslint-disable react/no-unknown-property */
-import { useEffect, useMemo } from 'react';
-import { BufferGeometry, CatmullRomCurve3, Color, Line, LineBasicMaterial, Vector3 } from 'three';
+import { useEffect, useMemo, useState } from 'react';
+import { BufferGeometry, CatmullRomCurve3, Color, Line, LineBasicMaterial, Vector3, Sprite, SpriteMaterial, TextureLoader } from 'three';
 import { Line2, LineGeometry, LineMaterial } from 'three-stdlib';
 
-import type { PlayerTimelineDetail } from '@src/modeles/heatmapView';
+import type { PlayerPositionLog, PlayerTimelineDetail } from '@src/modeles/heatmapView';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
+import type { ViewContext } from '@src/utils/vql';
 import type { FC } from 'react';
 
+import { useHVQL } from '@src/hooks/useHVQuery';
 import { useGeneralState, usePlayerTimelineState } from '@src/hooks/useHeatmapState';
 import { usePlayerPositionLogs } from '@src/modeles/heatmapView';
 import { zIndexes } from '@src/styles/style';
+import { getIconPath } from '@src/utils/heatmapIconMap';
 
 export type PlayerTimelinePointsTimeRange = {
   start: number; // 開始時刻（ミリ秒）
@@ -27,24 +30,22 @@ const Component: FC<PlayerTimelinePointsProps> = ({ service, state, currentTimel
     data: { upZ, scale },
   } = useGeneralState();
   const { data: timelineState, setData } = usePlayerTimelineState();
+  const [queryColor, setQueryColor] = useState<number | null>(null);
+  const [queryIcon, setQueryIcon] = useState<string | null>(null);
+
   const { data: fetchLogs, isLoading, isSuccess } = usePlayerPositionLogs(state?.player, state?.project_id, state?.session_id, service.createClient());
+
   const logs = useMemo(() => {
     if (!fetchLogs || !fetchLogs.data || fetchLogs.data.length === 0) return null;
-    const points: Map<
-      number,
-      {
-        x: number;
-        y: number;
-        z: number;
-        offset_timestamp: number;
-      }
-    > = new Map();
+    const points: Map<number, PlayerPositionLog> = new Map();
     fetchLogs.data.forEach((pt) => {
       points.set(pt.offset_timestamp, {
+        player: pt.player,
         x: pt.x * scale,
         y: (upZ ? (pt.z ?? 0) : pt.y) * scale + 10,
         z: (upZ ? pt.y : (pt.z ?? 0)) * scale,
         offset_timestamp: pt.offset_timestamp,
+        status: pt.status,
       });
     });
     return points.values().toArray();
@@ -62,8 +63,18 @@ const Component: FC<PlayerTimelinePointsProps> = ({ service, state, currentTimel
     return Array.from(logs)
       .filter((pt) => pt.offset_timestamp >= visibleTimeRange.start && pt.offset_timestamp <= currentTimelineSeek)
       .sort((a, b) => a.offset_timestamp - b.offset_timestamp)
-      .map((pt) => new Vector3(pt.x, pt.y, pt.z));
+      .map((pt) => {
+        return {
+          vec: new Vector3(pt.x, pt.y, pt.z),
+          data: pt,
+        };
+      });
   }, [logs, visibleTimeRange, currentTimelineSeek]);
+
+  const { compile, setDocument } = useHVQL();
+
+  useEffect(() => {}, []);
+
   useEffect(() => {
     if (!logs || logs.length === 0) return;
     const max = logs ? Math.max(...logs.map((pt) => pt.offset_timestamp)) : 0;
@@ -75,6 +86,32 @@ const Component: FC<PlayerTimelinePointsProps> = ({ service, state, currentTimel
       }));
     }
   }, [logs, setData, timelineState]);
+
+  useEffect(() => {
+    setDocument({
+      palette: { yellow: '#FFD400', blue: '#0057FF' },
+      vars: { threshold: 0.7 },
+    });
+  }, [setDocument, timelineState.queryText]);
+  useEffect(() => {
+    const latestLog = partialPathPoints.slice(-1)[0];
+    if (!latestLog) return;
+    const ctx: ViewContext = {
+      player: latestLog.data.player,
+      status: latestLog.data.status || {},
+      pos: { x: latestLog.data.x, y: latestLog.data.y, z: latestLog.data.z },
+      t: latestLog.data.offset_timestamp,
+    };
+    const style = compile(timelineState.queryText, ctx);
+    if (style.color) {
+      setQueryColor(Number('0x' + style.color.slice(1)));
+    }
+    if (style.playerIcon) {
+      setQueryIcon(style.playerIcon);
+    } else {
+      setQueryIcon(null);
+    }
+  }, [compile, partialPathPoints, timelineState.queryText]);
   if (isLoading || !logs || !isSuccess || !state?.visible) return <></>;
   return (
     <>
@@ -100,13 +137,13 @@ const Component: FC<PlayerTimelinePointsProps> = ({ service, state, currentTimel
       {/* 現在のタイムラインの位置までのパスを描画 */}
       {partialPathPoints.length > 1 &&
         (() => {
-          const positions = partialPathPoints.slice(partialPathPoints.length - 3, partialPathPoints.length).flatMap((v) => [v.x, v.y, v.z]);
+          const positions = partialPathPoints.slice(partialPathPoints.length - 3, partialPathPoints.length).flatMap(({ vec }) => [vec.x, vec.y, vec.z]);
 
           const geometry = new LineGeometry();
           geometry.setPositions(positions);
 
           const material = new LineMaterial({
-            color: 0xff0000,
+            color: queryColor || 0xff0000,
             linewidth: 5, // ピクセル単位の太さ
             worldUnits: false, // trueならworld単位（falseでOK）
             dashed: false,
@@ -119,13 +156,40 @@ const Component: FC<PlayerTimelinePointsProps> = ({ service, state, currentTimel
 
           return <primitive renderOrder={zIndexes.renderOrder.timelineArrows} object={new Line2(geometry, material)} />;
         })()}
+
+      {/* アイコン表示 */}
+      {queryIcon &&
+        partialPathPoints.length > 0 &&
+        (() => {
+          const lastPoint = partialPathPoints[partialPathPoints.length - 1];
+          const iconPath = getIconPath(queryIcon);
+
+          const textureLoader = new TextureLoader();
+          const texture = textureLoader.load(iconPath);
+          const spriteMaterial = new SpriteMaterial({
+            map: texture,
+            transparent: true,
+            opacity: 0.8,
+            sizeAttenuation: false,
+          });
+          spriteMaterial.depthTest = false;
+          spriteMaterial.transparent = true;
+          const sprite = new Sprite(spriteMaterial);
+          sprite.position.copy(lastPoint.vec);
+          sprite.position.y += 50 * scale; // arrowの上に表示
+          sprite.scale.set(0.07 * scale, 0.07 * scale, 1);
+
+          return <primitive renderOrder={zIndexes.renderOrder.timelineArrows} object={sprite} />;
+        })()}
+
+      {/* 現在のタイムラインの位置までのパスの矢印を描画 */}
       {partialPathPoints.length >= 2 &&
         (() => {
           const lastIdx = partialPathPoints.length - 1;
           const from = partialPathPoints[lastIdx - 1];
-          const to = partialPathPoints[lastIdx];
+          const to = partialPathPoints[lastIdx].vec;
 
-          const dir = to.clone().sub(from).normalize(); // 進行方向
+          const dir = to.clone().sub(from.vec).normalize(); // 進行方向
           const arrowLength = 30 * scale;
           const arrowWidth = 15 * scale;
 
@@ -146,7 +210,7 @@ const Component: FC<PlayerTimelinePointsProps> = ({ service, state, currentTimel
           geometry.setPositions(positions);
 
           const material = new LineMaterial({
-            color: 0xff0000,
+            color: queryColor || 0xff0000,
             linewidth: 5, // 太さはピクセルベース
             worldUnits: false,
             dashed: false,
