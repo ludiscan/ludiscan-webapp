@@ -1,5 +1,5 @@
 /* eslint-disable react/no-unknown-property */
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 import { BufferGeometry, CatmullRomCurve3, Color, Line, LineBasicMaterial, Vector3, Sprite, SpriteMaterial, TextureLoader } from 'three';
 import { Line2, LineGeometry, LineMaterial } from 'three-stdlib';
 
@@ -7,6 +7,7 @@ import type { PlayerPositionLog, PlayerTimelineDetail } from '@src/modeles/heatm
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { ViewContext } from '@src/utils/vql';
 import type { FC } from 'react';
+import type { Texture } from 'three';
 
 import { useHVQL } from '@src/hooks/useHVQuery';
 import { useGeneralState, usePlayerTimelineState } from '@src/hooks/useHeatmapState';
@@ -32,6 +33,12 @@ const Component: FC<PlayerTimelinePointsProps> = ({ service, state, currentTimel
   const { data: timelineState, setData } = usePlayerTimelineState();
   const [queryColor, setQueryColor] = useState<number | null>(null);
   const [queryIcon, setQueryIcon] = useState<string | null>(null);
+  const [currentIconPath, setCurrentIconPath] = useState<string | null>(null);
+
+  // パフォーマンス最適化用のref
+  const textureCache = useRef<Map<string, Texture>>(new Map());
+  const spriteRef = useRef<Sprite | null>(null);
+  const materialRef = useRef<SpriteMaterial | null>(null);
 
   const { data: fetchLogs, isLoading, isSuccess } = usePlayerPositionLogs(state?.player, state?.project_id, state?.session_id, service.createClient());
 
@@ -73,7 +80,55 @@ const Component: FC<PlayerTimelinePointsProps> = ({ service, state, currentTimel
 
   const { compile, setDocument } = useHVQL();
 
-  useEffect(() => {}, []);
+  // テクスチャのキャッシュ機能
+  const getCachedTexture = useCallback((iconPath: string): Texture => {
+    if (textureCache.current.has(iconPath)) {
+      return textureCache.current.get(iconPath)!;
+    }
+
+    const textureLoader = new TextureLoader();
+    const texture = textureLoader.load(iconPath);
+    textureCache.current.set(iconPath, texture);
+    return texture;
+  }, []);
+
+  // アイコンの更新を最適化
+  const updateIconTexture = useCallback(
+    (iconPath: string) => {
+      if (materialRef.current && materialRef.current.map !== textureCache.current.get(iconPath)) {
+        const texture = getCachedTexture(iconPath);
+        materialRef.current.map = texture;
+      }
+    },
+    [getCachedTexture],
+  );
+
+  // スプライトの初期化
+  useEffect(() => {
+    if (!spriteRef.current) {
+      const material = new SpriteMaterial({
+        transparent: true,
+        opacity: 0.8,
+        sizeAttenuation: false,
+        depthTest: false,
+      });
+      materialRef.current = material;
+
+      const sprite = new Sprite(material);
+      spriteRef.current = sprite;
+    }
+  }, []);
+
+  // クリーンアップ
+  useEffect(() => {
+    return () => {
+      if (materialRef.current) {
+        materialRef.current.dispose();
+      }
+      textureCache.current.forEach((texture) => texture.dispose());
+      textureCache.current.clear();
+    };
+  }, []);
 
   useEffect(() => {
     if (!logs || logs.length === 0) return;
@@ -108,10 +163,15 @@ const Component: FC<PlayerTimelinePointsProps> = ({ service, state, currentTimel
     }
     if (style.playerIcon) {
       setQueryIcon(style.playerIcon);
+      const newIconPath = getIconPath(style.playerIcon);
+      if (newIconPath !== currentIconPath) {
+        setCurrentIconPath(newIconPath);
+      }
     } else {
       setQueryIcon(null);
+      setCurrentIconPath(null);
     }
-  }, [compile, partialPathPoints, timelineState.queryText]);
+  }, [compile, partialPathPoints, timelineState.queryText, currentIconPath]);
   if (isLoading || !logs || !isSuccess || !state?.visible) return <></>;
   return (
     <>
@@ -160,26 +220,20 @@ const Component: FC<PlayerTimelinePointsProps> = ({ service, state, currentTimel
       {/* アイコン表示 */}
       {queryIcon &&
         partialPathPoints.length > 0 &&
+        spriteRef.current &&
+        currentIconPath &&
         (() => {
           const lastPoint = partialPathPoints[partialPathPoints.length - 1];
-          const iconPath = getIconPath(queryIcon);
 
-          const textureLoader = new TextureLoader();
-          const texture = textureLoader.load(iconPath);
-          const spriteMaterial = new SpriteMaterial({
-            map: texture,
-            transparent: true,
-            opacity: 0.8,
-            sizeAttenuation: false,
-          });
-          spriteMaterial.depthTest = false;
-          spriteMaterial.transparent = true;
-          const sprite = new Sprite(spriteMaterial);
-          sprite.position.copy(lastPoint.vec);
-          sprite.position.y += 50 * scale; // arrowの上に表示
-          sprite.scale.set(0.07 * scale, 0.07 * scale, 1);
+          // テクスチャの更新（必要時のみ）
+          updateIconTexture(currentIconPath);
 
-          return <primitive renderOrder={zIndexes.renderOrder.timelineArrows} object={sprite} />;
+          // スプライトの位置とスケールを更新
+          spriteRef.current.position.copy(lastPoint.vec);
+          spriteRef.current.position.y += 50 * scale; // arrowの上に表示
+          spriteRef.current.scale.set(0.07 * scale, 0.07 * scale, 1);
+
+          return <primitive renderOrder={zIndexes.renderOrder.timelineArrows} object={spriteRef.current} />;
         })()}
 
       {/* 現在のタイムラインの位置までのパスの矢印を描画 */}
