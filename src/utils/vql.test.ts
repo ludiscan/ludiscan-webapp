@@ -6,8 +6,6 @@ import type { ViewContext, HVQLProgram } from './vql';
 describe('HVQL - parse & compile', () => {
   const baseCtx: ViewContext = {
     player: 1,
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
     status: { team: 'yellow', hand: 'rock', hp: 82, flag: true },
     pos: { x: 10, y: 20, z: 0 },
     t: 1000,
