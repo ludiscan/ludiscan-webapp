@@ -122,6 +122,7 @@ const Component: FC<LoginPageProps> = (props) => {
 
 const IndexPage = styled(Component)`
   color: ${({ theme }) => theme.colors.text};
+
   &__content {
     width: 100%;
   }
@@ -136,12 +137,12 @@ const IndexPage = styled(Component)`
     display: flex;
     flex-direction: row;
     gap: 4px;
-    height: 20px;
     align-content: center;
-    padding: 12px 12px;
-    border-radius: 22px;
-    background: ${({ theme }) => theme.colors.surface.light};
+    height: 20px;
+    padding: 12px;
     text-decoration: none;
+    background: ${({ theme }) => theme.colors.surface.light};
+    border-radius: 22px;
   }
 `;
 
