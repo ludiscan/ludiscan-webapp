@@ -1,5 +1,3 @@
-import { promises as fs } from 'fs';
-
 import styled from '@emotion/styled';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -10,6 +8,7 @@ import remarkGfm from 'remark-gfm';
 import type { FC } from 'react';
 
 import { Header } from '@src/component/templates/Header';
+import readmeRaw from '@src/files/heatmapReadme.md';
 import { dimensions } from '@src/styles/style';
 
 export type IndexPageProps = {
@@ -19,13 +18,7 @@ export type IndexPageProps = {
 
 export async function getServerSideProps() {
   try {
-    const readmeRaw = await fs.readFile(process.cwd() + '/src/files/heatmapReadme.md', 'utf8');
-    return {
-      props: {
-        title: 'Index Page',
-        readme: readmeRaw,
-      },
-    };
+    return { props: { title: 'Index Page', readme: readmeRaw } };
   } catch {
     return {
       notFound: true,
