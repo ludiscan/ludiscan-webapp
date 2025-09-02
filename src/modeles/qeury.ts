@@ -1,36 +1,29 @@
 import createClientFetch from 'openapi-fetch';
 
 import type { paths } from '@generated/api';
-import type { Env } from '@src/modeles/env';
 import type { Middleware } from 'openapi-fetch';
 
+import { env } from '@src/config/env';
 import { getToken } from '@src/utils/localstrage';
 
 export const DefaultStaleTime = 1000 * 60 * 5; // 5 minutes
 
 const myMiddleware: Middleware = {
   async onRequest({ request }) {
-    if (localStorage) {
+    // SSRガード
+    if (typeof window !== 'undefined') {
       const token = getToken();
-      if (token) {
-        request.headers.set('Authorization', 'Bearer ' + token);
-      }
+      if (token) request.headers.set('Authorization', `Bearer ${token}`);
     }
     return request;
   },
-  async onResponse({ response }) {
-    if (!response.ok) {
-      // Will produce error messages like "https://example.org/api/v1/example: 404 Not Found".
-      throw new Error(`${response.url}: ${response.status} ${response.statusText}`);
-    }
-  },
   async onError({ error }) {
     // wrap errors thrown by fetch
-    return new Error('Oops, fetch failed ' + error);
+    throw error;
   },
 };
 
-export const createClient = (env: Env) => {
+export const createClient = () => {
   const apiClient = createClientFetch<paths>({
     baseUrl: env.API_BASE_URL || 'http://localhost',
     credentials: 'include',

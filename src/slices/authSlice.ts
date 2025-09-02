@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
 import type { PayloadAction } from '@reduxjs/toolkit';
-import type { Env } from '@src/modeles/env';
 import type { User } from '@src/modeles/user';
 
 import { createClient } from '@src/modeles/qeury';
@@ -34,7 +33,6 @@ export const initialState: AuthState = {
  * ログイン時に使用するペイロードの型
  */
 export interface LoginPayload {
-  env: Env;
   email: string;
   password: string;
 }
@@ -42,11 +40,11 @@ export interface LoginPayload {
 /**
  * createAsyncThunk を使ってログイン処理を非同期アクションとして定義
  */
-export const login = createAsyncThunk('auth/login', async ({ env, email, password }: LoginPayload, { rejectWithValue }) => {
+export const login = createAsyncThunk('auth/login', async ({ email, password }: LoginPayload, { rejectWithValue }) => {
   if (!email || !password) {
     return rejectWithValue('メールアドレスとパスワードを入力してください');
   }
-  const query = createClient(env);
+  const query = createClient();
   try {
     const res = await query.POST('/api/v0/login', {
       body: { email, password },

@@ -1,11 +1,16 @@
 {
   "name": "ludiscan-webapp",
-  "private": true,
+  "private": false,
   "engines": {
     "node": "23.6.x",
     "npm": "10.x"
   },
-  "version": "0.9.0",
+  "author": "matuyuhi",
+  "description": "",
+  "repository": {
+    "url": "https://github.com/ludiscan/ludiscan-webapp"
+  },
+  "version": "0.10.0",
   "scripts": {
     "dev": "next dev --turbopack -p 5173",
     "build:dev": "next build --turbopack",
@@ -42,7 +47,7 @@
     "file-saver": "^2.0.5",
     "framer-motion": "^12.6.5",
     "jszip": "^3.10.1",
-    "next": "15.3.4",
+    "next": "15.5.2",
     "npm-run-all2": "^7.0.2",
     "openapi-fetch": "^0.13.5",
     "react": "^19.0.0",

@@ -5,7 +5,6 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { HeatMapViewer } from './HeatmapViewer';
 
-import type { Env } from '@src/modeles/env';
 import type { HeatmapTask } from '@src/modeles/heatmaptask';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { GetServerSideProps } from 'next';
@@ -23,13 +22,11 @@ import { useOnlineHeatmapDataService } from '@src/utils/heatmap/HeatmapDataServi
 
 export type HeatMapTaskIdPageProps = {
   className?: string;
-  env?: Env | undefined;
   taskId?: string;
 };
 
 export const getServerSideProps: GetServerSideProps<HeatMapTaskIdPageProps> = async (context) => {
   const { params } = context;
-  const { env } = await import('@src/config/env');
   if (!params || !params.task_id) {
     return {
       notFound: true,
@@ -37,7 +34,6 @@ export const getServerSideProps: GetServerSideProps<HeatMapTaskIdPageProps> = as
   }
   return {
     props: {
-      env,
       taskId: params.task_id as string,
     },
   };
@@ -114,19 +110,19 @@ export const HeatmapIdPageLayout = styled(HeatmapIdPageLayoutComponent)`
   }
 `;
 
-const HeatMapTaskIdPage: FC<HeatMapTaskIdPageProps> = ({ className, env, taskId }) => {
+const HeatMapTaskIdPage: FC<HeatMapTaskIdPageProps> = ({ className, taskId }) => {
   const timer = useRef<NodeJS.Timeout>(undefined);
 
   const router = useRouter();
   const { data: version } = useVersion();
-  const { isAuthorized, isLoading, ready } = useAuth({ env });
+  const { isAuthorized, isLoading, ready } = useAuth();
 
   const { data: task, refetch: refetchTask } = useQuery({
-    queryKey: ['heatmap', taskId, isAuthorized, env],
+    queryKey: ['heatmap', taskId, isAuthorized],
     queryFn: async (): Promise<HeatmapTask | null> => {
-      if (!taskId || isNaN(Number(taskId)) || !env) return null;
+      if (!taskId || isNaN(Number(taskId))) return null;
       if (!isAuthorized) return null;
-      const { data, error } = await createClient(env).GET('/api/v0/heatmap/tasks/{task_id}', {
+      const { data, error } = await createClient().GET('/api/v0/heatmap/tasks/{task_id}', {
         params: { path: { task_id: Number(taskId) } },
       });
       if (error) throw error;
@@ -139,7 +135,7 @@ const HeatMapTaskIdPage: FC<HeatMapTaskIdPageProps> = ({ className, env, taskId 
     router.back();
   }, [router]);
 
-  const service = useOnlineHeatmapDataService(env, task);
+  const service = useOnlineHeatmapDataService(task);
 
   useEffect(() => {
     if (!task) return;

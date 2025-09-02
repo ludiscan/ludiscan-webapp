@@ -39,10 +39,6 @@ export const Default: Story = {
   name: 'default style',
   args: {
     isOpen: true,
-    env: {
-      HOSTNAME: 'https://localhost',
-      API_BASE_URL: 'https://localhost:8080',
-    },
     onClose: () => {
       /* eslint-disable-next-line no-console */
       console.log('onClose');

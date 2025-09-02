@@ -1,4 +1,4 @@
 export const env = {
-  HOSTNAME: `https://${process.env.HOST_NAME ?? ''}`,
-  API_BASE_URL: `https://${process.env.API_BASE_URL ?? ''}`,
+  HOSTNAME: process.env.NEXT_PUBLIC_HOSTNAME!,
+  API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL!,
 } as const;

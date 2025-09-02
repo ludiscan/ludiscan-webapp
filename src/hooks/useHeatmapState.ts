@@ -5,7 +5,7 @@ import type { EventLogSettings, GeneralSettings, HeatmapDataState, HotspotModeSe
 import type { RootState } from '@src/store';
 
 import { useAppDispatch, useAppSelector } from '@src/hooks/useDispatch';
-import { getInitialState, canvasActions } from '@src/slices/canvasSlice';
+import { getInitialState, set } from '@src/slices/canvasSlice';
 import { getCanvasValues } from '@src/utils/localstrage';
 import { capitalize } from '@src/utils/string';
 
@@ -98,7 +98,7 @@ export const useHeatmapState = () => {
   // session → storeへapply
   const apply = useCallback(() => {
     if (!sessionData) return;
-    dispatch(canvasActions.set(sessionData));
+    dispatch(set(sessionData));
   }, [dispatch, sessionData]);
 
   // discard → localStorageからロードしてsessionに反映

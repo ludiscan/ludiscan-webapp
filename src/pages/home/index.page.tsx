@@ -6,7 +6,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { ProjectItemRow } from './ProjectItemRow';
 import { SelectProjectDetail } from './SelectProjectDetail';
 
-import type { Env } from '@src/modeles/env';
 import type { Project } from '@src/modeles/project';
 import type { GetServerSideProps } from 'next';
 import type { FC } from 'react';
@@ -29,23 +28,17 @@ const fetchCount = 20;
 
 export type HomePageProps = {
   className?: string | undefined;
-  env?: Env;
 };
 
 export const getServerSideProps: GetServerSideProps<HomePageProps> = async () => {
-  // This function is not used in the component, but it's here to demonstrate how you might fetch data server-side.
-  // You can replace this with actual server-side logic if needed.
-  const { env } = await import('@src/config/env');
   return {
-    props: {
-      env,
-    },
+    props: {},
   };
 };
 
-const Component: FC<HomePageProps> = ({ className, env }) => {
+const Component: FC<HomePageProps> = ({ className }) => {
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
-  const { isAuthorized, isLoading, ready } = useAuth({ env });
+  const { isAuthorized, isLoading, ready } = useAuth();
   const router = useRouter();
   const {
     data: projects,
@@ -54,10 +47,10 @@ const Component: FC<HomePageProps> = ({ className, env }) => {
     isError: isErrorProjects,
     fetchNextPage: fetchNextPageProjects,
   } = useInfiniteQuery({
-    queryKey: ['projects', isAuthorized, env],
+    queryKey: ['projects', isAuthorized],
     queryFn: async ({ pageParam }): Promise<Project[] | undefined> => {
-      if (!isAuthorized || !env) return undefined;
-      const { data, error } = await createClient(env).GET('/api/v0/projects', {
+      if (!isAuthorized) return undefined;
+      const { data, error } = await createClient().GET('/api/v0/projects', {
         params: {
           query: {
             limit: fetchCount,
@@ -116,7 +109,7 @@ const Component: FC<HomePageProps> = ({ className, env }) => {
                           <div className={`${className}__selectProjectDetail ${selectedProject === project.id ? 'active' : ''}`}>
                             {selectedProject === project.id && (
                               <Card key={project.id} shadow={'large'} color={'transparent'}>
-                                <SelectProjectDetail project={project} env={env} />
+                                <SelectProjectDetail project={project} />
                               </Card>
                             )}
                           </div>
