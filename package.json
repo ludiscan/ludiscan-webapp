@@ -1,9 +1,14 @@
 {
   "name": "ludiscan-webapp",
-  "private": true,
+  "private": false,
   "engines": {
     "node": "23.6.x",
     "npm": "10.x"
+  },
+  "author": "matuyuhi",
+  "description": "",
+  "repository": {
+    "url": "https://github.com/ludiscan/ludiscan-webapp"
   },
   "version": "0.10.0",
   "scripts": {
