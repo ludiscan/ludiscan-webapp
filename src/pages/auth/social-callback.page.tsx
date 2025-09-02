@@ -1,45 +1,40 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 
-import type { Env } from '@next/env';
 import type { GetServerSideProps } from 'next';
 
 import { createClient, DefaultStaleTime } from '@src/modeles/qeury';
 import { saveToken, saveUser } from '@src/utils/localstrage';
 
 type SocialCallbackProps = {
-  env?: Env;
   token?: string;
 };
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const token = typeof ctx.query.token === 'string' ? ctx.query.token : null;
-  const { env } = await import('@src/config/env');
-  // A方式（localStorage保存）でも、ここで token をクライアントに渡して同ページで処理するのがシンプル
   return {
     props: {
-      env,
       token,
     },
   };
 };
 
-export default function SocialCallback({ env, token }: SocialCallbackProps) {
+export default function SocialCallback({ token }: SocialCallbackProps) {
   // クライアントで保存＆/auth/me 取得
   const {
     data: user,
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ['getMe', env, token],
+    queryKey: ['getMe', token],
     queryFn: async () => {
-      if (!env || !token) return;
+      if (!token) return;
       saveToken(token);
       const { data, error } = await createClient().GET('/api/v0/login/profile');
       if (error) return;
       return data;
     },
-    enabled: !!env && !!token,
+    enabled: !!token,
     retry: false,
     staleTime: DefaultStaleTime,
   });
