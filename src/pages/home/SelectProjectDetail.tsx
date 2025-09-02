@@ -6,7 +6,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { SessionItemRow } from './SessionItemRow';
 
 import type { CreateHeatmapItemData } from '@src/component/templates/CreateHeatmapTaskModal';
-import type { Env } from '@src/modeles/env';
 import type { Project } from '@src/modeles/project';
 import type { FC } from 'react';
 
@@ -21,11 +20,10 @@ const fetchCount = 20;
 
 export type SelectProjectDetailProps = {
   className?: string;
-  env?: Env | undefined;
   project: Project;
 };
 
-const Component: FC<SelectProjectDetailProps> = ({ className, project, env }) => {
+const Component: FC<SelectProjectDetailProps> = ({ className, project }) => {
   const [selectItem, setSelectedItem] = useState<undefined | CreateHeatmapItemData>(undefined);
   const router = useRouter();
   const {
@@ -35,10 +33,10 @@ const Component: FC<SelectProjectDetailProps> = ({ className, project, env }) =>
     isLoading: isLoadingSessions,
     isError: isErrorSessions,
   } = useInfiniteQuery({
-    queryKey: ['sessions', project.id, env],
+    queryKey: ['sessions', project.id],
     queryFn: async ({ pageParam }) => {
-      if (!project.id || project.id === 0 || !env) return [];
-      const { data, error } = await createClient(env).GET('/api/v0/projects/{project_id}/play_session', {
+      if (!project.id || project.id === 0) return [];
+      const { data, error } = await createClient().GET('/api/v0/projects/{project_id}/play_session', {
         params: {
           query: {
             limit: fetchCount,
@@ -84,7 +82,7 @@ const Component: FC<SelectProjectDetailProps> = ({ className, project, env }) =>
           </div>
         ))}
       {hasNextPageSessions && !isLoadingSessions && <Observer callback={fetchNextPageSessions} />}
-      <CreateHeatmapTaskModal env={env} isOpen={selectItem !== undefined} onClose={() => setSelectedItem(undefined)} projectId={project.id} />
+      <CreateHeatmapTaskModal isOpen={selectItem !== undefined} onClose={() => setSelectedItem(undefined)} projectId={project.id} />
     </FlexColumn>
   );
 };

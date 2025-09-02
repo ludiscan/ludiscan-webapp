@@ -16,7 +16,7 @@ import { Toggle } from '@src/component/atoms/Toggle';
 import { StatusContent } from '@src/component/molecules/StatusContent';
 import { usePlayerTimelineState } from '@src/hooks/useHeatmapState';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { DefaultStaleTime } from '@src/modeles/qeury';
+import { createClient, DefaultStaleTime } from '@src/modeles/qeury';
 import { fontSizes } from '@src/styles/style';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 import { toISOAboutStringWithTimezone } from '@src/utils/locale';
@@ -35,7 +35,7 @@ function toggleButtonStyle(theme: Theme): CSSProperties {
   };
 }
 
-const Component: FC<HeatmapMenuProps> = ({ extra = {}, service, className }) => {
+const Component: FC<HeatmapMenuProps> = ({ extra = {}, className }) => {
   const { theme } = useSharedTheme();
   const logName = 'logName' in extra ? extra.logName : undefined;
   const id = 'id' in extra ? extra.id : undefined;
@@ -50,7 +50,7 @@ const Component: FC<HeatmapMenuProps> = ({ extra = {}, service, className }) => 
     queryFn: async () => {
       if (typeof logName !== 'string' || !id) return null;
       // Replace with actual data fetching logic
-      return service.createClient()?.GET('/api/v0/general_log/position/{event_type}/{id}', {
+      return createClient().GET('/api/v0/general_log/position/{event_type}/{id}', {
         params: {
           path: {
             event_type: logName,
@@ -70,7 +70,7 @@ const Component: FC<HeatmapMenuProps> = ({ extra = {}, service, className }) => 
     queryKey: ['session', session_id, project_id],
     queryFn: async () => {
       if (!session_id || !project_id) return null;
-      return service.createClient()?.GET('/api/v0/projects/{project_id}/play_session/{session_id}', {
+      return createClient().GET('/api/v0/projects/{project_id}/play_session/{session_id}', {
         params: {
           path: {
             project_id,
@@ -87,7 +87,7 @@ const Component: FC<HeatmapMenuProps> = ({ extra = {}, service, className }) => 
     queryKey: ['project', project_id],
     queryFn: async () => {
       if (!project_id) return null;
-      return service.createClient()?.GET('/api/v0/projects/{id}', {
+      return createClient().GET('/api/v0/projects/{id}', {
         params: { path: { id: project_id } },
       });
     },

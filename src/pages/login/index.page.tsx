@@ -2,7 +2,6 @@ import styled from '@emotion/styled';
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
 
-import type { Env } from '@src/modeles/env';
 import type { FC } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
@@ -20,7 +19,6 @@ import { fontSizes } from '@src/styles/style';
 
 export type LoginPageProps = {
   className?: string | undefined;
-  env?: Env | undefined;
 };
 
 const Content: FC<LoginPageProps> = ({ className }) => {
@@ -143,7 +141,6 @@ const IndexPage = styled(Component)`
     padding: 12px 12px;
     border-radius: 22px;
     background: ${({ theme }) => theme.colors.surface.light};
-    // remove text-decoration
     text-decoration: none;
   }
 `;

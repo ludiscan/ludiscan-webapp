@@ -2,10 +2,9 @@ import { useQuery } from '@tanstack/react-query';
 
 import packageJson from '../../package.json';
 
-import type { components, paths } from '@generated/api';
-import type { Client } from 'openapi-fetch';
+import type { components } from '@generated/api';
 
-import { DefaultStaleTime } from '@src/modeles/qeury';
+import { createClient, DefaultStaleTime } from '@src/modeles/qeury';
 
 export type EventLogData = {
   key: string;
@@ -102,18 +101,13 @@ export const initializeValues: HeatmapDataState = {
   },
 };
 
-export function usePlayerPositionLogs(
-  player: number | undefined,
-  project_id: number | undefined,
-  session_id: number | undefined,
-  client: Client<paths, `${string}/${string}`> | null,
-) {
+export function usePlayerPositionLogs(player: number | undefined, project_id: number | undefined, session_id: number | undefined) {
   return useQuery({
-    queryKey: ['eventLogDetail', player, project_id, session_id, client],
+    queryKey: ['eventLogDetail', player, project_id, session_id],
     queryFn: async () => {
-      if (!project_id || !session_id || player === undefined || !client) return null;
+      if (!project_id || !session_id || player === undefined) return null;
       // Replace with actual data fetching logic
-      return client.GET('/api/v0/projects/{project_id}/play_session/{session_id}/player_position_log', {
+      return createClient().GET('/api/v0/projects/{project_id}/play_session/{session_id}/player_position_log', {
         params: {
           path: {
             project_id: project_id,

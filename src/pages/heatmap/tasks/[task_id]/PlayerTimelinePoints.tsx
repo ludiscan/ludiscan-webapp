@@ -26,7 +26,7 @@ export type PlayerTimelinePointsProps = {
   visibleTimeRange: PlayerTimelinePointsTimeRange;
 };
 
-const Component: FC<PlayerTimelinePointsProps> = ({ service, state, currentTimelineSeek, visibleTimeRange }) => {
+const Component: FC<PlayerTimelinePointsProps> = ({ state, currentTimelineSeek, visibleTimeRange }) => {
   const {
     data: { upZ, scale },
   } = useGeneralState();
@@ -40,7 +40,7 @@ const Component: FC<PlayerTimelinePointsProps> = ({ service, state, currentTimel
   const spriteRef = useRef<Sprite | null>(null);
   const materialRef = useRef<SpriteMaterial | null>(null);
 
-  const { data: fetchLogs, isLoading, isSuccess } = usePlayerPositionLogs(state?.player, state?.project_id, state?.session_id, service.createClient());
+  const { data: fetchLogs, isLoading, isSuccess } = usePlayerPositionLogs(state?.player, state?.project_id, state?.session_id);
 
   const logs = useMemo(() => {
     if (!fetchLogs || !fetchLogs.data || fetchLogs.data.length === 0) return null;
