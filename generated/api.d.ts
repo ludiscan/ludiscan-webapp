@@ -87,6 +87,83 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v0/auth/google': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Google OAuth開始（サインアップ/ログイン） */
+    get: operations['AuthController_googleStart'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/auth/google/link': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 現在のユーザーにGoogleアカウントをリンク
+     * @description ログイン済みユーザーのIDを `state` に封入し、/auth/google に302。最終的にコールバックでリンクします。
+     */
+    get: operations['AuthController_googleLink'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/auth/google/callback': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Google OAuth コールバック
+     * @description Passportが `req.user` にGoogleプロフィールをセット。`state` がリンクモードならリンク、そうでなければログイン/サインアップ。最後にフロントへ302（?token=... か ?code=...）。
+     */
+    get: operations['AuthController_googleCallback'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/auth/identity/google': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * 現在のユーザーからGoogleをアンリンク
+     * @description 唯一のログイン手段になる場合は拒否するなどのポリシーをAuthService側で実装してください。
+     */
+    delete: operations['AuthController_unlinkGoogle'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v0/login': {
     parameters: {
       query?: never;
@@ -634,6 +711,20 @@ export interface components {
       password: string;
       email: string;
     };
+    GoogleStartQueryDto: {
+      /** @description 署名付きのstate（CSRF防止やモード伝播用）。リンク時はAuthControllerが自動生成。 */
+      state?: string;
+    };
+    GoogleLinkQueryDto: {
+      /** @description リンク完了後に戻る先（フロントのURL） */
+      returnTo?: string;
+    };
+    GoogleCallbackQueryDto: {
+      /** @description Googleから戻るときのstate（署名付き） */
+      state?: string;
+      /** @description Google側エラー（任意） */
+      error?: string;
+    };
     LoginUserDto: {
       /** @example password */
       password: string;
@@ -1074,6 +1165,124 @@ export interface operations {
         content: {
           'application/json': components['schemas']['UserResponseDto'];
         };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  AuthController_googleStart: {
+    parameters: {
+      query?: {
+        state?: components['schemas']['GoogleStartQueryDto'];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Redirect to Google consent screen */
+      302: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  AuthController_googleLink: {
+    parameters: {
+      query?: {
+        /** @description リンク完了後に戻る先（フロントのURL） */
+        returnTo?: components['schemas']['GoogleLinkQueryDto'];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Redirect to /auth/google with signed state */
+      302: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  AuthController_googleCallback: {
+    parameters: {
+      query?: {
+        /** @description Googleから戻るときのstate（署名付き） */
+        state?: components['schemas']['GoogleCallbackQueryDto'];
+        /** @description Google側エラー（任意） */
+        error?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Redirect back to front-end with token or error code */
+      302: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  AuthController_unlinkGoogle: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Unlinked */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description Bad Request */
       400: {

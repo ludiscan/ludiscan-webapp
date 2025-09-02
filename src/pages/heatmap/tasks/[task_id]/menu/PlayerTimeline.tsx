@@ -26,7 +26,7 @@ import { TextArea } from '@src/component/molecules/TextArea';
 import { useGetApi } from '@src/hooks/useGetApi';
 import { usePlayerTimelineState } from '@src/hooks/useHeatmapState';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { DefaultStaleTime } from '@src/modeles/qeury';
+import { createClient, DefaultStaleTime } from '@src/modeles/qeury';
 import { fontSizes } from '@src/styles/style';
 import { toISOAboutStringWithTimezone } from '@src/utils/locale';
 import { compileHVQL, parseHVQL } from '@src/utils/vql';
@@ -45,7 +45,7 @@ function toggleButtonStyle(theme: Theme): CSSProperties {
   };
 }
 
-const DetailBlockInternal: FC<{ className?: string; details: PlayerTimelineDetail[]; service: HeatmapDataService }> = ({ className, details, service }) => {
+const DetailBlockInternal: FC<{ className?: string; details: PlayerTimelineDetail[]; service: HeatmapDataService }> = ({ className, details }) => {
   const { setData } = usePlayerTimelineState();
   const { theme } = useSharedTheme();
   // const player = detail.player;
@@ -55,7 +55,7 @@ const DetailBlockInternal: FC<{ className?: string; details: PlayerTimelineDetai
     queryKey: ['session', session_id, project_id],
     queryFn: async () => {
       if (!session_id || !project_id) return null;
-      return service.createClient()?.GET('/api/v0/projects/{project_id}/play_session/{session_id}', {
+      return createClient().GET('/api/v0/projects/{project_id}/play_session/{session_id}', {
         params: {
           path: {
             project_id,
@@ -215,7 +215,7 @@ const Component: FC<HeatmapMenuProps> = ({ className, service, task }) => {
   const { data: sessions } = useQuery({
     queryKey: ['player-timeline', task.project.id],
     queryFn: async () => {
-      return service.createClient()?.GET('/api/v0/projects/{project_id}/play_session', {
+      return createClient().GET('/api/v0/projects/{project_id}/play_session', {
         params: {
           path: {
             project_id: task.project.id,
@@ -224,10 +224,10 @@ const Component: FC<HeatmapMenuProps> = ({ className, service, task }) => {
       });
     },
     staleTime: DefaultStaleTime,
-    enabled: task.project.id !== undefined && service.createClient() !== null,
+    enabled: task.project.id !== undefined,
   });
 
-  const getPlayers = useGetApi('/api/v0/projects/{project_id}/play_session/{session_id}/player_position_log/{session_id}/players', service.getEnv(), {
+  const getPlayers = useGetApi('/api/v0/projects/{project_id}/play_session/{session_id}/player_position_log/{session_id}/players', {
     staleTime: DefaultStaleTime,
   });
   const sessionIds = useMemo(() => {
@@ -235,7 +235,7 @@ const Component: FC<HeatmapMenuProps> = ({ className, service, task }) => {
   }, [sessions]);
 
   const handleAddTimeline = useCallback(async () => {
-    if (!selectSessionId || service.createClient() === undefined) return;
+    if (!selectSessionId) return;
     const project_id = task.project.id;
     const session_id = selectSessionId ? Number(selectSessionId) : 0;
     const data = await getPlayers.fetch([
@@ -270,7 +270,7 @@ const Component: FC<HeatmapMenuProps> = ({ className, service, task }) => {
         details: [...(prev.details || []), ...newDetails],
       };
     });
-  }, [getPlayers, selectSessionId, service, setData, task.project.id]);
+  }, [getPlayers, selectSessionId, setData, task.project.id]);
 
   const queryDisable = useMemo(() => {
     try {

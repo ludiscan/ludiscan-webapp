@@ -2,7 +2,6 @@ import { useCallback, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
 import type { RootState } from '../store';
-import type { Env } from '@src/modeles/env';
 import type { User } from '@src/modeles/user';
 
 import { useAppDispatch } from '@src/hooks/useDispatch';
@@ -26,7 +25,6 @@ type LoginType = {
 };
 
 export type UseAuthOptions = {
-  env?: Env | undefined;
   onSuccessLogin?: () => void | Promise<void>;
   onErrorLogin?: (error: string) => void | Promise<void>;
 };
@@ -38,9 +36,8 @@ export function useAuth(props?: UseAuthOptions): UseAuthType {
   const handleLogin = useCallback(
     async (values: LoginType) => {
       const { email, password } = values;
-      if (!props?.env) return;
       // login アクションを dispatch し、成功時には追加の処理（onSuccessLogin 相当）も行えます
-      const resultAction = await dispatch(login({ env: props.env, email, password }));
+      const resultAction = await dispatch(login({ email, password }));
       if (login.fulfilled.match(resultAction)) {
         if (props?.onSuccessLogin) {
           await props.onSuccessLogin();

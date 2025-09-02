@@ -1,6 +1,5 @@
 import { useCallback, useState } from 'react';
 
-import type { Env } from '@src/modeles/env';
 import type { HeatmapStates } from '@src/modeles/heatmapView';
 import type { HeatmapTask, PositionEventLog } from '@src/modeles/heatmaptask';
 
@@ -23,10 +22,6 @@ export type HeatmapDataService = {
   getEventLog(logName: string): Promise<PositionEventLog[] | null>;
 
   eventLogs: Record<string, PositionEventLog[]>;
-
-  createClient: () => ReturnType<typeof createClient> | null;
-
-  getEnv: () => Env | undefined;
 };
 
 // データ型定義
@@ -40,15 +35,15 @@ export type OfflineHeatmapData = {
 };
 
 // 通常のオンライン環境用の実装
-export function useOnlineHeatmapDataService(env: Env | undefined, task: HeatmapTask | undefined | null): HeatmapDataService {
+export function useOnlineHeatmapDataService(task: HeatmapTask | undefined | null): HeatmapDataService {
   const [eventLogs, setEventLogs] = useState<Record<string, PositionEventLog[]>>({});
 
   const getMapList = useCallback(async () => {
     try {
-      if (!task || !env) {
+      if (!task) {
         return [];
       }
-      const { data, error } = await createClient(env).GET('/api/v0/heatmap/tasks/{task_id}/maps', {
+      const { data, error } = await createClient().GET('/api/v0/heatmap/tasks/{task_id}/maps', {
         params: {
           path: {
             task_id: Number(task.taskId),
@@ -60,15 +55,15 @@ export function useOnlineHeatmapDataService(env: Env | undefined, task: HeatmapT
     } catch {
       return [];
     }
-  }, [env, task]);
+  }, [task]);
 
   const getMapContent = useCallback(
     async (mapName: string) => {
       try {
-        if (!task || !env) {
+        if (!task) {
           return null;
         }
-        const { data, error } = await createClient(env).GET('/api/v0/heatmap/map_data/{map_name}', {
+        const { data, error } = await createClient().GET('/api/v0/heatmap/map_data/{map_name}', {
           params: {
             path: {
               map_name: mapName,
@@ -82,18 +77,18 @@ export function useOnlineHeatmapDataService(env: Env | undefined, task: HeatmapT
         return null;
       }
     },
-    [env, task],
+    [task],
   );
 
   const getGeneralLogKeys = useCallback(async () => {
     try {
-      if (!task || !env) {
+      if (!task) {
         return null;
       }
       const projectId = Number(task.project.id);
       const sessionId = task.session?.sessionId ? Number(task.session.sessionId) : undefined;
 
-      const { data, error } = await createClient(env).GET('/api/v0/general_log/position/keys', {
+      const { data, error } = await createClient().GET('/api/v0/general_log/position/keys', {
         params: {
           query: {
             project_id: projectId,
@@ -106,12 +101,12 @@ export function useOnlineHeatmapDataService(env: Env | undefined, task: HeatmapT
     } catch {
       return null;
     }
-  }, [env, task]);
+  }, [task]);
 
   const getProjectLogs = useCallback(
     async (logName: string) => {
-      if (!env || !task) return null;
-      return await createClient(env).GET('/api/v0/projects/{id}/general_log/position/{event_type}', {
+      if (!task) return null;
+      return await createClient().GET('/api/v0/projects/{id}/general_log/position/{event_type}', {
         params: {
           path: {
             id: task.project.id,
@@ -124,13 +119,13 @@ export function useOnlineHeatmapDataService(env: Env | undefined, task: HeatmapT
         },
       });
     },
-    [env, task],
+    [task],
   );
 
   const getSessionLogs = useCallback(
     async (logName: string) => {
-      if (!env || !task) return null;
-      return await createClient(env).GET('/api/v0/projects/{project_id}/play_session/{session_id}/general_log/position/{event_type}', {
+      if (!task) return null;
+      return await createClient().GET('/api/v0/projects/{project_id}/play_session/{session_id}/general_log/position/{event_type}', {
         params: {
           path: {
             project_id: task.project.id,
@@ -144,12 +139,12 @@ export function useOnlineHeatmapDataService(env: Env | undefined, task: HeatmapT
         },
       });
     },
-    [env, task],
+    [task],
   );
 
   const getEventLog = useCallback(
     async (logName: string): Promise<PositionEventLog[] | null> => {
-      if (!env || !task) return null;
+      if (!task) return null;
       // Fetch event log markers data from the server
       const res = task.session ? await getSessionLogs(logName) : await getProjectLogs(logName);
       if (res?.error) throw res.error;
@@ -161,18 +156,16 @@ export function useOnlineHeatmapDataService(env: Env | undefined, task: HeatmapT
       }
       return res?.data || null;
     },
-    [env, task, getSessionLogs, getProjectLogs],
+    [task, getSessionLogs, getProjectLogs],
   );
 
   return {
-    isInitialized: env != null && task != null,
+    isInitialized: task != null,
     getMapList,
     getMapContent,
     getGeneralLogKeys,
     task: task || undefined,
     getEventLog,
     eventLogs,
-    createClient: () => (env ? createClient(env) : null),
-    getEnv: () => env,
   };
 }
