@@ -8,8 +8,6 @@ frontend:
             commands:
                 - 'npm run prebuild:prod'
                 - 'npm run build:prod'
-                - 'echo NEXT_PUBLIC_API_BASE_URL=$API_BASE_URL >> .env'
-                - 'echo NEXT_PUBLIC_HOSTNAME=$HOST_NAME >> .env'
     artifacts:
         baseDirectory: .next
         files:

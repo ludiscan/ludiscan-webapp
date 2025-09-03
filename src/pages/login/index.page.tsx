@@ -57,7 +57,7 @@ const Content: FC<LoginPageProps> = ({ className }) => {
   return (
     <Modal className={className} isOpen={true} onClose={onClose} title={'SignIn or SignUp'} closeOutside={false} style={{ minWidth: '300px' }}>
       <InlineFlexColumn gap={24} className={`${className}__content`} align={'center'}>
-        <a className={`${className}__button google_login`} href={`${env?.API_BASE_URL}/api/v0/auth/google`} target={'_self'}>
+        <a className={`${className}__button google_login`} href={`${env.API_BASE_URL}/api/v0/auth/google`} target={'_self'}>
           <svg version='1.1' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48' className='LgbsSe-Bz112c'>
             <g>
               <path
