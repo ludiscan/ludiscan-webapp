@@ -12,10 +12,13 @@ import { Text } from '@src/component/atoms/Text';
 import { LinedText } from '@src/component/molecules/LinedText';
 import { Modal } from '@src/component/molecules/Modal';
 import { OutlinedTextField } from '@src/component/molecules/OutlinedTextField';
+import { Header } from '@src/component/templates/Header';
+import { SidebarLayout } from '@src/component/templates/SidebarLayout';
 import { useToast } from '@src/component/templates/ToastContext';
 import { env } from '@src/config/env';
 import { useAuth } from '@src/hooks/useAuth';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
+import { InnerContent } from '@src/pages/_app.page';
 import { fontSizes } from '@src/styles/style';
 
 export type LoginPageProps = {
@@ -56,39 +59,45 @@ const Content: FC<LoginPageProps> = ({ className }) => {
 
   const loginDisabled = useMemo(() => email === '' || password === '' || isLoading, [email, password, isLoading]);
   return (
-    <Modal className={className} isOpen={true} onClose={onClose} title={'SignIn or SignUp'} closeOutside={false} style={{ minWidth: '300px' }}>
-      <InlineFlexColumn gap={20} className={`${className}__content`} align={'center'}>
-        <a className={`${className}__button google_login`} href={`${env.API_BASE_URL}/api/v0/auth/google`} target={'_self'}>
-          <Image src={'/google.svg'} alt={'google'} width={20} height={20} />
-          <Text text={'Google で サインアップ'} color={theme.colors.text} fontSize={fontSizes.medium} />
-        </a>
-        <LinedText text={'または'} lineThickness={'1px'} fullWidth={true} />
-        <OutlinedTextField
-          className={`${className}__email`}
-          onChange={handleInputEmail}
-          value={email}
-          label={'Email'}
-          placeholder={'example@email.com'}
-          type={'email'}
-          fontSize={fontSizes.medium}
-          maxLength={50}
-        />
-        <OutlinedTextField
-          className={`${className}__password`}
-          onChange={handleInputPassword}
-          value={password}
-          label={'Password'}
-          type={'password'}
-          placeholder={'password'}
-          fontSize={fontSizes.medium}
-          maxLength={20}
-        />
-        <VerticalSpacer size={2} />
-        <Button onClick={handleLogin} scheme={'primary'} fontSize={'medium'} width={'full'} disabled={loginDisabled}>
-          <Text text={'Sign in'} />
-        </Button>
-      </InlineFlexColumn>
-    </Modal>
+    <div className={className}>
+      <SidebarLayout />
+      <InnerContent>
+        <Header title={''} onClick={router.back} />
+        <Modal isOpen={true} onClose={onClose} title={'SignIn or SignUp'} closeOutside={false} style={{ minWidth: '300px' }}>
+          <InlineFlexColumn gap={20} className={`${className}__content`} align={'center'}>
+            <a className={`${className}__button google_login`} href={`${env.API_BASE_URL}/api/v0/auth/google`} target={'_self'}>
+              <Image src={'/google.svg'} alt={'google'} width={20} height={20} />
+              <Text text={'Google で サインアップ'} color={theme.colors.text} fontSize={fontSizes.medium} />
+            </a>
+            <LinedText text={'または'} lineThickness={'1px'} fullWidth={true} />
+            <OutlinedTextField
+              className={`${className}__email`}
+              onChange={handleInputEmail}
+              value={email}
+              label={'Email'}
+              placeholder={'example@email.com'}
+              type={'email'}
+              fontSize={fontSizes.medium}
+              maxLength={50}
+            />
+            <OutlinedTextField
+              className={`${className}__password`}
+              onChange={handleInputPassword}
+              value={password}
+              label={'Password'}
+              type={'password'}
+              placeholder={'password'}
+              fontSize={fontSizes.medium}
+              maxLength={20}
+            />
+            <VerticalSpacer size={2} />
+            <Button onClick={handleLogin} scheme={'primary'} fontSize={'medium'} width={'full'} disabled={loginDisabled}>
+              <Text text={'Sign in'} />
+            </Button>
+          </InlineFlexColumn>
+        </Modal>
+      </InnerContent>
+    </div>
   );
 };
 

@@ -8,7 +8,9 @@ import remarkGfm from 'remark-gfm';
 import type { FC } from 'react';
 
 import { Header } from '@src/component/templates/Header';
+import { SidebarLayout } from '@src/component/templates/SidebarLayout';
 import readmeRaw from '@src/files/heatmapReadme.md';
+import { InnerContent } from '@src/pages/_app.page';
 import { dimensions } from '@src/styles/style';
 
 export type IndexPageProps = {
@@ -18,7 +20,7 @@ export type IndexPageProps = {
 
 export async function getServerSideProps() {
   try {
-    return { props: { title: 'Index Page', readme: readmeRaw } };
+    return { props: { readme: readmeRaw } };
   } catch {
     return {
       notFound: true,
@@ -33,15 +35,18 @@ const Component: FC<IndexPageProps> = ({ className, readme }) => {
   }, [router]);
   return (
     <div className={className}>
-      <Header title={'Index Page'} onClick={handleBackClick} />
-      <div className={`${className}__inner`}>
-        <Link href={'/home'}>
-          <span>Go to Home</span>
-        </Link>
-        <div className={`${className}__markdown`}>
-          <Markdown remarkPlugins={[remarkGfm]}>{readme}</Markdown>
+      <SidebarLayout />
+      <InnerContent>
+        <Header title={'Index Page'} onClick={handleBackClick} />
+        <div className={`${className}__inner`}>
+          <Link href={'/home'}>
+            <span>Go to Home</span>
+          </Link>
+          <div className={`${className}__markdown`}>
+            <Markdown remarkPlugins={[remarkGfm]}>{readme}</Markdown>
+          </div>
         </div>
-      </div>
+      </InnerContent>
     </div>
   );
 };
@@ -50,13 +55,18 @@ const IndexPage = styled(Component)`
   height: 100vh;
 
   &__inner {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - ${dimensions.headerHeight}px - 60px);
     padding: 2rem;
     text-align: center;
   }
 
   &__markdown {
+    flex: 1;
     max-width: ${dimensions.maxWidth}px;
     margin: 0 auto;
+    overflow-y: auto;
     font-size: 1.2rem;
     line-height: 1.6;
     text-align: start;
