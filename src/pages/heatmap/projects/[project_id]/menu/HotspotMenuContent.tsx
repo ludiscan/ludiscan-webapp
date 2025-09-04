@@ -1,4 +1,4 @@
-import type { HeatmapMenuProps } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenuContent';
+import type { HeatmapMenuProps } from '@src/pages/heatmap/projects/[project_id]/HeatmapMenuContent';
 import type { FC } from 'react';
 
 import { InlineFlexColumn } from '@src/component/atoms/Flex';
@@ -6,7 +6,7 @@ import { Slider } from '@src/component/atoms/Slider';
 import { Switch } from '@src/component/atoms/Switch';
 import { Tooltip } from '@src/component/atoms/Tooltip';
 import { useHotspotModeState } from '@src/hooks/useHeatmapState';
-import { InputRow } from '@src/pages/heatmap/tasks/[task_id]/menu/InputRow';
+import { InputRow } from '@src/pages/heatmap/projects/[project_id]/menu/InputRow';
 
 export const HotspotMenuContent: FC<HeatmapMenuProps> = ({ className }) => {
   const { data: hotspotMode, setData } = useHotspotModeState();

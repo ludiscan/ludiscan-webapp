@@ -1,8 +1,10 @@
-import { useCallback, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import type { HeatmapStates } from '@src/modeles/heatmapView';
 import type { HeatmapTask, PositionEventLog } from '@src/modeles/heatmaptask';
 
+import { useAuth } from '@src/hooks/useAuth';
 import { createClient } from '@src/modeles/qeury';
 
 // HeatmapViewer用のデータ取得インターフェース
@@ -22,6 +24,8 @@ export type HeatmapDataService = {
   getEventLog(logName: string): Promise<PositionEventLog[] | null>;
 
   eventLogs: Record<string, PositionEventLog[]>;
+
+  projectId: number | undefined;
 };
 
 // データ型定義
@@ -35,8 +39,42 @@ export type OfflineHeatmapData = {
 };
 
 // 通常のオンライン環境用の実装
-export function useOnlineHeatmapDataService(task: HeatmapTask | undefined | null): HeatmapDataService {
+export function useOnlineHeatmapDataService(projectId: number | undefined, initialTaskId: number | null): HeatmapDataService {
+  const timer = useRef<NodeJS.Timeout>(undefined);
   const [eventLogs, setEventLogs] = useState<Record<string, PositionEventLog[]>>({});
+  const [taskId, setTaskId] = useState<number | null>(initialTaskId);
+
+  const { isAuthorized, isLoading, ready } = useAuth();
+
+  const { data: task, refetch: refetchTask } = useQuery({
+    queryKey: ['heatmap', taskId, isAuthorized],
+    queryFn: async (): Promise<HeatmapTask | null> => {
+      if (!taskId || isNaN(Number(taskId))) return null;
+      if (!isAuthorized) return null;
+      const { data, error } = await createClient().GET('/api/v0/heatmap/tasks/{task_id}', {
+        params: { path: { task_id: Number(taskId) } },
+      });
+      if (error) throw error;
+      return data;
+    },
+    initialData: null,
+    enabled: taskId !== null && isAuthorized,
+  });
+
+  useEffect(() => {
+    if (!task) return;
+
+    if (task.status === 'pending' || task.status === 'processing') {
+      timer.current = setInterval(() => {
+        refetchTask().then(() => {});
+      }, 500);
+    }
+    return () => {
+      if (timer.current) {
+        clearInterval(timer.current);
+      }
+    };
+  }, [refetchTask, task]);
 
   const getMapList = useCallback(async () => {
     try {
@@ -160,12 +198,13 @@ export function useOnlineHeatmapDataService(task: HeatmapTask | undefined | null
   );
 
   return {
-    isInitialized: task != null,
+    isInitialized: isAuthorized && ready && projectId !== undefined,
     getMapList,
     getMapContent,
     getGeneralLogKeys,
     task: task || undefined,
     getEventLog,
     eventLogs,
+    projectId,
   };
 }

@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { createMockHeatmapTask } from '@src/modeles/heatmaptask';
-import { HeatmapMenuContent } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenuContent';
+import { HeatmapMenuContent } from '@src/pages/heatmap/projects/[project_id]/HeatmapMenuContent';
 
 export default {
   component: HeatmapMenuContent,

@@ -1,4 +1,4 @@
-// src/pages/heatmap/tasks/[task_id]/HeatmapCellOverlay.tsx
+// src/pages/heatmap/projects/[project_id]/HeatmapCellOverlay.tsx
 import { useEffect, useState, useMemo } from 'react';
 import * as THREE from 'three';
 

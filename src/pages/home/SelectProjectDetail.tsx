@@ -14,7 +14,7 @@ import { FlexColumn, InlineFlexRow } from '@src/component/atoms/Flex';
 import { Observer } from '@src/component/atoms/Observer';
 import { Text } from '@src/component/atoms/Text';
 import { CreateHeatmapTaskModal } from '@src/component/templates/CreateHeatmapTaskModal';
-import { createClient } from '@src/modeles/qeury';
+import { createClient, DefaultStaleTime } from '@src/modeles/qeury';
 
 const fetchCount = 20;
 
@@ -50,6 +50,7 @@ const Component: FC<SelectProjectDetailProps> = ({ className, project }) => {
       if (error) return [];
       return data;
     },
+    staleTime: DefaultStaleTime,
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
       if (!lastPage || lastPage.length < fetchCount) return undefined;

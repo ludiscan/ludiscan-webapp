@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { HeatmapIdPageLayout } from '@src/pages/heatmap/tasks/[task_id]/index.page';
+import { HeatmapIdPageLayout } from '@src/pages/heatmap/projects/[project_id]/index.page';
 
 export default {
   component: HeatmapIdPageLayout,

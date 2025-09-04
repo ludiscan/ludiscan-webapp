@@ -50,7 +50,7 @@ const Component: FC<HomePageProps> = ({ className }) => {
     queryKey: ['projects', isAuthorized],
     queryFn: async ({ pageParam }): Promise<Project[] | undefined> => {
       if (!isAuthorized) return undefined;
-      const { data, error } = await createClient().GET('/api/v0/projects', {
+      const { data, error } = await createClient().GET('/api/v0.1/projects', {
         params: {
           query: {
             limit: fetchCount,

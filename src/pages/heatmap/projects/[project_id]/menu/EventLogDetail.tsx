@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { InputRow } from './InputRow';
 
 import type { Theme } from '@emotion/react';
-import type { HeatmapMenuProps } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenuContent';
+import type { HeatmapMenuProps } from '@src/pages/heatmap/projects/[project_id]/HeatmapMenuContent';
 import type { FC, CSSProperties } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
