@@ -1,19 +1,17 @@
 import styled from '@emotion/styled';
 import { useInfiniteQuery } from '@tanstack/react-query';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 import { SessionItemRow } from './SessionItemRow';
 
-import type { CreateHeatmapItemData } from '@src/component/templates/CreateHeatmapTaskModal';
 import type { Project } from '@src/modeles/project';
 import type { FC } from 'react';
 
-import { Button } from '@src/component/atoms/Button';
 import { FlexColumn, InlineFlexRow } from '@src/component/atoms/Flex';
 import { Observer } from '@src/component/atoms/Observer';
 import { Text } from '@src/component/atoms/Text';
-import { CreateHeatmapTaskModal } from '@src/component/templates/CreateHeatmapTaskModal';
 import { createClient, DefaultStaleTime } from '@src/modeles/qeury';
 
 const fetchCount = 20;
@@ -24,7 +22,6 @@ export type SelectProjectDetailProps = {
 };
 
 const Component: FC<SelectProjectDetailProps> = ({ className, project }) => {
-  const [selectItem, setSelectedItem] = useState<undefined | CreateHeatmapItemData>(undefined);
   const router = useRouter();
   const {
     data: sessions,
@@ -57,10 +54,6 @@ const Component: FC<SelectProjectDetailProps> = ({ className, project }) => {
       return allPages.length * fetchCount;
     },
   });
-
-  const onClickCreateProjectTask = useCallback(async () => {
-    setSelectedItem({ projectId: project.id });
-  }, [project.id]);
   useEffect(() => {
     if (project.id <= 0) {
       return router.replace('/home');
@@ -69,9 +62,9 @@ const Component: FC<SelectProjectDetailProps> = ({ className, project }) => {
   return (
     <FlexColumn className={className}>
       <InlineFlexRow>
-        <Button onClick={onClickCreateProjectTask} scheme={'primary'} fontSize={'small'}>
+        <Link href={`/heatmap/projects/${project.id}`}>
           <Text text={'SELECT All'} fontWeight={'bold'} />
-        </Button>
+        </Link>
       </InlineFlexRow>
       {!isErrorSessions &&
         !isLoadingSessions &&
@@ -83,7 +76,6 @@ const Component: FC<SelectProjectDetailProps> = ({ className, project }) => {
           </div>
         ))}
       {hasNextPageSessions && !isLoadingSessions && <Observer callback={fetchNextPageSessions} />}
-      <CreateHeatmapTaskModal isOpen={selectItem !== undefined} onClose={() => setSelectedItem(undefined)} projectId={project.id} />
     </FlexColumn>
   );
 };
