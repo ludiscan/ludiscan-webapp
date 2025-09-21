@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import type { HeatmapStates } from '@src/modeles/heatmapView';
@@ -38,16 +38,72 @@ export type OfflineHeatmapData = {
   eventLogs: Record<string, PositionEventLog[]>;
 };
 
+async function sessionCreateTask(projectId: number, sessionId: number, stepSize: number, zVisible: boolean) {
+  return await createClient().POST('/api/v0/heatmap/projects/{project_id}/play_session/{session_id}/tasks', {
+    params: {
+      path: {
+        project_id: projectId,
+        session_id: sessionId,
+      },
+    },
+    body: {
+      stepSize: stepSize,
+      zVisible: zVisible,
+    },
+  });
+}
+
+async function projectCreateTask(projectId: number, stepSize: number, zVisible: boolean) {
+  return await createClient().POST('/api/v0/heatmap/projects/{project_id}/tasks', {
+    params: {
+      path: {
+        project_id: projectId,
+      },
+    },
+    body: {
+      stepSize: stepSize,
+      zVisible: zVisible,
+    },
+  });
+}
+
 // 通常のオンライン環境用の実装
 export function useOnlineHeatmapDataService(projectId: number | undefined, initialTaskId: number | null): HeatmapDataService {
   const timer = useRef<NodeJS.Timeout>(undefined);
   const [eventLogs, setEventLogs] = useState<Record<string, PositionEventLog[]>>({});
   const [taskId, setTaskId] = useState<number | null>(initialTaskId);
+  const [sessionId] = useState<number | null>(null);
+  const [stepSize] = useState<number>(50);
+  const [zVisible] = useState<boolean>(true);
 
-  const { isAuthorized, isLoading, ready } = useAuth();
+  const { isAuthorized, ready } = useAuth();
+  const queryClient = useQueryClient();
 
-  const { data: task, refetch: refetchTask } = useQuery({
-    queryKey: ['heatmap', taskId, isAuthorized],
+  const { data: createdTask } = useQuery({
+    queryKey: [projectId, sessionId, stepSize, zVisible],
+    queryFn: async (): Promise<HeatmapTask | null> => {
+      if (!projectId) {
+        return null;
+      }
+
+      const { data, error } =
+        sessionId && sessionId !== 0
+          ? await sessionCreateTask(projectId, sessionId, stepSize, zVisible)
+          : await projectCreateTask(projectId, stepSize, zVisible);
+      if (error) throw error;
+      return data;
+    },
+    enabled: isAuthorized && projectId !== undefined && projectId !== 0 && initialTaskId === null,
+    retry: 3,
+  });
+
+  useEffect(() => {
+    if (!createdTask) return;
+    setTaskId(createdTask.taskId);
+  }, [createdTask]);
+
+  const { data: task } = useQuery({
+    queryKey: ['heatmap', isAuthorized, taskId],
     queryFn: async (): Promise<HeatmapTask | null> => {
       if (!taskId || isNaN(Number(taskId))) return null;
       if (!isAuthorized) return null;
@@ -65,8 +121,8 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
     if (!task) return;
 
     if (task.status === 'pending' || task.status === 'processing') {
-      timer.current = setInterval(() => {
-        refetchTask().then(() => {});
+      timer.current = setInterval(async () => {
+        await queryClient.invalidateQueries({ queryKey: ['heatmap'] });
       }, 500);
     }
     return () => {
@@ -74,63 +130,54 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
         clearInterval(timer.current);
       }
     };
-  }, [refetchTask, task]);
+  }, [queryClient, task]);
 
   const getMapList = useCallback(async () => {
     try {
-      if (!task) {
+      if (!projectId) {
         return [];
       }
-      const { data, error } = await createClient().GET('/api/v0/heatmap/tasks/{task_id}/maps', {
+      const { data, error } = await createClient().GET('/api/v0.1/projects/{project_id}/maps', {
         params: {
           path: {
-            task_id: Number(task.taskId),
+            project_id: Number(projectId),
           },
         },
       });
       if (error) return [];
-      return data?.maps || [];
+      return data.maps || [];
     } catch {
       return [];
     }
-  }, [task]);
+  }, [projectId]);
 
-  const getMapContent = useCallback(
-    async (mapName: string) => {
-      try {
-        if (!task) {
-          return null;
-        }
-        const { data, error } = await createClient().GET('/api/v0/heatmap/map_data/{map_name}', {
-          params: {
-            path: {
-              map_name: mapName,
-            },
+  const getMapContent = useCallback(async (mapName: string) => {
+    try {
+      if (!mapName || mapName === '') return null;
+      const { data, error } = await createClient().GET('/api/v0/heatmap/map_data/{map_name}', {
+        params: {
+          path: {
+            map_name: mapName,
           },
-          parseAs: 'arrayBuffer',
-        });
-        if (error) return null;
-        return data;
-      } catch {
-        return null;
-      }
-    },
-    [task],
-  );
+        },
+        parseAs: 'arrayBuffer',
+      });
+      if (error) return null;
+      return data;
+    } catch {
+      return null;
+    }
+  }, []);
 
   const getGeneralLogKeys = useCallback(async () => {
     try {
-      if (!task) {
-        return null;
-      }
-      const projectId = Number(task.project.id);
-      const sessionId = task.session?.sessionId ? Number(task.session.sessionId) : undefined;
+      if (projectId === undefined) return null;
 
       const { data, error } = await createClient().GET('/api/v0/general_log/position/keys', {
         params: {
           query: {
             project_id: projectId,
-            session_id: sessionId,
+            session_id: sessionId ?? undefined,
           },
         },
       });
@@ -139,15 +186,15 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
     } catch {
       return null;
     }
-  }, [task]);
+  }, [projectId, sessionId]);
 
   const getProjectLogs = useCallback(
     async (logName: string) => {
-      if (!task) return null;
+      if (!projectId) return null;
       return await createClient().GET('/api/v0/projects/{id}/general_log/position/{event_type}', {
         params: {
           path: {
-            id: task.project.id,
+            id: projectId,
             event_type: logName,
           },
           query: {
@@ -157,17 +204,17 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
         },
       });
     },
-    [task],
+    [projectId],
   );
 
   const getSessionLogs = useCallback(
     async (logName: string) => {
-      if (!task) return null;
+      if (!projectId || !sessionId) return null;
       return await createClient().GET('/api/v0/projects/{project_id}/play_session/{session_id}/general_log/position/{event_type}', {
         params: {
           path: {
-            project_id: task.project.id,
-            session_id: task.session?.sessionId || 0,
+            project_id: projectId,
+            session_id: sessionId,
             event_type: logName,
           },
           query: {
@@ -177,14 +224,13 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
         },
       });
     },
-    [task],
+    [projectId, sessionId],
   );
 
   const getEventLog = useCallback(
     async (logName: string): Promise<PositionEventLog[] | null> => {
-      if (!task) return null;
       // Fetch event log markers data from the server
-      const res = task.session ? await getSessionLogs(logName) : await getProjectLogs(logName);
+      const res = sessionId ? await getSessionLogs(logName) : await getProjectLogs(logName);
       if (res?.error) throw res.error;
       if (res?.data) {
         setEventLogs((prev) => ({
@@ -194,7 +240,7 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
       }
       return res?.data || null;
     },
-    [task, getSessionLogs, getProjectLogs],
+    [sessionId, getSessionLogs, getProjectLogs],
   );
 
   return {
@@ -202,7 +248,7 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
     getMapList,
     getMapContent,
     getGeneralLogKeys,
-    task: task || undefined,
+    task: task || createdTask || undefined,
     getEventLog,
     eventLogs,
     projectId,

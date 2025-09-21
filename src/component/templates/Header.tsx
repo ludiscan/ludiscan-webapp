@@ -54,7 +54,13 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
             <FiChevronLeft />
           </Button>
         )}
-        <Image src={'/favicon/favicon.svg'} alt={'ludiscan'} width={onClick ? 28 : 32} height={onClick ? 28 : 32} />
+        <Image
+          className={`${className}__logo ${theme.colors.isLight && 'light'}`}
+          src={'/favicon/favicon.svg'}
+          alt={'ludiscan'}
+          width={onClick ? 28 : 32}
+          height={onClick ? 28 : 32}
+        />
         <Text text={'Ludiscan'} href={'/'} target={'_self'} fontSize={fontSizes.large2} fontWeight={fontWeights.bold} />
         <Text text={title} fontSize={fontSizes.medium} fontWeight={fontWeights.bold} color={theme.colors.secondary.main} />
         {iconTitleEnd && <>{iconTitleEnd}</>}
@@ -122,5 +128,15 @@ export const Header = styled(Component)`
 
   &__iconLabelRow.accent {
     color: ${({ theme }) => theme.colors.error};
+  }
+
+  &__logo {
+    width: ${({ onClick }) => (onClick ? '28px' : '32px')};
+    height: ${({ onClick }) => (onClick ? '28px' : '32px')};
+    filter: invert(100%);
+  }
+
+  &__logo.light {
+    filter: invert(0%);
   }
 `;

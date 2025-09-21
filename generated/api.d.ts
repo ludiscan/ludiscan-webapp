@@ -402,6 +402,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v0.1/projects/{project_id}/maps': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** プロジェクトのマップ一覧 */
+    get: operations['ProjectsV01Controller_getProjectMaps'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v0/general_log/keys': {
     parameters: {
       query?: never;
@@ -600,6 +617,23 @@ export interface paths {
     };
     /** Get general log keys */
     get: operations['PlaySessionController_getPositionLogKeys'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0.1/projects/{project_id}/sessions/{session_id}/maps': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** セッションのマップ一覧 */
+    get: operations['PlaySessionV01Controller_getSessionMaps'];
     put?: never;
     post?: never;
     delete?: never;
@@ -882,6 +916,9 @@ export interface components {
       /** @enum {string} */
       role?: 'admin' | 'viewer';
     };
+    GetMapsDto: {
+      maps: string[];
+    };
     StringGeneralLogDetailDto: {
       id: number;
       event_type: string;
@@ -1072,9 +1109,6 @@ export interface components {
        * @example 2021-01-01T00:00:00.000Z
        */
       updatedAt: string;
-    };
-    GetMapsDto: {
-      maps: string[];
     };
     DefaultErrorResponse: {
       /** @example 400 */
@@ -1904,6 +1938,36 @@ export interface operations {
       };
     };
   };
+  ProjectsV01Controller_getProjectMaps: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        project_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['GetMapsDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
   GeneralLogController_getKeys: {
     parameters: {
       query: {
@@ -2504,6 +2568,37 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  PlaySessionV01Controller_getSessionMaps: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        project_id: number;
+        session_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': string[];
         };
       };
     };

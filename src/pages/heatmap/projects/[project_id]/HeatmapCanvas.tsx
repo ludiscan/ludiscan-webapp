@@ -1,14 +1,14 @@
 import { OrbitControls } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AmbientLight, DirectionalLight, HemisphereLight, Raycaster, SpotLight, Vector2, Vector3 } from 'three';
+import { AmbientLight, Box3, DirectionalLight, HemisphereLight, Raycaster, SpotLight, Vector2, Vector3 } from 'three';
 
 import { HeatmapPointsMarker } from './HeatmapPointsMarker';
 
 import type { PlayerTimelinePointsTimeRange } from '@src/pages/heatmap/projects/[project_id]/PlayerTimelinePoints';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC } from 'react';
-import type { Group } from 'three';
+import type { Group, PerspectiveCamera, OrthographicCamera } from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 
 import { useEventLogState, useGeneralState, usePlayerTimelineState } from '@src/hooks/useHeatmapState';
@@ -36,8 +36,11 @@ type Waypoint = {
   position: Vector3; // x, y, z 座標（モデル表面に対して Y 座標を合わせたもの）
 };
 
+const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
+
 const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, service, currentTimelineSeek, visibleTimelineRange }) => {
   // const { invalidate } = useThree();
+  const fitInfoRef = useRef<{ dist: number; center: Vector3 }>({ dist: 1000, center: new Vector3() });
   const {
     data: { showHeatmap, heatmapOpacity, heatmapType },
   } = useGeneralState();
@@ -45,6 +48,8 @@ const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, s
   const { data: eventLog } = useEventLogState();
   const { data: timelineState } = usePlayerTimelineState();
   const orbitControlsRef = useRef<OrbitControlsImpl>(null);
+  const groupRef = useRef<Group>(null);
+  const orthoBaseZoomRef = useRef<number | null>(null);
 
   const visibleEventLogs = useMemo(() => eventLog.logs.filter((event) => event.visible), [eventLog]);
 
@@ -212,50 +217,185 @@ const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, s
     };
   }, [scene, theme]);
 
+  const getPercent = useCallback(() => {
+    const controls = orbitControlsRef.current;
+    const camera = controls?.object as PerspectiveCamera | OrthographicCamera | undefined;
+    if (!controls || !camera) return 100;
+
+    if ((camera as OrthographicCamera).isOrthographicCamera) {
+      const cam = camera as OrthographicCamera;
+      const base = orthoBaseZoomRef.current ?? cam.zoom;
+      return clamp(Math.round((cam.zoom / base) * 100), 25, 400);
+    }
+
+    const cam = camera as PerspectiveCamera;
+    const { dist: fitDist } = fitInfoRef.current;
+    const dist = controls.target.distanceTo(cam.position);
+    return clamp(Math.round(100 * (fitDist / dist)), 25, 400); // 100%でfit
+  }, []);
+
+  const notifyPercent = useCallback(() => {
+    const pct = getPercent();
+    heatMapEventBus.emit('camera:percent', { percent: pct });
+  }, [getPercent]);
+
+  const setPercent = useCallback(
+    (percent: number) => {
+      const controls = orbitControlsRef.current;
+      const camera = controls?.object as PerspectiveCamera | OrthographicCamera | undefined;
+      if (!controls || !camera) return;
+
+      // Orthographic
+      if ((camera as OrthographicCamera).isOrthographicCamera) {
+        const cam = camera as OrthographicCamera;
+        if (orthoBaseZoomRef.current == null) orthoBaseZoomRef.current = cam.zoom; // 100%の基準
+        const base = orthoBaseZoomRef.current;
+        const nextZoom = (clamp(percent, 25, 400) / 100) * base; // 100%が基準
+        cam.zoom = nextZoom;
+        cam.updateProjectionMatrix();
+        controls.update();
+        notifyPercent();
+        return;
+      }
+
+      // Perspective: distance = fitDist * (100 / percent)
+      const { dist: fitDist } = fitInfoRef.current;
+      const min = controls.minDistance ?? fitDist * 0.2;
+      const max = controls.maxDistance ?? fitDist * 6;
+
+      const targetDist = clamp(fitDist * (100 / clamp(percent, 25, 400)), min, max);
+      // console.log('targetDist', targetDist, 'min', min, 'max', max, 'percent', percent);
+
+      const cam = camera as PerspectiveCamera;
+      const dir = cam.position.clone().sub(controls.target).normalize();
+      cam.position.copy(controls.target.clone().add(dir.multiplyScalar(targetDist)));
+      cam.updateProjectionMatrix();
+      controls.update();
+      notifyPercent();
+    },
+    [notifyPercent],
+  );
+
+  const fitToObject = useCallback(() => {
+    const camera = orbitControlsRef.current?.object as PerspectiveCamera;
+    const controls = orbitControlsRef.current;
+    if (!camera || !controls || !groupRef.current) return;
+
+    const box = new Box3().setFromObject(groupRef.current);
+    const size = new Vector3();
+    const center = new Vector3();
+    box.getSize(size);
+    box.getCenter(center);
+
+    const radius = size.length() / 2;
+    const padding = 1.2;
+    const fov = (camera.fov * Math.PI) / 180;
+    const dist = (radius * padding) / Math.tan(fov / 2);
+
+    const dir = camera.position.clone().sub(controls.target).normalize();
+    const nextPos = center.clone().add(dir.multiplyScalar(dist));
+    controls.target.copy(center);
+    camera.position.copy(nextPos);
+    camera.updateProjectionMatrix();
+    controls.update();
+    notifyPercent();
+  }, [notifyPercent]);
+
+  useEffect(() => {
+    const onSet = (e: CustomEvent<{ percent: number }>) => setPercent(e.detail.percent);
+    const onFit = () => fitToObject();
+
+    heatMapEventBus.on('camera:set-zoom-percent', onSet);
+    heatMapEventBus.on('camera:fit', onFit);
+    return () => {
+      heatMapEventBus.off('camera:set-zoom-percent', onSet);
+      heatMapEventBus.off('camera:fit', onFit);
+    };
+  }, [fitToObject, setPercent]);
+
+  // モデルが揃った/サイズが決まったタイミングで実行
+  useEffect(() => {
+    const controls = orbitControlsRef.current;
+    const cam = controls?.object as PerspectiveCamera | undefined;
+    if (!controls || !cam || !groupRef.current) return;
+
+    const box = new Box3().setFromObject(groupRef.current);
+    const size = new Vector3(),
+      center = new Vector3();
+    box.getSize(size);
+    box.getCenter(center);
+    const radius = size.length() / 2 || 100;
+    const padding = 1.2;
+    const fov = (cam.fov * Math.PI) / 180;
+    const fitDist = (radius * padding) / Math.tan(fov / 2);
+
+    // 100% の基準
+    fitInfoRef.current = { dist: fitDist, center };
+
+    // Controls のレンジ（fit を中心に）
+    controls.minDistance = Math.max(1, fitDist * 0.2);
+    controls.maxDistance = fitDist * 6;
+
+    // カメラの near/far（遠クリップに埋もれないように）
+    cam.near = Math.max(0.1, fitDist * 0.01);
+    cam.far = fitDist * 12; // ← ここ重要！ far を十分大きく
+    cam.updateProjectionMatrix();
+
+    // 100% (= fit) の位置へ
+    const dir = cam.position.clone().sub(controls.target).normalize();
+    controls.target.copy(center);
+    cam.position.copy(center.clone().add(dir.multiplyScalar(fitDist)));
+    cam.updateProjectionMatrix();
+    controls.update();
+    notifyPercent();
+  }, [model, modelType, notifyPercent]); // モデルが変わったら再計算
+
   return (
     <>
-      {modelType && map && modelType !== 'server' && typeof map === 'string' && <LocalModelLoader ref={modelRef} modelPath={map} modelType={modelType} />}
-      {modelType && model && modelType === 'server' && typeof map !== 'string' && (
-        <>
-          <StreamModelLoader ref={modelRef} model={model} />
-          {modelRef.current && heatmapType === 'fill' && showHeatmap && (
-            <HeatmapCellOverlay group={modelRef.current} points={pointList} cellSize={(service.task?.stepSize || 50) / 2} opacity={heatmapOpacity} />
-          )}
-        </>
-      )}
-      {pointList && heatmapType === 'object' && showHeatmap && <HeatmapPointsMarker points={pointList} />}
-      {pointList && showHeatmap && <HotspotCircles points={pointList} />}
-      {visibleEventLogs.length > 0 && visibleEventLogs.map((event) => <EventLogMarkers key={event.key} logName={event.key} service={service} pref={event} />)}
-      {service &&
-        timelineState &&
-        timelineState.visible &&
-        timelineState.details &&
-        timelineState.details.length > 0 &&
-        timelineState.details.map((tl, index) => (
-          <PlayerTimelinePoints key={index} service={service} state={tl} currentTimelineSeek={currentTimelineSeek} visibleTimeRange={visibleTimelineRange} />
+      <group ref={groupRef}>
+        {modelType && map && modelType !== 'server' && typeof map === 'string' && <LocalModelLoader ref={modelRef} modelPath={map} modelType={modelType} />}
+        {modelType && model && modelType === 'server' && typeof map !== 'string' && (
+          <>
+            <StreamModelLoader ref={modelRef} model={model} />
+            {pointList && modelRef.current && heatmapType === 'fill' && showHeatmap && (
+              <HeatmapCellOverlay group={modelRef.current} points={pointList} cellSize={(service.task?.stepSize || 50) / 2} opacity={heatmapOpacity} />
+            )}
+          </>
+        )}
+        {pointList && heatmapType === 'object' && showHeatmap && <HeatmapPointsMarker points={pointList} />}
+        {pointList && showHeatmap && <HotspotCircles points={pointList} />}
+        {visibleEventLogs.length > 0 && visibleEventLogs.map((event) => <EventLogMarkers key={event.key} logName={event.key} service={service} pref={event} />)}
+        {service &&
+          timelineState &&
+          timelineState.visible &&
+          timelineState.details &&
+          timelineState.details.length > 0 &&
+          timelineState.details.map((tl, index) => (
+            <PlayerTimelinePoints key={index} service={service} state={tl} currentTimelineSeek={currentTimelineSeek} visibleTimeRange={visibleTimelineRange} />
+          ))}
+        {/* --- 追加：ウェイポイントを map して表示 --- */}
+        {waypoints.map((wp) => (
+          <WaypointMarker
+            key={wp.id}
+            position={wp.position}
+            selected={wp.id === selectedWaypointId}
+            onClick={() => {
+              setSelectedWaypointId(wp.id);
+            }}
+            onPointerDown={() => {
+              // ドラッグ開始
+              if (orbitControlsRef.current) orbitControlsRef.current.enabled = false;
+              setSelectedWaypointId(wp.id);
+              setDraggingWaypointId(wp.id);
+            }}
+            onPointerUp={() => {
+              // ドラッグ終了は上記 useEffect の window.pointerup でもキャッチしているが、
+              // こちらでも安全のため呼んでおく
+              setDraggingWaypointId(null);
+            }}
+          />
         ))}
-      {/* --- 追加：ウェイポイントを map して表示 --- */}
-      {waypoints.map((wp) => (
-        <WaypointMarker
-          key={wp.id}
-          position={wp.position}
-          selected={wp.id === selectedWaypointId}
-          onClick={() => {
-            setSelectedWaypointId(wp.id);
-          }}
-          onPointerDown={() => {
-            // ドラッグ開始
-            if (orbitControlsRef.current) orbitControlsRef.current.enabled = false;
-            setSelectedWaypointId(wp.id);
-            setDraggingWaypointId(wp.id);
-          }}
-          onPointerUp={() => {
-            // ドラッグ終了は上記 useEffect の window.pointerup でもキャッチしているが、
-            // こちらでも安全のため呼んでおく
-            setDraggingWaypointId(null);
-          }}
-        />
-      ))}
+      </group>
       <OrbitControls enableZoom enablePan enableRotate ref={orbitControlsRef} position0={new Vector3(1, 1, 3000)} />
     </>
   );

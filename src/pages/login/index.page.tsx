@@ -17,7 +17,9 @@ import { Header } from '@src/component/templates/Header';
 import { useToast } from '@src/component/templates/ToastContext';
 import { env } from '@src/config/env';
 import { useAuth } from '@src/hooks/useAuth';
+import { useIsDesktop } from '@src/hooks/useIsDesktop';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
+import lightTheme from '@src/styles/light';
 import { fontSizes } from '@src/styles/style';
 
 export type LoginPageProps = {
@@ -83,35 +85,25 @@ const SVGFilterDefs: FC = () => (
     </filter>
   </svg>
 );
+const background = `
+  linear-gradient(200deg, #3dffe2 10%, #3dffef 40%, #a4e6ff 70%, #36ff9b 100%),
+  radial-gradient(140% 60% at 20% 58%, rgba(237, 61, 108, 0.85) 0 32%, transparent 20%),
+  radial-gradient(140% 58% at 80% 62%, rgba(92, 255, 130, 0.85) 0 34%, transparent 64%),
+  radial-gradient(180% 70% at 50% 66%, rgba(61, 197, 255, 0.9) 0 22%, transparent 20%),
+  radial-gradient(140% 60% at 35% 50%, rgba(255, 138, 61, 0.8) 0 26%, transparent 30%),
+  radial-gradient(140% 60% at 65% 52%, rgba(54, 163, 255, 0.85) 0 26%, transparent 60%)
+`;
 
 /** 横に伸びる JetBrains 風レイヤ */
 const WavyLayer = styled.div`
   position: fixed;
-  top: 40%;
-  left: -20%;
-  right: -20%;
-  bottom: 5%;
+  inset: 25% -20% 30%;
   z-index: 0;
   pointer-events: none;
 
   /* 1) 長い帯（linear） + 2) 横長の楕円を重ねる */
-  background:
-    linear-gradient(200deg, #3dffe2 10%, #3dffef 40%, #a4e6ff 70%, #36ff9b 100%),
-    radial-gradient(140% 60% at 20% 58%, rgba(237, 61, 108, 0.85) 0 32%, transparent 20%),
-    radial-gradient(140% 58% at 80% 62%, rgba(92, 255, 130, 0.85) 0 34%, transparent 64%),
-    radial-gradient(180% 70% at 50% 66%, rgba(61, 197, 255, 0.9) 0 22%, transparent 20%),
-    radial-gradient(140% 60% at 35% 50%, rgba(255, 138, 61, 0.8) 0 26%, transparent 30%),
-    radial-gradient(140% 60% at 65% 52%, rgba(54, 163, 255, 0.85) 0 26%, transparent 60%);
+  background: ${background};
   background-repeat: no-repeat;
-
-  /* 横方向に“帯”が伸びるように各レイヤのサイズを大きくする */
-  background-size:
-    260% 160%,
-    /* linear 帯は特にワイド */ 200% 120%,
-    200% 120%,
-    220% 140%,
-    200% 120%,
-    200% 120%;
 
   /* 初期位置（中腹に集中させる） */
   background-position:
@@ -122,18 +114,26 @@ const WavyLayer = styled.div`
     32% 58%,
     68% 58%;
 
+  /* 横方向に“帯”が伸びるように各レイヤのサイズを大きくする */
+  background-size:
+    260% 160%,
+    /* linear 帯は特にワイド */ 200% 120%,
+    200% 120%,
+    220% 140%,
+    200% 120%,
+    200% 120%;
   background-blend-mode: screen, normal, normal, normal, normal, normal;
 
   /* ← ここが “うねり”の肝。SVG 変形 + ブラー */
-  filter: url(#warp) blur(30px) saturate(1.15);
+  filter: url('#warp') blur(30px) saturate(1.15);
   transform-origin: 50% 62%;
-  will-change: transform, background-position, background-size, filter;
 
   /* 回転は今の slowSpin を維持し、ripple を追加 */
   animation:
     ${slideX} 12s ease-in-out infinite alternate,
     ${ripple} 4s ease-in-out infinite alternate,
     ${slowSpin} 6s linear infinite alternate;
+  will-change: transform, background-position, background-size, filter;
 
   @media (prefers-reduced-motion: reduce) {
     animation: none;
@@ -142,6 +142,7 @@ const WavyLayer = styled.div`
 
 const Content: FC<LoginPageProps> = ({ className }) => {
   const router = useRouter();
+  const isDesktop = useIsDesktop();
   const { theme } = useSharedTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -177,15 +178,21 @@ const Content: FC<LoginPageProps> = ({ className }) => {
     <div className={className}>
       <SVGFilterDefs />
       <WavyLayer />
-      <div style={{ position: 'relative', zIndex: 1, height: '100%' }}>
+      <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', zIndex: 1, height: '100%' }}>
         <Header title={''} />
-        <Card border={theme.colors.border.main} shadow={'medium'} padding={'32px 28px'} blur={false} className={`${className}__form`}>
+        <Card
+          color={isDesktop ? theme.colors.surface.main : 'unset'}
+          border={theme.colors.border.main}
+          shadow={'medium'}
+          padding={'32px 28px'}
+          className={`${className}__form`}
+        >
           <InlineFlexColumn gap={24} className={`${className}__content`} align={'center'}>
             <InlineFlexColumn style={{ width: '100%' }} gap={8} align={'flex-start'}>
               <Text text={'Ludiscan Account'} fontWeight={'bold'} fontSize={fontSizes.largest} />
               <Text text={'sign in to manage all Ludiscan services and heatmap tools.'} fontSize={fontSizes.medium} color={theme.colors.text} />
             </InlineFlexColumn>
-            <a className={`${className}__button google_login`} href={`${env.API_BASE_URL}/api/v0/auth/google`} target={'_self'}>
+            <a className={`${className}__button google-login`} href={`${env.API_BASE_URL}/api/v0/auth/google`} target={'_self'}>
               <Image src={'/google.svg'} alt={'google'} width={20} height={20} />
               <Text
                 className={`${className}__buttonText`}
@@ -235,24 +242,46 @@ const Component: FC<LoginPageProps> = (props) => {
   );
 };
 
+const hexToRgba = (hex: string, alpha: number) => {
+  let c = hex.replace('#', '');
+  if (c.length === 3)
+    c = c
+      .split('')
+      .map((ch) => ch + ch)
+      .join('');
+  const num = parseInt(c, 16);
+  const r = (num >> 16) & 0xff;
+  const g = (num >> 8) & 0xff;
+  const b = num & 0xff;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
+
 const IndexPage = styled(Component)`
   position: relative;
   height: 100vh;
   overflow: hidden;
   color: ${({ theme }) => theme.colors.text};
-  background: ${({ theme }) => theme.colors.background};
+  background: ${lightTheme.colors.background};
 
   &__container {
     height: 100%;
   }
 
   &__form {
-    margin: 20px;
     position: relative;
+    z-index: 1;
     width: 100%;
     max-width: 320px;
     max-height: 600px;
-    z-index: 1;
+    margin: 20px;
+  }
+
+  .mobile &__form {
+    max-width: calc(100% - 58px);
+    height: 100%;
+    max-height: unset;
+    margin: 0;
+    background: ${({ theme }) => hexToRgba(theme.colors.surface.main, 0.5)};
   }
 
   &__content {
@@ -275,15 +304,15 @@ const IndexPage = styled(Component)`
     padding: 12px 24px;
     text-decoration: none;
     background: ${({ theme }) => theme.colors.surface.main};
-    border-radius: 48px;
     border: 1px solid ${({ theme }) => theme.colors.border.dark};
+    border-radius: 48px;
   }
 
   &__button:hover {
     opacity: 0.6;
   }
 
-  &__button.google_login {
+  &__button.google-login {
     width: calc(100% - 48px);
     max-width: 320px;
   }

@@ -68,7 +68,7 @@ const ToggleButton = styled(ToggleButtonComponent)`
 `;
 
 const Component: FC<ResponsiveSidebarProps> = ({ className, children, onChange }) => {
-  const [isOpen, setIsOpen] = useState<boolean>(true);
+  const [isOpen, setIsOpen] = useState<boolean | undefined>(undefined);
 
   useEffect(() => {
     const handleResize = () => {
@@ -78,6 +78,7 @@ const Component: FC<ResponsiveSidebarProps> = ({ className, children, onChange }
         setIsOpen(false);
       }
     };
+    handleResize();
 
     window.addEventListener('resize', handleResize);
     return () => {
@@ -86,7 +87,7 @@ const Component: FC<ResponsiveSidebarProps> = ({ className, children, onChange }
   }, []);
 
   useEffect(() => {
-    if (onChange) {
+    if (onChange && isOpen !== undefined) {
       onChange(isOpen);
     }
   }, [isOpen, onChange]);
@@ -99,12 +100,12 @@ const Component: FC<ResponsiveSidebarProps> = ({ className, children, onChange }
     setIsOpen(!isOpen);
   }, [isOpen]);
 
-  return (
+  return isOpen !== undefined ? (
     <div className={`${className} ${isOpen ? 'visible' : ''}`}>
       <ToggleButton onClick={toggleSidebar} isOpen={isOpen} />
       {children}
     </div>
-  );
+  ) : null;
 };
 
 export const ResponsiveSidebar = styled(Component)`

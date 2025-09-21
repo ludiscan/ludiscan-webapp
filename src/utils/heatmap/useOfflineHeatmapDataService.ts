@@ -79,5 +79,6 @@ export function useOfflineHeatmapDataService(offlineData: OfflineHeatmapData | n
     task: offlineData?.task,
     getEventLog,
     eventLogs: offlineData?.eventLogs || {},
+    projectId: offlineData?.task?.project.id,
   };
 }

@@ -20,6 +20,7 @@ import { DefaultStaleTime } from '@src/modeles/qeury';
 import { HeatMapCanvas } from '@src/pages/heatmap/projects/[project_id]/HeatmapCanvas';
 import { HeatmapMenuContent } from '@src/pages/heatmap/projects/[project_id]/HeatmapMenuContent';
 import { useOBJFromArrayBuffer } from '@src/pages/heatmap/projects/[project_id]/ModelLoader';
+import { MiniHeaderToolbar } from '@src/pages/heatmap/projects/[project_id]/QuickToolbar';
 import { HeatmapMenuSideBar } from '@src/pages/heatmap/projects/[project_id]/menu/HeatmapMenuSideBar';
 import { dimensions, zIndexes } from '@src/styles/style';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
@@ -49,21 +50,18 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
   const [visibleTimelineRange, setVisibleTimelineRange] = useState<PlayerTimelinePointsTimeRange>({ start: 0, end: timelineState.maxTime });
 
   const task = service.task;
-  const taskId = useMemo(() => {
-    return task?.taskId;
-  }, [task]);
 
   const { data: mapList } = useQuery({
-    queryKey: ['mapList', taskId, service],
+    queryKey: ['mapList', service],
     queryFn: async () => {
       return service.getMapList();
     },
     staleTime: DefaultStaleTime, // 5 minutes
-    enabled: !!taskId,
+    enabled: service.isInitialized,
   });
 
   const { data: mapContent } = useQuery({
-    queryKey: ['mapData', state.general.mapName, service, taskId],
+    queryKey: ['mapData', state.general.mapName, service],
     queryFn: async () => {
       if (!state.general.mapName) return null;
       return service.getMapContent(state.general.mapName);
@@ -72,7 +70,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
   });
 
   const { data: generalLogKeys } = useQuery({
-    queryKey: ['general', taskId],
+    queryKey: ['general'],
     queryFn: async () => {
       return service.getGeneralLogKeys();
     },
@@ -284,6 +282,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
       <FlexRow style={{ width: '100%', height: '100%' }} align={'center'} wrap={'nowrap'}>
         <HeatmapMenuSideBar className={`${className}__sideMenu`} service={service} currentMenu={openMenu} />
         <div className={`${className}__canvasBox`}>
+          <MiniHeaderToolbar />
           <Canvas camera={{ position: [2500, 5000, -2500], fov: 50, near: 10, far: 10000 }} ref={canvasRef} dpr={dpr}>
             <PerformanceMonitor factor={1} onChange={handleOnPerformance} />
             <HeatMapCanvas

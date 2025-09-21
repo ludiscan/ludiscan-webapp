@@ -20,13 +20,14 @@ export const Default: Story = {
   args: {
     version: 'story',
     service: {
-      isInitialized: true,
-      getMapList: async () => [''],
+      isInitialized: false,
+      getMapList: async () => [],
       getMapContent: async () => null,
-      getGeneralLogKeys: async () => null,
+      getGeneralLogKeys: async () => [],
       task: undefined,
       getEventLog: async () => [],
       eventLogs: {},
+      projectId: 1,
     },
   },
 };
