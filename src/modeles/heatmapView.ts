@@ -23,6 +23,7 @@ export type GeneralSettings = {
   upZ: boolean;
   scale: number;
   showHeatmap: boolean;
+  sessionId: number | null;
   heatmapOpacity: number;
   heatmapType: 'object' | 'fill';
   blockSize: number;
@@ -74,6 +75,7 @@ export const initializeValues: HeatmapDataState = {
     upZ: true,
     scale: 0.5,
     showHeatmap: true,
+    sessionId: null,
     heatmapOpacity: 1.0,
     heatmapType: 'object',
     blockSize: 1,

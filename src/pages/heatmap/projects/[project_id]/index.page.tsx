@@ -1,11 +1,9 @@
 import styled from '@emotion/styled';
-import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
 import { HeatMapViewer } from './HeatmapViewer';
 
-import type { HeatmapTask } from '@src/modeles/heatmaptask';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { GetServerSideProps } from 'next';
 import type { FC } from 'react';
@@ -16,25 +14,24 @@ import { StatusContent } from '@src/component/molecules/StatusContent';
 import { Header } from '@src/component/templates/Header';
 import { useAuth } from '@src/hooks/useAuth';
 import { useHeatmapState, useVersion } from '@src/hooks/useHeatmapState';
-import { createClient } from '@src/modeles/qeury';
 import { dimensions, fontSizes } from '@src/styles/style';
 import { useOnlineHeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 
 export type HeatMapTaskIdPageProps = {
   className?: string;
-  taskId?: string;
+  project_id?: number;
 };
 
 export const getServerSideProps: GetServerSideProps<HeatMapTaskIdPageProps> = async (context) => {
   const { params } = context;
-  if (!params || !params.task_id) {
+  if (!params || !params.project_id) {
     return {
       notFound: true,
     };
   }
   return {
     props: {
-      taskId: params.task_id as string,
+      project_id: Number(params.project_id as string),
     },
   };
 };
@@ -48,7 +45,8 @@ export type HeatmapIdPageLayoutProps = {
 
 const HeatmapIdPageLayoutComponent: FC<HeatmapIdPageLayoutProps> = ({ className, version, service, onBackClick }) => {
   const statusContentStatus = useMemo(() => {
-    if (!service.task) return 'loading';
+    if (!service.task) return 'success';
+    if (service.task.status === 'pending' || service.task.status === 'processing') return 'loading';
     return service.task.status === 'completed' ? 'success' : service.task.status === 'failed' ? 'error' : 'loading';
   }, [service.task]);
   const { apply, hasDiff, discard } = useHeatmapState();
@@ -73,9 +71,7 @@ const HeatmapIdPageLayoutComponent: FC<HeatmapIdPageLayoutProps> = ({ className,
         }
       />
       <div className={className}>
-        <StatusContent status={statusContentStatus}>
-          {service.task?.status === 'completed' && service && service.isInitialized && <HeatMapViewer dataService={service} />}
-        </StatusContent>
+        <StatusContent status={statusContentStatus}>{service && service.isInitialized && <HeatMapViewer service={service} />}</StatusContent>
       </div>
     </>
   );
@@ -110,47 +106,16 @@ export const HeatmapIdPageLayout = styled(HeatmapIdPageLayoutComponent)`
   }
 `;
 
-const HeatMapTaskIdPage: FC<HeatMapTaskIdPageProps> = ({ className, taskId }) => {
-  const timer = useRef<NodeJS.Timeout>(undefined);
-
+const HeatMapTaskIdPage: FC<HeatMapTaskIdPageProps> = ({ className, project_id }) => {
   const router = useRouter();
   const { data: version } = useVersion();
   const { isAuthorized, isLoading, ready } = useAuth();
-
-  const { data: task, refetch: refetchTask } = useQuery({
-    queryKey: ['heatmap', taskId, isAuthorized],
-    queryFn: async (): Promise<HeatmapTask | null> => {
-      if (!taskId || isNaN(Number(taskId))) return null;
-      if (!isAuthorized) return null;
-      const { data, error } = await createClient().GET('/api/v0/heatmap/tasks/{task_id}', {
-        params: { path: { task_id: Number(taskId) } },
-      });
-      if (error) throw error;
-      return data;
-    },
-    initialData: null,
-  });
 
   const handleBackClick = useCallback(() => {
     router.back();
   }, [router]);
 
-  const service = useOnlineHeatmapDataService(task);
-
-  useEffect(() => {
-    if (!task) return;
-
-    if (task.status === 'pending' || task.status === 'processing') {
-      timer.current = setInterval(() => {
-        refetchTask().then(() => {});
-      }, 500);
-    }
-    return () => {
-      if (timer.current) {
-        clearInterval(timer.current);
-      }
-    };
-  }, [refetchTask, task]);
+  const service = useOnlineHeatmapDataService(project_id, null);
 
   useEffect(() => {
     if (!isAuthorized && !isLoading && ready) {
@@ -158,7 +123,7 @@ const HeatMapTaskIdPage: FC<HeatMapTaskIdPageProps> = ({ className, taskId }) =>
     }
   }, [isAuthorized, isLoading, ready, router]);
 
-  if (!taskId || isNaN(Number(taskId))) {
+  if (!project_id || isNaN(Number(project_id))) {
     return <div>Invalid Task ID</div>;
   }
 

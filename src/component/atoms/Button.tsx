@@ -17,6 +17,7 @@ export type ButtonProps = {
   border?: boolean;
   children: ReactNode;
   disabled?: boolean | undefined;
+  title?: string;
 };
 
 export const ButtonIconSize = (props: Pick<ButtonProps, 'fontSize'>) => {
@@ -44,7 +45,7 @@ export const ButtonIconSize = (props: Pick<ButtonProps, 'fontSize'>) => {
 };
 
 const Component: FC<ButtonProps> = (props) => {
-  const { className, onClick, scheme, children, disabled = false } = props;
+  const { className, onClick, scheme, children, disabled = false, title } = props;
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       // stopping propagation to prevent parent click event by default
@@ -58,7 +59,7 @@ const Component: FC<ButtonProps> = (props) => {
   );
   return (
     <IconContext.Provider value={{ size: ButtonIconSize(props) }}>
-      <button className={`${className} ${scheme}`} onClick={handleClick} disabled={disabled}>
+      <button className={`${className} ${scheme}`} onClick={handleClick} disabled={disabled} title={title}>
         {children}
       </button>
     </IconContext.Provider>

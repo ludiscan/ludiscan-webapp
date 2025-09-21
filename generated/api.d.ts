@@ -334,6 +334,91 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v0.1/projects': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** 自分がアクセス可能なプロジェクト一覧（owner or member） */
+    get: operations['ProjectsV01Controller_myProjects'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0.1/projects/{project_id}/members': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** プロジェクトのメンバー一覧 */
+    get: operations['ProjectsV01Controller_listMembers'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0.1/projects/{project_id}/members/email': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** メンバー追加（メール指定・既存ユーザーのみ） */
+    post: operations['ProjectsV01Controller_addByEmail'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0.1/projects/{project_id}/members/{user_id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** メンバー削除（管理権限のみ） */
+    delete: operations['ProjectsV01Controller_remove'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0.1/projects/{project_id}/maps': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** プロジェクトのマップ一覧 */
+    get: operations['ProjectsV01Controller_getProjectMaps'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v0/general_log/keys': {
     parameters: {
       query?: never;
@@ -532,6 +617,23 @@ export interface paths {
     };
     /** Get general log keys */
     get: operations['PlaySessionController_getPositionLogKeys'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0.1/projects/{project_id}/sessions/{session_id}/maps': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** セッションのマップ一覧 */
+    get: operations['PlaySessionV01Controller_getSessionMaps'];
     put?: never;
     post?: never;
     delete?: never;
@@ -790,6 +892,33 @@ export interface components {
       offset_timestamp: number;
       player: number;
     };
+    ProjectMemberDto: {
+      user_id: string;
+      project_id: number;
+      /** @enum {string} */
+      role: 'admin' | 'viewer';
+      email: string;
+      name: string;
+      /** Format: date-time */
+      created_at: string;
+    };
+    ProjectResponseV01Dto: {
+      id: number;
+      name: string;
+      description: string;
+      /** Format: date-time */
+      createdAt: string;
+      user?: components['schemas']['UserResponseDto'] | null;
+      memberships: components['schemas']['ProjectMemberDto'][];
+    };
+    AddMemberByEmailDto: {
+      email: string;
+      /** @enum {string} */
+      role?: 'admin' | 'viewer';
+    };
+    GetMapsDto: {
+      maps: string[];
+    };
     StringGeneralLogDetailDto: {
       id: number;
       event_type: string;
@@ -980,9 +1109,6 @@ export interface components {
        * @example 2021-01-01T00:00:00.000Z
        */
       updatedAt: string;
-    };
-    GetMapsDto: {
-      maps: string[];
     };
     DefaultErrorResponse: {
       /** @example 400 */
@@ -1218,7 +1344,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description Redirect to /auth/google with signed state */
+      /** @description Redirect to /api/v0/auth/google with signed state */
       302: {
         headers: {
           [name: string]: unknown;
@@ -1664,6 +1790,171 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['GetGeneralLogKeysDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  ProjectsV01Controller_myProjects: {
+    parameters: {
+      query?: {
+        /** @description Number of logs to return (default: 20) */
+        limit?: number;
+        /** @description Offset for pagination (default: 0) */
+        offset?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProjectResponseV01Dto'][];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  ProjectsV01Controller_listMembers: {
+    parameters: {
+      query?: {
+        /** @description Number of logs to return (default: 20) */
+        limit?: number;
+        /** @description Offset for pagination (default: 0) */
+        offset?: number;
+      };
+      header?: never;
+      path: {
+        project_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProjectMemberDto'][];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  ProjectsV01Controller_addByEmail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        project_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AddMemberByEmailDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProjectMemberDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  ProjectsV01Controller_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        project_id: number;
+        user_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultSuccessResponse'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  ProjectsV01Controller_getProjectMaps: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        project_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['GetMapsDto'];
         };
       };
       /** @description Bad Request */
@@ -2277,6 +2568,37 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  PlaySessionV01Controller_getSessionMaps: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        project_id: number;
+        session_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': string[];
         };
       };
     };

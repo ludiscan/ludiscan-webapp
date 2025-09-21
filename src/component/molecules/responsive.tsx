@@ -1,24 +1,13 @@
-import { useEffect, useState } from 'react';
-
 import type { FC, ReactNode } from 'react';
 
-import { dimensions } from '@src/styles/style';
+import { useIsDesktop } from '@src/hooks/useIsDesktop';
 
 const Component: FC<{ desktop: ReactNode; mobile: ReactNode }> = ({ desktop, mobile }) => {
-  const [isDesktopLayout, setIsDesktopLayout] = useState(true);
+  const isDesktopLayout = useIsDesktop();
 
-  useEffect(() => {
-    const mediaQueryList = window.matchMedia(`(max-width: ${dimensions.mobileWidth}px)`);
-    const handleMediaChange = (event: MediaQueryListEvent) => {
-      setIsDesktopLayout(!event.matches);
-    };
-    setIsDesktopLayout(!mediaQueryList.matches);
-    // Add listener for media query changes
-    mediaQueryList.addEventListener('change', handleMediaChange);
-    return () => {
-      mediaQueryList.removeEventListener('change', handleMediaChange);
-    };
-  }, []);
+  if (isDesktopLayout === undefined) {
+    return null;
+  }
 
   return <>{isDesktopLayout ? desktop : mobile}</>;
 };

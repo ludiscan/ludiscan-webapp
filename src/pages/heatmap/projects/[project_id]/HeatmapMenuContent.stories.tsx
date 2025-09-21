@@ -2,8 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { createMockHeatmapTask } from '@src/modeles/heatmaptask';
-import { HeatmapMenuContent } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenuContent';
+import { HeatmapMenuContent } from '@src/pages/heatmap/projects/[project_id]/HeatmapMenuContent';
 
 export default {
   component: HeatmapMenuContent,
@@ -29,9 +28,18 @@ export const General: Story = {
     name: 'general',
     toggleMenu: () => {},
     eventLogKeys: ['event1', 'event2', 'event3'],
-    task: createMockHeatmapTask(),
     handleExportView: async () => {},
     mapOptions: ['Map1', 'Map2', 'Map3'],
+    service: {
+      isInitialized: false,
+      getMapList: async () => [],
+      getMapContent: async () => null,
+      getGeneralLogKeys: async () => [],
+      task: undefined,
+      getEventLog: async () => [],
+      eventLogs: {},
+      projectId: 1,
+    },
   },
 };
 

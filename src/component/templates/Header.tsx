@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
-import { useRouter } from 'next/navigation';
-import { useCallback } from 'react';
+import Image from 'next/image';
+import { usePathname, useRouter } from 'next/navigation';
+import { useCallback, useMemo } from 'react';
 import { CiUser, CiLight, CiDark } from 'react-icons/ci';
 import { FiChevronLeft } from 'react-icons/fi';
 import { MdLogout } from 'react-icons/md';
@@ -32,6 +33,9 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
 
   const { isAuthorized, logout } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
+
+  const isLoginPage = useMemo(() => pathname === '/login', [pathname]);
 
   const backIconHandle = useCallback(() => {
     if (onClick) {
@@ -50,7 +54,15 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
             <FiChevronLeft />
           </Button>
         )}
-        <Text text={title} fontSize={fontSizes.large2} fontWeight={fontWeights.bold} />
+        <Image
+          className={`${className}__logo ${theme.colors.isLight && 'light'}`}
+          src={'/favicon/favicon.svg'}
+          alt={'ludiscan'}
+          width={onClick ? 28 : 32}
+          height={onClick ? 28 : 32}
+        />
+        <Text text={'Ludiscan'} href={'/'} target={'_self'} fontSize={fontSizes.large2} fontWeight={fontWeights.bold} />
+        <Text text={title} fontSize={fontSizes.medium} fontWeight={fontWeights.bold} color={theme.colors.secondary.main} />
         {iconTitleEnd && <>{iconTitleEnd}</>}
         <div style={{ flex: 1 }} />
 
@@ -74,7 +86,7 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
           <Button fontSize={'large2'} onClick={toggleTheme} scheme={'none'}>
             {theme.colors.isLight ? <CiDark size={24} color={theme.colors.text} /> : <CiLight size={24} color={theme.colors.text} />}
           </Button>
-          {!isOffline && (
+          {!isOffline && !isLoginPage && (
             <>
               <Divider orientation={'vertical'} />
               {isAuthorized ? (
@@ -116,5 +128,15 @@ export const Header = styled(Component)`
 
   &__iconLabelRow.accent {
     color: ${({ theme }) => theme.colors.error};
+  }
+
+  &__logo {
+    width: ${({ onClick }) => (onClick ? '28px' : '32px')};
+    height: ${({ onClick }) => (onClick ? '28px' : '32px')};
+    filter: invert(100%);
+  }
+
+  &__logo.light {
+    filter: invert(0%);
   }
 `;

@@ -47,14 +47,12 @@ const ToggleButton = styled(ToggleButtonComponent)`
   z-index: ${zIndexes.sidebar + 1};
   width: 46px;
   height: 32px;
-  border-radius: 0 8px 8px 0;
   transform: translateX(-50%);
   transition: all 0.25s ease-in-out;
 
   &.closed {
     left: ${dimensions.sidebarWidth}px;
     background: ${({ theme }) => theme.colors.surface.main};
-    box-shadow: 0 2px 4px rgb(0 0 0 / 20%);
   }
 
   &__button {
@@ -70,7 +68,7 @@ const ToggleButton = styled(ToggleButtonComponent)`
 `;
 
 const Component: FC<ResponsiveSidebarProps> = ({ className, children, onChange }) => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<boolean | undefined>(undefined);
 
   useEffect(() => {
     const handleResize = () => {
@@ -80,8 +78,6 @@ const Component: FC<ResponsiveSidebarProps> = ({ className, children, onChange }
         setIsOpen(false);
       }
     };
-
-    // 初回レンダリング時に画面サイズをチェック
     handleResize();
 
     window.addEventListener('resize', handleResize);
@@ -91,7 +87,7 @@ const Component: FC<ResponsiveSidebarProps> = ({ className, children, onChange }
   }, []);
 
   useEffect(() => {
-    if (onChange) {
+    if (onChange && isOpen !== undefined) {
       onChange(isOpen);
     }
   }, [isOpen, onChange]);
@@ -104,12 +100,12 @@ const Component: FC<ResponsiveSidebarProps> = ({ className, children, onChange }
     setIsOpen(!isOpen);
   }, [isOpen]);
 
-  return (
+  return isOpen !== undefined ? (
     <div className={`${className} ${isOpen ? 'visible' : ''}`}>
       <ToggleButton onClick={toggleSidebar} isOpen={isOpen} />
       {children}
     </div>
-  );
+  ) : null;
 };
 
 export const ResponsiveSidebar = styled(Component)`

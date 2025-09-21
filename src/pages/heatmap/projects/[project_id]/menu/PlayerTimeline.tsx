@@ -10,7 +10,7 @@ import { InputRow } from './InputRow';
 
 import type { Theme } from '@emotion/react';
 import type { PlayerTimelineDetail } from '@src/modeles/heatmapView';
-import type { HeatmapMenuProps } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenuContent';
+import type { HeatmapMenuProps } from '@src/pages/heatmap/projects/[project_id]/HeatmapMenuContent';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC, CSSProperties } from 'react';
 
@@ -169,7 +169,7 @@ const queryPlaceholder =
   '  scissor -> player-current-point-icon: hand-scissor;\n' +
   '}';
 
-const Component: FC<HeatmapMenuProps> = ({ className, service, task }) => {
+const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
   const { data, setData } = usePlayerTimelineState();
   const [selectSessionId, setSelectSessionId] = useState<string | undefined>(undefined);
   const [queryText, setQueryText] = useState<string>('');
@@ -213,30 +213,34 @@ const Component: FC<HeatmapMenuProps> = ({ className, service, task }) => {
   }, [data.details]);
 
   const { data: sessions } = useQuery({
-    queryKey: ['player-timeline', task.project.id],
+    queryKey: ['player-timeline', service.projectId],
     queryFn: async () => {
-      return createClient().GET('/api/v0/projects/{project_id}/play_session', {
+      if (!service.projectId) return;
+      const { data, error } = await createClient().GET('/api/v0/projects/{project_id}/play_session', {
         params: {
           path: {
-            project_id: task.project.id,
+            project_id: service.projectId,
           },
         },
       });
+      if (error) return;
+      return data;
     },
     staleTime: DefaultStaleTime,
-    enabled: task.project.id !== undefined,
+    enabled: service.projectId !== undefined,
   });
 
   const getPlayers = useGetApi('/api/v0/projects/{project_id}/play_session/{session_id}/player_position_log/{session_id}/players', {
     staleTime: DefaultStaleTime,
   });
   const sessionIds = useMemo(() => {
-    return sessions?.data?.map((session) => String(session.sessionId)) || [];
+    return sessions?.map((session) => String(session.sessionId)) || [];
   }, [sessions]);
 
   const handleAddTimeline = useCallback(async () => {
     if (!selectSessionId) return;
-    const project_id = task.project.id;
+    const project_id = service.projectId;
+    if (!project_id) return;
     const session_id = selectSessionId ? Number(selectSessionId) : 0;
     const data = await getPlayers.fetch([
       {
@@ -270,7 +274,7 @@ const Component: FC<HeatmapMenuProps> = ({ className, service, task }) => {
         details: [...(prev.details || []), ...newDetails],
       };
     });
-  }, [getPlayers, selectSessionId, setData, task.project.id]);
+  }, [getPlayers, selectSessionId, setData, service.projectId]);
 
   const queryDisable = useMemo(() => {
     try {

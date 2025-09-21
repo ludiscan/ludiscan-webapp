@@ -4,7 +4,6 @@ import { BiSearch } from 'react-icons/bi';
 import { IoClose } from 'react-icons/io5';
 
 import type { Menus } from '@src/hooks/useHeatmapSideBarMenus';
-import type { HeatmapTask } from '@src/modeles/heatmaptask';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC } from 'react';
 import type { Group } from 'three';
@@ -24,7 +23,6 @@ export type HeatmapMenuProps = {
   name: Menus | undefined;
   toggleMenu: (value: boolean) => void;
   eventLogKeys?: string[] | undefined;
-  task: HeatmapTask;
   handleExportView: () => Promise<void>;
   mapOptions: string[];
   service: HeatmapDataService;
