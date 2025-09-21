@@ -8,12 +8,21 @@ const nextConfig: NextConfig = {
       test: /\.md$/i,
       type: 'asset/source',
     });
+    config.module.rules.push({
+      type: /\.svg$/,
+      use: ['@svgr/webpack'],
+    });
     return config;
   },
   turbopack: {
+    root: __dirname,
     rules: {
       '*.md': {
         loaders: ['raw-loader'],
+        as: '*.js',
+      },
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
         as: '*.js',
       },
     },
