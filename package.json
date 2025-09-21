@@ -33,6 +33,7 @@
     "build-storybook": "storybook build",
     "test-storybook": "test-storybook --config-dir .storybook",
     "generate:api-schemes": "npx openapi-typescript swagger.json --output generated/api.d.ts",
+    "generate:api-schemes:local-fetch": "npx openapi-typescript http://localhost:3211/swagger/api/v0/json --output generated/api.d.ts",
     "build:heatmap-bundle": "node scripts/create-heatmap-bundle.js",
     "prebuild:prod": "npm run build:heatmap-bundle"
   },
@@ -78,6 +79,7 @@
     "@storybook/react": "^8.6.12",
     "@storybook/test": "^8.6.12",
     "@storybook/test-runner": "^0.22.1",
+    "@svgr/webpack": "^8.1.0",
     "@swc/core": "^1.11.20",
     "@tanstack/eslint-plugin-query": "^5.64.2",
     "@types/jest": "^29.5.14",

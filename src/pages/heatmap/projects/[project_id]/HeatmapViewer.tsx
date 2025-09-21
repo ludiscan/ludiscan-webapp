@@ -9,7 +9,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { PerformanceMonitorApi } from '@react-three/drei';
 import type { PlaySpeedType } from '@src/component/templates/TimelineControllerBlock';
 import type { Menus } from '@src/hooks/useHeatmapSideBarMenus';
-import type { PlayerTimelinePointsTimeRange } from '@src/pages/heatmap/tasks/[task_id]/PlayerTimelinePoints';
+import type { PlayerTimelinePointsTimeRange } from '@src/pages/heatmap/projects/[project_id]/PlayerTimelinePoints';
 import type { HeatmapDataService, OfflineHeatmapData } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC } from 'react';
 
@@ -17,20 +17,21 @@ import { FlexRow } from '@src/component/atoms/Flex';
 import { TimelineControllerBlock } from '@src/component/templates/TimelineControllerBlock';
 import { useHeatmapState, usePlayerTimelineState } from '@src/hooks/useHeatmapState';
 import { DefaultStaleTime } from '@src/modeles/qeury';
-import { HeatMapCanvas } from '@src/pages/heatmap/tasks/[task_id]/HeatmapCanvas';
-import { HeatmapMenuContent } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenuContent';
-import { useOBJFromArrayBuffer } from '@src/pages/heatmap/tasks/[task_id]/ModelLoader';
-import { HeatmapMenuSideBar } from '@src/pages/heatmap/tasks/[task_id]/menu/HeatmapMenuSideBar';
+import { HeatMapCanvas } from '@src/pages/heatmap/projects/[project_id]/HeatmapCanvas';
+import { HeatmapMenuContent } from '@src/pages/heatmap/projects/[project_id]/HeatmapMenuContent';
+import { useOBJFromArrayBuffer } from '@src/pages/heatmap/projects/[project_id]/ModelLoader';
+import { MiniHeaderToolbar } from '@src/pages/heatmap/projects/[project_id]/QuickToolbar';
+import { HeatmapMenuSideBar } from '@src/pages/heatmap/projects/[project_id]/menu/HeatmapMenuSideBar';
 import { dimensions, zIndexes } from '@src/styles/style';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 import { getOfflineHeatmapTemplate } from '@src/utils/heatmap/getOfflineHeatmapTemplate';
 
 export type HeatmapViewerProps = {
   className?: string | undefined;
-  dataService: HeatmapDataService;
+  service: HeatmapDataService;
 };
 
-const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
+const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
   const [map, setMap] = useState<string | ArrayBuffer | null>(null);
   const [modelType, setModelType] = useState<'gltf' | 'glb' | 'obj' | 'server' | null>(null);
   const [dpr, setDpr] = useState(2);
@@ -48,33 +49,30 @@ const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
   const [timelinePlaySpeed, setTimelinePlaySpeed] = useState<PlaySpeedType>(1);
   const [visibleTimelineRange, setVisibleTimelineRange] = useState<PlayerTimelinePointsTimeRange>({ start: 0, end: timelineState.maxTime });
 
-  const task = dataService.task;
-  const taskId = useMemo(() => {
-    return task?.taskId;
-  }, [task]);
+  const task = service.task;
 
   const { data: mapList } = useQuery({
-    queryKey: ['mapList', taskId, dataService],
+    queryKey: ['mapList', service],
     queryFn: async () => {
-      return dataService.getMapList();
+      return service.getMapList();
     },
     staleTime: DefaultStaleTime, // 5 minutes
-    enabled: !!taskId,
+    enabled: service.isInitialized,
   });
 
   const { data: mapContent } = useQuery({
-    queryKey: ['mapData', state.general.mapName, dataService, taskId],
+    queryKey: ['mapData', state.general.mapName, service],
     queryFn: async () => {
       if (!state.general.mapName) return null;
-      return dataService.getMapContent(state.general.mapName);
+      return service.getMapContent(state.general.mapName);
     },
     staleTime: 1000 * 60 * 20,
   });
 
   const { data: generalLogKeys } = useQuery({
-    queryKey: ['general', taskId],
+    queryKey: ['general'],
     queryFn: async () => {
-      return dataService.getGeneralLogKeys();
+      return service.getGeneralLogKeys();
     },
     staleTime: DefaultStaleTime,
   });
@@ -148,7 +146,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
         mapList: mapList ?? [],
         mapContentBase64: mapContentBase64, // Base64エンコードしたモデルデータ
         generalLogKeys: generalLogKeys ?? null,
-        eventLogs: dataService.eventLogs,
+        eventLogs: service.eventLogs,
       };
 
       zip.file('data.json', JSON.stringify(heatmapData, null, 2));
@@ -219,7 +217,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
       console.error('エクスポート中にエラーが発生しました:', error);
       alert('エクスポートに失敗しました。');
     }
-  }, [dataService.eventLogs, generalLogKeys, mapContent, mapList, state, task]);
+  }, [service.eventLogs, generalLogKeys, mapContent, mapList, state, task]);
 
   useEffect(() => {
     const clickMenuIconHandler = (event: CustomEvent<{ name: Menus }>) => {
@@ -282,12 +280,13 @@ const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
   return (
     <div className={`${className}__view`}>
       <FlexRow style={{ width: '100%', height: '100%' }} align={'center'} wrap={'nowrap'}>
-        <HeatmapMenuSideBar className={`${className}__sideMenu`} service={dataService} currentMenu={openMenu} />
+        <HeatmapMenuSideBar className={`${className}__sideMenu`} service={service} currentMenu={openMenu} />
         <div className={`${className}__canvasBox`}>
+          <MiniHeaderToolbar />
           <Canvas camera={{ position: [2500, 5000, -2500], fov: 50, near: 10, far: 10000 }} ref={canvasRef} dpr={dpr}>
             <PerformanceMonitor factor={1} onChange={handleOnPerformance} />
             <HeatMapCanvas
-              service={dataService}
+              service={service}
               pointList={pointList}
               map={map}
               modelType={modelType}
@@ -341,21 +340,18 @@ const Component: FC<HeatmapViewerProps> = ({ className, dataService }) => {
           </div>
         )}
       </FlexRow>
-      {task && (
-        <div className={`${className}__canvasMenuBox`}>
-          <HeatmapMenuContent
-            task={task}
-            name={openMenu}
-            toggleMenu={handleMenuClose}
-            mapOptions={mapList ?? []}
-            model={model}
-            handleExportView={handleExportView}
-            eventLogKeys={generalLogKeys ?? undefined}
-            extra={menuExtra}
-            service={dataService}
-          />
-        </div>
-      )}
+      <div className={`${className}__canvasMenuBox`}>
+        <HeatmapMenuContent
+          name={openMenu}
+          toggleMenu={handleMenuClose}
+          mapOptions={mapList ?? []}
+          model={model}
+          handleExportView={handleExportView}
+          eventLogKeys={generalLogKeys ?? undefined}
+          extra={menuExtra}
+          service={service}
+        />
+      </div>
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { HeatmapIdPageLayout } from '@src/pages/heatmap/tasks/[task_id]/index.page';
+import { HeatmapIdPageLayout } from '@src/pages/heatmap/projects/[project_id]/index.page';
 
 export default {
   component: HeatmapIdPageLayout,
@@ -20,13 +20,14 @@ export const Default: Story = {
   args: {
     version: 'story',
     service: {
-      isInitialized: true,
-      getMapList: async () => [''],
+      isInitialized: false,
+      getMapList: async () => [],
       getMapContent: async () => null,
-      getGeneralLogKeys: async () => null,
+      getGeneralLogKeys: async () => [],
       task: undefined,
       getEventLog: async () => [],
       eventLogs: {},
+      projectId: 1,
     },
   },
 };

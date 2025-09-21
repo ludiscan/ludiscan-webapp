@@ -5,6 +5,9 @@ export interface HeatMapEventMap {
   'add-waypoint': { waypoint: { x: number; y: number; z: number } };
   'click-event-log': { logName: string; id: number };
   'event-log-detail-loaded': { logName: string; id: number };
+  'camera:percent': { percent: number };
+  'camera:set-zoom-percent': { percent: number };
+  'camera:fit': object;
 }
 
 class EventBus<T> extends EventTarget {

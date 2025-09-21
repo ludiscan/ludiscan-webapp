@@ -4,18 +4,18 @@ import { IoIosInformationCircleOutline } from 'react-icons/io';
 import { SiSvgtrace } from 'react-icons/si';
 
 import type { HeatmapStates } from '@src/modeles/heatmapView';
-import type { HeatmapMenuProps } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenuContent';
+import type { HeatmapMenuProps } from '@src/pages/heatmap/projects/[project_id]/HeatmapMenuContent';
 import type { FC, JSX } from 'react';
 
 import { Text } from '@src/component/atoms/Text';
 import { useHeatmapState } from '@src/hooks/useHeatmapState';
-import { EventLogDetail } from '@src/pages/heatmap/tasks/[task_id]/menu/EventLogDetail';
-import { EventLogContent } from '@src/pages/heatmap/tasks/[task_id]/menu/EventLogs';
-import { GeneralMenuContent } from '@src/pages/heatmap/tasks/[task_id]/menu/GeneralMenuContent';
-import { HotspotMenuContent } from '@src/pages/heatmap/tasks/[task_id]/menu/HotspotMenuContent';
-import { InfoMenuContent } from '@src/pages/heatmap/tasks/[task_id]/menu/InfoMenuContent';
-import { MapMenuContent } from '@src/pages/heatmap/tasks/[task_id]/menu/MapMenuContent';
-import { PlayerTimeline } from '@src/pages/heatmap/tasks/[task_id]/menu/PlayerTimeline';
+import { EventLogDetail } from '@src/pages/heatmap/projects/[project_id]/menu/EventLogDetail';
+import { EventLogContent } from '@src/pages/heatmap/projects/[project_id]/menu/EventLogs';
+import { GeneralMenuContent } from '@src/pages/heatmap/projects/[project_id]/menu/GeneralMenuContent';
+import { HotspotMenuContent } from '@src/pages/heatmap/projects/[project_id]/menu/HotspotMenuContent';
+import { InfoMenuContent } from '@src/pages/heatmap/projects/[project_id]/menu/InfoMenuContent';
+import { MapMenuContent } from '@src/pages/heatmap/projects/[project_id]/menu/MapMenuContent';
+import { PlayerTimeline } from '@src/pages/heatmap/projects/[project_id]/menu/PlayerTimeline';
 import { fontSizes, fontWeights } from '@src/styles/style';
 
 export type SideBarMenuType = {

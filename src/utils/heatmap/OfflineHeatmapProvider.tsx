@@ -12,7 +12,7 @@ import { Modal } from '@src/component/molecules/Modal';
 import { Header } from '@src/component/templates/Header';
 import { ToastProvider } from '@src/component/templates/ToastContext';
 import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
-import { HeatMapViewer } from '@src/pages/heatmap/tasks/[task_id]/HeatmapViewer';
+import { HeatMapViewer } from '@src/pages/heatmap/projects/[project_id]/HeatmapViewer';
 import { type AppStore, store } from '@src/store';
 import lightTheme from '@src/styles/light';
 import { fontSizes } from '@src/styles/style';
@@ -130,7 +130,7 @@ export const Component: FC<OfflineHeatmapProviderProps> = ({ className }) => {
                 </>
               }
             />
-            {data && !isLoading && service && service.isInitialized && <HeatMapViewer dataService={service} />}
+            {data && !isLoading && service && service.isInitialized && <HeatMapViewer service={service} />}
           </SharedThemeProvider>
         </QueryClientProvider>
       </ToastProvider>

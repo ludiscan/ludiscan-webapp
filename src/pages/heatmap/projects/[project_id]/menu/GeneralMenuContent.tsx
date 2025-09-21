@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 
 import type { GeneralSettings } from '@src/modeles/heatmapView';
-import type { HeatmapMenuProps } from '@src/pages/heatmap/tasks/[task_id]/HeatmapMenuContent';
+import type { HeatmapMenuProps } from '@src/pages/heatmap/projects/[project_id]/HeatmapMenuContent';
 import type { FC } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
@@ -12,7 +12,7 @@ import { Text } from '@src/component/atoms/Text';
 import { SegmentedSwitch } from '@src/component/molecules/SegmentedSwitch';
 import { Selector } from '@src/component/molecules/Selector';
 import { useGeneralState } from '@src/hooks/useHeatmapState';
-import { InputColumn, InputRow } from '@src/pages/heatmap/tasks/[task_id]/menu/InputRow';
+import { InputColumn, InputRow } from '@src/pages/heatmap/projects/[project_id]/menu/InputRow';
 import { fontSizes } from '@src/styles/style';
 
 export const GeneralMenuContent: FC<HeatmapMenuProps> = () => {
