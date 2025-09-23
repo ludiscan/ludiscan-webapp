@@ -39,6 +39,8 @@ export const General: Story = {
       getEventLog: async () => [],
       eventLogs: {},
       projectId: 1,
+      sessionId: null,
+      setSessionId: () => {},
     },
   },
 };
