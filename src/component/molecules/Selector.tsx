@@ -3,17 +3,20 @@ import { useState } from 'react';
 import { IoIosArrowDown } from 'react-icons/io';
 
 import type { ButtonProps } from '@src/component/atoms/Button';
+import type { LabeledButtonProps } from '@src/component/atoms/LabeledButton';
 import type { FC } from 'react';
 
 import { Text } from '@src/component/atoms/Text';
 import { Menu } from '@src/component/molecules/Menu';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 
-export type SelectorProps = Omit<ButtonProps, 'onClick' | 'fontSize' | 'scheme' | 'children'> & {
+export type SelectorProps = Omit<LabeledButtonProps, 'onClick' | 'fontSize' | 'scheme' | 'children'> & {
   options: string[];
   value?: string;
   onChange?: (value: string) => void | Promise<void>;
   fontSize?: ButtonProps['fontSize'];
+  placement?: 'top' | 'bottom';
+  align?: 'left' | 'right';
   scheme?: ButtonProps['scheme'];
 };
 
@@ -35,7 +38,7 @@ const Component: FC<SelectorProps> = (props) => {
         </div>
       }
     >
-      <Menu.ContentColumn padding={'2px'}>
+      <Menu.ContentColumn padding={'2px'} align={props.align} placement={props.placement}>
         {options.map((option, index) => {
           return (
             <Menu.ContentButton
@@ -73,6 +76,7 @@ export const Selector = styled(Component)`
     display: flex;
     gap: 12px;
     align-items: center;
+    justify-content: space-between;
     min-width: 80px;
     padding: 4px 6px;
 

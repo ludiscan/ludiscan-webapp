@@ -1,6 +1,5 @@
 import styled from '@emotion/styled';
 import { useEffect, useMemo } from 'react';
-import { BiSearch } from 'react-icons/bi';
 import { IoClose } from 'react-icons/io5';
 
 import type { Menus } from '@src/hooks/useHeatmapSideBarMenus';
@@ -10,8 +9,7 @@ import type { Group } from 'three';
 
 import { Button } from '@src/component/atoms/Button';
 import { Card } from '@src/component/atoms/Card';
-import { FlexColumn, FlexRow, InlineFlexRow } from '@src/component/atoms/Flex';
-import { TextField } from '@src/component/molecules/TextField';
+import { FlexColumn, InlineFlexRow } from '@src/component/atoms/Flex';
 import { MenuContents } from '@src/hooks/useHeatmapSideBarMenus';
 import { useGeneralState } from '@src/hooks/useHeatmapState';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
@@ -48,18 +46,12 @@ const Component: FC<HeatmapMenuProps> = (props) => {
   }
   return (
     <Card className={className} padding={'0px'} color={theme.colors.surface.main} blur>
+      <InlineFlexRow align={'center'} gap={16} style={{ position: 'absolute', top: '20px', right: '20px' }}>
+        <Button onClick={() => toggleMenu(false)} scheme={'none'} fontSize={'small'}>
+          <IoClose />
+        </Button>
+      </InlineFlexRow>
       <FlexColumn gap={8} align={'flex-start'} className={`${className}__content`}>
-        <InlineFlexRow align={'center'} gap={16} style={{ width: '100%' }}>
-          <div style={{ flex: 1 }}>
-            <FlexRow align={'space-between'} className={`${className}__searchBox`}>
-              <TextField fontSize={fontSizes.medium} onChange={() => {}} placeholder={'search menu...'} />
-              <BiSearch />
-            </FlexRow>
-          </div>
-          <Button onClick={() => toggleMenu(false)} scheme={'none'} fontSize={'small'}>
-            <IoClose />
-          </Button>
-        </InlineFlexRow>
         {content && <content.Component {...props} />}
       </FlexColumn>
     </Card>
@@ -67,7 +59,8 @@ const Component: FC<HeatmapMenuProps> = (props) => {
 };
 
 export const HeatmapMenuContent = styled(Component)`
-  width: 280px;
+  position: relative;
+  width: 350px;
   height: 100%;
   color: ${({ theme }) => theme.colors.text};
 

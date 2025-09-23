@@ -2,11 +2,10 @@ import styled from '@emotion/styled';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
-import Markdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 
 import type { FC } from 'react';
 
+import { MarkDownText } from '@src/component/molecules/MarkDownText';
 import { Header } from '@src/component/templates/Header';
 import { SidebarLayout } from '@src/component/templates/SidebarLayout';
 import readmeRaw from '@src/files/heatmapReadme.md';
@@ -42,9 +41,7 @@ const Component: FC<IndexPageProps> = ({ className, readme }) => {
           <Link href={'/home'}>
             <span>Go to Home</span>
           </Link>
-          <div className={`${className}__markdown`}>
-            <Markdown remarkPlugins={[remarkGfm]}>{readme}</Markdown>
-          </div>
+          {readme && <MarkDownText className={`${className}__markdown`} markdown={readme} />}
         </div>
       </InnerContent>
     </div>

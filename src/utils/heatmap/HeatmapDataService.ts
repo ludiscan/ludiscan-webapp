@@ -26,6 +26,9 @@ export type HeatmapDataService = {
   eventLogs: Record<string, PositionEventLog[]>;
 
   projectId: number | undefined;
+
+  sessionId: number | null;
+  setSessionId: (sessionId: number | null) => void;
 };
 
 // データ型定義
@@ -72,7 +75,7 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
   const timer = useRef<NodeJS.Timeout>(undefined);
   const [eventLogs, setEventLogs] = useState<Record<string, PositionEventLog[]>>({});
   const [taskId, setTaskId] = useState<number | null>(initialTaskId);
-  const [sessionId] = useState<number | null>(null);
+  const [sessionId, setSessionId] = useState<number | null>(null);
   const [stepSize] = useState<number>(50);
   const [zVisible] = useState<boolean>(true);
 
@@ -252,5 +255,7 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
     getEventLog,
     eventLogs,
     projectId,
+    sessionId,
+    setSessionId,
   };
 }

@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { BsGrid, BsPerson } from 'react-icons/bs';
 import { CiMap, CiMapPin, CiStreamOn } from 'react-icons/ci';
 import { IoIosInformationCircleOutline } from 'react-icons/io';
@@ -15,6 +16,7 @@ import { HotspotMenuContent } from '@src/features/heatmap/menu/HotspotMenuConten
 import { InfoMenuContent } from '@src/features/heatmap/menu/InfoMenuContent';
 import { MapMenuContent } from '@src/features/heatmap/menu/MapMenuContent';
 import { PlayerTimeline } from '@src/features/heatmap/menu/PlayerTimeline';
+import { AISummaryMenuContent } from '@src/features/heatmap/summary/AISummaryMenuContent';
 import { useHeatmapState } from '@src/hooks/useHeatmapState';
 import { fontSizes, fontWeights } from '@src/styles/style';
 
@@ -68,6 +70,11 @@ export const MenuContents: MenuType[] = [
   {
     name: 'eventLogDetail',
     Component: EventLogDetail,
+  },
+  {
+    name: 'summary',
+    icon: <Image src={'/heatmap/summarize-ai.svg'} alt={'summary'} width={22} height={22} />,
+    Component: AISummaryMenuContent,
   },
 ] as const;
 
