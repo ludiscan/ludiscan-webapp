@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from 'react';
 
+import type { HeatmapMenuProps } from '@src/features/heatmap/HeatmapMenuContent';
 import type { EventLogData } from '@src/modeles/heatmapView';
-import type { HeatmapMenuProps } from '@src/pages/heatmap/projects/[project_id]/HeatmapMenuContent';
 import type { FC } from 'react';
 
 import { Divider } from '@src/component/atoms/Divider';
@@ -9,8 +9,8 @@ import { InlineFlexColumn, InlineFlexRow } from '@src/component/atoms/Flex';
 import { Switch } from '@src/component/atoms/Switch';
 import { Text } from '@src/component/atoms/Text';
 import { Selector } from '@src/component/molecules/Selector';
+import { InputRow } from '@src/features/heatmap/menu/InputRow';
 import { useEventLogState } from '@src/hooks/useHeatmapState';
-import { InputRow } from '@src/pages/heatmap/projects/[project_id]/menu/InputRow';
 import { fontSizes, fontWeights } from '@src/styles/style';
 import { getRandomPrimitiveColor } from '@src/utils/color';
 

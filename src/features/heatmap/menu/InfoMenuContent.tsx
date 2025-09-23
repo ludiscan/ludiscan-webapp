@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import { FaFileExport } from 'react-icons/fa';
 
-import type { HeatmapMenuProps } from '@src/pages/heatmap/projects/[project_id]/HeatmapMenuContent';
+import type { HeatmapMenuProps } from '@src/features/heatmap/HeatmapMenuContent';
 import type { FC } from 'react';
 
 import { Button } from '@src/component/atoms/Button';

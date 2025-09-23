@@ -9,8 +9,8 @@ import remarkGfm from 'remark-gfm';
 import { InputRow } from './InputRow';
 
 import type { Theme } from '@emotion/react';
+import type { HeatmapMenuProps } from '@src/features/heatmap/HeatmapMenuContent';
 import type { PlayerTimelineDetail } from '@src/modeles/heatmapView';
-import type { HeatmapMenuProps } from '@src/pages/heatmap/projects/[project_id]/HeatmapMenuContent';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC, CSSProperties } from 'react';
 

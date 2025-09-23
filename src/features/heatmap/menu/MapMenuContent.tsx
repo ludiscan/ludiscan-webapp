@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 
 import type { Theme } from '@emotion/react';
-import type { HeatmapMenuProps } from '@src/pages/heatmap/projects/[project_id]/HeatmapMenuContent';
+import type { HeatmapMenuProps } from '@src/features/heatmap/HeatmapMenuContent';
 import type { CSSProperties, FC } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
@@ -9,10 +9,10 @@ import { InlineFlexColumn } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { Toggle } from '@src/component/atoms/Toggle';
 import { Selector } from '@src/component/molecules/Selector';
+import { ObjectToggleList } from '@src/features/heatmap/ObjectToggleList';
+import { InputRow } from '@src/features/heatmap/menu/InputRow';
 import { useGeneralState } from '@src/hooks/useHeatmapState';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { ObjectToggleList } from '@src/pages/heatmap/projects/[project_id]/ObjectToggleList';
-import { InputRow } from '@src/pages/heatmap/projects/[project_id]/menu/InputRow';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
 function toggleButtonStyle(theme: Theme): CSSProperties {

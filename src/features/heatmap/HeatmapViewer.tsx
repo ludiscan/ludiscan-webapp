@@ -8,20 +8,20 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { PerformanceMonitorApi } from '@react-three/drei';
 import type { PlaySpeedType } from '@src/component/templates/TimelineControllerBlock';
+import type { PlayerTimelinePointsTimeRange } from '@src/features/heatmap/PlayerTimelinePoints';
 import type { Menus } from '@src/hooks/useHeatmapSideBarMenus';
-import type { PlayerTimelinePointsTimeRange } from '@src/pages/heatmap/projects/[project_id]/PlayerTimelinePoints';
 import type { HeatmapDataService, OfflineHeatmapData } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC } from 'react';
 
 import { FlexRow } from '@src/component/atoms/Flex';
 import { TimelineControllerBlock } from '@src/component/templates/TimelineControllerBlock';
+import { HeatMapCanvas } from '@src/features/heatmap/HeatmapCanvas';
+import { HeatmapMenuContent } from '@src/features/heatmap/HeatmapMenuContent';
+import { useOBJFromArrayBuffer } from '@src/features/heatmap/ModelLoader';
+import { MiniHeaderToolbar } from '@src/features/heatmap/QuickToolbar';
+import { HeatmapMenuSideBar } from '@src/features/heatmap/menu/HeatmapMenuSideBar';
 import { useHeatmapState, usePlayerTimelineState } from '@src/hooks/useHeatmapState';
 import { DefaultStaleTime } from '@src/modeles/qeury';
-import { HeatMapCanvas } from '@src/pages/heatmap/projects/[project_id]/HeatmapCanvas';
-import { HeatmapMenuContent } from '@src/pages/heatmap/projects/[project_id]/HeatmapMenuContent';
-import { useOBJFromArrayBuffer } from '@src/pages/heatmap/projects/[project_id]/ModelLoader';
-import { MiniHeaderToolbar } from '@src/pages/heatmap/projects/[project_id]/QuickToolbar';
-import { HeatmapMenuSideBar } from '@src/pages/heatmap/projects/[project_id]/menu/HeatmapMenuSideBar';
 import { dimensions, zIndexes } from '@src/styles/style';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 import { getOfflineHeatmapTemplate } from '@src/utils/heatmap/getOfflineHeatmapTemplate';

@@ -5,20 +5,20 @@ import { AmbientLight, Box3, DirectionalLight, HemisphereLight, Raycaster, SpotL
 
 import { HeatmapPointsMarker } from './HeatmapPointsMarker';
 
-import type { PlayerTimelinePointsTimeRange } from '@src/pages/heatmap/projects/[project_id]/PlayerTimelinePoints';
+import type { PlayerTimelinePointsTimeRange } from '@src/features/heatmap/PlayerTimelinePoints';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC } from 'react';
 import type { Group, PerspectiveCamera, OrthographicCamera } from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 
+import { EventLogMarkers } from '@src/features/heatmap/EventLogMarkers';
+import { HeatmapCellOverlay } from '@src/features/heatmap/HeatmapCellOverlay';
+import { HotspotCircles } from '@src/features/heatmap/HotspotCircles';
+import { LocalModelLoader, StreamModelLoader } from '@src/features/heatmap/ModelLoader';
+import { PlayerTimelinePoints } from '@src/features/heatmap/PlayerTimelinePoints';
+import { WaypointMarker } from '@src/features/heatmap/WaypointMarker';
 import { useEventLogState, useGeneralState, usePlayerTimelineState } from '@src/hooks/useHeatmapState';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { EventLogMarkers } from '@src/pages/heatmap/projects/[project_id]/EventLogMarkers';
-import { HeatmapCellOverlay } from '@src/pages/heatmap/projects/[project_id]/HeatmapCellOverlay';
-import { HotspotCircles } from '@src/pages/heatmap/projects/[project_id]/HotspotCircles';
-import { LocalModelLoader, StreamModelLoader } from '@src/pages/heatmap/projects/[project_id]/ModelLoader';
-import { PlayerTimelinePoints } from '@src/pages/heatmap/projects/[project_id]/PlayerTimelinePoints';
-import { WaypointMarker } from '@src/pages/heatmap/projects/[project_id]/WaypointMarker';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
 type HeatmapCanvasProps = {
