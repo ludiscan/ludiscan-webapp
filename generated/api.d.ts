@@ -3060,6 +3060,13 @@ export interface operations {
           'application/json': components['schemas']['DefaultErrorResponse'];
         };
       };
+      /** @description Summary not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   SummariesController_create: {
