@@ -796,6 +796,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v0.1/projects/{project_id}/sessions/{session_id}/summary': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['SummariesController_latest'];
+    put?: never;
+    post: operations['SummariesController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -822,10 +838,15 @@ export interface components {
       returnTo?: string;
     };
     GoogleCallbackQueryDto: {
-      /** @description Googleから戻るときのstate（署名付き） */
+      /** @description 署名付きstate（自前検証用） */
       state?: string;
-      /** @description Google側エラー（任意） */
+      /** @description Google側エラー（存在する場合） */
       error?: string;
+      code?: string;
+      scope?: string;
+      authuser?: string;
+      prompt?: string;
+      hd?: string;
     };
     LoginUserDto: {
       /** @example password */
@@ -1110,6 +1131,27 @@ export interface components {
        */
       updatedAt: string;
     };
+    SessionSummaryDto: {
+      /**
+       * @description Summary UUID
+       * @example 8c7b3c7a-1c6a-41a4-9a9b-9b1c1d2e3f4a
+       */
+      id: string;
+      /** @enum {string} */
+      status: 'queued' | 'running' | 'done' | 'error';
+      /** @enum {string} */
+      lang: 'ja' | 'en';
+      /** @enum {string} */
+      provider: 'template' | 'ollama' | 'openai';
+      /** @example gpt-4o-mini */
+      model: string | null;
+      summary_md: string | null;
+      summary_json: {
+        [key: string]: unknown;
+      } | null;
+      /** Format: date-time */
+      created_at: string;
+    };
     DefaultErrorResponse: {
       /** @example 400 */
       code: number;
@@ -1365,10 +1407,15 @@ export interface operations {
   AuthController_googleCallback: {
     parameters: {
       query?: {
-        /** @description Googleから戻るときのstate（署名付き） */
+        /** @description 署名付きstate（自前検証用） */
         state?: components['schemas']['GoogleCallbackQueryDto'];
-        /** @description Google側エラー（任意） */
+        /** @description Google側エラー（存在する場合） */
         error?: string;
+        code?: string;
+        scope?: string;
+        authuser?: string;
+        prompt?: string;
+        hd?: string;
       };
       header?: never;
       path?: never;
@@ -2970,6 +3017,83 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  SummariesController_latest: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Project ID */
+        project_id: number;
+        /** @description Session ID */
+        session_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SessionSummaryDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  SummariesController_create: {
+    parameters: {
+      query: {
+        /** @description Language */
+        lang?: 'ja' | 'en';
+        /** @description Step size */
+        step_size?: number;
+        /** @description Z-axis visibility */
+        z_visible: boolean;
+        /** @description Queue generation */
+        queue?: boolean;
+        /** @description Summarization provider */
+        provider?: 'template' | 'openai' | 'ollama';
+      };
+      header?: never;
+      path: {
+        /** @description Project ID */
+        project_id: number;
+        /** @description Session ID */
+        session_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SessionSummaryDto'];
+        };
       };
       /** @description Bad Request */
       400: {
