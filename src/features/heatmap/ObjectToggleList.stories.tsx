@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
+import { ObjectToggleList } from '@src/features/heatmap/ObjectToggleList';
 import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
-import { ObjectToggleList } from '@src/pages/heatmap/projects/[project_id]/ObjectToggleList';
 import darkTheme from '@src/styles/dark';
 import lightTheme from '@src/styles/light';
 

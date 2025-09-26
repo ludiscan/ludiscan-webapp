@@ -23,3 +23,5 @@ export function createMockHeatmapTask(): HeatmapTask {
 export type GeneralEventLogKeys = components['schemas']['GetGeneralLogKeysDto'];
 
 export type PositionEventLog = components['schemas']['PositionGeneralLogDto'];
+
+export type SessionSummary = components['schemas']['SessionSummaryDto'];
