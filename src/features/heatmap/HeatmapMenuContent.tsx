@@ -60,7 +60,7 @@ const Component: FC<HeatmapMenuProps> = (props) => {
 
 export const HeatmapMenuContent = styled(Component)`
   position: relative;
-  width: 350px;
+  width: 500px;
   height: 100%;
   color: ${({ theme }) => theme.colors.text};
 

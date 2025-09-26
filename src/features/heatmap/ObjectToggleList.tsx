@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { IoMdEye, IoMdEyeOff } from 'react-icons/io';
 
 import type { FC } from 'react';
@@ -12,6 +12,7 @@ import { fontSizes } from '@src/styles/style';
 
 export type ObjectToggleListProps = {
   className?: string;
+  mapName: string;
   model:
     | Group
     | {
@@ -26,141 +27,220 @@ export type ObjectToggleListProps = {
       };
 };
 
-/**
- * material のクローンを生成して、透明度（opacity）を設定する
- */
-const updateAlpha = (material: Material | Material[], alpha: number): Material | Material[] => {
-  if (Array.isArray(material)) {
-    return material.map((mat) => {
-      const clone = mat.clone();
-      clone.transparent = true;
-      clone.opacity = alpha;
-      clone.needsUpdate = true;
-      return clone;
-    });
-  }
-  const clone = material.clone();
-  clone.transparent = true;
-  clone.opacity = alpha;
-  clone.needsUpdate = true;
-  return clone;
+// ---- helpers ----
+type OpacityLevel = 0.5 | 1.0;
+type ChildState = { visible: boolean; opacity: OpacityLevel };
+type DisplayState = Record<string, ChildState>;
+
+/** 配列/単体どちらの Material でも clone + opacity 設定 */
+const cloneWithOpacity = (mat: Material | Material[], opacity: number): Material | Material[] => {
+  const apply = (m: Material) => {
+    const c = m.clone();
+    c.transparent = opacity < 1.0 ? true : c.transparent || false;
+    c.opacity = opacity;
+    c.needsUpdate = true;
+    return c;
+  };
+  return Array.isArray(mat) ? mat.map(apply) : apply(mat);
 };
 
-/**
- * child の表示状態（0: フル表示, 1: 半透明表示, 2: 非表示）を更新する関数
- */
-const updateChildDisplay = (child: { visible: boolean; material?: Material | Material[] } & { uuid: string }, state: number) => {
-  if (state === 0) {
-    // フル表示
-    child.visible = true;
-    if ('material' in child && child.material) {
-      child.material = updateAlpha(child.material, 1);
-    }
-  } else if (state === 1) {
-    // 半透明表示 (opacity: 0.5)
-    child.visible = true;
-    if ('material' in child && child.material) {
-      child.material = updateAlpha(child.material, 0.5);
-    }
-  } else if (state === 2) {
-    // 非表示
-    child.visible = false;
-  }
+/** key 生成（モデル名 + 子uuid列） */
+const makeStorageKey = (mapName: string, model: ObjectToggleListProps['model']) => {
+  const name = (model as Group).name || 'Model';
+  return `ObjectToggleList:${mapName}:${name}`;
 };
 
-/**
- * 各子要素の表示状態を 0: フル表示, 1: 半透明表示, 2: 非表示 とする
- */
-const Component: FC<ObjectToggleListProps> = ({ className, model }) => {
-  // displayState は各子要素の状態を uuid ごとに管理する
-  const [displayState, setDisplayState] = useState<Record<string, number>>({});
+const Component: FC<ObjectToggleListProps> = ({ className, model, mapName }) => {
+  const storageKey = useMemo(() => makeStorageKey(mapName, model), [mapName, model]);
 
-  // 0: フル表示, 1: 半透明表示, 2: 非表示, 3: custom(個別設定)
-  const [allToggleState, setAllToggleState] = useState<number>(0);
+  // child.uuid -> { visible, opacity }
+  const [displayState, setDisplayState] = useState<DisplayState>({});
 
-  // 初回または model が変更された際、各子要素の状態（0: フル表示）を一括で設定する
+  // material キャッシュ: child.uuid -> { '1.0'?: mat, '0.5'?: mat }
+  const matCacheRef = useRef<Map<string, Partial<Record<OpacityLevel, Material | Material[]>>>>(new Map());
+
+  // 初期化：localStorage から復元 or デフォルト可視(1.0)
   useEffect(() => {
-    const initState: Record<string, number> = {};
+    const saved = typeof window !== 'undefined' ? window.localStorage.getItem(storageKey) : null;
+    const init: DisplayState = {};
     model.children.forEach((child) => {
-      initState[child.uuid] = 0;
-      // 初期状態としてフル表示に合わせて更新
-      updateChildDisplay(child, 0);
+      init[child.uuid] = { visible: true, opacity: 1.0 };
     });
-    setDisplayState(initState);
-  }, [model]);
-
-  // クリックごとに状態をローテーション (0 -> 1 -> 2 -> 0) し、対象の child のみ更新する
-  const toggleDisplayState = useCallback(
-    (uuid: string) => {
-      setDisplayState((prev) => {
-        const current = prev[uuid] ?? 0;
-        const newState = (current + 1) % 3;
-        // 対象の child を特定
-        const targetChild = model.children.find((child) => child.uuid === uuid);
-        if (targetChild) {
-          updateChildDisplay(targetChild, newState);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved) as DisplayState;
+        // 既存 child のみ復帰
+        for (const uuid of Object.keys(init)) {
+          if (parsed[uuid]) init[uuid] = parsed[uuid];
         }
-        return { ...prev, [uuid]: newState };
-      });
-      setAllToggleState(3);
-    },
-    [model.children],
-  );
+      } catch {
+        // 破損時は無視
+      }
+    }
+    setDisplayState(init);
+  }, [storageKey, model]);
 
+  // displayState が変わったら Three 側へ反映 + 保存
   useEffect(() => {
-    if (allToggleState === 3) return;
+    // Threeに適用
     model.children.forEach((child) => {
-      updateChildDisplay(child, allToggleState);
-      setDisplayState((prev) => ({ ...prev, [child.uuid]: allToggleState }));
+      const s = displayState[child.uuid];
+      if (!s) return;
+      child.visible = s.visible;
+      if (!s.visible) return;
+
+      if ('material' in child) {
+        // キャッシュから取り出す or 生成
+        const cache = matCacheRef.current.get(child.uuid) ?? {};
+        let cloned = cache[s.opacity];
+        if (!cloned) {
+          const base = cache[1.0] ?? child.material; // 既に1.0をクローンしていればそれをベースにしてもOK
+          if (base) {
+            cloned = cloneWithOpacity(base, s.opacity);
+            cache[s.opacity] = cloned;
+            matCacheRef.current.set(child.uuid, cache);
+          }
+        }
+        child.material = cloned;
+      }
     });
-  }, [allToggleState, model]);
+
+    // 保存
+    if (typeof window !== 'undefined' && Object.keys(displayState).length > 0) {
+      window.localStorage.setItem(storageKey, JSON.stringify(displayState));
+    }
+  }, [displayState, model, storageKey]);
+
+  // アンマウント時: クローンを dispose
+  useEffect(() => {
+    // ref.current のスナップショットを取る
+    const cache = matCacheRef.current;
+    const levels: (0.5 | 1.0)[] = [1.0, 0.5];
+
+    return () => {
+      cache.forEach((entry) => {
+        levels.forEach((lv) => {
+          const m = entry[lv];
+          if (!m) return;
+          if (Array.isArray(m)) m.forEach((mm) => mm.dispose?.());
+          else m.dispose?.();
+        });
+      });
+      cache.clear();
+    };
+  }, []);
+
+  // ---- UI handlers ----
+  const setAllVisible = useCallback((visible: boolean) => {
+    setDisplayState((prev) => {
+      const next: DisplayState = {};
+      for (const [uuid, s] of Object.entries(prev)) next[uuid] = { ...s, visible };
+      return next;
+    });
+  }, []);
+
+  const setAllOpacity = useCallback((opacity: OpacityLevel) => {
+    setDisplayState((prev) => {
+      const next: DisplayState = {};
+      for (const [uuid, s] of Object.entries(prev)) next[uuid] = { ...s, opacity };
+      return next;
+    });
+  }, []);
+
+  const toggleChildVisible = useCallback((uuid: string) => {
+    setDisplayState((prev) => ({ ...prev, [uuid]: { ...prev[uuid], visible: !prev[uuid].visible } }));
+  }, []);
+
+  const toggleChildOpacity = useCallback((uuid: string) => {
+    setDisplayState((prev) => {
+      const cur = prev[uuid];
+      const nextOpacity: OpacityLevel = cur.opacity === 1.0 ? 0.5 : 1.0;
+      return { ...prev, [uuid]: { ...cur, opacity: nextOpacity } };
+    });
+  }, []);
+
+  // 親 UI の現在集計
+  const anyVisible = useMemo(() => Object.values(displayState).some((s) => s.visible), [displayState]);
+  const allVisible = useMemo(() => Object.values(displayState).length > 0 && Object.values(displayState).every((s) => s.visible), [displayState]);
+  const majorityOpacity: OpacityLevel = useMemo(() => {
+    const vs = Object.values(displayState);
+    if (vs.length === 0) return 1.0;
+    const half = vs.filter((s) => s.opacity === 0.5).length;
+    return half > vs.length / 2 ? 0.5 : 1.0;
+  }, [displayState]);
 
   return (
     <div className={className}>
       {/* 親ラベル */}
       <FlexRow className={`${className}__parent-label`} align={'center'} gap={8}>
         <Text text={(model as Group).name || 'Mesh'} fontSize={fontSizes.medium} />
-        <Button scheme={'none'} fontSize={'large1'} className={`${className}__visibleButton`} onClick={() => setAllToggleState((allToggleState + 1) % 3)}>
-          {allToggleState === 0 ? (
-            <IoMdEye />
-          ) : allToggleState === 1 ? (
-            <Text text={'0.5'} fontSize={fontSizes.small} fontWeight={'bold'} />
-          ) : allToggleState === 2 ? (
-            <IoMdEyeOff />
-          ) : (
-            <Text text={'--'} fontSize={fontSizes.small} fontWeight={'bold'} />
-          )}
+        {/* 全体 visible トグル */}
+        <Button
+          scheme={'none'}
+          fontSize={'large1'}
+          className={`${className}__visibleButton`}
+          onClick={() => setAllVisible(!allVisible)}
+          aria-label={allVisible ? 'Hide all' : 'Show all'}
+        >
+          {allVisible ? <IoMdEye /> : anyVisible ? <IoMdEye /> : <IoMdEyeOff />}
+        </Button>
+        {/* 全体 opacity トグル（visible時のデフォルトを合わせるイメージ） */}
+        <Button
+          scheme={'none'}
+          fontSize={'smallest'}
+          className={`${className}__opacityButton`}
+          onClick={() => setAllOpacity(majorityOpacity === 1.0 ? 0.5 : 1.0)}
+          disabled={!anyVisible}
+          aria-label={'Toggle opacity for all visible'}
+        >
+          <Text text={majorityOpacity.toFixed(1)} fontSize={fontSizes.small} fontWeight={'bold'} />
         </Button>
       </FlexRow>
 
       {/* 子要素リスト */}
       <ul className={`${className}__child-list`}>
-        {model.children.map((child) => (
-          <li key={child.uuid}>
-            <InlineFlexRow align={'center'} gap={4}>
-              <Text text={child.name || child.type} fontSize={fontSizes.small} />
-              <Button onClick={() => toggleDisplayState(child.uuid)} scheme={'none'} fontSize={'large1'} className={`${className}__visibleButton`}>
-                {displayState[child.uuid] === 0 ? (
-                  <IoMdEye />
-                ) : displayState[child.uuid] === 1 ? (
-                  <Text text={'0.5'} fontSize={fontSizes.small} fontWeight={'bold'} />
-                ) : (
-                  <IoMdEyeOff />
+        {model.children.map((child) => {
+          const s = displayState[child.uuid];
+          const visible = s?.visible ?? true;
+          const opacity = s?.opacity ?? 1.0;
+          return (
+            <li key={child.uuid}>
+              <InlineFlexRow align={'center'} gap={6}>
+                <Text text={child.name || child.type} fontSize={fontSizes.small} />
+                {/* 個別 visible */}
+                <Button
+                  onClick={() => toggleChildVisible(child.uuid)}
+                  scheme={'none'}
+                  fontSize={'large1'}
+                  className={`${className}__visibleButton`}
+                  aria-label={visible ? 'Hide' : 'Show'}
+                >
+                  {visible ? <IoMdEye /> : <IoMdEyeOff />}
+                </Button>
+                {/* 個別 opacity：visible の時だけ表示 */}
+                {visible && (
+                  <Button
+                    fontSize={'smallest'}
+                    onClick={() => toggleChildOpacity(child.uuid)}
+                    scheme={'none'}
+                    className={`${className}__opacityButton`}
+                    aria-label={'Toggle opacity'}
+                  >
+                    <Text text={opacity.toFixed(1)} fontSize={fontSizes.small} fontWeight={'bold'} />
+                  </Button>
                 )}
-              </Button>
-            </InlineFlexRow>
-          </li>
-        ))}
+              </InlineFlexRow>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
 };
 
 export const ObjectToggleList = styled(Component)`
-  /* 全体の余白やフォント */
   position: relative;
 
-  /* 親ラベル ("Mesh") のスタイル */
   &__parent-label {
     position: relative;
     left: 6px;
@@ -169,7 +249,6 @@ export const ObjectToggleList = styled(Component)`
     font-weight: bold;
   }
 
-  /* 親ラベルから子リストへ続く短い横線 */
   &__parent-label::after {
     position: absolute;
     top: 50%;
@@ -180,7 +259,6 @@ export const ObjectToggleList = styled(Component)`
     background: #ccc;
   }
 
-  /* 子リスト */
   &__child-list {
     position: relative;
     padding: 0;
@@ -188,14 +266,12 @@ export const ObjectToggleList = styled(Component)`
     list-style: none;
   }
 
-  /* 各子要素 (li) */
   &__child-list li {
     position: relative;
     padding: 2px 0;
     padding-left: 20px;
   }
 
-  /* 横線 */
   &__child-list li::before {
     position: absolute;
     top: 50%;
@@ -206,7 +282,6 @@ export const ObjectToggleList = styled(Component)`
     background: #ccc;
   }
 
-  /* 縦線 */
   &__child-list li::after {
     position: absolute;
     top: 0;
@@ -217,19 +292,18 @@ export const ObjectToggleList = styled(Component)`
     background: #ccc;
   }
 
-  /* 最後の li 要素だけは縦線を途中で止める */
   &__child-list li:last-child::after {
     bottom: calc(50% - 2px);
   }
 
-  /* 1行目の場合、上寄りに線を調整する */
   &__child-list li:first-of-type::after {
     top: -8px;
   }
 
-  /* ボタン（眼アイコン） */
-  &__visibleButton {
+  &__visibleButton,
+  &__opacityButton {
     display: flex;
     align-content: center;
+    min-width: 28px;
   }
 `;

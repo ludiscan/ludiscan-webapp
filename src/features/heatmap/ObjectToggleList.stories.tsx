@@ -27,6 +27,7 @@ export const Default: Story = {
   ...Template,
   name: 'default style',
   args: {
+    mapName: '',
     model: {
       children: [
         { uuid: '1', name: 'Model1', type: 'obj', visible: true },
