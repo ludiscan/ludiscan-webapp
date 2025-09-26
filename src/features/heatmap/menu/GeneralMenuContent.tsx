@@ -5,7 +5,6 @@ import type { GeneralSettings } from '@src/modeles/heatmapView';
 import type { FC } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
-import { InlineFlexColumn } from '@src/component/atoms/Flex';
 import { Slider } from '@src/component/atoms/Slider';
 import { Switch } from '@src/component/atoms/Switch';
 import { Text } from '@src/component/atoms/Text';
@@ -19,7 +18,7 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = () => {
   const { data: general, setData } = useGeneralState();
   const handleReload = useCallback(() => {}, []);
   return (
-    <InlineFlexColumn gap={4}>
+    <>
       <InputRow label={'上向ベクトル'}>
         <SegmentedSwitch
           fontSize={'smallest'}
@@ -80,6 +79,6 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = () => {
           <Text text={'Reload'} fontSize={fontSizes.small} />
         </Button>
       </InputRow>
-    </InlineFlexColumn>
+    </>
   );
 };
