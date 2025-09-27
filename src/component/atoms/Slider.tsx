@@ -160,7 +160,7 @@ export const Slider = styled(SliderComponent)`
     position: relative; /* tooltip を絶対位置で配置するため */
     display: flex;
     align-items: center;
-    width: calc(100% - ${({ sideLabel }) => (sideLabel ? '40px' : '0')} - ${({ textField }) => (textField ? '39px' : '0')});
+    width: calc(100% - ${({ sideLabel }) => (sideLabel ? '40px' : '0px')} - ${({ textField }) => (textField ? '39px' : '0')});
   }
 
   &__tooltip {

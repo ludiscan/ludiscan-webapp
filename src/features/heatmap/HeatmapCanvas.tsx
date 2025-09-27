@@ -3,7 +3,7 @@ import { useThree } from '@react-three/fiber';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AmbientLight, Box3, DirectionalLight, HemisphereLight, Raycaster, SpotLight, Vector2, Vector3 } from 'three';
 
-import { HeatmapPointsMarker } from './HeatmapPointsMarker';
+import { HeatmapObjectOverlay } from './HeatmapObjectOverlay';
 
 import type { PlayerTimelinePointsTimeRange } from '@src/features/heatmap/PlayerTimelinePoints';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
@@ -12,7 +12,7 @@ import type { Group, PerspectiveCamera, OrthographicCamera } from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 
 import { EventLogMarkers } from '@src/features/heatmap/EventLogMarkers';
-import { HeatmapCellOverlay } from '@src/features/heatmap/HeatmapCellOverlay';
+import { HeatmapFillOverlay } from '@src/features/heatmap/HeatmapFillOverlay';
 import { HotspotCircles } from '@src/features/heatmap/HotspotCircles';
 import { LocalModelLoader, StreamModelLoader } from '@src/features/heatmap/ModelLoader';
 import { PlayerTimelinePoints } from '@src/features/heatmap/PlayerTimelinePoints';
@@ -358,11 +358,11 @@ const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, s
           <>
             <StreamModelLoader ref={modelRef} model={model} />
             {pointList && modelRef.current && heatmapType === 'fill' && showHeatmap && (
-              <HeatmapCellOverlay group={modelRef.current} points={pointList} cellSize={(service.task?.stepSize || 50) / 2} opacity={heatmapOpacity} />
+              <HeatmapFillOverlay group={modelRef.current} points={pointList} cellSize={(service.task?.stepSize || 50) / 2} opacity={heatmapOpacity} />
             )}
           </>
         )}
-        {pointList && heatmapType === 'object' && showHeatmap && <HeatmapPointsMarker points={pointList} />}
+        {pointList && heatmapType === 'object' && showHeatmap && <HeatmapObjectOverlay points={pointList} />}
         {pointList && showHeatmap && <HotspotCircles points={pointList} />}
         {visibleEventLogs.length > 0 && visibleEventLogs.map((event) => <EventLogMarkers key={event.key} logName={event.key} service={service} pref={event} />)}
         {service &&

@@ -39,7 +39,7 @@ function Toolbar({ className, service }: Props) {
   });
 
   const sessionIds = useMemo(() => {
-    if (!sessions) return [];
+    if (!sessions || !Array.isArray(sessions)) return [];
     return sessions?.map((session) => String(session.sessionId)) || [];
   }, [sessions]);
 
