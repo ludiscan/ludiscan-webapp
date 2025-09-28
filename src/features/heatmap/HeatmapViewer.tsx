@@ -47,7 +47,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
   const [timelinePlaySpeed, setTimelinePlaySpeed] = useState<PlaySpeedType>(1);
   const [visibleTimelineRange, setVisibleTimelineRange] = useState<PlayerTimelinePointsTimeRange>({ start: 0, end: timelineState.maxTime });
 
-  const task = service.task;
+  const task = useMemo(() => service.task, [service.task]);
 
   const { data: mapList } = useQuery({
     queryKey: ['mapList', service],

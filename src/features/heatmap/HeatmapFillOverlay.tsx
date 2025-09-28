@@ -41,9 +41,9 @@ type Props = {
   opacity?: number;
 };
 
-export const HeatmapCellOverlay: FC<Props> = ({ group, points, cellSize, maxDensity, threshold = 0, offset = 0.1, opacity = 0.7 }) => {
+export const HeatmapFillOverlay: FC<Props> = ({ group, points, cellSize, maxDensity, threshold = 0, offset = 0.1, opacity = 0.7 }) => {
   const {
-    data: { upZ, scale },
+    data: { upZ, scale, colorScale },
   } = useGeneralState();
 
   const [cells, setCells] = useState<Cell[]>([]);
@@ -64,15 +64,14 @@ export const HeatmapCellOverlay: FC<Props> = ({ group, points, cellSize, maxDens
       raycaster.set(origin, new THREE.Vector3(0, -1, 0));
       const hit = raycaster.intersectObject(group, true)[0];
       if (!hit || !hit.face) continue;
-
       newCells.push({
         pos: hit.point,
         normal: hit.face.normal.clone(),
-        color: lerpColor(t),
+        color: lerpColor(t * colorScale > 1 ? 1 : t * colorScale),
       });
     }
     setCells(newCells);
-  }, [group, points, raycaster, md, threshold, upZ, scale, cellSize]);
+  }, [group, points, raycaster, md, threshold, upZ, scale, cellSize, colorScale]);
 
   return (
     <group>

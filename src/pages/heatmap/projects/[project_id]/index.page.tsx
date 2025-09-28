@@ -12,7 +12,7 @@ import { StatusContent } from '@src/component/molecules/StatusContent';
 import { Header } from '@src/component/templates/Header';
 import { HeatMapViewer } from '@src/features/heatmap/HeatmapViewer';
 import { useAuth } from '@src/hooks/useAuth';
-import { useHeatmapState, useVersion } from '@src/hooks/useHeatmapState';
+import { useGeneralState, useHeatmapState, useVersion } from '@src/hooks/useHeatmapState';
 import { dimensions, fontSizes } from '@src/styles/style';
 import { useOnlineHeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 
@@ -114,7 +114,9 @@ const HeatMapTaskIdPage: FC<HeatMapTaskIdPageProps> = ({ className, project_id }
     router.back();
   }, [router]);
 
-  const service = useOnlineHeatmapDataService(project_id, null);
+  const { data: general } = useGeneralState();
+
+  const service = useOnlineHeatmapDataService(project_id, null, general.sessionHeatmap);
 
   useEffect(() => {
     if (!isAuthorized && !isLoading && ready) {

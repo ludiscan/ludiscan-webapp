@@ -30,6 +30,8 @@ export type GeneralSettings = {
   mapName: string;
   minThreshold: number;
   maxThreshold: number;
+  colorScale: number;
+  sessionHeatmap: boolean;
 };
 export type HotspotModeSettings = {
   visible: boolean;
@@ -82,6 +84,8 @@ export const initializeValues: HeatmapDataState = {
     mapName: '',
     minThreshold: 0.0,
     maxThreshold: 1,
+    colorScale: 1.0,
+    sessionHeatmap: false,
   },
   hotspotMode: {
     visible: false,
