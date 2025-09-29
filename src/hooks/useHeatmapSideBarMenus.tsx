@@ -58,7 +58,7 @@ export const MenuContents: MenuType[] = [
     Component: EventLogContent,
   },
   {
-    name: 'playerTimeline',
+    name: 'timeline',
     icon: <SiSvgtrace />,
     Component: PlayerTimeline,
   },

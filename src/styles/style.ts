@@ -43,6 +43,11 @@ export const dimensions = {
   maxWidth: 1200,
 } as const;
 
+export const layers = {
+  default: 0,
+  raycast: 7,
+} as const;
+
 export const colors = {
   primary: '#0070f3',
   primaryVariant: '#ff0080',
