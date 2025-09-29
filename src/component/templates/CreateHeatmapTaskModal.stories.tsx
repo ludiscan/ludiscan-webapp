@@ -5,7 +5,7 @@ import { Text } from '../atoms/Text';
 
 import { CreateHeatmapTaskModal } from './CreateHeatmapTaskModal';
 
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs';
 
 const queryClient = new QueryClient();
 

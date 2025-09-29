@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs';
 
 import { ObjectToggleList } from '@src/features/heatmap/ObjectToggleList';
 import { SharedThemeProvider } from '@src/hooks/useSharedTheme';

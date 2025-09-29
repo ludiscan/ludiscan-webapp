@@ -5,7 +5,7 @@ import { BsPerson } from 'react-icons/bs';
 import darkTheme from '../../styles/dark';
 import lightTheme from '../../styles/light';
 
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs';
 
 import { Button } from '@src/component/atoms/Button';
 import { Text } from '@src/component/atoms/Text';

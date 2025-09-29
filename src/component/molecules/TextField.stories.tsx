@@ -2,7 +2,7 @@
 import darkTheme from '../../styles/dark';
 import lightTheme from '../../styles/light';
 
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs';
 
 import { TextField } from '@src/component/molecules/TextField';
 import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
