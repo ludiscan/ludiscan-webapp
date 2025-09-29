@@ -8,7 +8,7 @@ import darkTheme from './dark';
 import lightTheme from './light';
 import { colors } from './style';
 
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs';
 import type { FC } from 'react';
 
 export default {

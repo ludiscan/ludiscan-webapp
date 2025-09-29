@@ -1,6 +1,6 @@
-import { within, expect } from '@storybook/test';
+import { within, expect } from 'storybook/test';
 
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs';
 
 import { LinedText } from '@src/component/molecules/LinedText';
 

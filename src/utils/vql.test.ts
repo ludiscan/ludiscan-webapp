@@ -111,7 +111,6 @@ describe('HVQL - parse & compile', () => {
   });
 
   test('compileHVQL: クォート付き文字列の除去', () => {
-    // eslint-disable-next-line quotes
     const script = ['map status.hand {', "  rock -> player-current-point-icon: 'hand-rock';", '}'].join('\n');
 
     const apply = compileHVQL(script);
