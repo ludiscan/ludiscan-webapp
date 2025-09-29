@@ -13,7 +13,7 @@ import { FlexColumn, InlineFlexRow } from '@src/component/atoms/Flex';
 import { MenuContents } from '@src/hooks/useHeatmapSideBarMenus';
 import { useGeneralState } from '@src/hooks/useHeatmapState';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { fontSizes, fontWeights } from '@src/styles/style';
+import { fontSizes, fontWeights, zIndexes } from '@src/styles/style';
 
 export type HeatmapMenuProps = {
   model: Group | null;
@@ -46,7 +46,7 @@ const Component: FC<HeatmapMenuProps> = (props) => {
   }
   return (
     <Card className={className} padding={'0px'} color={theme.colors.surface.main} blur>
-      <InlineFlexRow align={'center'} gap={16} style={{ position: 'absolute', top: '20px', right: '20px' }}>
+      <InlineFlexRow align={'center'} gap={16} style={{ position: 'absolute', top: '20px', right: '20px', zIndex: zIndexes.header }}>
         <Button onClick={() => toggleMenu(false)} scheme={'none'} fontSize={'small'}>
           <IoClose />
         </Button>

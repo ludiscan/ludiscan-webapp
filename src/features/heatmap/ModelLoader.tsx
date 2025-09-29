@@ -6,6 +6,7 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import type { FC, RefObject } from 'react';
 import type { Group } from 'three';
 
+import { setRaycastLayerRecursive } from '@src/features/heatmap/ObjectToggleList';
 import { useGeneralState } from '@src/hooks/useHeatmapState';
 
 type LocalModelLoaderProps = {
@@ -58,6 +59,7 @@ export function useOBJFromArrayBuffer(arrayBuffer: ArrayBuffer | null): Group | 
 
     try {
       const obj = loader.parse(text);
+      setRaycastLayerRecursive(obj, true);
       setObject3d(obj);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (_error) {

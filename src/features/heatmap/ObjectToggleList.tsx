@@ -3,12 +3,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { IoMdEye, IoMdEyeOff } from 'react-icons/io';
 
 import type { FC } from 'react';
-import type { Group, Material } from 'three';
+import type { Group, Material, Object3D } from 'three';
 
 import { Button } from '@src/component/atoms/Button';
 import { FlexRow, InlineFlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
-import { fontSizes } from '@src/styles/style';
+import { fontSizes, layers } from '@src/styles/style';
 
 export type ObjectToggleListProps = {
   className?: string;
@@ -26,6 +26,12 @@ export type ObjectToggleListProps = {
         }[];
       };
 };
+
+export function setRaycastLayerRecursive(obj: Object3D, enabled: boolean) {
+  if (enabled) obj.layers.enable(layers.raycast);
+  else obj.layers.disable(layers.raycast);
+  for (const c of obj.children) setRaycastLayerRecursive(c, enabled);
+}
 
 // ---- helpers ----
 type OpacityLevel = 0.5 | 1.0;
@@ -64,12 +70,12 @@ const Component: FC<ObjectToggleListProps> = ({ className, model, mapName }) => 
     const saved = typeof window !== 'undefined' ? window.localStorage.getItem(storageKey) : null;
     const init: DisplayState = {};
     model.children.forEach((child) => {
+      // any: Object3D を受ける
       init[child.uuid] = { visible: true, opacity: 1.0 };
     });
     if (saved) {
       try {
         const parsed = JSON.parse(saved) as DisplayState;
-        // 既存 child のみ復帰
         for (const uuid of Object.keys(init)) {
           if (parsed[uuid]) init[uuid] = parsed[uuid];
         }
@@ -78,23 +84,27 @@ const Component: FC<ObjectToggleListProps> = ({ className, model, mapName }) => 
       }
     }
     setDisplayState(init);
+
+    // ★ レイヤー初期化（現在の可視状態に合わせる）
+    model.children.forEach((child) => {
+      const s = init[child.uuid];
+      setRaycastLayerRecursive(child as unknown as Object3D, !!s?.visible);
+    });
   }, [storageKey, model]);
 
   // displayState が変わったら Three 側へ反映 + 保存
   useEffect(() => {
-    // Threeに適用
     model.children.forEach((child) => {
       const s = displayState[child.uuid];
       if (!s) return;
-      child.visible = s.visible;
-      if (!s.visible) return;
 
-      if ('material' in child) {
-        // キャッシュから取り出す or 生成
+      // 描画の可視/透明度
+      child.visible = s.visible;
+      if ('material' in child && s.visible) {
         const cache = matCacheRef.current.get(child.uuid) ?? {};
         let cloned = cache[s.opacity];
         if (!cloned) {
-          const base = cache[1.0] ?? child.material; // 既に1.0をクローンしていればそれをベースにしてもOK
+          const base = cache[1.0] ?? child.material;
           if (base) {
             cloned = cloneWithOpacity(base, s.opacity);
             cache[s.opacity] = cloned;
@@ -103,9 +113,11 @@ const Component: FC<ObjectToggleListProps> = ({ className, model, mapName }) => 
         }
         child.material = cloned;
       }
+
+      // ★ レイキャスト可否（可視に連動）
+      setRaycastLayerRecursive(child as unknown as Object3D, s.visible);
     });
 
-    // 保存
     if (typeof window !== 'undefined' && Object.keys(displayState).length > 0) {
       window.localStorage.setItem(storageKey, JSON.stringify(displayState));
     }
