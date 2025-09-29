@@ -2,8 +2,8 @@
   "name": "ludiscan-webapp",
   "private": false,
   "engines": {
-    "node": "23.6.x",
-    "npm": "10.x"
+    "node": "24.9.x",
+    "npm": "11.x"
   },
   "author": "matuyuhi",
   "description": "",
