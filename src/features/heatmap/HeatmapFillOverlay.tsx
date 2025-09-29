@@ -185,8 +185,8 @@ export const HeatmapFillOverlay: FC<Props> = ({ group, points, cellSize, offset 
     const m = new THREE.Matrix4();
     const s = new THREE.Vector3(1.5, 1.5, 1.5);
     const col = new THREE.Color();
-    // @ts-ignore
-    const arr: Float32Array = inst.instanceColor.array;
+
+    const arr = inst.instanceColor.array;
 
     instanceData.forEach((it, idx) => {
       m.compose(it.pos, it.quat, s);
