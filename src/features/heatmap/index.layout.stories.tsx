@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs';
 
 import { HeatmapIdPageLayout } from '@src/pages/heatmap/projects/[project_id]/index.page';
 
@@ -28,6 +28,8 @@ export const Default: Story = {
       getEventLog: async () => [],
       eventLogs: {},
       projectId: 1,
+      sessionId: null,
+      setSessionId: () => {},
     },
   },
 };

@@ -5,7 +5,6 @@ import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
-import { Divider } from '@src/component/atoms/Divider';
 import { FlexColumn } from '@src/component/atoms/Flex';
 import { Tooltip } from '@src/component/atoms/Tooltip';
 import { useHeatmapSideBarMenus } from '@src/hooks/useHeatmapSideBarMenus';
@@ -22,7 +21,6 @@ const Component: FC<MenuSideBarProps> = ({ className, currentMenu }) => {
   const menus = useHeatmapSideBarMenus();
   return (
     <FlexColumn className={className} gap={12} wrap={'nowrap'}>
-      <Divider orientation={'horizontal'} />
       {menus.map(({ name, icon }) => (
         <Button
           className={`${className}__button ${name === currentMenu ? 'active' : ''}`}

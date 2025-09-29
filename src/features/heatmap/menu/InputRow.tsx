@@ -26,12 +26,10 @@ export const InputRow = styled(
   ({ className, label, children, align = 'center' }: { className?: string; label: string; children: ReactNode; align?: FlexProps['align'] }) => {
     const { theme } = useSharedTheme();
     return (
-      <div className={className}>
-        <InlineFlexRow align={align} wrap={'nowrap'} gap={4}>
-          <Text text={label} fontSize={fontSizes.small} style={{ width: '90px' }} color={theme.colors.secondary.light} />
-          <div style={{ flex: 1 }}>{children}</div>
-        </InlineFlexRow>
-      </div>
+      <InlineFlexRow className={className} align={align} wrap={'nowrap'} gap={4}>
+        <Text text={label} fontSize={fontSizes.small} style={{ width: '90px' }} color={theme.colors.secondary.light} />
+        <div style={{ flex: 1 }}>{children}</div>
+      </InlineFlexRow>
     );
   },
 )`

@@ -1,6 +1,6 @@
 import { IoCut } from 'react-icons/io5';
 
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs';
 
 import { IconLabelRow } from '@src/component/molecules/IconLabelRow';
 

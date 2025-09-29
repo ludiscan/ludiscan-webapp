@@ -1,21 +1,23 @@
+import Image from 'next/image';
 import { BsGrid, BsPerson } from 'react-icons/bs';
 import { CiMap, CiMapPin, CiStreamOn } from 'react-icons/ci';
 import { IoIosInformationCircleOutline } from 'react-icons/io';
 import { SiSvgtrace } from 'react-icons/si';
 
+import type { HeatmapMenuProps } from '@src/features/heatmap/HeatmapMenuContent';
 import type { HeatmapStates } from '@src/modeles/heatmapView';
-import type { HeatmapMenuProps } from '@src/pages/heatmap/projects/[project_id]/HeatmapMenuContent';
 import type { FC, JSX } from 'react';
 
 import { Text } from '@src/component/atoms/Text';
+import { EventLogDetail } from '@src/features/heatmap/menu/EventLogDetail';
+import { EventLogContent } from '@src/features/heatmap/menu/EventLogs';
+import { GeneralMenuContent } from '@src/features/heatmap/menu/GeneralMenuContent';
+import { HotspotMenuContent } from '@src/features/heatmap/menu/HotspotMenuContent';
+import { InfoMenuContent } from '@src/features/heatmap/menu/InfoMenuContent';
+import { MapMenuContent } from '@src/features/heatmap/menu/MapMenuContent';
+import { PlayerTimeline } from '@src/features/heatmap/menu/PlayerTimeline';
+import { AISummaryMenuContent } from '@src/features/heatmap/summary/AISummaryMenuContent';
 import { useHeatmapState } from '@src/hooks/useHeatmapState';
-import { EventLogDetail } from '@src/pages/heatmap/projects/[project_id]/menu/EventLogDetail';
-import { EventLogContent } from '@src/pages/heatmap/projects/[project_id]/menu/EventLogs';
-import { GeneralMenuContent } from '@src/pages/heatmap/projects/[project_id]/menu/GeneralMenuContent';
-import { HotspotMenuContent } from '@src/pages/heatmap/projects/[project_id]/menu/HotspotMenuContent';
-import { InfoMenuContent } from '@src/pages/heatmap/projects/[project_id]/menu/InfoMenuContent';
-import { MapMenuContent } from '@src/pages/heatmap/projects/[project_id]/menu/MapMenuContent';
-import { PlayerTimeline } from '@src/pages/heatmap/projects/[project_id]/menu/PlayerTimeline';
 import { fontSizes, fontWeights } from '@src/styles/style';
 
 export type SideBarMenuType = {
@@ -56,7 +58,7 @@ export const MenuContents: MenuType[] = [
     Component: EventLogContent,
   },
   {
-    name: 'playerTimeline',
+    name: 'timeline',
     icon: <SiSvgtrace />,
     Component: PlayerTimeline,
   },
@@ -68,6 +70,11 @@ export const MenuContents: MenuType[] = [
   {
     name: 'eventLogDetail',
     Component: EventLogDetail,
+  },
+  {
+    name: 'summary',
+    icon: <Image src={'/heatmap/summarize-ai.svg'} alt={'summary'} width={22} height={22} />,
+    Component: AISummaryMenuContent,
   },
 ] as const;
 

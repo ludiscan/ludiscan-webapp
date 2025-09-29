@@ -9,8 +9,8 @@ import remarkGfm from 'remark-gfm';
 import { InputRow } from './InputRow';
 
 import type { Theme } from '@emotion/react';
+import type { HeatmapMenuProps } from '@src/features/heatmap/HeatmapMenuContent';
 import type { PlayerTimelineDetail } from '@src/modeles/heatmapView';
-import type { HeatmapMenuProps } from '@src/pages/heatmap/projects/[project_id]/HeatmapMenuContent';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC, CSSProperties } from 'react';
 
@@ -83,6 +83,7 @@ const DetailBlockInternal: FC<{ className?: string; details: PlayerTimelineDetai
   if (details.length === 0) return null;
   return (
     <InlineFlexColumn gap={4} className={className}>
+      <Divider />
       <FlexRow className={`${className}__row`} wrap={'nowrap'} align={'center'}>
         <Text text={`Session: ${session_id}`} fontSize={fontSizes.small} color={theme.colors.secondary.main} />
         <div style={{ flex: 1 }} />
@@ -213,7 +214,7 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
   }, [data.details]);
 
   const { data: sessions } = useQuery({
-    queryKey: ['player-timeline', service.projectId],
+    queryKey: ['sessions', service.projectId],
     queryFn: async () => {
       if (!service.projectId) return;
       const { data, error } = await createClient().GET('/api/v0/projects/{project_id}/play_session', {
@@ -349,10 +350,7 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
             </Button>
           </Toggle>
           {Array.from(sessionByDetail.values()).map((details, index) => (
-            <>
-              <Divider key={`${index}-divider`} />
-              <DetailBlock key={`${index}-detail-block`} details={details} service={service} />
-            </>
+            <DetailBlock key={`${index}-detail-block`} details={details} service={service} />
           ))}
         </>
       )}

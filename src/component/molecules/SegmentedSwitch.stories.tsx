@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs';
 
 import { FlexColumn } from '@src/component/atoms/Flex';
 import { SegmentedSwitch } from '@src/component/molecules/SegmentedSwitch';

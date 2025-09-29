@@ -1,32 +1,91 @@
 import styled from '@emotion/styled';
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { IoEllipsisHorizontal } from 'react-icons/io5';
 
 import type { StyledComponent } from '@emotion/styled';
 import type { ButtonProps } from '@src/component/atoms/Button';
 import type { CardProps } from '@src/component/atoms/Card';
-import type { FC, ReactNode, MouseEvent } from 'react';
+import type { LabeledButtonProps } from '@src/component/atoms/LabeledButton';
+import type { FC, ReactNode, MouseEvent, RefObject } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
 import { Card } from '@src/component/atoms/Card';
 import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
+import { LabeledButton } from '@src/component/atoms/LabeledButton';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { zIndexes } from '@src/styles/style';
 
-export type MenuProps = Omit<ButtonProps, 'onClick'> & {
+export type MenuProps = Omit<LabeledButtonProps, 'onClick'> & {
   className?: string | undefined;
   icon: ReactNode;
   children: ReactNode;
   onClick?: ButtonProps['onClick'];
 };
 
-export const EllipsisMenuContext = createContext<{ isOpen: boolean; onClose: () => void }>({ isOpen: false, onClose: () => {} });
+const EllipsisMenuContext = createContext<{ isOpen: boolean; onClose: () => void; anchorRef: RefObject<HTMLDivElement | null> }>({
+  isOpen: false,
+  onClose: () => {},
+  anchorRef: { current: null },
+});
 
-export const useEllipsisMenuContext = () => useContext(EllipsisMenuContext);
+const useEllipsisMenuContext = () => useContext(EllipsisMenuContext);
+
+type FloatingProps = {
+  className?: string;
+  children: ReactNode;
+  align?: 'left' | 'right';
+  placement?: 'top' | 'bottom';
+  offset?: number;
+  openClassName?: string; // "open"
+};
+
+const Floating: FC<FloatingProps> = ({ className, children, align = 'left', placement = 'bottom', offset = 8, openClassName = 'open' }) => {
+  const { isOpen, anchorRef } = useEllipsisMenuContext();
+  const [style, setStyle] = useState<React.CSSProperties>({ position: 'fixed', visibility: 'hidden' });
+
+  const update = useCallback(() => {
+    const el = anchorRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+
+    const base: React.CSSProperties = { position: 'fixed', zIndex: zIndexes.dropdown };
+    const left = align === 'left' ? rect.left : undefined;
+    const right = align === 'right' ? window.innerWidth - rect.right : undefined;
+
+    // bottom: rect.bottom + offset で下へ、top: rect.top - offset & translateY(-100%) で上へ
+    if (placement === 'bottom') {
+      setStyle({ ...base, top: rect.bottom + offset, left, right });
+    } else {
+      setStyle({ ...base, top: rect.top - offset, left, right, transform: 'translateY(-100%)' });
+    }
+  }, [anchorRef, align, placement, offset]);
+
+  useLayoutEffect(() => {
+    if (!isOpen) return;
+    update();
+    const onScroll = () => update();
+    const onResize = () => update();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onResize);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onResize);
+    };
+  }, [isOpen, update]);
+
+  const content = (
+    <div className={`${className} ${isOpen ? openClassName : ''}`} style={style}>
+      {children}
+    </div>
+  );
+  return createPortal(content, document.body);
+};
 
 const Component: FC<MenuProps> = (props) => {
   const { className, icon, children, onClick } = props;
   const [isOpen, setIsOpen] = useState(false);
+  const anchorRef = useRef<HTMLDivElement>(null);
   const closeMenu = useCallback(() => {
     setIsOpen(false);
   }, []);
@@ -65,11 +124,11 @@ const Component: FC<MenuProps> = (props) => {
     [closeMenu, isOpen, onClick, openMenu],
   );
   return (
-    <div className={className}>
-      <Button {...props} onClick={handleClick}>
+    <div className={className} ref={anchorRef}>
+      <LabeledButton {...props} onClick={handleClick}>
         {icon}
-      </Button>
-      <EllipsisMenuContext.Provider value={{ isOpen, onClose: closeMenu }}>{children}</EllipsisMenuContext.Provider>
+      </LabeledButton>
+      <EllipsisMenuContext.Provider value={{ isOpen, onClose: closeMenu, anchorRef }}>{children}</EllipsisMenuContext.Provider>
     </div>
   );
 };
@@ -78,6 +137,7 @@ export type EllipsisMenuContentProps = CardProps & {
   className?: string | undefined;
   align?: 'left' | 'right';
   gap?: number;
+  placement?: 'top' | 'bottom';
   children: ReactNode;
 };
 
@@ -86,11 +146,13 @@ const ContentRowComponent: FC<EllipsisMenuContentProps> = (props) => {
   const { isOpen } = useEllipsisMenuContext();
   const { className, gap, children, shadow = 'medium', border = theme.colors.border.light, padding = '8px', stopPropagate = true } = props;
   return (
-    <Card {...props} className={`${className} ${isOpen ? 'open' : ''}`} shadow={shadow} border={border} padding={padding} stopPropagate={stopPropagate}>
-      <FlexRow align={'center'} gap={gap} wrap={'nowrap'}>
-        {children}
-      </FlexRow>
-    </Card>
+    <Floating className={`${className} ${isOpen ? 'open' : ''}`} align={props.align} placement={props['placement'] || 'bottom'}>
+      <Card {...props} className={`${className} ${isOpen ? 'open' : ''}`} shadow={shadow} border={border} padding={padding} stopPropagate={stopPropagate}>
+        <FlexRow align={'center'} gap={gap} wrap={'nowrap'}>
+          {children}
+        </FlexRow>
+      </Card>
+    </Floating>
   );
 };
 
@@ -99,11 +161,13 @@ const ContentColumnComponent: FC<EllipsisMenuContentProps> = (props) => {
   const { isOpen } = useEllipsisMenuContext();
   const { className, gap, children, shadow = 'medium', border = theme.colors.border.light, padding = '8px', stopPropagate = true } = props;
   return (
-    <Card {...props} className={`${className} ${isOpen ? 'open' : ''}`} shadow={shadow} border={border} padding={padding} stopPropagate={stopPropagate}>
-      <FlexColumn align={'flex-start'} gap={gap} wrap={'nowrap'}>
-        {children}
-      </FlexColumn>
-    </Card>
+    <Floating className={`${className} ${isOpen ? 'open' : ''}`} align={props.align} placement={props['placement'] || 'bottom'}>
+      <Card {...props} className={`${className} ${isOpen ? 'open' : ''}`} shadow={shadow} border={border} padding={padding} stopPropagate={stopPropagate}>
+        <FlexColumn align={'flex-start'} gap={gap} wrap={'nowrap'}>
+          {children}
+        </FlexColumn>
+      </Card>
+    </Floating>
   );
 };
 
@@ -124,9 +188,6 @@ const ContentButton: FC<ButtonProps> = (props) => {
 };
 
 const ContentRow = styled(ContentRowComponent)`
-  position: absolute;
-  ${({ align }) => (align === 'left' ? 'left: 0;' : 'right: 0;')}
-  z-index: ${zIndexes.dropdown};
   visibility: hidden;
   opacity: 0;
   transition: 0.3s;
@@ -138,9 +199,6 @@ const ContentRow = styled(ContentRowComponent)`
 `;
 
 const ContentColumn = styled(ContentColumnComponent)`
-  position: absolute;
-  ${({ align }) => (align === 'left' ? 'left: 0;' : 'right: 0;')}
-  z-index: ${zIndexes.dropdown};
   visibility: hidden;
   opacity: 0;
   transition: 0.3s;

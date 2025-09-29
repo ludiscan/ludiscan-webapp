@@ -2,11 +2,11 @@ import { useQuery } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import { FaFileExport } from 'react-icons/fa';
 
-import type { HeatmapMenuProps } from '@src/pages/heatmap/projects/[project_id]/HeatmapMenuContent';
+import type { HeatmapMenuProps } from '@src/features/heatmap/HeatmapMenuContent';
 import type { FC } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
-import { InlineFlexColumn, InlineFlexRow } from '@src/component/atoms/Flex';
+import { InlineFlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { useVersion } from '@src/hooks/useHeatmapState';
 import { createClient, DefaultStaleTime } from '@src/modeles/qeury';
@@ -38,7 +38,7 @@ export const InfoMenuContent: FC<HeatmapMenuProps> = ({ handleExportView, servic
   });
 
   return (
-    <InlineFlexColumn gap={4}>
+    <>
       <InlineFlexRow align={'center'} gap={4}>
         <Text text={`version: ${version}`} fontSize={fontSizes.small} />
       </InlineFlexRow>
@@ -64,6 +64,6 @@ export const InfoMenuContent: FC<HeatmapMenuProps> = ({ handleExportView, servic
           <Text text={'エクスポート'} fontSize={fontSizes.small} fontWeight={fontWeights.bold} />
         </Button>
       </InlineFlexRow>
-    </InlineFlexColumn>
+    </>
   );
 };

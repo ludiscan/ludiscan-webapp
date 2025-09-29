@@ -1,7 +1,7 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs';
 
+import { ObjectToggleList } from '@src/features/heatmap/ObjectToggleList';
 import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
-import { ObjectToggleList } from '@src/pages/heatmap/projects/[project_id]/ObjectToggleList';
 import darkTheme from '@src/styles/dark';
 import lightTheme from '@src/styles/light';
 
@@ -27,6 +27,7 @@ export const Default: Story = {
   ...Template,
   name: 'default style',
   args: {
+    mapName: '',
     model: {
       children: [
         { uuid: '1', name: 'Model1', type: 'obj', visible: true },

@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs';
 
 import { Text } from '@src/component/atoms/Text';
 import { ResponsiveSidebar } from '@src/component/molecules/ResponsiveSidebar';

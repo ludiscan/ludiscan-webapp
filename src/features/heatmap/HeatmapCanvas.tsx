@@ -3,22 +3,22 @@ import { useThree } from '@react-three/fiber';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AmbientLight, Box3, DirectionalLight, HemisphereLight, Raycaster, SpotLight, Vector2, Vector3 } from 'three';
 
-import { HeatmapPointsMarker } from './HeatmapPointsMarker';
+import { HeatmapObjectOverlay } from './HeatmapObjectOverlay';
 
-import type { PlayerTimelinePointsTimeRange } from '@src/pages/heatmap/projects/[project_id]/PlayerTimelinePoints';
+import type { PlayerTimelinePointsTimeRange } from '@src/features/heatmap/PlayerTimelinePoints';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC } from 'react';
 import type { Group, PerspectiveCamera, OrthographicCamera } from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 
+import { EventLogMarkers } from '@src/features/heatmap/EventLogMarkers';
+import { HeatmapFillOverlay } from '@src/features/heatmap/HeatmapFillOverlay';
+import { HotspotCircles } from '@src/features/heatmap/HotspotCircles';
+import { LocalModelLoader, StreamModelLoader } from '@src/features/heatmap/ModelLoader';
+import { PlayerTimelinePoints } from '@src/features/heatmap/PlayerTimelinePoints';
+import { WaypointMarker } from '@src/features/heatmap/WaypointMarker';
 import { useEventLogState, useGeneralState, usePlayerTimelineState } from '@src/hooks/useHeatmapState';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { EventLogMarkers } from '@src/pages/heatmap/projects/[project_id]/EventLogMarkers';
-import { HeatmapCellOverlay } from '@src/pages/heatmap/projects/[project_id]/HeatmapCellOverlay';
-import { HotspotCircles } from '@src/pages/heatmap/projects/[project_id]/HotspotCircles';
-import { LocalModelLoader, StreamModelLoader } from '@src/pages/heatmap/projects/[project_id]/ModelLoader';
-import { PlayerTimelinePoints } from '@src/pages/heatmap/projects/[project_id]/PlayerTimelinePoints';
-import { WaypointMarker } from '@src/pages/heatmap/projects/[project_id]/WaypointMarker';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
 type HeatmapCanvasProps = {
@@ -358,11 +358,11 @@ const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, s
           <>
             <StreamModelLoader ref={modelRef} model={model} />
             {pointList && modelRef.current && heatmapType === 'fill' && showHeatmap && (
-              <HeatmapCellOverlay group={modelRef.current} points={pointList} cellSize={(service.task?.stepSize || 50) / 2} opacity={heatmapOpacity} />
+              <HeatmapFillOverlay group={modelRef.current} points={pointList} cellSize={(service.task?.stepSize || 50) / 2} opacity={heatmapOpacity} />
             )}
           </>
         )}
-        {pointList && heatmapType === 'object' && showHeatmap && <HeatmapPointsMarker points={pointList} />}
+        {pointList && heatmapType === 'object' && showHeatmap && <HeatmapObjectOverlay points={pointList} />}
         {pointList && showHeatmap && <HotspotCircles points={pointList} />}
         {visibleEventLogs.length > 0 && visibleEventLogs.map((event) => <EventLogMarkers key={event.key} logName={event.key} service={service} pref={event} />)}
         {service &&

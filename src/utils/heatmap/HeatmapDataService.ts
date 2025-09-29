@@ -26,6 +26,9 @@ export type HeatmapDataService = {
   eventLogs: Record<string, PositionEventLog[]>;
 
   projectId: number | undefined;
+
+  sessionId: number | null;
+  setSessionId: (sessionId: number | null) => void;
 };
 
 // データ型定義
@@ -68,11 +71,11 @@ async function projectCreateTask(projectId: number, stepSize: number, zVisible: 
 }
 
 // 通常のオンライン環境用の実装
-export function useOnlineHeatmapDataService(projectId: number | undefined, initialTaskId: number | null): HeatmapDataService {
+export function useOnlineHeatmapDataService(projectId: number | undefined, initialTaskId: number | null, sessionHeatmap: boolean): HeatmapDataService {
   const timer = useRef<NodeJS.Timeout>(undefined);
   const [eventLogs, setEventLogs] = useState<Record<string, PositionEventLog[]>>({});
   const [taskId, setTaskId] = useState<number | null>(initialTaskId);
-  const [sessionId] = useState<number | null>(null);
+  const [sessionId, setSessionId] = useState<number | null>(null);
   const [stepSize] = useState<number>(50);
   const [zVisible] = useState<boolean>(true);
 
@@ -80,14 +83,14 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
   const queryClient = useQueryClient();
 
   const { data: createdTask } = useQuery({
-    queryKey: [projectId, sessionId, stepSize, zVisible],
+    queryKey: [projectId, sessionId, stepSize, zVisible, sessionHeatmap],
     queryFn: async (): Promise<HeatmapTask | null> => {
       if (!projectId) {
         return null;
       }
 
       const { data, error } =
-        sessionId && sessionId !== 0
+        sessionHeatmap && sessionId && sessionId !== 0
           ? await sessionCreateTask(projectId, sessionId, stepSize, zVisible)
           : await projectCreateTask(projectId, stepSize, zVisible);
       if (error) throw error;
@@ -252,5 +255,7 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
     getEventLog,
     eventLogs,
     projectId,
+    sessionId,
+    setSessionId,
   };
 }

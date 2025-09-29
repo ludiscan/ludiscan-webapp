@@ -1,7 +1,7 @@
 // atoms/Divider.stories.tsx
 import { Divider } from './Divider';
 
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs';
 
 import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
 import darkTheme from '@src/styles/dark';

@@ -8,6 +8,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import js from '@eslint/js';
 import { FlatCompat } from '@eslint/eslintrc';
+import eslintConfigPrettier from 'eslint-config-prettier';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -61,15 +62,6 @@ export default defineConfig([
 
     rules: {
       'default-param-last': 0,
-
-      indent: [
-        2,
-        2,
-        {
-          ignoredNodes: ['TemplateLiteral'],
-          SwitchCase: 1,
-        },
-      ],
 
       'key-spacing': 0,
       'jsx-a11y/no-onchange': 0,
@@ -140,4 +132,5 @@ export default defineConfig([
       '@typescript-eslint/triple-slash-reference': 'off',
     },
   },
+  eslintConfigPrettier,
 ]);

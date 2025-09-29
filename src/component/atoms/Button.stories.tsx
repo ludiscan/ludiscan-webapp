@@ -1,6 +1,6 @@
 import { Button } from './Button';
 
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs';
 
 import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
 import darkTheme from '@src/styles/dark';
