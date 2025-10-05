@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unknown-property */
-import { useEffect, useMemo, useState, useRef, useCallback } from 'react';
-import { BufferGeometry, CatmullRomCurve3, Color, Line, LineBasicMaterial, Vector3, Sprite, SpriteMaterial, TextureLoader } from 'three';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { BufferGeometry, CatmullRomCurve3, Color, Line, LineBasicMaterial, Sprite, SpriteMaterial, TextureLoader, Vector3 } from 'three';
 import { Line2, LineGeometry, LineMaterial } from 'three-stdlib';
 
 import type { PlayerPositionLog, PlayerTimelineDetail } from '@src/modeles/heatmapView';
@@ -9,8 +9,9 @@ import type { ViewContext } from '@src/utils/vql';
 import type { FC } from 'react';
 import type { Texture } from 'three';
 
+import { useGeneralPick } from '@src/hooks/useGeneral';
 import { useHVQL } from '@src/hooks/useHVQuery';
-import { useGeneralState, usePlayerTimelineState } from '@src/hooks/useHeatmapState';
+import { usePlayerTimelinePatch, usePlayerTimelinePick } from '@src/hooks/usePlayerTimeline';
 import { usePlayerPositionLogs } from '@src/modeles/heatmapView';
 import { zIndexes } from '@src/styles/style';
 import { getIconPath } from '@src/utils/heatmapIconMap';
@@ -22,15 +23,13 @@ export type PlayerTimelinePointsTimeRange = {
 export type PlayerTimelinePointsProps = {
   service: HeatmapDataService;
   state: PlayerTimelineDetail | null;
-  currentTimelineSeek: number;
   visibleTimeRange: PlayerTimelinePointsTimeRange;
 };
 
-const Component: FC<PlayerTimelinePointsProps> = ({ state, currentTimelineSeek, visibleTimeRange }) => {
-  const {
-    data: { upZ, scale },
-  } = useGeneralState();
-  const { data: timelineState, setData } = usePlayerTimelineState();
+const Component: FC<PlayerTimelinePointsProps> = ({ state, visibleTimeRange }) => {
+  const { upZ, scale } = useGeneralPick('upZ', 'scale');
+  const { currentTimelineSeek, maxTime, queryText } = usePlayerTimelinePick('currentTimelineSeek', 'maxTime', 'queryText');
+  const setTimelineState = usePlayerTimelinePatch();
   const [queryColor, setQueryColor] = useState<number | null>(null);
   const [queryIcon, setQueryIcon] = useState<string | null>(null);
   const [currentIconPath, setCurrentIconPath] = useState<string | null>(null);
@@ -96,8 +95,7 @@ const Component: FC<PlayerTimelinePointsProps> = ({ state, currentTimelineSeek, 
   const updateIconTexture = useCallback(
     (iconPath: string) => {
       if (materialRef.current && materialRef.current.map !== textureCache.current.get(iconPath)) {
-        const texture = getCachedTexture(iconPath);
-        materialRef.current.map = texture;
+        materialRef.current.map = getCachedTexture(iconPath);
       }
     },
     [getCachedTexture],
@@ -114,8 +112,7 @@ const Component: FC<PlayerTimelinePointsProps> = ({ state, currentTimelineSeek, 
       });
       materialRef.current = material;
 
-      const sprite = new Sprite(material);
-      spriteRef.current = sprite;
+      spriteRef.current = new Sprite(material);
     }
   }, []);
 
@@ -133,21 +130,21 @@ const Component: FC<PlayerTimelinePointsProps> = ({ state, currentTimelineSeek, 
   useEffect(() => {
     if (!logs || logs.length === 0) return;
     const max = logs ? Math.max(...logs.map((pt) => pt.offset_timestamp)) : 0;
-    if (max > (timelineState.maxTime || 0)) {
-      setData((prev) => ({
+    if (max > (maxTime || 0)) {
+      setTimelineState((prev) => ({
         ...prev,
         currantTime: 0,
         maxTime: max,
       }));
     }
-  }, [logs, setData, timelineState]);
+  }, [logs, maxTime, setTimelineState]);
 
   useEffect(() => {
     setDocument({
       palette: { yellow: '#FFD400', blue: '#0057FF' },
       vars: { threshold: 0.7 },
     });
-  }, [setDocument, timelineState.queryText]);
+  }, [setDocument, queryText]);
   useEffect(() => {
     const latestLog = partialPathPoints.slice(-1)[0];
     if (!latestLog) return;
@@ -157,7 +154,7 @@ const Component: FC<PlayerTimelinePointsProps> = ({ state, currentTimelineSeek, 
       pos: { x: latestLog.data.x, y: latestLog.data.y, z: latestLog.data.z },
       t: latestLog.data.offset_timestamp,
     };
-    const style = compile(timelineState.queryText, ctx);
+    const style = compile(queryText, ctx);
     if (style.color) {
       setQueryColor(Number('0x' + style.color.slice(1)));
     }
@@ -171,7 +168,7 @@ const Component: FC<PlayerTimelinePointsProps> = ({ state, currentTimelineSeek, 
       setQueryIcon(null);
       setCurrentIconPath(null);
     }
-  }, [compile, partialPathPoints, timelineState.queryText, currentIconPath]);
+  }, [compile, partialPathPoints, queryText, currentIconPath]);
   if (isLoading || !logs || !isSuccess || !state?.visible) return <></>;
   return (
     <>

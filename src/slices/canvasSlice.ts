@@ -3,7 +3,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 import type { PayloadAction } from '@reduxjs/toolkit';
-import type { HeatmapDataState } from '@src/modeles/heatmapView';
+import type { HeatmapDataState, PlayerTimelineSettings } from '@src/modeles/heatmapView';
 
 import { initializeValues } from '@src/modeles/heatmapView';
 import { getCanvasValues, saveCanvasValues } from '@src/utils/localstrage';
@@ -32,17 +32,45 @@ const canvasSlice = createSlice({
     setGeneral: (state, action: PayloadAction<HeatmapDataState['general']>) => {
       state.general = action.payload;
     },
+    patchGeneral: (state, action: PayloadAction<Partial<HeatmapDataState['general']>>) => {
+      state.general = { ...state.general, ...action.payload };
+    },
     setHotspotMode: (state, action: PayloadAction<HeatmapDataState['hotspotMode']>) => {
       state.hotspotMode = action.payload;
     },
+    patchHotspotMode: (state, action: PayloadAction<Partial<HeatmapDataState['hotspotMode']>>) => {
+      state.hotspotMode = { ...state.hotspotMode, ...action.payload };
+    },
+
     setEventLog: (state, action: PayloadAction<HeatmapDataState['eventLog']>) => {
       state.eventLog = action.payload;
     },
+    patchEventLog: (state, action: PayloadAction<Partial<HeatmapDataState['eventLog']>>) => {
+      state.eventLog = { ...state.eventLog, ...action.payload };
+    },
+
     setPlayerTimeline: (state, action: PayloadAction<HeatmapDataState['playerTimeline']>) => {
       state.playerTimeline = action.payload;
+    },
+    patchPlayerTimeline: (state, action: PayloadAction<Partial<PlayerTimelineSettings>>) => {
+      state.playerTimeline = { ...state.playerTimeline, ...action.payload };
+    },
+    updatePlayerTimeline: (state, action: PayloadAction<(prev: PlayerTimelineSettings) => PlayerTimelineSettings>) => {
+      state.playerTimeline = action.payload(state.playerTimeline);
     },
   },
 });
 
-export const { set } = canvasSlice.actions;
+export const {
+  set,
+  setGeneral,
+  patchGeneral,
+  setHotspotMode,
+  patchHotspotMode,
+  setEventLog,
+  patchEventLog,
+  setPlayerTimeline,
+  patchPlayerTimeline,
+  updatePlayerTimeline,
+} = canvasSlice.actions;
 export const canvasReducer = canvasSlice.reducer;

@@ -1,4 +1,4 @@
-// WaypointMarker.tsx (HeatmapCanvas と同じファイル内でも構いません)
+// WaypointMarker.tsx
 
 import { Color } from 'three';
 
@@ -6,7 +6,7 @@ import type { ThreeEvent } from '@react-three/fiber';
 import type { FC } from 'react';
 import type { Vector3 } from 'three';
 
-import { useGeneralState } from '@src/hooks/useHeatmapState';
+import { useGeneralSelect } from '@src/hooks/useGeneral';
 
 type WaypointMarkerProps = {
   position: Vector3;
@@ -18,9 +18,7 @@ type WaypointMarkerProps = {
 
 export const WaypointMarker: FC<WaypointMarkerProps> = ({ position, selected, onClick, onPointerDown, onPointerUp }) => {
   // ユーザーのスケール設定を反映する（Heatmap の他の要素と大きさを合わせるため）
-  const {
-    data: { scale },
-  } = useGeneralState();
+  const scale = useGeneralSelect((s) => s.scale);
 
   return (
     <mesh

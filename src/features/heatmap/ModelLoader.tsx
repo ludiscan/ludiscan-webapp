@@ -7,7 +7,7 @@ import type { FC, RefObject } from 'react';
 import type { Group } from 'three';
 
 import { setRaycastLayerRecursive } from '@src/features/heatmap/ObjectToggleList';
-import { useGeneralState } from '@src/hooks/useHeatmapState';
+import { useGeneralSelect } from '@src/hooks/useGeneral';
 
 type LocalModelLoaderProps = {
   modelPath: string;
@@ -16,9 +16,7 @@ type LocalModelLoaderProps = {
 };
 
 const LocalModelLoaderContent: FC<LocalModelLoaderProps> = ({ modelPath, modelType, ref }) => {
-  const {
-    data: { scale },
-  } = useGeneralState();
+  const scale = useGeneralSelect((s) => s.scale);
   const model = useLoader(modelType == 'obj' ? OBJLoader : GLTFLoader, modelPath);
   return (
     <group
@@ -71,9 +69,7 @@ export function useOBJFromArrayBuffer(arrayBuffer: ArrayBuffer | null): Group | 
 }
 
 const StreamModelLoaderComponent: FC<StreamModelLoaderProps> = ({ model, ref }) => {
-  const {
-    data: { scale },
-  } = useGeneralState();
+  const scale = useGeneralSelect((s) => s.scale);
   return (
     <Suspense fallback={null}>
       <group

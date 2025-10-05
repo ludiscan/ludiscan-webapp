@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { BsInfoCircle } from 'react-icons/bs';
 import { IoClose } from 'react-icons/io5';
 import Markdown from 'react-markdown';
@@ -24,7 +24,7 @@ import { Modal } from '@src/component/molecules/Modal';
 import { Selector } from '@src/component/molecules/Selector';
 import { TextArea } from '@src/component/molecules/TextArea';
 import { useGetApi } from '@src/hooks/useGetApi';
-import { usePlayerTimelineState } from '@src/hooks/useHeatmapState';
+import { usePlayerTimelinePatch, usePlayerTimelinePick } from '@src/hooks/usePlayerTimeline';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { createClient, DefaultStaleTime } from '@src/modeles/qeury';
 import { fontSizes } from '@src/styles/style';
@@ -46,7 +46,7 @@ function toggleButtonStyle(theme: Theme): CSSProperties {
 }
 
 const DetailBlockInternal: FC<{ className?: string; details: PlayerTimelineDetail[]; service: HeatmapDataService }> = ({ className, details }) => {
-  const { setData } = usePlayerTimelineState();
+  const setData = usePlayerTimelinePatch();
   const { theme } = useSharedTheme();
   // const player = detail.player;
   const project_id = details[0].project_id;
@@ -170,8 +170,9 @@ const queryPlaceholder =
   '  scissor -> player-current-point-icon: hand-scissor;\n' +
   '}';
 
-const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
-  const { data, setData } = usePlayerTimelineState();
+const PlayerTimelineComponent: FC<HeatmapMenuProps> = ({ className, service }) => {
+  const setData = usePlayerTimelinePatch();
+  const { details, queryText: queryTextState } = usePlayerTimelinePick('details', 'queryText');
   const [selectSessionId, setSelectSessionId] = useState<string | undefined>(undefined);
   const [queryText, setQueryText] = useState<string>('');
   const [isOpenQueryInfo, setIsOpenQueryInfo] = useState<boolean>(false);
@@ -204,14 +205,14 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
 
   const sessionByDetail = useMemo(() => {
     const map = new Map<number, PlayerTimelineDetail[]>();
-    data.details?.forEach((detail) => {
+    details?.forEach((detail) => {
       if (!map.has(detail.session_id)) {
         map.set(detail.session_id, []);
       }
       map.get(detail.session_id)?.push(detail);
     });
     return map;
-  }, [data.details]);
+  }, [details]);
 
   const { data: sessions } = useQuery({
     queryKey: ['sessions', service.projectId],
@@ -291,11 +292,11 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
 
   // load-queryText
   useEffect(() => {
-    const t = data.queryText;
+    const t = queryTextState;
     if (t && t !== '') {
       setQueryText(t);
     }
-  }, [data.queryText]);
+  }, [queryTextState]);
 
   useEffect(() => {
     if (queryText === '') {
@@ -363,28 +364,33 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
   );
 };
 
-export const PlayerTimeline = styled(Component)`
-  &__weight1 {
-    flex: 1;
-  }
+export const PlayerTimeline = memo(
+  styled(PlayerTimelineComponent)`
+    &__weight1 {
+      flex: 1;
+    }
 
-  &__row {
-    position: relative;
-    width: 100%;
-    padding: 4px 8px;
-  }
+    &__row {
+      position: relative;
+      width: 100%;
+      padding: 4px 8px;
+    }
 
-  &__queryTextFieldContainer {
-    display: flex;
-    width: 100%;
-  }
+    &__queryTextFieldContainer {
+      display: flex;
+      width: 100%;
+    }
 
-  &__queryTextField {
-    flex: 1;
-    max-width: 90%;
-    min-height: 92px;
-    padding: 0;
-    margin: 0;
-    font-size: ${fontSizes.small};
-  }
-`;
+    &__queryTextField {
+      flex: 1;
+      max-width: 90%;
+      min-height: 92px;
+      padding: 0;
+      margin: 0;
+      font-size: ${fontSizes.small};
+    }
+  `,
+  (prev, next) => {
+    return prev.className == next.className && prev.service.projectId == next.service.projectId;
+  },
+);

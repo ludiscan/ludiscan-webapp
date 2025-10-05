@@ -8,11 +8,12 @@ import { Text } from '@src/component/atoms/Text';
 import { Selector } from '@src/component/molecules/Selector';
 import { ObjectToggleList } from '@src/features/heatmap/ObjectToggleList';
 import { InputRow } from '@src/features/heatmap/menu/InputRow';
-import { useGeneralState } from '@src/hooks/useHeatmapState';
+import { useGeneralPatch, useGeneralSelect } from '@src/hooks/useGeneral';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
 export const MapMenuContent: FC<HeatmapMenuProps> = ({ className, mapOptions, model }) => {
-  const { data: general, setData } = useGeneralState();
+  const mapName = useGeneralSelect((s) => s.mapName);
+  const setData = useGeneralPatch();
   const handleAddWaypoint = useCallback(() => {
     heatMapEventBus.emit('add-waypoint');
   }, []);
@@ -21,9 +22,11 @@ export const MapMenuContent: FC<HeatmapMenuProps> = ({ className, mapOptions, mo
       <InputRow label={'visualize map'}>
         <Selector
           className={`${className}__inputNewLine`}
-          onChange={(mapName) => setData({ ...general, mapName })}
+          onChange={(mapName) => {
+            setData({ mapName });
+          }}
           options={mapOptions}
-          value={general.mapName}
+          value={mapName}
           fontSize={'small'}
           disabled={mapOptions.length === 0}
         />
@@ -31,7 +34,7 @@ export const MapMenuContent: FC<HeatmapMenuProps> = ({ className, mapOptions, mo
       <Button scheme={'surface'} fontSize={'medium'} onClick={handleAddWaypoint}>
         <Text text={'add waypoint'} />
       </Button>
-      {model && general.mapName && <ObjectToggleList mapName={general.mapName} model={model} />}
+      {model && mapName && <ObjectToggleList mapName={mapName} model={model} />}
     </>
   );
 };

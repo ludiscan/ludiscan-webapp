@@ -1,16 +1,19 @@
-import { useCallback, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useDispatch, useSelector, useStore } from 'react-redux';
 
 import type { EventLogSettings, GeneralSettings, HeatmapDataState, HotspotModeSettings, PlayerTimelineSettings } from '@src/modeles/heatmapView';
 import type { RootState } from '@src/store';
 
-import { useAppDispatch, useAppSelector } from '@src/hooks/useDispatch';
+import { useAppDispatch } from '@src/hooks/useDispatch';
 import { getInitialState, set } from '@src/slices/canvasSlice';
 import { getCanvasValues } from '@src/utils/localstrage';
 import { capitalize } from '@src/utils/string';
 
 type keys = keyof HeatmapDataState & keyof RootState['heatmapCanvas'];
 
+/**
+ * @deprecated
+ */
 function useHeatmapValuesState<T extends HeatmapDataState[keys]>(key: keys) {
   // storeから現在のstate取得
   const data = useSelector((state: RootState) => state.heatmapCanvas[key]) as T;
@@ -62,62 +65,73 @@ function useHeatmapValuesState<T extends HeatmapDataState[keys]>(key: keys) {
   };
 }
 
+/**
+ * @deprecated you can use {useGeneralSelect} or {useGeneralPatch}
+ */
 export const useGeneralState = () => useHeatmapValuesState<GeneralSettings>('general');
+/**
+ * @deprecated you can use {useHotspotModeSelect} or {useHotspotModePatch}
+ */
 export const useHotspotModeState = () => useHeatmapValuesState<HotspotModeSettings>('hotspotMode');
+/**
+ * @deprecated you can use {useEventLogSelect} or {useEventLogPatch}
+ */
 export const useEventLogState = () => useHeatmapValuesState<EventLogSettings>('eventLog');
+/**
+ * @deprecated you can use {useVersion}
+ */
 export const useVersion = () => useHeatmapValuesState<string | undefined>('version');
+/**
+ * @deprecated you can use {usePlayerTimelineSelect} or {usePlayerTimelinePatch}
+ */
 export const usePlayerTimelineState = () => useHeatmapValuesState<PlayerTimelineSettings>('playerTimeline');
+
+// 速さや安定性が気になったら fast-deep-equal へ差し替え可
+const deepEqual = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
 
 export const useHeatmapState = () => {
   const dispatch = useAppDispatch();
-  const data = useAppSelector((state: RootState) => state.heatmapCanvas);
-  const [sessionData, setSessionData] = useState<HeatmapDataState>(data);
+  const store = useStore<RootState>();
 
-  const [hasDiff, setHasDiff] = useState<boolean>(false);
+  // localStorage のスナップショットを保持
+  const savedRef = useRef<HeatmapDataState | null>(null);
+  const [hasDiff, setHasDiff] = useState(false);
 
+  // 初期読み込み
   useEffect(() => {
-    // 初期化時にlocalStorageから値をロード
-    const savedData = getCanvasValues();
-    if (savedData) {
-      setSessionData(savedData);
-    }
-  }, []);
+    savedRef.current = getCanvasValues() ?? null;
+    const now = store.getState().heatmapCanvas;
+    setHasDiff(!!savedRef.current && !deepEqual(savedRef.current, now));
+  }, [store]);
 
+  // Redux 変更を購読（コンポーネントは hasDiff が変わる時だけ再レンダー）
   useEffect(() => {
-    if (data) {
-      setSessionData(data);
-      const savedData = getCanvasValues();
-      if (savedData && JSON.stringify(savedData) !== JSON.stringify(data)) {
-        setHasDiff(true);
-      } else {
-        setHasDiff(false);
-      }
-    }
-  }, [data]);
+    const unsubscribe = store.subscribe(() => {
+      const now = store.getState().heatmapCanvas;
+      const saved = savedRef.current;
+      const nextHasDiff = !!saved && !deepEqual(saved, now);
+      setHasDiff((prev) => (prev !== nextHasDiff ? nextHasDiff : prev));
+    });
+    return unsubscribe();
+  }, [store]);
 
-  // session → storeへapply
+  // 現在の Redux 値を保存（set 内で saveCanvasValues が走る想定）
   const apply = useCallback(() => {
-    if (!sessionData) return;
-    dispatch(set(sessionData));
-  }, [dispatch, sessionData]);
+    const now = store.getState().heatmapCanvas; // ★その瞬間のスナップショット
+    dispatch(set(now));
+    savedRef.current = now;
+    setHasDiff(false);
+  }, [dispatch, store]);
 
-  // discard → localStorageからロードしてsessionに反映
+  // 保存値で Redux を上書き（破棄）
   const discard = useCallback(() => {
-    const savedData = getCanvasValues();
-    if (savedData) {
-      setSessionData(savedData);
+    const saved = getCanvasValues();
+    if (saved) {
+      dispatch(set(saved));
+      savedRef.current = saved;
       setHasDiff(false);
     }
-  }, []);
+  }, [dispatch]);
 
-  return {
-    general: sessionData.general,
-    hotspotMode: sessionData.hotspotMode,
-    eventLog: sessionData.eventLog,
-    playerTimeline: sessionData.playerTimeline,
-    hasDiff,
-    version: sessionData.version,
-    apply,
-    discard,
-  };
+  return { apply, hasDiff, discard };
 };

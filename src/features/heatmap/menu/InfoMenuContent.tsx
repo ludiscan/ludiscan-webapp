@@ -8,13 +8,10 @@ import type { FC } from 'react';
 import { Button } from '@src/component/atoms/Button';
 import { InlineFlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
-import { useVersion } from '@src/hooks/useHeatmapState';
 import { createClient, DefaultStaleTime } from '@src/modeles/qeury';
 import { fontSizes, fontWeights } from '@src/styles/style';
 
 export const InfoMenuContent: FC<HeatmapMenuProps> = ({ handleExportView, service }) => {
-  const { data: version } = useVersion();
-
   const handleExportHeatmap = useCallback(async () => {
     await handleExportView();
   }, [handleExportView]);
@@ -39,9 +36,6 @@ export const InfoMenuContent: FC<HeatmapMenuProps> = ({ handleExportView, servic
 
   return (
     <>
-      <InlineFlexRow align={'center'} gap={4}>
-        <Text text={`version: ${version}`} fontSize={fontSizes.small} />
-      </InlineFlexRow>
       {project && (
         <>
           <InlineFlexRow align={'center'} gap={4}>

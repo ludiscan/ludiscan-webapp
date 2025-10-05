@@ -3,7 +3,7 @@ import { Color, Vector3 } from 'three';
 
 import type { FC } from 'react';
 
-import { useGeneralState } from '@src/hooks/useHeatmapState';
+import { useGeneralPick } from '@src/hooks/useGeneral';
 
 export type PointMarkersProps = {
   points: { x: number; y: number; z?: number | undefined; density: number }[];
@@ -74,8 +74,13 @@ class Point extends Vector3 {
 
 const Component: FC<PointMarkersProps> = ({ points, colorIntensity = 0.6 }) => {
   const {
-    data: { upZ, scale, minThreshold = 0.0, maxThreshold = 1.0, heatmapOpacity = 1.0, colorScale },
-  } = useGeneralState();
+    upZ,
+    scale,
+    minThreshold = 0.0,
+    maxThreshold = 1.0,
+    heatmapOpacity = 1.0,
+    colorScale,
+  } = useGeneralPick('upZ', 'scale', 'minThreshold', 'maxThreshold', 'heatmapOpacity', 'colorScale');
 
   // Z-up / Y-up の変換
   const pointList = useMemo(

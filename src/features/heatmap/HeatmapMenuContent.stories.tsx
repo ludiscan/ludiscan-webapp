@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { Meta, StoryObj } from '@storybook/nextjs';
 
 import { HeatmapMenuContent } from '@src/features/heatmap/HeatmapMenuContent';
+import { useOfflineHeatmapDataService } from '@src/utils/heatmap/useOfflineHeatmapDataService';
 
 export default {
   component: HeatmapMenuContent,
@@ -30,18 +31,8 @@ export const General: Story = {
     eventLogKeys: ['event1', 'event2', 'event3'],
     handleExportView: async () => {},
     mapOptions: ['Map1', 'Map2', 'Map3'],
-    service: {
-      isInitialized: false,
-      getMapList: async () => [],
-      getMapContent: async () => null,
-      getGeneralLogKeys: async () => [],
-      task: undefined,
-      getEventLog: async () => [],
-      eventLogs: {},
-      projectId: 1,
-      sessionId: null,
-      setSessionId: () => {},
-    },
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    service: useOfflineHeatmapDataService(null),
   },
 };
 

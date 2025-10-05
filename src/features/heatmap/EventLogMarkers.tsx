@@ -11,7 +11,8 @@ import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC } from 'react';
 import type { Shape, Box3, Group } from 'three';
 
-import { useEventLogState, useGeneralState } from '@src/hooks/useHeatmapState';
+import { useEventLogPick } from '@src/hooks/useEventLog';
+import { useGeneralPick } from '@src/hooks/useGeneral';
 import { DefaultStaleTime } from '@src/modeles/qeury';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
@@ -96,11 +97,9 @@ const MarkerBillboard: FC<{
 
 const EventLogMarkers: FC<EventLogMarkersProps> = ({ logName, service, pref }) => {
   const { color } = pref;
-  const {
-    data: { upZ = false, scale },
-  } = useGeneralState();
+  const { upZ = false, scale } = useGeneralPick('upZ', 'scale');
 
-  const { data: eventLog } = useEventLogState();
+  const { filters } = useEventLogPick('filters');
   const { camera, size } = useThree();
 
   // Load and prepare SVG shapes
@@ -142,7 +141,7 @@ const EventLogMarkers: FC<EventLogMarkersProps> = ({ logName, service, pref }) =
     () =>
       (data ?? [])
         .map((d) => {
-          const playerFilter = eventLog.filters['player'] || -1;
+          const playerFilter = filters['player'] || -1;
           if (playerFilter !== -1 && d.player !== playerFilter) return null; // Filter by player if specified
           const { x, y, z } = d.event_data;
           return {
@@ -151,7 +150,7 @@ const EventLogMarkers: FC<EventLogMarkersProps> = ({ logName, service, pref }) =
           };
         })
         .filter((d) => d != null),
-    [data, upZ, scale, eventLog],
+    [data, upZ, scale, filters],
   );
 
   // Overlap filtering state
