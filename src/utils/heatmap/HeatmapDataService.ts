@@ -23,7 +23,7 @@ export type HeatmapDataService = {
 
   getEventLog(logName: string): Promise<PositionEventLog[] | null>;
 
-  eventLogs: Record<string, PositionEventLog[]>;
+  getEventLogSnapshot(logName: string): PositionEventLog[] | null;
 
   projectId: number | undefined;
 
@@ -31,6 +31,18 @@ export type HeatmapDataService = {
   setSessionId: (sessionId: number | null) => void;
 };
 
+export const mockHeatmapDataService = {
+  isInitialized: true,
+  getMapList: async () => ['map1', 'map2', 'map3'],
+  getMapContent: async () => null,
+  getGeneralLogKeys: async () => ['key1', 'key2', 'key3'],
+  task: undefined,
+  getEventLog: async () => [],
+  getEventLogSnapshot: () => [],
+  projectId: 1,
+  sessionId: null,
+  setSessionId: () => {},
+};
 // データ型定義
 export type OfflineHeatmapData = {
   task: HeatmapTask;
@@ -73,7 +85,6 @@ async function projectCreateTask(projectId: number, stepSize: number, zVisible: 
 // 通常のオンライン環境用の実装
 export function useOnlineHeatmapDataService(projectId: number | undefined, initialTaskId: number | null, sessionHeatmap: boolean): HeatmapDataService {
   const timer = useRef<NodeJS.Timeout>(undefined);
-  const [eventLogs, setEventLogs] = useState<Record<string, PositionEventLog[]>>({});
   const [taskId, setTaskId] = useState<number | null>(initialTaskId);
   const [sessionId, setSessionId] = useState<number | null>(null);
   const [stepSize] = useState<number>(50);
@@ -229,21 +240,27 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
     },
     [projectId, sessionId],
   );
+  const eventLogKey = (projectId: number | undefined, sessionId: number | null, logName: string) =>
+    ['eventLog', projectId ?? 0, sessionId ?? 0, logName] as const;
 
   const getEventLog = useCallback(
     async (logName: string): Promise<PositionEventLog[] | null> => {
-      // Fetch event log markers data from the server
       const res = sessionId ? await getSessionLogs(logName) : await getProjectLogs(logName);
       if (res?.error) throw res.error;
-      if (res?.data) {
-        setEventLogs((prev) => ({
-          ...prev,
-          [logName]: res.data,
-        }));
+      const data = res?.data ?? null;
+      if (data) {
+        queryClient.setQueryData(eventLogKey(projectId, sessionId, logName), data);
       }
-      return res?.data || null;
+      return data;
     },
-    [sessionId, getSessionLogs, getProjectLogs],
+    [projectId, sessionId, getSessionLogs, getProjectLogs, queryClient],
+  );
+
+  const getEventLogSnapshot = useCallback(
+    (logName: string): PositionEventLog[] | null => {
+      return (queryClient.getQueryData(eventLogKey(projectId, sessionId, logName)) as PositionEventLog[] | undefined) ?? null;
+    },
+    [projectId, sessionId, queryClient],
   );
 
   return {
@@ -253,7 +270,7 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
     getGeneralLogKeys,
     task: task || createdTask || undefined,
     getEventLog,
-    eventLogs,
+    getEventLogSnapshot,
     projectId,
     sessionId,
     setSessionId,

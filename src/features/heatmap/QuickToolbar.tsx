@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 
@@ -124,61 +124,68 @@ function Toolbar({ className, service }: Props) {
   );
 }
 
-export const QuickToolbar = styled(Toolbar)`
-  /* 行としてレイアウトに参加させる（オーバーレイにしない） */
-  display: flex;
-  flex-direction: row;
-  gap: 6px;
-  align-items: center;
-  justify-content: end;
-  width: calc(100% - 64px);
-  padding: 4px 32px;
-  background: ${({ theme }) => theme.colors.surface.main};
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border.main};
-
-  .wide {
-    min-width: 56px;
-  }
-
-  .tabnum {
-    font-variant-numeric: tabular-nums;
-  }
-
-  .select {
-    position: relative;
-  }
-
-  .caret {
-    margin-left: 6px;
-    font-size: 10px;
-  }
-
-  .dropdown {
-    position: absolute;
-    top: 36px;
-    left: 0;
-    z-index: 10;
-    width: 90px;
-    padding: 4px;
-    list-style: none;
+export const QuickToolbar = memo(
+  styled(Toolbar)`
+    /* 行としてレイアウトに参加させる（オーバーレイにしない） */
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    align-items: center;
+    justify-content: end;
+    width: calc(100% - 64px);
+    padding: 4px 32px;
     background: ${({ theme }) => theme.colors.surface.main};
-    border: 1px solid ${({ theme }) => theme.colors.border.main};
-    border-radius: 8px;
-    box-shadow: 0 6px 16px rgb(0 0 0 / 8%);
-  }
+    border-bottom: 1px solid ${({ theme }) => theme.colors.border.main};
 
-  .item {
-    width: 100%;
-    padding: 8px;
-    color: ${({ theme }) => theme.colors.text};
-    text-align: left;
-    cursor: pointer;
-    background: transparent;
-    border: 0;
-    border-radius: 6px;
-
-    &:hover {
-      background: ${({ theme }) => theme.colors.surface.dark};
+    .wide {
+      min-width: 56px;
     }
-  }
-`;
+
+    .tabnum {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .select {
+      position: relative;
+    }
+
+    .caret {
+      margin-left: 6px;
+      font-size: 10px;
+    }
+
+    .dropdown {
+      position: absolute;
+      top: 36px;
+      left: 0;
+      z-index: 10;
+      width: 90px;
+      padding: 4px;
+      list-style: none;
+      background: ${({ theme }) => theme.colors.surface.main};
+      border: 1px solid ${({ theme }) => theme.colors.border.main};
+      border-radius: 8px;
+      box-shadow: 0 6px 16px rgb(0 0 0 / 8%);
+    }
+
+    .item {
+      width: 100%;
+      padding: 8px;
+      color: ${({ theme }) => theme.colors.text};
+      text-align: left;
+      cursor: pointer;
+      background: transparent;
+      border: 0;
+      border-radius: 6px;
+
+      &:hover {
+        background: ${({ theme }) => theme.colors.surface.dark};
+      }
+    }
+  `,
+  (prev, next) => {
+    return prev.className === next.className && prev.service.projectId === next.service.projectId;
+  },
+);
+
+QuickToolbar.displayName = 'QuickToolbar';

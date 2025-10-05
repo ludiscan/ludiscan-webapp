@@ -24,13 +24,16 @@ export type ObjectToggleListProps = {
           visible: boolean;
           material?: Material | Material[];
         }[];
-      };
+      }
+    | undefined;
 };
 
 export function setRaycastLayerRecursive(obj: Object3D, enabled: boolean) {
-  if (enabled) obj.layers.enable(layers.raycast);
-  else obj.layers.disable(layers.raycast);
-  for (const c of obj.children) setRaycastLayerRecursive(c, enabled);
+  if (enabled) obj.layers?.enable(layers.raycast);
+  else obj.layers?.disable(layers.raycast);
+  if ('children' in obj) {
+    for (const c of obj.children) setRaycastLayerRecursive(c, enabled);
+  }
 }
 
 // ---- helpers ----
@@ -52,7 +55,7 @@ const cloneWithOpacity = (mat: Material | Material[], opacity: number): Material
 
 /** key 生成（モデル名 + 子uuid列） */
 const makeStorageKey = (mapName: string, model: ObjectToggleListProps['model']) => {
-  const name = (model as Group).name || 'Model';
+  const name = model && 'name' in model ? model.name : 'Model';
   return `ObjectToggleList:${mapName}:${name}`;
 };
 
@@ -69,7 +72,7 @@ const Component: FC<ObjectToggleListProps> = ({ className, model, mapName }) => 
   useEffect(() => {
     const saved = typeof window !== 'undefined' ? window.localStorage.getItem(storageKey) : null;
     const init: DisplayState = {};
-    model.children.forEach((child) => {
+    model?.children.forEach((child) => {
       // any: Object3D を受ける
       init[child.uuid] = { visible: true, opacity: 1.0 };
     });
@@ -86,15 +89,15 @@ const Component: FC<ObjectToggleListProps> = ({ className, model, mapName }) => 
     setDisplayState(init);
 
     // ★ レイヤー初期化（現在の可視状態に合わせる）
-    model.children.forEach((child) => {
+    model?.children.forEach((child) => {
       const s = init[child.uuid];
-      setRaycastLayerRecursive(child as unknown as Object3D, !!s?.visible);
+      setRaycastLayerRecursive(child as Object3D, !!s?.visible);
     });
   }, [storageKey, model]);
 
   // displayState が変わったら Three 側へ反映 + 保存
   useEffect(() => {
-    model.children.forEach((child) => {
+    model?.children.forEach((child) => {
       const s = displayState[child.uuid];
       if (!s) return;
 
@@ -180,6 +183,10 @@ const Component: FC<ObjectToggleListProps> = ({ className, model, mapName }) => 
     const half = vs.filter((s) => s.opacity === 0.5).length;
     return half > vs.length / 2 ? 0.5 : 1.0;
   }, [displayState]);
+
+  if (model == undefined) {
+    return null;
+  }
 
   return (
     <div className={className}>

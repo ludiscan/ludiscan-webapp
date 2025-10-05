@@ -2,24 +2,26 @@ import styled from '@emotion/styled';
 import { PerformanceMonitor, Stats } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { useQuery } from '@tanstack/react-query';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useStore } from 'react-redux';
 
 import type { PerformanceMonitorApi } from '@react-three/drei';
-import type { PlaySpeedType } from '@src/component/templates/TimelineControllerBlock';
 import type { PlayerTimelinePointsTimeRange } from '@src/features/heatmap/PlayerTimelinePoints';
 import type { Menus } from '@src/hooks/useHeatmapSideBarMenus';
+import type { PositionEventLog } from '@src/modeles/heatmaptask';
+import type { RootState } from '@src/store';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC } from 'react';
 
 import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
-import { TimelineControllerBlock } from '@src/component/templates/TimelineControllerBlock';
 import { HeatMapCanvas } from '@src/features/heatmap/HeatmapCanvas';
 import { HeatmapMenuContent } from '@src/features/heatmap/HeatmapMenuContent';
 import { useOBJFromArrayBuffer } from '@src/features/heatmap/ModelLoader';
 import { QuickToolbar } from '@src/features/heatmap/QuickToolbar';
+import { TimelineControlWrapper } from '@src/features/heatmap/TimelineControlWrapper';
 import { exportHeatmap } from '@src/features/heatmap/export-heatmap';
 import { HeatmapMenuSideBar } from '@src/features/heatmap/menu/HeatmapMenuSideBar';
-import { useHeatmapState, usePlayerTimelineState } from '@src/hooks/useHeatmapState';
+import { useGeneralSelect } from '@src/hooks/useGeneral';
 import { DefaultStaleTime } from '@src/modeles/qeury';
 import { dimensions, zIndexes } from '@src/styles/style';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
@@ -40,12 +42,9 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
   const [openMenu, setOpenMenu] = useState<Menus | undefined>(undefined);
   const [menuExtra, setMenuExtra] = useState<object | undefined>(undefined);
 
-  const state = useHeatmapState();
-  const { data: timelineState, setData: setTimelineState } = usePlayerTimelineState();
+  const mapName = useGeneralSelect((s) => s.mapName);
 
-  const [currentTimelineSeek, setCurrentTimelineSeek] = useState<number>(0);
-  const [timelinePlaySpeed, setTimelinePlaySpeed] = useState<PlaySpeedType>(1);
-  const [visibleTimelineRange, setVisibleTimelineRange] = useState<PlayerTimelinePointsTimeRange>({ start: 0, end: timelineState.maxTime });
+  const [visibleTimelineRange, setVisibleTimelineRange] = useState<PlayerTimelinePointsTimeRange>({ start: 0, end: 0 });
 
   const task = useMemo(() => service.task, [service.task]);
 
@@ -59,10 +58,10 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
   });
 
   const { data: mapContent } = useQuery({
-    queryKey: ['mapData', state.general.mapName, service],
+    queryKey: ['mapData', mapName, service],
     queryFn: async () => {
-      if (!state.general.mapName) return null;
-      return service.getMapContent(state.general.mapName);
+      if (!mapName) return null;
+      return service.getMapContent(mapName);
     },
     staleTime: 1000 * 60 * 20,
   });
@@ -111,9 +110,23 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
   }, [map]);
   const model = useOBJFromArrayBuffer(buffer);
 
+  const store = useStore<RootState>();
   const handleExportView = useCallback(async () => {
     try {
-      await exportHeatmap(task, service.eventLogs, generalLogKeys, mapContent, mapList, state);
+      const d: Record<string, PositionEventLog[]> = store
+        .getState()
+        .heatmapCanvas.eventLog.logs.map((s) => {
+          return { k: s.key, d: service.getEventLogSnapshot(s.key) };
+        })
+        .reduce(
+          (acc, curr) => {
+            if (!curr.d || curr.d.length === 0) return acc;
+            acc[curr.k] = curr.d;
+            return acc;
+          },
+          {} as Record<string, PositionEventLog[]>,
+        );
+      await exportHeatmap(task, d, generalLogKeys, mapContent, mapList, store.getState().heatmapCanvas);
       // 成功メッセージ
       alert('エクスポートが完了しました！');
     } catch (error) {
@@ -121,7 +134,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
       console.error('エクスポート中にエラーが発生しました:', error);
       alert('エクスポートに失敗しました。');
     }
-  }, [service.eventLogs, generalLogKeys, mapContent, mapList, state, task]);
+  }, [generalLogKeys, mapContent, mapList, service, store, task]);
 
   useEffect(() => {
     const clickMenuIconHandler = (event: CustomEvent<{ name: Menus }>) => {
@@ -138,33 +151,6 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
       heatMapEventBus.off('click-event-log', clickEventLogHandler);
     };
   }, []);
-
-  useEffect(() => {
-    setVisibleTimelineRange({ start: 0, end: timelineState.maxTime });
-  }, [timelineState.maxTime]);
-
-  useEffect(() => {
-    if (timelineState.isPlaying) {
-      const interval = setInterval(() => {
-        setCurrentTimelineSeek((prev) => {
-          if (prev < visibleTimelineRange.start || prev >= visibleTimelineRange.end) {
-            return visibleTimelineRange.start;
-          }
-          const nextSeek = prev + timelinePlaySpeed * 100; // 1秒ごとに進める
-          if (nextSeek > visibleTimelineRange.end) {
-            clearInterval(interval);
-            setTimelineState((prev) => ({
-              ...prev,
-              isPlaying: false,
-            }));
-            return visibleTimelineRange.start;
-          }
-          return nextSeek;
-        });
-      }, 100);
-      return () => clearInterval(interval);
-    }
-  }, [setTimelineState, timelinePlaySpeed, timelineState.isPlaying, visibleTimelineRange]);
 
   useEffect(() => {
     const div = divRef.current;
@@ -188,61 +174,15 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
         <FlexColumn className={`${className}__canvasBox`}>
           <Canvas style={{ flex: 1 }} camera={{ position: [2500, 5000, -2500], fov: 50, near: 10, far: 10000 }} ref={canvasRef} dpr={dpr}>
             <PerformanceMonitor factor={1} onChange={handleOnPerformance} />
-            <HeatMapCanvas
-              service={service}
-              pointList={pointList}
-              map={map}
-              modelType={modelType}
-              model={model}
-              currentTimelineSeek={currentTimelineSeek}
-              visibleTimelineRange={visibleTimelineRange}
-            />
+            <HeatMapCanvas service={service} pointList={pointList} map={map} modelType={modelType} model={model} visibleTimelineRange={visibleTimelineRange} />
             <Stats parent={divRef} className={`${className}__stats`} />
           </Canvas>
           {/*{performance && <PerformanceList api={performance} className={`${className}__performance`} />}*/}
           <QuickToolbar className={`${className}__footToolbar`} service={service} />
         </FlexColumn>
-        {timelineState.visible && (
-          <div className={`${className}__player`}>
-            <TimelineControllerBlock
-              isPlaying={timelineState.isPlaying}
-              currentTime={currentTimelineSeek}
-              maxTime={timelineState.maxTime}
-              currentMinTime={visibleTimelineRange.start}
-              currentMaxTime={visibleTimelineRange.end}
-              playSpeed={timelinePlaySpeed}
-              onChangePlaySpeed={setTimelinePlaySpeed}
-              onChangeMinTime={(minTime) => {
-                setVisibleTimelineRange((prev) => ({
-                  ...prev,
-                  start: minTime,
-                }));
-              }}
-              onChangeMaxTime={(maxTime) => {
-                setVisibleTimelineRange((prev) => ({
-                  ...prev,
-                  end: maxTime,
-                }));
-              }}
-              onClickMenu={() => {
-                setOpenMenu('playerTimeline');
-              }}
-              onClickPlay={() => {
-                setTimelineState((prev) => ({
-                  ...prev,
-                  isPlaying: !timelineState.isPlaying,
-                }));
-              }}
-              onSeek={setCurrentTimelineSeek}
-              onClickBackFrame={() => {
-                setCurrentTimelineSeek((prev) => Math.max(prev - 200 * timelinePlaySpeed, visibleTimelineRange.start));
-              }}
-              onClickForwardFrame={() => {
-                setCurrentTimelineSeek((prev) => Math.min(prev + 200 * timelinePlaySpeed, visibleTimelineRange.end));
-              }}
-            />
-          </div>
-        )}
+        <div className={`${className}__player`}>
+          <TimelineControlWrapper setOpenMenu={setOpenMenu} setVisibleTimelineRange={setVisibleTimelineRange} visibleTimelineRange={visibleTimelineRange} />
+        </div>
       </FlexRow>
       <div className={`${className}__canvasMenuBox`}>
         <HeatmapMenuContent
@@ -260,69 +200,74 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
   );
 };
 
-export const HeatMapViewer = styled(Component)`
-  &__view {
-    position: relative;
-    width: calc(100% - 2px);
-    height: 100%;
-    overflow: hidden;
-    border-top: ${({ theme }) => `1px solid ${theme.colors.border.main}`};
-  }
+export const HeatMapViewer = memo(
+  styled(Component)`
+    &__view {
+      position: relative;
+      width: calc(100% - 2px);
+      height: 100%;
+      overflow: hidden;
+      border-top: ${({ theme }) => `1px solid ${theme.colors.border.main}`};
+    }
 
-  &__sideMenu {
-    z-index: ${zIndexes.content + 2};
-    display: flex;
-    flex-shrink: 0;
-    height: 100%;
-    overflow-y: auto;
-    background: ${({ theme }) => theme.colors.surface.dark};
-  }
+    &__sideMenu {
+      z-index: ${zIndexes.content + 2};
+      display: flex;
+      flex-shrink: 0;
+      height: 100%;
+      overflow-y: auto;
+      background: ${({ theme }) => theme.colors.surface.dark};
+    }
 
-  &__canvasMenuBox {
-    position: absolute;
-    top: 0;
-    left: 55px;
-    z-index: ${zIndexes.content + 2};
-    display: flex;
-    width: max-content;
-    height: 100%;
-  }
+    &__canvasMenuBox {
+      position: absolute;
+      top: 0;
+      left: 55px;
+      z-index: ${zIndexes.content + 2};
+      display: flex;
+      width: max-content;
+      height: 100%;
+    }
 
-  &__inputfile {
-    width: 100%;
-    height: 40px;
-  }
+    &__inputfile {
+      width: 100%;
+      height: 40px;
+    }
 
-  &__canvasBox {
-    position: relative;
-    flex: 1;
-    width: 100%;
-    max-width: 1900px;
-    height: 100%;
-    margin: 0 auto;
-    border: ${({ theme }) => `1px solid ${theme.colors.border.main}`};
-  }
+    &__canvasBox {
+      position: relative;
+      flex: 1;
+      width: 100%;
+      max-width: 1900px;
+      height: 100%;
+      margin: 0 auto;
+      border: ${({ theme }) => `1px solid ${theme.colors.border.main}`};
+    }
 
-  &__performance {
-    position: absolute;
-    top: 0;
-    right: 10px;
-  }
+    &__performance {
+      position: absolute;
+      top: 0;
+      right: 10px;
+    }
 
-  &__player {
-    position: absolute;
-    bottom: 40px;
-    left: 50%;
-    margin-left: 30px;
-    transform: translateX(-50%);
-  }
+    &__player {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      margin-left: 30px;
+      transform: translateX(-50%);
+    }
 
-  &__stats {
-    position: absolute;
-    top: calc(${dimensions.headerHeight}px + 2px) !important;
-    right: 0 !important;
-    left: unset !important;
-    z-index: ${zIndexes.content + 1};
-    pointer-events: none;
-  }
-`;
+    &__stats {
+      position: absolute;
+      top: calc(${dimensions.headerHeight}px + 2px) !important;
+      right: 0 !important;
+      left: unset !important;
+      z-index: ${zIndexes.content + 1};
+      pointer-events: none;
+    }
+  `,
+  (prev, next) => {
+    return prev.className == next.className && prev.service.task == next.service.task;
+  },
+);
