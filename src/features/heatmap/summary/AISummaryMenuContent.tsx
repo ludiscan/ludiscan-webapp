@@ -86,8 +86,8 @@ const ChatCard = styled.div`
 
 const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
   const qc = useQueryClient();
-  const projectId = service.projectId!;
-  const sessionId = service.sessionId!;
+  const projectId = service.projectId;
+  const sessionId = service.sessionId;
   const enabled = useMemo(() => Number.isFinite(projectId) && sessionId != null, [projectId, sessionId]);
 
   // 最新のサマリ取得（queued/running の間だけ 500ms ポーリング）
@@ -101,7 +101,7 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
     queryKey: ['sessionSummary', projectId, sessionId],
     enabled,
     queryFn: () => {
-      return fetchLatestSummary(projectId, sessionId);
+      return fetchLatestSummary(projectId!, sessionId!);
     },
     refetchInterval: (data) => {
       if (!data || data.state.data === null) return false;
@@ -120,8 +120,8 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
   const { mutate: regenMutate, isPending: isRegenPending } = useMutation({
     mutationFn: () =>
       enqueueSummary({
-        projectId,
-        sessionId,
+        projectId: projectId!,
+        sessionId: sessionId!,
         lang: 'ja',
         stepSize: 50,
         zVisible: true,

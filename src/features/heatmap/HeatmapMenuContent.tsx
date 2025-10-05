@@ -121,6 +121,14 @@ export const HeatmapMenuContent = memo(
     }
   `,
   (prev, next) => {
-    return prev.className == next.className && prev.name == next.name && prev.mapOptions == next.mapOptions && prev.toggleMenu == next.toggleMenu;
+    return (
+      prev.className == next.className &&
+      prev.name == next.name &&
+      prev.mapOptions == next.mapOptions &&
+      prev.toggleMenu == next.toggleMenu &&
+      prev.service.task == next.service.task &&
+      prev.service.projectId == next.service.projectId &&
+      prev.service.sessionId == next.service.sessionId
+    );
   },
 );

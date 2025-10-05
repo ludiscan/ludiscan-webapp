@@ -8,6 +8,7 @@ export interface HeatMapEventMap {
   'camera:percent': { percent: number };
   'camera:set-zoom-percent': { percent: number };
   'camera:fit': object;
+  'focus:ping': { position: { x: number; y: number; z: number } };
 }
 
 class EventBus<T> extends EventTarget {

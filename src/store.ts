@@ -2,12 +2,14 @@ import { configureStore } from '@reduxjs/toolkit';
 
 import { authReducer } from '@src/slices/authSlice';
 import { canvasReducer } from '@src/slices/canvasSlice';
+import { selectionReducer } from '@src/slices/selectionSlice';
 
 export const store = () => {
   return configureStore({
     reducer: {
       auth: authReducer,
       heatmapCanvas: canvasReducer,
+      selection: selectionReducer,
     },
   });
 };
