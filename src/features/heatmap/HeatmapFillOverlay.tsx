@@ -3,6 +3,7 @@ import * as THREE from 'three';
 
 import type { FC } from 'react';
 
+import { useSelectable } from '@src/features/heatmap/selection/hooks';
 import { useGeneralPick } from '@src/hooks/useGeneral';
 import { layers, zIndexes } from '@src/styles/style';
 
@@ -209,6 +210,20 @@ export const HeatmapFillOverlay: FC<Props> = ({ group, points, cellSize, offset 
   }, [instanceData, count]);
   const matKey = useMemo(() => `heatmap-mat-${count}`, [count]);
 
+  const cellHandlers = useSelectable('heatmap-cell', {
+    getSelection: (e) => {
+      const i = e.instanceId ?? -1;
+      const p = e.point;
+      return {
+        kind: 'heatmap-cell',
+        index: i,
+        worldPosition: { x: p.x, y: p.y, z: p.z },
+        // density: i >= 0 ? densities[i] : undefined,
+      };
+    },
+    fit: 'point',
+  });
+
   if (count === 0) return null;
 
   return (
@@ -217,6 +232,7 @@ export const HeatmapFillOverlay: FC<Props> = ({ group, points, cellSize, offset 
       args={[undefined, undefined, count]} /* eslint-disable-line react/no-unknown-property */
       renderOrder={zIndexes.renderOrder.heatmap} /* eslint-disable-line react/no-unknown-property */
       frustumCulled={false} /* eslint-disable-line react/no-unknown-property */
+      {...cellHandlers}
     >
       <planeGeometry args={[worldCellSize, worldCellSize]} /* eslint-disable-line react/no-unknown-property */ />
       <meshBasicMaterial

@@ -7,6 +7,7 @@ import type { FC, RefObject } from 'react';
 import type { Group } from 'three';
 
 import { setRaycastLayerRecursive } from '@src/features/heatmap/ObjectToggleList';
+import { useSelectable } from '@src/features/heatmap/selection/hooks';
 import { useGeneralSelect } from '@src/hooks/useGeneral';
 
 type LocalModelLoaderProps = {
@@ -18,10 +19,12 @@ type LocalModelLoaderProps = {
 const LocalModelLoaderContent: FC<LocalModelLoaderProps> = ({ modelPath, modelType, ref }) => {
   const scale = useGeneralSelect((s) => s.scale);
   const model = useLoader(modelType == 'obj' ? OBJLoader : GLTFLoader, modelPath);
+  const handlers = useSelectable('map-mesh', { fit: 'object' });
   return (
     <group
       ref={ref}
       dispose={null} // eslint-disable-line react/no-unknown-property
+      {...handlers}
     >
       <primitive
         object={'scene' in model ? model.scene : model} // eslint-disable-line react/no-unknown-property

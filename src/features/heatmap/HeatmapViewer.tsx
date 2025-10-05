@@ -21,6 +21,7 @@ import { QuickToolbar } from '@src/features/heatmap/QuickToolbar';
 import { TimelineControlWrapper } from '@src/features/heatmap/TimelineControlWrapper';
 import { exportHeatmap } from '@src/features/heatmap/export-heatmap';
 import { HeatmapMenuSideBar } from '@src/features/heatmap/menu/HeatmapMenuSideBar';
+import { InspectorModal } from '@src/features/heatmap/selection/InspectorModal';
 import { useGeneralSelect } from '@src/hooks/useGeneral';
 import { DefaultStaleTime } from '@src/modeles/qeury';
 import { dimensions, zIndexes } from '@src/styles/style';
@@ -196,6 +197,10 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
           service={service}
         />
       </div>
+
+      <div className={`${className}__selectionInspector`}>
+        <InspectorModal />
+      </div>
     </div>
   );
 };
@@ -227,6 +232,15 @@ export const HeatMapViewer = memo(
       display: flex;
       width: max-content;
       height: 100%;
+    }
+
+    &__selectionInspector {
+      position: absolute;
+      top: 60px;
+      right: 16px;
+      z-index: ${zIndexes.content + 2};
+      max-width: 360px;
+      max-height: 200px;
     }
 
     &__inputfile {
@@ -268,6 +282,11 @@ export const HeatMapViewer = memo(
     }
   `,
   (prev, next) => {
-    return prev.className == next.className && prev.service.task == next.service.task;
+    return (
+      prev.className == next.className &&
+      prev.service.task == next.service.task &&
+      prev.service.projectId == next.service.projectId &&
+      prev.service.sessionId == next.service.sessionId
+    );
   },
 );
