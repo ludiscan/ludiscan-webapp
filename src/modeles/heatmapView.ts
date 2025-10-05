@@ -53,6 +53,7 @@ export type PlayerTimelineSettings = {
   isPlaying: boolean;
   maxTime: number;
   queryText: string;
+  currentTimelineSeek: number;
 };
 
 export type HeatmapStates = {
@@ -104,6 +105,7 @@ export const initializeValues: HeatmapDataState = {
     isPlaying: false,
     maxTime: 0,
     queryText: '',
+    currentTimelineSeek: 0,
   },
 };
 

@@ -1,7 +1,9 @@
 import styled from '@emotion/styled';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useMemo } from 'react';
+import { memo, useCallback, useEffect, useMemo } from 'react';
+import { useSelector } from 'react-redux';
 
+import type { RootState } from '@src/store';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { GetServerSideProps } from 'next';
 import type { FC } from 'react';
@@ -12,7 +14,8 @@ import { StatusContent } from '@src/component/molecules/StatusContent';
 import { Header } from '@src/component/templates/Header';
 import { HeatMapViewer } from '@src/features/heatmap/HeatmapViewer';
 import { useAuth } from '@src/hooks/useAuth';
-import { useGeneralState, useHeatmapState, useVersion } from '@src/hooks/useHeatmapState';
+import { useGeneralSelect } from '@src/hooks/useGeneral';
+import { useHeatmapState } from '@src/hooks/useHeatmapState';
 import { dimensions, fontSizes } from '@src/styles/style';
 import { useOnlineHeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 
@@ -37,20 +40,15 @@ export const getServerSideProps: GetServerSideProps<HeatMapTaskIdPageProps> = as
 
 export type HeatmapIdPageLayoutProps = {
   className?: string;
-  version: string;
   onBackClick?: () => void;
   service: HeatmapDataService;
 };
 
-const HeatmapIdPageLayoutComponent: FC<HeatmapIdPageLayoutProps> = ({ className, version, service, onBackClick }) => {
-  const statusContentStatus = useMemo(() => {
-    if (!service.task) return 'success';
-    if (service.task.status === 'pending' || service.task.status === 'processing') return 'loading';
-    return service.task.status === 'completed' ? 'success' : service.task.status === 'failed' ? 'error' : 'loading';
-  }, [service.task]);
-  const { apply, hasDiff, discard } = useHeatmapState();
-  return (
-    <>
+const HeaderWrapper = memo(
+  ({ className, onBackClick }: { className?: string; onBackClick?: () => void }) => {
+    const { apply, hasDiff, discard } = useHeatmapState();
+    const version = useSelector((s: RootState) => s.heatmapCanvas.version);
+    return (
       <Header
         title={'Heatmap'}
         onClick={onBackClick}
@@ -69,6 +67,23 @@ const HeatmapIdPageLayoutComponent: FC<HeatmapIdPageLayoutProps> = ({ className,
           </>
         }
       />
+    );
+  },
+  (prev, next) => {
+    return prev.className === next.className && prev.onBackClick === next.onBackClick;
+  },
+);
+HeaderWrapper.displayName = 'HeaderWrapper';
+
+const HeatmapIdPageLayoutComponent: FC<HeatmapIdPageLayoutProps> = ({ className, service, onBackClick }) => {
+  const statusContentStatus = useMemo(() => {
+    if (!service.task) return 'success';
+    if (service.task.status === 'pending' || service.task.status === 'processing') return 'loading';
+    return service.task.status === 'completed' ? 'success' : service.task.status === 'failed' ? 'error' : 'loading';
+  }, [service.task]);
+  return (
+    <>
+      <HeaderWrapper className={className} onBackClick={onBackClick} />
       <div className={className}>
         <StatusContent status={statusContentStatus}>{service && service.isInitialized && <HeatMapViewer service={service} />}</StatusContent>
       </div>
@@ -107,16 +122,15 @@ export const HeatmapIdPageLayout = styled(HeatmapIdPageLayoutComponent)`
 
 const HeatMapTaskIdPage: FC<HeatMapTaskIdPageProps> = ({ className, project_id }) => {
   const router = useRouter();
-  const { data: version } = useVersion();
   const { isAuthorized, isLoading, ready } = useAuth();
 
   const handleBackClick = useCallback(() => {
     router.back();
   }, [router]);
 
-  const { data: general } = useGeneralState();
+  const sessionHeatmap = useGeneralSelect((s) => s.sessionHeatmap);
 
-  const service = useOnlineHeatmapDataService(project_id, null, general.sessionHeatmap);
+  const service = useOnlineHeatmapDataService(project_id, null, sessionHeatmap);
 
   useEffect(() => {
     if (!isAuthorized && !isLoading && ready) {
@@ -128,7 +142,7 @@ const HeatMapTaskIdPage: FC<HeatMapTaskIdPageProps> = ({ className, project_id }
     return <div>Invalid Task ID</div>;
   }
 
-  return <HeatmapIdPageLayout className={className} service={service} version={version ? `v${version}` : '---'} onBackClick={handleBackClick} />;
+  return <HeatmapIdPageLayout className={className} service={service} onBackClick={handleBackClick} />;
 };
 
 export default HeatMapTaskIdPage;

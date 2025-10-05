@@ -78,7 +78,11 @@ export function useOfflineHeatmapDataService(offlineData: OfflineHeatmapData | n
     getGeneralLogKeys,
     task: offlineData?.task,
     getEventLog,
-    eventLogs: offlineData?.eventLogs || {},
+    getEventLogSnapshot(logName: string): PositionEventLog[] | null {
+      const data = offlineData;
+      if (!data) return null;
+      return data.eventLogs[logName] || null;
+    },
     projectId: offlineData?.task?.project.id,
     sessionId: null,
     setSessionId: () => {},

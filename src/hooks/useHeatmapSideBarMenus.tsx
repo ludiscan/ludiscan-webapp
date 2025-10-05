@@ -3,9 +3,11 @@ import { BsGrid, BsPerson } from 'react-icons/bs';
 import { CiMap, CiMapPin, CiStreamOn } from 'react-icons/ci';
 import { IoIosInformationCircleOutline } from 'react-icons/io';
 import { SiSvgtrace } from 'react-icons/si';
+import { useStore } from 'react-redux';
 
 import type { HeatmapMenuProps } from '@src/features/heatmap/HeatmapMenuContent';
-import type { HeatmapStates } from '@src/modeles/heatmapView';
+import type { HeatmapDataState } from '@src/modeles/heatmapView';
+import type { RootState } from '@src/store';
 import type { FC, JSX } from 'react';
 
 import { Text } from '@src/component/atoms/Text';
@@ -17,7 +19,6 @@ import { InfoMenuContent } from '@src/features/heatmap/menu/InfoMenuContent';
 import { MapMenuContent } from '@src/features/heatmap/menu/MapMenuContent';
 import { PlayerTimeline } from '@src/features/heatmap/menu/PlayerTimeline';
 import { AISummaryMenuContent } from '@src/features/heatmap/summary/AISummaryMenuContent';
-import { useHeatmapState } from '@src/hooks/useHeatmapState';
 import { fontSizes, fontWeights } from '@src/styles/style';
 
 export type SideBarMenuType = {
@@ -28,7 +29,7 @@ export type SideBarMenuType = {
 
 export type MenuType = Omit<SideBarMenuType, 'icon'> & {
   icon?: JSX.Element;
-  visible?: (state: HeatmapStates) => boolean;
+  visible?: (state: HeatmapDataState) => boolean;
 };
 
 export const MenuContents: MenuType[] = [
@@ -81,9 +82,9 @@ export const MenuContents: MenuType[] = [
 export type Menus = (typeof MenuContents)[number]['name'];
 
 export function useHeatmapSideBarMenus(): SideBarMenuType[] {
-  const state = useHeatmapState();
+  const store = useStore<RootState>();
   return MenuContents.map((content) => {
-    if (content.icon == null || (content.visible ? !content.visible(state) : false)) {
+    if (content.icon == null || (content.visible ? !content.visible(store.getState().heatmapCanvas) : false)) {
       return null;
     }
     return {

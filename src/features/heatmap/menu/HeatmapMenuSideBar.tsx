@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { memo } from 'react';
 
 import type { Menus } from '@src/hooks/useHeatmapSideBarMenus';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
@@ -41,27 +42,32 @@ const Component: FC<MenuSideBarProps> = ({ className, currentMenu }) => {
   );
 };
 
-export const HeatmapMenuSideBar = styled(Component)`
-  width: 38px;
-  height: 100%;
-  padding: 8px;
-  background: ${({ theme }) => theme.colors.surface.main};
-  border-right: ${({ theme }) => `1px solid ${theme.colors.border.main}`};
+export const HeatmapMenuSideBar = memo(
+  styled(Component)`
+    width: 38px;
+    height: 100%;
+    padding: 8px;
+    background: ${({ theme }) => theme.colors.surface.main};
+    border-right: ${({ theme }) => `1px solid ${theme.colors.border.main}`};
 
-  &__button {
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 38px;
-    transition: background 0.2s;
+    &__button {
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 38px;
+      transition: background 0.2s;
 
-    &:hover {
-      background: ${({ theme }) => theme.colors.surface.dark};
+      &:hover {
+        background: ${({ theme }) => theme.colors.surface.dark};
+      }
+
+      &.active {
+        color: ${({ theme }) => theme.colors.surface.light};
+        background: ${({ theme }) => theme.colors.primary.main};
+      }
     }
-
-    &.active {
-      color: ${({ theme }) => theme.colors.surface.light};
-      background: ${({ theme }) => theme.colors.primary.main};
-    }
-  }
-`;
+  `,
+  (prev, next) => {
+    return prev.className == next.className && prev.currentMenu === next.currentMenu;
+  },
+);

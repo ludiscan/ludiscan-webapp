@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { GrContract, GrExpand } from 'react-icons/gr';
 import { IoMenu, IoPause, IoPlay, IoPlayBackSharp, IoPlayForwardSharp } from 'react-icons/io5';
 import { RiPlayMiniFill, RiPlayReverseMiniFill } from 'react-icons/ri';
@@ -271,128 +271,140 @@ const createBackgroundGradient = (theme: Theme, currentMinTime: number, currentM
   )`;
 };
 
-export const TimelineControllerBlock = styled(Component)`
-  max-width: 450px;
-  height: 24px;
-  padding: 16px 16px 20px;
-  color: ${({ theme }) => theme.colors.text};
-  border-radius: 32px;
-  transition: all 0.2s ease-in-out;
-
-  &.open {
-    height: 45px;
-  }
-
-  &__sliderWrapper {
-    position: relative;
-    flex: 1;
-    min-width: 150px;
-    height: 20px;
-  }
-
-  &__sliderBackground {
-    position: absolute;
-    top: 50%;
-    width: 100%;
-    height: 4px;
-    background: ${({ theme, currentMinTime, currentMaxTime, maxTime }) => createBackgroundGradient(theme, currentMinTime, currentMaxTime, maxTime)};
-    border-radius: 2px;
-    transform: translateY(-50%);
-  }
-
-  /* thumb 共通 */
-  &__thumb {
-    position: absolute;
-    top: 50%;
-    z-index: 5;
-    display: flex;
-    align-content: center;
-    cursor: pointer;
-    transform: translate(-50%, -50%);
-  }
-
-  &__thumb--min {
-    /* 追加スタイリングがあれば */
-  }
-
-  &__thumb--max {
-    /* 追加スタイリングがあれば */
-  }
-
-  /* 現在位置スライダーは最前面 */
-  &__seekBarInput {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 4;
-    width: 100%;
-    height: 100%;
-    appearance: none;
-    background: transparent;
-
-    &::-webkit-slider-thumb {
-      /* English comment: taller thumb for current */
-      width: 6px;
-      height: 20px;
-      appearance: none;
-      cursor: pointer;
-      background: ${({ theme }) => theme.colors.surface.main};
-      border: 1px solid ${({ theme }) => theme.colors.primary.main};
-      border-radius: 8px;
-    }
-
-    &::-moz-range-thumb {
-      width: 6px;
-      height: 20px;
-      cursor: pointer;
-      background: ${({ theme }) => theme.colors.surface.main};
-      border: 1px solid ${({ theme }) => theme.colors.primary.main};
-      border-radius: 8px;
-    }
-  }
-
-  &__toggleButton {
-    position: relative;
-
-    .icon-expand,
-    .icon-contract {
-      opacity: 0;
-      transition:
-        opacity 0.2s ease,
-        transform 0.2s ease;
-    }
-
-    /* closed 状態 → expand アイコンを表示 */
-    &:not(.open) .icon-expand {
-      opacity: 1;
-      transform: rotate(0deg);
-    }
-
-    /* open 状態 → contract アイコンを表示＆軽く回転 */
-    &.open .icon-contract {
-      opacity: 1;
-      transform: rotate(180deg);
-    }
-  }
-
-  &__label {
-    position: absolute;
-    right: 0;
-    bottom: -18px;
+export const TimelineControllerBlock = memo(
+  styled(Component)`
+    max-width: 450px;
+    height: 24px;
+    padding: 16px 16px 20px;
+    color: ${({ theme }) => theme.colors.text};
+    border-radius: 32px;
     transition: all 0.2s ease-in-out;
 
     &.open {
-      position: unset;
+      height: 45px;
     }
-  }
 
-  &__speedLabel {
-    position: absolute;
-    right: 0;
-    bottom: 13px;
-  }
+    &__sliderWrapper {
+      position: relative;
+      flex: 1;
+      min-width: 150px;
+      height: 20px;
+    }
 
-  &__playSpeedText {
-    transition: all 0.2s ease-in-out;
-  }
-`;
+    &__sliderBackground {
+      position: absolute;
+      top: 50%;
+      width: 100%;
+      height: 4px;
+      background: ${({ theme, currentMinTime, currentMaxTime, maxTime }) => createBackgroundGradient(theme, currentMinTime, currentMaxTime, maxTime)};
+      border-radius: 2px;
+      transform: translateY(-50%);
+    }
+
+    /* thumb 共通 */
+    &__thumb {
+      position: absolute;
+      top: 50%;
+      z-index: 5;
+      display: flex;
+      align-content: center;
+      cursor: pointer;
+      transform: translate(-50%, -50%);
+    }
+
+    &__thumb--min {
+      /* 追加スタイリングがあれば */
+    }
+
+    &__thumb--max {
+      /* 追加スタイリングがあれば */
+    }
+
+    /* 現在位置スライダーは最前面 */
+    &__seekBarInput {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 4;
+      width: 100%;
+      height: 100%;
+      appearance: none;
+      background: transparent;
+
+      &::-webkit-slider-thumb {
+        /* English comment: taller thumb for current */
+        width: 6px;
+        height: 20px;
+        appearance: none;
+        cursor: pointer;
+        background: ${({ theme }) => theme.colors.surface.main};
+        border: 1px solid ${({ theme }) => theme.colors.primary.main};
+        border-radius: 8px;
+      }
+
+      &::-moz-range-thumb {
+        width: 6px;
+        height: 20px;
+        cursor: pointer;
+        background: ${({ theme }) => theme.colors.surface.main};
+        border: 1px solid ${({ theme }) => theme.colors.primary.main};
+        border-radius: 8px;
+      }
+    }
+
+    &__toggleButton {
+      position: relative;
+
+      .icon-expand,
+      .icon-contract {
+        opacity: 0;
+        transition:
+          opacity 0.2s ease,
+          transform 0.2s ease;
+      }
+
+      /* closed 状態 → expand アイコンを表示 */
+      &:not(.open) .icon-expand {
+        opacity: 1;
+        transform: rotate(0deg);
+      }
+
+      /* open 状態 → contract アイコンを表示＆軽く回転 */
+      &.open .icon-contract {
+        opacity: 1;
+        transform: rotate(180deg);
+      }
+    }
+
+    &__label {
+      position: absolute;
+      right: 0;
+      bottom: -18px;
+      transition: all 0.2s ease-in-out;
+
+      &.open {
+        position: unset;
+      }
+    }
+
+    &__speedLabel {
+      position: absolute;
+      right: 0;
+      bottom: 13px;
+    }
+
+    &__playSpeedText {
+      transition: all 0.2s ease-in-out;
+    }
+  `,
+  (prev, next) => {
+    return (
+      prev.isPlaying === next.isPlaying &&
+      prev.currentTime === next.currentTime &&
+      prev.currentMinTime === next.currentMinTime &&
+      prev.currentMaxTime === next.currentMaxTime &&
+      prev.maxTime === next.maxTime &&
+      prev.playSpeed === next.playSpeed
+    );
+  },
+);

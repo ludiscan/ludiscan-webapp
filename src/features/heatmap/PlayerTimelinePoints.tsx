@@ -1,16 +1,20 @@
 /* eslint-disable react/no-unknown-property */
-import { useEffect, useMemo, useState, useRef, useCallback } from 'react';
-import { BufferGeometry, CatmullRomCurve3, Color, Line, LineBasicMaterial, Vector3, Sprite, SpriteMaterial, TextureLoader } from 'three';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { BufferGeometry, CatmullRomCurve3, Color, Line, LineBasicMaterial, Sprite, SpriteMaterial, TextureLoader, Vector3 } from 'three';
 import { Line2, LineGeometry, LineMaterial } from 'three-stdlib';
 
+import type { PlayerArrowExtra } from '@src/features/heatmap/selection/hooks';
 import type { PlayerPositionLog, PlayerTimelineDetail } from '@src/modeles/heatmapView';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { ViewContext } from '@src/utils/vql';
 import type { FC } from 'react';
-import type { Texture } from 'three';
+import type { Texture, Group } from 'three';
 
+import { useSelectable } from '@src/features/heatmap/selection/hooks';
+import { registerLiveObject } from '@src/features/heatmap/selection/liveObjectRegistry';
+import { useGeneralPick } from '@src/hooks/useGeneral';
 import { useHVQL } from '@src/hooks/useHVQuery';
-import { useGeneralState, usePlayerTimelineState } from '@src/hooks/useHeatmapState';
+import { usePlayerTimelinePatch, usePlayerTimelinePick } from '@src/hooks/usePlayerTimeline';
 import { usePlayerPositionLogs } from '@src/modeles/heatmapView';
 import { zIndexes } from '@src/styles/style';
 import { getIconPath } from '@src/utils/heatmapIconMap';
@@ -22,15 +26,13 @@ export type PlayerTimelinePointsTimeRange = {
 export type PlayerTimelinePointsProps = {
   service: HeatmapDataService;
   state: PlayerTimelineDetail | null;
-  currentTimelineSeek: number;
   visibleTimeRange: PlayerTimelinePointsTimeRange;
 };
 
-const Component: FC<PlayerTimelinePointsProps> = ({ state, currentTimelineSeek, visibleTimeRange }) => {
-  const {
-    data: { upZ, scale },
-  } = useGeneralState();
-  const { data: timelineState, setData } = usePlayerTimelineState();
+const Component: FC<PlayerTimelinePointsProps> = ({ state, visibleTimeRange }) => {
+  const { upZ, scale } = useGeneralPick('upZ', 'scale');
+  const { currentTimelineSeek, maxTime, queryText } = usePlayerTimelinePick('currentTimelineSeek', 'maxTime', 'queryText');
+  const setTimelineState = usePlayerTimelinePatch();
   const [queryColor, setQueryColor] = useState<number | null>(null);
   const [queryIcon, setQueryIcon] = useState<string | null>(null);
   const [currentIconPath, setCurrentIconPath] = useState<string | null>(null);
@@ -96,8 +98,7 @@ const Component: FC<PlayerTimelinePointsProps> = ({ state, currentTimelineSeek, 
   const updateIconTexture = useCallback(
     (iconPath: string) => {
       if (materialRef.current && materialRef.current.map !== textureCache.current.get(iconPath)) {
-        const texture = getCachedTexture(iconPath);
-        materialRef.current.map = texture;
+        materialRef.current.map = getCachedTexture(iconPath);
       }
     },
     [getCachedTexture],
@@ -114,8 +115,7 @@ const Component: FC<PlayerTimelinePointsProps> = ({ state, currentTimelineSeek, 
       });
       materialRef.current = material;
 
-      const sprite = new Sprite(material);
-      spriteRef.current = sprite;
+      spriteRef.current = new Sprite(material);
     }
   }, []);
 
@@ -133,21 +133,21 @@ const Component: FC<PlayerTimelinePointsProps> = ({ state, currentTimelineSeek, 
   useEffect(() => {
     if (!logs || logs.length === 0) return;
     const max = logs ? Math.max(...logs.map((pt) => pt.offset_timestamp)) : 0;
-    if (max > (timelineState.maxTime || 0)) {
-      setData((prev) => ({
+    if (max > (maxTime || 0)) {
+      setTimelineState((prev) => ({
         ...prev,
         currantTime: 0,
         maxTime: max,
       }));
     }
-  }, [logs, setData, timelineState]);
+  }, [logs, maxTime, setTimelineState]);
 
   useEffect(() => {
     setDocument({
       palette: { yellow: '#FFD400', blue: '#0057FF' },
       vars: { threshold: 0.7 },
     });
-  }, [setDocument, timelineState.queryText]);
+  }, [setDocument, queryText]);
   useEffect(() => {
     const latestLog = partialPathPoints.slice(-1)[0];
     if (!latestLog) return;
@@ -157,7 +157,7 @@ const Component: FC<PlayerTimelinePointsProps> = ({ state, currentTimelineSeek, 
       pos: { x: latestLog.data.x, y: latestLog.data.y, z: latestLog.data.z },
       t: latestLog.data.offset_timestamp,
     };
-    const style = compile(timelineState.queryText, ctx);
+    const style = compile(queryText, ctx);
     if (style.color) {
       setQueryColor(Number('0x' + style.color.slice(1)));
     }
@@ -171,7 +171,52 @@ const Component: FC<PlayerTimelinePointsProps> = ({ state, currentTimelineSeek, 
       setQueryIcon(null);
       setCurrentIconPath(null);
     }
-  }, [compile, partialPathPoints, timelineState.queryText, currentIconPath]);
+  }, [compile, partialPathPoints, queryText, currentIconPath]);
+
+  // 直近2点（from→to）を取る
+  const lastSeg = useMemo(() => {
+    if (partialPathPoints.length < 2) return null;
+    const lastIdx = partialPathPoints.length - 1;
+    const from = partialPathPoints[lastIdx - 1];
+    const to = partialPathPoints[lastIdx];
+    return { from, to };
+  }, [partialPathPoints]);
+
+  // playerId を文字列に（store型が string の場合）
+  const playerIdStr = String(state?.player ?? '');
+
+  // live 参照キー（セッションで一意に）
+  const liveRefKey = useMemo(() => {
+    if (!state?.player) return undefined;
+    return `player:${state.player}:${state.session_id ?? ''}`;
+  }, [state?.player, state?.session_id]);
+  // 進行方向/速度/tick を算出
+  const arrowExtra: PlayerArrowExtra = useMemo(() => {
+    const { to } = lastSeg || {};
+    return {
+      playerId: Number(playerIdStr),
+      tick: to?.data.offset_timestamp || 0,
+      liveRefKey,
+    };
+  }, [lastSeg, playerIdStr, liveRefKey]);
+
+  // グループ参照をレジストリへ
+  const arrowRef = useRef<Group>(null);
+  useEffect(() => {
+    if (!arrowRef.current || !liveRefKey) return;
+    const unregister = registerLiveObject(liveRefKey, arrowRef.current);
+    return () => {
+      unregister();
+    };
+  }, [liveRefKey]);
+
+  // ← ここが重要：必須フィールド（playerId / tick）を extra で渡す
+  const arrowHandlers = useSelectable('player-arrow', {
+    extra: arrowExtra,
+    fit: 'sphere',
+    fitPadding: 2.0,
+  });
+
   if (isLoading || !logs || !isSuccess || !state?.visible) return <></>;
   return (
     <>
@@ -194,29 +239,6 @@ const Component: FC<PlayerTimelinePointsProps> = ({ state, currentTimelineSeek, 
         />
       )}
 
-      {/* 現在のタイムラインの位置までのパスを描画 */}
-      {partialPathPoints.length > 1 &&
-        (() => {
-          const positions = partialPathPoints.slice(partialPathPoints.length - 3, partialPathPoints.length).flatMap(({ vec }) => [vec.x, vec.y, vec.z]);
-
-          const geometry = new LineGeometry();
-          geometry.setPositions(positions);
-
-          const material = new LineMaterial({
-            color: queryColor || 0xff0000,
-            linewidth: 5, // ピクセル単位の太さ
-            worldUnits: false, // trueならworld単位（falseでOK）
-            dashed: false,
-            opacity: 0.7,
-          });
-
-          material.depthTest = false;
-          material.transparent = true;
-          material.resolution.set(window.innerWidth, window.innerHeight); // これ必須！
-
-          return <primitive renderOrder={zIndexes.renderOrder.timelineArrows} object={new Line2(geometry, material)} />;
-        })()}
-
       {/* アイコン表示 */}
       {queryIcon &&
         partialPathPoints.length > 0 &&
@@ -236,46 +258,77 @@ const Component: FC<PlayerTimelinePointsProps> = ({ state, currentTimelineSeek, 
           return <primitive renderOrder={zIndexes.renderOrder.timelineArrows} object={spriteRef.current} />;
         })()}
 
-      {/* 現在のタイムラインの位置までのパスの矢印を描画 */}
-      {partialPathPoints.length >= 2 &&
-        (() => {
-          const lastIdx = partialPathPoints.length - 1;
-          const from = partialPathPoints[lastIdx - 1];
-          const to = partialPathPoints[lastIdx].vec;
+      <group {...arrowHandlers}>
+        {lastSeg && (
+          <mesh ref={arrowRef} position={lastSeg.to.vec}>
+            <sphereGeometry args={[50 * scale, 20, 12]} />
+            <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+          </mesh>
+        )}
+        {/* 現在のタイムラインの位置までのパスを描画 */}
+        {partialPathPoints.length > 1 &&
+          (() => {
+            const positions = partialPathPoints.slice(partialPathPoints.length - 3, partialPathPoints.length).flatMap(({ vec }) => [vec.x, vec.y, vec.z]);
 
-          const dir = to.clone().sub(from.vec).normalize(); // 進行方向
-          const arrowLength = 30 * scale;
-          const arrowWidth = 15 * scale;
+            const geometry = new LineGeometry();
+            geometry.setPositions(positions);
 
-          // 任意方向に垂直なベクトルを取得
-          const getPerpendicularVector = (dir: Vector3) => {
-            const up = Math.abs(dir.y) < 0.99 ? new Vector3(0, 1, 0) : new Vector3(1, 0, 0);
-            return new Vector3().crossVectors(dir, up).normalize();
-          };
+            const material = new LineMaterial({
+              color: queryColor || 0xff0000,
+              linewidth: 5, // ピクセル単位の太さ
+              worldUnits: false, // trueならworld単位（falseでOK）
+              dashed: false,
+              opacity: 0.7,
+            });
 
-          const perpendicular = getPerpendicularVector(dir).multiplyScalar(arrowWidth);
-          const tail = to.clone().sub(dir.clone().multiplyScalar(arrowLength));
-          const left = tail.clone().add(perpendicular);
-          const right = tail.clone().sub(perpendicular);
+            material.depthTest = false;
+            material.transparent = true;
+            material.resolution.set(window.innerWidth, window.innerHeight); // これ必須！
 
-          const positions = [left, to, right].flatMap((v) => [v.x, v.y, v.z]);
+            return <primitive renderOrder={zIndexes.renderOrder.timelineArrows} object={new Line2(geometry, material)} />;
+          })()}
 
-          const geometry = new LineGeometry();
-          geometry.setPositions(positions);
+        {/* 現在のタイムラインの位置までのパスの矢印を描画 */}
+        {partialPathPoints.length >= 2 &&
+          (() => {
+            const lastIdx = partialPathPoints.length - 1;
+            const from = partialPathPoints[lastIdx - 1];
+            const to = partialPathPoints[lastIdx].vec;
 
-          const material = new LineMaterial({
-            color: queryColor || 0xff0000,
-            linewidth: 5, // 太さはピクセルベース
-            worldUnits: false,
-            dashed: false,
-          });
+            const dir = to.clone().sub(from.vec).normalize(); // 進行方向
+            const arrowLength = 30 * scale;
+            const arrowWidth = 15 * scale;
 
-          material.depthTest = false; // 深度テストを無効化
-          material.transparent = true;
-          material.resolution.set(window.innerWidth, window.innerHeight);
+            // 任意方向に垂直なベクトルを取得
+            const getPerpendicularVector = (dir: Vector3) => {
+              const up = Math.abs(dir.y) < 0.99 ? new Vector3(0, 1, 0) : new Vector3(1, 0, 0);
+              return new Vector3().crossVectors(dir, up).normalize();
+            };
 
-          return <primitive renderOrder={zIndexes.renderOrder.timelineArrows} object={new Line2(geometry, material)} />;
-        })()}
+            const perpendicular = getPerpendicularVector(dir).multiplyScalar(arrowWidth);
+            const tail = to.clone().sub(dir.clone().multiplyScalar(arrowLength));
+            const left = tail.clone().add(perpendicular);
+            const right = tail.clone().sub(perpendicular);
+
+            const positions = [left, to, right].flatMap((v) => [v.x, v.y, v.z]);
+
+            const geometry = new LineGeometry();
+            geometry.setPositions(positions);
+
+            const material = new LineMaterial({
+              color: queryColor || 0xff0000,
+              linewidth: 5, // 太さはピクセルベース
+              worldUnits: false,
+              dashed: false,
+            });
+
+            material.depthTest = false; // 深度テストを無効化
+            material.transparent = true;
+            material.resolution.set(window.innerWidth, window.innerHeight);
+
+            return <primitive renderOrder={zIndexes.renderOrder.timelineArrows} object={new Line2(geometry, material)} />;
+          })()}
+      </group>
     </>
   );
 };

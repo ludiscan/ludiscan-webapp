@@ -3,7 +3,8 @@ import * as THREE from 'three';
 
 import type { FC } from 'react';
 
-import { useGeneralState } from '@src/hooks/useHeatmapState';
+import { useSelectable } from '@src/features/heatmap/selection/hooks';
+import { useGeneralPick } from '@src/hooks/useGeneral';
 import { layers, zIndexes } from '@src/styles/style';
 
 export type PointWithDensity = { x: number; y: number; z?: number; density: number };
@@ -62,15 +63,13 @@ function lerpColor(t01: number) {
 
 export const HeatmapFillOverlay: FC<Props> = ({ group, points, cellSize, offset = 0.08, opacity, colorIntensity = 0.6, targetLayer }) => {
   const {
-    data: {
-      upZ,
-      scale,
-      minThreshold = 0.0, // ObjectOverlay 準拠
-      maxThreshold = 1.0,
-      heatmapOpacity = 1.0,
-      colorScale,
-    },
-  } = useGeneralState();
+    upZ,
+    scale,
+    minThreshold = 0.0, // ObjectOverlay 準拠
+    maxThreshold = 1.0,
+    heatmapOpacity = 1.0,
+    colorScale,
+  } = useGeneralPick('upZ', 'scale', 'minThreshold', 'maxThreshold', 'heatmapOpacity', 'colorScale');
   const matRef = useRef<THREE.MeshBasicMaterial>(null);
 
   const worldPts = useMemo(() => {
@@ -211,6 +210,20 @@ export const HeatmapFillOverlay: FC<Props> = ({ group, points, cellSize, offset 
   }, [instanceData, count]);
   const matKey = useMemo(() => `heatmap-mat-${count}`, [count]);
 
+  const cellHandlers = useSelectable('heatmap-cell', {
+    getSelection: (e) => {
+      const i = e.instanceId ?? -1;
+      const p = e.point;
+      return {
+        kind: 'heatmap-cell',
+        index: i,
+        worldPosition: { x: p.x, y: p.y, z: p.z },
+        // density: i >= 0 ? densities[i] : undefined,
+      };
+    },
+    fit: 'point',
+  });
+
   if (count === 0) return null;
 
   return (
@@ -219,6 +232,7 @@ export const HeatmapFillOverlay: FC<Props> = ({ group, points, cellSize, offset 
       args={[undefined, undefined, count]} /* eslint-disable-line react/no-unknown-property */
       renderOrder={zIndexes.renderOrder.heatmap} /* eslint-disable-line react/no-unknown-property */
       frustumCulled={false} /* eslint-disable-line react/no-unknown-property */
+      {...cellHandlers}
     >
       <planeGeometry args={[worldCellSize, worldCellSize]} /* eslint-disable-line react/no-unknown-property */ />
       <meshBasicMaterial

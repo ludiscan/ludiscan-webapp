@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { useEffect, useMemo } from 'react';
+import { memo, useEffect, useMemo } from 'react';
 import { IoClose } from 'react-icons/io5';
 
 import type { Menus } from '@src/hooks/useHeatmapSideBarMenus';
@@ -10,8 +10,8 @@ import type { Group } from 'three';
 import { Button } from '@src/component/atoms/Button';
 import { Card } from '@src/component/atoms/Card';
 import { FlexColumn, InlineFlexRow } from '@src/component/atoms/Flex';
+import { useGeneralPatch, useGeneralSelect } from '@src/hooks/useGeneral';
 import { MenuContents } from '@src/hooks/useHeatmapSideBarMenus';
-import { useGeneralState } from '@src/hooks/useHeatmapState';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { fontSizes, fontWeights, zIndexes } from '@src/styles/style';
 
@@ -27,18 +27,19 @@ export type HeatmapMenuProps = {
   extra?: object;
 };
 
-const Component: FC<HeatmapMenuProps> = (props) => {
+const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
   const { className, name, mapOptions, toggleMenu } = props;
-  const { data: general, setData: setGeneral } = useGeneralState();
+  const mapName = useGeneralSelect((s) => s.mapName);
+  const setGeneral = useGeneralPatch();
   const { theme } = useSharedTheme();
 
   useEffect(() => {
-    if ((!general.mapName || general.mapName === '') && mapOptions.length > 0) {
-      setGeneral({ ...general, mapName: mapOptions[0] });
-    } else if (mapOptions.length === 0 && general.mapName) {
-      setGeneral({ ...general, mapName: '' });
+    if ((!mapName || mapName === '') && mapOptions.length > 0) {
+      setGeneral({ mapName: mapOptions[0] });
+    } else if (mapOptions.length === 0 && mapName) {
+      setGeneral({ mapName: '' });
     }
-  }, [general, general.mapName, mapOptions, setGeneral]);
+  }, [mapName, mapOptions, setGeneral]);
   const content = useMemo(() => MenuContents.find((content) => content.name === name), [name]);
 
   if (!content) {
@@ -58,63 +59,76 @@ const Component: FC<HeatmapMenuProps> = (props) => {
   );
 };
 
-export const HeatmapMenuContent = styled(Component)`
-  position: relative;
-  width: 500px;
-  height: 100%;
-  color: ${({ theme }) => theme.colors.text};
-
-  &__content {
-    height: calc(100% - 32px);
-    padding: 16px;
-    overflow: hidden auto;
-  }
-
-  &__toggle {
-    width: 100%;
-    background: none;
-    border: none;
-  }
-
-  &__searchBox {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    width: 100%;
-    padding: 2px 8px;
-    font-size: ${fontSizes.small};
-    font-weight: ${fontWeights.bold};
+export const HeatmapMenuContent = memo(
+  styled(HeatmapMenuContentComponent)`
+    position: relative;
+    width: 500px;
+    height: 100%;
     color: ${({ theme }) => theme.colors.text};
-    background: ${({ theme }) => theme.colors.surface.dark};
-    border-radius: 12px;
 
-    & input {
-      flex: 1;
-      color: ${({ theme }) => theme.colors.text};
-      outline: none;
-      background: transparent;
+    &__content {
+      height: calc(100% - 32px);
+      padding: 16px;
+      overflow: hidden auto;
+    }
+
+    &__toggle {
+      width: 100%;
+      background: none;
       border: none;
     }
-  }
 
-  &__meshesRow {
-    max-height: 200px;
-    padding: 0 8px;
-    overflow: hidden auto;
-  }
+    &__searchBox {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      width: 100%;
+      padding: 2px 8px;
+      font-size: ${fontSizes.small};
+      font-weight: ${fontWeights.bold};
+      color: ${({ theme }) => theme.colors.text};
+      background: ${({ theme }) => theme.colors.surface.dark};
+      border-radius: 12px;
 
-  &__label {
-    width: 120px;
-  }
+      & input {
+        flex: 1;
+        color: ${({ theme }) => theme.colors.text};
+        outline: none;
+        background: transparent;
+        border: none;
+      }
+    }
 
-  &__input {
-    flex: 1;
-    width: fit-content;
-    padding: 0 8px;
-  }
+    &__meshesRow {
+      max-height: 200px;
+      padding: 0 8px;
+      overflow: hidden auto;
+    }
 
-  &__inputNewLine {
-    width: 100%;
-    padding: 0 8px;
-  }
-`;
+    &__label {
+      width: 120px;
+    }
+
+    &__input {
+      flex: 1;
+      width: fit-content;
+      padding: 0 8px;
+    }
+
+    &__inputNewLine {
+      width: 100%;
+      padding: 0 8px;
+    }
+  `,
+  (prev, next) => {
+    return (
+      prev.className == next.className &&
+      prev.name == next.name &&
+      prev.mapOptions == next.mapOptions &&
+      prev.toggleMenu == next.toggleMenu &&
+      prev.service.task == next.service.task &&
+      prev.service.projectId == next.service.projectId &&
+      prev.service.sessionId == next.service.sessionId
+    );
+  },
+);

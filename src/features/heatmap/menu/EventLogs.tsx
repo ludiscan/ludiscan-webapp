@@ -10,17 +10,18 @@ import { Switch } from '@src/component/atoms/Switch';
 import { Text } from '@src/component/atoms/Text';
 import { Selector } from '@src/component/molecules/Selector';
 import { InputRow } from '@src/features/heatmap/menu/InputRow';
-import { useEventLogState } from '@src/hooks/useHeatmapState';
+import { useEventLogPatch, useEventLogSelect } from '@src/hooks/useEventLog';
 import { fontSizes, fontWeights } from '@src/styles/style';
 import { getRandomPrimitiveColor } from '@src/utils/color';
 
 const Component: FC<HeatmapMenuProps> = ({ eventLogKeys }) => {
-  const { data: eventLog, setData: setEventLogs } = useEventLogState();
+  const logs = useEventLogSelect((s) => s.logs);
+  const setEventLogs = useEventLogPatch();
 
   useEffect(() => {
     if (eventLogKeys) {
       // 現在のキー列を取り出す
-      const currentKeys = eventLog.logs.map((e) => e.key);
+      const currentKeys = logs.map((e) => e.key);
 
       const setA = new Set(eventLogKeys);
       const setB = new Set(currentKeys);
@@ -29,23 +30,18 @@ const Component: FC<HeatmapMenuProps> = ({ eventLogKeys }) => {
         return;
       }
       const eventLogDats: EventLogData[] = eventLogKeys.map((key) => {
-        const index = eventLog.logs.findIndex((e) => e.key === key);
+        const index = logs.findIndex((e) => e.key === key);
         // console.log(eventLogs[index]?.color);
         return {
           key,
-          visible: index !== -1 ? eventLog.logs[index].visible : false,
-          color: eventLog.logs[index]?.color || getRandomPrimitiveColor(),
-          iconName: eventLog.logs[index]?.iconName || 'CiStreamOn',
+          visible: index !== -1 ? logs[index].visible : false,
+          color: logs[index]?.color || getRandomPrimitiveColor(),
+          iconName: logs[index]?.iconName || 'CiStreamOn',
         };
       });
-      setEventLogs((prev) => {
-        return {
-          ...prev,
-          logs: eventLogDats,
-        };
-      });
+      setEventLogs({ logs: eventLogDats });
     }
-  }, [eventLogKeys, eventLog.logs, setEventLogs]);
+  }, [eventLogKeys, logs, setEventLogs]);
 
   const handleFilterPlayer = useCallback(
     (player: string) => {
@@ -79,41 +75,35 @@ const Component: FC<HeatmapMenuProps> = ({ eventLogKeys }) => {
       </InlineFlexRow>
       <InlineFlexRow align={'center'} gap={4}>
         {eventLogKeys?.map((key) => {
-          const index = eventLog.logs.findIndex((e) => e.key === key);
+          const index = logs.findIndex((e) => e.key === key);
           return (
             <InputRow key={key} label={key}>
               <Switch
                 label={key}
                 onChange={(checked) => {
-                  const newEventLogs = eventLog.logs.map((e) => ({ ...e }));
+                  const newEventLogs = logs.map((e) => ({ ...e }));
                   if (index !== -1) {
                     newEventLogs[index].visible = checked;
                   } else {
                     newEventLogs.push({ key, visible: checked, color: '#000000', iconName: 'CiStreamOn' });
                   }
-                  setEventLogs((prev) => ({
-                    ...prev,
-                    logs: newEventLogs,
-                  }));
+                  setEventLogs({ logs: newEventLogs });
                 }}
-                checked={index !== -1 ? eventLog.logs[index].visible : false}
+                checked={index !== -1 ? logs[index].visible : false}
                 size={'small'}
               />
-              {eventLog.logs[index] && eventLog.logs[index].color && (
+              {logs[index] && logs[index].color && (
                 <input
                   type={'color'}
-                  color={eventLog.logs[index].color}
+                  color={logs[index].color}
                   onChange={(e) => {
-                    const newEventLogs = eventLog.logs.map((e) => ({ ...e }));
+                    const newEventLogs = logs.map((e) => ({ ...e }));
                     if (index !== -1) {
                       newEventLogs[index].color = e.target.value;
                     } else {
                       newEventLogs.push({ key, visible: false, color: e.target.value, iconName: 'CiStreamOn' });
                     }
-                    setEventLogs((prev) => ({
-                      ...prev,
-                      logs: newEventLogs,
-                    }));
+                    setEventLogs({ logs: newEventLogs });
                   }}
                 />
               )}

@@ -1,15 +1,25 @@
 import { useMemo } from 'react';
-import { Color, Vector3 } from 'three';
+import { Color } from 'three';
 
 import type { FC } from 'react';
 
-import { useGeneralState } from '@src/hooks/useHeatmapState';
+import { useSelectable } from '@src/features/heatmap/selection/hooks';
+import { useGeneralPick } from '@src/hooks/useGeneral';
 
 export type PointMarkersProps = {
   points: { x: number; y: number; z?: number | undefined; density: number }[];
   minThreshold?: number; // **最低表示密度**
   maxThreshold?: number; // **最大密度の閾値**
   colorIntensity?: number; // **色の強調度**
+};
+
+type RenderCell = {
+  x: number;
+  y: number;
+  z: number;
+  color: Color;
+  density: number; // ← 生の密度
+  srcIndex: number; // 元 points 内のインデックス（必要なら）
 };
 
 // ----------------------------------------------------------------
@@ -63,19 +73,34 @@ function transform(x: number, mode: ScaleMode): number {
   }
 }
 
-class Point extends Vector3 {
-  color: Color;
+const Cell: FC<{ cell: RenderCell; scale: number; opacity: number }> = ({ cell, scale, opacity }) => {
+  const handlers = useSelectable('heatmap-cell', {
+    getSelection: () => ({
+      kind: 'heatmap-cell',
+      index: cell.srcIndex, // 任意
+      worldPosition: { x: cell.x, y: cell.y, z: cell.z },
+      density: cell.density, // ★ ここで渡す
+    }),
+    fit: 'point',
+  });
 
-  constructor(x: number, y: number, z: number, color: Color) {
-    super(x, y, z);
-    this.color = color;
-  }
-}
+  return (
+    <mesh position={[cell.x, cell.y, cell.z]} /* eslint-disable-line react/no-unknown-property */ {...handlers}>
+      <boxGeometry args={[50 * scale, 50 * scale, 50 * scale]} /* eslint-disable-line react/no-unknown-property */ />
+      <meshStandardMaterial color={cell.color} opacity={opacity} transparent /* eslint-disable-line react/no-unknown-property */ />
+    </mesh>
+  );
+};
 
 const Component: FC<PointMarkersProps> = ({ points, colorIntensity = 0.6 }) => {
   const {
-    data: { upZ, scale, minThreshold = 0.0, maxThreshold = 1.0, heatmapOpacity = 1.0, colorScale },
-  } = useGeneralState();
+    upZ,
+    scale,
+    minThreshold = 0.0,
+    maxThreshold = 1.0,
+    heatmapOpacity = 1.0,
+    colorScale,
+  } = useGeneralPick('upZ', 'scale', 'minThreshold', 'maxThreshold', 'heatmapOpacity', 'colorScale');
 
   // Z-up / Y-up の変換
   const pointList = useMemo(
@@ -129,29 +154,25 @@ const Component: FC<PointMarkersProps> = ({ points, colorIntensity = 0.6 }) => {
     });
   }, [lo, mode, hi, pointList, colorIntensity, colorScale, scale]);
 
-  // ★ここでの getColor は「t」そのまま。colorScale の二重掛けを削除！
-  const memoizedPoints = useMemo(() => {
+  const renderCells: RenderCell[] = useMemo(() => {
+    // ここはあなたの normalizePoints/memoizedPoints ロジックをベースに
+    // フィルタ後の点について density と元インデックスを入れて返す
     return normalizePoints
-      .map(({ x, y, z, t }) => {
+      .map((np, idx) => {
+        const d = points[idx].density; // ★ 元配列の密度を拾う
+        const t = np.t; // 正規化済み 0..1
         if (t > maxThreshold || t < minThreshold) return null;
+
         const color = getColor(t, MIN_COLOR, MAX_COLOR);
-        return new Point(x, y, z, color);
+        return { x: np.x, y: np.y, z: np.z, color, density: d, srcIndex: idx };
       })
-      .filter((s): s is Point => s != null);
-  }, [maxThreshold, minThreshold, normalizePoints]);
+      .filter(Boolean) as RenderCell[];
+  }, [normalizePoints, points, maxThreshold, minThreshold]);
 
   return (
     <>
-      {memoizedPoints.map((pos, i) => (
-        <mesh
-          key={i}
-          position={new Vector3(pos.x, pos.y, pos.z)} /* eslint-disable-line react/no-unknown-property */
-          castShadow={false} /* eslint-disable-line react/no-unknown-property */
-          receiveShadow={false} /* eslint-disable-line react/no-unknown-property */
-        >
-          <boxGeometry args={[50 * scale, 50 * scale, 50 * scale]} /> {/* eslint-disable-line react/no-unknown-property */}
-          <meshStandardMaterial color={pos.color} opacity={heatmapOpacity} transparent={true} /> {/* eslint-disable-line react/no-unknown-property */}
-        </mesh>
+      {renderCells.map((c) => (
+        <Cell key={c.srcIndex} cell={c} scale={scale} opacity={heatmapOpacity} />
       ))}
     </>
   );

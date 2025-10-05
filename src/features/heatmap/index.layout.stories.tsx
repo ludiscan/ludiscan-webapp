@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs';
 
 import { HeatmapIdPageLayout } from '@src/pages/heatmap/projects/[project_id]/index.page';
+import { mockHeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 
 export default {
   component: HeatmapIdPageLayout,
@@ -18,18 +19,6 @@ const Template: Story = {
 export const Default: Story = {
   ...Template,
   args: {
-    version: 'story',
-    service: {
-      isInitialized: false,
-      getMapList: async () => [],
-      getMapContent: async () => null,
-      getGeneralLogKeys: async () => [],
-      task: undefined,
-      getEventLog: async () => [],
-      eventLogs: {},
-      projectId: 1,
-      sessionId: null,
-      setSessionId: () => {},
-    },
+    service: mockHeatmapDataService,
   },
 };

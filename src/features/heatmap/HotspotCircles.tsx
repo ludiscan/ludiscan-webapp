@@ -3,20 +3,17 @@ import { Color, Vector3 } from 'three';
 
 import type { FC } from 'react';
 
-import { useGeneralState, useHotspotModeState } from '@src/hooks/useHeatmapState';
+import { useGeneralPick } from '@src/hooks/useGeneral';
+import { useHotspotModePick } from '@src/hooks/useHotspotMode';
 
 export type PointCirclesProps = {
   points: { x: number; y: number; z?: number | undefined; density: number }[];
 };
 
 const Component: FC<PointCirclesProps> = ({ points }) => {
-  const {
-    data: { scale, upZ },
-  } = useGeneralState();
+  const { scale, upZ } = useGeneralPick('scale', 'upZ');
 
-  const {
-    data: { visible, cellRadius, thresholdCount, skipNearDuplication },
-  } = useHotspotModeState();
+  const { visible, cellRadius, thresholdCount, skipNearDuplication } = useHotspotModePick('visible', 'cellRadius', 'thresholdCount', 'skipNearDuplication');
 
   // **各ポイントの周囲の密度を集計**
   const areaDensities = useMemo(() => {

@@ -14,7 +14,7 @@ import { InlineFlexColumn, InlineFlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { Toggle } from '@src/component/atoms/Toggle';
 import { StatusContent } from '@src/component/molecules/StatusContent';
-import { usePlayerTimelineState } from '@src/hooks/useHeatmapState';
+import { usePlayerTimelinePatch, usePlayerTimelinePick } from '@src/hooks/usePlayerTimeline';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { createClient, DefaultStaleTime } from '@src/modeles/qeury';
 import { fontSizes } from '@src/styles/style';
@@ -102,20 +102,17 @@ const Component: FC<HeatmapMenuProps> = ({ extra = {}, className }) => {
     return 'loading';
   }, [isLoading, isError, isSuccess, logDetail]);
 
-  const { data: timelineState, setData: setTimelineState } = usePlayerTimelineState();
+  const { details } = usePlayerTimelinePick('details');
+  const setTimelineState = usePlayerTimelinePatch();
 
   const timelineDisable = useMemo(() => {
     return (
       !logDetail?.data ||
       !project_id ||
       !session_id ||
-      !(
-        timelineState.details?.every(
-          (detail) => detail.player !== logDetail.data.player || detail.project_id !== project_id || detail.session_id !== session_id,
-        ) ?? true
-      )
+      !(details?.every((detail) => detail.player !== logDetail.data.player || detail.project_id !== project_id || detail.session_id !== session_id) ?? true)
     );
-  }, [logDetail, project_id, session_id, timelineState.details]);
+  }, [logDetail, project_id, session_id, details]);
 
   const handleTimelineClick = useCallback(() => {
     if (timelineDisable || !logDetail || !logDetail.data || !project_id || !session_id) return;

@@ -1,9 +1,10 @@
 import { OrbitControls } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AmbientLight, Box3, DirectionalLight, HemisphereLight, Raycaster, SpotLight, Vector2, Vector3 } from 'three';
 
 import { HeatmapObjectOverlay } from './HeatmapObjectOverlay';
+import { FocusController } from './selection/FocusController';
 
 import type { PlayerTimelinePointsTimeRange } from '@src/features/heatmap/PlayerTimelinePoints';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
@@ -17,7 +18,11 @@ import { HotspotCircles } from '@src/features/heatmap/HotspotCircles';
 import { LocalModelLoader, StreamModelLoader } from '@src/features/heatmap/ModelLoader';
 import { PlayerTimelinePoints } from '@src/features/heatmap/PlayerTimelinePoints';
 import { WaypointMarker } from '@src/features/heatmap/WaypointMarker';
-import { useEventLogState, useGeneralState, usePlayerTimelineState } from '@src/hooks/useHeatmapState';
+import { FocusLinkBridge } from '@src/features/heatmap/selection/FocusLinkBridge';
+import { FocusPingLayer } from '@src/features/heatmap/selection/FocusPingLayer';
+import { useEventLogSelect } from '@src/hooks/useEventLog';
+import { useGeneralPick } from '@src/hooks/useGeneral';
+import { usePlayerTimelinePick } from '@src/hooks/usePlayerTimeline';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
@@ -27,7 +32,6 @@ type HeatmapCanvasProps = {
   map?: string | ArrayBuffer | null;
   modelType?: 'gltf' | 'glb' | 'obj' | 'server' | null;
   pointList: { x: number; y: number; z?: number; density: number }[];
-  currentTimelineSeek: number;
   visibleTimelineRange: PlayerTimelinePointsTimeRange;
 };
 
@@ -38,20 +42,51 @@ type Waypoint = {
 
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 
-const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, service, currentTimelineSeek, visibleTimelineRange }) => {
+const EventLogs = memo(
+  ({ service }: { service: HeatmapDataService }) => {
+    const logs = useEventLogSelect((s) => s.logs);
+    const visibleEventLogs = useMemo(() => logs.filter((event) => event.visible), [logs]);
+    return (
+      <>
+        {visibleEventLogs.length > 0 && visibleEventLogs.map((event) => <EventLogMarkers key={event.key} logName={event.key} service={service} pref={event} />)}
+      </>
+    );
+  },
+  (prev, next) => {
+    return prev.service === next.service;
+  },
+);
+
+EventLogs.displayName = 'EventLogs';
+
+const TimelinePoints = memo(
+  ({ service, visibleTimelineRange }: { service: HeatmapDataService; visibleTimelineRange: PlayerTimelinePointsTimeRange }) => {
+    const { visible, details } = usePlayerTimelinePick('visible', 'details');
+    return (
+      <>
+        {service &&
+          visible &&
+          details &&
+          details.length > 0 &&
+          details.map((tl, index) => <PlayerTimelinePoints key={index} service={service} state={tl} visibleTimeRange={visibleTimelineRange} />)}
+      </>
+    );
+  },
+  (prev, next) => {
+    return prev.service === next.service && prev.visibleTimelineRange === next.visibleTimelineRange;
+  },
+);
+TimelinePoints.displayName = 'TimelinePoints';
+
+const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, service, visibleTimelineRange }) => {
   // const { invalidate } = useThree();
   const fitInfoRef = useRef<{ dist: number; center: Vector3 }>({ dist: 1000, center: new Vector3() });
-  const {
-    data: { showHeatmap, heatmapOpacity, heatmapType },
-  } = useGeneralState();
+  const { showHeatmap, heatmapOpacity, heatmapType } = useGeneralPick('showHeatmap', 'heatmapOpacity', 'heatmapType');
   const { theme } = useSharedTheme();
-  const { data: eventLog } = useEventLogState();
-  const { data: timelineState } = usePlayerTimelineState();
+
   const orbitControlsRef = useRef<OrbitControlsImpl>(null);
   const groupRef = useRef<Group>(null);
   const orthoBaseZoomRef = useRef<number | null>(null);
-
-  const visibleEventLogs = useMemo(() => eventLog.logs.filter((event) => event.visible), [eventLog]);
 
   // **1-1. State を追加**
   const [waypoints, setWaypoints] = useState<Waypoint[]>([]);
@@ -364,15 +399,8 @@ const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, s
         )}
         {pointList && heatmapType === 'object' && showHeatmap && <HeatmapObjectOverlay points={pointList} />}
         {pointList && showHeatmap && <HotspotCircles points={pointList} />}
-        {visibleEventLogs.length > 0 && visibleEventLogs.map((event) => <EventLogMarkers key={event.key} logName={event.key} service={service} pref={event} />)}
-        {service &&
-          timelineState &&
-          timelineState.visible &&
-          timelineState.details &&
-          timelineState.details.length > 0 &&
-          timelineState.details.map((tl, index) => (
-            <PlayerTimelinePoints key={index} service={service} state={tl} currentTimelineSeek={currentTimelineSeek} visibleTimeRange={visibleTimelineRange} />
-          ))}
+        <EventLogs service={service} />
+        <TimelinePoints service={service} visibleTimelineRange={visibleTimelineRange} />
         {/* --- 追加：ウェイポイントを map して表示 --- */}
         {waypoints.map((wp) => (
           <WaypointMarker
@@ -396,9 +424,23 @@ const Component: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, s
           />
         ))}
       </group>
+      <FocusController orbit={orbitControlsRef} sceneRoot={groupRef} />
       <OrbitControls enableZoom enablePan enableRotate ref={orbitControlsRef} position0={new Vector3(1, 1, 3000)} />
+      <FocusPingLayer ttlMs={1800} baseRadius={60} />
+
+      {/* ③ AIリンク/外部postMessage→focus */}
+      <FocusLinkBridge />
     </>
   );
 };
 
-export const HeatMapCanvas = Component;
+export const HeatMapCanvas = memo(
+  HeatMapCanvasComponent,
+  (prev, next) =>
+    prev.model === next.model &&
+    prev.map === next.map &&
+    prev.modelType === next.modelType &&
+    prev.pointList === next.pointList &&
+    prev.visibleTimelineRange === next.visibleTimelineRange &&
+    prev.service.task == next.service.task,
+);
