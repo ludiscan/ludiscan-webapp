@@ -31,6 +31,18 @@ export type HeatmapDataService = {
   setSessionId: (sessionId: number | null) => void;
 };
 
+export const mockHeatmapDataService = {
+  isInitialized: true,
+  getMapList: async () => ['map1', 'map2', 'map3'],
+  getMapContent: async () => null,
+  getGeneralLogKeys: async () => ['key1', 'key2', 'key3'],
+  task: undefined,
+  getEventLog: async () => [],
+  getEventLogSnapshot: () => [],
+  projectId: 1,
+  sessionId: null,
+  setSessionId: () => {},
+};
 // データ型定義
 export type OfflineHeatmapData = {
   task: HeatmapTask;

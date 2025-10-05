@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs';
 
 import { HeatmapIdPageLayout } from '@src/pages/heatmap/projects/[project_id]/index.page';
-import { useOfflineHeatmapDataService } from '@src/utils/heatmap/useOfflineHeatmapDataService';
+import { mockHeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 
 export default {
   component: HeatmapIdPageLayout,
@@ -19,7 +19,6 @@ const Template: Story = {
 export const Default: Story = {
   ...Template,
   args: {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    service: useOfflineHeatmapDataService(null),
+    service: mockHeatmapDataService,
   },
 };
