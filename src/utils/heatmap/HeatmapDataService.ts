@@ -244,7 +244,6 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
     [projectId, sessionId, getSessionLogs, getProjectLogs, queryClient],
   );
 
-  console.log(queryClient.getQueryData(['eventLog']));
   const getEventLogSnapshot = useCallback(
     (logName: string): PositionEventLog[] | null => {
       return (queryClient.getQueryData(eventLogKey(projectId, sessionId, logName)) as PositionEventLog[] | undefined) ?? null;

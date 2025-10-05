@@ -106,13 +106,12 @@ export const useHeatmapState = () => {
 
   // Redux 変更を購読（コンポーネントは hasDiff が変わる時だけ再レンダー）
   useEffect(() => {
-    const unsubscribe = store.subscribe(() => {
+    return store.subscribe(() => {
       const now = store.getState().heatmapCanvas;
       const saved = savedRef.current;
       const nextHasDiff = !!saved && !deepEqual(saved, now);
       setHasDiff((prev) => (prev !== nextHasDiff ? nextHasDiff : prev));
     });
-    return unsubscribe();
   }, [store]);
 
   // 現在の Redux 値を保存（set 内で saveCanvasValues が走る想定）
