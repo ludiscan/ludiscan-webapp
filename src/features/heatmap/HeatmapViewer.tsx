@@ -21,6 +21,7 @@ import { QuickToolbar } from '@src/features/heatmap/QuickToolbar';
 import { TimelineControlWrapper } from '@src/features/heatmap/TimelineControlWrapper';
 import { exportHeatmap } from '@src/features/heatmap/export-heatmap';
 import { HeatmapMenuSideBar } from '@src/features/heatmap/menu/HeatmapMenuSideBar';
+import { FocusLinkBridge } from '@src/features/heatmap/selection/FocusLinkBridge';
 import { InspectorModal } from '@src/features/heatmap/selection/InspectorModal';
 import { useGeneralSelect } from '@src/hooks/useGeneral';
 import { DefaultStaleTime } from '@src/modeles/qeury';
@@ -201,6 +202,8 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
       <div className={`${className}__selectionInspector`}>
         <InspectorModal />
       </div>
+      {/* AIリンク/外部postMessage→focus */}
+      <FocusLinkBridge />
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { Color } from 'three';
 
 import type { FC } from 'react';
@@ -178,4 +178,11 @@ const Component: FC<PointMarkersProps> = ({ points, colorIntensity = 0.6 }) => {
   );
 };
 
-export const HeatmapObjectOverlay = Component;
+export const HeatmapObjectOverlay = memo(
+  Component,
+  (prevProps, nextProps) =>
+    prevProps.points == nextProps.points &&
+    prevProps.colorIntensity == prevProps.colorIntensity &&
+    prevProps.minThreshold == nextProps.minThreshold &&
+    prevProps.maxThreshold == nextProps.maxThreshold,
+);

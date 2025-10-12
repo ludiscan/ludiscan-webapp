@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { memo, useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 
 import type { FC } from 'react';
@@ -61,7 +61,7 @@ function lerpColor(t01: number) {
   return MIN_COLOR.clone().lerp(MAX_COLOR, t01);
 }
 
-export const HeatmapFillOverlay: FC<Props> = ({ group, points, cellSize, offset = 0.08, opacity, colorIntensity = 0.6, targetLayer }) => {
+const HeatmapFillOverlayComponent: FC<Props> = ({ group, points, cellSize, offset = 0.08, opacity, colorIntensity = 0.6, targetLayer }) => {
   const {
     upZ,
     scale,
@@ -250,3 +250,8 @@ export const HeatmapFillOverlay: FC<Props> = ({ group, points, cellSize, offset 
     </instancedMesh>
   );
 };
+
+export const HeatmapFillOverlay = memo(
+  HeatmapFillOverlayComponent,
+  (prev, next) => prev.group === next.group && prev.points === next.points && prev.cellSize === next.cellSize && prev.opacity === next.opacity,
+);

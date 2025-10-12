@@ -21,7 +21,6 @@ import { Switch } from '@src/component/atoms/Switch';
 import { Text } from '@src/component/atoms/Text';
 import { Toggle } from '@src/component/atoms/Toggle';
 import { Modal } from '@src/component/molecules/Modal';
-import { Selector } from '@src/component/molecules/Selector';
 import { TextArea } from '@src/component/molecules/TextArea';
 import { useGetApi } from '@src/hooks/useGetApi';
 import { usePlayerTimelinePatch, usePlayerTimelinePick } from '@src/hooks/usePlayerTimeline';
@@ -172,11 +171,15 @@ const queryPlaceholder =
 
 const PlayerTimelineComponent: FC<HeatmapMenuProps> = ({ className, service }) => {
   const setData = usePlayerTimelinePatch();
-  const { details, queryText: queryTextState } = usePlayerTimelinePick('details', 'queryText');
-  const [selectSessionId, setSelectSessionId] = useState<string | undefined>(undefined);
+  const { details, queryText: queryTextState, visible } = usePlayerTimelinePick('details', 'queryText', 'visible');
   const [queryText, setQueryText] = useState<string>('');
   const [isOpenQueryInfo, setIsOpenQueryInfo] = useState<boolean>(false);
   const [queryReadme, setQueryReadme] = useState<string>('');
+  const selectSessionId = service.sessionId;
+
+  const visibilityDisabled = useMemo(() => {
+    return !service.projectId || !service.sessionId;
+  }, [service.projectId, service.sessionId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -214,69 +217,62 @@ const PlayerTimelineComponent: FC<HeatmapMenuProps> = ({ className, service }) =
     return map;
   }, [details]);
 
-  const { data: sessions } = useQuery({
-    queryKey: ['sessions', service.projectId],
-    queryFn: async () => {
-      if (!service.projectId) return;
-      const { data, error } = await createClient().GET('/api/v0/projects/{project_id}/play_session', {
-        params: {
-          path: {
-            project_id: service.projectId,
-          },
-        },
-      });
-      if (error) return;
-      return data;
-    },
-    staleTime: DefaultStaleTime,
-    enabled: service.projectId !== undefined,
-  });
-
   const getPlayers = useGetApi('/api/v0/projects/{project_id}/play_session/{session_id}/player_position_log/{session_id}/players', {
     staleTime: DefaultStaleTime,
   });
-  const sessionIds = useMemo(() => {
-    return sessions?.map((session) => String(session.sessionId)) || [];
-  }, [sessions]);
 
-  const handleAddTimeline = useCallback(async () => {
-    if (!selectSessionId) return;
-    const project_id = service.projectId;
-    if (!project_id) return;
-    const session_id = selectSessionId ? Number(selectSessionId) : 0;
-    const data = await getPlayers.fetch([
-      {
-        params: {
-          path: {
-            project_id,
-            session_id,
+  const { data: players } = useQuery({
+    queryKey: [selectSessionId, service.projectId],
+    queryFn: async () => {
+      if (!selectSessionId) return null;
+      const project_id = service.projectId;
+      if (!project_id) return null;
+      const session_id = selectSessionId ? Number(selectSessionId) : 0;
+      const { data } = await getPlayers.fetch([
+        {
+          params: {
+            path: {
+              project_id,
+              session_id,
+            },
           },
         },
-      },
-    ]);
-    const players = data?.data;
-    if (!players) return;
-    setData((prev) => {
-      const newDetails: PlayerTimelineDetail[] = players
-        .map((player) => {
-          if (prev.details?.some((d) => d.player === player && d.session_id === session_id)) {
-            return null;
-          }
-          return {
-            player: player,
-            project_id,
-            session_id,
-            visible: true,
-          };
-        })
-        .filter((s) => s !== null);
-      return {
-        ...prev,
-        visible: true,
-        details: [...(prev.details || []), ...newDetails],
-      };
-    });
-  }, [getPlayers, selectSessionId, setData, service.projectId]);
+      ]);
+      return data;
+    },
+    staleTime: DefaultStaleTime,
+    enabled: selectSessionId !== null && service.projectId !== undefined,
+  });
+
+  const onVisibilityChange = useCallback(
+    (checked: boolean) => {
+      if (!players) return;
+      const session_id = service.sessionId;
+      const project_id = service.projectId;
+      if (!session_id || !project_id) return;
+      setData((prev) => {
+        const newDetails: PlayerTimelineDetail[] = players
+          .map((player) => {
+            if (prev.details?.some((d) => d.player === player && d.session_id === session_id)) {
+              return null;
+            }
+            return {
+              player: player,
+              project_id,
+              session_id,
+              visible: true,
+            };
+          })
+          .filter((s) => s !== null);
+        return {
+          ...prev,
+          visible: checked,
+          details: [...(prev.details || []), ...newDetails],
+        };
+      });
+    },
+    [players, service.projectId, service.sessionId, setData],
+  );
 
   const queryDisable = useMemo(() => {
     try {
@@ -327,15 +323,10 @@ const PlayerTimelineComponent: FC<HeatmapMenuProps> = ({ className, service }) =
 
   return (
     <InlineFlexColumn gap={8} style={{ width: '100%' }}>
-      <Text text={'create'} />
-      <InputRow label={'select session'}>
-        <InlineFlexRow>
-          <Selector options={sessionIds} value={selectSessionId} onChange={setSelectSessionId} />
-          <Button fontSize={'small'} onClick={handleAddTimeline} scheme={'primary'} disabled={selectSessionId === undefined}>
-            <Text text={'add'} />
-          </Button>
-        </InlineFlexRow>
+      <InputRow label={'visibility'} align={'center'}>
+        <Switch disabled={visibilityDisabled} checked={visible} onChange={onVisibilityChange} size={'small'} label={'visibility'} />
       </InputRow>
+      {visibilityDisabled && <Text text={'please select project and session'} fontSize={fontSizes.small} />}
       {sessionByDetail.size > 0 && (
         <>
           <Toggle
@@ -391,6 +382,6 @@ export const PlayerTimeline = memo(
     }
   `,
   (prev, next) => {
-    return prev.className == next.className && prev.service.projectId == next.service.projectId;
+    return prev.className == next.className && prev.service.projectId == next.service.projectId && prev.service.sessionId == next.service.sessionId;
   },
 );
