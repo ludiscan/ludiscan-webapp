@@ -33,7 +33,7 @@ export function useGetApi<TPath extends PathsWithMethod<paths, 'get'>>(
   const fetch = useCallback(
     (
       init: InitParam<MaybeOptionalInit<paths[TPath], 'get'>>,
-    ): Promise<FetchResponse<paths[TPath]['get'], InitParam<MaybeOptionalInit<paths[TPath], 'get'>>, 'application/json'>> | null => {
+    ): Promise<FetchResponse<paths[TPath]['get'], InitParam<MaybeOptionalInit<paths[TPath], 'get'>>, 'application/json'>> => {
       return queryClient.fetchQuery({
         queryKey: [path, init],
         queryFn: async () => await createClient().GET(path, ...init),

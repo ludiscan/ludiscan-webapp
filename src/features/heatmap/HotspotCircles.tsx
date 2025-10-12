@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { Color, Vector3 } from 'three';
 
 import type { FC } from 'react';
@@ -90,4 +90,4 @@ const Component: FC<PointCirclesProps> = ({ points }) => {
   ));
 };
 
-export const HotspotCircles = Component;
+export const HotspotCircles = memo(Component, (prev, next) => prev.points === next.points);

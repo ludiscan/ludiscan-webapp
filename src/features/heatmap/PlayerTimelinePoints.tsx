@@ -1,5 +1,5 @@
 /* eslint-disable react/no-unknown-property */
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BufferGeometry, CatmullRomCurve3, Color, Line, LineBasicMaterial, Sprite, SpriteMaterial, TextureLoader, Vector3 } from 'three';
 import { Line2, LineGeometry, LineMaterial } from 'three-stdlib';
 
@@ -261,7 +261,7 @@ const Component: FC<PlayerTimelinePointsProps> = ({ state, visibleTimeRange }) =
       <group {...arrowHandlers}>
         {lastSeg && (
           <mesh ref={arrowRef} position={lastSeg.to.vec}>
-            <sphereGeometry args={[50 * scale, 20, 12]} />
+            <sphereGeometry args={[100 * scale, 20, 12]} />
             <meshBasicMaterial transparent opacity={0} depthWrite={false} />
           </mesh>
         )}
@@ -333,4 +333,4 @@ const Component: FC<PlayerTimelinePointsProps> = ({ state, visibleTimeRange }) =
   );
 };
 
-export const PlayerTimelinePoints = Component;
+export const PlayerTimelinePoints = memo(Component, (prev, next) => prev.state === next.state && prev.visibleTimeRange === next.visibleTimeRange);
