@@ -182,7 +182,7 @@ export const HeatmapObjectOverlay = memo(
   Component,
   (prevProps, nextProps) =>
     prevProps.points == nextProps.points &&
-    prevProps.colorIntensity == prevProps.colorIntensity &&
+    prevProps.colorIntensity == nextProps.colorIntensity &&
     prevProps.minThreshold == nextProps.minThreshold &&
     prevProps.maxThreshold == nextProps.maxThreshold,
 );
