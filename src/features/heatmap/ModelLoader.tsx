@@ -1,5 +1,5 @@
 import { useLoader } from '@react-three/fiber';
-import { Suspense, useState, useEffect } from 'react';
+import { Suspense, useState, useEffect, memo } from 'react';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 
@@ -37,7 +37,10 @@ const LocalModelLoaderContent: FC<LocalModelLoaderProps> = ({ modelPath, modelTy
   );
 };
 
-export const LocalModelLoader = LocalModelLoaderContent;
+export const LocalModelLoader = memo(
+  LocalModelLoaderContent,
+  (prev, next) => prev.modelPath === next.modelPath && prev.modelType === next.modelType && prev.ref === next.ref,
+);
 
 type StreamModelLoaderProps = {
   model: Group;
@@ -93,4 +96,4 @@ const StreamModelLoaderComponent: FC<StreamModelLoaderProps> = ({ model, ref }) 
   );
 };
 
-export const StreamModelLoader = StreamModelLoaderComponent;
+export const StreamModelLoader = memo(StreamModelLoaderComponent, (prev, next) => prev.model === next.model && prev.ref === next.ref);

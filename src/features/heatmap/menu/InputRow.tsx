@@ -28,7 +28,7 @@ export const InputRow = styled(
     return (
       <InlineFlexRow className={className} align={align} wrap={'nowrap'} gap={4}>
         <Text text={label} fontSize={fontSizes.small} style={{ width: '90px' }} color={theme.colors.secondary.light} />
-        <div style={{ flex: 1 }}>{children}</div>
+        <div style={{ flex: 1, display: 'flex' }}>{children}</div>
       </InlineFlexRow>
     );
   },

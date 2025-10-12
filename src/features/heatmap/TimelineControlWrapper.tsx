@@ -14,10 +14,26 @@ export type TimelineControlWrapperProps = {
 
 type ViewProps = Omit<ComponentProps<typeof TimelineControllerBlock>, 'currentTime'>;
 
-const TimelineControllerView = memo((props: ViewProps) => {
-  const currentTime = usePlayerTimelineSelect((s) => s.currentTimelineSeek);
-  return <TimelineControllerBlock {...props} currentTime={currentTime} />;
-});
+const TimelineControllerView = memo(
+  (props: ViewProps) => {
+    const currentTime = usePlayerTimelineSelect((s) => s.currentTimelineSeek);
+    return <TimelineControllerBlock {...props} currentTime={currentTime} />;
+  },
+  (prev, next) =>
+    prev.isPlaying === next.isPlaying &&
+    prev.maxTime === next.maxTime &&
+    prev.currentMinTime === next.currentMinTime &&
+    prev.currentMaxTime === next.currentMaxTime &&
+    prev.playSpeed === next.playSpeed &&
+    prev.onChangePlaySpeed === next.onChangePlaySpeed &&
+    prev.onChangeMinTime === next.onChangeMinTime &&
+    prev.onChangeMaxTime === next.onChangeMaxTime &&
+    prev.onClickMenu === next.onClickMenu &&
+    prev.onClickPlay === next.onClickPlay &&
+    prev.onSeek === next.onSeek &&
+    prev.onClickBackFrame === next.onClickBackFrame &&
+    prev.onClickForwardFrame === next.onClickForwardFrame,
+);
 TimelineControllerView.displayName = 'TimelineControllerView';
 
 export const TimelineControlWrapper: FC<TimelineControlWrapperProps> = ({ setVisibleTimelineRange, visibleTimelineRange, setOpenMenu }) => {

@@ -18,7 +18,6 @@ import { HotspotCircles } from '@src/features/heatmap/HotspotCircles';
 import { LocalModelLoader, StreamModelLoader } from '@src/features/heatmap/ModelLoader';
 import { PlayerTimelinePoints } from '@src/features/heatmap/PlayerTimelinePoints';
 import { WaypointMarker } from '@src/features/heatmap/WaypointMarker';
-import { FocusLinkBridge } from '@src/features/heatmap/selection/FocusLinkBridge';
 import { FocusPingLayer } from '@src/features/heatmap/selection/FocusPingLayer';
 import { useEventLogSelect } from '@src/hooks/useEventLog';
 import { useGeneralPick } from '@src/hooks/useGeneral';
@@ -427,9 +426,6 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({ model, map, modelType,
       <FocusController orbit={orbitControlsRef} sceneRoot={groupRef} />
       <OrbitControls enableZoom enablePan enableRotate ref={orbitControlsRef} position0={new Vector3(1, 1, 3000)} />
       <FocusPingLayer ttlMs={1800} baseRadius={60} />
-
-      {/* ③ AIリンク/外部postMessage→focus */}
-      <FocusLinkBridge />
     </>
   );
 };
