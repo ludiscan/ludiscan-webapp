@@ -3,22 +3,18 @@ frontend:
     phases:
         preBuild:
             commands:
-                - 'curl -fsSL https://bun.sh/install | bash -s "bun-v1.3.0"'
-                - 'export BUN_INSTALL="$HOME/.bun"'
-                - 'export PATH="$BUN_INSTALL/bin:$PATH"'
-                - 'bun install --frozen-lockfile'
+                - curl -fsSL https://bun.sh/install | bash -s "bun-v1.3.0"
+                - source /root/.bashrc
+                - bun install --frozen-lockfile
         build:
             commands:
-                - 'export BUN_INSTALL="$HOME/.bun"'
-                - 'export PATH="$BUN_INSTALL/bin:$PATH"'
-                - 'bun run prebuild:prod'
-                - 'bun run build:prod'
+                - bun run prebuild:prod
+                - bun run build:prod
     artifacts:
         baseDirectory: .next
         files:
             - '**/*'
     cache:
         paths:
-            - '.next/cache/**/*'
-            - 'node_modules/**/*'
-            - '$HOME/.bun/**/*'
+            - .next/cache/**/*
+            - node_modules/**/*
