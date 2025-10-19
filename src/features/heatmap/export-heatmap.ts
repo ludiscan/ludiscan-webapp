@@ -53,13 +53,10 @@ export const exportHeatmap = async (
 
   // 4. バンドルJSの取得
   try {
-    // 現在のホストからAPIエンドポイントのURLを作成
-    const currentUrl = window.location.origin;
-    const bundleUrl = `${currentUrl}/api/export-heatmap-bundle`;
     // eslint-disable-next-line
-    console.log('バンドルJSを取得します:', bundleUrl);
+    console.log('バンドルJSを取得します');
 
-    const bundleResponse = await fetch(bundleUrl);
+    const bundleResponse = await fetch('/api/export-heatmap-bundle');
     if (!bundleResponse.ok) {
       // eslint-disable-next-line
       console.error(`バンドルJSの取得に失敗しました: ${bundleResponse.status}`);

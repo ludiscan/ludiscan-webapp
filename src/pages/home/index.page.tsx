@@ -2,12 +2,11 @@ import styled from '@emotion/styled';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { BiRefresh } from 'react-icons/bi';
+import { BiRefresh, BiMenuAltLeft, BiGridAlt } from 'react-icons/bi';
 
 import { ProjectItemRow } from './ProjectItemRow';
 
 import type { Project } from '@src/modeles/project';
-import type { GetServerSideProps } from 'next';
 import type { FC } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
@@ -30,12 +29,6 @@ const fetchCount = 20;
 
 export type HomePageProps = {
   className?: string | undefined;
-};
-
-export const getServerSideProps: GetServerSideProps<HomePageProps> = async () => {
-  return {
-    props: {},
-  };
 };
 
 type SortOption = 'created_desc' | 'created_asc' | 'name_asc' | 'name_desc' | 'updated_desc' | 'updated_asc';
@@ -169,11 +162,11 @@ const Component: FC<HomePageProps> = ({ className }) => {
                 ))}
               </select>
               <div className={`${className}__displayToggle`}>
-                <Button onClick={() => setDisplayMode('list')} scheme={displayMode === 'list' ? 'primary' : 'none'} fontSize={'small'} title={'リスト表示'}>
-                  <Text text={'📋'} fontSize={fontSizes.medium} />
+                <Button onClick={() => setDisplayMode('list')} scheme={displayMode === 'list' ? 'primary' : 'none'} fontSize={'small'} title={'List View'}>
+                  <BiMenuAltLeft size={20} />
                 </Button>
-                <Button onClick={() => setDisplayMode('card')} scheme={displayMode === 'card' ? 'primary' : 'none'} fontSize={'small'} title={'カード表示'}>
-                  <Text text={'🗂️'} fontSize={fontSizes.medium} />
+                <Button onClick={() => setDisplayMode('card')} scheme={displayMode === 'card' ? 'primary' : 'none'} fontSize={'small'} title={'Card View'}>
+                  <BiGridAlt size={20} />
                 </Button>
               </div>
             </FlexRow>
@@ -231,7 +224,7 @@ const Component: FC<HomePageProps> = ({ className }) => {
                               <Text text={project.name} fontSize={fontSizes.large1} color={theme.colors.text} fontWeight={'bold'} />
                               <Text text={project.description} fontSize={fontSizes.small} color={theme.colors.secondary.main} fontWeight={fontWeights.bold} />
                               <Text
-                                text={`📊 ${project.session_count ?? 0} sessions`}
+                                text={`${project.session_count ?? 0} sessions`}
                                 fontSize={fontSizes.smallest}
                                 color={theme.colors.secondary.main}
                                 fontWeight={'lighter'}
@@ -286,12 +279,12 @@ const IndexPage = styled(Component)`
   &__sortSelect {
     min-width: 200px;
     padding: 8px 12px;
+    font-size: ${fontSizes.medium}px;
+    color: ${({ theme }) => theme.colors.text};
+    cursor: pointer;
+    background-color: ${({ theme }) => theme.colors.surface.main};
     border: 1px solid ${({ theme }) => theme.colors.border.main};
     border-radius: 4px;
-    background-color: ${({ theme }) => theme.colors.surface.main};
-    color: ${({ theme }) => theme.colors.text};
-    font-size: ${fontSizes.medium}px;
-    cursor: pointer;
   }
 
   &__sortSelect:hover {
@@ -306,9 +299,9 @@ const IndexPage = styled(Component)`
   &__displayToggle {
     display: flex;
     gap: 4px;
+    padding: 4px;
     border: 1px solid ${({ theme }) => theme.colors.border.main};
     border-radius: 4px;
-    padding: 4px;
   }
 
   &__projects {
@@ -323,15 +316,15 @@ const IndexPage = styled(Component)`
   }
 
   &__projectCard {
-    min-height: 160px;
     display: flex;
     flex-direction: column;
+    min-height: 160px;
     transition:
       box-shadow 0.2s ease-in-out,
       transform 0.2s ease-in-out;
 
     &:hover {
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 8px 16px rgb(0 0 0 / 15%);
       transform: translateY(-2px);
     }
   }
@@ -358,8 +351,8 @@ const IndexPage = styled(Component)`
 
   &__errorState {
     padding: 32px 0;
-    text-align: center;
     color: #ef5350;
+    text-align: center;
   }
 
   &__emptyState {

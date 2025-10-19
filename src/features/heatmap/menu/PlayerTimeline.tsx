@@ -185,6 +185,7 @@ const PlayerTimelineComponent: FC<HeatmapMenuProps> = ({ className, service }) =
     let cancelled = false;
     (async () => {
       try {
+        // For static files, we use fetch directly with proper error handling
         const res = await fetch('/heatmap/vqueryREADME.md', { cache: 'no-store' });
 
         if (!res.ok) {

@@ -63,6 +63,7 @@
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^4.1.1",
+    "@emotion/babel-plugin": "^11.13.5",
     "@emotion/styled": "^11.14.0",
     "@eslint/compat": "^1.2.8",
     "@eslint/config-array": "^0.21.0",
