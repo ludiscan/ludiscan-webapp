@@ -812,6 +812,197 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v0/game-api-keys': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * APIキー一覧を取得
+     * @description ユーザーが作成した全てのAPIキーの一覧を取得します。
+     */
+    get: operations['GameApiKeysController_findAll'];
+    put?: never;
+    /**
+     * ゲームクライアント用のAPIキーを作成
+     * @description ゲームクライアントから使用するAPIキーを新規作成します。作成されたAPIキーは一度だけ表示され、二度と表示されないため必ず保存してください。
+     */
+    post: operations['GameApiKeysController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/game-api-keys/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * APIキーの詳細を取得
+     * @description 指定されたAPIキーIDの詳細情報を取得します。
+     */
+    get: operations['GameApiKeysController_findOne'];
+    put?: never;
+    post?: never;
+    /**
+     * APIキーを削除
+     * @description 指定されたAPIキーを削除します。削除されたAPIキーは使用できなくなります。
+     */
+    delete: operations['GameApiKeysController_delete'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/game-api-keys/{id}/projects': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * APIキーがアクセス可能なプロジェクト一覧を取得
+     * @description このAPIキーがアクセス可能なプロジェクトの一覧を取得します。
+     */
+    get: operations['GameApiKeysController_getProjects'];
+    /**
+     * APIキーがアクセス可能なプロジェクトを設定
+     * @description このAPIキーがアクセス可能なプロジェクトを更新します。
+     */
+    put: operations['GameApiKeysController_updateProjects'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/game/projects': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** アクセス可能なプロジェクト一覧を取得 */
+    get: operations['GameController_getProjects'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/game/projects/{project_id}/sessions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** セッションを作成 */
+    post: operations['GameController_createSession'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/game/projects/{project_id}/sessions/{session_id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** セッションを更新 */
+    put: operations['GameController_updateSession'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/game/projects/{project_id}/sessions/{session_id}/finish': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** セッションを終了 */
+    post: operations['GameController_finishSession'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/game/projects/{project_id}/sessions/{session_id}/logs/{event_type}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** テキストログを送信 */
+    post: operations['GameController_createLog'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/game/projects/{project_id}/sessions/{session_id}/position-logs/{event_type}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** 位置ログを送信 */
+    post: operations['GameController_createPositionLog'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/game/projects/{project_id}/sessions/{session_id}/player-positions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** プレイヤー位置ログをバイナリでまとめて送信（V2フォーマット対応） */
+    post: operations['GameController_uploadPlayerPositions'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -861,9 +1052,11 @@ export interface components {
       id: number;
       name: string;
       description: string;
+      is2D: boolean;
       /** Format: date-time */
       createdAt: string;
       user?: components['schemas']['UserResponseDto'] | null;
+      session_count?: number;
     };
     CreateProjectDto: {
       /** @example name */
@@ -927,10 +1120,12 @@ export interface components {
       id: number;
       name: string;
       description: string;
+      is2D: boolean;
       /** Format: date-time */
       createdAt: string;
       user?: components['schemas']['UserResponseDto'] | null;
       memberships: components['schemas']['ProjectMemberDto'][];
+      session_count?: number;
     };
     AddMemberByEmailDto: {
       email: string;
@@ -983,7 +1178,7 @@ export interface components {
       isPlaying: boolean;
     };
     CreatePlaySessionDto: {
-      name: string;
+      name?: string | null;
       deviceId?: string | null;
       platform?: string | null;
       appVersion?: string | null;
@@ -1151,6 +1346,62 @@ export interface components {
       } | null;
       /** Format: date-time */
       created_at: string;
+    };
+    CreateGameApiKeyDto: {
+      /**
+       * @description APIキーの識別名
+       * @example My Unity Game Client
+       */
+      name: string;
+    };
+    CreateGameApiKeyResponseDto: {
+      /** @description APIキーID */
+      id: string;
+      /** @description APIキーの識別名 */
+      name: string;
+      /** @description APIキー本体（この画面でのみ表示されます。必ず保存してください） */
+      apiKey: string;
+      /**
+       * Format: date-time
+       * @description 作成日時
+       */
+      createdAt: string;
+    };
+    GameApiKeyResponseDto: {
+      /** @description APIキーID */
+      id: string;
+      /** @description APIキーの識別名 */
+      name: string;
+      /** @description アクティブ状態 */
+      isActive: boolean;
+      /**
+       * Format: date-time
+       * @description 最終使用日時
+       */
+      lastUsedAt: string | null;
+      /**
+       * Format: date-time
+       * @description 作成日時
+       */
+      createdAt: string;
+      /** @description アクセス可能なプロジェクトのリスト */
+      projects: components['schemas']['ProjectResponseDto'][];
+      /**
+       * @deprecated
+       * @description アクセス可能なプロジェクトIDのリスト (deprecated: use projects instead)
+       */
+      projectIds: number[];
+    };
+    UpdateGameApiKeyProjectsDto: {
+      /**
+       * @description アクセスを許可するプロジェクトIDのリスト
+       * @example [
+       *       1,
+       *       2,
+       *       3
+       *     ]
+       */
+      projectIds: number[];
     };
     DefaultErrorResponse: {
       /** @example 400 */
@@ -3078,8 +3329,6 @@ export interface operations {
         step_size?: number;
         /** @description Z-axis visibility */
         z_visible: boolean;
-        /** @description Queue generation */
-        queue?: boolean;
         /** @description Summarization provider */
         provider?: 'template' | 'openai' | 'ollama';
       };
@@ -3100,6 +3349,554 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['SessionSummaryDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  GameApiKeysController_findAll: {
+    parameters: {
+      query?: {
+        /** @description Number of API keys to return (default: 20, max: 100) */
+        limit?: number;
+        /** @description Offset for pagination (default: 0) */
+        offset?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['GameApiKeyResponseDto'][];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GameApiKeysController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateGameApiKeyDto'];
+      };
+    };
+    responses: {
+      /** @description Created - APIキーが正常に作成されました */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CreateGameApiKeyResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GameApiKeysController_findOne: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description API Key ID */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['GameApiKeyResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GameApiKeysController_delete: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description API Key ID */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GameApiKeysController_getProjects: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description API Key ID */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProjectResponseDto'][];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GameApiKeysController_updateProjects: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description API Key ID */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateGameApiKeyProjectsDto'];
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['GameApiKeyResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GameController_getProjects: {
+    parameters: {
+      query?: {
+        /** @description Number of projects to return (default: 20, max: 100) */
+        limit?: number;
+        /** @description Offset for pagination (default: 0) */
+        offset?: number;
+      };
+      header: {
+        /** @description ゲームクライアント用APIキー */
+        'X-API-Key': string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProjectResponseDto'][];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  GameController_createSession: {
+    parameters: {
+      query?: never;
+      header: {
+        /** @description ゲームクライアント用APIキー */
+        'X-API-Key': string;
+      };
+      path: {
+        /** @description Project ID */
+        project_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreatePlaySessionDto'];
+      };
+    };
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PlaySessionResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  GameController_updateSession: {
+    parameters: {
+      query?: never;
+      header: {
+        /** @description ゲームクライアント用APIキー */
+        'X-API-Key': string;
+      };
+      path: {
+        /** @description Project ID */
+        project_id: number;
+        /** @description Session ID */
+        session_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdatePlaySessionDto'];
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PlaySessionResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  GameController_finishSession: {
+    parameters: {
+      query?: never;
+      header: {
+        /** @description ゲームクライアント用APIキー */
+        'X-API-Key': string;
+      };
+      path: {
+        /** @description Project ID */
+        project_id: number;
+        /** @description Session ID */
+        session_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PlaySessionResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  GameController_createLog: {
+    parameters: {
+      query?: never;
+      header: {
+        /** @description ゲームクライアント用APIキー */
+        'X-API-Key': string;
+      };
+      path: {
+        /** @description Project ID */
+        project_id: number;
+        /** @description Session ID */
+        session_id: number;
+        /** @description Event type */
+        event_type: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateGeneralLogDto'];
+      };
+    };
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['StringGeneralLogDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  GameController_createPositionLog: {
+    parameters: {
+      query?: never;
+      header: {
+        /** @description ゲームクライアント用APIキー */
+        'X-API-Key': string;
+      };
+      path: {
+        /** @description Project ID */
+        project_id: number;
+        /** @description Session ID */
+        session_id: number;
+        /** @description Event type */
+        event_type: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateGeneralLogDto'];
+      };
+    };
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PositionGeneralLogDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  GameController_uploadPlayerPositions: {
+    parameters: {
+      query?: never;
+      header: {
+        /** @description ゲームクライアント用APIキー */
+        'X-API-Key': string;
+      };
+      path: {
+        /** @description Project ID */
+        project_id: number;
+        /** @description Session ID */
+        session_id: number;
+      };
+      cookie?: never;
+    };
+    /** @description Binary data containing player positions (V1 or V2 format) */
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          /** Format: binary */
+          file?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultSuccessResponse'];
         };
       };
       /** @description Bad Request */

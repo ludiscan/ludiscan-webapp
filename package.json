@@ -10,7 +10,7 @@
   "repository": {
     "url": "https://github.com/ludiscan/ludiscan-webapp"
   },
-  "version": "0.14.2",
+  "version": "0.15.0",
   "scripts": {
     "dev": "next dev --turbopack -p 5173",
     "build:dev": "next build --turbopack",
@@ -63,6 +63,7 @@
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^4.1.1",
+    "@emotion/babel-plugin": "^11.13.5",
     "@emotion/styled": "^11.14.0",
     "@eslint/compat": "^1.2.8",
     "@eslint/config-array": "^0.21.0",

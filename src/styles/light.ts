@@ -14,7 +14,7 @@ const lightTheme: Theme = {
     background: colors.neutral02,
     surface: {
       main: colors.neutral01,
-      dark: colors.neutral03, // やや暗いバリエーション
+      dark: colors.neutral04, // やや暗いバリエーション
       light: colors.white, // 明るいバリエーション
     },
     text: colors.stone11,
