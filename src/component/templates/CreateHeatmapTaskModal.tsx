@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -74,13 +74,32 @@ const Component: FC<CreateHeatmapTaskSessionModalProps | CreateHeatmapTaskProjec
   const [zVisible, setZVisible] = useState(true);
   const router = useRouter();
   const queryClient = useQueryClient();
+  // Fetch project data to check if it's a 2D project
+  const { data: projectData } = useQuery({
+    queryKey: ['project', props.projectId],
+    queryFn: async () => {
+      const { data } = await createClient().GET('/api/v0/projects/{id}', {
+        params: {
+          path: {
+            id: props.projectId,
+          },
+        },
+      });
+      return data;
+    },
+    enabled: isOpen && !!props.projectId,
+  });
+
+  // Force zVisible to false if project is 2D
+  const isProjectIs2D = projectData?.is2D ?? false;
+  const effectiveZVisible = isProjectIs2D ? false : zVisible;
   const {
     mutate: createTaskMutation,
     isPending,
     isSuccess,
     data: task,
   } = useMutation({
-    mutationKey: ['createProjectTask', stepSize, zVisible],
+    mutationKey: ['createProjectTask', stepSize, effectiveZVisible],
     mutationFn: async (dto: CreateTask) => {
       const { projectId, sessionId } = dto;
       if (!projectId || projectId === 0) {
@@ -89,8 +108,8 @@ const Component: FC<CreateHeatmapTaskSessionModalProps | CreateHeatmapTaskProjec
 
       const { data, error } =
         sessionId && sessionId !== 0
-          ? await sessionCreateTask(projectId, sessionId, stepSize, zVisible)
-          : await projectCreateTask(projectId, stepSize, zVisible);
+          ? await sessionCreateTask(projectId, sessionId, stepSize, effectiveZVisible)
+          : await projectCreateTask(projectId, stepSize, effectiveZVisible);
       if (error) return undefined;
       return data;
     },
@@ -127,12 +146,12 @@ const Component: FC<CreateHeatmapTaskSessionModalProps | CreateHeatmapTaskProjec
       <ClampText text={'詳細な設定'} lines={2} fontSize={fontSizes.medium} width={'100%'} />
       <VerticalSpacer size={12} />
       <InlineFlexColumn align={'flex-start'} gap={12} className={`${className}__content`}>
-        <Tooltip tooltip={'create a 2D/3D view'}>
+        <Tooltip tooltip={isProjectIs2D ? 'This is a 2D project. Z-axis is disabled.' : 'create a 2D/3D view'}>
           <FlexRow align={'center'} gap={12} className={`${className}__inputRow`}>
             <div className={`${className}__input`}>
-              <Switch size={'large'} onChange={handleZVisibleChange} label='ZVisible' checked={zVisible} />
+              <Switch size={'large'} onChange={handleZVisibleChange} label='ZVisible' checked={effectiveZVisible} disabled={isProjectIs2D} />
             </div>
-            <Text text='Z Visible' />
+            <Text text={isProjectIs2D ? 'Z Visible (Disabled for 2D Project)' : 'Z Visible'} />
           </FlexRow>
         </Tooltip>
         <FlexRow align={'center'} gap={12} className={`${className}__inputRow`}>
