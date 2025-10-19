@@ -3,10 +3,10 @@ frontend:
     phases:
         preBuild:
             commands:
-                - 'curl -fsSL https://bun.sh/install | bash'
+                - 'curl -fsSL https://bun.sh/install | bash -s "bun-v1.3.0"'
                 - 'export BUN_INSTALL="$HOME/.bun"'
                 - 'export PATH="$BUN_INSTALL/bin:$PATH"'
-                - 'bun install'
+                - 'bun install --frozen-lockfile'
         build:
             commands:
                 - 'export BUN_INSTALL="$HOME/.bun"'
