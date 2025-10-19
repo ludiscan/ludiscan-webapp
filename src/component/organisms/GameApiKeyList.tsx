@@ -141,13 +141,7 @@ const Component: FC<GameApiKeyListProps> = ({
                     )}
                   </FlexColumn>
                   <FlexRow gap={8} className={`${className}__keyActions`}>
-                    <Button
-                      onClick={() => onShowDetails(key)}
-                      scheme='none'
-                      fontSize='small'
-                      title='View Details'
-                      className={`${className}__actionButton`}
-                    >
+                    <Button onClick={() => onShowDetails(key)} scheme='none' fontSize='small' title='View Details' className={`${className}__actionButton`}>
                       <BiShow size={18} color={theme.colors.secondary.main} />
                     </Button>
                     <Button onClick={() => onDeleteKey(key)} scheme='none' fontSize='small' title='Delete' className={`${className}__actionButton`}>

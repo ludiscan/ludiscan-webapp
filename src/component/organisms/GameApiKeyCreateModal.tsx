@@ -22,15 +22,7 @@ export type GameApiKeyCreateModalProps = {
   onCreateKey: () => Promise<void>;
 };
 
-const Component: FC<GameApiKeyCreateModalProps> = ({
-  className,
-  isOpen,
-  newKeyName,
-  isCreatingKey = false,
-  onClose,
-  onKeyNameChange,
-  onCreateKey,
-}) => {
+const Component: FC<GameApiKeyCreateModalProps> = ({ className, isOpen, newKeyName, isCreatingKey = false, onClose, onKeyNameChange, onCreateKey }) => {
   const { theme } = useSharedTheme();
 
   const handleCreate = useCallback(async () => {
@@ -44,12 +36,7 @@ const Component: FC<GameApiKeyCreateModalProps> = ({
           <div>
             <Text text='Key Name' fontSize={fontSizes.small} color={theme.colors.text} fontWeight={fontWeights.bold} />
             <VerticalSpacer size={8} />
-            <OutlinedTextField
-              value={newKeyName}
-              onChange={onKeyNameChange}
-              placeholder='e.g., Production API Key'
-              fontSize={fontSizes.medium}
-            />
+            <OutlinedTextField value={newKeyName} onChange={onKeyNameChange} placeholder='e.g., Production API Key' fontSize={fontSizes.medium} />
           </div>
 
           <FlexRow gap={8} className={`${className}__buttonRow`}>

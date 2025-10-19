@@ -212,8 +212,8 @@ export const GameApiKeyDetailModal = styled(Component)`
 
   &__projectCheckbox {
     display: flex;
-    align-items: center;
     gap: 8px;
+    align-items: center;
     padding: 8px;
     cursor: pointer;
     border-radius: 4px;
@@ -224,9 +224,9 @@ export const GameApiKeyDetailModal = styled(Component)`
     }
 
     input[type='checkbox'] {
-      cursor: pointer;
       width: 18px;
       height: 18px;
+      cursor: pointer;
     }
   }
 
