@@ -4,10 +4,15 @@ frontend:
         preBuild:
             commands:
                 - curl -fsSL https://bun.sh/install | bash -s "bun-v1.3.0"
-                - source /root/.bashrc
+                - export BUN_INSTALL="$HOME/.bun"
+                - export PATH="$BUN_INSTALL/bin:$PATH"
+                - bun --version
                 - bun install --frozen-lockfile
         build:
             commands:
+                - export BUN_INSTALL="$HOME/.bun"
+                - export PATH="$BUN_INSTALL/bin:$PATH"
+                - bun --version
                 - bun run prebuild:prod
                 - bun run build:prod
     artifacts:
