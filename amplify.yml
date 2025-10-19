@@ -3,16 +3,18 @@ frontend:
     phases:
         preBuild:
             commands:
-                - 'npm ci --cache .npm --prefer-offline'
+                - curl -fsSL https://bun.sh/install | bash -s "bun-v1.3.0"
+                - source /root/.bashrc
+                - bun install --frozen-lockfile
         build:
             commands:
-                - 'npm run prebuild:prod'
-                - 'npm run build:prod'
+                - bun run prebuild:prod
+                - bun run build:prod
     artifacts:
         baseDirectory: .next
         files:
             - '**/*'
     cache:
         paths:
-            - '.next/cache/**/*'
-            - '.npm/**/*'
+            - .next/cache/**/*
+            - node_modules/**/*
