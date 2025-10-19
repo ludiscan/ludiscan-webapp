@@ -4,30 +4,32 @@
 
 ## 開発環境
 
-- Node.js: 23.6.x
-- npm: 10.x
+- Node.js: 24.9.x
+- Bun: 1.3.x
 
 ### セットアップ
 
 ```bash
-fnm use
+# Bunのインストール (Homebrew)
+brew install bun
+
 # 依存関係のインストール
-npm install
+bun install
 
 # 開発サーバーの起動
-npm run dev
+bun run dev
 ```
 
 ### API スキーマファイルの生成
 - `swagger.json` を rootに配置し以下を実行する
 ```bash
-npm run generate:api-schemes
+bun run generate:api-schemes
 ```
 
 ### Storybook 起動
 
 ```bash
-npm run storybook
+bun run storybook
 ```
 
 ## 開発・運用方針
