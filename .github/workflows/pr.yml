@@ -5,7 +5,7 @@ on:
       - 'src/**'
       - '.github/workflows/pr.yml'
       - 'package.json'
-      - 'package-lock.json'
+      - 'bun.lock'
   workflow_dispatch:
 
 permissions:
@@ -23,21 +23,30 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24.9.x'
-          cache: 'npm'
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
       - name: Install dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
+
       - name: Lint
-        run: npm run lint
+        run: bun run lint
+
       - name: Format check
-        run: npm run format:check
+        run: bun run format:check
+
       - name: Test
-        run: npm test
+        run: bun test
         env:
           CI: true
+
       - name: Type check
-        run: npm run type
+        run: bun run type
+
       - name: Build
-        run: npm run build:prod
+        run: bun run build:prod
 
   storybook-test:
     runs-on: ubuntu-22.04
@@ -46,15 +55,22 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24.9.x'
-          cache: 'npm'
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
       - name: Install dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
+
       - name: Install Playwright
-        run: npx playwright install --with-deps
+        run: bunx playwright install --with-deps
+
       - name: Build Storybook
-        run: npm run build-storybook --quiet
+        run: bun run build-storybook --quiet
+
       - name: Serve Storybook and run tests
         run: |
-          npx concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
-            "npx http-server storybook-static --port 6006 --silent" \
-            "npx wait-on tcp:6006 && npm run test-storybook"
+          bunx concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
+            "bunx http-server storybook-static --port 6006 --silent" \
+            "bunx wait-on tcp:6006 && bun run test-storybook"

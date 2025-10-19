@@ -3,7 +3,7 @@
   "private": false,
   "engines": {
     "node": "24.9.x",
-    "npm": "11.x"
+    "bun": ">=1.3.0"
   },
   "author": "matuyuhi",
   "description": "",
@@ -32,10 +32,10 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "test-storybook": "test-storybook --config-dir .storybook",
-    "generate:api-schemes": "npx openapi-typescript swagger.json --output generated/api.d.ts",
-    "generate:api-schemes:local-fetch": "npx openapi-typescript http://localhost:3211/swagger/api/v0/json --output generated/api.d.ts",
+    "generate:api-schemes": "bunx openapi-typescript swagger.json --output generated/api.d.ts",
+    "generate:api-schemes:local-fetch": "bunx openapi-typescript http://localhost:3211/swagger/api/v0/json --output generated/api.d.ts",
     "build:heatmap-bundle": "node scripts/create-heatmap-bundle.js",
-    "prebuild:prod": "npm run build:heatmap-bundle"
+    "prebuild:prod": "bun run build:heatmap-bundle"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

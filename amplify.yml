@@ -3,11 +3,16 @@ frontend:
     phases:
         preBuild:
             commands:
-                - 'npm ci --cache .npm --prefer-offline'
+                - 'curl -fsSL https://bun.sh/install | bash'
+                - 'export BUN_INSTALL="$HOME/.bun"'
+                - 'export PATH="$BUN_INSTALL/bin:$PATH"'
+                - 'bun install'
         build:
             commands:
-                - 'npm run prebuild:prod'
-                - 'npm run build:prod'
+                - 'export BUN_INSTALL="$HOME/.bun"'
+                - 'export PATH="$BUN_INSTALL/bin:$PATH"'
+                - 'bun run prebuild:prod'
+                - 'bun run build:prod'
     artifacts:
         baseDirectory: .next
         files:
@@ -15,4 +20,5 @@ frontend:
     cache:
         paths:
             - '.next/cache/**/*'
-            - '.npm/**/*'
+            - 'node_modules/**/*'
+            - '~/.bun/**/*'
