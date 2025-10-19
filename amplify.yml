@@ -21,4 +21,4 @@ frontend:
         paths:
             - '.next/cache/**/*'
             - 'node_modules/**/*'
-            - '~/.bun/**/*'
+            - '$HOME/.bun/**/*'
