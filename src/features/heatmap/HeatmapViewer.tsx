@@ -24,9 +24,10 @@ import { HeatmapMenuSideBar } from '@src/features/heatmap/menu/HeatmapMenuSideBa
 import { FocusLinkBridge } from '@src/features/heatmap/selection/FocusLinkBridge';
 import { InspectorModal } from '@src/features/heatmap/selection/InspectorModal';
 import { useGeneralSelect } from '@src/hooks/useGeneral';
-import { DefaultStaleTime } from '@src/modeles/qeury';
+import { DefaultStaleTime, createClient } from '@src/modeles/qeury';
 import { dimensions, zIndexes } from '@src/styles/style';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
+import { detectDimensionality } from '@src/utils/heatmap/detectDimensionality';
 
 export type HeatmapViewerProps = {
   className?: string | undefined;
@@ -49,6 +50,23 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
   const [visibleTimelineRange, setVisibleTimelineRange] = useState<PlayerTimelinePointsTimeRange>({ start: 0, end: 0 });
 
   const task = useMemo(() => service.task, [service.task]);
+
+  // プロジェクトデータを取得
+  const { data: project } = useQuery({
+    queryKey: ['project', service.projectId],
+    queryFn: async () => {
+      if (!service.projectId) return null;
+      const res = await createClient().GET('/api/v0/projects/{id}', {
+        params: { path: { id: service.projectId } },
+      });
+      return res.data ?? null;
+    },
+    staleTime: DefaultStaleTime,
+    enabled: !!service.projectId,
+  });
+
+  // 2D/3D判定（プロジェクトのis2Dを優先）
+  const dimensionality = useMemo(() => detectDimensionality(project?.is2D, task), [project?.is2D, task]);
 
   const { data: mapList } = useQuery({
     queryKey: ['mapList', service],
@@ -174,9 +192,27 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
       <FlexRow style={{ width: '100%', height: '100%' }} align={'center'} wrap={'nowrap'}>
         <HeatmapMenuSideBar className={`${className}__sideMenu`} service={service} currentMenu={openMenu} />
         <FlexColumn className={`${className}__canvasBox`}>
-          <Canvas style={{ flex: 1 }} camera={{ position: [2500, 5000, -2500], fov: 50, near: 10, far: 10000 }} ref={canvasRef} dpr={dpr}>
+          <Canvas
+            style={{ flex: 1 }}
+            camera={
+              dimensionality === '2d'
+                ? { position: [0, 5000, 0], up: [0, 0, -1], near: 10, far: 20000 } // 2D: 真上から俯瞰
+                : { position: [2500, 5000, -2500], fov: 50, near: 10, far: 10000 } // 3D: 斜め視点
+            }
+            orthographic={dimensionality === '2d'} // 2Dは正投影カメラ
+            ref={canvasRef}
+            dpr={dpr}
+          >
             <PerformanceMonitor factor={1} onChange={handleOnPerformance} />
-            <HeatMapCanvas service={service} pointList={pointList} map={map} modelType={modelType} model={model} visibleTimelineRange={visibleTimelineRange} />
+            <HeatMapCanvas
+              service={service}
+              pointList={pointList}
+              map={map}
+              modelType={modelType}
+              model={model}
+              visibleTimelineRange={visibleTimelineRange}
+              dimensionality={dimensionality}
+            />
             <Stats parent={divRef} className={`${className}__stats`} />
           </Canvas>
           {/*{performance && <PerformanceList api={performance} className={`${className}__performance`} />}*/}

@@ -10,6 +10,7 @@ export function createMockHeatmapTask(): HeatmapTask {
       name: 'Sample Project',
       description: 'This is a sample project for heatmap visualization.',
       createdAt: new Date().toDateString(),
+      is2D: false,
     },
     stepSize: 50,
     zVisible: true,

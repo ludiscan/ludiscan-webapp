@@ -32,6 +32,7 @@ type HeatmapCanvasProps = {
   modelType?: 'gltf' | 'glb' | 'obj' | 'server' | null;
   pointList: { x: number; y: number; z?: number; density: number }[];
   visibleTimelineRange: PlayerTimelinePointsTimeRange;
+  dimensionality: '2d' | '3d';
 };
 
 type Waypoint = {
@@ -77,7 +78,7 @@ const TimelinePoints = memo(
 );
 TimelinePoints.displayName = 'TimelinePoints';
 
-const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, service, visibleTimelineRange }) => {
+const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, service, visibleTimelineRange, dimensionality }) => {
   // const { invalidate } = useThree();
   const fitInfoRef = useRef<{ dist: number; center: Vector3 }>({ dist: 1000, center: new Vector3() });
   const { showHeatmap, heatmapOpacity, heatmapType } = useGeneralPick('showHeatmap', 'heatmapOpacity', 'heatmapType');
@@ -227,29 +228,31 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({ model, map, modelType,
   }, [draggingWaypointId, camera, gl, raycaster, setWaypoints]);
 
   useEffect(() => {
-    // 平行光源を作成
-    // new THREE.DirectionalLight(色, 光の強さ)
-    const ambientLight = new AmbientLight(0xffffff, 0.2);
-    scene.add(ambientLight);
-    // 平行光源を作成
-    // new THREE.DirectionalLight(色, 光の強さ)
-    const directionalLight = new DirectionalLight(0xffffff, 0.4);
-    scene.add(directionalLight);
+    // 2Dモード: 真上からのシンプルな照明
+    // 3Dモード: 既存の複数光源
+    const lights: (AmbientLight | DirectionalLight | HemisphereLight | SpotLight)[] = [];
 
-    const hemisphereLight = new HemisphereLight(theme.colors.background, theme.colors.surface.dark, 1);
-    scene.add(hemisphereLight);
-    // スポットライト光源を作成
-    // new THREE.SpotLight(色, 光の強さ, 距離, 照射角, ボケ具合, 減衰率)
-    const spotLight = new SpotLight(0xffffff, 4, 30, Math.PI / 4, 10, 0.5);
-    scene.add(spotLight);
+    if (dimensionality === '2d') {
+      // 2D: 環境光+真上からの平行光源のみ
+      const ambientLight = new AmbientLight(0xffffff, 0.6);
+      const directionalLight = new DirectionalLight(0xffffff, 0.8);
+      directionalLight.position.set(0, 1, 0); // 真上から
+      lights.push(ambientLight, directionalLight);
+    } else {
+      // 3D: 既存の複雑な照明システム
+      const ambientLight = new AmbientLight(0xffffff, 0.2);
+      const directionalLight = new DirectionalLight(0xffffff, 0.4);
+      const hemisphereLight = new HemisphereLight(theme.colors.background, theme.colors.surface.dark, 1);
+      const spotLight = new SpotLight(0xffffff, 4, 30, Math.PI / 4, 10, 0.5);
+      lights.push(ambientLight, directionalLight, hemisphereLight, spotLight);
+    }
+
+    lights.forEach((light) => scene.add(light));
+
     return () => {
-      // コンポーネントのクリーンアップ時に光源を削除
-      scene.remove(ambientLight);
-      scene.remove(directionalLight);
-      scene.remove(hemisphereLight);
-      scene.remove(spotLight);
+      lights.forEach((light) => scene.remove(light));
     };
-  }, [scene, theme]);
+  }, [scene, theme, dimensionality]);
 
   const getPercent = useCallback(() => {
     const controls = orbitControlsRef.current;
@@ -387,15 +390,20 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({ model, map, modelType,
   return (
     <>
       <group ref={groupRef}>
-        {modelType && map && modelType !== 'server' && typeof map === 'string' && <LocalModelLoader ref={modelRef} modelPath={map} modelType={modelType} />}
-        {modelType && model && modelType === 'server' && typeof map !== 'string' && (
+        {/* 3Dモデルは3Dモード、または2Dモードで明示的にマップが読み込まれている場合のみ表示 */}
+        {modelType && map && modelType !== 'server' && typeof map === 'string' && (dimensionality === '3d' || map) && (
+          <LocalModelLoader ref={modelRef} modelPath={map} modelType={modelType} />
+        )}
+        {modelType && model && modelType === 'server' && typeof map !== 'string' && (dimensionality === '3d' || map) && (
           <>
             <StreamModelLoader ref={modelRef} model={model} />
-            {pointList && modelRef.current && heatmapType === 'fill' && showHeatmap && (
+            {/* fillモードは3Dモデル表面に配置するため、3Dモードまたはモデルがある場合のみ */}
+            {pointList && modelRef.current && heatmapType === 'fill' && showHeatmap && dimensionality === '3d' && (
               <HeatmapFillOverlay group={modelRef.current} points={pointList} cellSize={(service.task?.stepSize || 50) / 2} opacity={heatmapOpacity} />
             )}
           </>
         )}
+        {/* objectモードとホットスポットは2D/3D両方で表示 */}
         {pointList && heatmapType === 'object' && showHeatmap && <HeatmapObjectOverlay points={pointList} />}
         {pointList && showHeatmap && <HotspotCircles points={pointList} />}
         <EventLogs service={service} />
@@ -424,7 +432,13 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({ model, map, modelType,
         ))}
       </group>
       <FocusController orbit={orbitControlsRef} sceneRoot={groupRef} />
-      <OrbitControls enableZoom enablePan enableRotate ref={orbitControlsRef} position0={new Vector3(1, 1, 3000)} />
+      <OrbitControls
+        enableZoom
+        enablePan
+        enableRotate={dimensionality === '3d'} // 2Dモードでは回転を無効化
+        ref={orbitControlsRef}
+        position0={new Vector3(1, 1, 3000)}
+      />
       <FocusPingLayer ttlMs={1800} baseRadius={60} />
     </>
   );
@@ -438,5 +452,6 @@ export const HeatMapCanvas = memo(
     prev.modelType === next.modelType &&
     prev.pointList === next.pointList &&
     prev.visibleTimelineRange === next.visibleTimelineRange &&
-    prev.service.task == next.service.task,
+    prev.service.task == next.service.task &&
+    prev.dimensionality === next.dimensionality,
 );
