@@ -1056,6 +1056,7 @@ export interface components {
       /** Format: date-time */
       createdAt: string;
       user?: components['schemas']['UserResponseDto'] | null;
+      session_count?: number;
     };
     CreateProjectDto: {
       /** @example name */
@@ -1124,6 +1125,7 @@ export interface components {
       createdAt: string;
       user?: components['schemas']['UserResponseDto'] | null;
       memberships: components['schemas']['ProjectMemberDto'][];
+      session_count?: number;
     };
     AddMemberByEmailDto: {
       email: string;
