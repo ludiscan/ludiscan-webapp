@@ -27,6 +27,7 @@ const canvasSlice = createSlice({
       state.general = action.payload.general;
       state.hotspotMode = action.payload.hotspotMode;
       state.eventLog = action.payload.eventLog;
+      state.splitMode = action.payload.splitMode;
       saveCanvasValues(state);
     },
     setGeneral: (state, action: PayloadAction<HeatmapDataState['general']>) => {
@@ -58,6 +59,13 @@ const canvasSlice = createSlice({
     updatePlayerTimeline: (state, action: PayloadAction<(prev: PlayerTimelineSettings) => PlayerTimelineSettings>) => {
       state.playerTimeline = action.payload(state.playerTimeline);
     },
+
+    setSplitMode: (state, action: PayloadAction<HeatmapDataState['splitMode']>) => {
+      state.splitMode = action.payload;
+    },
+    patchSplitMode: (state, action: PayloadAction<Partial<HeatmapDataState['splitMode']>>) => {
+      state.splitMode = { ...state.splitMode, ...action.payload };
+    },
   },
 });
 
@@ -72,5 +80,7 @@ export const {
   setPlayerTimeline,
   patchPlayerTimeline,
   updatePlayerTimeline,
+  setSplitMode,
+  patchSplitMode,
 } = canvasSlice.actions;
 export const canvasReducer = canvasSlice.reducer;

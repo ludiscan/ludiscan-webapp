@@ -3,7 +3,7 @@ import { PerformanceMonitor, Stats } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { useQuery } from '@tanstack/react-query';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useStore } from 'react-redux';
+import { useSelector, useStore } from 'react-redux';
 
 import type { PerformanceMonitorApi } from '@react-three/drei';
 import type { PlayerTimelinePointsTimeRange } from '@src/features/heatmap/PlayerTimelinePoints';
@@ -46,6 +46,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
   const [menuExtra, setMenuExtra] = useState<object | undefined>(undefined);
 
   const mapName = useGeneralSelect((s) => s.mapName);
+  const splitMode = useSelector((s: RootState) => s.heatmapCanvas.splitMode);
 
   const [visibleTimelineRange, setVisibleTimelineRange] = useState<PlayerTimelinePointsTimeRange>({ start: 0, end: 0 });
 
@@ -187,37 +188,58 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
     };
   }, []);
 
+  const renderCanvas = useCallback(
+    (paneId?: string) => (
+      <Canvas
+        key={paneId}
+        style={{ flex: 1 }}
+        camera={
+          dimensionality === '2d'
+            ? { position: [0, 5000, 0], up: [0, 0, -1], near: 10, far: 20000 } // 2D: 真上から俯瞰
+            : { position: [2500, 5000, -2500], fov: 50, near: 10, far: 10000 } // 3D: 斜め視点
+        }
+        orthographic={dimensionality === '2d'} // 2Dは正投影カメラ
+        ref={canvasRef}
+        dpr={dpr}
+      >
+        <PerformanceMonitor factor={1} onChange={handleOnPerformance} />
+        <HeatMapCanvas
+          service={service}
+          pointList={pointList}
+          map={map}
+          modelType={modelType}
+          model={model}
+          visibleTimelineRange={visibleTimelineRange}
+          dimensionality={dimensionality}
+        />
+        <Stats parent={divRef} className={`${className}__stats`} />
+      </Canvas>
+    ),
+    [dimensionality, dpr, handleOnPerformance, service, pointList, map, modelType, model, visibleTimelineRange, divRef, className],
+  );
+
   return (
     <div className={`${className}__view`}>
       <FlexRow style={{ width: '100%', height: '100%' }} align={'center'} wrap={'nowrap'}>
         <HeatmapMenuSideBar className={`${className}__sideMenu`} service={service} currentMenu={openMenu} />
-        <FlexColumn className={`${className}__canvasBox`}>
-          <Canvas
-            style={{ flex: 1 }}
-            camera={
-              dimensionality === '2d'
-                ? { position: [0, 5000, 0], up: [0, 0, -1], near: 10, far: 20000 } // 2D: 真上から俯瞰
-                : { position: [2500, 5000, -2500], fov: 50, near: 10, far: 10000 } // 3D: 斜め視点
-            }
-            orthographic={dimensionality === '2d'} // 2Dは正投影カメラ
-            ref={canvasRef}
-            dpr={dpr}
-          >
-            <PerformanceMonitor factor={1} onChange={handleOnPerformance} />
-            <HeatMapCanvas
-              service={service}
-              pointList={pointList}
-              map={map}
-              modelType={modelType}
-              model={model}
-              visibleTimelineRange={visibleTimelineRange}
-              dimensionality={dimensionality}
-            />
-            <Stats parent={divRef} className={`${className}__stats`} />
-          </Canvas>
-          {/*{performance && <PerformanceList api={performance} className={`${className}__performance`} />}*/}
-          <QuickToolbar className={`${className}__footToolbar`} service={service} />
-        </FlexColumn>
+        {splitMode.enabled ? (
+          <FlexRow className={`${className}__splitContainer`} style={{ flex: 1, flexDirection: splitMode.direction === 'horizontal' ? 'row' : 'column' }}>
+            <FlexColumn className={`${className}__canvasBox ${className}__canvasBox--split`}>
+              {renderCanvas('left')}
+              <QuickToolbar className={`${className}__footToolbar`} service={service} />
+            </FlexColumn>
+            <FlexColumn className={`${className}__canvasBox ${className}__canvasBox--split`}>
+              {renderCanvas('right')}
+              <QuickToolbar className={`${className}__footToolbar`} service={service} />
+            </FlexColumn>
+          </FlexRow>
+        ) : (
+          <FlexColumn className={`${className}__canvasBox`}>
+            {renderCanvas()}
+            {/*{performance && <PerformanceList api={performance} className={`${className}__performance`} />}*/}
+            <QuickToolbar className={`${className}__footToolbar`} service={service} />
+          </FlexColumn>
+        )}
         <div className={`${className}__player`}>
           <TimelineControlWrapper setOpenMenu={setOpenMenu} setVisibleTimelineRange={setVisibleTimelineRange} visibleTimelineRange={visibleTimelineRange} />
         </div>
@@ -287,6 +309,13 @@ export const HeatMapViewer = memo(
       height: 40px;
     }
 
+    &__splitContainer {
+      position: relative;
+      gap: 2px;
+      width: 100%;
+      height: 100%;
+    }
+
     &__canvasBox {
       position: relative;
       flex: 1;
@@ -295,6 +324,11 @@ export const HeatMapViewer = memo(
       height: 100%;
       margin: 0 auto;
       border: ${({ theme }) => `1px solid ${theme.colors.border.main}`};
+    }
+
+    &__canvasBox--split {
+      max-width: none;
+      border: ${({ theme }) => `2px solid ${theme.colors.border.main}`};
     }
 
     &__performance {
