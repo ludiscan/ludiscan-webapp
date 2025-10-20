@@ -56,11 +56,17 @@ export type PlayerTimelineSettings = {
   currentTimelineSeek: number;
 };
 
+export type SplitModeSettings = {
+  enabled: boolean;
+  direction: 'horizontal' | 'vertical';
+};
+
 export type HeatmapStates = {
   general: GeneralSettings;
   hotspotMode: HotspotModeSettings;
   eventLog: EventLogSettings;
   playerTimeline: PlayerTimelineSettings;
+  splitMode: SplitModeSettings;
 };
 
 // Canvas の状態の型定義
@@ -106,6 +112,10 @@ export const initializeValues: HeatmapDataState = {
     maxTime: 0,
     queryText: '',
     currentTimelineSeek: 0,
+  },
+  splitMode: {
+    enabled: false,
+    direction: 'horizontal',
   },
 };
 

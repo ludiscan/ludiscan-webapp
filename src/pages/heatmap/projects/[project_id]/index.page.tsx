@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useRouter } from 'next/navigation';
 import { memo, useCallback, useEffect, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import type { RootState } from '@src/store';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
@@ -16,6 +16,7 @@ import { HeatMapViewer } from '@src/features/heatmap/HeatmapViewer';
 import { useAuth } from '@src/hooks/useAuth';
 import { useGeneralSelect } from '@src/hooks/useGeneral';
 import { useHeatmapState } from '@src/hooks/useHeatmapState';
+import { patchSplitMode } from '@src/slices/canvasSlice';
 import { dimensions, fontSizes } from '@src/styles/style';
 import { useOnlineHeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 
@@ -48,6 +49,21 @@ const HeaderWrapper = memo(
   ({ className, onBackClick }: { className?: string; onBackClick?: () => void }) => {
     const { apply, hasDiff, discard } = useHeatmapState();
     const version = useSelector((s: RootState) => s.heatmapCanvas.version);
+    const splitMode = useSelector((s: RootState) => s.heatmapCanvas.splitMode);
+    const dispatch = useDispatch();
+
+    const handleSplitHorizontal = useCallback(() => {
+      dispatch(patchSplitMode({ enabled: true, direction: 'horizontal' }));
+    }, [dispatch]);
+
+    const handleSplitVertical = useCallback(() => {
+      dispatch(patchSplitMode({ enabled: true, direction: 'vertical' }));
+    }, [dispatch]);
+
+    const handleSingleView = useCallback(() => {
+      dispatch(patchSplitMode({ enabled: false }));
+    }, [dispatch]);
+
     return (
       <Header
         title={'Heatmap'}
@@ -55,6 +71,21 @@ const HeaderWrapper = memo(
         iconTitleEnd={<Text className={`${className}__headerV`} text={`${version || 'debug'}`} fontSize={fontSizes.small} fontWeight={'bold'} />}
         iconEnd={
           <>
+            <Button
+              fontSize={'small'}
+              onClick={handleSplitHorizontal}
+              scheme={splitMode.enabled && splitMode.direction === 'horizontal' ? 'primary' : 'surface'}
+            >
+              <Text text={'Split ↔'} fontWeight={'bold'} />
+            </Button>
+            <Button fontSize={'small'} onClick={handleSplitVertical} scheme={splitMode.enabled && splitMode.direction === 'vertical' ? 'primary' : 'surface'}>
+              <Text text={'Split ↕'} fontWeight={'bold'} />
+            </Button>
+            {splitMode.enabled && (
+              <Button fontSize={'small'} onClick={handleSingleView} scheme={'surface'}>
+                <Text text={'Single'} fontWeight={'bold'} />
+              </Button>
+            )}
             <Button fontSize={'small'} onClick={discard} scheme={'surface'} disabled={!hasDiff}>
               <Text text={'Discord'} fontWeight={'bold'} />
             </Button>
