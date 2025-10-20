@@ -8,6 +8,7 @@ import type { FC } from 'react';
 import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { ResponsiveSidebar } from '@src/component/molecules/ResponsiveSidebar';
+import { useAuth } from '@src/hooks/useAuth';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { fontSizes, fontWeights } from '@src/styles/style';
 
@@ -19,28 +20,32 @@ interface MenuItem {
   label: string;
   href: string;
   icon: React.ReactNode;
+  requiresAuth?: boolean;
 }
 
 const MENU_ITEMS: MenuItem[] = [
-  { label: 'Home', href: '/home', icon: <BiHome size={20} /> },
-  { label: 'Profile', href: '/profile', icon: <BiUser size={20} /> },
-  { label: 'API Keys', href: '/api-keys', icon: <BiKey size={20} /> },
-  { label: 'Security', href: '/security', icon: <BiLock size={20} /> },
+  { label: 'Home', href: '/home', icon: <BiHome size={20} />, requiresAuth: true },
+  { label: 'Profile', href: '/profile', icon: <BiUser size={20} />, requiresAuth: true },
+  { label: 'API Keys', href: '/api-keys', icon: <BiKey size={20} />, requiresAuth: true },
+  { label: 'Security', href: '/security', icon: <BiLock size={20} />, requiresAuth: true },
 ];
 
 const Component: FC<SidebarLayoutProps> = ({ className }) => {
   const pathname = usePathname();
   const { theme } = useSharedTheme();
+  const { isAuthorized } = useAuth();
 
   const isActive = (href: string) => {
     return pathname === href || pathname?.startsWith(href + '/');
   };
 
+  const visibleItems = MENU_ITEMS.filter((item) => !item.requiresAuth || isAuthorized);
+
   return (
     <ResponsiveSidebar>
       <div className={className}>
         <FlexColumn gap={8}>
-          {MENU_ITEMS.map((item) => (
+          {visibleItems.map((item) => (
             <Link key={item.href} href={item.href}>
               <div className={`${className}__menuItem ${isActive(item.href) ? 'active' : ''}`}>
                 <FlexRow gap={12} align={'center'} className={`${className}__menuContent`}>

@@ -43,22 +43,39 @@ type FloatingProps = {
 const Floating: FC<FloatingProps> = ({ className, children, align = 'left', placement = 'bottom', offset = 8, openClassName = 'open' }) => {
   const { isOpen, anchorRef } = useEllipsisMenuContext();
   const [style, setStyle] = useState<React.CSSProperties>({ position: 'fixed', visibility: 'hidden' });
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const update = useCallback(() => {
     const el = anchorRef.current;
+    const content = contentRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
 
     const base: React.CSSProperties = { position: 'fixed', zIndex: zIndexes.dropdown };
-    const left = align === 'left' ? rect.left : undefined;
-    const right = align === 'right' ? window.innerWidth - rect.right : undefined;
+    const positionStyle: React.CSSProperties = { ...base };
 
-    // bottom: rect.bottom + offset で下へ、top: rect.top - offset & translateY(-100%) で上へ
+    // 垂直位置を計算
     if (placement === 'bottom') {
-      setStyle({ ...base, top: rect.bottom + offset, left, right });
+      positionStyle.top = rect.bottom + offset;
     } else {
-      setStyle({ ...base, top: rect.top - offset, left, right, transform: 'translateY(-100%)' });
+      positionStyle.top = rect.top - offset;
+      positionStyle.transform = 'translateY(-100%)';
     }
+
+    // 水平位置を計算
+    if (align === 'left') {
+      positionStyle.left = rect.left;
+    } else {
+      // Right align: try to align right edge of menu with right edge of anchor
+      // but keep it within viewport
+      const contentWidth = content?.offsetWidth || 0;
+      const targetLeft = rect.right - contentWidth;
+      const minLeft = 8; // minimum padding from left edge
+      const maxLeft = window.innerWidth - contentWidth - 8; // maximum position (considering right padding)
+      positionStyle.left = Math.max(minLeft, Math.min(targetLeft, maxLeft));
+    }
+
+    setStyle(positionStyle);
   }, [anchorRef, align, placement, offset]);
 
   useLayoutEffect(() => {
@@ -75,7 +92,7 @@ const Floating: FC<FloatingProps> = ({ className, children, align = 'left', plac
   }, [isOpen, update]);
 
   const content = (
-    <div className={`${className} ${isOpen ? openClassName : ''}`} style={style}>
+    <div ref={contentRef} className={`${className} ${isOpen ? openClassName : ''}`} style={style}>
       {children}
     </div>
   );
@@ -138,6 +155,7 @@ export type EllipsisMenuContentProps = CardProps & {
   align?: 'left' | 'right';
   gap?: number;
   placement?: 'top' | 'bottom';
+  offset?: number;
   children: ReactNode;
 };
 
@@ -161,7 +179,7 @@ const ContentColumnComponent: FC<EllipsisMenuContentProps> = (props) => {
   const { isOpen } = useEllipsisMenuContext();
   const { className, gap, children, shadow = 'medium', border = theme.colors.border.light, padding = '8px', stopPropagate = true } = props;
   return (
-    <Floating className={`${className} ${isOpen ? 'open' : ''}`} align={props.align} placement={props['placement'] || 'bottom'}>
+    <Floating className={`${className} ${isOpen ? 'open' : ''}`} align={props.align} placement={props['placement'] || 'bottom'} offset={props.offset}>
       <Card {...props} className={`${className} ${isOpen ? 'open' : ''}`} shadow={shadow} border={border} padding={padding} stopPropagate={stopPropagate}>
         <FlexColumn align={'flex-start'} gap={gap} wrap={'nowrap'}>
           {children}

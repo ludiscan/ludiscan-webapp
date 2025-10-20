@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 
 import type { FC } from 'react';
 
@@ -9,6 +9,7 @@ import { MarkDownText } from '@src/component/molecules/MarkDownText';
 import { Header } from '@src/component/templates/Header';
 import { SidebarLayout } from '@src/component/templates/SidebarLayout';
 import readmeRaw from '@src/files/heatmapReadme.md';
+import { useAuth } from '@src/hooks/useAuth';
 import { InnerContent } from '@src/pages/_app.page';
 import { dimensions } from '@src/styles/style';
 
@@ -29,19 +30,39 @@ export async function getServerSideProps() {
 
 const Component: FC<IndexPageProps> = ({ className, readme }) => {
   const router = useRouter();
+  const { isAuthorized, ready } = useAuth();
+
   const handleBackClick = useCallback(() => {
     router.back();
   }, [router]);
+
+  useEffect(() => {
+    // When user is authorized, redirect to home
+    if (ready && isAuthorized) {
+      router.push('/home');
+    }
+  }, [isAuthorized, ready, router]);
+
   return (
     <div className={className}>
-      <SidebarLayout />
-      <InnerContent>
-        <Header title={'Index Page'} onClick={handleBackClick} />
+      {isAuthorized && <SidebarLayout />}
+      <InnerContent showSidebar={isAuthorized}>
+        <Header title={'Ludiscan'} onClick={handleBackClick} />
         <div className={`${className}__inner`}>
-          <Link href={'/home'}>
-            <span>Go to Home</span>
-          </Link>
-          {readme && <MarkDownText className={`${className}__markdown`} markdown={readme} />}
+          {!isAuthorized && ready ? (
+            <div className={`${className}__content`}>
+              <div className={`${className}__welcome`}>
+                <h1 className={`${className}__title`}>Welcome to Ludiscan</h1>
+                <p className={`${className}__subtitle`}>Visualize gameplay data with 3D and 2D heatmaps</p>
+                <div className={`${className}__buttons`}>
+                  <Link href={'/login'}>Sign In</Link>
+                </div>
+              </div>
+              {readme && <MarkDownText className={`${className}__markdown`} markdown={readme} />}
+            </div>
+          ) : (
+            <div className={`${className}__loading`}>Loading...</div>
+          )}
         </div>
       </InnerContent>
     </div>
@@ -59,53 +80,64 @@ const IndexPage = styled(Component)`
     text-align: center;
   }
 
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    height: 100%;
+  }
+
+  &__welcome {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: ${({ theme }) => theme.colors.primary.main};
+  }
+
+  &__subtitle {
+    margin: 0;
+    font-size: 1.1rem;
+    color: ${({ theme }) => theme.colors.text};
+    opacity: 0.8;
+  }
+
+  &__buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+
+    a {
+      text-decoration: none;
+    }
+  }
+
   &__markdown {
     flex: 1;
+    width: 100%;
     max-width: ${dimensions.maxWidth}px;
     margin: 0 auto;
     overflow-y: auto;
-    font-size: 1.2rem;
+    font-size: 1rem;
     line-height: 1.6;
     text-align: start;
   }
 
-  &__logo {
-    height: 6em;
-    padding: 1.5em;
-    transition: filter 300ms;
-    will-change: filter;
-  }
-
-  &__logo:hover {
-    filter: drop-shadow(0 0 2em #646cffaa);
-  }
-
-  &__logo.react:hover {
-    filter: drop-shadow(0 0 2em #61dafbaa);
-  }
-
-  @keyframes logo-spin {
-    from {
-      transform: rotate(0deg);
-    }
-
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    a:nth-of-type(2) &__logo {
-      animation: logo-spin infinite 20s linear;
-    }
-  }
-
-  &__card {
-    padding: 2em;
-  }
-
-  &__read-the-docs {
-    color: #888;
+  &__loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    font-size: 1.2rem;
+    color: ${({ theme }) => theme.colors.text};
   }
 `;
 

@@ -91,7 +91,8 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
               <Divider orientation={'vertical'} />
               {isAuthorized ? (
                 <Menu fontSize={'large2'} scheme={'none'} icon={<CiUser size={24} color={theme.colors.text} />}>
-                  <Menu.ContentColumn gap={4}>
+                  <Menu.ContentColumn gap={4} align={'right'} placement={'bottom'} offset={16}>
+                    <IconLabelRow className={`${className}__iconLabelRow`} gap={8} label={'Profile'} icon={<CiUser />} href={'/profile'} target={'_self'} />
                     <Divider orientation={'horizontal'} margin={'0'} />
                     <IconLabelRow className={`${className}__iconLabelRow accent`} gap={8} label={'Logout'} icon={<MdLogout />} onClick={handleLogout} />
                   </Menu.ContentColumn>
