@@ -192,7 +192,7 @@ const Content: FC<LoginPageProps> = ({ className }) => {
               <Text text={'Ludiscan Account'} fontWeight={'bold'} fontSize={fontSizes.largest} />
               <Text text={'sign in to manage all Ludiscan services and heatmap tools.'} fontSize={fontSizes.medium} color={theme.colors.text} />
             </InlineFlexColumn>
-            <a className={`${className}__button google-login`} href={`${env.API_BASE_URL}/api/v0/auth/google`} target={'_self'}>
+            <a className={`${className}__button google-login`} href={`${env.API_BASE_URL}/api/v0/auth/google`} target={'_self'} rel={'noopener noreferrer'}>
               <Image src={'/google.svg'} alt={'google'} width={20} height={20} />
               <Text
                 className={`${className}__buttonText`}

@@ -19,10 +19,10 @@ const Content = styled.div`
   background: ${({ theme }) => theme.colors.background};
 `;
 
-export const InnerContent = styled.div`
+export const InnerContent = styled.div<{ showSidebar?: boolean }>`
   /* stylelint-disable-next-line */
   @media (min-width: ${dimensions.mobileWidth}px) {
-    margin-left: ${dimensions.sidebarWidth}px;
+    margin-left: ${(props) => (props.showSidebar !== false ? dimensions.sidebarWidth : 0)}px;
   }
 `;
 
