@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
@@ -8,6 +8,7 @@ import { Button } from '@src/component/atoms/Button';
 import { InlineFlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { Selector } from '@src/component/molecules/Selector';
+import { createRouteCoachTask } from '@src/features/heatmap/routecoach/api';
 import { createClient, DefaultStaleTime } from '@src/modeles/qeury';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
@@ -19,6 +20,7 @@ function Toolbar({ className, service }: Props) {
   const [open, setOpen] = useState(false);
   const [percent, setPercent] = useState(100);
   const [selectSessionId, setSelectSessionId] = useState<string | undefined>(undefined);
+  const qc = useQueryClient();
 
   const { data: sessions } = useQuery({
     queryKey: ['sessions', service.projectId],
@@ -42,6 +44,20 @@ function Toolbar({ className, service }: Props) {
     if (!sessions || !Array.isArray(sessions)) return [];
     return sessions?.map((session) => String(session.sessionId)) || [];
   }, [sessions]);
+
+  // RouteCoachタスク実行
+  const { mutate: startRouteCoach, isPending: isRouteCoachPending } = useMutation({
+    mutationFn: async () => {
+      if (!service.projectId || !service.sessionId) throw new Error('Project and session are required');
+      return createRouteCoachTask(service.projectId, service.sessionId);
+    },
+    onSuccess: async () => {
+      // タスク実行後、RouteCoachメニューのキャッシュを無効化
+      await qc.invalidateQueries({ queryKey: ['routeCoachSummary'] });
+      // メニューを自動開く
+      heatMapEventBus.emit('click-menu-icon', { name: 'routecoach' });
+    },
+  });
 
   useEffect(() => {
     const onPercent = (e: CustomEvent<{ percent: number }>) => setPercent(e.detail.percent);
@@ -118,6 +134,15 @@ function Toolbar({ className, service }: Props) {
           disabled={selectSessionId === undefined}
         >
           <Text text={'filter'} />
+        </Button>
+        <Button
+          fontSize={'small'}
+          onClick={() => startRouteCoach()}
+          scheme={'primary'}
+          disabled={!service.sessionId || isRouteCoachPending}
+          title='セッションのルート分析を実行'
+        >
+          <Text text={isRouteCoachPending ? '分析中…' : 'Route Analysis'} />
         </Button>
       </InlineFlexRow>
     </div>

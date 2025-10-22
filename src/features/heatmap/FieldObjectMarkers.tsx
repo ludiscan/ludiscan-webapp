@@ -1,6 +1,6 @@
 import { Billboard, Center } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Vector3, SphereGeometry, BoxGeometry, Sprite, SpriteMaterial, TextureLoader } from 'three';
 
 import type { components } from '@generated/api';
@@ -11,6 +11,7 @@ import type { FC } from 'react';
 import type { Group, Texture } from 'three';
 
 import { useGeneralPick } from '@src/hooks/useGeneral';
+import { usePlayerTimelinePick } from '@src/hooks/usePlayerTimeline';
 import { getIconPath } from '@src/utils/heatmapIconMap';
 import { compileHVQL, type ViewContext } from '@src/utils/vql';
 
@@ -78,9 +79,10 @@ const FieldObjectMarker: FC<{
   );
 };
 
-const FieldObjectMarkers: FC<FieldObjectMarkersProps> = ({ _service, logs, objectType, pref, queryText }) => {
+const FieldObjectMarkersComponent: FC<FieldObjectMarkersProps> = ({ _service, logs, objectType, pref, queryText }) => {
   const { color, iconName, hvqlScript } = pref;
   const { upZ = false, scale } = useGeneralPick('upZ', 'scale');
+  const { visible: isTimelineActive, currentTimelineSeek: currentSeekTime } = usePlayerTimelinePick('visible', 'currentTimelineSeek');
   const { camera, size } = useThree();
 
   // Use queryText from Redux if provided, otherwise fallback to hvqlScript from pref
@@ -102,28 +104,55 @@ const FieldObjectMarkers: FC<FieldObjectMarkersProps> = ({ _service, logs, objec
   const materialRef = useRef<SpriteMaterial | null>(null);
   const [currentIconPath, setCurrentIconPath] = useState<string | null>(null);
 
+  // Precompute spawn/despawn times for each object (optimization)
+  const objectTimings = useMemo(() => {
+    const timings = new Map<string, { spawnTime: number; despawnTime: number }>();
+    logs.forEach((log) => {
+      if (log.object_type !== objectType) return;
+      if (!timings.has(log.object_id)) {
+        timings.set(log.object_id, { spawnTime: Number.MAX_VALUE, despawnTime: 0 });
+      }
+      const timing = timings.get(log.object_id)!;
+      if (log.event_type === 'spawn') {
+        timing.spawnTime = Math.min(timing.spawnTime, log.offset_timestamp);
+      } else if (log.event_type === 'despawn') {
+        timing.despawnTime = Math.max(timing.despawnTime, log.offset_timestamp);
+      }
+    });
+    return timings;
+  }, [logs, objectType]);
+
   // Precompute world positions for this object type
   // Apply same coordinate transformation as PlayerPositionLog (HeatmapObjectOverlay.tsx)
   // Database stores: x=Z_unity*100, y=X_unity*100, z=Y_unity*100
   // Display: Keep X, swap Y/Z based on upZ flag
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const worldPositions = useMemo<{ pos: Vector3; id: string; eventType: 'spawn' | 'move' | 'despawn' | 'update'; metadata?: Record<string, any> }[]>(
-    () =>
-      logs
-        .filter((log) => log.object_type === objectType)
-        .map((log) => {
-          const { x, y, z } = log;
-          const zVal = z ?? 0;
-          // Apply Y/Z swap transform (same as HeatmapObjectOverlay.tsx)
-          return {
-            pos: new Vector3(x * scale, (upZ ? zVal : y) * scale, (upZ ? y : zVal) * scale),
-            id: log.object_id,
-            eventType: log.event_type,
-            metadata: log.status || {},
-          };
-        }),
-    [logs, objectType, upZ, scale],
-  );
+  const worldPositions = useMemo<{ pos: Vector3; id: string; eventType: 'spawn' | 'move' | 'despawn' | 'update'; metadata?: Record<string, any> }[]>(() => {
+    let filteredLogs = logs.filter((log) => log.object_type === objectType);
+
+    // If Timeline is active, filter by spawn/despawn times
+    if (isTimelineActive && currentSeekTime !== undefined) {
+      filteredLogs = filteredLogs.filter((log) => {
+        const timing = objectTimings.get(log.object_id);
+        if (!timing) return false;
+        const spawnTime = timing.spawnTime === Number.MAX_VALUE ? 0 : timing.spawnTime;
+        const despawnTime = timing.despawnTime === 0 ? Number.MAX_VALUE : timing.despawnTime;
+        return currentSeekTime >= spawnTime && currentSeekTime <= despawnTime;
+      });
+    }
+
+    return filteredLogs.map((log) => {
+      const { x, y, z } = log;
+      const zVal = z ?? 0;
+      // Apply Y/Z swap transform (same as HeatmapObjectOverlay.tsx)
+      return {
+        pos: new Vector3(x * scale, (upZ ? zVal : y) * scale, (upZ ? y : zVal) * scale),
+        id: log.object_id,
+        eventType: log.event_type,
+        metadata: log.status || {},
+      };
+    });
+  }, [logs, objectType, objectTimings, upZ, scale, isTimelineActive, currentSeekTime]);
 
   // Overlap filtering with useMemo
   const visiblePositions = useMemo(() => {
@@ -298,5 +327,18 @@ const FieldObjectMarkers: FC<FieldObjectMarkersProps> = ({ _service, logs, objec
     </>
   );
 };
+
+const FieldObjectMarkers = memo(FieldObjectMarkersComponent, (prev, next) => {
+  // Re-render only if these props change
+  return (
+    prev._service === next._service &&
+    prev.logs === next.logs &&
+    prev.objectType === next.objectType &&
+    prev.pref === next.pref &&
+    prev.queryText === next.queryText
+  );
+});
+
+FieldObjectMarkers.displayName = 'FieldObjectMarkers';
 
 export default FieldObjectMarkers;

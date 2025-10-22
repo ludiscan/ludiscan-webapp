@@ -2,6 +2,7 @@ import Image from 'next/image';
 import { BsGrid, BsPerson } from 'react-icons/bs';
 import { CiMap, CiMapPin, CiStreamOn } from 'react-icons/ci';
 import { FaCube } from 'react-icons/fa';
+import { GiPathDistance } from 'react-icons/gi';
 import { IoIosInformationCircleOutline } from 'react-icons/io';
 import { SiSvgtrace } from 'react-icons/si';
 import { useStore } from 'react-redux';
@@ -20,6 +21,7 @@ import { HotspotMenuContent } from '@src/features/heatmap/menu/HotspotMenuConten
 import { InfoMenuContent } from '@src/features/heatmap/menu/InfoMenuContent';
 import { MapMenuContent } from '@src/features/heatmap/menu/MapMenuContent';
 import { PlayerTimeline } from '@src/features/heatmap/menu/PlayerTimeline';
+import { RouteCoachMenuContent } from '@src/features/heatmap/routecoach/RouteCoachMenuContent';
 import { AISummaryMenuContent } from '@src/features/heatmap/summary/AISummaryMenuContent';
 import { fontSizes, fontWeights } from '@src/styles/style';
 
@@ -69,6 +71,11 @@ export const MenuContents: MenuType[] = [
     name: 'timeline',
     icon: <SiSvgtrace />,
     Component: PlayerTimeline,
+  },
+  {
+    name: 'routecoach',
+    icon: <GiPathDistance />,
+    Component: RouteCoachMenuContent,
   },
   {
     name: 'more',

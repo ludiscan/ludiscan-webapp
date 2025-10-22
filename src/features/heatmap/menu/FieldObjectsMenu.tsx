@@ -22,7 +22,7 @@ map status.hand {
   rock     -> icon: hand-rock;
   paper    -> icon: hand-paper;
   scissor  -> icon: hand-scissor;
-  *        -> icon: spawn;
+  *        -> icon: hand-paper;
 }
 `;
 
