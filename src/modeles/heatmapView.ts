@@ -11,6 +11,7 @@ export type EventLogData = {
   visible: boolean;
   color: string;
   iconName: string;
+  hvqlScript?: string; // Optional HVQL script for dynamic icon/style based on event metadata
 };
 
 export type EventLogSettings = {
@@ -56,6 +57,21 @@ export type PlayerTimelineSettings = {
   currentTimelineSeek: number;
 };
 
+export type FieldObjectData = {
+  objectType: string;
+  visible: boolean;
+  color: string;
+  iconName: string;
+  hvqlScript?: string; // Optional HVQL script for dynamic icon/style based on object metadata
+};
+
+export type FieldObjectSettings = {
+  visible: boolean;
+  objects: FieldObjectData[];
+  filters: Record<string, boolean | number>;
+  queryText: string; // HVQL query for dynamic object styling/icons
+};
+
 export type SplitModeSettings = {
   enabled: boolean;
   direction: 'horizontal' | 'vertical';
@@ -66,6 +82,7 @@ export type HeatmapStates = {
   hotspotMode: HotspotModeSettings;
   eventLog: EventLogSettings;
   playerTimeline: PlayerTimelineSettings;
+  fieldObject: FieldObjectSettings;
   splitMode: SplitModeSettings;
 };
 
@@ -113,6 +130,12 @@ export const initializeValues: HeatmapDataState = {
     queryText: '',
     currentTimelineSeek: 0,
   },
+  fieldObject: {
+    visible: false,
+    objects: [],
+    filters: {},
+    queryText: '',
+  },
   splitMode: {
     enabled: false,
     direction: 'horizontal',
@@ -141,5 +164,43 @@ export function usePlayerPositionLogs(player: number | undefined, project_id: nu
     },
     staleTime: DefaultStaleTime,
     enabled: !!project_id && !!session_id && player !== undefined,
+  });
+}
+
+export function useFieldObjectLogs(project_id: number | undefined, session_id: number | undefined) {
+  return useQuery({
+    queryKey: ['fieldObjectLogs', project_id, session_id],
+    queryFn: async () => {
+      if (!project_id || !session_id) return null;
+      return createClient().GET('/api/v0/projects/{project_id}/play_session/{session_id}/field_object_log', {
+        params: {
+          path: {
+            project_id: project_id,
+            session_id: session_id,
+          },
+        },
+      });
+    },
+    staleTime: DefaultStaleTime,
+    enabled: !!project_id && !!session_id,
+  });
+}
+
+export function useFieldObjectTypes(project_id: number | undefined, session_id: number | undefined) {
+  return useQuery({
+    queryKey: ['fieldObjectTypes', project_id, session_id],
+    queryFn: async () => {
+      if (!project_id || !session_id) return null;
+      return createClient().GET('/api/v0/projects/{project_id}/play_session/{session_id}/field_object_log/object_types', {
+        params: {
+          path: {
+            project_id: project_id,
+            session_id: session_id,
+          },
+        },
+      });
+    },
+    staleTime: DefaultStaleTime,
+    enabled: !!project_id && !!session_id,
   });
 }

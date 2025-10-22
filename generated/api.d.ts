@@ -694,6 +694,41 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v0/projects/{project_id}/play_session/{session_id}/field_object_log': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get field object logs */
+    get: operations['FieldObjectLogController_get'];
+    put?: never;
+    /** Upload binary field object logs */
+    post: operations['FieldObjectLogController_post'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/projects/{project_id}/play_session/{session_id}/field_object_log/object_types': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get distinct object types from session */
+    get: operations['FieldObjectLogController_getObjectTypes'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v0/heatmap/projects/{project_id}/play_session/{session_id}/tasks': {
     parameters: {
       query?: never;
@@ -1003,6 +1038,159 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v0/game/projects/{project_id}/sessions/{session_id}/field-object-logs': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** フィールドオブジェクトログをバイナリでまとめて送信（LSFOフォーマット） */
+    post: operations['GameController_uploadFieldObjectLogs'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/route-coach/projects/{project_id}/tasks': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** プロジェクト全体のルート分析タスクを作成 */
+    post: operations['RouteCoachController_createProjectTask'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/route-coach/projects/{project_id}/sessions/{session_id}/tasks': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** セッション単位のルート分析タスクを作成 */
+    post: operations['RouteCoachController_createSessionTask'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/route-coach/projects/{project_id}/summary': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** プロジェクトのルート概要を取得 */
+    get: operations['RouteCoachController_getSummary'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/route-coach/projects/{project_id}/players/{player_id}/suggestions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** プレイヤーへの分岐提案を取得 */
+    get: operations['RouteCoachController_getSuggestions'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/route-coach/projects/{project_id}/players/{player_id}/habits': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** プレイヤーの習慣ルートを取得 */
+    get: operations['RouteCoachController_getHabits'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/route-coach/projects/{project_id}/sessions/{session_id}/summary': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** セッションのルート概要を取得 */
+    get: operations['RouteCoachController_getSessionSummary'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/route-coach/projects/{project_id}/sessions/{session_id}/players/{player_id}/suggestions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** セッションのプレイヤー分岐提案を取得 */
+    get: operations['RouteCoachController_getSessionSuggestions'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/route-coach/projects/{project_id}/sessions/{session_id}/players/{player_id}/habits': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** セッションのプレイヤー習慣ルートを取得 */
+    get: operations['RouteCoachController_getSessionHabits'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1219,6 +1407,30 @@ export interface components {
       location?: string | null;
       status?: Record<string, never> | null;
     };
+    FieldObjectLogDto: {
+      /**
+       * @description Unique object identifier in the game
+       * @example item_123
+       */
+      object_id: string;
+      /**
+       * @description Type of the object
+       * @example health_potion
+       */
+      object_type: string;
+      x: number;
+      y: number;
+      z?: number | null;
+      /** @description Milliseconds since session start */
+      offset_timestamp: number;
+      /**
+       * @description Event type for this log entry
+       * @enum {string}
+       */
+      event_type: 'spawn' | 'move' | 'despawn' | 'update';
+      /** @description Additional custom data for this object */
+      status?: Record<string, never> | null;
+    };
     CreateHeatmapDto: {
       /**
        * @description Heatmap width
@@ -1402,6 +1614,40 @@ export interface components {
        *     ]
        */
       projectIds: number[];
+    };
+    RouteEdgeDto: {
+      id: number;
+      from: Record<string, never>;
+      to: Record<string, never>;
+      traversal_count: number;
+      avg_duration_ms: number;
+      death_count: number;
+      death_rate: number;
+      success_count: number;
+      success_rate: number;
+      avg_time_to_success_ms: number;
+    };
+    RouteSuggestionDto: {
+      /** @description 分岐点の座標 */
+      junction: Record<string, never>;
+      /** @description プレイヤーが現在選んでいるルート */
+      current_choice: Record<string, never>;
+      /** @description 代替ルートの候補 */
+      alternatives: string[];
+    };
+    RouteHabitDto: {
+      /** @description 頻度ランク（1から） */
+      rank: number;
+      /** @description ルートの経路（座標列） */
+      path: string[];
+      /** @description 通過回数 */
+      frequency: number;
+      /** @description 死亡率 */
+      death_rate: number;
+      /** @description 成功率 */
+      success_rate: number;
+      /** @description クリア平均時間（ミリ秒） */
+      avg_time_to_success_ms: number;
     };
     DefaultErrorResponse: {
       /** @example 400 */
@@ -3052,6 +3298,117 @@ export interface operations {
       };
     };
   };
+  FieldObjectLogController_get: {
+    parameters: {
+      query?: {
+        /** @description Filter by start offset_timestamp (optional) */
+        start_time?: number;
+        /** @description Filter by end offset_timestamp (optional) */
+        end_time?: number;
+        /** @description Comma-separated object types to filter (optional) */
+        object_types?: string;
+      };
+      header?: never;
+      path: {
+        project_id: number;
+        session_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['FieldObjectLogDto'][];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  FieldObjectLogController_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        project_id: number;
+        session_id: number;
+      };
+      cookie?: never;
+    };
+    /** @description Binary data containing field object events */
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          /** Format: binary */
+          file?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultSuccessResponse'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  FieldObjectLogController_getObjectTypes: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        project_id: number;
+        session_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': string[];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
   HeatmapController_createSessionTask: {
     parameters: {
       query?: never;
@@ -3897,6 +4254,312 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['DefaultSuccessResponse'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  GameController_uploadFieldObjectLogs: {
+    parameters: {
+      query?: never;
+      header: {
+        /** @description ゲームクライアント用APIキー */
+        'X-API-Key': string;
+      };
+      path: {
+        /** @description Project ID */
+        project_id: number;
+        /** @description Session ID */
+        session_id: number;
+      };
+      cookie?: never;
+    };
+    /** @description Binary data containing field object events (LSFO V1 format) */
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          /** Format: binary */
+          file?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultSuccessResponse'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  RouteCoachController_createProjectTask: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        project_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description タスク作成成功 */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  RouteCoachController_createSessionTask: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        project_id: number;
+        session_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description タスク作成成功 */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  RouteCoachController_getSummary: {
+    parameters: {
+      query?: {
+        /** @description 指定時は個人統計、未指定時はグローバル統計 */
+        playerId?: number;
+      };
+      header?: never;
+      path: {
+        project_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description ルート概要 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RouteEdgeDto'][];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  RouteCoachController_getSuggestions: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        project_id: number;
+        player_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description 分岐提案リスト */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RouteSuggestionDto'][];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  RouteCoachController_getHabits: {
+    parameters: {
+      query?: {
+        /** @description 上位K個を取得（デフォルト: 5） */
+        topK?: number;
+      };
+      header?: never;
+      path: {
+        project_id: number;
+        player_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description 習慣ルートリスト */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RouteHabitDto'][];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  RouteCoachController_getSessionSummary: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        project_id: number;
+        session_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description セッションのルート概要 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RouteEdgeDto'][];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  RouteCoachController_getSessionSuggestions: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        project_id: number;
+        session_id: number;
+        player_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description セッションの分岐提案リスト */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RouteSuggestionDto'][];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  RouteCoachController_getSessionHabits: {
+    parameters: {
+      query?: {
+        /** @description 上位K個を取得（デフォルト: 5） */
+        topK?: number;
+      };
+      header?: never;
+      path: {
+        project_id: number;
+        session_id: number;
+        player_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description セッションの習慣ルートリスト */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RouteHabitDto'][];
         };
       };
       /** @description Bad Request */

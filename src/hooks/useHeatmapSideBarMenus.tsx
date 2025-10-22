@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { BsGrid, BsPerson } from 'react-icons/bs';
 import { CiMap, CiMapPin, CiStreamOn } from 'react-icons/ci';
+import { FaCube } from 'react-icons/fa';
 import { IoIosInformationCircleOutline } from 'react-icons/io';
 import { SiSvgtrace } from 'react-icons/si';
 import { useStore } from 'react-redux';
@@ -13,6 +14,7 @@ import type { FC, JSX } from 'react';
 import { Text } from '@src/component/atoms/Text';
 import { EventLogDetail } from '@src/features/heatmap/menu/EventLogDetail';
 import { EventLogContent } from '@src/features/heatmap/menu/EventLogs';
+import { FieldObjectsMenuContent } from '@src/features/heatmap/menu/FieldObjectsMenu';
 import { GeneralMenuContent } from '@src/features/heatmap/menu/GeneralMenuContent';
 import { HotspotMenuContent } from '@src/features/heatmap/menu/HotspotMenuContent';
 import { InfoMenuContent } from '@src/features/heatmap/menu/InfoMenuContent';
@@ -57,6 +59,11 @@ export const MenuContents: MenuType[] = [
     name: 'eventlog',
     icon: <CiStreamOn />,
     Component: EventLogContent,
+  },
+  {
+    name: 'fieldObject',
+    icon: <FaCube />,
+    Component: FieldObjectsMenuContent,
   },
   {
     name: 'timeline',

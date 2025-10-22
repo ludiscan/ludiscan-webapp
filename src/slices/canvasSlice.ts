@@ -3,7 +3,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 import type { PayloadAction } from '@reduxjs/toolkit';
-import type { HeatmapDataState, PlayerTimelineSettings } from '@src/modeles/heatmapView';
+import type { HeatmapDataState, PlayerTimelineSettings, FieldObjectSettings } from '@src/modeles/heatmapView';
 
 import { initializeValues } from '@src/modeles/heatmapView';
 import { getCanvasValues, saveCanvasValues } from '@src/utils/localstrage';
@@ -27,6 +27,7 @@ const canvasSlice = createSlice({
       state.general = action.payload.general;
       state.hotspotMode = action.payload.hotspotMode;
       state.eventLog = action.payload.eventLog;
+      state.fieldObject = action.payload.fieldObject;
       state.splitMode = action.payload.splitMode;
       saveCanvasValues(state);
     },
@@ -60,6 +61,13 @@ const canvasSlice = createSlice({
       state.playerTimeline = action.payload(state.playerTimeline);
     },
 
+    setFieldObject: (state, action: PayloadAction<HeatmapDataState['fieldObject']>) => {
+      state.fieldObject = action.payload;
+    },
+    patchFieldObject: (state, action: PayloadAction<Partial<FieldObjectSettings>>) => {
+      state.fieldObject = { ...state.fieldObject, ...action.payload };
+    },
+
     setSplitMode: (state, action: PayloadAction<HeatmapDataState['splitMode']>) => {
       state.splitMode = action.payload;
     },
@@ -80,6 +88,8 @@ export const {
   setPlayerTimeline,
   patchPlayerTimeline,
   updatePlayerTimeline,
+  setFieldObject,
+  patchFieldObject,
   setSplitMode,
   patchSplitMode,
 } = canvasSlice.actions;

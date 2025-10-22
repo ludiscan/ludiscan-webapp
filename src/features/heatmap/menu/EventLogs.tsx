@@ -13,6 +13,17 @@ import { InputRow } from '@src/features/heatmap/menu/InputRow';
 import { useEventLogPatch, useEventLogSelect } from '@src/hooks/useEventLog';
 import { fontSizes, fontWeights } from '@src/styles/style';
 import { getRandomPrimitiveColor } from '@src/utils/color';
+import { availableIcons } from '@src/utils/heatmapIconMap';
+
+// Default HVQL script for HandChangeItem events
+const HAND_CHANGE_ITEM_HVQL = `
+map status.hand {
+  rock     -> player-current-point-icon: hand-rock;
+  paper    -> player-current-point-icon: hand-paper;
+  scissor  -> player-current-point-icon: hand-scissor;
+  *        -> player-current-point-icon: target;
+}
+`;
 
 const Component: FC<HeatmapMenuProps> = ({ eventLogKeys }) => {
   const logs = useEventLogSelect((s) => s.logs);
@@ -32,11 +43,19 @@ const Component: FC<HeatmapMenuProps> = ({ eventLogKeys }) => {
       const eventLogDats: EventLogData[] = eventLogKeys.map((key) => {
         const index = logs.findIndex((e) => e.key === key);
         // console.log(eventLogs[index]?.color);
+
+        // Auto-assign HVQL script for HandChangeItem events
+        let hvqlScript = logs[index]?.hvqlScript;
+        if (key === 'GetHandChangeItem' && !hvqlScript) {
+          hvqlScript = HAND_CHANGE_ITEM_HVQL;
+        }
+
         return {
           key,
           visible: index !== -1 ? logs[index].visible : false,
           color: logs[index]?.color || getRandomPrimitiveColor(),
           iconName: logs[index]?.iconName || 'CiStreamOn',
+          hvqlScript,
         };
       });
       setEventLogs({ logs: eventLogDats });
@@ -85,7 +104,8 @@ const Component: FC<HeatmapMenuProps> = ({ eventLogKeys }) => {
                   if (index !== -1) {
                     newEventLogs[index].visible = checked;
                   } else {
-                    newEventLogs.push({ key, visible: checked, color: '#000000', iconName: 'CiStreamOn' });
+                    const hvqlScript = key === 'GetHandChangeItem' ? HAND_CHANGE_ITEM_HVQL : undefined;
+                    newEventLogs.push({ key, visible: checked, color: '#000000', iconName: 'target', hvqlScript });
                   }
                   setEventLogs({ logs: newEventLogs });
                 }}
@@ -93,19 +113,34 @@ const Component: FC<HeatmapMenuProps> = ({ eventLogKeys }) => {
                 size={'small'}
               />
               {logs[index] && logs[index].color && (
-                <input
-                  type={'color'}
-                  color={logs[index].color}
-                  onChange={(e) => {
-                    const newEventLogs = logs.map((e) => ({ ...e }));
-                    if (index !== -1) {
-                      newEventLogs[index].color = e.target.value;
-                    } else {
-                      newEventLogs.push({ key, visible: false, color: e.target.value, iconName: 'CiStreamOn' });
-                    }
-                    setEventLogs({ logs: newEventLogs });
-                  }}
-                />
+                <>
+                  <input
+                    type={'color'}
+                    color={logs[index].color}
+                    onChange={(e) => {
+                      const newEventLogs = logs.map((e) => ({ ...e }));
+                      if (index !== -1) {
+                        newEventLogs[index].color = e.target.value;
+                      } else {
+                        newEventLogs.push({ key, visible: false, color: e.target.value, iconName: 'target' });
+                      }
+                      setEventLogs({ logs: newEventLogs });
+                    }}
+                  />
+                  <Selector
+                    options={availableIcons}
+                    onChange={(iconName) => {
+                      const newEventLogs = logs.map((e) => ({ ...e }));
+                      if (index !== -1) {
+                        newEventLogs[index].iconName = iconName;
+                      } else {
+                        newEventLogs.push({ key, visible: false, color: '#000000', iconName });
+                      }
+                      setEventLogs({ logs: newEventLogs });
+                    }}
+                    // defaultValue={logs[index]?.iconName || 'target'}
+                  />
+                </>
               )}
             </InputRow>
           );
