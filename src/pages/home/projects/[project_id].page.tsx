@@ -1,7 +1,8 @@
 import styled from '@emotion/styled';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { BiBarChart, BiUser, BiKey } from 'react-icons/bi';
+import { BiBarChart, BiUser, BiKey, BiLineChart } from 'react-icons/bi';
 
 import { ProjectDetailsApiKeysTab } from './tabs/ProjectDetailsApiKeysTab';
 import { ProjectDetailsMembersTab } from './tabs/ProjectDetailsMembersTab';
@@ -11,7 +12,7 @@ import type { Project } from '@src/modeles/project';
 import type { FC } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
-import { FlexColumn } from '@src/component/atoms/Flex';
+import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { Header } from '@src/component/templates/Header';
 import { SidebarLayout } from '@src/component/templates/SidebarLayout';
@@ -134,10 +135,16 @@ const Component: FC<ProjectDetailsPageProps> = ({ className }) => {
 
         {/* プロジェクト基本情報 */}
         <div className={`${className}__header`}>
-          <FlexColumn gap={8}>
-            <Text text={project.name} fontSize={fontSizes.largest} color={theme.colors.text} fontWeight={fontWeights.bolder} />
-            <Text text={project.description} fontSize={fontSizes.small} color={theme.colors.secondary.main} fontWeight={fontWeights.bold} />
-          </FlexColumn>
+          <FlexRow gap={16} align={'flex-start'}>
+            <FlexColumn gap={8} style={{ flex: 1 }}>
+              <Text text={project.name} fontSize={fontSizes.largest} color={theme.colors.text} fontWeight={fontWeights.bolder} />
+              <Text text={project.description} fontSize={fontSizes.small} color={theme.colors.secondary.main} fontWeight={fontWeights.bold} />
+            </FlexColumn>
+            <Link href={`/heatmap/projects/${project.id}`} style={{ textDecoration: 'none' }}>
+              <BiLineChart size={20} />
+              <Text text='Heatmap' fontWeight={fontWeights.bold} />
+            </Link>
+          </FlexRow>
         </div>
 
         {/* タブナビゲーション */}

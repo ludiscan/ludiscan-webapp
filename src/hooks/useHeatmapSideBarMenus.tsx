@@ -1,6 +1,8 @@
 import Image from 'next/image';
 import { BsGrid, BsPerson } from 'react-icons/bs';
 import { CiMap, CiMapPin, CiStreamOn } from 'react-icons/ci';
+import { FaCube } from 'react-icons/fa';
+import { GiPathDistance } from 'react-icons/gi';
 import { IoIosInformationCircleOutline } from 'react-icons/io';
 import { SiSvgtrace } from 'react-icons/si';
 import { useStore } from 'react-redux';
@@ -13,11 +15,13 @@ import type { FC, JSX } from 'react';
 import { Text } from '@src/component/atoms/Text';
 import { EventLogDetail } from '@src/features/heatmap/menu/EventLogDetail';
 import { EventLogContent } from '@src/features/heatmap/menu/EventLogs';
+import { FieldObjectsMenuContent } from '@src/features/heatmap/menu/FieldObjectsMenu';
 import { GeneralMenuContent } from '@src/features/heatmap/menu/GeneralMenuContent';
 import { HotspotMenuContent } from '@src/features/heatmap/menu/HotspotMenuContent';
 import { InfoMenuContent } from '@src/features/heatmap/menu/InfoMenuContent';
 import { MapMenuContent } from '@src/features/heatmap/menu/MapMenuContent';
 import { PlayerTimeline } from '@src/features/heatmap/menu/PlayerTimeline';
+import { RouteCoachMenuContent } from '@src/features/heatmap/routecoach/RouteCoachMenuContent';
 import { AISummaryMenuContent } from '@src/features/heatmap/summary/AISummaryMenuContent';
 import { fontSizes, fontWeights } from '@src/styles/style';
 
@@ -59,9 +63,19 @@ export const MenuContents: MenuType[] = [
     Component: EventLogContent,
   },
   {
+    name: 'fieldObject',
+    icon: <FaCube />,
+    Component: FieldObjectsMenuContent,
+  },
+  {
     name: 'timeline',
     icon: <SiSvgtrace />,
     Component: PlayerTimeline,
+  },
+  {
+    name: 'routecoach',
+    icon: <GiPathDistance />,
+    Component: RouteCoachMenuContent,
   },
   {
     name: 'more',

@@ -95,6 +95,23 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
     staleTime: DefaultStaleTime,
   });
 
+  const { data: fieldObjectLogs } = useQuery({
+    queryKey: ['fieldObjectLogs', service.projectId, service.sessionId],
+    queryFn: async () => {
+      if (!service.projectId || !service.sessionId) return null;
+      return createClient().GET('/api/v0/projects/{project_id}/play_session/{session_id}/field_object_log', {
+        params: {
+          path: {
+            project_id: service.projectId,
+            session_id: service.sessionId,
+          },
+        },
+      });
+    },
+    staleTime: DefaultStaleTime,
+    enabled: !!service.projectId && !!service.sessionId,
+  });
+
   useEffect(() => {
     if (!mapContent) return;
     setMap(mapContent);
@@ -157,6 +174,13 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
     }
   }, [generalLogKeys, mapContent, mapList, service, store, task]);
 
+  // セッション選択時にフィールドオブジェクトメニューを自動開く
+  useEffect(() => {
+    if (fieldObjectLogs && fieldObjectLogs.data && fieldObjectLogs.data.length > 0 && service.sessionId) {
+      setOpenMenu('fieldObject');
+    }
+  }, [service.sessionId, fieldObjectLogs]);
+
   useEffect(() => {
     const clickMenuIconHandler = (event: CustomEvent<{ name: Menus }>) => {
       setOpenMenu(event.detail.name);
@@ -211,11 +235,12 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
           model={model}
           visibleTimelineRange={visibleTimelineRange}
           dimensionality={dimensionality}
+          fieldObjectLogs={fieldObjectLogs?.data}
         />
         <Stats parent={divRef} className={`${className}__stats`} />
       </Canvas>
     ),
-    [dimensionality, dpr, handleOnPerformance, service, pointList, map, modelType, model, visibleTimelineRange, divRef, className],
+    [dimensionality, dpr, handleOnPerformance, service, pointList, map, modelType, model, visibleTimelineRange, divRef, className, fieldObjectLogs?.data],
   );
 
   return (

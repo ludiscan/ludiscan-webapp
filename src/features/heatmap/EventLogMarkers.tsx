@@ -2,19 +2,20 @@ import { Billboard, Center } from '@react-three/drei';
 import { useFrame, useLoader, useThree } from '@react-three/fiber';
 import { useQuery } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Vector3, ShapeGeometry, DoubleSide, BackSide } from 'three';
+import { Vector3, ShapeGeometry, DoubleSide, BackSide, Sprite, SpriteMaterial, TextureLoader } from 'three';
 import { SVGLoader } from 'three-stdlib';
 
 import type { ThreeEvent } from '@react-three/fiber';
 import type { EventLogData } from '@src/modeles/heatmapView';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC } from 'react';
-import type { Shape, Box3, Group } from 'three';
+import type { Shape, Box3, Group, Texture } from 'three';
 
 import { useEventLogPick } from '@src/hooks/useEventLog';
 import { useGeneralPick } from '@src/hooks/useGeneral';
 import { DefaultStaleTime } from '@src/modeles/qeury';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
+import { getIconPath } from '@src/utils/heatmapIconMap';
 
 export type EventLogMarkersProps = {
   service: HeatmapDataService;
@@ -96,11 +97,26 @@ const MarkerBillboard: FC<{
 };
 
 const EventLogMarkers: FC<EventLogMarkersProps> = ({ logName, service, pref }) => {
-  const { color } = pref;
+  const { color, iconName } = pref;
   const { upZ = false, scale } = useGeneralPick('upZ', 'scale');
 
   const { filters } = useEventLogPick('filters');
   const { camera, size } = useThree();
+
+  // Compile HVQL script if provided
+  // const hvqlCompiler = useMemo(() => {
+  //   if (!hvqlScript) return null;
+  //   try {
+  //     return compileHVQL(hvqlScript);
+  //   } catch {
+  //     return null;
+  //   }
+  // }, [hvqlScript]);
+
+  // テクスチャキャッシュ
+  const textureCache = useRef<Map<string, Texture>>(new Map());
+  const spriteRef = useRef<Sprite | null>(null);
+  const materialRef = useRef<SpriteMaterial | null>(null);
 
   // Load and prepare SVG shapes
   const svgData = useLoader(SVGLoader, '/heatmap/target.svg');
@@ -111,6 +127,7 @@ const EventLogMarkers: FC<EventLogMarkersProps> = ({ logName, service, pref }) =
   }, [svgData]);
 
   const [selectedData, setSelectedData] = useState<number | undefined>(undefined);
+  const [currentIconPath, setCurrentIconPath] = useState<string | null>(null);
 
   const geometries = useMemo<ShapeGeometry[]>(
     () =>
@@ -136,8 +153,9 @@ const EventLogMarkers: FC<EventLogMarkersProps> = ({ logName, service, pref }) =
     refetchOnWindowFocus: false,
   });
 
-  // Precompute world positions
-  const worldPositions = useMemo<{ pos: Vector3; id: number }[]>(
+  // Precompute world positions with metadata
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const worldPositions = useMemo<{ pos: Vector3; id: number; metadata?: Record<string, any> }[]>(
     () =>
       (data ?? [])
         .map((d) => {
@@ -147,23 +165,20 @@ const EventLogMarkers: FC<EventLogMarkersProps> = ({ logName, service, pref }) =
           return {
             pos: upZ ? new Vector3(x * scale, z * scale, y * scale) : new Vector3(x * scale, y * scale, z * scale),
             id: d.id,
+            // metadata: d.metadata || {},
           };
         })
         .filter((d) => d != null),
     [data, upZ, scale, filters],
   );
 
-  // Overlap filtering state
-  const [visibleIds, setVisibleIds] = useState<Set<number>>(new Set());
-  const thresholdPx = 20;
-  const screenCache = useRef<{ px: number; py: number }[]>([]);
-  const keptIndices: number[] = useRef<number[]>([]).current;
+  // Overlap filtering with useMemo
+  const visibleWorldPositions = useMemo(() => {
+    if (!worldPositions || worldPositions.length === 0) return [];
 
-  useFrame(() => {
-    if (!worldPositions) return;
-    const newSet = new Set<number>();
-    screenCache.current = [];
-    keptIndices.length = 0;
+    const visible: typeof worldPositions = [];
+    const screenCache: { px: number; py: number }[] = [];
+    const thresholdPx = 20;
 
     for (let i = 0; i < worldPositions.length; i++) {
       const wp = worldPositions[i];
@@ -172,25 +187,21 @@ const EventLogMarkers: FC<EventLogMarkersProps> = ({ logName, service, pref }) =
       const py = ((1 - ndc.y) / 2) * size.height;
 
       let skip = false;
-      for (const idx of keptIndices) {
-        const { px: kx, py: ky } = screenCache.current[idx];
-        if ((px - kx) ** 2 + (py - ky) ** 2 < thresholdPx * thresholdPx) {
+      for (const cached of screenCache) {
+        if ((px - cached.px) ** 2 + (py - cached.py) ** 2 < thresholdPx * thresholdPx) {
           skip = true;
           break;
         }
       }
+
       if (!skip) {
-        newSet.add(wp.id);
-        keptIndices.push(i);
-        screenCache.current[i] = { px, py };
+        visible.push(wp);
+        screenCache.push({ px, py });
       }
     }
 
-    // Update if changed
-    if (newSet.size !== visibleIds.size || [...newSet].some((id) => !visibleIds.has(id))) {
-      setVisibleIds(newSet);
-    }
-  });
+    return visible;
+  }, [worldPositions, camera, size]);
 
   // Click handler
   const handlePointClick = useCallback(
@@ -200,6 +211,66 @@ const EventLogMarkers: FC<EventLogMarkersProps> = ({ logName, service, pref }) =
     },
     [logName],
   );
+
+  // テクスチャのキャッシュ機能
+  const getCachedTexture = useCallback((iconPath: string): Texture => {
+    if (textureCache.current.has(iconPath)) {
+      return textureCache.current.get(iconPath)!;
+    }
+
+    const textureLoader = new TextureLoader();
+    const texture = textureLoader.load(iconPath);
+    textureCache.current.set(iconPath, texture);
+    return texture;
+  }, []);
+
+  // アイコンの更新を最適化
+  const updateIconTexture = useCallback(
+    (iconPath: string) => {
+      if (materialRef.current && materialRef.current.map !== textureCache.current.get(iconPath)) {
+        materialRef.current.map = getCachedTexture(iconPath);
+      }
+    },
+    [getCachedTexture],
+  );
+
+  // スプライトの初期化
+  useEffect(() => {
+    if (!spriteRef.current) {
+      const material = new SpriteMaterial({
+        transparent: true,
+        opacity: 0.8,
+        sizeAttenuation: false,
+        depthTest: false,
+      });
+      materialRef.current = material;
+
+      spriteRef.current = new Sprite(material);
+    }
+  }, []);
+
+  // クリーンアップ
+  useEffect(() => {
+    return () => {
+      if (materialRef.current) {
+        materialRef.current.dispose();
+      }
+      textureCache.current.forEach((texture) => texture.dispose());
+      textureCache.current = new Map<string, Texture>();
+    };
+  }, []);
+
+  // アイコンパスの更新
+  useEffect(() => {
+    if (iconName) {
+      const newIconPath = getIconPath(iconName);
+      if (newIconPath !== currentIconPath) {
+        setCurrentIconPath(newIconPath);
+      }
+    } else {
+      setCurrentIconPath(null);
+    }
+  }, [iconName, currentIconPath]);
 
   useEffect(() => {
     const handleEventLogDetailLoaded = (event: CustomEvent<{ logName: string; id: number }>) => {
@@ -213,21 +284,65 @@ const EventLogMarkers: FC<EventLogMarkersProps> = ({ logName, service, pref }) =
     };
   }, [logName]);
 
+  // Helper function to get icon name based on HVQL or fallback
+  // const getIconNameForMarker = useCallback(
+  //   (metadata: Record<string, any> | undefined): string | undefined => {
+  //     if (!metadata) return iconName;
+  //
+  //     if (hvqlCompiler) {
+  //       try {
+  //         const ctx: ViewContext = {
+  //           player: 0,
+  //           status: metadata,
+  //           pos: { x: 0, y: 0, z: 0 },
+  //           t: 0,
+  //         };
+  //         const style = hvqlCompiler(ctx);
+  //         return style.icon || iconName;
+  //       } catch (e) {
+  //         console.error('Error applying HVQL:', e);
+  //         return iconName;
+  //       }
+  //     }
+  //
+  //     return iconName;
+  //   },
+  //   [hvqlCompiler, iconName],
+  // );
+
   return (
     <>
-      {worldPositions?.map((d, i) =>
-        visibleIds.has(d.id) ? (
-          <MarkerBillboard
-            key={d.id}
-            selected={d.id == selectedData}
-            pos={worldPositions[i].pos}
-            id={d.id}
-            color={color}
-            geometries={geometries}
-            onClick={handlePointClick}
-          />
-        ) : null,
-      )}
+      {visibleWorldPositions.map((d) => (
+        <MarkerBillboard
+          key={d.id}
+          selected={d.id === selectedData}
+          pos={d.pos}
+          id={d.id}
+          color={color}
+          geometries={geometries}
+          onClick={handlePointClick}
+          // iconName={getIconNameForMarker(d.metadata)}
+          // metadata={d.metadata}
+        />
+      ))}
+      {/* アイコン表示 */}
+      {iconName &&
+        visibleWorldPositions.length > 0 &&
+        spriteRef.current &&
+        currentIconPath &&
+        (() => {
+          // テクスチャの更新（必要時のみ）
+          updateIconTexture(currentIconPath);
+
+          // スプライトの位置とスケールを更新
+          const randomPos = visibleWorldPositions[0];
+          spriteRef.current.position.copy(randomPos.pos);
+          spriteRef.current.position.y += 50 * scale; // マーカーの上に表示
+          spriteRef.current.scale.set(0.07 * scale, 0.07 * scale, 1);
+
+          // eslint-disable-next-line react/no-unknown-property
+          return <primitive object={spriteRef.current} />;
+        })()}
     </>
   );
 };
