@@ -61,9 +61,9 @@ describe('HVQL - parse & compile', () => {
       '}',
       '',
       'map status.hand {',
-      '  rock   -> player-current-point-icon: hand-rock;',
-      '  paper  -> player-current-point-icon: hand-paper;',
-      '  *      -> player-current-point-icon: hand-unknown;',
+      '  rock   -> icon: hand-rock;',
+      '  paper  -> icon: hand-paper;',
+      '  *      -> icon: hand-unknown;',
       '}',
     ].join('\n');
 
@@ -111,7 +111,7 @@ describe('HVQL - parse & compile', () => {
   });
 
   test('compileHVQL: クォート付き文字列の除去', () => {
-    const script = ['map status.hand {', "  rock -> player-current-point-icon: 'hand-rock';", '}'].join('\n');
+    const script = ['map status.hand {', "  rock -> icon: 'hand-rock';", '}'].join('\n');
 
     const apply = compileHVQL(script);
     const style = apply(baseCtx);
