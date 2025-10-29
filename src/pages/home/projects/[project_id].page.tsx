@@ -2,10 +2,11 @@ import styled from '@emotion/styled';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { BiBarChart, BiUser, BiKey, BiLineChart } from 'react-icons/bi';
+import { BiBarChart, BiUser, BiKey, BiLineChart, BiMap } from 'react-icons/bi';
 
 import { ProjectDetailsApiKeysTab } from './tabs/ProjectDetailsApiKeysTab';
 import { ProjectDetailsMembersTab } from './tabs/ProjectDetailsMembersTab';
+import { ProjectDetailsRouteCoachTab } from './tabs/ProjectDetailsRouteCoachTab';
 import { ProjectDetailsSessionsTab } from './tabs/ProjectDetailsSessionsTab';
 
 import type { Project } from '@src/modeles/project';
@@ -23,7 +24,7 @@ import { createClient } from '@src/modeles/qeury';
 import { InnerContent } from '@src/pages/_app.page';
 import { fontSizes, fontWeights } from '@src/styles/style';
 
-type TabType = 'sessions' | 'members' | 'api-keys';
+type TabType = 'sessions' | 'members' | 'api-keys' | 'route-coach';
 
 export type ProjectDetailsPageProps = {
   className?: string;
@@ -180,6 +181,16 @@ const Component: FC<ProjectDetailsPageProps> = ({ className }) => {
               <BiKey size={20} />
               <Text text='API Keys' fontSize={fontSizes.medium} />
             </Button>
+            <Button
+              onClick={() => setActiveTab('route-coach')}
+              scheme={activeTab === 'route-coach' ? 'primary' : 'none'}
+              fontSize='small'
+              className={`${className}__tabButton`}
+              title='Route Coach'
+            >
+              <BiMap size={20} />
+              <Text text='Route Coach' fontSize={fontSizes.medium} />
+            </Button>
           </div>
         </div>
 
@@ -188,6 +199,7 @@ const Component: FC<ProjectDetailsPageProps> = ({ className }) => {
           {activeTab === 'sessions' && <ProjectDetailsSessionsTab project={project} />}
           {activeTab === 'members' && <ProjectDetailsMembersTab project={project} />}
           {activeTab === 'api-keys' && <ProjectDetailsApiKeysTab project={project} />}
+          {activeTab === 'route-coach' && <ProjectDetailsRouteCoachTab project={project} />}
         </div>
       </InnerContent>
     </div>

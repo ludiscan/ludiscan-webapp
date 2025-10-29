@@ -2,90 +2,149 @@ import type { components } from '@generated/api';
 
 import { createClient } from '@src/modeles/qeury';
 
-export type RouteEdgeDto = components['schemas']['RouteEdgeDto'];
-export type RouteSuggestionDto = components['schemas']['RouteSuggestionDto'];
-export type RouteHabitDto = components['schemas']['RouteHabitDto'];
+/**
+ * RouteCoach v2 API
+ * イベントクラスタと改善案ルートを取得・管理
+ */
+
+export type EventClusterDetailDto = components['schemas']['EventClusterDetailDto'];
+export type ImprovementRouteDto = components['schemas']['ImprovementRouteDto'];
+export type SubmitImprovementRouteFeedbackRequestDto = components['schemas']['SubmitImprovementRouteFeedbackRequestDto'];
+export type SubmitImprovementRouteFeedbackResponseDto = components['schemas']['SubmitImprovementRouteFeedbackResponseDto'];
 
 /**
- * セッション内のルート分析タスクを開始
+ * プロジェクトのイベントクラスタと改善案を取得
+ * @param projectId プロジェクトID
+ * @param playerId プレイヤーID
+ * @param mapName マップ名（optional）
+ * @param eventType イベントタイプ（optional: 'death' | 'success'）
+ * @param freshnessDays データ鮮度（日数、デフォルト: 30）
  */
-export async function createRouteCoachTask(projectId: number, sessionId: number): Promise<{ taskId: number }> {
-  if (!projectId || !sessionId) throw new Error('projectId and sessionId are required');
-
-  const { data, error } = await createClient().POST('/api/v0/route-coach/projects/{project_id}/sessions/{session_id}/tasks', {
-    params: {
-      path: { project_id: projectId, session_id: sessionId },
-    },
-  });
-
-  if (error) throw error;
-  if (!data) throw new Error('Failed to create route coach task');
-  return data as { taskId: number };
-}
-
-/**
- * セッションのルート統計を取得
- */
-export async function fetchRouteCoachSummary(projectId: number, sessionId: number): Promise<RouteEdgeDto[] | null> {
+export async function fetchEventClusters(
+  projectId: number,
+  playerId: string,
+  mapName?: string,
+  eventType?: 'death' | 'success',
+  freshnessDays?: number,
+): Promise<EventClusterDetailDto[] | null> {
   try {
-    const { data, error } = await createClient().GET('/api/v0/route-coach/projects/{project_id}/sessions/{session_id}/summary', {
+    const { data, error } = await createClient().GET('/api/v0/route-coach/projects/{project_id}/event-clusters', {
       params: {
-        path: { project_id: projectId, session_id: sessionId },
+        path: { project_id: projectId },
+        query: {
+          player_id: playerId,
+          ...(mapName && { map_name: mapName }),
+          ...(eventType && { event_type: eventType }),
+          ...(freshnessDays !== undefined && { freshness_days: freshnessDays }),
+        },
       },
     });
 
     if (error) {
-      if (error.code === 404) return null; // タスク未実行
-      throw error;
+      // eslint-disable-next-line no-console
+      console.error('Failed to fetch event clusters:', error);
+      return null;
     }
-    if (!data) return null;
-    return data;
-  } catch {
+    return data || null;
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('Failed to fetch event clusters:', err);
     return null;
   }
 }
 
 /**
- * セッション内のプレイヤーのルート改善提案を取得
+ * 改善案ルートへのフィードバックを送信
+ * @param improvementRouteId 改善案ルートID
+ * @param rating 評価（1: Bad, 2: Neutral, 3: Good）
+ * @param comment コメント（optional）
  */
-export async function fetchRouteCoachSuggestions(projectId: number, sessionId: number, playerId: number): Promise<RouteSuggestionDto[] | null> {
+export async function submitImprovementRouteFeedback(
+  improvementRouteId: number,
+  rating: 1 | 2 | 3,
+  comment?: string,
+): Promise<SubmitImprovementRouteFeedbackResponseDto | null> {
   try {
-    const { data, error } = await createClient().GET('/api/v0/route-coach/projects/{project_id}/sessions/{session_id}/players/{player_id}/suggestions', {
+    const { data, error } = await createClient().POST('/api/v0/route-coach/improvement-routes/{improvement_route_id}/feedback', {
       params: {
-        path: { project_id: projectId, session_id: sessionId, player_id: playerId },
+        path: { improvement_route_id: improvementRouteId },
+      },
+      body: {
+        rating,
+        ...(comment && { comment }),
       },
     });
 
     if (error) {
-      if (error.code === 404) return null;
+      // eslint-disable-next-line no-console
+      console.error('Failed to submit feedback:', error);
       throw error;
     }
-    if (!data) return null;
-    return data;
-  } catch {
-    return null;
+    return data || null;
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('Failed to submit feedback:', err);
+    throw err;
   }
 }
 
 /**
- * セッション内のプレイヤーのルート習慣（よく使うルート）を取得
+ * プロジェクトの改善ルート生成ジョブを投入
+ * @param projectId プロジェクトID
+ * @param mapName マップ名（optional）
+ * @param force 強制再生成フラグ（true の場合、既存の completed/failed タスクを削除して再生成）
  */
-export async function fetchRouteCoachHabits(projectId: number, sessionId: number, playerId: number, topK: number = 5): Promise<RouteHabitDto[] | null> {
+export async function generateImprovementRoutes(projectId: number, mapName?: string, force?: boolean) {
   try {
-    const { data, error } = await createClient().GET('/api/v0/route-coach/projects/{project_id}/sessions/{session_id}/players/{player_id}/habits', {
+    const query: Record<string, string> = {};
+    if (mapName) {
+      query.map_name = mapName;
+    }
+    if (force) {
+      query.force = 'true';
+    }
+
+    const { data, error } = await createClient().POST('/api/v0/route-coach/projects/{project_id}/generate-improvement-routes', {
       params: {
-        path: { project_id: projectId, session_id: sessionId, player_id: playerId },
-        query: { topK },
+        path: { project_id: projectId },
+        ...(Object.keys(query).length > 0 && { query }),
       },
     });
 
     if (error) {
-      if (error.code === 404) return null;
+      // eslint-disable-next-line no-console
+      console.error('Failed to generate improvement routes:', error);
       throw error;
     }
-    if (!data) return null;
-    return data;
-  } catch {
+    return data || null;
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('Failed to generate improvement routes:', err);
+    throw err;
+  }
+}
+
+/**
+ * 改善ルート生成タスクの状態を取得
+ * @param taskId タスクID
+ */
+export async function getImprovementRoutesTaskStatus(taskId: number) {
+  try {
+    const { data, error } = await createClient().GET('/api/v0/route-coach/improvement-routes-jobs/{job_id}', {
+      params: {
+        path: { job_id: taskId },
+      },
+    });
+
+    if (error) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to get task status:', error);
+      return null;
+    }
+    return data || null;
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('Failed to get task status:', err);
     return null;
   }
 }

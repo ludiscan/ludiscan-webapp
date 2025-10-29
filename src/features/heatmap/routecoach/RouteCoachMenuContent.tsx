@@ -1,40 +1,64 @@
 // src/features/heatmap/routecoach/RouteCoachMenuContent.tsx
 import styled from '@emotion/styled';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useMemo, useEffect, useCallback } from 'react';
+import { useMemo, useEffect, useCallback, useState, memo } from 'react';
 
 import type { HeatmapMenuProps } from '@src/features/heatmap/HeatmapMenuContent';
 import type { FC } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
-import { FlexColumn } from '@src/component/atoms/Flex';
+import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
-import { createRouteCoachTask, fetchRouteCoachSummary } from '@src/features/heatmap/routecoach/api';
+import { TextField } from '@src/component/molecules/TextField';
+import { EventClusterViewer } from '@src/component/organisms/EventClusterViewer';
+import { generateImprovementRoutes, getImprovementRoutesTaskStatus } from '@src/features/heatmap/routecoach/api';
+import { createClient } from '@src/modeles/qeury';
 import { fontSizes } from '@src/styles/style';
-import { toISOAboutStringWithTimezone } from '@src/utils/locale';
 
-const POLL_MS = 1000;
+const POLL_MS = 2000;
 
-/* ===== Styles ===== */
-const Hint = styled.div`
+/* ===== Styled Components (following BEM pattern) ===== */
+interface HintProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+const HintComponent: FC<HintProps> = ({ children, className }) => <div className={className}>{children}</div>;
+
+const Hint = styled(HintComponent)`
   font-size: 12px;
   color: #666;
 `;
 
-const EmptyBox = styled.div`
+interface EmptyBoxProps {
+  children: React.ReactNode;
+  className?: string;
+  onClick?: () => void;
+}
+
+const EmptyBoxComponent: FC<EmptyBoxProps> = ({ children, className, onClick }) => (
+  <div className={className} onClick={onClick} role='presentation'>
+    {children}
+  </div>
+);
+
+const EmptyBox = styled(EmptyBoxComponent)`
   padding: 10px 12px;
   font-size: 12px;
   color: #666;
   cursor: pointer;
   border: 1px dashed #bbb;
   border-radius: 8px;
-
-  &[data-disabled='true'] > u {
-    cursor: not-allowed;
-  }
 `;
 
-const ErrorBox = styled.div`
+interface ErrorBoxProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+const ErrorBoxComponent: FC<ErrorBoxProps> = ({ children, className }) => <div className={className}>{children}</div>;
+
+const ErrorBox = styled(ErrorBoxComponent)`
   padding: 10px 12px;
   font-size: 12px;
   color: #b00020;
@@ -42,42 +66,33 @@ const ErrorBox = styled.div`
   border-radius: 8px;
 `;
 
-const MetaGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, auto);
-  gap: 12px;
-  font-size: 12px;
-  color: #555;
-`;
+interface ScrollableClusterSectionProps {
+  children: React.ReactNode;
+  className?: string;
+}
 
-const RouteList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-height: 400px;
+const ScrollableClusterSectionComponent: FC<ScrollableClusterSectionProps> = ({ children, className }) => <div className={className}>{children}</div>;
+
+const ScrollableClusterSection = styled(ScrollableClusterSectionComponent)`
+  max-height: calc(100vh - 450px);
+  padding-right: 8px;
   overflow-y: auto;
-`;
 
-const RouteCard = styled.div`
-  padding: 8px 12px;
-  font-size: 12px;
-  background: #f5f5f5;
-  border-left: 3px solid #0a7a31;
-  border-radius: 6px;
-
-  & > div {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 4px;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
+  &::-webkit-scrollbar {
+    width: 6px;
   }
 
-  & span {
-    font-weight: 600;
-    color: #333;
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+
+    &:hover {
+      background: #999;
+    }
   }
 `;
 
@@ -87,129 +102,188 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
   const sessionId = service.sessionId;
   const enabled = useMemo(() => Number.isFinite(projectId) && sessionId != null, [projectId, sessionId]);
 
-  // ルートサマリーを取得（実行中の場合はポーリング）
-  const {
-    data: summary,
-    isFetching,
-    isLoading,
-    isError,
-    error,
-  } = useQuery({
-    queryKey: ['routeCoachSummary', projectId, sessionId],
+  // タスクID を管理する状態
+  const [taskId, setTaskId] = useState<number | null>(null);
+
+  // プレイヤーID入力
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string>('');
+
+  // 強制再生成フラグ
+  const [forceRegenerate, setForceRegenerate] = useState<boolean>(false);
+
+  // セッションのプレイヤー一覧を取得
+  const { data: players, isLoading: isLoadingPlayers } = useQuery<number[]>({
+    queryKey: ['sessionPlayers', projectId, sessionId],
     enabled,
-    queryFn: () => {
-      return fetchRouteCoachSummary(projectId!, sessionId!);
+    queryFn: async () => {
+      if (!projectId || !sessionId) return [];
+      const { data, error } = await createClient().GET('/api/v0/projects/{project_id}/play_session/{session_id}/player_position_log/{session_id}/players', {
+        params: {
+          path: {
+            project_id: projectId,
+            session_id: sessionId,
+          },
+        },
+      });
+      if (error || !data) return [];
+      return data;
     },
-    // 404の場合は無限再試行しない
-    retry: 1,
     refetchOnWindowFocus: false,
   });
 
-  // タスク実行（queue=true で投入）→ 直後に再取得
-  const { mutate: startAnalysis, isPending: isAnalyzing } = useMutation({
-    mutationFn: () => createRouteCoachTask(projectId!, sessionId!),
-    onSuccess: async () => {
-      // タスク実行完了後、すぐに再取得開始
-      await qc.invalidateQueries({ queryKey: ['routeCoachSummary', projectId, sessionId] });
-    },
+  // タスク状態を定期的に取得（taskIdが存在する場合）
+  const {
+    data: taskStatus,
+    isFetching: isTaskFetching,
+    refetch: refetchTaskStatus,
+  } = useQuery({
+    queryKey: ['improvementRoutesTask', taskId],
+    enabled: !!taskId,
+    queryFn: () => getImprovementRoutesTaskStatus(taskId!),
+    refetchOnWindowFocus: false,
   });
 
-  // ポーリング設定：タスク未実行（null）の場合は再取得しない
+  // ポーリング管理：status が 'completed' または 'failed' 以外の場合のみポーリング継続
   useEffect(() => {
-    if (summary === null && !isAnalyzing) {
-      // タスク未実行状態 - ポーリング不要
+    if (!taskStatus || taskStatus.status === 'completed' || taskStatus.status === 'failed') {
       return;
     }
 
-    // タスク実行中 or データ取得中の場合はポーリング開始
     const interval = setInterval(() => {
-      if (!isAnalyzing) {
-        qc.invalidateQueries({ queryKey: ['routeCoachSummary', projectId, sessionId] });
-      }
+      refetchTaskStatus();
     }, POLL_MS);
 
     return () => clearInterval(interval);
-  }, [summary, isAnalyzing, projectId, sessionId, qc]);
+  }, [taskStatus, refetchTaskStatus]);
 
-  // 離脱時にポーリング停止
+  // 改善ルート生成を開始
+  const { mutate: startGeneration, isPending: isGenerating } = useMutation({
+    mutationFn: () => generateImprovementRoutes(projectId!, undefined, forceRegenerate),
+    onSuccess: (result) => {
+      if (result) {
+        // eslint-disable-next-line
+        console.log('Improvement routes generation started, taskId:', result.taskId, 'force:', forceRegenerate);
+        setTaskId(result.taskId ?? null);
+        setForceRegenerate(false);
+      }
+    },
+    onError: (error) => {
+      // eslint-disable-next-line
+      console.error('Failed to start generation:', error);
+      setForceRegenerate(false);
+    },
+  });
+
+  const busy = isGenerating || isTaskFetching;
+  const disabled = !enabled || busy;
+
+  // タスク実行中のメッセージ
+  const taskStatusMessage = useMemo(() => {
+    if (!taskStatus) return null;
+    switch (taskStatus.status) {
+      case 'pending':
+      case 'processing':
+        return '改善ルート生成中…';
+      case 'completed':
+        return taskStatus.result
+          ? `改善ルート生成完了 (クラスター: ${taskStatus.result.clusters_generated}, 改善案: ${taskStatus.result.improvements_generated})`
+          : '改善ルート生成完了';
+      case 'failed':
+        return `生成失敗: ${taskStatus.error_message || 'Unknown error'}`;
+      default:
+        return null;
+    }
+  }, [taskStatus]);
+
+  const onStartGeneration = useCallback(() => {
+    if (disabled) return;
+    startGeneration();
+  }, [disabled, startGeneration]);
+
+  const onForceRegenerate = useCallback(() => {
+    if (disabled) return;
+    setForceRegenerate(true);
+    startGeneration();
+  }, [disabled, startGeneration]);
+
+  // セッション切り替え時にtaskIdをリセット
+  useEffect(() => {
+    setTaskId(null);
+    setSelectedPlayerId('');
+    setForceRegenerate(false);
+  }, [projectId, sessionId]);
+
+  // クリーンアップ
   useEffect(() => {
     return () => {
-      qc.cancelQueries({ queryKey: ['routeCoachSummary'] });
+      qc.cancelQueries({ queryKey: ['improvementRoutesTask'] });
+      qc.cancelQueries({ queryKey: ['sessionPlayers'] });
     };
   }, [qc]);
 
-  const busy = isAnalyzing || isFetching;
-  const disabled = !enabled || busy;
-
-  const onStartAnalysis = useCallback(() => {
-    if (disabled) return;
-    startAnalysis();
-  }, [disabled, startAnalysis]);
+  // プレイヤーを選択する
+  const handlePlayerSelect = useCallback((playerId: string) => {
+    setSelectedPlayerId(playerId);
+  }, []);
 
   return (
-    <FlexColumn gap={12}>
-      <Text text={'Route Coach'} fontSize={fontSizes.large3} />
-      <Button onClick={onStartAnalysis} disabled={disabled} title='セッションのルート分析を開始' scheme={'primary'} fontSize={'small'}>
-        {busy ? '分析中…' : '分析開始'}
-      </Button>
+    <FlexColumn gap={12} className={className} wrap={'nowrap'}>
+      <Text text={'Route Coach v2'} fontSize={fontSizes.large3} />
 
-      {isLoading && <Hint>読み込み中…</Hint>}
-      {isError && <ErrorBox>読み込みに失敗しました：{String(error?.message ?? '')}</ErrorBox>}
+      {/* 改善ルート生成ボタン */}
+      <FlexRow gap={8}>
+        <Button onClick={onStartGeneration} disabled={disabled} title='プロジェクトの改善ルートを生成' scheme={'primary'} fontSize={'small'}>
+          {busy ? '生成中…' : '改善ルート生成'}
+        </Button>
+        {taskStatus?.status === 'completed' && (
+          <Button onClick={onForceRegenerate} disabled={disabled} title='既存のタスクを削除して強制的に再生成' scheme={'secondary'} fontSize={'small'}>
+            再生成
+          </Button>
+        )}
+      </FlexRow>
 
-      {/* まだ分析がない（404→null） */}
-      {!isLoading && !summary && (
-        <EmptyBox onClick={onStartAnalysis} data-disabled={disabled}>
-          まだ分析がありません。<u>分析開始</u>ボタンで実行できます。
+      {/* タスク実行中のステータス */}
+      {taskStatusMessage ? <Hint>{taskStatusMessage}</Hint> : null}
+
+      {/* タスク失敗時のエラーメッセージ */}
+      {taskStatus?.status === 'failed' ? <ErrorBox>生成に失敗しました：{taskStatus.error_message || '不明なエラー'}</ErrorBox> : null}
+
+      {/* まだ生成がない */}
+      {!taskStatus ? (
+        <EmptyBox onClick={onStartGeneration}>
+          <u>改善ルート生成</u>ボタンでプロジェクトの改善ルートを生成できます。
         </EmptyBox>
+      ) : null}
+
+      {/* プレイヤー選択UI */}
+      {isLoadingPlayers ? (
+        <Hint>プレイヤー一覧を読み込み中...</Hint>
+      ) : players && players.length > 0 ? (
+        <FlexColumn gap={8}>
+          <Text text={'プレイヤーを選択'} fontSize={fontSizes.medium} />
+          <FlexRow gap={8} align={'center'}>
+            <TextField value={selectedPlayerId} onChange={handlePlayerSelect} placeholder={'プレイヤーIDを入力'} fontSize={fontSizes.small} />
+            <Text text={'利用可能なプレイヤー: ' + players.join(', ')} fontSize={fontSizes.small} />
+          </FlexRow>
+        </FlexColumn>
+      ) : (
+        <Hint>このセッションにはプレイヤーがいません。</Hint>
       )}
 
-      {/* 分析結果表示 */}
-      {summary && Array.isArray(summary) && summary.length > 0 && (
-        <>
-          <MetaGrid>
-            <span>検出ルート数: {summary.length}</span>
-            <span>更新: {toISOAboutStringWithTimezone(new Date())}</span>
-          </MetaGrid>
-
-          <div>
-            <Text text={'ルート一覧'} fontSize={fontSizes.small} />
-            <RouteList className={`${className}__routeList`}>
-              {summary.slice(0, 10).map((route, idx) => (
-                <RouteCard key={idx}>
-                  <div>
-                    <span>Route {idx + 1}</span>
-                    <span>通過: {route.traversal_count}</span>
-                  </div>
-                  <div>
-                    <span>
-                      From: ({Number(route.from.x).toFixed(0)}, {Number(route.from.z ?? 0).toFixed(0)})
-                    </span>
-                  </div>
-                  <div>
-                    <span>
-                      To: ({Number(route.to.x).toFixed(0)}, {Number(route.to.z ?? 0).toFixed(0)})
-                    </span>
-                  </div>
-                  <div>
-                    <span>死亡率: {(Number(route.death_rate) * 100).toFixed(1)}%</span>
-                    <span>成功率: {(Number(route.success_rate) * 100).toFixed(1)}%</span>
-                  </div>
-                </RouteCard>
-              ))}
-            </RouteList>
-          </div>
-
-          {summary.length > 10 && <Hint>最初の10ルートのみを表示しています（全{summary.length}ルート）</Hint>}
-        </>
-      )}
-
-      {summary && Array.isArray(summary) && summary.length === 0 && <Hint>このセッションではルートが検出されませんでした。</Hint>}
+      {/* イベントクラスター表示 */}
+      {selectedPlayerId ? (
+        <ScrollableClusterSection>
+          <FlexColumn gap={16}>
+            <Text text={`プレイヤー ${selectedPlayerId} の改善ルート`} fontSize={fontSizes.large1} />
+            <EventClusterViewer projectId={projectId!} playerId={selectedPlayerId} />
+          </FlexColumn>
+        </ScrollableClusterSection>
+      ) : null}
     </FlexColumn>
   );
 };
 
-export const RouteCoachMenuContent = styled(Component)`
-  &__routeList {
-    /* RouteListのスタイルはRouteListコンポーネントで定義済み */
-  }
-`;
+export const RouteCoachMenuContent = memo(
+  Component,
+  (prev, next) => prev.service.sessionId === next.service.sessionId && prev.service.projectId === next.service.projectId,
+);

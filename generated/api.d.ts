@@ -565,7 +565,11 @@ export interface paths {
     /** Get session general log */
     get: operations['PlaySessionController_getGeneralLog'];
     put?: never;
-    /** create general log */
+    /**
+     * create general log
+     * @deprecated
+     * @description DEPRECATED: Use batch upload endpoint instead (POST /projects/:project_id/sessions/:session_id/general-events/upload). This endpoint is for real-time logging and will be removed in a future version.
+     */
     post: operations['PlaySessionController_createGeneralLog'];
     delete?: never;
     options?: never;
@@ -600,7 +604,11 @@ export interface paths {
     /** Get general log */
     get: operations['PlaySessionController_getPositionLog'];
     put?: never;
-    /** create position log */
+    /**
+     * create position log
+     * @deprecated
+     * @description DEPRECATED: Use batch upload endpoint instead (POST /projects/:project_id/sessions/:session_id/general-events/upload). This endpoint is for real-time logging and will be removed in a future version.
+     */
     post: operations['PlaySessionController_createPositionLog'];
     delete?: never;
     options?: never;
@@ -1055,7 +1063,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/api/v0/route-coach/projects/{project_id}/tasks': {
+  '/api/v0/game/projects/{project_id}/sessions/{session_id}/general-events/upload': {
     parameters: {
       query?: never;
       header?: never;
@@ -1064,15 +1072,38 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** プロジェクト全体のルート分析タスクを作成 */
-    post: operations['RouteCoachController_createProjectTask'];
+    /** Upload batch general event logs */
+    post: operations['GameController_uploadGeneralEventLogs'];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  '/api/v0/route-coach/projects/{project_id}/sessions/{session_id}/tasks': {
+  '/api/v0/route-coach/projects/{project_id}/event-clusters': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * プロジェクトのイベントクラスタと改善案を取得
+     * @description
+     *     指定したプレイヤーのイベント（死亡/成功）をクラスタリングし、
+     *     各クラスタに対するルートパターンと改善案を返します。
+     *
+     */
+    get: operations['RouteCoachController_getEventClusters'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/route-coach/improvement-routes/{improvement_route_id}/feedback': {
     parameters: {
       query?: never;
       header?: never;
@@ -1081,108 +1112,62 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** セッション単位のルート分析タスクを作成 */
-    post: operations['RouteCoachController_createSessionTask'];
+    /**
+     * 改善案のフィードバックを送信
+     * @description
+     *     改善案に対して3段階評価（Bad/Neutral/Good）とコメントを送信します。
+     *     同じプレイヤーから同じ改善案への複数フィードバックは上書きされます。
+     *
+     */
+    post: operations['RouteCoachController_submitFeedback'];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  '/api/v0/route-coach/projects/{project_id}/summary': {
+  '/api/v0/route-coach/projects/{project_id}/generate-improvement-routes': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    /** プロジェクトのルート概要を取得 */
-    get: operations['RouteCoachController_getSummary'];
+    get?: never;
     put?: never;
-    post?: never;
+    /**
+     * プロジェクトの改善ルート生成ジョブを投入
+     * @description
+     *     プロジェクト全体の改善ルートを生成するための非同期ジョブをキューに投入します。
+     *     このジョブは死亡イベントをクラスタリングし、各クラスタに対する
+     *     改善提案（Strategy 1: 分岐点検出、Strategy 2: 安全通過、Strategy 3: 時間短縮）を生成します。
+     *
+     *     同じプロジェクト・マップの組み合わせで既に完了したタスクがある場合は、
+     *     新規ジョブを投入せずに既存タスクを返します。
+     *
+     */
+    post: operations['RouteCoachController_generateImprovementRoutes'];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  '/api/v0/route-coach/projects/{project_id}/players/{player_id}/suggestions': {
+  '/api/v0/route-coach/improvement-routes-jobs/{job_id}': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    /** プレイヤーへの分岐提案を取得 */
-    get: operations['RouteCoachController_getSuggestions'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v0/route-coach/projects/{project_id}/players/{player_id}/habits': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** プレイヤーの習慣ルートを取得 */
-    get: operations['RouteCoachController_getHabits'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v0/route-coach/projects/{project_id}/sessions/{session_id}/summary': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** セッションのルート概要を取得 */
-    get: operations['RouteCoachController_getSessionSummary'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v0/route-coach/projects/{project_id}/sessions/{session_id}/players/{player_id}/suggestions': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** セッションのプレイヤー分岐提案を取得 */
-    get: operations['RouteCoachController_getSessionSuggestions'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v0/route-coach/projects/{project_id}/sessions/{session_id}/players/{player_id}/habits': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** セッションのプレイヤー習慣ルートを取得 */
-    get: operations['RouteCoachController_getSessionHabits'];
+    /**
+     * 改善ルート生成タスクの状態を取得
+     * @description
+     *     改善ルート生成タスクの処理状況を確認します。
+     *     完了したタスクは永続化されているため、いつでも結果を取得できます。
+     *
+     */
+    get: operations['RouteCoachController_getImprovementRoutesJobStatus'];
     put?: never;
     post?: never;
     delete?: never;
@@ -1391,6 +1376,8 @@ export interface components {
     CreateGeneralLogDto: {
       text_data: string | null;
       position_data: components['schemas']['Position'] | null;
+      /** @description Extended metadata for RouteCoach extended events */
+      metadata: Record<string, never> | null;
       offset_timestamp: number;
       player: number;
     };
@@ -1615,39 +1602,154 @@ export interface components {
        */
       projectIds: number[];
     };
-    RouteEdgeDto: {
+    EventRawCoordinateDto: {
+      /** @description X coordinate */
+      x: number;
+      /** @description Y coordinate */
+      y: number;
+      /** @description Z coordinate */
+      z: number;
+      /** @description Event timestamp (milliseconds) */
+      event_timestamp: number;
+      /** @description Session ID */
+      session_id: string;
+      /** @description Player ID */
+      player_id: string;
+    };
+    RoutePatternDto: {
+      /** @description Route pattern ID */
       id: number;
-      from: Record<string, never>;
-      to: Record<string, never>;
-      traversal_count: number;
-      avg_duration_ms: number;
-      death_count: number;
-      death_rate: number;
+      /** @description Trajectory points leading to the cluster */
+      trajectory_points: {
+        x?: number;
+        y?: number;
+        z?: number;
+      }[];
+      /** @description Number of times this route was taken */
+      occurrence_count: number;
+      /** @description Number of times this route led to success */
       success_count: number;
+      /** @description Average duration in milliseconds */
+      avg_duration_ms?: number;
+      /** @description Success rate (0-1) */
       success_rate: number;
-      avg_time_to_success_ms: number;
+      /** @description Whether this route passes near the cluster without triggering the event */
+      passes_near_cluster: boolean;
+      /** @description Number of times this route safely passed near the cluster */
+      cluster_near_count: number;
     };
-    RouteSuggestionDto: {
-      /** @description 分岐点の座標 */
-      junction: Record<string, never>;
-      /** @description プレイヤーが現在選んでいるルート */
-      current_choice: Record<string, never>;
-      /** @description 代替ルートの候補 */
-      alternatives: string[];
+    ImprovementRouteDto: {
+      /** @description Improvement route ID */
+      id: number;
+      /**
+       * @description Type of improvement strategy
+       * @enum {string}
+       */
+      strategy_type: 'divergence' | 'safety_passage' | 'faster';
+      /** @description Recommended trajectory points */
+      trajectory_points: {
+        x?: number;
+        y?: number;
+        z?: number;
+      }[];
+      /** @description Success rate (0-1) */
+      success_rate?: number;
+      /** @description Number of times this route succeeded */
+      success_count?: number;
+      /** @description Average duration in milliseconds */
+      avg_duration_ms?: number;
+      /** @description Time saved compared to death routes (milliseconds) */
+      time_saved_ms?: number;
+      /** @description Analysis for divergence strategy */
+      divergence_analysis?: {
+        [key: string]: unknown;
+      };
+      /** @description Safety score (0-1) for safety_passage strategy */
+      safety_score?: number;
+      /** @description Evidence supporting the improvement */
+      evidence?: {
+        [key: string]: unknown;
+      };
+      /** @description Reasoning behind the improvement */
+      reasoning?: string;
+      /** @description Total feedback count */
+      feedback_total_count: number;
+      /** @description Average feedback rating (1-3) */
+      feedback_avg_rating: number;
     };
-    RouteHabitDto: {
-      /** @description 頻度ランク（1から） */
-      rank: number;
-      /** @description ルートの経路（座標列） */
-      path: string[];
-      /** @description 通過回数 */
-      frequency: number;
-      /** @description 死亡率 */
-      death_rate: number;
-      /** @description 成功率 */
-      success_rate: number;
-      /** @description クリア平均時間（ミリ秒） */
-      avg_time_to_success_ms: number;
+    EventClusterDetailDto: {
+      /** @description Cluster ID */
+      id: number;
+      /** @description Center X coordinate of the cluster */
+      cluster_center_x: number;
+      /** @description Center Y coordinate of the cluster */
+      cluster_center_y: number;
+      /** @description Center Z coordinate of the cluster */
+      cluster_center_z: number;
+      /** @description Radius of the cluster (meters) */
+      cluster_radius: number;
+      /** @description Total raw event count in this cluster */
+      raw_event_count: number;
+      /**
+       * @description Type of event this cluster represents
+       * @enum {string}
+       */
+      event_type: 'death' | 'success';
+      /** @description Map name */
+      map_name?: string;
+      /** @description Raw event coordinates in this cluster */
+      raw_coordinates: components['schemas']['EventRawCoordinateDto'][];
+      /** @description Route patterns leading to this cluster */
+      routes: components['schemas']['RoutePatternDto'][];
+      /** @description Improvement route recommendations */
+      improvements: components['schemas']['ImprovementRouteDto'][];
+      /**
+       * Format: date-time
+       * @description Cluster creation timestamp
+       */
+      created_at: string;
+      /**
+       * Format: date-time
+       * @description Cluster last update timestamp
+       */
+      updated_at: string;
+    };
+    SubmitImprovementRouteFeedbackRequestDto: {
+      /**
+       * @description Rating: 1=Bad (👎), 2=Neutral (😐), 3=Good (👍)
+       * @enum {number}
+       */
+      rating: 1 | 2 | 3;
+      /** @description Optional comment about the improvement */
+      comment?: string;
+    };
+    ImprovementRouteFeedbackRecordDto: {
+      /** @description Feedback ID */
+      id: number;
+      /** @description Player ID who gave the feedback */
+      player_id: string;
+      /**
+       * @description Rating: 1=Bad, 2=Neutral, 3=Good
+       * @enum {number}
+       */
+      rating: 1 | 2 | 3;
+      /** @description Comment from the player */
+      comment?: string;
+      /**
+       * Format: date-time
+       * @description Feedback submission timestamp
+       */
+      created_at: string;
+    };
+    SubmitImprovementRouteFeedbackResponseDto: {
+      /** @description Improvement route ID */
+      improvement_route_id: number;
+      /** @description Total feedback count for this improvement route */
+      feedback_total_count: number;
+      /** @description Average feedback rating (1-3) */
+      feedback_avg_rating: number;
+      /** @description All feedback records for this improvement route */
+      feedbacks: components['schemas']['ImprovementRouteFeedbackRecordDto'][];
     };
     DefaultErrorResponse: {
       /** @example 400 */
@@ -4312,23 +4414,39 @@ export interface operations {
       };
     };
   };
-  RouteCoachController_createProjectTask: {
+  GameController_uploadGeneralEventLogs: {
     parameters: {
       query?: never;
-      header?: never;
+      header: {
+        /** @description ゲームクライアント用APIキー */
+        'X-API-Key': string;
+      };
       path: {
         project_id: number;
+        session_id: number;
       };
       cookie?: never;
     };
-    requestBody?: never;
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          /**
+           * Format: binary
+           * @description Binary file in LSEV V1 format
+           */
+          file?: string;
+        };
+      };
+    };
     responses: {
-      /** @description タスク作成成功 */
+      /** @description Created */
       201: {
         headers: {
           [name: string]: unknown;
         };
-        content?: never;
+        content: {
+          'application/json': components['schemas']['DefaultSuccessResponse'];
+        };
       };
       /** @description Bad Request */
       400: {
@@ -4341,24 +4459,69 @@ export interface operations {
       };
     };
   };
-  RouteCoachController_createSessionTask: {
+  RouteCoachController_getEventClusters: {
     parameters: {
-      query?: never;
+      query: {
+        /** @description Player ID to filter events */
+        player_id: string;
+        /** @description Map name to filter by */
+        map_name?: string;
+        /** @description Event type to filter by */
+        event_type?: 'death' | 'success';
+        /** @description Data freshness window in days (default: 30) */
+        freshness_days?: number;
+      };
       header?: never;
       path: {
         project_id: number;
-        session_id: number;
       };
       cookie?: never;
     };
     requestBody?: never;
     responses: {
-      /** @description タスク作成成功 */
+      /** @description イベントクラスタと改善案リスト */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EventClusterDetailDto'][];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  RouteCoachController_submitFeedback: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        improvement_route_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['SubmitImprovementRouteFeedbackRequestDto'];
+      };
+    };
+    responses: {
+      /** @description フィードバック送信成功 */
       201: {
         headers: {
           [name: string]: unknown;
         };
-        content?: never;
+        content: {
+          'application/json': components['schemas']['SubmitImprovementRouteFeedbackResponseDto'];
+        };
       };
       /** @description Bad Request */
       400: {
@@ -4371,11 +4534,11 @@ export interface operations {
       };
     };
   };
-  RouteCoachController_getSummary: {
+  RouteCoachController_generateImprovementRoutes: {
     parameters: {
       query?: {
-        /** @description 指定時は個人統計、未指定時はグローバル統計 */
-        playerId?: number;
+        /** @description マップ名でフィルタ（指定時はそのマップのみ処理） */
+        map_name?: string;
       };
       header?: never;
       path: {
@@ -4385,13 +4548,17 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description ルート概要 */
-      200: {
+      /** @description ジョブ投入成功またはキャッシュされたタスク */
+      201: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['RouteEdgeDto'][];
+          'application/json': {
+            taskId?: number;
+            status?: string;
+            message?: string;
+          };
         };
       };
       /** @description Bad Request */
@@ -4405,161 +4572,35 @@ export interface operations {
       };
     };
   };
-  RouteCoachController_getSuggestions: {
+  RouteCoachController_getImprovementRoutesJobStatus: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        project_id: number;
-        player_id: number;
+        /** @description タスクID */
+        job_id: number;
       };
       cookie?: never;
     };
     requestBody?: never;
     responses: {
-      /** @description 分岐提案リスト */
+      /** @description タスク状態 */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['RouteSuggestionDto'][];
-        };
-      };
-      /** @description Bad Request */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['DefaultErrorResponse'];
-        };
-      };
-    };
-  };
-  RouteCoachController_getHabits: {
-    parameters: {
-      query?: {
-        /** @description 上位K個を取得（デフォルト: 5） */
-        topK?: number;
-      };
-      header?: never;
-      path: {
-        project_id: number;
-        player_id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description 習慣ルートリスト */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['RouteHabitDto'][];
-        };
-      };
-      /** @description Bad Request */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['DefaultErrorResponse'];
-        };
-      };
-    };
-  };
-  RouteCoachController_getSessionSummary: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        project_id: number;
-        session_id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description セッションのルート概要 */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['RouteEdgeDto'][];
-        };
-      };
-      /** @description Bad Request */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['DefaultErrorResponse'];
-        };
-      };
-    };
-  };
-  RouteCoachController_getSessionSuggestions: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        project_id: number;
-        session_id: number;
-        player_id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description セッションの分岐提案リスト */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['RouteSuggestionDto'][];
-        };
-      };
-      /** @description Bad Request */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['DefaultErrorResponse'];
-        };
-      };
-    };
-  };
-  RouteCoachController_getSessionHabits: {
-    parameters: {
-      query?: {
-        /** @description 上位K個を取得（デフォルト: 5） */
-        topK?: number;
-      };
-      header?: never;
-      path: {
-        project_id: number;
-        session_id: number;
-        player_id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description セッションの習慣ルートリスト */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['RouteHabitDto'][];
+          'application/json': {
+            id?: number;
+            /** @enum {string} */
+            status?: 'pending' | 'processing' | 'completed' | 'failed';
+            result?: Record<string, never> | null;
+            error_message?: string | null;
+            /** Format: date-time */
+            created_at?: string;
+            /** Format: date-time */
+            updated_at?: string;
+          };
         };
       };
       /** @description Bad Request */
