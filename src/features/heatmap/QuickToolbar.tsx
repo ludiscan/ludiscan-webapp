@@ -8,7 +8,7 @@ import { Button } from '@src/component/atoms/Button';
 import { InlineFlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { Selector } from '@src/component/molecules/Selector';
-import { createRouteCoachTask } from '@src/features/heatmap/routecoach/api';
+import { generateImprovementRoutes } from '@src/features/heatmap/routecoach/api';
 import { createClient, DefaultStaleTime } from '@src/modeles/qeury';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
@@ -31,6 +31,10 @@ function Toolbar({ className, service }: Props) {
           path: {
             project_id: service.projectId,
           },
+          query: {
+            limit: 200,
+            offset: 0,
+          },
         },
       });
       if (error) return;
@@ -45,15 +49,16 @@ function Toolbar({ className, service }: Props) {
     return sessions?.map((session) => String(session.sessionId)) || [];
   }, [sessions]);
 
-  // RouteCoachタスク実行
+  // RouteCoach改善ルート生成
   const { mutate: startRouteCoach, isPending: isRouteCoachPending } = useMutation({
     mutationFn: async () => {
-      if (!service.projectId || !service.sessionId) throw new Error('Project and session are required');
-      return createRouteCoachTask(service.projectId, service.sessionId);
+      if (!service.projectId) throw new Error('Project is required');
+      return generateImprovementRoutes(service.projectId);
     },
     onSuccess: async () => {
-      // タスク実行後、RouteCoachメニューのキャッシュを無効化
-      await qc.invalidateQueries({ queryKey: ['routeCoachSummary'] });
+      // 生成後、RouteCoachメニューのキャッシュを無効化
+      await qc.invalidateQueries({ queryKey: ['eventClusters'] });
+      await qc.invalidateQueries({ queryKey: ['improvementRoutesJob'] });
       // メニューを自動開く
       heatMapEventBus.emit('click-menu-icon', { name: 'routecoach' });
     },
@@ -126,7 +131,15 @@ function Toolbar({ className, service }: Props) {
         1:1
       </Button>
       <InlineFlexRow align={'center'} wrap={'nowrap'}>
-        <Selector placement={'top'} align={'right'} label={'session'} options={sessionIds} value={selectSessionId} onChange={setSelectSessionId} />
+        <Selector
+          placement={'top'}
+          align={'right'}
+          label={'session'}
+          options={sessionIds}
+          value={selectSessionId}
+          onChange={setSelectSessionId}
+          maxHeight={250}
+        />
         <Button
           fontSize={'small'}
           onClick={() => service.setSessionId(Number(selectSessionId) || null)}
@@ -139,10 +152,10 @@ function Toolbar({ className, service }: Props) {
           fontSize={'small'}
           onClick={() => startRouteCoach()}
           scheme={'primary'}
-          disabled={!service.sessionId || isRouteCoachPending}
-          title='セッションのルート分析を実行'
+          disabled={!service.projectId || isRouteCoachPending}
+          title='プロジェクトの改善ルートを生成'
         >
-          <Text text={isRouteCoachPending ? '分析中…' : 'Route Analysis'} />
+          <Text text={isRouteCoachPending ? '生成中…' : 'Generate Routes'} />
         </Button>
       </InlineFlexRow>
     </div>

@@ -18,11 +18,36 @@ export type SelectorProps = Omit<LabeledButtonProps, 'onClick' | 'fontSize' | 's
   placement?: 'top' | 'bottom';
   align?: 'left' | 'right';
   scheme?: ButtonProps['scheme'];
+  maxHeight?: number;
 };
+
+// スクロール可能なContentColumnをラップ
+const ScrollableContentColumn = styled(Menu.ContentColumn)`
+  max-height: ${(props: { maxHeight?: number }) => props.maxHeight || 300}px;
+  overflow: hidden auto;
+
+  /* スクロールバーのスタイリング */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: ${({ theme }) => theme.colors.border.main};
+    border-radius: 3px;
+
+    &:hover {
+      background: ${({ theme }) => theme.colors.border.light};
+    }
+  }
+`;
 
 const Component: FC<SelectorProps> = (props) => {
   const { theme } = useSharedTheme();
-  const { className, options, value, onChange, fontSize = 'medium', scheme = 'none', border = true, radius = 'small' } = props;
+  const { className, options, value, onChange, fontSize = 'medium', scheme = 'none', border = true, radius = 'small', maxHeight = 300 } = props;
   const [valueRef, setValueRef] = useState<string>(value || options[0] || '');
   return (
     <Menu
@@ -38,7 +63,7 @@ const Component: FC<SelectorProps> = (props) => {
         </div>
       }
     >
-      <Menu.ContentColumn padding={'2px'} align={props.align} placement={props.placement}>
+      <ScrollableContentColumn maxHeight={maxHeight} padding={'2px'} align={props.align} placement={props.placement}>
         {options.map((option, index) => {
           return (
             <Menu.ContentButton
@@ -55,7 +80,7 @@ const Component: FC<SelectorProps> = (props) => {
             </Menu.ContentButton>
           );
         })}
-      </Menu.ContentColumn>
+      </ScrollableContentColumn>
     </Menu>
   );
 };

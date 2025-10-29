@@ -1,5 +1,17 @@
 import type { Menus } from '@src/hooks/useHeatmapSideBarMenus';
 
+export interface RouteEdgeData {
+  id: number;
+  from: { x?: number; z?: number };
+  to: { x?: number; z?: number };
+  traversal_count: number;
+  avg_duration_ms: number | null;
+  death_count: number;
+  death_rate: number;
+  success_rate: number;
+  avg_time_to_success_ms: number | null;
+}
+
 export interface HeatMapEventMap {
   'click-menu-icon': { name: Menus };
   'add-waypoint': { waypoint: { x: number; y: number; z: number } };
@@ -9,6 +21,7 @@ export interface HeatMapEventMap {
   'camera:set-zoom-percent': { percent: number };
   'camera:fit': object;
   'focus:ping': { position: { x: number; y: number; z: number } };
+  'route-selected': { route: RouteEdgeData | null };
 }
 
 class EventBus<T> extends EventTarget {

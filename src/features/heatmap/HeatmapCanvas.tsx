@@ -19,6 +19,7 @@ import { HeatmapFillOverlay } from '@src/features/heatmap/HeatmapFillOverlay';
 import { HotspotCircles } from '@src/features/heatmap/HotspotCircles';
 import { LocalModelLoader, StreamModelLoader } from '@src/features/heatmap/ModelLoader';
 import { PlayerTimelinePoints } from '@src/features/heatmap/PlayerTimelinePoints';
+import { RouteVisualization } from '@src/features/heatmap/RouteVisualization';
 import { WaypointMarker } from '@src/features/heatmap/WaypointMarker';
 import { FocusPingLayer } from '@src/features/heatmap/selection/FocusPingLayer';
 import { useEventLogSelect } from '@src/hooks/useEventLog';
@@ -475,6 +476,7 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
         position0={new Vector3(1, 1, 3000)}
       />
       <FocusPingLayer ttlMs={1800} baseRadius={60} />
+      <RouteVisualization dimensionality={dimensionality} />
     </>
   );
 };
