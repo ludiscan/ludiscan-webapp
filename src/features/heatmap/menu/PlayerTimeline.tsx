@@ -25,7 +25,8 @@ import { TextArea } from '@src/component/molecules/TextArea';
 import { useGetApi } from '@src/hooks/useGetApi';
 import { usePlayerTimelinePatch, usePlayerTimelinePick } from '@src/hooks/usePlayerTimeline';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { createClient, DefaultStaleTime } from '@src/modeles/qeury';
+import { useApiClient } from '@src/modeles/ApiClientContext';
+import { DefaultStaleTime } from '@src/modeles/qeury';
 import { fontSizes } from '@src/styles/style';
 import { toISOAboutStringWithTimezone } from '@src/utils/locale';
 import { compileHVQL, parseHVQL } from '@src/utils/vql';
@@ -47,14 +48,15 @@ function toggleButtonStyle(theme: Theme): CSSProperties {
 const DetailBlockInternal: FC<{ className?: string; details: PlayerTimelineDetail[]; service: HeatmapDataService }> = ({ className, details }) => {
   const setData = usePlayerTimelinePatch();
   const { theme } = useSharedTheme();
+  const apiClient = useApiClient();
   // const player = detail.player;
   const project_id = details[0].project_id;
   const session_id = details[0].session_id;
   const { data: session } = useQuery({
-    queryKey: ['session', session_id, project_id],
+    queryKey: ['session', session_id, project_id, apiClient],
     queryFn: async () => {
       if (!session_id || !project_id) return null;
-      return createClient().GET('/api/v0/projects/{project_id}/play_session/{session_id}', {
+      return apiClient.GET('/api/v0/projects/{project_id}/play_session/{session_id}', {
         params: {
           path: {
             project_id,
@@ -66,18 +68,6 @@ const DetailBlockInternal: FC<{ className?: string; details: PlayerTimelineDetai
     staleTime: DefaultStaleTime,
     enabled: !!session_id && !!project_id,
   });
-
-  // const { data: project } = useQuery({
-  //   queryKey: ['project', project_id],
-  //   queryFn: async () => {
-  //     if (!project_id) return null;
-  //     return service.createClient()?.GET('/api/v0/projects/{id}', {
-  //       params: { path: { id: project_id } },
-  //     });
-  //   },
-  //   staleTime: DefaultStaleTime,
-  //   enabled: !!project_id,
-  // });
 
   if (details.length === 0) return null;
   return (

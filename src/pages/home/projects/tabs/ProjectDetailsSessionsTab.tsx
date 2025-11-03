@@ -14,7 +14,8 @@ import { Text } from '@src/component/atoms/Text';
 import { Pagination } from '@src/component/molecules/Pagination';
 import { useToast } from '@src/component/templates/ToastContext';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { createClient, DefaultStaleTime } from '@src/modeles/qeury';
+import { useApiClient } from '@src/modeles/ApiClientContext';
+import { DefaultStaleTime } from '@src/modeles/qeury';
 import { SessionItemRow } from '@src/pages/home/SessionItemRow';
 import { fontSizes, fontWeights } from '@src/styles/style';
 
@@ -35,17 +36,18 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [currentPage, setCurrentPage] = useState(1);
+  const apiClient = useApiClient();
 
   const {
     data: sessions = [],
     isLoading: isLoadingSessions,
     isError: isErrorSessions,
   } = useQuery({
-    queryKey: ['sessions', project.id, currentPage],
+    queryKey: ['sessions', project.id, currentPage, apiClient],
     queryFn: async () => {
       if (!project.id || project.id === 0) return [];
       const offset = (currentPage - 1) * ITEMS_PER_PAGE;
-      const { data, error } = await createClient().GET('/api/v0/projects/{project_id}/play_session', {
+      const { data, error } = await apiClient.GET('/api/v0/projects/{project_id}/play_session', {
         params: {
           query: {
             limit: ITEMS_PER_PAGE,

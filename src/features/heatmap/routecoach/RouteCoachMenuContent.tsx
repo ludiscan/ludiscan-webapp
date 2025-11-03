@@ -11,8 +11,8 @@ import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { TextField } from '@src/component/molecules/TextField';
 import { EventClusterViewer } from '@src/component/organisms/EventClusterViewer';
-import { generateImprovementRoutes, getImprovementRoutesTaskStatus } from '@src/features/heatmap/routecoach/api';
-import { createClient } from '@src/modeles/qeury';
+import { useRouteCoachApi } from '@src/features/heatmap/routecoach/api';
+import { useApiClient } from '@src/modeles/ApiClientContext';
 import { fontSizes } from '@src/styles/style';
 
 const POLL_MS = 2000;
@@ -111,13 +111,16 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
   // 強制再生成フラグ
   const [forceRegenerate, setForceRegenerate] = useState<boolean>(false);
 
+  const apiClient = useApiClient();
+  const routeCoachApi = useRouteCoachApi();
+
   // セッションのプレイヤー一覧を取得
   const { data: players, isLoading: isLoadingPlayers } = useQuery<number[]>({
-    queryKey: ['sessionPlayers', projectId, sessionId],
+    queryKey: ['sessionPlayers', projectId, sessionId, apiClient],
     enabled,
     queryFn: async () => {
       if (!projectId || !sessionId) return [];
-      const { data, error } = await createClient().GET('/api/v0/projects/{project_id}/play_session/{session_id}/player_position_log/{session_id}/players', {
+      const { data, error } = await apiClient.GET('/api/v0/projects/{project_id}/play_session/{session_id}/player_position_log/{session_id}/players', {
         params: {
           path: {
             project_id: projectId,
@@ -139,7 +142,7 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
   } = useQuery({
     queryKey: ['improvementRoutesTask', taskId],
     enabled: !!taskId,
-    queryFn: () => getImprovementRoutesTaskStatus(taskId!),
+    queryFn: () => routeCoachApi.getImprovementRoutesTaskStatus(taskId!),
     refetchOnWindowFocus: false,
   });
 
@@ -158,7 +161,7 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
 
   // 改善ルート生成を開始
   const { mutate: startGeneration, isPending: isGenerating } = useMutation({
-    mutationFn: () => generateImprovementRoutes(projectId!, undefined, forceRegenerate),
+    mutationFn: () => routeCoachApi.generateImprovementRoutes(projectId!, undefined, forceRegenerate),
     onSuccess: (result) => {
       if (result) {
         // eslint-disable-next-line

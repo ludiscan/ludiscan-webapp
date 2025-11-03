@@ -1,0 +1,36 @@
+[
+  {
+    "id": 1,
+    "event_type": "death",
+    "event_data": {
+      "x": 100.5,
+      "y": 200.3,
+      "z": 50.0
+    },
+    "offset_timestamp": 1000,
+    "player": 1
+  },
+  {
+    "id": 2,
+    "event_type": "death",
+    "event_data": {
+      "x": 150.2,
+      "y": 250.8,
+      "z": 45.5
+    },
+    "offset_timestamp": 2000,
+    "player": 2
+  },
+  {
+    "id": 3,
+    "event_type": "death",
+    "event_data": {
+      "x": 200.1,
+      "y": 300.4,
+      "z": 40.0
+    },
+    "offset_timestamp": 3000,
+    "player": 1
+  }
+]
+

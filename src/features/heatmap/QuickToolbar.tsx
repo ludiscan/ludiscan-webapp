@@ -8,8 +8,9 @@ import { Button } from '@src/component/atoms/Button';
 import { InlineFlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { Selector } from '@src/component/molecules/Selector';
-import { generateImprovementRoutes } from '@src/features/heatmap/routecoach/api';
-import { createClient, DefaultStaleTime } from '@src/modeles/qeury';
+import { useRouteCoachApi } from '@src/features/heatmap/routecoach/api';
+import { useApiClient } from '@src/modeles/ApiClientContext';
+import { DefaultStaleTime } from '@src/modeles/qeury';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
 const PRESETS = [25, 50, 75, 100, 150, 200, 300, 400];
@@ -21,12 +22,14 @@ function Toolbar({ className, service }: Props) {
   const [percent, setPercent] = useState(100);
   const [selectSessionId, setSelectSessionId] = useState<string | undefined>(undefined);
   const qc = useQueryClient();
+  const apiClient = useApiClient();
+  const routeCoachApi = useRouteCoachApi();
 
   const { data: sessions } = useQuery({
     queryKey: ['sessions', service.projectId],
     queryFn: async () => {
       if (!service.projectId) return;
-      const { data, error } = await createClient().GET('/api/v0/projects/{project_id}/play_session', {
+      const { data, error } = await apiClient.GET('/api/v0/projects/{project_id}/play_session', {
         params: {
           path: {
             project_id: service.projectId,
@@ -53,7 +56,7 @@ function Toolbar({ className, service }: Props) {
   const { mutate: startRouteCoach, isPending: isRouteCoachPending } = useMutation({
     mutationFn: async () => {
       if (!service.projectId) throw new Error('Project is required');
-      return generateImprovementRoutes(service.projectId);
+      return routeCoachApi.generateImprovementRoutes(service.projectId);
     },
     onSuccess: async () => {
       // 生成後、RouteCoachメニューのキャッシュを無効化

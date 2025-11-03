@@ -15,7 +15,8 @@ import { Modal } from '@src/component/molecules/Modal';
 import { OutlinedTextField } from '@src/component/molecules/OutlinedTextField';
 import { useToast } from '@src/component/templates/ToastContext';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { createClient, DefaultStaleTime } from '@src/modeles/qeury';
+import { useApiClient } from '@src/modeles/ApiClientContext';
+import { DefaultStaleTime } from '@src/modeles/qeury';
 import { fontSizes, fontWeights } from '@src/styles/style';
 
 export type ProjectDetailsMembersTabProps = {
@@ -44,6 +45,7 @@ const Component: FC<ProjectDetailsMembersTabProps> = ({ className, project }) =>
   const [memberToDelete, setMemberToDelete] = useState<Member | null>(null);
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const apiClient = useApiClient();
 
   // メンバー一覧を取得
   const {
@@ -51,9 +53,9 @@ const Component: FC<ProjectDetailsMembersTabProps> = ({ className, project }) =>
     isLoading: isLoadingMembers,
     isError: isErrorMembers,
   } = useQuery({
-    queryKey: ['members', project.id],
+    queryKey: ['members', project.id, apiClient],
     queryFn: async () => {
-      const { data, error } = await createClient().GET('/api/v0.1/projects/{project_id}/members', {
+      const { data, error } = await apiClient.GET('/api/v0.1/projects/{project_id}/members', {
         params: {
           path: {
             project_id: project.id,
@@ -83,7 +85,7 @@ const Component: FC<ProjectDetailsMembersTabProps> = ({ className, project }) =>
 
     try {
       setIsSubmittingMember(true);
-      const { error } = await createClient().POST('/api/v0.1/projects/{project_id}/members/email', {
+      const { error } = await apiClient.POST('/api/v0.1/projects/{project_id}/members/email', {
         params: {
           path: {
             project_id: project.id,
@@ -109,7 +111,7 @@ const Component: FC<ProjectDetailsMembersTabProps> = ({ className, project }) =>
     } finally {
       setIsSubmittingMember(false);
     }
-  }, [newMemberEmail, newMemberRole, project.id, queryClient, showToast]);
+  }, [newMemberEmail, newMemberRole, project.id, queryClient, showToast, apiClient]);
 
   const handleDeleteMember = useCallback((member: Member) => {
     setMemberToDelete(member);
@@ -121,7 +123,7 @@ const Component: FC<ProjectDetailsMembersTabProps> = ({ className, project }) =>
 
     try {
       setIsDeleting(true);
-      const { error } = await createClient().DELETE('/api/v0.1/projects/{project_id}/members/{user_id}', {
+      const { error } = await apiClient.DELETE('/api/v0.1/projects/{project_id}/members/{user_id}', {
         params: {
           path: {
             project_id: project.id,
@@ -143,7 +145,7 @@ const Component: FC<ProjectDetailsMembersTabProps> = ({ className, project }) =>
     } finally {
       setIsDeleting(false);
     }
-  }, [memberToDelete, project.id, queryClient, showToast]);
+  }, [memberToDelete, project.id, queryClient, showToast, apiClient]);
 
   const formatDate = (dateString: string) => {
     try {

@@ -9,7 +9,7 @@ import { FlexColumn } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { EventClusterViewer } from '@src/component/organisms/EventClusterViewer';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { createClient } from '@src/modeles/qeury';
+import { useApiClient } from '@src/modeles/ApiClientContext';
 import { fontSizes, fontWeights } from '@src/styles/style';
 
 type Session = components['schemas']['PlaySessionResponseDto'];
@@ -56,13 +56,14 @@ const Component: FC<ProjectDetailsRouteCoachTabProps> = ({ project, className })
   const [selectedPlayerId, setSelectedPlayerId] = useState<number | null>(null);
   const [isLoadingSessions, setIsLoadingSessions] = useState(true);
   const [isLoadingPlayers, setIsLoadingPlayers] = useState(false);
+  const apiClient = useApiClient();
 
   // セッション一覧を取得
   useEffect(() => {
     const fetchSessions = async () => {
       setIsLoadingSessions(true);
       try {
-        const { data, error } = await createClient().GET('/api/v0/projects/{project_id}/play_session', {
+        const { data, error } = await apiClient.GET('/api/v0/projects/{project_id}/play_session', {
           params: {
             path: { project_id: project.id },
             query: { limit: 100, offset: 0 },
@@ -83,7 +84,7 @@ const Component: FC<ProjectDetailsRouteCoachTabProps> = ({ project, className })
     };
 
     fetchSessions();
-  }, [project.id]);
+  }, [project.id, apiClient]);
 
   // 選択されたセッションのプレイヤー一覧を取得
   useEffect(() => {
@@ -92,7 +93,7 @@ const Component: FC<ProjectDetailsRouteCoachTabProps> = ({ project, className })
     const fetchPlayers = async () => {
       setIsLoadingPlayers(true);
       try {
-        const { data, error } = await createClient().GET('/api/v0/projects/{project_id}/play_session/{session_id}/player_position_log/{session_id}/players', {
+        const { data, error } = await apiClient.GET('/api/v0/projects/{project_id}/play_session/{session_id}/player_position_log/{session_id}/players', {
           params: {
             path: {
               project_id: project.id,
@@ -115,7 +116,7 @@ const Component: FC<ProjectDetailsRouteCoachTabProps> = ({ project, className })
     };
 
     fetchPlayers();
-  }, [project.id, selectedSessionId]);
+  }, [project.id, selectedSessionId, apiClient]);
 
   if (isLoadingSessions) {
     return (
