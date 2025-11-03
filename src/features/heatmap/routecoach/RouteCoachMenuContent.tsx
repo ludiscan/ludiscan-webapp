@@ -274,10 +274,13 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
       )}
 
       {/* イベントクラスター表示 */}
-      {selectedPlayerId ? (
+      {taskStatus ? (
         <ScrollableClusterSection>
           <FlexColumn gap={16}>
-            <Text text={`プレイヤー ${selectedPlayerId} の改善ルート`} fontSize={fontSizes.large1} />
+            <Text
+              text={selectedPlayerId ? `プレイヤー ${selectedPlayerId} の改善ルート` : '全プレイヤーの改善ルート'}
+              fontSize={fontSizes.large1}
+            />
             <EventClusterViewer projectId={projectId!} playerId={selectedPlayerId} />
           </FlexColumn>
         </ScrollableClusterSection>

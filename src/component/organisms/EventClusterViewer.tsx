@@ -34,7 +34,7 @@ interface ImprovementRoute {
 interface EventClusterViewerProps {
   className?: string;
   projectId: number;
-  playerId: string;
+  playerId?: string;
   mapName?: string;
   onRouteVisualize?: (route: ImprovementRoute, clusterIndex: number) => void;
 }

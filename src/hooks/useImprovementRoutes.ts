@@ -6,12 +6,12 @@ import { createClient } from '@src/modeles/qeury';
  * イベントクラスタと改善案ルートを取得するHook
  *
  * @param projectId プロジェクトID
- * @param playerId プレイヤーID
+ * @param playerId プレイヤーID（オプション - 指定されない場合は全プレイヤーのデータを取得）
  * @param options
  */
 export function useImprovementRoutes(
   projectId: number,
-  playerId: string,
+  playerId?: string,
   options?: {
     mapName?: string;
     eventType?: 'death' | 'success';
@@ -25,17 +25,19 @@ export function useImprovementRoutes(
   return useQuery({
     queryKey,
     queryFn: async () => {
+      const queryParams = {
+        ...(playerId && { player_id: playerId }),
+        ...(options?.mapName && { map_name: options.mapName }),
+        ...(options?.eventType && { event_type: options.eventType }),
+        ...(options?.freshnessDays && {
+          freshness_days: options.freshnessDays,
+        }),
+      } as any;
+
       const response = await client.GET('/api/v0/route-coach/projects/{project_id}/event-clusters', {
         params: {
           path: { project_id: projectId },
-          query: {
-            player_id: playerId,
-            ...(options?.mapName && { map_name: options.mapName }),
-            ...(options?.eventType && { event_type: options.eventType }),
-            ...(options?.freshnessDays && {
-              freshness_days: options.freshnessDays,
-            }),
-          },
+          query: queryParams,
         },
       });
 
@@ -45,7 +47,7 @@ export function useImprovementRoutes(
 
       return response.data;
     },
-    enabled: options?.enabled !== false && !!projectId && !!playerId,
+    enabled: options?.enabled !== false && !!projectId,
     staleTime: 5 * 60 * 1000, // 5分
     gcTime: 30 * 60 * 1000, // 30分
   });
