@@ -16,7 +16,7 @@ const Template: Story = {
   render: (args) => {
     return (
       <div style={{ width: '100%', height: '500px', backgroundColor: '#20232a' }}>
-        <Canvas camera={{ position: [500, 500, 500], fov: 75 }} frameLoop='demand'>
+        <Canvas camera={{ position: [500, 500, 500], fov: 75 }} frameloop='demand'>
           <ambientLight intensity={0.5} /> {/* eslint-disable-line react/no-unknown-property */}
           <directionalLight position={[10, 10, 10]} intensity={1} /> {/* eslint-disable-line react/no-unknown-property */}
           <HotspotCircles {...args} />
