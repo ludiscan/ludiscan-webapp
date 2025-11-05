@@ -96,5 +96,3 @@ jobs:
       - name: Upload screenshots to Argos
         continue-on-error: true
         run: bunx argos upload ./storybook-static --token ${{ secrets.ARGOS_TOKEN }}
-        env:
-          ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
