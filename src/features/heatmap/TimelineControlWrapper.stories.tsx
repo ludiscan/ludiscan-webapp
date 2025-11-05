@@ -20,11 +20,7 @@ const TimelineControlWrapperExample = () => {
 
   return (
     <div>
-      <TimelineControlWrapper
-        visibleTimelineRange={visibleTimelineRange}
-        setVisibleTimelineRange={setVisibleTimelineRange}
-        setOpenMenu={setOpenMenu}
-      />
+      <TimelineControlWrapper visibleTimelineRange={visibleTimelineRange} setVisibleTimelineRange={setVisibleTimelineRange} setOpenMenu={setOpenMenu} />
       {openMenu && <div style={{ marginTop: 20 }}>Open Menu: {openMenu}</div>}
     </div>
   );

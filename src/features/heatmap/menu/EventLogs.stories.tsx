@@ -39,15 +39,6 @@ export const ManyEvents: Story = {
   name: 'Many Events',
   args: createMockMenuProps({
     name: 'eventlog',
-    eventLogKeys: [
-      'PlayerSpawn',
-      'PlayerDeath',
-      'ItemPickup',
-      'ItemDrop',
-      'EnemyKill',
-      'DamageTaken',
-      'HealthRestore',
-      'LevelUp',
-    ],
+    eventLogKeys: ['PlayerSpawn', 'PlayerDeath', 'ItemPickup', 'ItemDrop', 'EnemyKill', 'DamageTaken', 'HealthRestore', 'LevelUp'],
   }),
 };

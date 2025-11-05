@@ -30,16 +30,21 @@ const Template: Story = {
 };
 
 // Wrapper component to emit route-selected event
-const RouteVisualizationWith2DRoute: React.FC = () => {
+const RouteVisualizationWith2DRoute = () => {
   useEffect(() => {
     // Emit a sample route after component mounts
     setTimeout(() => {
       heatMapEventBus.emit('route-selected', {
         route: {
-          from: { x: 0, y: 0, z: 0 },
-          to: { x: 200, y: 0, z: 200 },
-          count: 10,
-          probability: 0.8,
+          id: 1,
+          from: { x: 0, z: 0 },
+          to: { x: 200, z: 200 },
+          traversal_count: 10,
+          avg_duration_ms: 5000,
+          death_count: 0,
+          death_rate: 0,
+          success_rate: 0.8,
+          avg_time_to_success_ms: 4500,
         },
       });
     }, 100);
@@ -50,23 +55,28 @@ const RouteVisualizationWith2DRoute: React.FC = () => {
       <Canvas camera={{ position: [500, 500, 500], fov: 75 }}>
         <ambientLight intensity={0.5} /> {/* eslint-disable-line react/no-unknown-property */}
         <directionalLight position={[10, 10, 10]} intensity={1} /> {/* eslint-disable-line react/no-unknown-property */}
-        <RouteVisualization dimensionality="2d" />
+        <RouteVisualization dimensionality='2d' />
         <OrbitControls enableZoom={true} enablePan={true} enableRotate={true} />
       </Canvas>
     </div>
   );
 };
 
-const RouteVisualizationWith3DRoute: React.FC = () => {
+const RouteVisualizationWith3DRoute = () => {
   useEffect(() => {
     // Emit a sample route after component mounts
     setTimeout(() => {
       heatMapEventBus.emit('route-selected', {
         route: {
-          from: { x: -150, y: 0, z: -150 },
-          to: { x: 150, y: 0, z: 150 },
-          count: 25,
-          probability: 0.95,
+          id: 2,
+          from: { x: -150, z: -150 },
+          to: { x: 150, z: 150 },
+          traversal_count: 25,
+          avg_duration_ms: 7000,
+          death_count: 1,
+          death_rate: 0.04,
+          success_rate: 0.95,
+          avg_time_to_success_ms: 6800,
         },
       });
     }, 100);
@@ -77,7 +87,7 @@ const RouteVisualizationWith3DRoute: React.FC = () => {
       <Canvas camera={{ position: [500, 500, 500], fov: 75 }}>
         <ambientLight intensity={0.5} /> {/* eslint-disable-line react/no-unknown-property */}
         <directionalLight position={[10, 10, 10]} intensity={1} /> {/* eslint-disable-line react/no-unknown-property */}
-        <RouteVisualization dimensionality="3d" />
+        <RouteVisualization dimensionality='3d' />
         <OrbitControls enableZoom={true} enablePan={true} enableRotate={true} />
       </Canvas>
     </div>

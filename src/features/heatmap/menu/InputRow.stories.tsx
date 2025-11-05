@@ -23,7 +23,7 @@ export const WithSwitch: Story = {
   name: 'With Switch',
   args: {
     label: 'Show Heatmap',
-    children: <Switch label="Toggle" checked={true} onChange={() => {}} size="small" />,
+    children: <Switch label='Toggle' checked={true} onChange={() => {}} size='small' />,
   },
 };
 
@@ -42,7 +42,7 @@ export const WithButton: Story = {
   args: {
     label: 'Action',
     children: (
-      <Button onClick={() => {}} scheme="primary" fontSize="sm">
+      <Button onClick={() => {}} scheme='primary' fontSize='sm'>
         Apply
       </Button>
     ),
@@ -85,6 +85,6 @@ export const ColumnWithSwitch: typeof ColumnTemplate = {
   name: 'Column: With Switch',
   args: {
     label: 'Enable Feature',
-    children: <Switch label="Toggle" checked={false} onChange={() => {}} size="small" />,
+    children: <Switch label='Toggle' checked={false} onChange={() => {}} size='small' />,
   },
 };
