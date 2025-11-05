@@ -15,7 +15,7 @@ const Template: Story = {
   render: (args) => {
     return (
       <Card {...args}>
-        <Text text={'Plain Text'} />
+        <Text text={'Card Plain Text'} />
       </Card>
     );
   },

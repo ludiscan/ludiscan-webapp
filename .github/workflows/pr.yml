@@ -6,10 +6,20 @@ on:
       - '.github/workflows/pr.yml'
       - 'package.json'
       - 'bun.lock'
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'src/**'
+      - '.storybook/**'
   workflow_dispatch:
 
 permissions:
   contents: read
+  pull-requests: write
+  checks: write
+  statuses: write
 
 concurrency:
   group: 'pr-workflow-${{ github.head_ref }}'

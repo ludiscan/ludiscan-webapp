@@ -25,6 +25,13 @@ Argos CIは、Pull Request上でStorybookコンポーネントの見た目の差
 4. GitHubの認証画面で、リポジトリへのアクセスを許可
 5. インストール完了後、Argosがリポジトリのステータスチェックとコメント投稿ができるようになる
 
+**重要**: GitHub ActionsワークフローにもArgosがPRコメントを投稿するための適切なパーミッションが設定されている必要があります：
+- `pull-requests: write` - PRにコメントを投稿
+- `checks: write` - チェックステータスを更新
+- `statuses: write` - ステータスを更新
+
+これらのパーミッションは `.github/workflows/pr.yml` に既に設定されています。
+
 ### 3. Argosトークンの取得
 
 1. Argosダッシュボードでプロジェクト設定を開く
@@ -40,16 +47,57 @@ Argos CIは、Pull Request上でStorybookコンポーネントの見た目の差
    - **Secret**: 先ほどコピーしたトークンを貼り付け
 4. "Add secret" をクリック
 
-### 5. 動作確認
+### 5. ベースライン（基準）ビルドの作成と承認
+
+**重要**: 初回セットアップ時は、ベースラインビルドを作成して承認する必要があります。これを行わないと、全てのスクリーンショットが「added」として表示されます。
+
+#### 方法1: develop/mainブランチへのマージで自動作成（推奨）
+
+1. このPRをdevelopブランチにマージ
+2. GitHub Actionsが自動的にdevelopブランチでArgosを実行
+3. Argosダッシュボードで新しいビルドを確認
+4. ビルドの「Approve」ボタンをクリックして承認
+5. これ以降、PRで作成されたビルドは、このベースラインと比較される
+
+#### 方法2: 手動でベースラインを作成
+
+developブランチにマージできない場合：
+
+```bash
+# developブランチをチェックアウト
+git checkout develop
+git pull
+
+# Storybookをビルドしてテストを実行
+bun run build-storybook
+bun run test-storybook
+
+# Argosにアップロード（ベースラインとして）
+bunx argos upload ./screenshots --token <ARGOS_TOKEN>
+```
+
+その後、Argosダッシュボードでビルドを承認します。
+
+#### 自動承認の設定（オプション）
+
+Argosダッシュボードで自動承認を設定すると、手動承認が不要になります：
+
+1. Argosダッシュボードで "Settings" → "Branches" に移動
+2. "Auto-approved branches" に `develop` と `main` を追加
+3. 以降、これらのブランチのビルドは自動的に承認される
+
+### 6. 動作確認
 
 1. 新しいブランチを作成し、コンポーネントの見た目を変更
 2. PRを作成
 3. GitHub Actionsで `storybook-test` ジョブが実行される
-4. Argosがビジュアル差分を生成
+4. Argosがビジュアル差分を生成（ベースラインと比較）
 5. **Argos GitHub Appがインストール済みの場合**、PRに自動でコメントが投稿される
 6. コメント内のリンクから差分を確認できる
 
-**注意**: GitHub Appをインストールしていない場合は、Argosダッシュボードで直接差分を確認する必要があります。PRコメントは投稿されません。
+**注意**:
+- GitHub Appをインストールしていない場合は、Argosダッシュボードで直接差分を確認する必要があります。PRコメントは投稿されません。
+- ベースラインビルドが承認されていない場合、全てのスクリーンショットが「added」として表示されます。
 
 ## 使い方
 
@@ -108,15 +156,54 @@ export default {
     path: './screenshots', // スクリーンショット保存先
   },
   // threshold: 0.5, // 差分検出の感度（0-1）
-  // reference: {
-  //   branch: 'main', // 比較対象ブランチ
-  // },
+  reference: {
+    branch: 'develop', // 比較対象ブランチ（ベースライン）
+  },
 };
 ```
 
+**重要**: `reference.branch` を設定することで、Argosがどのブランチと比較するかを明示的に指定します。この設定がないと、全てのスクリーンショットが「added」として扱われる可能性があります。
+
 ### GitHub Actions (.github/workflows/pr.yml)
 
-PRワークフローの `storybook-test` ジョブで、スクリーンショット撮影とArgosへのアップロードが実行されます：
+#### トリガー設定
+
+ワークフローは以下の場合に実行されます：
+
+```yaml
+on:
+  pull_request:  # PRの作成・更新時
+    paths:
+      - 'src/**'
+      - '.github/workflows/pr.yml'
+      - 'package.json'
+      - 'bun.lock'
+  push:  # main/developブランチへのプッシュ時（ベースライン作成）
+    branches:
+      - main
+      - develop
+    paths:
+      - 'src/**'
+      - '.storybook/**'
+```
+
+**重要**: main/developブランチへのプッシュ時にもArgosを実行することで、ベースラインビルドが自動的に作成されます。
+
+#### パーミッション設定
+
+ArgosがPRにコメントを投稿するための適切なパーミッションが設定されています：
+
+```yaml
+permissions:
+  contents: read
+  pull-requests: write  # PRにコメントを投稿
+  checks: write         # チェックステータスを更新
+  statuses: write       # ステータスを更新
+```
+
+#### Storybookテストとアップロード
+
+`storybook-test` ジョブで、スクリーンショット撮影とArgosへのアップロードが実行されます：
 
 ```yaml
 - name: Serve Storybook and run tests
@@ -132,6 +219,30 @@ PRワークフローの `storybook-test` ジョブで、スクリーンショッ
 
 ## トラブルシューティング
 
+### 全てのスクリーンショットが「added」として表示される
+
+**原因**: ベースラインビルドが存在しないか、承認されていない
+
+**解決策**:
+
+1. **ベースラインビルドを作成**:
+   - developブランチにこのPRをマージ（GitHub Actionsが自動実行される）
+   - または、developブランチで手動でArgosを実行（上記「方法2」参照）
+
+2. **ベースラインビルドを承認**:
+   - Argosダッシュボードでdevelopブランチのビルドを開く
+   - 「Approve」ボタンをクリック
+   - または、"Settings" → "Branches" で `develop` を自動承認ブランチに追加
+
+3. **argos.config.jsを確認**:
+   ```javascript
+   reference: {
+     branch: 'develop', // 正しいベースブランチが設定されているか確認
+   }
+   ```
+
+4. **次回のPR作成時**: ベースラインと正しく比較され、実際の変更のみが表示される
+
 ### PRにコメントが投稿されない
 
 **最も多い原因**: Argos GitHub Appがインストールされていない
@@ -144,6 +255,7 @@ PRワークフローの `storybook-test` ジョブで、スクリーンショッ
 **その他の確認事項**:
 - GitHubリポジトリの "Settings" → "Integrations" → "GitHub Apps" でArgosが表示されているか確認
 - Argosダッシュボードで該当のビルドが成功しているか確認
+- GitHub Actionsワークフローに適切なパーミッション（`pull-requests: write`, `checks: write`, `statuses: write`）が設定されているか確認
 
 ### Argosアップロードが失敗する
 
