@@ -91,7 +91,7 @@ jobs:
         run: |
           bunx concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
             "bunx http-server storybook-static --port 6006 --silent" \
-            "bunx wait-on tcp:6006 && bun run test-storybook"
+            "bunx wait-on tcp:6006 && NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules bun run test-storybook"
 
       - name: Upload screenshots to Argos
         continue-on-error: true
