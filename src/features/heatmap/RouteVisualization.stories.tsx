@@ -22,7 +22,7 @@ const Template: Story = {
           <ambientLight intensity={0.5} /> {/* eslint-disable-line react/no-unknown-property */}
           <directionalLight position={[10, 10, 10]} intensity={1} /> {/* eslint-disable-line react/no-unknown-property */}
           <RouteVisualization {...args} />
-          <OrbitControls enableZoom={true} enablePan={true} enableRotate={true} />
+          <OrbitControls enableZoom={true} enablePan={true} enableRotate={true} enableDamping={false} autoRotate={false} />
         </Canvas>
       </div>
     );
@@ -56,7 +56,7 @@ const RouteVisualizationWith2DRoute = () => {
         <ambientLight intensity={0.5} /> {/* eslint-disable-line react/no-unknown-property */}
         <directionalLight position={[10, 10, 10]} intensity={1} /> {/* eslint-disable-line react/no-unknown-property */}
         <RouteVisualization dimensionality='2d' />
-        <OrbitControls enableZoom={true} enablePan={true} enableRotate={true} />
+        <OrbitControls enableZoom={true} enablePan={true} enableRotate={true} enableDamping={false} autoRotate={false} />
       </Canvas>
     </div>
   );
@@ -88,7 +88,7 @@ const RouteVisualizationWith3DRoute = () => {
         <ambientLight intensity={0.5} /> {/* eslint-disable-line react/no-unknown-property */}
         <directionalLight position={[10, 10, 10]} intensity={1} /> {/* eslint-disable-line react/no-unknown-property */}
         <RouteVisualization dimensionality='3d' />
-        <OrbitControls enableZoom={true} enablePan={true} enableRotate={true} />
+        <OrbitControls enableZoom={true} enablePan={true} enableRotate={true} enableDamping={false} autoRotate={false} />
       </Canvas>
     </div>
   );

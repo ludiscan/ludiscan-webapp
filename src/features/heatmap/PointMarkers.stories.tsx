@@ -20,11 +20,7 @@ const Template: Story = {
           <directionalLight position={[10, 10, 10]} intensity={1} /> {/* eslint-disable-line react/no-unknown-property */}
           <HeatmapObjectOverlay {...args} />
           {/* カメラ移動・回転を可能にする */}
-          <OrbitControls
-            enableZoom={true} // ズーム可能
-            enablePan={true} // 平行移動可能
-            enableRotate={true} // 回転可能
-          />
+          <OrbitControls enableZoom={true} enablePan={true} enableRotate={true} enableDamping={false} autoRotate={false} />
         </Canvas>
       </div>
     );

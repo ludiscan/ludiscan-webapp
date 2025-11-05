@@ -20,7 +20,7 @@ const Template: Story = {
           <ambientLight intensity={0.5} /> {/* eslint-disable-line react/no-unknown-property */}
           <directionalLight position={[10, 10, 10]} intensity={1} /> {/* eslint-disable-line react/no-unknown-property */}
           <HotspotCircles {...args} />
-          <OrbitControls enableZoom={true} enablePan={true} enableRotate={true} />
+          <OrbitControls enableZoom={true} enablePan={true} enableRotate={true} enableDamping={false} autoRotate={false} />
         </Canvas>
       </div>
     );
@@ -41,13 +41,25 @@ const samplePoints = [
   { x: -60, y: 0, z: -60, density: 3 },
 ];
 
-// High density cluster
-const denseCluster = Array.from({ length: 50 }, (_) => ({
-  x: Math.random() * 100 - 50,
-  y: 0,
-  z: Math.random() * 100 - 50,
-  density: Math.floor(Math.random() * 10) + 1,
-}));
+// High density cluster - using seeded random for consistent screenshots
+const createSeededCluster = (seed: number, count: number, offsetX: number, offsetZ: number, range: number) => {
+  // Simple seeded random number generator for reproducible results
+  const seededRandom = (index: number) => {
+    const x = Math.sin(seed + index * 0.1) * 10000;
+    return x - Math.floor(x);
+  };
+
+  return Array.from({ length: count }, (_, i) => ({
+    x: seededRandom(i * 2) * range + offsetX,
+    y: 0,
+    z: seededRandom(i * 2 + 1) * range + offsetZ,
+    density: Math.floor(seededRandom(i * 3) * 10) + 1,
+  }));
+};
+
+const denseCluster = createSeededCluster(1, 50, -50, -50, 100);
+const cluster2 = createSeededCluster(2, 30, 150, 150, 100);
+const cluster3 = createSeededCluster(3, 20, -150, -150, 100);
 
 export const Default: Story = {
   ...Template,
@@ -69,20 +81,6 @@ export const MultipleClusters: Story = {
   ...Template,
   name: 'Multiple Clusters',
   args: {
-    points: [
-      ...denseCluster,
-      ...Array.from({ length: 30 }, (_) => ({
-        x: Math.random() * 100 + 150,
-        y: 0,
-        z: Math.random() * 100 + 150,
-        density: Math.floor(Math.random() * 10) + 1,
-      })),
-      ...Array.from({ length: 20 }, (_) => ({
-        x: Math.random() * 100 - 150,
-        y: 0,
-        z: Math.random() * 100 - 150,
-        density: Math.floor(Math.random() * 10) + 1,
-      })),
-    ],
+    points: [...denseCluster, ...cluster2, ...cluster3],
   },
 };

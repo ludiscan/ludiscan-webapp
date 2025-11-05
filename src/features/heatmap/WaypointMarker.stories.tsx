@@ -21,7 +21,7 @@ const Template: Story = {
           <ambientLight intensity={0.5} /> {/* eslint-disable-line react/no-unknown-property */}
           <directionalLight position={[10, 10, 10]} intensity={1} /> {/* eslint-disable-line react/no-unknown-property */}
           <WaypointMarker {...args} />
-          <OrbitControls enableZoom={true} enablePan={true} enableRotate={true} />
+          <OrbitControls enableZoom={true} enablePan={true} enableRotate={true} enableDamping={false} autoRotate={false} />
         </Canvas>
       </div>
     );
@@ -62,7 +62,7 @@ export const MultipleWaypoints: Story = {
           <WaypointMarker position={new Vector3(-200, 0, 0)} selected={false} onClick={() => {}} />
           <WaypointMarker position={new Vector3(0, 0, 200)} selected={false} onClick={() => {}} />
           <WaypointMarker position={new Vector3(0, 0, -200)} selected={false} onClick={() => {}} />
-          <OrbitControls enableZoom={true} enablePan={true} enableRotate={true} />
+          <OrbitControls enableZoom={true} enablePan={true} enableRotate={true} enableDamping={false} autoRotate={false} />
         </Canvas>
       </div>
     );
