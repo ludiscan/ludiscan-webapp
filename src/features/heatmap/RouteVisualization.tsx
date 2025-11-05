@@ -24,8 +24,6 @@ export const RouteVisualization: FC<RouteVisualizationProps> = ({ dimensionality
 
   useEffect(() => {
     const handleRouteSelected = (event: CustomEvent<{ route: RouteEdgeData | null }>) => {
-      // eslint-disable-next-line
-      console.log('Route selected event received:', event.detail.route);
       setSelectedRoute(event.detail.route);
     };
 

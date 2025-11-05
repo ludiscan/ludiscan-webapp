@@ -67,7 +67,7 @@ const Component: FC<PointCirclesProps> = ({ points }) => {
         size: cellRadius,
         force: area.totalDensity * 0.1,
       });
-      if (areas.length == thresholdCount) {
+      if (areas.length === thresholdCount) {
         break;
       }
     }

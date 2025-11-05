@@ -290,15 +290,13 @@ const PlayerTimelineComponent: FC<HeatmapMenuProps> = ({ className, service }) =
       return;
     }
     try {
-      const applyStyle = compileHVQL(queryText, {
+      compileHVQL(queryText, {
         palette: { yellow: '#FFD400', blue: '#0057FF' },
         vars: {}, // 必要なら
       });
-      /* eslint-disable-next-line no-console */
-      console.log('HVQL query:', applyStyle);
     } catch (error: unknown) {
       // eslint-disable-next-line no-console
-      console.log('HVQL parse error:', error);
+      console.error('HVQL parse error:', error);
     }
   }, [queryText]);
 

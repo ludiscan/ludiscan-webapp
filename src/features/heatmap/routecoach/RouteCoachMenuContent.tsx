@@ -169,8 +169,6 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
     mutationFn: () => routeCoachApi.generateImprovementRoutes(projectId!, undefined, forceRegenerate),
     onSuccess: (result) => {
       if (result) {
-        // eslint-disable-next-line
-        console.log('Improvement routes generation started, taskId:', result.taskId, 'force:', forceRegenerate);
         setTaskId(result.taskId ?? null);
         setForceRegenerate(false);
       }

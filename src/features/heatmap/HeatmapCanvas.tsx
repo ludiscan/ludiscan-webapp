@@ -139,15 +139,23 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
   const raycaster = useMemo(() => new Raycaster(), []);
   const modelRef = useRef<Group>(null);
 
-  // 移動量。必要に応じて調整してください（マップのスケールに合わせる）
-  const MOVE_DELTA = 10;
+  // Camera and interaction constants
+  const MOVE_DELTA = 10; // Waypoint movement delta
+  const RAYCAST_HEIGHT = 10000; // Height for raycast origin
+  const DEFAULT_WAYPOINT_Z = 200; // Default Z position for new waypoints
+  const MIN_DISTANCE_MULTIPLIER = 0.2; // Minimum camera distance multiplier
+  const MAX_DISTANCE_MULTIPLIER = 6; // Maximum camera distance multiplier
+  const ZOOM_BASE_VALUE = 100; // Base value for zoom calculations
+  const ZOOM_MIN_PERCENT = 25; // Minimum zoom percentage
+  const ZOOM_MAX_PERCENT = 400; // Maximum zoom percentage
+  const FIT_PADDING = 1.2; // Padding for fit-to-object
 
   // モデル表面での正確な Y 座標を取得する関数
   const getHeightOnModel = useCallback(
     (x: number, z: number): Vector3 | null => {
       if (!modelRef.current) return null;
       // Y を十分大きな位置にして、その直下方向（0,-1,0）に Raycaster を飛ばす
-      const origin = new Vector3(x, 10000, z);
+      const origin = new Vector3(x, RAYCAST_HEIGHT, z);
       const direction = new Vector3(0, -1, 0);
       raycaster.set(origin, direction);
       // モデルのグループ以下すべてを対象に intersection を計算
@@ -208,7 +216,7 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
       // 例として「モデルのワールド空間の中心 (0,0) あたり」を初期位置とする
       // 必要があればメニュー側から座標を渡しても構いません
       const defaultX = 0;
-      const defaultZ = 200;
+      const defaultZ = DEFAULT_WAYPOINT_Z;
       const hit = getHeightOnModel(defaultX, defaultZ);
       if (!hit) {
         // console.warn('モデル表面の交差点が見つかりませんでした');
@@ -337,10 +345,10 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
 
       // Perspective: distance = fitDist * (100 / percent)
       const { dist: fitDist } = fitInfoRef.current;
-      const min = controls.minDistance ?? fitDist * 0.2;
-      const max = controls.maxDistance ?? fitDist * 6;
+      const min = controls.minDistance ?? fitDist * MIN_DISTANCE_MULTIPLIER;
+      const max = controls.maxDistance ?? fitDist * MAX_DISTANCE_MULTIPLIER;
 
-      const targetDist = clamp(fitDist * (100 / clamp(percent, 25, 400)), min, max);
+      const targetDist = clamp(fitDist * (ZOOM_BASE_VALUE / clamp(percent, ZOOM_MIN_PERCENT, ZOOM_MAX_PERCENT)), min, max);
       // console.log('targetDist', targetDist, 'min', min, 'max', max, 'percent', percent);
 
       const cam = camera as PerspectiveCamera;
@@ -365,7 +373,7 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
     box.getCenter(center);
 
     const radius = size.length() / 2;
-    const padding = 1.2;
+    const padding = FIT_PADDING;
     const fov = (camera.fov * Math.PI) / 180;
     const dist = (radius * padding) / Math.tan(fov / 2);
 

@@ -184,7 +184,7 @@ const Component: FC<ObjectToggleListProps> = ({ className, model, mapName }) => 
     return half > vs.length / 2 ? 0.5 : 1.0;
   }, [displayState]);
 
-  if (model == undefined) {
+  if (model === undefined) {
     return null;
   }
 
