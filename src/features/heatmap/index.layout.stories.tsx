@@ -6,6 +6,11 @@ import { mockHeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 export default {
   component: HeatmapIdPageLayout,
   controls: {},
+  parameters: {
+    // Disable screenshot testing for this complex page layout
+    // It includes 3D Canvas, data loading, and async operations that cause timeouts
+    chromatic: { disableSnapshot: true },
+  },
 } as Meta;
 
 type Story = StoryObj<typeof HeatmapIdPageLayout>;

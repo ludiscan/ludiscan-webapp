@@ -15,16 +15,12 @@ const Template: Story = {
   render: (args) => {
     return (
       <div style={{ width: '100%', height: '500px', backgroundColor: '#20232a' }}>
-        <Canvas camera={{ position: [3, 3, 3], fov: 75 }}>
+        <Canvas camera={{ position: [3, 3, 3], fov: 75 }} frameloop='demand'>
           <ambientLight intensity={0.5} /> {/* eslint-disable-line react/no-unknown-property */}
           <directionalLight position={[10, 10, 10]} intensity={1} /> {/* eslint-disable-line react/no-unknown-property */}
           <HeatmapObjectOverlay {...args} />
           {/* カメラ移動・回転を可能にする */}
-          <OrbitControls
-            enableZoom={true} // ズーム可能
-            enablePan={true} // 平行移動可能
-            enableRotate={true} // 回転可能
-          />
+          <OrbitControls enableZoom={true} enablePan={true} enableRotate={true} enableDamping={false} autoRotate={false} />
         </Canvas>
       </div>
     );
