@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs';
 
+import { createMockMenuProps, createMockService } from '@src/features/heatmap/__storybook__/mockData';
 import { PlayerTimeline } from '@src/features/heatmap/menu/PlayerTimeline';
-import { mockHeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 
 export default {
   component: PlayerTimeline,
@@ -19,31 +19,19 @@ const Template: Story = {
 export const Default: Story = {
   ...Template,
   name: 'Default (No Session)',
-  args: {
-    model: null,
+  args: createMockMenuProps({
     name: 'playerTimeline',
-    toggleMenu: () => {},
-    eventLogKeys: [],
-    handleExportView: async () => {},
-    mapOptions: [],
-    service: mockHeatmapDataService,
-  },
+  }),
 };
 
 export const WithSession: Story = {
   ...Template,
   name: 'With Session',
-  args: {
-    model: null,
+  args: createMockMenuProps({
     name: 'playerTimeline',
-    toggleMenu: () => {},
-    eventLogKeys: [],
-    handleExportView: async () => {},
-    mapOptions: [],
-    service: {
-      ...mockHeatmapDataService,
-      projectId: '12345',
+    service: createMockService({
+      projectId: 12345,
       sessionId: 1,
-    } as any,
-  },
+    }),
+  }),
 };

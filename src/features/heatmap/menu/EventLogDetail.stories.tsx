@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs';
 
+import { createMockMenuProps } from '@src/features/heatmap/__storybook__/mockData';
 import { EventLogDetail } from '@src/features/heatmap/menu/EventLogDetail';
 
 export default {
@@ -18,40 +19,20 @@ const Template: Story = {
 export const Loading: Story = {
   ...Template,
   name: 'Loading State',
-  args: {
-    model: null,
+  args: createMockMenuProps({
     name: 'eventLogDetail',
-    toggleMenu: () => {},
-    eventLogKeys: [],
-    handleExportView: async () => {},
-    mapOptions: [],
-    service: {
-      projectId: '1',
-      sessionId: null,
-      setSessionId: () => {},
-    } as any,
     extra: {
       logName: 'PlayerDeath',
       id: 123,
     },
-  },
+  }),
 };
 
 export const NoData: Story = {
   ...Template,
   name: 'No Data',
-  args: {
-    model: null,
+  args: createMockMenuProps({
     name: 'eventLogDetail',
-    toggleMenu: () => {},
-    eventLogKeys: [],
-    handleExportView: async () => {},
-    mapOptions: [],
-    service: {
-      projectId: '1',
-      sessionId: null,
-      setSessionId: () => {},
-    } as any,
     extra: {},
-  },
+  }),
 };

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs';
 
+import { createMockMenuProps, createMockService } from '@src/features/heatmap/__storybook__/mockData';
 import { RouteCoachMenuContent } from '@src/features/heatmap/routecoach/RouteCoachMenuContent';
-import { mockHeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 
 export default {
   component: RouteCoachMenuContent,
@@ -19,31 +19,19 @@ const Template: Story = {
 export const Default: Story = {
   ...Template,
   name: 'Default (No Project)',
-  args: {
-    model: null,
+  args: createMockMenuProps({
     name: 'routecoach',
-    toggleMenu: () => {},
-    eventLogKeys: [],
-    handleExportView: async () => {},
-    mapOptions: [],
-    service: mockHeatmapDataService,
-  },
+  }),
 };
 
 export const WithProject: Story = {
   ...Template,
   name: 'With Project ID',
-  args: {
-    model: null,
+  args: createMockMenuProps({
     name: 'routecoach',
-    toggleMenu: () => {},
-    eventLogKeys: [],
-    handleExportView: async () => {},
-    mapOptions: [],
-    service: {
-      ...mockHeatmapDataService,
-      projectId: '12345',
+    service: createMockService({
+      projectId: 12345,
       sessionId: 1,
-    } as any,
-  },
+    }),
+  }),
 };

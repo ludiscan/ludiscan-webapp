@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs';
 
+import { createMockMenuProps } from '@src/features/heatmap/__storybook__/mockData';
 import { HotspotMenuContent } from '@src/features/heatmap/menu/HotspotMenuContent';
 
 export default {
@@ -18,17 +19,7 @@ const Template: Story = {
 export const Default: Story = {
   ...Template,
   name: 'Default',
-  args: {
-    model: null,
+  args: createMockMenuProps({
     name: 'hotspot',
-    toggleMenu: () => {},
-    eventLogKeys: [],
-    handleExportView: async () => {},
-    mapOptions: [],
-    service: {
-      projectId: '1',
-      sessionId: null,
-      setSessionId: () => {},
-    } as any,
-  },
+  }),
 };

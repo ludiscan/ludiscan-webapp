@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs';
+import type { Group } from 'three';
 
+import { createMockMenuProps, mockModel } from '@src/features/heatmap/__storybook__/mockData';
 import { MapMenuContent } from '@src/features/heatmap/menu/MapMenuContent';
 
 export default {
@@ -15,64 +17,30 @@ const Template: Story = {
   },
 };
 
-const mockModel = {
-  children: [
-    { uuid: '1', name: 'Building1', type: 'obj', visible: true },
-    { uuid: '2', name: 'Building2', type: 'gltf', visible: false },
-    { uuid: '3', name: 'Tree1', type: 'glb', visible: true },
-  ],
-};
-
 export const Default: Story = {
   ...Template,
   name: 'Default (No Map Options)',
-  args: {
-    model: null,
+  args: createMockMenuProps({
     name: 'map',
-    toggleMenu: () => {},
-    eventLogKeys: [],
-    handleExportView: async () => {},
-    mapOptions: [],
-    service: {
-      projectId: '1',
-      sessionId: null,
-      setSessionId: () => {},
-    } as any,
-  },
+  }),
 };
 
 export const WithMapOptions: Story = {
   ...Template,
   name: 'With Map Options',
-  args: {
-    model: mockModel as any,
+  args: createMockMenuProps({
+    model: mockModel as unknown as Group,
     name: 'map',
-    toggleMenu: () => {},
-    eventLogKeys: [],
-    handleExportView: async () => {},
     mapOptions: ['Map1', 'Map2', 'Map3'],
-    service: {
-      projectId: '1',
-      sessionId: null,
-      setSessionId: () => {},
-    } as any,
-  },
+  }),
 };
 
 export const WithModelSelected: Story = {
   ...Template,
   name: 'With Model Selected',
-  args: {
-    model: mockModel as any,
+  args: createMockMenuProps({
+    model: mockModel as unknown as Group,
     name: 'map',
-    toggleMenu: () => {},
-    eventLogKeys: [],
-    handleExportView: async () => {},
     mapOptions: ['Map1', 'Map2', 'Map3'],
-    service: {
-      projectId: '1',
-      sessionId: null,
-      setSessionId: () => {},
-    } as any,
-  },
+  }),
 };
