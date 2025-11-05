@@ -15,13 +15,23 @@ Argos CIは、Pull Request上でStorybookコンポーネントの見た目の差
 2. GitHubアカウントでサインアップ
 3. リポジトリ (`ludiscan/ludiscan-webapp`) を接続
 
-### 2. Argosトークンの取得
+### 2. Argos GitHub Appのインストール（重要！）
+
+**PRに自動でコメントを投稿するために必須です**
+
+1. Argosダッシュボードでプロジェクトを開く
+2. "Settings" → "GitHub" に移動
+3. "Install GitHub App" ボタンをクリック
+4. GitHubの認証画面で、リポジトリへのアクセスを許可
+5. インストール完了後、Argosがリポジトリのステータスチェックとコメント投稿ができるようになる
+
+### 3. Argosトークンの取得
 
 1. Argosダッシュボードでプロジェクト設定を開く
 2. "Settings" → "Tokens" から **ARGOS_TOKEN** を取得
 3. トークンをコピー（後で使用）
 
-### 3. GitHub Secretsの設定
+### 4. GitHub Secretsの設定
 
 1. GitHubリポジトリの "Settings" → "Secrets and variables" → "Actions" を開く
 2. "New repository secret" をクリック
@@ -30,12 +40,16 @@ Argos CIは、Pull Request上でStorybookコンポーネントの見た目の差
    - **Secret**: 先ほどコピーしたトークンを貼り付け
 4. "Add secret" をクリック
 
-### 4. 動作確認
+### 5. 動作確認
 
 1. 新しいブランチを作成し、コンポーネントの見た目を変更
 2. PRを作成
 3. GitHub Actionsで `storybook-test` ジョブが実行される
-4. Argosがビジュアル差分を生成し、PRにコメントが投稿される
+4. Argosがビジュアル差分を生成
+5. **Argos GitHub Appがインストール済みの場合**、PRに自動でコメントが投稿される
+6. コメント内のリンクから差分を確認できる
+
+**注意**: GitHub Appをインストールしていない場合は、Argosダッシュボードで直接差分を確認する必要があります。PRコメントは投稿されません。
 
 ## 使い方
 
@@ -117,6 +131,19 @@ PRワークフローの `storybook-test` ジョブで、スクリーンショッ
 ```
 
 ## トラブルシューティング
+
+### PRにコメントが投稿されない
+
+**最も多い原因**: Argos GitHub Appがインストールされていない
+
+1. Argosダッシュボードで "Settings" → "GitHub" を確認
+2. "Install GitHub App" ボタンが表示されている場合、まだインストールされていない
+3. ボタンをクリックしてGitHub Appをインストール
+4. インストール後、次のPRから自動でコメントが投稿される
+
+**その他の確認事項**:
+- GitHubリポジトリの "Settings" → "Integrations" → "GitHub Apps" でArgosが表示されているか確認
+- Argosダッシュボードで該当のビルドが成功しているか確認
 
 ### Argosアップロードが失敗する
 
