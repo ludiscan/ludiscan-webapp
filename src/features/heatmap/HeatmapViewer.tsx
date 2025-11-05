@@ -14,6 +14,7 @@ import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC } from 'react';
 
 import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
+import { useToast } from '@src/component/templates/ToastContext';
 import { HeatMapCanvas } from '@src/features/heatmap/HeatmapCanvas';
 import { HeatmapMenuContent } from '@src/features/heatmap/HeatmapMenuContent';
 import { useOBJFromArrayBuffer } from '@src/features/heatmap/ModelLoader';
@@ -36,6 +37,7 @@ export type HeatmapViewerProps = {
 };
 
 const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
+  const toast = useToast();
   const [map, setMap] = useState<string | ArrayBuffer | null>(null);
   const [modelType, setModelType] = useState<'gltf' | 'glb' | 'obj' | 'server' | null>(null);
   const [dpr, setDpr] = useState(2);
@@ -169,13 +171,13 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
         );
       await exportHeatmap(task, d, generalLogKeys, mapContent, mapList, store.getState().heatmapCanvas);
       // 成功メッセージ
-      alert('エクスポートが完了しました！');
+      toast.showToast('Export completed successfully', 3000, 'success');
     } catch (error) {
       // eslint-disable-next-line
       console.error('エクスポート中にエラーが発生しました:', error);
-      alert('エクスポートに失敗しました。');
+      toast.showToast('Export failed', 3000, 'error');
     }
-  }, [generalLogKeys, mapContent, mapList, service, store, task]);
+  }, [generalLogKeys, mapContent, mapList, service, store, task, toast]);
 
   // セッション選択時にフィールドオブジェクトメニューを自動開く
   useEffect(() => {
@@ -385,10 +387,10 @@ export const HeatMapViewer = memo(
   `,
   (prev, next) => {
     return (
-      prev.className == next.className &&
-      prev.service.task == next.service.task &&
-      prev.service.projectId == next.service.projectId &&
-      prev.service.sessionId == next.service.sessionId
+      prev.className === next.className &&
+      prev.service.task === next.service.task &&
+      prev.service.projectId === next.service.projectId &&
+      prev.service.sessionId === next.service.sessionId
     );
   },
 );
