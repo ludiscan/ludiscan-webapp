@@ -10,6 +10,9 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
+  checks: write
+  statuses: write
 
 concurrency:
   group: 'pr-workflow-${{ github.head_ref }}'

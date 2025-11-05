@@ -25,6 +25,13 @@ Argos CIは、Pull Request上でStorybookコンポーネントの見た目の差
 4. GitHubの認証画面で、リポジトリへのアクセスを許可
 5. インストール完了後、Argosがリポジトリのステータスチェックとコメント投稿ができるようになる
 
+**重要**: GitHub ActionsワークフローにもArgosがPRコメントを投稿するための適切なパーミッションが設定されている必要があります：
+- `pull-requests: write` - PRにコメントを投稿
+- `checks: write` - チェックステータスを更新
+- `statuses: write` - ステータスを更新
+
+これらのパーミッションは `.github/workflows/pr.yml` に既に設定されています。
+
 ### 3. Argosトークンの取得
 
 1. Argosダッシュボードでプロジェクト設定を開く
@@ -116,7 +123,17 @@ export default {
 
 ### GitHub Actions (.github/workflows/pr.yml)
 
-PRワークフローの `storybook-test` ジョブで、スクリーンショット撮影とArgosへのアップロードが実行されます：
+PRワークフローには、ArgosがPRにコメントを投稿するための適切なパーミッションが設定されています：
+
+```yaml
+permissions:
+  contents: read
+  pull-requests: write  # PRにコメントを投稿
+  checks: write         # チェックステータスを更新
+  statuses: write       # ステータスを更新
+```
+
+`storybook-test` ジョブで、スクリーンショット撮影とArgosへのアップロードが実行されます：
 
 ```yaml
 - name: Serve Storybook and run tests
@@ -144,6 +161,7 @@ PRワークフローの `storybook-test` ジョブで、スクリーンショッ
 **その他の確認事項**:
 - GitHubリポジトリの "Settings" → "Integrations" → "GitHub Apps" でArgosが表示されているか確認
 - Argosダッシュボードで該当のビルドが成功しているか確認
+- GitHub Actionsワークフローに適切なパーミッション（`pull-requests: write`, `checks: write`, `statuses: write`）が設定されているか確認
 
 ### Argosアップロードが失敗する
 
