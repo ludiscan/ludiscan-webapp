@@ -26,7 +26,7 @@ const Component: FC<DocsContentProps> = ({ doc, className }) => {
   if (!doc) {
     return (
       <div className={className}>
-        <Text text='Select a documentation page to view its content' fontSize={fontSizes.large1} color={theme.colors.secondary.main} />
+        <Text text='Select a documentation page to view its content' fontSize={fontSizes.large1} color={theme.colors.text.secondary} />
       </div>
     );
   }
@@ -36,8 +36,8 @@ const Component: FC<DocsContentProps> = ({ doc, className }) => {
       <FlexColumn gap={24}>
         {/* Header */}
         <div className={`${className}__header`}>
-          <Text text={doc.frontmatter.title} fontSize={fontSizes.largest} fontWeight={fontWeights.bold} color={theme.colors.text} />
-          {doc.frontmatter.description && <Text text={doc.frontmatter.description} fontSize={fontSizes.large1} color={theme.colors.secondary.main} />}
+          <Text text={doc.frontmatter.title} fontSize={fontSizes.largest} fontWeight={fontWeights.bold} color={theme.colors.text.primary} />
+          {doc.frontmatter.description && <Text text={doc.frontmatter.description} fontSize={fontSizes.large1} color={theme.colors.text.secondary} />}
         </div>
 
         {/* Content - Rendered with MarkDownText */}
@@ -58,7 +58,7 @@ export const DocsContent = styled(Component)`
     gap: 8px;
     padding-bottom: 16px;
     margin-bottom: 16px;
-    border-bottom: 1px solid ${({ theme }) => theme.colors.border.main};
+    border-bottom: 1px solid ${({ theme }) => theme.colors.border.default};
   }
 
   &__content {
@@ -70,7 +70,7 @@ export const DocsContent = styled(Component)`
   &__markdown {
     font-size: ${fontSizes.medium};
     line-height: 1.7;
-    color: ${({ theme }) => theme.colors.text};
+    color: ${({ theme }) => theme.colors.text.primary};
 
     /* Headings */
     h1 {
@@ -78,8 +78,8 @@ export const DocsContent = styled(Component)`
       margin: 24px 0 16px;
       font-size: ${fontSizes.largest};
       font-weight: ${fontWeights.bold};
-      color: ${({ theme }) => theme.colors.text};
-      border-bottom: 2px solid ${({ theme }) => theme.colors.border.main};
+      color: ${({ theme }) => theme.colors.text.primary};
+      border-bottom: 2px solid ${({ theme }) => theme.colors.border.default};
 
       &:first-of-type {
         margin-top: 0;
@@ -91,22 +91,22 @@ export const DocsContent = styled(Component)`
       margin: 20px 0 12px;
       font-size: ${fontSizes.large3};
       font-weight: ${fontWeights.bold};
-      color: ${({ theme }) => theme.colors.text};
-      border-bottom: 1px solid ${({ theme }) => theme.colors.border.main};
+      color: ${({ theme }) => theme.colors.text.primary};
+      border-bottom: 1px solid ${({ theme }) => theme.colors.border.default};
     }
 
     h3 {
       margin: 16px 0 8px;
       font-size: ${fontSizes.large2};
       font-weight: ${fontWeights.bold};
-      color: ${({ theme }) => theme.colors.text};
+      color: ${({ theme }) => theme.colors.text.primary};
     }
 
     h4 {
       margin: 12px 0 8px;
       font-size: ${fontSizes.large1};
       font-weight: ${fontWeights.bold};
-      color: ${({ theme }) => theme.colors.text};
+      color: ${({ theme }) => theme.colors.text.primary};
     }
 
     /* Paragraphs */
@@ -149,8 +149,8 @@ export const DocsContent = styled(Component)`
       padding: 2px 6px;
       font-family: Consolas, Monaco, 'Courier New', monospace;
       font-size: 0.9em;
-      color: ${({ theme }) => theme.colors.error};
-      background-color: ${({ theme }) => theme.colors.surface.main};
+      color: ${({ theme }) => theme.colors.semantic.error.main};
+      background-color: ${({ theme }) => theme.colors.surface.base};
       border-radius: 4px;
     }
 
@@ -159,14 +159,14 @@ export const DocsContent = styled(Component)`
       padding: 16px;
       margin: 16px 0;
       overflow-x: auto;
-      background-color: ${({ theme }) => theme.colors.surface.main};
-      border: 1px solid ${({ theme }) => theme.colors.border.main};
+      background-color: ${({ theme }) => theme.colors.surface.base};
+      border: 1px solid ${({ theme }) => theme.colors.border.default};
       border-radius: 8px;
 
       code {
         padding: 0;
         font-size: ${fontSizes.small};
-        color: ${({ theme }) => theme.colors.text};
+        color: ${({ theme }) => theme.colors.text.primary};
         background-color: transparent;
         border-radius: 0;
       }
@@ -176,8 +176,8 @@ export const DocsContent = styled(Component)`
     blockquote {
       padding: 12px 20px;
       margin: 16px 0;
-      color: ${({ theme }) => theme.colors.secondary.main};
-      background-color: ${({ theme }) => theme.colors.surface.main};
+      color: ${({ theme }) => theme.colors.text.secondary};
+      background-color: ${({ theme }) => theme.colors.surface.base};
       border-left: 4px solid ${({ theme }) => theme.colors.primary.main};
 
       p {
@@ -190,22 +190,22 @@ export const DocsContent = styled(Component)`
       width: 100%;
       margin: 16px 0;
       border-collapse: collapse;
-      border: 1px solid ${({ theme }) => theme.colors.border.main};
+      border: 1px solid ${({ theme }) => theme.colors.border.default};
 
       th,
       td {
         padding: 10px 12px;
         text-align: left;
-        border: 1px solid ${({ theme }) => theme.colors.border.main};
+        border: 1px solid ${({ theme }) => theme.colors.border.default};
       }
 
       th {
         font-weight: ${fontWeights.bold};
-        background-color: ${({ theme }) => theme.colors.surface.main};
+        background-color: ${({ theme }) => theme.colors.surface.base};
       }
 
       tr:nth-of-type(even) {
-        background-color: ${({ theme }) => theme.colors.surface.main};
+        background-color: ${({ theme }) => theme.colors.surface.base};
       }
     }
 
@@ -213,13 +213,13 @@ export const DocsContent = styled(Component)`
     hr {
       margin: 24px 0;
       border: none;
-      border-top: 1px solid ${({ theme }) => theme.colors.border.main};
+      border-top: 1px solid ${({ theme }) => theme.colors.border.default};
     }
 
     /* Strong and emphasis */
     strong {
       font-weight: ${fontWeights.bold};
-      color: ${({ theme }) => theme.colors.text};
+      color: ${({ theme }) => theme.colors.text.primary};
     }
 
     em {

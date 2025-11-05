@@ -13,8 +13,8 @@ import { Header } from '@src/component/templates/Header';
 import { ToastProvider } from '@src/component/templates/ToastContext';
 import { HeatMapViewer } from '@src/features/heatmap/HeatmapViewer';
 import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
+import theme from '@src/modeles/theme';
 import { type AppStore, store } from '@src/store';
-import lightTheme from '@src/styles/light';
 import { fontSizes } from '@src/styles/style';
 import { useOfflineHeatmapDataService } from '@src/utils/heatmap/useOfflineHeatmapDataService';
 
@@ -90,10 +90,10 @@ export const Component: FC<OfflineHeatmapProviderProps> = ({ className }) => {
     <Provider store={storeRef.current}>
       <ToastProvider position={'top-right'}>
         <QueryClientProvider client={queryClient}>
-          <SharedThemeProvider initialTheme={lightTheme}>
+          <SharedThemeProvider initialTheme={theme.crimsonDusk.dark}>
             <Modal isOpen={data == null} title={'ヒートマップデータの読み込み'} onClose={() => {}}>
               <div className={`${className}__fileInputWrapper`}>
-                <Button onClick={() => dataInput.current?.click()} scheme={'primary'} fontSize={'medium'} disabled={isLoading}>
+                <Button onClick={() => dataInput.current?.click()} scheme={'primary'} fontSize={'base'} disabled={isLoading}>
                   ファイルを選択
                   <input
                     ref={dataInput}
@@ -118,13 +118,13 @@ export const Component: FC<OfflineHeatmapProviderProps> = ({ className }) => {
               iconTitleEnd={<Text className={`${className}__headerV`} text={'offline'} fontSize={fontSizes.small} fontWeight={'bold'} />}
               iconEnd={
                 <>
-                  <Button fontSize={'small'} onClick={() => {}} scheme={'surface'}>
+                  <Button fontSize={'sm'} onClick={() => {}} scheme={'surface'}>
                     <Text text={'Discord'} fontWeight={'bold'} />
                   </Button>
-                  <Button fontSize={'small'} onClick={() => {}} scheme={'surface'}>
+                  <Button fontSize={'sm'} onClick={() => {}} scheme={'surface'}>
                     <Text text={'Save'} fontWeight={'bold'} />
                   </Button>
-                  <Button fontSize={'small'} onClick={() => {}} scheme={'primary'}>
+                  <Button fontSize={'sm'} onClick={() => {}} scheme={'primary'}>
                     <Text text={'Export'} fontWeight={'bold'} />
                   </Button>
                 </>

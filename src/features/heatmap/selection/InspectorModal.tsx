@@ -94,7 +94,7 @@ export const InspectorModalComponent: FC<{ className?: string }> = ({ className 
   if (!sel) return null;
 
   return (
-    <Card className={className} color={theme.colors.surface.light} border={theme.colors.border.main} blur>
+    <Card className={className} color={theme.colors.surface.sunken} border={theme.colors.border.default} blur>
       {title && <Text text={title} fontSize={fontSizes.large3} />}
 
       <div style={{ display: 'grid', gap: 6 }}>
@@ -107,13 +107,13 @@ export const InspectorModalComponent: FC<{ className?: string }> = ({ className 
       <hr style={{ margin: '12px 0', opacity: 0.2 }} />
 
       <InlineFlexRow align={'center'} gap={8}>
-        <Button onClick={focusHere} scheme={'surface'} fontSize={'small'}>
+        <Button onClick={focusHere} scheme={'surface'} fontSize={'sm'}>
           Center camera
         </Button>
 
         {sel.kind === 'player-arrow' && sel.liveRefKey && <button onClick={toggleFollow}>{isFollowingThis ? 'Stop following' : 'Follow this player'}</button>}
       </InlineFlexRow>
-      <Button className={`${className}__close`} onClick={() => dispatch(setSelected(null))} scheme={'none'} fontSize={'small'}>
+      <Button className={`${className}__close`} onClick={() => dispatch(setSelected(null))} scheme={'none'} fontSize={'sm'}>
         <IoClose />
       </Button>
     </Card>

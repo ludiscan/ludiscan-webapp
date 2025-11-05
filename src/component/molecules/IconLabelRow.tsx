@@ -29,7 +29,7 @@ const Component: FC<IconLabelRowButtonProps | IconLabelRowLinkProps> = (props) =
   if ('onClick' in props) {
     const { className, icon, label, onClick, gap } = props as IconLabelRowButtonProps;
     return (
-      <Button className={className} onClick={onClick} scheme={'none'} fontSize={'medium'}>
+      <Button className={className} onClick={onClick} scheme={'none'} fontSize={'base'}>
         <FlexRow gap={gap} align={'center'} wrap={'nowrap'} className={`${className}__buttonRow`}>
           {icon}
           <Text text={label} />
@@ -40,7 +40,7 @@ const Component: FC<IconLabelRowButtonProps | IconLabelRowLinkProps> = (props) =
   const { className, icon, label, href, target = '_self', gap } = props as IconLabelRowLinkProps;
   return (
     <a className={`${className} a`} href={href} target={target} rel='noopener noreferrer'>
-      <IconContext.Provider value={{ size: ButtonIconSize({ fontSize: 'medium' }) }}>
+      <IconContext.Provider value={{ size: ButtonIconSize({ fontSize: 'base' }) }}>
         <FlexRow gap={gap} align={'center'} wrap={'nowrap'} className={`${className}__linkedRow`}>
           {icon}
           <Text className={`${className}__linkedText`} text={label} fontSize={fontSizes.medium} />

@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 
 import { authReducer } from '@src/slices/authSlice';
 import { canvasReducer } from '@src/slices/canvasSlice';
+import { routeCoachReducer } from '@src/slices/routeCoachSlice';
 import { selectionReducer } from '@src/slices/selectionSlice';
 
 export const store = () => {
@@ -10,6 +11,7 @@ export const store = () => {
       auth: authReducer,
       heatmapCanvas: canvasReducer,
       selection: selectionReducer,
+      routeCoach: routeCoachReducer,
     },
   });
 };

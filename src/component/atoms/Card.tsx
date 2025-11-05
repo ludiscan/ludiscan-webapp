@@ -67,13 +67,13 @@ const hexToRgba = (hex: string, alpha: number) => {
 
 export const Card = styled(Component)`
   padding: ${({ padding }) => padding || '16px'};
-  background-color: ${({ color, theme }) => color || theme.colors.surface.main};
+  background-color: ${({ color, theme }) => color || theme.colors.surface.base};
   border: ${({ border }) => `1px solid ${border}`};
   border-radius: 8px;
   box-shadow: ${(props) => shadowStyle(props)};
 
   &.blur {
-    background-color: ${({ color, theme }) => hexToRgba(color || theme.colors.surface.main, 0.7)};
+    background-color: ${({ color, theme }) => hexToRgba(color || theme.colors.surface.base, 0.7)};
 
     ${({ border }) => border && `border: 1px solid ${hexToRgba(border, 0.7)}`};
     /* 背景をぼかす */

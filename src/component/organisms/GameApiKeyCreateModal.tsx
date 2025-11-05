@@ -34,16 +34,16 @@ const Component: FC<GameApiKeyCreateModalProps> = ({ className, isOpen, newKeyNa
       <div className={`${className}__modal`}>
         <FlexColumn gap={16}>
           <div>
-            <Text text='Key Name' fontSize={fontSizes.small} color={theme.colors.text} fontWeight={fontWeights.bold} />
+            <Text text='Key Name' fontSize={fontSizes.small} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
             <VerticalSpacer size={8} />
             <OutlinedTextField value={newKeyName} onChange={onKeyNameChange} placeholder='e.g., Production API Key' fontSize={fontSizes.medium} />
           </div>
 
           <FlexRow gap={8} className={`${className}__buttonRow`}>
-            <Button onClick={onClose} scheme='none' fontSize='small' disabled={isCreatingKey}>
+            <Button onClick={onClose} scheme='none' fontSize={'sm'} disabled={isCreatingKey}>
               <Text text='Cancel' fontSize={fontSizes.small} />
             </Button>
-            <Button onClick={handleCreate} scheme='primary' fontSize='small' disabled={isCreatingKey}>
+            <Button onClick={handleCreate} scheme='primary' fontSize={'sm'} disabled={isCreatingKey}>
               <Text text={isCreatingKey ? 'Creating...' : 'Create'} fontSize={fontSizes.small} />
             </Button>
           </FlexRow>
@@ -56,7 +56,7 @@ const Component: FC<GameApiKeyCreateModalProps> = ({ className, isOpen, newKeyNa
 export const GameApiKeyCreateModal = styled(Component)`
   &__modal {
     padding: 16px;
-    color: ${({ theme }) => theme.colors.text};
+    color: ${({ theme }) => theme.colors.text.primary};
   }
 
   &__buttonRow {

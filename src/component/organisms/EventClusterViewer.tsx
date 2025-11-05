@@ -4,6 +4,7 @@ import type { FC } from 'react';
 
 import { ImprovementRouteCard } from '@src/component/molecules/ImprovementRouteCard';
 import { useImprovementRoutes } from '@src/hooks/useImprovementRoutes';
+import { useSelectedClusterId } from '@src/hooks/useRouteCoach';
 
 interface ImprovementRoute {
   id: number;
@@ -37,12 +38,15 @@ interface EventClusterViewerProps {
   playerId?: string;
   mapName?: string;
   onRouteVisualize?: (route: ImprovementRoute, clusterIndex: number) => void;
+  onSelectCluster?: (clusterId: number) => void;
 }
 
 /**
  * イベントクラスタと改善案ルートを表示するviewer
  */
-const Component: FC<EventClusterViewerProps> = ({ className, projectId, playerId, mapName, onRouteVisualize }) => {
+const Component: FC<EventClusterViewerProps> = ({ className, projectId, playerId, mapName, onRouteVisualize, onSelectCluster }) => {
+  // Redux から selectedClusterId を取得
+  const selectedClusterId = useSelectedClusterId();
   const { data, isLoading, error } = useImprovementRoutes(projectId, playerId, {
     mapName,
   });
@@ -65,9 +69,20 @@ const Component: FC<EventClusterViewerProps> = ({ className, projectId, playerId
     <div className={className}>
       {clusters.map((cluster, clusterIndex) => {
         const c = cluster;
+        const isSelected = selectedClusterId === c.id;
         return (
-          <div key={`cluster-${c.id}`} className={`${className}__cluster`}>
-            <div className={`${className}__clusterHeader`}>
+          <div key={`cluster-${c.id}`} className={`${className}__cluster ${isSelected ? `${className}__cluster--selected` : ''}`}>
+            <div
+              className={`${className}__clusterHeader`}
+              onClick={() => onSelectCluster?.(c.id)}
+              role='button'
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  onSelectCluster?.(c.id);
+                }
+              }}
+            >
               <div>
                 <h3 className={`${className}__clusterTitle`}>
                   クラスタ #{String(c.id)}
@@ -160,6 +175,13 @@ export const EventClusterViewer = styled(Component)`
     background-color: #f5f5f5;
     border: 1px solid #ddd;
     border-radius: 8px;
+    transition: all 0.2s ease;
+
+    &--selected {
+      background-color: #e3f2fd;
+      border-color: #2196f3;
+      box-shadow: 0 0 8px rgb(33 150 243 / 30%);
+    }
   }
 
   &__clusterHeader {
@@ -168,7 +190,19 @@ export const EventClusterViewer = styled(Component)`
     justify-content: space-between;
     padding-bottom: 12px;
     margin-bottom: 16px;
+    cursor: pointer;
     border-bottom: 2px solid #2196f3;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: rgb(33 150 243 / 5%);
+    }
+
+    &:focus {
+      outline: 2px solid #2196f3;
+      outline-offset: 2px;
+    }
   }
 
   &__clusterTitle {

@@ -74,10 +74,10 @@ const DetailBlockInternal: FC<{ className?: string; details: PlayerTimelineDetai
     <InlineFlexColumn gap={4} className={className}>
       <Divider />
       <FlexRow className={`${className}__row`} wrap={'nowrap'} align={'center'}>
-        <Text text={`Session: ${session_id}`} fontSize={fontSizes.small} color={theme.colors.secondary.main} />
+        <Text text={`Session: ${session_id}`} fontSize={fontSizes.small} color={theme.colors.text.secondary} />
         <div style={{ flex: 1 }} />
         <Button
-          fontSize={'medium'}
+          fontSize={'base'}
           onClick={() => {
             setData((prev) => {
               const newDetails: PlayerTimelineDetail[] = prev.details?.filter((d) => !details.some((detail) => d.session_id === detail.session_id)) || [];
@@ -91,7 +91,7 @@ const DetailBlockInternal: FC<{ className?: string; details: PlayerTimelineDetai
       </FlexRow>
       {details.map((detail, index) => (
         <InlineFlexRow key={index} wrap={'nowrap'} align={'center'} className={`${className}__row`} gap={4}>
-          <Text text={`Player: ${detail.player}`} fontSize={fontSizes.small} color={theme.colors.secondary.main} />
+          <Text text={`Player: ${detail.player}`} fontSize={fontSizes.small} color={theme.colors.text.secondary} />
           <Switch
             checked={detail.visible}
             onChange={() => {
@@ -121,7 +121,7 @@ const DetailBlockInternal: FC<{ className?: string; details: PlayerTimelineDetai
               <Text text={session.data.name} fontSize={fontSizes.small} />
             </InputRow>
             <InlineFlexRow wrap={'nowrap'} align={'center'} className={`${className}__row`} gap={4}>
-              <Text text={'Start Time'} fontSize={fontSizes.small} color={theme.colors.secondary.main} />
+              <Text text={'Start Time'} fontSize={fontSizes.small} color={theme.colors.text.secondary} />
               <div className={`${className}__weight1`}>
                 <Text text={toISOAboutStringWithTimezone(new Date(session.data.startTime))} fontSize={fontSizes.small} />
               </div>
@@ -328,7 +328,7 @@ const PlayerTimelineComponent: FC<HeatmapMenuProps> = ({ className, service }) =
             onTrailingIconClick={() => setIsOpenQueryInfo(true)}
           >
             <TextArea placeholder={queryPlaceholder} className={`${className}__queryTextField`} value={queryText} onChange={setQueryText} />
-            <Button fontSize={'small'} scheme={'primary'} onClick={onApplyQuery} disabled={queryDisable}>
+            <Button fontSize={'sm'} scheme={'primary'} onClick={onApplyQuery} disabled={queryDisable}>
               <Text text={'search'} />
             </Button>
           </Toggle>

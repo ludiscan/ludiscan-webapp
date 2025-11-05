@@ -55,7 +55,7 @@ export const InfoMenuContent: FC<HeatmapMenuProps> = ({ handleExportView, servic
         </>
       )}
       <InlineFlexRow align={'center'} gap={8} style={{ marginTop: 8, justifyContent: 'center' }}>
-        <Button onClick={handleExportHeatmap} scheme={'primary'} fontSize={'small'}>
+        <Button onClick={handleExportHeatmap} scheme={'primary'} fontSize={'sm'}>
           <FaFileExport style={{ marginRight: 4 }} />
           <Text text={'エクスポート'} fontSize={fontSizes.small} fontWeight={fontWeights.bold} />
         </Button>

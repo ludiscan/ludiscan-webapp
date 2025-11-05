@@ -51,8 +51,8 @@ function defaultStyle(theme: Theme): Styles {
       height: 'fit-content',
       position: 'relative',
       borderRadius: '8px',
-      backgroundColor: theme.colors.surface.main,
-      border: `1px solid ${theme.colors.border.main}`,
+      backgroundColor: theme.colors.surface.base,
+      border: `1px solid ${theme.colors.border.default}`,
       paddingTop: '12px',
       transition: 'all 0.5s ease-in-out',
     },
@@ -76,7 +76,7 @@ const Component = ({ className, isOpen, onClose, children, title, closeOutside, 
         </FlexColumn>
       )}
       {onClose && (
-        <Button className={`${className}__closeButton`} onClick={onClose} scheme={'none'} fontSize={'medium'}>
+        <Button className={`${className}__closeButton`} onClick={onClose} scheme={'none'} fontSize={'base'}>
           <IoCloseOutline size={24} />
         </Button>
       )}

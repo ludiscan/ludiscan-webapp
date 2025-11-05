@@ -40,7 +40,7 @@ const Component: FC<SecurityPageProps> = ({ className }) => {
         <SidebarLayout />
         <InnerContent>
           <div className={`${className}__centerContent`}>
-            <Text text='Loading...' fontSize={fontSizes.medium} color={theme.colors.text} />
+            <Text text='Loading...' fontSize={fontSizes.medium} color={theme.colors.text.primary} />
           </div>
         </InnerContent>
       </div>
@@ -54,16 +54,16 @@ const Component: FC<SecurityPageProps> = ({ className }) => {
         <Header title='Security Settings' onClick={handleBack} />
 
         <div className={`${className}__container`}>
-          <Card blur color={theme.colors.surface.main} className={`${className}__card`}>
+          <Card blur color={theme.colors.surface.base} className={`${className}__card`}>
             <FlexColumn gap={24}>
               {/* パスワード変更セクション */}
               <div>
-                <Text text='Password Management' fontSize={fontSizes.large1} color={theme.colors.text} fontWeight={fontWeights.bold} />
+                <Text text='Password Management' fontSize={fontSizes.large1} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
                 <VerticalSpacer size={12} />
                 <Text
                   text='Password change functionality will be available in a future update.'
                   fontSize={fontSizes.small}
-                  color={theme.colors.secondary.main}
+                  color={theme.colors.text.secondary}
                   fontWeight='lighter'
                 />
               </div>
@@ -72,12 +72,12 @@ const Component: FC<SecurityPageProps> = ({ className }) => {
 
               {/* 2段階認証セクション */}
               <div>
-                <Text text='Two-Factor Authentication' fontSize={fontSizes.large1} color={theme.colors.text} fontWeight={fontWeights.bold} />
+                <Text text='Two-Factor Authentication' fontSize={fontSizes.large1} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
                 <VerticalSpacer size={12} />
                 <Text
                   text='Two-factor authentication will be available in a future update.'
                   fontSize={fontSizes.small}
-                  color={theme.colors.secondary.main}
+                  color={theme.colors.text.secondary}
                   fontWeight='lighter'
                 />
               </div>
@@ -86,12 +86,12 @@ const Component: FC<SecurityPageProps> = ({ className }) => {
 
               {/* セッション管理セクション */}
               <div>
-                <Text text='Session Management' fontSize={fontSizes.large1} color={theme.colors.text} fontWeight={fontWeights.bold} />
+                <Text text='Session Management' fontSize={fontSizes.large1} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
                 <VerticalSpacer size={12} />
                 <Text
                   text='Session management features will be available in a future update.'
                   fontSize={fontSizes.small}
-                  color={theme.colors.secondary.main}
+                  color={theme.colors.text.secondary}
                   fontWeight='lighter'
                 />
               </div>
@@ -100,12 +100,12 @@ const Component: FC<SecurityPageProps> = ({ className }) => {
 
               {/* ログイン履歴セクション */}
               <div>
-                <Text text='Login History' fontSize={fontSizes.large1} color={theme.colors.text} fontWeight={fontWeights.bold} />
+                <Text text='Login History' fontSize={fontSizes.large1} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
                 <VerticalSpacer size={12} />
                 <Text
                   text='Login history tracking will be available in a future update.'
                   fontSize={fontSizes.small}
-                  color={theme.colors.secondary.main}
+                  color={theme.colors.text.secondary}
                   fontWeight='lighter'
                 />
               </div>
@@ -114,31 +114,31 @@ const Component: FC<SecurityPageProps> = ({ className }) => {
 
               {/* セキュリティ情報セクション */}
               <div>
-                <Text text='Security Information' fontSize={fontSizes.large1} color={theme.colors.text} fontWeight={fontWeights.bold} />
+                <Text text='Security Information' fontSize={fontSizes.large1} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
                 <VerticalSpacer size={12} />
                 <FlexColumn gap={8}>
                   <Text
                     text='• All API keys are encrypted and securely stored'
                     fontSize={fontSizes.small}
-                    color={theme.colors.secondary.main}
+                    color={theme.colors.text.secondary}
                     fontWeight='lighter'
                   />
                   <Text
                     text='• Never share your API keys with untrusted parties'
                     fontSize={fontSizes.small}
-                    color={theme.colors.secondary.main}
+                    color={theme.colors.text.secondary}
                     fontWeight='lighter'
                   />
                   <Text
                     text='• Regularly review your API keys and delete unused ones'
                     fontSize={fontSizes.small}
-                    color={theme.colors.secondary.main}
+                    color={theme.colors.text.secondary}
                     fontWeight='lighter'
                   />
                   <Text
                     text='• Report any suspicious activity to our support team'
                     fontSize={fontSizes.small}
-                    color={theme.colors.secondary.main}
+                    color={theme.colors.text.secondary}
                     fontWeight='lighter'
                   />
                 </FlexColumn>
@@ -166,7 +166,7 @@ const SecurityPage = styled(Component)`
   &__divider {
     height: 1px;
     margin: 8px 0;
-    background-color: ${({ theme }) => theme.colors.border.main};
+    background-color: ${({ theme }) => theme.colors.border.default};
   }
 
   &__centerContent {

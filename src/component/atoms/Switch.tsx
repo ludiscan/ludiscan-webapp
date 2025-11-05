@@ -58,7 +58,7 @@ export const Switch = styled(SwitchComponent)`
     inset: 0;
     cursor: pointer;
     background-color: ${({ theme }) => theme.colors.secondary.light};
-    border: 1px solid ${({ theme }) => theme.colors.border.light};
+    border: 1px solid ${({ theme }) => theme.colors.border.strong};
     border-radius: ${({ size }) => (size === 'small' ? '10px' : size === 'medium' ? '12px' : '14px')};
     transition: 0.4s;
   }

@@ -49,13 +49,13 @@ const Component: FC<ProjectItemRowProps> = ({ className, project }) => {
     >
       <FlexRow align={'center'} className={`${className}__content`}>
         <FlexColumn gap={2} className={`${className}__info`}>
-          <ClampText text={project.name} fontSize={fontSizes.large1} color={theme.colors.text} fontWeight={'bold'} lines={1} />
-          <ClampText text={project.description} fontSize={fontSizes.small} fontWeight={'lighter'} lines={1} color={theme.colors.secondary.main} />
+          <ClampText text={project.name} fontSize={fontSizes.large1} color={theme.colors.text.primary} fontWeight={'bold'} lines={1} />
+          <ClampText text={project.description} fontSize={fontSizes.small} fontWeight={'lighter'} lines={1} color={theme.colors.text.secondary} />
           <InlineFlexRow gap={8} className={`${className}__meta`}>
             {project.session_count !== undefined && (
-              <Text text={`${project.session_count} sessions`} fontSize={fontSizes.smallest} color={theme.colors.secondary.main} fontWeight={'lighter'} />
+              <Text text={`${project.session_count} sessions`} fontSize={fontSizes.smallest} color={theme.colors.text.secondary} fontWeight={'lighter'} />
             )}
-            <Text text={`Created: ${formatDate(project.createdAt)}`} fontSize={fontSizes.smallest} color={theme.colors.secondary.main} fontWeight={'lighter'} />
+            <Text text={`Created: ${formatDate(project.createdAt)}`} fontSize={fontSizes.smallest} color={theme.colors.text.secondary} fontWeight={'lighter'} />
           </InlineFlexRow>
         </FlexColumn>
       </FlexRow>
@@ -73,7 +73,7 @@ export const ProjectItemRow = styled(Component)`
 
   &:hover {
     padding: 4px 8px;
-    background-color: ${({ theme }) => theme.colors.surface.light};
+    background-color: ${({ theme }) => theme.colors.surface.sunken};
   }
 
   &__content {

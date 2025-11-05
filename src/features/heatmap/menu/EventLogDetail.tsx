@@ -172,7 +172,7 @@ const Component: FC<HeatmapMenuProps> = ({ extra = {}, className }) => {
                     <Text text={session.data.name} fontSize={fontSizes.small} />
                   </InputRow>
                   <InlineFlexRow wrap={'nowrap'} align={'center'} className={`${className}__row`} gap={4}>
-                    <Text text={'Start Time'} fontSize={fontSizes.small} color={theme.colors.secondary.main} />
+                    <Text text={'Start Time'} fontSize={fontSizes.small} color={theme.colors.text.secondary} />
                     <div className={`${className}__weight1`}>
                       <Text text={toISOAboutStringWithTimezone(new Date(session.data.startTime))} fontSize={fontSizes.small} />
                     </div>
@@ -202,13 +202,13 @@ const Component: FC<HeatmapMenuProps> = ({ extra = {}, className }) => {
         )}
         <InlineFlexRow align={'flex-end'} className={`${className}__row`}>
           <div style={{ flex: 1 }} />
-          <Button fontSize={'medium'} onClick={handleTimelineClick} scheme={'surface'} disabled={timelineDisable}>
+          <Button fontSize={'base'} onClick={handleTimelineClick} scheme={'surface'} disabled={timelineDisable}>
             <Text text={'timeline'} fontSize={fontSizes.medium} />
           </Button>
         </InlineFlexRow>
         <InputRow label={''}>
           <div style={{ flex: 1 }} />
-          <Button onClick={handleReload} scheme={'surface'} fontSize={'small'}>
+          <Button onClick={handleReload} scheme={'surface'} fontSize={'sm'}>
             <Text text={'Reload'} fontSize={fontSizes.small} />
           </Button>
         </InputRow>

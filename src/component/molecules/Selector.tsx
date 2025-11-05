@@ -36,18 +36,18 @@ const ScrollableContentColumn = styled(Menu.ContentColumn)`
   }
 
   &::-webkit-scrollbar-thumb {
-    background: ${({ theme }) => theme.colors.border.main};
+    background: ${({ theme }) => theme.colors.border.default};
     border-radius: 3px;
 
     &:hover {
-      background: ${({ theme }) => theme.colors.border.light};
+      background: ${({ theme }) => theme.colors.border.strong};
     }
   }
 `;
 
 const Component: FC<SelectorProps> = (props) => {
   const { theme } = useSharedTheme();
-  const { className, options, value, onChange, fontSize = 'medium', scheme = 'none', border = true, radius = 'small', maxHeight = 300 } = props;
+  const { className, options, value, onChange, fontSize = 'base', scheme = 'none', border = true, radius = 'small', maxHeight = 300 } = props;
   const [valueRef, setValueRef] = useState<string>(value || options[0] || '');
   return (
     <Menu
@@ -59,7 +59,7 @@ const Component: FC<SelectorProps> = (props) => {
       icon={
         <div className={`${className}__text`}>
           <Text text={valueRef} />
-          <IoIosArrowDown size={16} color={theme.colors.secondary.light} />
+          <IoIosArrowDown size={16} color={theme.colors.text.secondary} />
         </div>
       }
     >
@@ -74,7 +74,7 @@ const Component: FC<SelectorProps> = (props) => {
                 onChange?.(option);
               }}
               radius={'small'}
-              fontSize={'large1'}
+              fontSize={'lg'}
             >
               <Text text={option} className={`${className}__text`} />
             </Menu.ContentButton>
@@ -106,7 +106,7 @@ export const Selector = styled(Component)`
     padding: 4px 6px;
 
     &:hover {
-      background: ${({ theme }) => theme.colors.surface.dark};
+      background: ${({ theme }) => theme.colors.surface.raised};
     }
   }
 `;

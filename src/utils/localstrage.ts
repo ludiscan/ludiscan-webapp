@@ -1,4 +1,5 @@
 import type { HeatmapDataState } from '@src/modeles/heatmapView';
+import type { ThemeType } from '@src/modeles/theme';
 import type { User } from '@src/modeles/user';
 
 import { initializeValues } from '@src/modeles/heatmapView';
@@ -84,6 +85,24 @@ export function getThemeName(): 'light' | 'dark' | null {
   const storage = localStorage.getItem(STORAGE_KEY);
   if (storage) {
     return JSON.parse(storage).theme || null;
+  }
+  return null;
+}
+
+export function saveThemeType(themeType: ThemeType): void {
+  const storage = localStorage.getItem(STORAGE_KEY);
+  if (storage) {
+    const data = JSON.parse(storage);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...data, themeType }));
+  } else {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ themeType }));
+  }
+}
+
+export function getThemeType(): ThemeType | null {
+  const storage = localStorage.getItem(STORAGE_KEY);
+  if (storage) {
+    return JSON.parse(storage).themeType || null;
   }
   return null;
 }

@@ -1,11 +1,8 @@
 // TextField.stories.tsx
-import darkTheme from '../../styles/dark';
-import lightTheme from '../../styles/light';
 
 import type { Meta, StoryObj } from '@storybook/nextjs';
 
 import { OutlinedTextField } from '@src/component/molecules/OutlinedTextField';
-import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
 
 export default {
   component: OutlinedTextField,
@@ -19,13 +16,7 @@ const Template: Story = {
     placeholder: 'Placeholder',
   },
   render: (args) => {
-    return (
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      <SharedThemeProvider initialTheme={args.type === 'light' ? lightTheme : darkTheme}>
-        <OutlinedTextField {...args} />
-      </SharedThemeProvider>
-    );
+    return <OutlinedTextField {...args} />;
   },
 };
 

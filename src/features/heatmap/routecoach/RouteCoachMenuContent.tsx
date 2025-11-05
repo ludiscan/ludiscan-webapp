@@ -12,6 +12,8 @@ import { Text } from '@src/component/atoms/Text';
 import { TextField } from '@src/component/molecules/TextField';
 import { EventClusterViewer } from '@src/component/organisms/EventClusterViewer';
 import { useRouteCoachApi } from '@src/features/heatmap/routecoach/api';
+import { useImprovementRoutes } from '@src/hooks/useImprovementRoutes';
+import { useRouteCoachPatch } from '@src/hooks/useRouteCoach';
 import { useApiClient } from '@src/modeles/ApiClientContext';
 import { fontSizes } from '@src/styles/style';
 
@@ -110,6 +112,9 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
 
   // 強制再生成フラグ
   const [forceRegenerate, setForceRegenerate] = useState<boolean>(false);
+
+  // Redux から cluster 選択状態を更新
+  const patchRouteCoach = useRouteCoachPatch();
 
   const apiClient = useApiClient();
   const routeCoachApi = useRouteCoachApi();
@@ -214,7 +219,8 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
     setTaskId(null);
     setSelectedPlayerId('');
     setForceRegenerate(false);
-  }, [projectId, sessionId]);
+    patchRouteCoach({ selectedClusterId: null });
+  }, [projectId, sessionId, patchRouteCoach]);
 
   // クリーンアップ
   useEffect(() => {
@@ -229,17 +235,22 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
     setSelectedPlayerId(playerId);
   }, []);
 
+  // 改善ルートデータを取得（クラスター一覧用）
+  const { data: clusterData } = useImprovementRoutes(projectId || 0, selectedPlayerId, {
+    enabled: enabled && !!taskStatus,
+  });
+
   return (
     <FlexColumn gap={12} className={className} wrap={'nowrap'}>
       <Text text={'Route Coach v2'} fontSize={fontSizes.large3} />
 
       {/* 改善ルート生成ボタン */}
       <FlexRow gap={8}>
-        <Button onClick={onStartGeneration} disabled={disabled} title='プロジェクトの改善ルートを生成' scheme={'primary'} fontSize={'small'}>
+        <Button onClick={onStartGeneration} disabled={disabled} title='プロジェクトの改善ルートを生成' scheme={'primary'} fontSize={'sm'}>
           {busy ? '生成中…' : '改善ルート生成'}
         </Button>
         {taskStatus?.status === 'completed' && (
-          <Button onClick={onForceRegenerate} disabled={disabled} title='既存のタスクを削除して強制的に再生成' scheme={'secondary'} fontSize={'small'}>
+          <Button onClick={onForceRegenerate} disabled={disabled} title='既存のタスクを削除して強制的に再生成' scheme={'secondary'} fontSize={'sm'}>
             再生成
           </Button>
         )}
@@ -273,17 +284,20 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
         <Hint>このセッションにはプレイヤーがいません。</Hint>
       )}
 
-      {/* イベントクラスター表示 */}
-      {taskStatus ? (
+      {/* クラスター選択リスト */}
+      {taskStatus && clusterData && clusterData.length > 0 ? (
         <ScrollableClusterSection>
           <FlexColumn gap={16}>
-            <Text
-              text={selectedPlayerId ? `プレイヤー ${selectedPlayerId} の改善ルート` : '全プレイヤーの改善ルート'}
-              fontSize={fontSizes.large1}
+            <Text text='クラスター選択' fontSize={fontSizes.large1} />
+            <EventClusterViewer
+              projectId={projectId!}
+              playerId={selectedPlayerId}
+              onSelectCluster={(clusterId) => patchRouteCoach({ selectedClusterId: clusterId })}
             />
-            <EventClusterViewer projectId={projectId!} playerId={selectedPlayerId} />
           </FlexColumn>
         </ScrollableClusterSection>
+      ) : taskStatus ? (
+        <Hint>このプレイヤーのクラスターはまだ生成されていません。</Hint>
       ) : null}
     </FlexColumn>
   );

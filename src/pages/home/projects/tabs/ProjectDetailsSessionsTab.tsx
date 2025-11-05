@@ -100,14 +100,14 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
 
   return (
     <div className={className}>
-      <Card blur color={theme.colors.surface.main} className={`${className}__card`}>
+      <Card blur color={theme.colors.surface.base} className={`${className}__card`}>
         {/* Header */}
         <FlexRow className={`${className}__header`} gap={16} align={'center'}>
-          <Button onClick={handleRefresh} scheme='surface' disabled={isLoadingSessions || isRefreshing} fontSize='small'>
+          <Button onClick={handleRefresh} scheme='surface' disabled={isLoadingSessions || isRefreshing} fontSize={'sm'}>
             <BiRefresh size={20} />
           </Button>
-          <Text text={`Total: ${project.session_count ?? 0}`} fontSize={fontSizes.medium} color={theme.colors.text} fontWeight={fontWeights.bold} />
-          {searchQuery && <Text text={`(${filteredAndSortedSessions.length}件一致)`} fontSize={fontSizes.small} color={theme.colors.secondary.main} />}
+          <Text text={`Total: ${project.session_count ?? 0}`} fontSize={fontSizes.medium} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
+          {searchQuery && <Text text={`(${filteredAndSortedSessions.length}件一致)`} fontSize={fontSizes.small} color={theme.colors.text.secondary} />}
         </FlexRow>
 
         {/* Search and Sort Controls */}
@@ -135,14 +135,14 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
           {/* ローディング状態 */}
           {isLoadingSessions && !isErrorSessions && (
             <div className={`${className}__loadingState`}>
-              <Text text='セッションを読み込み中...' fontSize={fontSizes.medium} color={theme.colors.text} />
+              <Text text='セッションを読み込み中...' fontSize={fontSizes.medium} color={theme.colors.text.primary} />
             </div>
           )}
 
           {/* エラー状態 */}
           {isErrorSessions && (
             <div className={`${className}__errorState`}>
-              <Text text='セッション一覧の取得に失敗しました' fontSize={fontSizes.medium} color={theme.colors.text} />
+              <Text text='セッション一覧の取得に失敗しました' fontSize={fontSizes.medium} color={theme.colors.text.primary} />
             </div>
           )}
 
@@ -160,14 +160,14 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
           {/* 検索結果なし */}
           {!isLoadingSessions && !isErrorSessions && searchQuery && filteredAndSortedSessions.length === 0 && (
             <div className={`${className}__emptyState`}>
-              <Text text={`「${searchQuery}」に一致するセッションが見つかりません`} fontSize={fontSizes.medium} color={theme.colors.secondary.main} />
+              <Text text={`「${searchQuery}」に一致するセッションが見つかりません`} fontSize={fontSizes.medium} color={theme.colors.text.secondary} />
             </div>
           )}
 
           {/* 空状態 */}
           {!isLoadingSessions && !isErrorSessions && sessions.length === 0 && !searchQuery && (
             <div className={`${className}__emptyState`}>
-              <Text text='セッションがありません' fontSize={fontSizes.medium} color={theme.colors.secondary.main} />
+              <Text text='セッションがありません' fontSize={fontSizes.medium} color={theme.colors.text.secondary} />
             </div>
           )}
         </FlexColumn>
@@ -202,7 +202,7 @@ export const ProjectDetailsSessionsTab = styled(Component)`
     align-items: center;
     padding-bottom: 12px;
     margin-bottom: 12px;
-    border-bottom: 1px solid ${({ theme }) => theme.colors.border.main};
+    border-bottom: 1px solid ${({ theme }) => theme.colors.border.default};
   }
 
   &__controls {
@@ -218,28 +218,28 @@ export const ProjectDetailsSessionsTab = styled(Component)`
     min-width: 250px;
     padding: 8px 12px;
     font-size: 14px;
-    color: ${({ theme }) => theme.colors.text};
-    background-color: ${({ theme }) => theme.colors.surface.light ?? 'rgba(255, 255, 255, 0.02)'};
-    border: 1px solid ${({ theme }) => theme.colors.border.main};
+    color: ${({ theme }) => theme.colors.text.primary};
+    background-color: ${({ theme }) => theme.colors.surface.sunken ?? 'rgba(255, 255, 255, 0.02)'};
+    border: 1px solid ${({ theme }) => theme.colors.border.default};
     border-radius: 6px;
 
     input {
       flex: 1;
       font-size: 14px;
-      color: ${({ theme }) => theme.colors.text};
+      color: ${({ theme }) => theme.colors.text.primary};
       outline: none;
       background: none;
       border: none;
 
       &::placeholder {
-        color: ${({ theme }) => theme.colors.secondary.main};
+        color: ${({ theme }) => theme.colors.text.secondary};
         opacity: 0.6;
       }
     }
 
     svg {
       flex-shrink: 0;
-      color: ${({ theme }) => theme.colors.secondary.main};
+      color: ${({ theme }) => theme.colors.text.secondary};
       opacity: 0.7;
     }
   }
@@ -247,11 +247,11 @@ export const ProjectDetailsSessionsTab = styled(Component)`
   &__sortSelect {
     padding: 8px 12px;
     font-size: 14px;
-    color: ${({ theme }) => theme.colors.text};
+    color: ${({ theme }) => theme.colors.text.primary};
     white-space: nowrap;
     cursor: pointer;
-    background-color: ${({ theme }) => theme.colors.surface.light ?? 'rgba(255, 255, 255, 0.02)'};
-    border: 1px solid ${({ theme }) => theme.colors.border.main};
+    background-color: ${({ theme }) => theme.colors.surface.sunken ?? 'rgba(255, 255, 255, 0.02)'};
+    border: 1px solid ${({ theme }) => theme.colors.border.default};
     border-radius: 6px;
 
     &:hover {
@@ -265,8 +265,8 @@ export const ProjectDetailsSessionsTab = styled(Component)`
     }
 
     option {
-      color: ${({ theme }) => theme.colors.text};
-      background-color: ${({ theme }) => theme.colors.surface.main};
+      color: ${({ theme }) => theme.colors.text.primary};
+      background-color: ${({ theme }) => theme.colors.surface.base};
     }
   }
 
@@ -276,14 +276,14 @@ export const ProjectDetailsSessionsTab = styled(Component)`
 
   &__sessionItem {
     padding: 0 4px;
-    border-bottom: 1px solid ${({ theme }) => theme.colors.border.main};
+    border-bottom: 1px solid ${({ theme }) => theme.colors.border.default};
 
     &:last-child {
       border-bottom: none;
     }
 
     &:hover {
-      background-color: ${({ theme }) => theme.colors.surface.light ?? 'rgba(255, 255, 255, 0.01)'};
+      background-color: ${({ theme }) => theme.colors.surface.sunken ?? 'rgba(255, 255, 255, 0.01)'};
     }
   }
 

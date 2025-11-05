@@ -153,7 +153,7 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
   return (
     <FlexColumn gap={12}>
       <Text text={'AI要約'} fontSize={fontSizes.large3} />
-      <Button onClick={() => regenMutate()} disabled={disabled} title='要約を再生成（キュー投入）' scheme={'primary'} fontSize={'small'}>
+      <Button onClick={() => regenMutate()} disabled={disabled} title='要約を再生成（キュー投入）' scheme={'primary'} fontSize={'sm'}>
         {busy ? '生成中…' : '再生成'}
       </Button>
       {isLoading && <Hint>読み込み中…</Hint>}

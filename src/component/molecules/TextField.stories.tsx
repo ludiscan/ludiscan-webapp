@@ -1,11 +1,7 @@
 // TextField.stories.tsx
-import darkTheme from '../../styles/dark';
-import lightTheme from '../../styles/light';
-
 import type { Meta, StoryObj } from '@storybook/nextjs';
 
 import { TextField } from '@src/component/molecules/TextField';
-import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
 
 export default {
   component: TextField,
@@ -20,13 +16,7 @@ const Template: Story = {
     fontSize: '18px',
   },
   render: (args) => {
-    return (
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      <SharedThemeProvider initialTheme={args.type === 'light' ? lightTheme : darkTheme}>
-        <TextField {...args} />
-      </SharedThemeProvider>
-    );
+    return <TextField {...args} />;
   },
 };
 

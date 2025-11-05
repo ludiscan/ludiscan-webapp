@@ -32,7 +32,7 @@ export function useImprovementRoutes(
         ...(options?.freshnessDays && {
           freshness_days: options.freshnessDays,
         }),
-      } as any;
+      };
 
       const response = await client.GET('/api/v0/route-coach/projects/{project_id}/event-clusters', {
         params: {

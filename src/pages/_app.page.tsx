@@ -15,8 +15,8 @@ import { dimensions } from '@src/styles/style';
 
 const Content = styled.div`
   overflow: hidden;
-  color: ${({ theme }) => theme.colors.text};
-  background: ${({ theme }) => theme.colors.background};
+  color: ${({ theme }) => theme.colors.text.primary};
+  background: ${({ theme }) => theme.colors.background.default};
 `;
 
 export const InnerContent = styled.div<{ showSidebar?: boolean }>`

@@ -128,7 +128,7 @@ const Component: FC<PaginationProps> = ({ className, currentPage, totalItems, it
           onClick={() => onPageChange(1)}
           disabled={isFirstPage}
           scheme='surface'
-          fontSize='small'
+          fontSize={'sm'}
           className={`${className}__navButton`}
           title='最初のページへ'
         >
@@ -140,7 +140,7 @@ const Component: FC<PaginationProps> = ({ className, currentPage, totalItems, it
           onClick={() => onPageChange(currentPage - 1)}
           disabled={isFirstPage}
           scheme='surface'
-          fontSize='small'
+          fontSize={'sm'}
           className={`${className}__navButton`}
           title='前のページへ'
         >
@@ -169,7 +169,7 @@ const Component: FC<PaginationProps> = ({ className, currentPage, totalItems, it
           onClick={() => onPageChange(currentPage + 1)}
           disabled={isLastPage}
           scheme='surface'
-          fontSize='small'
+          fontSize={'sm'}
           className={`${className}__navButton`}
           title='次のページへ'
         >
@@ -181,7 +181,7 @@ const Component: FC<PaginationProps> = ({ className, currentPage, totalItems, it
           onClick={() => onPageChange(totalPages)}
           disabled={isLastPage}
           scheme='surface'
-          fontSize='small'
+          fontSize={'sm'}
           className={`${className}__navButton`}
           title='最後のページへ'
         >
@@ -193,7 +193,7 @@ const Component: FC<PaginationProps> = ({ className, currentPage, totalItems, it
       <Text
         text={`${startItem}–${endItem} / ${totalItems}件`}
         fontSize={fontSizes.smallest}
-        color={theme.colors.secondary.main}
+        color={theme.colors.text.secondary}
         className={`${className}__info`}
       />
     </div>
@@ -222,10 +222,10 @@ export const Pagination = styled(Component)`
     padding: 0 8px;
     font-size: 14px;
     font-weight: 500;
-    color: ${({ theme }) => theme.colors.text};
+    color: ${({ theme }) => theme.colors.text.primary};
     cursor: pointer;
-    background-color: ${({ theme }) => theme.colors.surface.light ?? 'rgba(255, 255, 255, 0.02)'};
-    border: 1px solid ${({ theme }) => theme.colors.border.main};
+    background-color: ${({ theme }) => theme.colors.surface.sunken ?? 'rgba(255, 255, 255, 0.02)'};
+    border: 1px solid ${({ theme }) => theme.colors.border.default};
     border-radius: 4px;
     transition: all 0.2s ease;
 

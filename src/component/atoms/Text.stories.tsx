@@ -2,9 +2,6 @@ import { Text } from './Text';
 
 import type { Meta, StoryObj } from '@storybook/nextjs';
 
-import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
-import darkTheme from '@src/styles/dark';
-import lightTheme from '@src/styles/light';
 import { colors, fontSizes } from '@src/styles/style';
 
 export default {
@@ -15,13 +12,7 @@ type Story = StoryObj<typeof Text>;
 
 const Template: Story = {
   render: (args) => {
-    return (
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      <SharedThemeProvider initialTheme={args.type === 'light' ? lightTheme : darkTheme}>
-        <Text {...args} />
-      </SharedThemeProvider>
-    );
+    return <Text {...args} />;
   },
 };
 

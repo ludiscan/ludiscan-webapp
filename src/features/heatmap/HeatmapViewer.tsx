@@ -239,6 +239,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
           visibleTimelineRange={visibleTimelineRange}
           dimensionality={dimensionality}
           fieldObjectLogs={fieldObjectLogs?.data}
+          projectId={service.projectId}
         />
         <Stats parent={divRef} className={`${className}__stats`} />
       </Canvas>
@@ -301,7 +302,7 @@ export const HeatMapViewer = memo(
       width: calc(100% - 2px);
       height: 100%;
       overflow: hidden;
-      border-top: ${({ theme }) => `1px solid ${theme.colors.border.main}`};
+      border-top: ${({ theme }) => `1px solid ${theme.colors.border.default}`};
     }
 
     &__sideMenu {
@@ -310,7 +311,7 @@ export const HeatMapViewer = memo(
       flex-shrink: 0;
       height: 100%;
       overflow-y: auto;
-      background: ${({ theme }) => theme.colors.surface.dark};
+      background: ${({ theme }) => theme.colors.surface.raised};
     }
 
     &__canvasMenuBox {
@@ -351,12 +352,12 @@ export const HeatMapViewer = memo(
       max-width: 1900px;
       height: 100%;
       margin: 0 auto;
-      border: ${({ theme }) => `1px solid ${theme.colors.border.main}`};
+      border: ${({ theme }) => `1px solid ${theme.colors.border.default}`};
     }
 
     &__canvasBox--split {
       max-width: none;
-      border: ${({ theme }) => `2px solid ${theme.colors.border.main}`};
+      border: ${({ theme }) => `2px solid ${theme.colors.border.default}`};
     }
 
     &__performance {

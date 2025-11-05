@@ -38,7 +38,7 @@ export const TextField = styled(Component)`
   font-weight: ${({ fontWeight }) => fontWeight || 'normal'};
   text-shadow: ${({ shadow }) => (shadow ? '0 0 4px rgba(0, 0, 0, 0.2)' : 'none')};
   background: unset;
-  border: 1px solid ${({ theme }) => theme.colors.border.dark};
+  border: 1px solid ${({ theme }) => theme.colors.border.strong};
   border-radius: 4px;
 
   &:focus {

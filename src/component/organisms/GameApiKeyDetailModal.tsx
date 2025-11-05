@@ -74,38 +74,38 @@ const Component: FC<GameApiKeyDetailModalProps> = ({ className, isOpen, selected
           {selectedKey && (
             <>
               <div>
-                <Text text='Name' fontSize={fontSizes.small} color={theme.colors.text} fontWeight={fontWeights.bold} />
+                <Text text='Name' fontSize={fontSizes.small} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
                 <VerticalSpacer size={4} />
-                <Text text={selectedKey.name} fontSize={fontSizes.medium} color={theme.colors.secondary.main} />
+                <Text text={selectedKey.name} fontSize={fontSizes.medium} color={theme.colors.text.secondary} />
               </div>
 
               <div>
-                <Text text='Key ID' fontSize={fontSizes.small} color={theme.colors.text} fontWeight={fontWeights.bold} />
+                <Text text='Key ID' fontSize={fontSizes.small} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
                 <VerticalSpacer size={4} />
                 <div className={`${className}__keyValueContainer`}>
-                  <Text text={maskKeyValue(selectedKey.id)} fontSize={fontSizes.smallest} color={theme.colors.secondary.main} />
+                  <Text text={maskKeyValue(selectedKey.id)} fontSize={fontSizes.smallest} color={theme.colors.text.secondary} />
                 </div>
               </div>
 
               <div>
-                <Text text='Created' fontSize={fontSizes.small} color={theme.colors.text} fontWeight={fontWeights.bold} />
+                <Text text='Created' fontSize={fontSizes.small} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
                 <VerticalSpacer size={4} />
-                <Text text={formatDate(selectedKey.createdAt)} fontSize={fontSizes.small} color={theme.colors.secondary.main} />
+                <Text text={formatDate(selectedKey.createdAt)} fontSize={fontSizes.small} color={theme.colors.text.secondary} />
               </div>
 
               {selectedKey.lastUsedAt && (
                 <div>
-                  <Text text='Last Used' fontSize={fontSizes.small} color={theme.colors.text} fontWeight={fontWeights.bold} />
+                  <Text text='Last Used' fontSize={fontSizes.small} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
                   <VerticalSpacer size={4} />
-                  <Text text={formatDate(selectedKey.lastUsedAt)} fontSize={fontSizes.small} color={theme.colors.secondary.main} />
+                  <Text text={formatDate(selectedKey.lastUsedAt)} fontSize={fontSizes.small} color={theme.colors.text.secondary} />
                 </div>
               )}
 
               <div>
                 <FlexRow gap={8} align='center' className={`${className}__projectsHeader`}>
-                  <Text text='Projects' fontSize={fontSizes.small} color={theme.colors.text} fontWeight={fontWeights.bold} />
+                  <Text text='Projects' fontSize={fontSizes.small} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
                   {!isEditingProjects && (
-                    <Button onClick={handleOpenEdit} scheme='none' fontSize='small' className={`${className}__editButton`}>
+                    <Button onClick={handleOpenEdit} scheme='none' fontSize={'sm'} className={`${className}__editButton`}>
                       <Text text='Edit' fontSize={fontSizes.smallest} color={theme.colors.primary.main} fontWeight={fontWeights.bold} />
                     </Button>
                   )}
@@ -127,16 +127,16 @@ const Component: FC<GameApiKeyDetailModalProps> = ({ className, isOpen, selected
                             }
                           }}
                         />
-                        <Text text={proj.name} fontSize={fontSizes.small} color={theme.colors.text} />
+                        <Text text={proj.name} fontSize={fontSizes.small} color={theme.colors.text.primary} />
                       </label>
                     ))}
                   </FlexColumn>
                 ) : (
                   <FlexColumn gap={4}>
                     {selectedKey.projects.length > 0 ? (
-                      selectedKey.projects.map((proj) => <Text key={proj.id} text={proj.name} fontSize={fontSizes.small} color={theme.colors.secondary.main} />)
+                      selectedKey.projects.map((proj) => <Text key={proj.id} text={proj.name} fontSize={fontSizes.small} color={theme.colors.text.secondary} />)
                     ) : (
-                      <Text text='No projects assigned' fontSize={fontSizes.small} color={theme.colors.secondary.main} fontWeight='lighter' />
+                      <Text text='No projects assigned' fontSize={fontSizes.small} color={theme.colors.text.secondary} fontWeight='lighter' />
                     )}
                   </FlexColumn>
                 )}
@@ -153,17 +153,17 @@ const Component: FC<GameApiKeyDetailModalProps> = ({ className, isOpen, selected
                     setSelectedProjectIds(selectedKey?.projects.map((p) => p.id) || []);
                   }}
                   scheme='none'
-                  fontSize='small'
+                  fontSize={'sm'}
                   disabled={isUpdatingProjects}
                 >
                   <Text text='Cancel' fontSize={fontSizes.small} />
                 </Button>
-                <Button onClick={handleSaveProjects} scheme='primary' fontSize='small' disabled={isUpdatingProjects}>
+                <Button onClick={handleSaveProjects} scheme='primary' fontSize={'sm'} disabled={isUpdatingProjects}>
                   <Text text={isUpdatingProjects ? 'Saving...' : 'Save'} fontSize={fontSizes.small} />
                 </Button>
               </>
             ) : (
-              <Button onClick={handleCloseModal} scheme='primary' fontSize='small'>
+              <Button onClick={handleCloseModal} scheme='primary' fontSize={'sm'}>
                 <Text text='Close' fontSize={fontSizes.small} />
               </Button>
             )}
@@ -177,15 +177,15 @@ const Component: FC<GameApiKeyDetailModalProps> = ({ className, isOpen, selected
 export const GameApiKeyDetailModal = styled(Component)`
   &__modal {
     padding: 16px;
-    color: ${({ theme }) => theme.colors.text};
+    color: ${({ theme }) => theme.colors.text.primary};
   }
 
   &__keyValueContainer {
     padding: 8px 12px;
     font-family: monospace;
     word-break: break-all;
-    background-color: ${({ theme }) => theme.colors.surface.main};
-    border: 1px solid ${({ theme }) => theme.colors.border.main};
+    background-color: ${({ theme }) => theme.colors.surface.base};
+    border: 1px solid ${({ theme }) => theme.colors.border.default};
     border-radius: 4px;
   }
 
@@ -199,14 +199,14 @@ export const GameApiKeyDetailModal = styled(Component)`
     transition: background-color 0.2s ease-in-out;
 
     &:hover {
-      background-color: ${({ theme }) => theme.colors.surface.light};
+      background-color: ${({ theme }) => theme.colors.surface.sunken};
     }
   }
 
   &__projectSelection {
     padding: 12px;
-    background-color: ${({ theme }) => theme.colors.surface.light};
-    border: 1px solid ${({ theme }) => theme.colors.border.main};
+    background-color: ${({ theme }) => theme.colors.surface.sunken};
+    border: 1px solid ${({ theme }) => theme.colors.border.default};
     border-radius: 6px;
   }
 
@@ -220,7 +220,7 @@ export const GameApiKeyDetailModal = styled(Component)`
     transition: background-color 0.2s ease-in-out;
 
     &:hover {
-      background-color: ${({ theme }) => theme.colors.surface.main};
+      background-color: ${({ theme }) => theme.colors.surface.base};
     }
 
     input[type='checkbox'] {

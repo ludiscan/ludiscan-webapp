@@ -161,12 +161,12 @@ const Component: FC<ProjectDetailsMembersTabProps> = ({ className, project }) =>
 
   return (
     <div className={className}>
-      <Card blur color={theme.colors.surface.main} className={`${className}__card`}>
+      <Card blur color={theme.colors.surface.base} className={`${className}__card`}>
         <FlexRow className={`${className}__header`} gap={16}>
           <div className={`${className}__searchContainer`}>
             <OutlinedTextField value={searchQuery} onChange={setSearchQuery} placeholder='メンバーを検索...' fontSize={fontSizes.medium} />
           </div>
-          <Button onClick={() => setIsAddMemberModalOpen(true)} scheme='primary' fontSize='small'>
+          <Button onClick={() => setIsAddMemberModalOpen(true)} scheme='primary' fontSize={'sm'}>
             <Text text='+ Add Member' fontSize={fontSizes.small} />
           </Button>
         </FlexRow>
@@ -176,14 +176,14 @@ const Component: FC<ProjectDetailsMembersTabProps> = ({ className, project }) =>
           {/* ローディング状態 */}
           {isLoadingMembers && !isErrorMembers && (
             <div className={`${className}__loadingState`}>
-              <Text text='メンバーを読み込み中...' fontSize={fontSizes.medium} color={theme.colors.text} />
+              <Text text='メンバーを読み込み中...' fontSize={fontSizes.medium} color={theme.colors.text.primary} />
             </div>
           )}
 
           {/* エラー状態 */}
           {isErrorMembers && (
             <div className={`${className}__errorState`}>
-              <Text text='メンバー一覧の取得に失敗しました' fontSize={fontSizes.medium} color={theme.colors.text} />
+              <Text text='メンバー一覧の取得に失敗しました' fontSize={fontSizes.medium} color={theme.colors.text.primary} />
             </div>
           )}
 
@@ -195,20 +195,20 @@ const Component: FC<ProjectDetailsMembersTabProps> = ({ className, project }) =>
               <div key={member.user_id} className={`${className}__memberItem`}>
                 <FlexRow className={`${className}__memberRow`} align='center' gap={12}>
                   <FlexColumn gap={4} className={`${className}__memberInfo`}>
-                    <Text text={member.name} fontSize={fontSizes.medium} color={theme.colors.text} fontWeight={fontWeights.bold} />
-                    <Text text={member.email} fontSize={fontSizes.small} color={theme.colors.secondary.main} fontWeight={fontWeights.bold} />
+                    <Text text={member.name} fontSize={fontSizes.medium} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
+                    <Text text={member.email} fontSize={fontSizes.small} color={theme.colors.text.secondary} fontWeight={fontWeights.bold} />
                     <Text
                       text={`Added: ${formatDate(member.created_at)}`}
                       fontSize={fontSizes.smallest}
-                      color={theme.colors.secondary.main}
+                      color={theme.colors.text.secondary}
                       fontWeight='lighter'
                     />
                   </FlexColumn>
                   <div className={`${className}__memberRole`}>
-                    <Text text={member.role} fontSize={fontSizes.small} color={theme.colors.secondary.main} fontWeight={fontWeights.bold} />
+                    <Text text={member.role} fontSize={fontSizes.small} color={theme.colors.text.secondary} fontWeight={fontWeights.bold} />
                   </div>
-                  <Button onClick={() => handleDeleteMember(member)} scheme='none' fontSize='small' className={`${className}__deleteButton`}>
-                    <BiTrash size={18} color={theme.colors.error} />
+                  <Button onClick={() => handleDeleteMember(member)} scheme='none' fontSize={'sm'} className={`${className}__deleteButton`}>
+                    <BiTrash size={18} color={theme.colors.semantic.error.main} />
                   </Button>
                 </FlexRow>
               </div>
@@ -217,7 +217,7 @@ const Component: FC<ProjectDetailsMembersTabProps> = ({ className, project }) =>
           {/* 空状態 */}
           {!isLoadingMembers && !isErrorMembers && filteredMembers.length === 0 && (
             <div className={`${className}__emptyState`}>
-              <Text text='メンバーがありません' fontSize={fontSizes.medium} color={theme.colors.secondary.main} />
+              <Text text='メンバーがありません' fontSize={fontSizes.medium} color={theme.colors.text.secondary} />
             </div>
           )}
         </FlexColumn>
@@ -228,13 +228,13 @@ const Component: FC<ProjectDetailsMembersTabProps> = ({ className, project }) =>
         <div className={`${className}__modal`}>
           <FlexColumn gap={16}>
             <div>
-              <Text text='Email Address' fontSize={fontSizes.small} color={theme.colors.text} fontWeight={fontWeights.bold} />
+              <Text text='Email Address' fontSize={fontSizes.small} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
               <VerticalSpacer size={8} />
               <OutlinedTextField value={newMemberEmail} onChange={setNewMemberEmail} placeholder='member@example.com' fontSize={fontSizes.medium} />
             </div>
 
             <div>
-              <Text text='Role' fontSize={fontSizes.small} color={theme.colors.text} fontWeight={fontWeights.bold} />
+              <Text text='Role' fontSize={fontSizes.small} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
               <VerticalSpacer size={8} />
               <select value={newMemberRole} onChange={(e) => setNewMemberRole(e.target.value as 'viewer' | 'admin')} className={`${className}__roleSelect`}>
                 <option value='viewer'>Viewer</option>
@@ -243,10 +243,10 @@ const Component: FC<ProjectDetailsMembersTabProps> = ({ className, project }) =>
             </div>
 
             <FlexRow gap={8} className={`${className}__buttonRow`}>
-              <Button onClick={() => setIsAddMemberModalOpen(false)} scheme='none' fontSize='small'>
+              <Button onClick={() => setIsAddMemberModalOpen(false)} scheme='none' fontSize={'sm'}>
                 <Text text='Cancel' fontSize={fontSizes.small} />
               </Button>
-              <Button onClick={handleAddMember} scheme='primary' fontSize='small' disabled={isSubmittingMember}>
+              <Button onClick={handleAddMember} scheme='primary' fontSize={'sm'} disabled={isSubmittingMember}>
                 <Text text={isSubmittingMember ? 'Adding...' : 'Add Member'} fontSize={fontSizes.small} />
               </Button>
             </FlexRow>
@@ -267,7 +267,7 @@ const Component: FC<ProjectDetailsMembersTabProps> = ({ className, project }) =>
             <Text
               text={`${memberToDelete?.name} (${memberToDelete?.email}) を削除してよろしいですか？`}
               fontSize={fontSizes.medium}
-              color={theme.colors.text}
+              color={theme.colors.text.primary}
             />
             <FlexRow gap={8} className={`${className}__buttonRow`}>
               <Button
@@ -275,12 +275,12 @@ const Component: FC<ProjectDetailsMembersTabProps> = ({ className, project }) =>
                   if (!isDeleting) setIsConfirmDeleteOpen(false);
                 }}
                 scheme='none'
-                fontSize='small'
+                fontSize={'sm'}
                 disabled={isDeleting}
               >
                 <Text text='Cancel' fontSize={fontSizes.small} />
               </Button>
-              <Button onClick={handleConfirmDelete} scheme='primary' fontSize='small' disabled={isDeleting}>
+              <Button onClick={handleConfirmDelete} scheme='primary' fontSize={'sm'} disabled={isDeleting}>
                 <Text text={isDeleting ? 'Deleting...' : 'Delete'} fontSize={fontSizes.small} />
               </Button>
             </FlexRow>
@@ -310,7 +310,7 @@ export const ProjectDetailsMembersTab = styled(Component)`
 
   &__memberItem {
     padding: 12px 0;
-    border-bottom: 1px solid ${({ theme }) => theme.colors.border.main};
+    border-bottom: 1px solid ${({ theme }) => theme.colors.border.default};
 
     &:last-child {
       border-bottom: none;
@@ -336,7 +336,7 @@ export const ProjectDetailsMembersTab = styled(Component)`
     transition: background-color 0.2s ease-in-out;
 
     &:hover {
-      background-color: ${({ theme }) => theme.colors.surface.light};
+      background-color: ${({ theme }) => theme.colors.surface.sunken};
     }
   }
 
@@ -356,19 +356,19 @@ export const ProjectDetailsMembersTab = styled(Component)`
     width: 100%;
     padding: 8px 12px;
     font-size: ${fontSizes.medium}px;
-    color: ${({ theme }) => theme.colors.text};
+    color: ${({ theme }) => theme.colors.text.primary};
     cursor: pointer;
-    background-color: ${({ theme }) => theme.colors.surface.main};
-    border: 1px solid ${({ theme }) => theme.colors.border.main};
+    background-color: ${({ theme }) => theme.colors.surface.base};
+    border: 1px solid ${({ theme }) => theme.colors.border.default};
     border-radius: 4px;
 
     &:hover {
-      border-color: ${({ theme }) => theme.colors.border.dark};
+      border-color: ${({ theme }) => theme.colors.border.strong};
     }
 
     &:focus {
       outline: none;
-      border-color: ${({ theme }) => theme.colors.secondary.main};
+      border-color: ${({ theme }) => theme.colors.text.secondary};
     }
   }
 
