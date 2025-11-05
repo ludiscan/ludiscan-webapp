@@ -31,6 +31,7 @@ dist-ssr
 
 *storybook.log
 storybook-static
+screenshots
 
 /public/heatmap-bundle-meta.json
 /public/heatmap-viewer-bundle.js

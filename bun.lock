@@ -29,6 +29,7 @@
       },
       "devDependencies": {
         "@argos-ci/cli": "^3.2.1",
+        "@argos-ci/storybook": "^5.0.4",
         "@chromatic-com/storybook": "^4.1.1",
         "@emotion/babel-plugin": "^11.13.5",
         "@emotion/styled": "^11.14.0",
@@ -86,9 +87,15 @@
 
     "@argos-ci/api-client": ["@argos-ci/api-client@0.14.0", "", { "dependencies": { "debug": "^4.4.3", "openapi-fetch": "^0.15.0" } }, "sha512-lVWN8MrRYEbCjcZcutTzdJEA9tNB1IBqjIUJyjxR1iHMXZJYVLQbWQcmlZz33sIHkicLgAKTKrSVUOjf34MXAA=="],
 
+    "@argos-ci/browser": ["@argos-ci/browser@5.0.0", "", {}, "sha512-SKAD7EXoLX4u50dzTIT/ABnpD284+DnBfoJM0ZrTIav2eiiVJyknNKSznF5w118lYGnYvugTXbKMnukGPzJeOA=="],
+
     "@argos-ci/cli": ["@argos-ci/cli@3.2.1", "", { "dependencies": { "@argos-ci/core": "4.5.0", "commander": "^14.0.2", "ora": "^9.0.0", "update-notifier": "^7.3.1" }, "bin": { "argos": "bin/argos-cli.js" } }, "sha512-U/i68TWYR/leXzVs4AhE9MjLgiN37ydxC4CqvrS9haDqIO1duNXcQBdxRpX9EwX4eyDo58eG/VYFCEnYVf48gg=="],
 
     "@argos-ci/core": ["@argos-ci/core@4.5.0", "", { "dependencies": { "@argos-ci/api-client": "0.14.0", "@argos-ci/util": "3.2.0", "convict": "^6.2.4", "debug": "^4.4.3", "fast-glob": "^3.3.3", "mime-types": "^3.0.1", "sharp": "^0.34.4", "tmp": "^0.2.5" } }, "sha512-jERRoj+da36Y9NwFyws00LKFmCLHBTklIE0DYRptrPUSf3aitly6KmllkKHGi2UU1XcIqAO2Pzy1l5shCs/FXw=="],
+
+    "@argos-ci/playwright": ["@argos-ci/playwright@6.3.1", "", { "dependencies": { "@argos-ci/browser": "5.0.0", "@argos-ci/core": "4.5.0", "@argos-ci/util": "3.2.0", "chalk": "^5.6.2", "debug": "^4.4.3" } }, "sha512-E4zl8i/+l4v7eK8NUzp0J3clok+urHGe2WP/FRtOMPuQ9vmZ/FF4LTZ3obMhmeyu9/PMIdV545w4KPaTZl3Y5w=="],
+
+    "@argos-ci/storybook": ["@argos-ci/storybook@5.2.1", "", { "dependencies": { "@argos-ci/playwright": "6.3.1", "@argos-ci/util": "3.2.0" } }, "sha512-MldADhlxKPRFvd39TqK8Nf5FDKo1EL1x6Wy6+UZbinvfBEwJ4Gjfw59WS642rPgcnlaSr8QlGTxzMwURa+L1Bw=="],
 
     "@argos-ci/util": ["@argos-ci/util@3.2.0", "", {}, "sha512-/Bn0qCH8VsdPv5WB9TUEf3oTgsIqsTMUEjPVDopHLzKK+j7nQYGOF3MnN7VhBow82BXeStBfJCS3UiZ6cgxRlw=="],
 
@@ -2845,6 +2852,8 @@
     "zwitch": ["zwitch@2.0.4", "", {}, "sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A=="],
 
     "@argos-ci/api-client/openapi-fetch": ["openapi-fetch@0.15.0", "", { "dependencies": { "openapi-typescript-helpers": "^0.0.15" } }, "sha512-OjQUdi61WO4HYhr9+byCPMj0+bgste/LtSBEcV6FzDdONTs7x0fWn8/ndoYwzqCsKWIxEZwo4FN/TG1c1rI8IQ=="],
+
+    "@argos-ci/playwright/chalk": ["chalk@5.6.2", "", {}, "sha512-7NzBL0rN6fMUW+f7A6Io4h40qQlG+xGmtMxfbnH/K7TAtt8JQWVQK+6g0UXKMeVJoyV5EkkNsErQ8pVD3bLHbA=="],
 
     "@babel/core/convert-source-map": ["convert-source-map@2.0.0", "", {}, "sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg=="],
 

@@ -63,6 +63,7 @@
   },
   "devDependencies": {
     "@argos-ci/cli": "^3.2.1",
+    "@argos-ci/storybook": "^5.0.4",
     "@chromatic-com/storybook": "^4.1.1",
     "@emotion/babel-plugin": "^11.13.5",
     "@emotion/styled": "^11.14.0",
