@@ -77,7 +77,7 @@ import { argosScreenshot } from '@argos-ci/storybook/test-runner';
 const config: TestRunnerConfig = {
   async postVisit(page, context) {
     // 各Storyのスクリーンショットを ./screenshots に保存
-    await argosScreenshot(page, context.id);
+    await argosScreenshot(page, context);
   },
 };
 
