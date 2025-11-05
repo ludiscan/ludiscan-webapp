@@ -32,6 +32,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Build Storybook**: `bun run build-storybook`
 - **Test Storybook**: `bun run test-storybook`
 
+### Visual Regression Testing
+- **Argos CI**: Automated visual diff testing on PRs
+- Configuration: `argos.config.js` in project root
+- Automatically runs on PR creation/updates via GitHub Actions
+- View visual diffs and approve/reject changes at [argos-ci.com](https://argos-ci.com)
+
 ### API & Generation
 - **Generate API types**: `bun run generate:api-schemes` (requires `swagger.json` in root)
 - **Generate from local API**: `bun run generate:api-schemes:local-fetch` (from `http://localhost:3211/swagger/api/v0/json`)
