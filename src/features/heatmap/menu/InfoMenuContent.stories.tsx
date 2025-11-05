@@ -21,9 +21,7 @@ export const Default: Story = {
   name: 'Default',
   args: createMockMenuProps({
     name: 'info',
-    handleExportView: async () => {
-      console.log('Export view clicked');
-    },
+    handleExportView: async () => {},
   }),
 };
 
@@ -32,9 +30,7 @@ export const WithProjectId: Story = {
   name: 'With Project ID',
   args: createMockMenuProps({
     name: 'info',
-    handleExportView: async () => {
-      console.log('Export view clicked');
-    },
+    handleExportView: async () => {},
     service: createMockService({
       projectId: 12345,
     }),

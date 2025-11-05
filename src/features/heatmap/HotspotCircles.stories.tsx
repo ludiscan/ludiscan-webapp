@@ -42,7 +42,7 @@ const samplePoints = [
 ];
 
 // High density cluster
-const denseCluster = Array.from({ length: 50 }, (_, i) => ({
+const denseCluster = Array.from({ length: 50 }, (_) => ({
   x: Math.random() * 100 - 50,
   y: 0,
   z: Math.random() * 100 - 50,
@@ -71,13 +71,13 @@ export const MultipleClusters: Story = {
   args: {
     points: [
       ...denseCluster,
-      ...Array.from({ length: 30 }, (_, i) => ({
+      ...Array.from({ length: 30 }, (_) => ({
         x: Math.random() * 100 + 150,
         y: 0,
         z: Math.random() * 100 + 150,
         density: Math.floor(Math.random() * 10) + 1,
       })),
-      ...Array.from({ length: 20 }, (_, i) => ({
+      ...Array.from({ length: 20 }, (_) => ({
         x: Math.random() * 100 - 150,
         y: 0,
         z: Math.random() * 100 - 150,

@@ -34,6 +34,7 @@ export const Default: Story = {
   args: {
     position: new Vector3(0, 0, 0),
     selected: false,
+    // eslint-disable-next-line no-console
     onClick: () => console.log('Waypoint clicked'),
   },
 };
@@ -44,6 +45,7 @@ export const Selected: Story = {
   args: {
     position: new Vector3(0, 0, 0),
     selected: true,
+    // eslint-disable-next-line no-console
     onClick: () => console.log('Waypoint clicked'),
   },
 };
