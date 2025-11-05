@@ -6,6 +6,13 @@ on:
       - '.github/workflows/pr.yml'
       - 'package.json'
       - 'bun.lock'
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'src/**'
+      - '.storybook/**'
   workflow_dispatch:
 
 permissions:

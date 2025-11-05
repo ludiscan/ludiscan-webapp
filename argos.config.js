@@ -20,8 +20,8 @@ export default {
   // Optional: Configure screenshot comparison settings
   // threshold: 0.5, // Sensitivity for detecting visual changes (0-1)
 
-  // Optional: Configure which branches to compare against
-  // reference: {
-  //   branch: 'main',
-  // },
+  // Configure which branches to compare against
+  reference: {
+    branch: 'develop', // Base branch for comparison
+  },
 };
