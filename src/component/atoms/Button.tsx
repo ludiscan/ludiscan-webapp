@@ -191,7 +191,7 @@ export const Button = styled(Component)`
   &.none {
     color: ${({ theme }) => theme.colors.text.primary};
     background-color: transparent;
-    ${({ theme, border }) => border && `border: 1px solid ${theme.colors.border.default};`}
+    ${({ theme, border }) => border && `border: 1px solid ${theme.colors.border.strong};`}
   }
 
   &.error {

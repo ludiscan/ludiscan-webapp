@@ -57,14 +57,14 @@ export const Switch = styled(SwitchComponent)`
     position: absolute;
     inset: 0;
     cursor: pointer;
-    background-color: ${({ theme }) => theme.colors.secondary.light};
-    border: 1px solid ${({ theme }) => theme.colors.border.strong};
+    background-color: ${({ theme }) => theme.colors.surface.interactive};
+    border: 1px solid ${({ theme }) => theme.colors.border.subtle};
     border-radius: ${({ size }) => (size === 'small' ? '10px' : size === 'medium' ? '12px' : '14px')};
     transition: 0.4s;
   }
 
   input:checked + &__slider {
-    background-color: ${({ theme }) => theme.colors.primary.main || '#2196F3'};
+    background-color: ${({ theme }) => theme.colors.primary.main};
   }
 
   &__slider::before {

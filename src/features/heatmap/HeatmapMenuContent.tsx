@@ -114,11 +114,6 @@ export const HeatmapMenuContent = memo(
       width: fit-content;
       padding: 0 8px;
     }
-
-    &__inputNewLine {
-      width: 100%;
-      padding: 0 8px;
-    }
   `,
   (prev, next) => {
     return (
