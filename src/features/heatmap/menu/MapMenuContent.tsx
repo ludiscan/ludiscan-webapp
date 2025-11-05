@@ -11,7 +11,7 @@ import { InputRow } from '@src/features/heatmap/menu/InputRow';
 import { useGeneralPatch, useGeneralSelect } from '@src/hooks/useGeneral';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
-export const MapMenuContent: FC<HeatmapMenuProps> = ({ className, mapOptions, model }) => {
+export const MapMenuContent: FC<HeatmapMenuProps> = ({ mapOptions, model }) => {
   const mapName = useGeneralSelect((s) => s.mapName);
   const setData = useGeneralPatch();
   const handleAddWaypoint = useCallback(() => {
@@ -21,7 +21,6 @@ export const MapMenuContent: FC<HeatmapMenuProps> = ({ className, mapOptions, mo
     <>
       <InputRow label={'visualize map'}>
         <Selector
-          className={`${className}__inputNewLine`}
           onChange={(mapName) => {
             setData({ mapName });
           }}
