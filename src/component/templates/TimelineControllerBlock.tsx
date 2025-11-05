@@ -140,10 +140,10 @@ const Component: FC<TimelineControllerBlockProps> = ({
 
   return (
     <Card
-      color={theme.colors.surface.main}
+      color={theme.colors.surface.base}
       className={`${className} ${isDetailOpen && 'open'}`}
       shadow='medium'
-      border={theme.colors.border.main}
+      border={theme.colors.border.default}
       stopPropagate
       blur
     >
@@ -152,13 +152,13 @@ const Component: FC<TimelineControllerBlockProps> = ({
           {isDetailOpen && (
             <InlineFlexRow align={'center'} gap={12} style={{ width: '100%' }} wrap={'nowrap'}>
               <InlineFlexRow align={'center'} gap={4}>
-                <Button onClick={onClickBackFrame} scheme={'none'} fontSize={'medium'}>
+                <Button onClick={onClickBackFrame} scheme={'none'} fontSize={'base'}>
                   <IoPlayBackSharp />
                 </Button>
-                <Button className={`${className}__playButton`} onClick={onClickPlay} scheme={'none'} fontSize={'large3'}>
+                <Button className={`${className}__playButton`} onClick={onClickPlay} scheme={'none'} fontSize={'2xl'}>
                   {isPlaying ? <IoPause /> : <IoPlay />}
                 </Button>
-                <Button onClick={onClickForwardFrame} scheme={'none'} fontSize={'medium'}>
+                <Button onClick={onClickForwardFrame} scheme={'none'} fontSize={'base'}>
                   <IoPlayForwardSharp />
                 </Button>
               </InlineFlexRow>
@@ -166,17 +166,17 @@ const Component: FC<TimelineControllerBlockProps> = ({
               {/* Play Speed Selector */}
               <InlineFlexRow align={'center'} gap={4}>
                 {PlaySpeed.map((value) => (
-                  <Button key={value} onClick={() => onChangePlaySpeed(value)} scheme={'none'} fontSize={'small'}>
+                  <Button key={value} onClick={() => onChangePlaySpeed(value)} scheme={'none'} fontSize={'sm'}>
                     <Text
                       className={`${className}__playSpeedText`}
                       text={`${value}x`}
                       fontSize={playSpeed === value ? fontSizes.medium : fontSizes.small}
-                      color={playSpeed === value ? theme.colors.text : theme.colors.secondary.main}
+                      color={playSpeed === value ? theme.colors.text.primary : theme.colors.text.secondary}
                     />
                   </Button>
                 ))}
               </InlineFlexRow>
-              <Button onClick={onClickMenu} scheme={'none'} fontSize={'large1'}>
+              <Button onClick={onClickMenu} scheme={'none'} fontSize={'lg'}>
                 <IoMenu />
               </Button>
             </InlineFlexRow>
@@ -184,13 +184,13 @@ const Component: FC<TimelineControllerBlockProps> = ({
           <InlineFlexRow align={'center'} gap={12} style={{ width: '100%' }} wrap={'nowrap'}>
             {!isDetailOpen && (
               <InlineFlexRow align={'center'} gap={4}>
-                <Button onClick={onClickBackFrame} scheme={'none'} fontSize={'small'}>
+                <Button onClick={onClickBackFrame} scheme={'none'} fontSize={'sm'}>
                   <IoPlayBackSharp />
                 </Button>
-                <Button className={`${className}__playButton`} onClick={onClickPlay} scheme={'none'} fontSize={'large2'}>
+                <Button className={`${className}__playButton`} onClick={onClickPlay} scheme={'none'} fontSize={'xl'}>
                   {isPlaying ? <IoPause /> : <IoPlay />}
                 </Button>
-                <Button onClick={onClickForwardFrame} scheme={'none'} fontSize={'small'}>
+                <Button onClick={onClickForwardFrame} scheme={'none'} fontSize={'sm'}>
                   <IoPlayForwardSharp />
                 </Button>
               </InlineFlexRow>
@@ -199,7 +199,7 @@ const Component: FC<TimelineControllerBlockProps> = ({
             <div className={`${className}__sliderWrapper`} ref={trackRef}>
               {!isDetailOpen && (
                 <>
-                  <Text className={`${className}__speedLabel`} text={`${playSpeed}x`} fontSize={fontSizes.small} color={theme.colors.secondary.main} />
+                  <Text className={`${className}__speedLabel`} text={`${playSpeed}x`} fontSize={fontSizes.small} color={theme.colors.text.secondary} />
                   <Text className={`${className}__label`} text={`${currentTimeLabel}/${maxTimeLabel}`} fontSize={fontSizes.small} />
                 </>
               )}
@@ -236,7 +236,7 @@ const Component: FC<TimelineControllerBlockProps> = ({
               className={`${className}__toggleButton ${isDetailOpen ? 'open' : ''}`}
               onClick={() => setIsDetailOpen(!isDetailOpen)}
               scheme={'none'}
-              fontSize={'medium'}
+              fontSize={'base'}
             >
               {!isDetailOpen ? (
                 <span className='icon-expand'>
@@ -276,7 +276,7 @@ export const TimelineControllerBlock = memo(
     max-width: 450px;
     height: 24px;
     padding: 16px 16px 20px;
-    color: ${({ theme }) => theme.colors.text};
+    color: ${({ theme }) => theme.colors.text.primary};
     border-radius: 32px;
     transition: all 0.2s ease-in-out;
 
@@ -337,7 +337,7 @@ export const TimelineControllerBlock = memo(
         height: 20px;
         appearance: none;
         cursor: pointer;
-        background: ${({ theme }) => theme.colors.surface.main};
+        background: ${({ theme }) => theme.colors.surface.base};
         border: 1px solid ${({ theme }) => theme.colors.primary.main};
         border-radius: 8px;
       }
@@ -346,7 +346,7 @@ export const TimelineControllerBlock = memo(
         width: 6px;
         height: 20px;
         cursor: pointer;
-        background: ${({ theme }) => theme.colors.surface.main};
+        background: ${({ theme }) => theme.colors.surface.base};
         border: 1px solid ${({ theme }) => theme.colors.primary.main};
         border-radius: 8px;
       }

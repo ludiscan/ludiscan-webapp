@@ -1,0 +1,25 @@
+[
+  {
+    "id": 4,
+    "event_type": "success",
+    "event_data": {
+      "x": 300.0,
+      "y": 400.0,
+      "z": 60.0
+    },
+    "offset_timestamp": 5000,
+    "player": 1
+  },
+  {
+    "id": 5,
+    "event_type": "success",
+    "event_data": {
+      "x": 350.5,
+      "y": 450.2,
+      "z": 55.3
+    },
+    "offset_timestamp": 6000,
+    "player": 2
+  }
+]
+

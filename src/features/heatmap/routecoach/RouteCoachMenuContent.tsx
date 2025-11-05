@@ -11,8 +11,10 @@ import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { TextField } from '@src/component/molecules/TextField';
 import { EventClusterViewer } from '@src/component/organisms/EventClusterViewer';
-import { generateImprovementRoutes, getImprovementRoutesTaskStatus } from '@src/features/heatmap/routecoach/api';
-import { createClient } from '@src/modeles/qeury';
+import { useRouteCoachApi } from '@src/features/heatmap/routecoach/api';
+import { useImprovementRoutes } from '@src/hooks/useImprovementRoutes';
+import { useRouteCoachPatch } from '@src/hooks/useRouteCoach';
+import { useApiClient } from '@src/modeles/ApiClientContext';
 import { fontSizes } from '@src/styles/style';
 
 const POLL_MS = 2000;
@@ -111,13 +113,19 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
   // 強制再生成フラグ
   const [forceRegenerate, setForceRegenerate] = useState<boolean>(false);
 
+  // Redux から cluster 選択状態を更新
+  const patchRouteCoach = useRouteCoachPatch();
+
+  const apiClient = useApiClient();
+  const routeCoachApi = useRouteCoachApi();
+
   // セッションのプレイヤー一覧を取得
   const { data: players, isLoading: isLoadingPlayers } = useQuery<number[]>({
-    queryKey: ['sessionPlayers', projectId, sessionId],
+    queryKey: ['sessionPlayers', projectId, sessionId, apiClient],
     enabled,
     queryFn: async () => {
       if (!projectId || !sessionId) return [];
-      const { data, error } = await createClient().GET('/api/v0/projects/{project_id}/play_session/{session_id}/player_position_log/{session_id}/players', {
+      const { data, error } = await apiClient.GET('/api/v0/projects/{project_id}/play_session/{session_id}/player_position_log/{session_id}/players', {
         params: {
           path: {
             project_id: projectId,
@@ -139,7 +147,7 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
   } = useQuery({
     queryKey: ['improvementRoutesTask', taskId],
     enabled: !!taskId,
-    queryFn: () => getImprovementRoutesTaskStatus(taskId!),
+    queryFn: () => routeCoachApi.getImprovementRoutesTaskStatus(taskId!),
     refetchOnWindowFocus: false,
   });
 
@@ -158,7 +166,7 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
 
   // 改善ルート生成を開始
   const { mutate: startGeneration, isPending: isGenerating } = useMutation({
-    mutationFn: () => generateImprovementRoutes(projectId!, undefined, forceRegenerate),
+    mutationFn: () => routeCoachApi.generateImprovementRoutes(projectId!, undefined, forceRegenerate),
     onSuccess: (result) => {
       if (result) {
         // eslint-disable-next-line
@@ -211,7 +219,8 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
     setTaskId(null);
     setSelectedPlayerId('');
     setForceRegenerate(false);
-  }, [projectId, sessionId]);
+    patchRouteCoach({ selectedClusterId: null });
+  }, [projectId, sessionId, patchRouteCoach]);
 
   // クリーンアップ
   useEffect(() => {
@@ -226,17 +235,22 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
     setSelectedPlayerId(playerId);
   }, []);
 
+  // 改善ルートデータを取得（クラスター一覧用）
+  const { data: clusterData } = useImprovementRoutes(projectId || 0, selectedPlayerId, {
+    enabled: enabled && !!taskStatus,
+  });
+
   return (
     <FlexColumn gap={12} className={className} wrap={'nowrap'}>
       <Text text={'Route Coach v2'} fontSize={fontSizes.large3} />
 
       {/* 改善ルート生成ボタン */}
       <FlexRow gap={8}>
-        <Button onClick={onStartGeneration} disabled={disabled} title='プロジェクトの改善ルートを生成' scheme={'primary'} fontSize={'small'}>
+        <Button onClick={onStartGeneration} disabled={disabled} title='プロジェクトの改善ルートを生成' scheme={'primary'} fontSize={'sm'}>
           {busy ? '生成中…' : '改善ルート生成'}
         </Button>
         {taskStatus?.status === 'completed' && (
-          <Button onClick={onForceRegenerate} disabled={disabled} title='既存のタスクを削除して強制的に再生成' scheme={'secondary'} fontSize={'small'}>
+          <Button onClick={onForceRegenerate} disabled={disabled} title='既存のタスクを削除して強制的に再生成' scheme={'secondary'} fontSize={'sm'}>
             再生成
           </Button>
         )}
@@ -270,14 +284,20 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
         <Hint>このセッションにはプレイヤーがいません。</Hint>
       )}
 
-      {/* イベントクラスター表示 */}
-      {selectedPlayerId ? (
+      {/* クラスター選択リスト */}
+      {taskStatus && clusterData && clusterData.length > 0 ? (
         <ScrollableClusterSection>
           <FlexColumn gap={16}>
-            <Text text={`プレイヤー ${selectedPlayerId} の改善ルート`} fontSize={fontSizes.large1} />
-            <EventClusterViewer projectId={projectId!} playerId={selectedPlayerId} />
+            <Text text='クラスター選択' fontSize={fontSizes.large1} />
+            <EventClusterViewer
+              projectId={projectId!}
+              playerId={selectedPlayerId}
+              onSelectCluster={(clusterId) => patchRouteCoach({ selectedClusterId: clusterId })}
+            />
           </FlexColumn>
         </ScrollableClusterSection>
+      ) : taskStatus ? (
+        <Hint>このプレイヤーのクラスターはまだ生成されていません。</Hint>
       ) : null}
     </FlexColumn>
   );

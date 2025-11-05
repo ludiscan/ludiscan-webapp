@@ -27,11 +27,11 @@ export const MapMenuContent: FC<HeatmapMenuProps> = ({ className, mapOptions, mo
           }}
           options={mapOptions}
           value={mapName}
-          fontSize={'small'}
+          fontSize={'sm'}
           disabled={mapOptions.length === 0}
         />
       </InputRow>
-      <Button scheme={'surface'} fontSize={'medium'} onClick={handleAddWaypoint}>
+      <Button scheme={'surface'} fontSize={'base'} onClick={handleAddWaypoint}>
         <Text text={'add waypoint'} />
       </Button>
       {model && mapName && <ObjectToggleList mapName={mapName} model={model} />}

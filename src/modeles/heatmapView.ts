@@ -4,7 +4,8 @@ import packageJson from '../../package.json';
 
 import type { components } from '@generated/api';
 
-import { createClient, DefaultStaleTime } from '@src/modeles/qeury';
+import { useApiClient } from '@src/modeles/ApiClientContext';
+import { DefaultStaleTime } from '@src/modeles/qeury';
 
 export type EventLogData = {
   key: string;
@@ -143,12 +144,13 @@ export const initializeValues: HeatmapDataState = {
 };
 
 export function usePlayerPositionLogs(player: number | undefined, project_id: number | undefined, session_id: number | undefined) {
+  const apiClient = useApiClient();
   return useQuery({
-    queryKey: ['eventLogDetail', player, project_id, session_id],
+    queryKey: ['eventLogDetail', player, project_id, session_id, apiClient],
     queryFn: async () => {
       if (!project_id || !session_id || player === undefined) return null;
       // Replace with actual data fetching logic
-      return createClient().GET('/api/v0/projects/{project_id}/play_session/{session_id}/player_position_log', {
+      return apiClient.GET('/api/v0/projects/{project_id}/play_session/{session_id}/player_position_log', {
         params: {
           path: {
             project_id: project_id,
@@ -167,31 +169,13 @@ export function usePlayerPositionLogs(player: number | undefined, project_id: nu
   });
 }
 
-export function useFieldObjectLogs(project_id: number | undefined, session_id: number | undefined) {
-  return useQuery({
-    queryKey: ['fieldObjectLogs', project_id, session_id],
-    queryFn: async () => {
-      if (!project_id || !session_id) return null;
-      return createClient().GET('/api/v0/projects/{project_id}/play_session/{session_id}/field_object_log', {
-        params: {
-          path: {
-            project_id: project_id,
-            session_id: session_id,
-          },
-        },
-      });
-    },
-    staleTime: DefaultStaleTime,
-    enabled: !!project_id && !!session_id,
-  });
-}
-
 export function useFieldObjectTypes(project_id: number | undefined, session_id: number | undefined) {
+  const apiClient = useApiClient();
   return useQuery({
-    queryKey: ['fieldObjectTypes', project_id, session_id],
+    queryKey: ['fieldObjectTypes', project_id, session_id, apiClient],
     queryFn: async () => {
       if (!project_id || !session_id) return null;
-      return createClient().GET('/api/v0/projects/{project_id}/play_session/{session_id}/field_object_log/object_types', {
+      return apiClient.GET('/api/v0/projects/{project_id}/play_session/{session_id}/field_object_log/object_types', {
         params: {
           path: {
             project_id: project_id,

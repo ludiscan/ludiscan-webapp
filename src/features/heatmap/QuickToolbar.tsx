@@ -8,8 +8,9 @@ import { Button } from '@src/component/atoms/Button';
 import { InlineFlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { Selector } from '@src/component/molecules/Selector';
-import { generateImprovementRoutes } from '@src/features/heatmap/routecoach/api';
-import { createClient, DefaultStaleTime } from '@src/modeles/qeury';
+import { useRouteCoachApi } from '@src/features/heatmap/routecoach/api';
+import { useApiClient } from '@src/modeles/ApiClientContext';
+import { DefaultStaleTime } from '@src/modeles/qeury';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
 const PRESETS = [25, 50, 75, 100, 150, 200, 300, 400];
@@ -21,12 +22,14 @@ function Toolbar({ className, service }: Props) {
   const [percent, setPercent] = useState(100);
   const [selectSessionId, setSelectSessionId] = useState<string | undefined>(undefined);
   const qc = useQueryClient();
+  const apiClient = useApiClient();
+  const routeCoachApi = useRouteCoachApi();
 
   const { data: sessions } = useQuery({
     queryKey: ['sessions', service.projectId],
     queryFn: async () => {
       if (!service.projectId) return;
-      const { data, error } = await createClient().GET('/api/v0/projects/{project_id}/play_session', {
+      const { data, error } = await apiClient.GET('/api/v0/projects/{project_id}/play_session', {
         params: {
           path: {
             project_id: service.projectId,
@@ -53,7 +56,7 @@ function Toolbar({ className, service }: Props) {
   const { mutate: startRouteCoach, isPending: isRouteCoachPending } = useMutation({
     mutationFn: async () => {
       if (!service.projectId) throw new Error('Project is required');
-      return generateImprovementRoutes(service.projectId);
+      return routeCoachApi.generateImprovementRoutes(service.projectId);
     },
     onSuccess: async () => {
       // 生成後、RouteCoachメニューのキャッシュを無効化
@@ -100,11 +103,11 @@ function Toolbar({ className, service }: Props) {
 
   return (
     <div className={className} role='toolbar' aria-label='Viewer quick tools'>
-      <Button className='btn' onClick={() => step(-1)} aria-label='Zoom out' scheme={'surface'} fontSize={'small'}>
+      <Button className='btn' onClick={() => step(-1)} aria-label='Zoom out' scheme={'surface'} fontSize={'sm'}>
         −
       </Button>
       <div className='select'>
-        <Button className='btn wide' onClick={() => setOpen((v) => !v)} aria-expanded={open} aria-haspopup='listbox' fontSize={'small'} scheme={'surface'}>
+        <Button className='btn wide' onClick={() => setOpen((v) => !v)} aria-expanded={open} aria-haspopup='listbox' fontSize={'sm'} scheme={'surface'}>
           <span className='tabnum'>{percent}%</span>
           <span className='caret'>▾</span>
         </Button>
@@ -121,13 +124,13 @@ function Toolbar({ className, service }: Props) {
         )}
       </div>
 
-      <Button onClick={() => step(1)} aria-label='Zoom in' scheme={'surface'} fontSize={'small'}>
+      <Button onClick={() => step(1)} aria-label='Zoom in' scheme={'surface'} fontSize={'sm'}>
         ＋
       </Button>
-      <Button className='btn wide' onClick={fit} title='Fit (0)' scheme={'surface'} fontSize={'small'}>
+      <Button className='btn wide' onClick={fit} title='Fit (0)' scheme={'surface'} fontSize={'sm'}>
         Fit
       </Button>
-      <Button className='btn wide' onClick={oneToOne} title='1:1' scheme={'surface'} fontSize={'small'}>
+      <Button className='btn wide' onClick={oneToOne} title='1:1' scheme={'surface'} fontSize={'sm'}>
         1:1
       </Button>
       <InlineFlexRow align={'center'} wrap={'nowrap'}>
@@ -141,7 +144,7 @@ function Toolbar({ className, service }: Props) {
           maxHeight={250}
         />
         <Button
-          fontSize={'small'}
+          fontSize={'sm'}
           onClick={() => service.setSessionId(Number(selectSessionId) || null)}
           scheme={'primary'}
           disabled={selectSessionId === undefined}
@@ -149,7 +152,7 @@ function Toolbar({ className, service }: Props) {
           <Text text={'filter'} />
         </Button>
         <Button
-          fontSize={'small'}
+          fontSize={'sm'}
           onClick={() => startRouteCoach()}
           scheme={'primary'}
           disabled={!service.projectId || isRouteCoachPending}
@@ -172,8 +175,8 @@ export const QuickToolbar = memo(
     justify-content: end;
     width: calc(100% - 64px);
     padding: 4px 32px;
-    background: ${({ theme }) => theme.colors.surface.main};
-    border-bottom: 1px solid ${({ theme }) => theme.colors.border.main};
+    background: ${({ theme }) => theme.colors.surface.base};
+    border-bottom: 1px solid ${({ theme }) => theme.colors.border.default};
 
     .wide {
       min-width: 56px;
@@ -200,8 +203,8 @@ export const QuickToolbar = memo(
       width: 90px;
       padding: 4px;
       list-style: none;
-      background: ${({ theme }) => theme.colors.surface.main};
-      border: 1px solid ${({ theme }) => theme.colors.border.main};
+      background: ${({ theme }) => theme.colors.surface.base};
+      border: 1px solid ${({ theme }) => theme.colors.border.default};
       border-radius: 8px;
       box-shadow: 0 6px 16px rgb(0 0 0 / 8%);
     }
@@ -209,7 +212,7 @@ export const QuickToolbar = memo(
     .item {
       width: 100%;
       padding: 8px;
-      color: ${({ theme }) => theme.colors.text};
+      color: ${({ theme }) => theme.colors.text.primary};
       text-align: left;
       cursor: pointer;
       background: transparent;
@@ -217,7 +220,7 @@ export const QuickToolbar = memo(
       border-radius: 6px;
 
       &:hover {
-        background: ${({ theme }) => theme.colors.surface.dark};
+        background: ${({ theme }) => theme.colors.surface.raised};
       }
     }
   `,

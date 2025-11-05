@@ -71,28 +71,24 @@ const HeaderWrapper = memo(
         iconTitleEnd={<Text className={`${className}__headerV`} text={`${version || 'debug'}`} fontSize={fontSizes.small} fontWeight={'bold'} />}
         iconEnd={
           <>
-            <Button
-              fontSize={'small'}
-              onClick={handleSplitHorizontal}
-              scheme={splitMode.enabled && splitMode.direction === 'horizontal' ? 'primary' : 'surface'}
-            >
+            <Button fontSize={'sm'} onClick={handleSplitHorizontal} scheme={splitMode.enabled && splitMode.direction === 'horizontal' ? 'primary' : 'surface'}>
               <Text text={'Split ↔'} fontWeight={'bold'} />
             </Button>
-            <Button fontSize={'small'} onClick={handleSplitVertical} scheme={splitMode.enabled && splitMode.direction === 'vertical' ? 'primary' : 'surface'}>
+            <Button fontSize={'sm'} onClick={handleSplitVertical} scheme={splitMode.enabled && splitMode.direction === 'vertical' ? 'primary' : 'surface'}>
               <Text text={'Split ↕'} fontWeight={'bold'} />
             </Button>
             {splitMode.enabled && (
-              <Button fontSize={'small'} onClick={handleSingleView} scheme={'surface'}>
+              <Button fontSize={'sm'} onClick={handleSingleView} scheme={'surface'}>
                 <Text text={'Single'} fontWeight={'bold'} />
               </Button>
             )}
-            <Button fontSize={'small'} onClick={discard} scheme={'surface'} disabled={!hasDiff}>
+            <Button fontSize={'sm'} onClick={discard} scheme={'surface'} disabled={!hasDiff}>
               <Text text={'Discord'} fontWeight={'bold'} />
             </Button>
-            <Button fontSize={'small'} onClick={apply} scheme={'surface'} className={`${className}__badgeButton ${hasDiff ? 'badge' : ''}`}>
+            <Button fontSize={'sm'} onClick={apply} scheme={'surface'} className={`${className}__badgeButton ${hasDiff ? 'badge' : ''}`}>
               <Text text={'Save'} fontWeight={'bold'} />
             </Button>
-            <Button fontSize={'small'} onClick={() => {}} scheme={'secondary'}>
+            <Button fontSize={'sm'} onClick={() => {}} scheme={'tertiary'}>
               <Text text={'Export'} fontWeight={'bold'} />
             </Button>
           </>
@@ -106,7 +102,7 @@ const HeaderWrapper = memo(
 );
 HeaderWrapper.displayName = 'HeaderWrapper';
 
-const HeatmapIdPageLayoutComponent: FC<HeatmapIdPageLayoutProps> = ({ className, service, onBackClick }) => {
+export const HeatmapIdPageLayoutComponent: FC<HeatmapIdPageLayoutProps> = ({ className, service, onBackClick }) => {
   const statusContentStatus = useMemo(() => {
     if (!service.task) return 'success';
     if (service.task.status === 'pending' || service.task.status === 'processing') return 'loading';
@@ -124,7 +120,7 @@ const HeatmapIdPageLayoutComponent: FC<HeatmapIdPageLayoutProps> = ({ className,
 
 export const HeatmapIdPageLayout = styled(HeatmapIdPageLayoutComponent)`
   height: calc(100vh - ${dimensions.headerHeight}px);
-  background: ${({ theme }) => theme.colors.surface.dark};
+  background: ${({ theme }) => theme.colors.surface.raised};
 
   &__headerV {
     align-self: end;
@@ -147,7 +143,7 @@ export const HeatmapIdPageLayout = styled(HeatmapIdPageLayoutComponent)`
     content: '';
     background-color: ${({ theme }) => theme.colors.primary.main};
     border-radius: 50%;
-    box-shadow: 2px 2px 12px ${({ theme }) => theme.colors.border.dark};
+    box-shadow: 2px 2px 12px ${({ theme }) => theme.colors.border.strong};
   }
 `;
 

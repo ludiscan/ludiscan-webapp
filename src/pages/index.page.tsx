@@ -106,7 +106,7 @@ const IndexPage = styled(Component)`
   &__subtitle {
     margin: 0;
     font-size: 1.1rem;
-    color: ${({ theme }) => theme.colors.text};
+    color: ${({ theme }) => theme.colors.text.primary};
     opacity: 0.8;
   }
 
@@ -137,7 +137,7 @@ const IndexPage = styled(Component)`
     justify-content: center;
     height: 100%;
     font-size: 1.2rem;
-    color: ${({ theme }) => theme.colors.text};
+    color: ${({ theme }) => theme.colors.text.primary};
   }
 `;
 

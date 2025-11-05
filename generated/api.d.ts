@@ -4461,9 +4461,9 @@ export interface operations {
   };
   RouteCoachController_getEventClusters: {
     parameters: {
-      query: {
-        /** @description Player ID to filter events */
-        player_id: string;
+      query?: {
+        /** @description Player ID to filter events (optional - if not specified, all players are included) */
+        player_id?: string;
         /** @description Map name to filter by */
         map_name?: string;
         /** @description Event type to filter by */
@@ -4539,6 +4539,8 @@ export interface operations {
       query?: {
         /** @description マップ名でフィルタ（指定時はそのマップのみ処理） */
         map_name?: string;
+        /** @description force=true の場合、既存の completed/failed タスクを削除して強制再生成 */
+        force?: string;
       };
       header?: never;
       path: {

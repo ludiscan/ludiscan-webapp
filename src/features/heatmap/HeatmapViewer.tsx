@@ -24,7 +24,8 @@ import { HeatmapMenuSideBar } from '@src/features/heatmap/menu/HeatmapMenuSideBa
 import { FocusLinkBridge } from '@src/features/heatmap/selection/FocusLinkBridge';
 import { InspectorModal } from '@src/features/heatmap/selection/InspectorModal';
 import { useGeneralSelect } from '@src/hooks/useGeneral';
-import { DefaultStaleTime, createClient } from '@src/modeles/qeury';
+import { useApiClient } from '@src/modeles/ApiClientContext';
+import { DefaultStaleTime } from '@src/modeles/qeury';
 import { dimensions, zIndexes } from '@src/styles/style';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 import { detectDimensionality } from '@src/utils/heatmap/detectDimensionality';
@@ -47,6 +48,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
 
   const mapName = useGeneralSelect((s) => s.mapName);
   const splitMode = useSelector((s: RootState) => s.heatmapCanvas.splitMode);
+  const apiClient = useApiClient();
 
   const [visibleTimelineRange, setVisibleTimelineRange] = useState<PlayerTimelinePointsTimeRange>({ start: 0, end: 0 });
 
@@ -57,7 +59,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
     queryKey: ['project', service.projectId],
     queryFn: async () => {
       if (!service.projectId) return null;
-      const res = await createClient().GET('/api/v0/projects/{id}', {
+      const res = await apiClient.GET('/api/v0/projects/{id}', {
         params: { path: { id: service.projectId } },
       });
       return res.data ?? null;
@@ -70,7 +72,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
   const dimensionality = useMemo(() => detectDimensionality(project?.is2D, task), [project?.is2D, task]);
 
   const { data: mapList } = useQuery({
-    queryKey: ['mapList', service],
+    queryKey: ['mapList', service, service.projectId],
     queryFn: async () => {
       return service.getMapList();
     },
@@ -99,7 +101,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
     queryKey: ['fieldObjectLogs', service.projectId, service.sessionId],
     queryFn: async () => {
       if (!service.projectId || !service.sessionId) return null;
-      return createClient().GET('/api/v0/projects/{project_id}/play_session/{session_id}/field_object_log', {
+      return apiClient.GET('/api/v0/projects/{project_id}/play_session/{session_id}/field_object_log', {
         params: {
           path: {
             project_id: service.projectId,
@@ -110,6 +112,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
     },
     staleTime: DefaultStaleTime,
     enabled: !!service.projectId && !!service.sessionId,
+    // apiClientは関数なので、依存配列に含めない（Contextから毎回取得されるため）
   });
 
   useEffect(() => {
@@ -236,6 +239,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
           visibleTimelineRange={visibleTimelineRange}
           dimensionality={dimensionality}
           fieldObjectLogs={fieldObjectLogs?.data}
+          projectId={service.projectId}
         />
         <Stats parent={divRef} className={`${className}__stats`} />
       </Canvas>
@@ -298,7 +302,7 @@ export const HeatMapViewer = memo(
       width: calc(100% - 2px);
       height: 100%;
       overflow: hidden;
-      border-top: ${({ theme }) => `1px solid ${theme.colors.border.main}`};
+      border-top: ${({ theme }) => `1px solid ${theme.colors.border.default}`};
     }
 
     &__sideMenu {
@@ -307,7 +311,7 @@ export const HeatMapViewer = memo(
       flex-shrink: 0;
       height: 100%;
       overflow-y: auto;
-      background: ${({ theme }) => theme.colors.surface.dark};
+      background: ${({ theme }) => theme.colors.surface.raised};
     }
 
     &__canvasMenuBox {
@@ -348,12 +352,12 @@ export const HeatMapViewer = memo(
       max-width: 1900px;
       height: 100%;
       margin: 0 auto;
-      border: ${({ theme }) => `1px solid ${theme.colors.border.main}`};
+      border: ${({ theme }) => `1px solid ${theme.colors.border.default}`};
     }
 
     &__canvasBox--split {
       max-width: none;
-      border: ${({ theme }) => `2px solid ${theme.colors.border.main}`};
+      border: ${({ theme }) => `2px solid ${theme.colors.border.default}`};
     }
 
     &__performance {

@@ -46,9 +46,9 @@ const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
     return null;
   }
   return (
-    <Card className={className} padding={'0px'} color={theme.colors.surface.main} blur>
+    <Card className={className} padding={'0px'} color={theme.colors.surface.base} blur>
       <InlineFlexRow align={'center'} gap={16} style={{ position: 'absolute', top: '20px', right: '20px', zIndex: zIndexes.header }}>
-        <Button onClick={() => toggleMenu(false)} scheme={'none'} fontSize={'small'}>
+        <Button onClick={() => toggleMenu(false)} scheme={'none'} fontSize={'sm'}>
           <IoClose />
         </Button>
       </InlineFlexRow>
@@ -64,7 +64,7 @@ export const HeatmapMenuContent = memo(
     position: relative;
     width: 500px;
     height: 100%;
-    color: ${({ theme }) => theme.colors.text};
+    color: ${({ theme }) => theme.colors.text.primary};
 
     &__content {
       height: calc(100% - 32px);
@@ -86,13 +86,13 @@ export const HeatmapMenuContent = memo(
       padding: 2px 8px;
       font-size: ${fontSizes.small};
       font-weight: ${fontWeights.bold};
-      color: ${({ theme }) => theme.colors.text};
-      background: ${({ theme }) => theme.colors.surface.dark};
+      color: ${({ theme }) => theme.colors.text.primary};
+      background: ${({ theme }) => theme.colors.surface.raised};
       border-radius: 12px;
 
       & input {
         flex: 1;
-        color: ${({ theme }) => theme.colors.text};
+        color: ${({ theme }) => theme.colors.text.primary};
         outline: none;
         background: transparent;
         border: none;

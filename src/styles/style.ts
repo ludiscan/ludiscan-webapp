@@ -1,3 +1,6 @@
+/**
+ * @deprecated
+ */
 export const fontSizes = {
   smallest: '10px',
   small: '12px',
@@ -8,8 +11,14 @@ export const fontSizes = {
   largest: '24px',
 } as const;
 
+/**
+ * @deprecated
+ */
 export type FontSize = keyof typeof fontSizes;
 
+/**
+ * @deprecated
+ */
 export const fontWeights = {
   lighter: 200,
   light: 300,
@@ -47,7 +56,9 @@ export const layers = {
   default: 0,
   raycast: 7,
 } as const;
-
+/**
+ * @deprecated
+ */
 export const colors = {
   primary: '#0070f3',
   primaryVariant: '#ff0080',

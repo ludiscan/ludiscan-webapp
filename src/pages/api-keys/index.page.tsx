@@ -120,7 +120,7 @@ const Component: FC<ApiKeysPageProps> = ({ className }) => {
         <SidebarLayout />
         <InnerContent>
           <div className={`${className}__centerContent`}>
-            <Text text='Loading...' fontSize={fontSizes.medium} color={theme.colors.text} />
+            <Text text='Loading...' fontSize={fontSizes.medium} color={theme.colors.text.primary} />
           </div>
         </InnerContent>
       </div>

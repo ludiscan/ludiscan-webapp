@@ -31,7 +31,7 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = () => {
     <>
       <InputRow label={'上向ベクトル'}>
         <SegmentedSwitch
-          fontSize={'smallest'}
+          fontSize={'xs'}
           value={upZ ? 'Z' : 'Y'}
           options={['Y', 'Z']}
           onChange={(v) => {
@@ -65,7 +65,7 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = () => {
           onChange={(v) => {
             setData({ heatmapType: v as GeneralSettings['heatmapType'] });
           }}
-          fontSize={'medium'}
+          fontSize={'base'}
         />
       </InputRow>
       <InputRow label={'blockSize'}>
@@ -79,7 +79,7 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = () => {
       </InputRow>
       <InputRow label={''}>
         <div style={{ flex: 1 }} />
-        <Button onClick={handleReload} scheme={'surface'} fontSize={'small'}>
+        <Button onClick={handleReload} scheme={'surface'} fontSize={'sm'}>
           <Text text={'Reload'} fontSize={fontSizes.small} />
         </Button>
       </InputRow>

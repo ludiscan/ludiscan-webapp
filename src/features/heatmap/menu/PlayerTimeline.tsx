@@ -25,7 +25,8 @@ import { TextArea } from '@src/component/molecules/TextArea';
 import { useGetApi } from '@src/hooks/useGetApi';
 import { usePlayerTimelinePatch, usePlayerTimelinePick } from '@src/hooks/usePlayerTimeline';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { createClient, DefaultStaleTime } from '@src/modeles/qeury';
+import { useApiClient } from '@src/modeles/ApiClientContext';
+import { DefaultStaleTime } from '@src/modeles/qeury';
 import { fontSizes } from '@src/styles/style';
 import { toISOAboutStringWithTimezone } from '@src/utils/locale';
 import { compileHVQL, parseHVQL } from '@src/utils/vql';
@@ -47,14 +48,15 @@ function toggleButtonStyle(theme: Theme): CSSProperties {
 const DetailBlockInternal: FC<{ className?: string; details: PlayerTimelineDetail[]; service: HeatmapDataService }> = ({ className, details }) => {
   const setData = usePlayerTimelinePatch();
   const { theme } = useSharedTheme();
+  const apiClient = useApiClient();
   // const player = detail.player;
   const project_id = details[0].project_id;
   const session_id = details[0].session_id;
   const { data: session } = useQuery({
-    queryKey: ['session', session_id, project_id],
+    queryKey: ['session', session_id, project_id, apiClient],
     queryFn: async () => {
       if (!session_id || !project_id) return null;
-      return createClient().GET('/api/v0/projects/{project_id}/play_session/{session_id}', {
+      return apiClient.GET('/api/v0/projects/{project_id}/play_session/{session_id}', {
         params: {
           path: {
             project_id,
@@ -67,27 +69,15 @@ const DetailBlockInternal: FC<{ className?: string; details: PlayerTimelineDetai
     enabled: !!session_id && !!project_id,
   });
 
-  // const { data: project } = useQuery({
-  //   queryKey: ['project', project_id],
-  //   queryFn: async () => {
-  //     if (!project_id) return null;
-  //     return service.createClient()?.GET('/api/v0/projects/{id}', {
-  //       params: { path: { id: project_id } },
-  //     });
-  //   },
-  //   staleTime: DefaultStaleTime,
-  //   enabled: !!project_id,
-  // });
-
   if (details.length === 0) return null;
   return (
     <InlineFlexColumn gap={4} className={className}>
       <Divider />
       <FlexRow className={`${className}__row`} wrap={'nowrap'} align={'center'}>
-        <Text text={`Session: ${session_id}`} fontSize={fontSizes.small} color={theme.colors.secondary.main} />
+        <Text text={`Session: ${session_id}`} fontSize={fontSizes.small} color={theme.colors.text.secondary} />
         <div style={{ flex: 1 }} />
         <Button
-          fontSize={'medium'}
+          fontSize={'base'}
           onClick={() => {
             setData((prev) => {
               const newDetails: PlayerTimelineDetail[] = prev.details?.filter((d) => !details.some((detail) => d.session_id === detail.session_id)) || [];
@@ -101,7 +91,7 @@ const DetailBlockInternal: FC<{ className?: string; details: PlayerTimelineDetai
       </FlexRow>
       {details.map((detail, index) => (
         <InlineFlexRow key={index} wrap={'nowrap'} align={'center'} className={`${className}__row`} gap={4}>
-          <Text text={`Player: ${detail.player}`} fontSize={fontSizes.small} color={theme.colors.secondary.main} />
+          <Text text={`Player: ${detail.player}`} fontSize={fontSizes.small} color={theme.colors.text.secondary} />
           <Switch
             checked={detail.visible}
             onChange={() => {
@@ -131,7 +121,7 @@ const DetailBlockInternal: FC<{ className?: string; details: PlayerTimelineDetai
               <Text text={session.data.name} fontSize={fontSizes.small} />
             </InputRow>
             <InlineFlexRow wrap={'nowrap'} align={'center'} className={`${className}__row`} gap={4}>
-              <Text text={'Start Time'} fontSize={fontSizes.small} color={theme.colors.secondary.main} />
+              <Text text={'Start Time'} fontSize={fontSizes.small} color={theme.colors.text.secondary} />
               <div className={`${className}__weight1`}>
                 <Text text={toISOAboutStringWithTimezone(new Date(session.data.startTime))} fontSize={fontSizes.small} />
               </div>
@@ -338,7 +328,7 @@ const PlayerTimelineComponent: FC<HeatmapMenuProps> = ({ className, service }) =
             onTrailingIconClick={() => setIsOpenQueryInfo(true)}
           >
             <TextArea placeholder={queryPlaceholder} className={`${className}__queryTextField`} value={queryText} onChange={setQueryText} />
-            <Button fontSize={'small'} scheme={'primary'} onClick={onApplyQuery} disabled={queryDisable}>
+            <Button fontSize={'sm'} scheme={'primary'} onClick={onApplyQuery} disabled={queryDisable}>
               <Text text={'search'} />
             </Button>
           </Toggle>

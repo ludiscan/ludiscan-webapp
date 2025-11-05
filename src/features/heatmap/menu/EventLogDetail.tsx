@@ -16,7 +16,8 @@ import { Toggle } from '@src/component/atoms/Toggle';
 import { StatusContent } from '@src/component/molecules/StatusContent';
 import { usePlayerTimelinePatch, usePlayerTimelinePick } from '@src/hooks/usePlayerTimeline';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { createClient, DefaultStaleTime } from '@src/modeles/qeury';
+import { useApiClient } from '@src/modeles/ApiClientContext';
+import { DefaultStaleTime } from '@src/modeles/qeury';
 import { fontSizes } from '@src/styles/style';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 import { toISOAboutStringWithTimezone } from '@src/utils/locale';
@@ -40,6 +41,8 @@ const Component: FC<HeatmapMenuProps> = ({ extra = {}, className }) => {
   const logName = 'logName' in extra ? extra.logName : undefined;
   const id = 'id' in extra ? extra.id : undefined;
 
+  const apiClient = useApiClient();
+
   const {
     data: logDetail,
     isLoading,
@@ -50,7 +53,7 @@ const Component: FC<HeatmapMenuProps> = ({ extra = {}, className }) => {
     queryFn: async () => {
       if (typeof logName !== 'string' || !id) return null;
       // Replace with actual data fetching logic
-      return createClient().GET('/api/v0/general_log/position/{event_type}/{id}', {
+      return apiClient.GET('/api/v0/general_log/position/{event_type}/{id}', {
         params: {
           path: {
             event_type: logName,
@@ -70,7 +73,7 @@ const Component: FC<HeatmapMenuProps> = ({ extra = {}, className }) => {
     queryKey: ['session', session_id, project_id],
     queryFn: async () => {
       if (!session_id || !project_id) return null;
-      return createClient().GET('/api/v0/projects/{project_id}/play_session/{session_id}', {
+      return apiClient.GET('/api/v0/projects/{project_id}/play_session/{session_id}', {
         params: {
           path: {
             project_id,
@@ -87,7 +90,7 @@ const Component: FC<HeatmapMenuProps> = ({ extra = {}, className }) => {
     queryKey: ['project', project_id],
     queryFn: async () => {
       if (!project_id) return null;
-      return createClient().GET('/api/v0/projects/{id}', {
+      return apiClient.GET('/api/v0/projects/{id}', {
         params: { path: { id: project_id } },
       });
     },
@@ -169,7 +172,7 @@ const Component: FC<HeatmapMenuProps> = ({ extra = {}, className }) => {
                     <Text text={session.data.name} fontSize={fontSizes.small} />
                   </InputRow>
                   <InlineFlexRow wrap={'nowrap'} align={'center'} className={`${className}__row`} gap={4}>
-                    <Text text={'Start Time'} fontSize={fontSizes.small} color={theme.colors.secondary.main} />
+                    <Text text={'Start Time'} fontSize={fontSizes.small} color={theme.colors.text.secondary} />
                     <div className={`${className}__weight1`}>
                       <Text text={toISOAboutStringWithTimezone(new Date(session.data.startTime))} fontSize={fontSizes.small} />
                     </div>
@@ -199,13 +202,13 @@ const Component: FC<HeatmapMenuProps> = ({ extra = {}, className }) => {
         )}
         <InlineFlexRow align={'flex-end'} className={`${className}__row`}>
           <div style={{ flex: 1 }} />
-          <Button fontSize={'medium'} onClick={handleTimelineClick} scheme={'surface'} disabled={timelineDisable}>
+          <Button fontSize={'base'} onClick={handleTimelineClick} scheme={'surface'} disabled={timelineDisable}>
             <Text text={'timeline'} fontSize={fontSizes.medium} />
           </Button>
         </InlineFlexRow>
         <InputRow label={''}>
           <div style={{ flex: 1 }} />
-          <Button onClick={handleReload} scheme={'surface'} fontSize={'small'}>
+          <Button onClick={handleReload} scheme={'surface'} fontSize={'sm'}>
             <Text text={'Reload'} fontSize={fontSizes.small} />
           </Button>
         </InputRow>

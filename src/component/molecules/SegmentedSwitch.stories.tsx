@@ -13,13 +13,13 @@ const Template: Story = {
   render: (args) => {
     return (
       <FlexColumn gap={16}>
-        <SegmentedSwitch {...args} fontSize={'smallest'} />
-        <SegmentedSwitch {...args} fontSize={'small'} />
-        <SegmentedSwitch {...args} fontSize={'medium'} />
-        <SegmentedSwitch {...args} fontSize={'large1'} />
-        <SegmentedSwitch {...args} fontSize={'large2'} />
-        <SegmentedSwitch {...args} fontSize={'large3'} />
-        <SegmentedSwitch {...args} fontSize={'largest'} />
+        <SegmentedSwitch {...args} fontSize={'xs'} />
+        <SegmentedSwitch {...args} fontSize={'sm'} />
+        <SegmentedSwitch {...args} fontSize={'base'} />
+        <SegmentedSwitch {...args} fontSize={'lg'} />
+        <SegmentedSwitch {...args} fontSize={'xl'} />
+        <SegmentedSwitch {...args} fontSize={'2xl'} />
+        <SegmentedSwitch {...args} fontSize={'3xl'} />
       </FlexColumn>
     );
   },

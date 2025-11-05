@@ -45,6 +45,6 @@ const Orientation = (props: DividerProps) => {
 };
 
 export const Divider = styled(DividerComponent)<DividerProps>`
-  background-color: ${({ color, theme }) => color || theme.colors.border.main || '#e0e0e0'};
+  background-color: ${({ color, theme }) => color || theme.colors.border.default || '#e0e0e0'};
   ${(props) => Orientation(props)}
 `;

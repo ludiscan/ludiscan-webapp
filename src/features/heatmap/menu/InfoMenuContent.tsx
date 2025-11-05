@@ -8,19 +8,21 @@ import type { FC } from 'react';
 import { Button } from '@src/component/atoms/Button';
 import { InlineFlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
-import { createClient, DefaultStaleTime } from '@src/modeles/qeury';
+import { useApiClient } from '@src/modeles/ApiClientContext';
+import { DefaultStaleTime } from '@src/modeles/qeury';
 import { fontSizes, fontWeights } from '@src/styles/style';
 
 export const InfoMenuContent: FC<HeatmapMenuProps> = ({ handleExportView, service }) => {
   const handleExportHeatmap = useCallback(async () => {
     await handleExportView();
   }, [handleExportView]);
+  const apiClient = useApiClient();
 
   const { data: project } = useQuery({
     queryKey: [service.projectId],
     queryFn: async () => {
       if (!service.projectId) return;
-      const { data, error } = await createClient().GET('/api/v0/projects/{id}', {
+      const { data, error } = await apiClient.GET('/api/v0/projects/{id}', {
         params: {
           path: {
             id: service.projectId,
@@ -53,7 +55,7 @@ export const InfoMenuContent: FC<HeatmapMenuProps> = ({ handleExportView, servic
         </>
       )}
       <InlineFlexRow align={'center'} gap={8} style={{ marginTop: 8, justifyContent: 'center' }}>
-        <Button onClick={handleExportHeatmap} scheme={'primary'} fontSize={'small'}>
+        <Button onClick={handleExportHeatmap} scheme={'primary'} fontSize={'sm'}>
           <FaFileExport style={{ marginRight: 4 }} />
           <Text text={'エクスポート'} fontSize={fontSizes.small} fontWeight={fontWeights.bold} />
         </Button>

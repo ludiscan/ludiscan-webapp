@@ -19,6 +19,7 @@ import { HeatmapFillOverlay } from '@src/features/heatmap/HeatmapFillOverlay';
 import { HotspotCircles } from '@src/features/heatmap/HotspotCircles';
 import { LocalModelLoader, StreamModelLoader } from '@src/features/heatmap/ModelLoader';
 import { PlayerTimelinePoints } from '@src/features/heatmap/PlayerTimelinePoints';
+import { RouteCoachVisualization } from '@src/features/heatmap/RouteCoachVisualization';
 import { RouteVisualization } from '@src/features/heatmap/RouteVisualization';
 import { WaypointMarker } from '@src/features/heatmap/WaypointMarker';
 import { FocusPingLayer } from '@src/features/heatmap/selection/FocusPingLayer';
@@ -38,6 +39,8 @@ type HeatmapCanvasProps = {
   visibleTimelineRange: PlayerTimelinePointsTimeRange;
   dimensionality: '2d' | '3d';
   fieldObjectLogs?: components['schemas']['FieldObjectLogDto'][];
+  projectId?: number;
+  playerId?: string;
 };
 
 type Waypoint = {
@@ -113,6 +116,8 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
   visibleTimelineRange,
   dimensionality,
   fieldObjectLogs = [],
+  projectId,
+  playerId,
 }) => {
   // const { invalidate } = useThree();
   const fitInfoRef = useRef<{ dist: number; center: Vector3 }>({ dist: 1000, center: new Vector3() });
@@ -277,7 +282,7 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
       // 3D: 既存の複雑な照明システム
       const ambientLight = new AmbientLight(0xffffff, 0.2);
       const directionalLight = new DirectionalLight(0xffffff, 0.4);
-      const hemisphereLight = new HemisphereLight(theme.colors.background, theme.colors.surface.dark, 1);
+      const hemisphereLight = new HemisphereLight(theme.colors.background.default, theme.colors.surface.raised, 1);
       const spotLight = new SpotLight(0xffffff, 4, 30, Math.PI / 4, 10, 0.5);
       lights.push(ambientLight, directionalLight, hemisphereLight, spotLight);
     }
@@ -477,6 +482,7 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
       />
       <FocusPingLayer ttlMs={1800} baseRadius={60} />
       <RouteVisualization dimensionality={dimensionality} />
+      {projectId && <RouteCoachVisualization projectId={projectId} playerId={playerId} />}
     </>
   );
 };
@@ -491,5 +497,7 @@ export const HeatMapCanvas = memo(
     prev.visibleTimelineRange === next.visibleTimelineRange &&
     prev.service.task == next.service.task &&
     prev.dimensionality === next.dimensionality &&
-    prev.fieldObjectLogs === next.fieldObjectLogs,
+    prev.fieldObjectLogs === next.fieldObjectLogs &&
+    prev.projectId === next.projectId &&
+    prev.playerId === next.playerId,
 );

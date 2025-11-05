@@ -44,7 +44,7 @@ const Component: FC<StatusContentProps> = ({ className, status, errorMessage, ch
         <div className={className}>
           <Modal isOpen={true} title={errorMessage || 'An error occurred.'} closeOutside={false} style={{ minWidth: '300px' }}>
             {onRetry && (
-              <Button onClick={onRetry} scheme={'primary'} fontSize={'large1'} width={'full'}>
+              <Button onClick={onRetry} scheme={'primary'} fontSize={'lg'} width={'full'}>
                 Retry
               </Button>
             )}

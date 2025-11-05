@@ -11,7 +11,7 @@ import { Button } from '@src/component/atoms/Button';
 import { FlexColumn } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { MarkDownText } from '@src/component/molecules/MarkDownText';
-import { fetchLatestSummary, enqueueSummary } from '@src/features/heatmap/summary/api';
+import { useSummaryApi } from '@src/features/heatmap/summary/api';
 import { fontSizes } from '@src/styles/style';
 import { toISOAboutStringWithTimezone } from '@src/utils/locale';
 
@@ -90,6 +90,8 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
   const sessionId = service.sessionId;
   const enabled = useMemo(() => Number.isFinite(projectId) && sessionId != null, [projectId, sessionId]);
 
+  const summaryApi = useSummaryApi();
+
   // 最新のサマリ取得（queued/running の間だけ 500ms ポーリング）
   const {
     data: summary,
@@ -101,7 +103,7 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
     queryKey: ['sessionSummary', projectId, sessionId],
     enabled,
     queryFn: () => {
-      return fetchLatestSummary(projectId!, sessionId!);
+      return summaryApi.fetchLatestSummary(projectId!, sessionId!);
     },
     refetchInterval: (data) => {
       if (!data || data.state.data === null) return false;
@@ -119,7 +121,7 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
   // 再生成（queue=true で投入）→ 直後に再取得
   const { mutate: regenMutate, isPending: isRegenPending } = useMutation({
     mutationFn: () =>
-      enqueueSummary({
+      summaryApi.enqueueSummary({
         projectId: projectId!,
         sessionId: sessionId!,
         lang: 'ja',
@@ -151,7 +153,7 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
   return (
     <FlexColumn gap={12}>
       <Text text={'AI要約'} fontSize={fontSizes.large3} />
-      <Button onClick={() => regenMutate()} disabled={disabled} title='要約を再生成（キュー投入）' scheme={'primary'} fontSize={'small'}>
+      <Button onClick={() => regenMutate()} disabled={disabled} title='要約を再生成（キュー投入）' scheme={'primary'} fontSize={'sm'}>
         {busy ? '生成中…' : '再生成'}
       </Button>
       {isLoading && <Hint>読み込み中…</Hint>}

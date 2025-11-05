@@ -43,6 +43,7 @@ type FloatingProps = {
 const Floating: FC<FloatingProps> = ({ className, children, align = 'left', placement = 'bottom', offset = 8, openClassName = 'open' }) => {
   const { isOpen, anchorRef } = useEllipsisMenuContext();
   const [style, setStyle] = useState<React.CSSProperties>({ position: 'fixed', visibility: 'hidden' });
+  const [isMounted, setIsMounted] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
   const update = useCallback(() => {
@@ -78,6 +79,10 @@ const Floating: FC<FloatingProps> = ({ className, children, align = 'left', plac
     setStyle(positionStyle);
   }, [anchorRef, align, placement, offset]);
 
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   useLayoutEffect(() => {
     if (!isOpen) return;
     update();
@@ -90,6 +95,11 @@ const Floating: FC<FloatingProps> = ({ className, children, align = 'left', plac
       window.removeEventListener('resize', onResize);
     };
   }, [isOpen, update]);
+
+  // マウント後のみPortalをレンダリング
+  if (!isMounted) {
+    return null;
+  }
 
   const content = (
     <div ref={contentRef} className={`${className} ${isOpen ? openClassName : ''}`} style={style}>
@@ -162,7 +172,7 @@ export type EllipsisMenuContentProps = CardProps & {
 const ContentRowComponent: FC<EllipsisMenuContentProps> = (props) => {
   const { theme } = useSharedTheme();
   const { isOpen } = useEllipsisMenuContext();
-  const { className, gap, children, shadow = 'medium', border = theme.colors.border.light, padding = '8px', stopPropagate = true } = props;
+  const { className, gap, children, shadow = 'medium', border = theme.colors.border.strong, padding = '8px', stopPropagate = true } = props;
   return (
     <Floating className={`${className} ${isOpen ? 'open' : ''}`} align={props.align} placement={props['placement'] || 'bottom'}>
       <Card {...props} className={`${className} ${isOpen ? 'open' : ''}`} shadow={shadow} border={border} padding={padding} stopPropagate={stopPropagate}>
@@ -177,7 +187,7 @@ const ContentRowComponent: FC<EllipsisMenuContentProps> = (props) => {
 const ContentColumnComponent: FC<EllipsisMenuContentProps> = (props) => {
   const { theme } = useSharedTheme();
   const { isOpen } = useEllipsisMenuContext();
-  const { className, gap, children, shadow = 'medium', border = theme.colors.border.light, padding = '8px', stopPropagate = true } = props;
+  const { className, gap, children, shadow = 'medium', border = theme.colors.border.strong, padding = '8px', stopPropagate = true } = props;
   return (
     <Floating className={`${className} ${isOpen ? 'open' : ''}`} align={props.align} placement={props['placement'] || 'bottom'} offset={props.offset}>
       <Card {...props} className={`${className} ${isOpen ? 'open' : ''}`} shadow={shadow} border={border} padding={padding} stopPropagate={stopPropagate}>

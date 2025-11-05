@@ -53,19 +53,19 @@ const Component: FC<SessionItemRowProps> = ({ className, session }) => {
           <FlexRow gap={12} align={'center'}>
             {session.deviceId && (
               <Tooltip tooltip={`Device: ${session.deviceId}`}>
-                <Text text={`ID: ${session.deviceId}`} fontSize={fontSizes.smallest} color={theme.colors.text} fontWeight={fontWeights.light} />
+                <Text text={`ID: ${session.deviceId}`} fontSize={fontSizes.smallest} color={theme.colors.text.primary} fontWeight={fontWeights.light} />
               </Tooltip>
             )}
 
             {session.platform && (
               <Tooltip tooltip={`Platform: ${session.platform}`}>
-                <Text text={session.platform} fontSize={fontSizes.smallest} color={theme.colors.secondary.main} fontWeight={fontWeights.light} />
+                <Text text={session.platform} fontSize={fontSizes.smallest} color={theme.colors.text.secondary} fontWeight={fontWeights.light} />
               </Tooltip>
             )}
 
             {session.appVersion && (
               <Tooltip tooltip={`App Version: ${session.appVersion}`}>
-                <Text text={`v${session.appVersion}`} fontSize={fontSizes.smallest} color={theme.colors.secondary.main} fontWeight={fontWeights.light} />
+                <Text text={`v${session.appVersion}`} fontSize={fontSizes.smallest} color={theme.colors.text.secondary} fontWeight={fontWeights.light} />
               </Tooltip>
             )}
           </FlexRow>
@@ -73,11 +73,11 @@ const Component: FC<SessionItemRowProps> = ({ className, session }) => {
 
         {/* Meta Info - Right aligned */}
         <FlexColumn gap={4} align={'flex-end'} style={{ flexShrink: 0 }}>
-          <Text text={formatDate(session.startTime)} fontSize={fontSizes.smallest} color={theme.colors.secondary.main} fontWeight={fontWeights.light} />
+          <Text text={formatDate(session.startTime)} fontSize={fontSizes.smallest} color={theme.colors.text.secondary} fontWeight={fontWeights.light} />
           <Text
             text={calculateDuration(session.startTime, session.endTime)}
             fontSize={fontSizes.smallest}
-            color={session.isPlaying ? '#4caf50' : theme.colors.secondary.main}
+            color={session.isPlaying ? '#4caf50' : theme.colors.text.secondary}
             fontWeight={fontWeights.light}
           />
         </FlexColumn>
@@ -97,7 +97,7 @@ export const SessionItemRow = styled(Component)`
     padding-left: 8px;
     margin-right: -8px;
     margin-left: -8px;
-    background-color: ${({ theme }) => theme.colors.surface.light ?? 'rgba(255, 255, 255, 0.02)'};
+    background-color: ${({ theme }) => theme.colors.surface.sunken ?? 'rgba(255, 255, 255, 0.02)'};
     border-radius: 4px;
   }
 `;

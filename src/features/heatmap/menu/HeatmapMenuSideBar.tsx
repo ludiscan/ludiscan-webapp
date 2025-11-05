@@ -30,7 +30,7 @@ const Component: FC<MenuSideBarProps> = ({ className, currentMenu }) => {
           onClick={() => {
             heatMapEventBus.emit('click-menu-icon', { name });
           }}
-          fontSize={'large2'}
+          fontSize={'xl'}
           radius={'small'}
         >
           <Tooltip tooltip={name} placement={'bottom'} fontSize={fontSizes.small}>
@@ -47,8 +47,8 @@ export const HeatmapMenuSideBar = memo(
     width: 38px;
     height: 100%;
     padding: 8px;
-    background: ${({ theme }) => theme.colors.surface.main};
-    border-right: ${({ theme }) => `1px solid ${theme.colors.border.main}`};
+    background: ${({ theme }) => theme.colors.surface.base};
+    border-right: ${({ theme }) => `1px solid ${theme.colors.border.default}`};
 
     &__button {
       align-items: center;
@@ -58,12 +58,12 @@ export const HeatmapMenuSideBar = memo(
       transition: background 0.2s;
 
       &:hover {
-        background: ${({ theme }) => theme.colors.surface.dark};
+        background: ${({ theme }) => theme.colors.surface.hover};
       }
 
       &.active {
-        color: ${({ theme }) => theme.colors.surface.light};
-        background: ${({ theme }) => theme.colors.primary.main};
+        color: ${({ theme }) => theme.colors.primary.contrast};
+        background: ${({ theme }) => theme.colors.primary.light};
       }
     }
   `,

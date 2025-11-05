@@ -13,7 +13,6 @@ import { Text } from '@src/component/atoms/Text';
 import { ResponsiveSidebar } from '@src/component/molecules/ResponsiveSidebar';
 import { useAuth } from '@src/hooks/useAuth';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { fontSizes, fontWeights } from '@src/styles/style';
 
 export type SidebarLayoutProps = {
   className?: string | undefined;
@@ -87,7 +86,12 @@ const Component: FC<SidebarLayoutProps> = ({ className }) => {
                   <button className={`${className}__menuItem ${isDocsActive ? 'active' : ''}`} onClick={() => toggleDropdown(item.label)} type='button'>
                     <FlexRow gap={12} align={'center'} className={`${className}__menuContent`}>
                       <div className={`${className}__menuIcon`}>{item.icon}</div>
-                      <Text text={item.label} fontSize={fontSizes.medium} fontWeight={fontWeights.bold} color={theme.colors.text} />
+                      <Text
+                        text={item.label}
+                        fontSize={theme.typography.fontSize.base}
+                        fontWeight={theme.typography.fontWeight.bold}
+                        color={theme.colors.text.primary}
+                      />
                       <div className={`${className}__chevron`}>{isExpanded ? <BiChevronDown size={18} /> : <BiChevronRight size={18} />}</div>
                     </FlexRow>
                   </button>
@@ -98,16 +102,21 @@ const Component: FC<SidebarLayoutProps> = ({ className }) => {
                       {docsGroups.map((group) => (
                         <div key={group.name} className={`${className}__dropdownGroup`}>
                           <div className={`${className}__dropdownGroupTitle`}>
-                            <Text text={group.name} fontSize={fontSizes.small} fontWeight={fontWeights.bold} color={theme.colors.secondary.main} />
+                            <Text
+                              text={group.name}
+                              fontSize={theme.typography.fontSize.sm}
+                              fontWeight={theme.typography.fontWeight.bold}
+                              color={theme.colors.text.tertiary}
+                            />
                           </div>
                           {group.items.map((doc) => (
                             <Link key={doc.slug} href={`/heatmap/docs/${doc.slug}`}>
                               <div className={`${className}__dropdownItem ${isActive(`/heatmap/docs/${doc.slug}`) ? 'active' : ''}`}>
                                 <Text
                                   text={doc.frontmatter.title}
-                                  fontSize={fontSizes.small}
-                                  fontWeight={isActive(`/heatmap/docs/${doc.slug}`) ? fontWeights.bold : fontWeights.normal}
-                                  color={theme.colors.text}
+                                  fontSize={theme.typography.fontSize.sm}
+                                  fontWeight={isActive(`/heatmap/docs/${doc.slug}`) ? theme.typography.fontWeight.bold : theme.typography.fontWeight.medium}
+                                  color={theme.colors.text.primary}
                                 />
                               </div>
                             </Link>
@@ -128,7 +137,12 @@ const Component: FC<SidebarLayoutProps> = ({ className }) => {
                 <div className={`${className}__menuItem ${isActive(item.href) ? 'active' : ''}`}>
                   <FlexRow gap={12} align={'center'} className={`${className}__menuContent`}>
                     <div className={`${className}__menuIcon`}>{item.icon}</div>
-                    <Text text={item.label} fontSize={fontSizes.medium} fontWeight={fontWeights.bold} color={theme.colors.text} />
+                    <Text
+                      text={item.label}
+                      fontSize={theme.typography.fontSize.base}
+                      fontWeight={theme.typography.fontWeight.semibold}
+                      color={theme.colors.text.primary}
+                    />
                   </FlexRow>
                 </div>
               </Link>
@@ -154,13 +168,13 @@ export const SidebarLayout = styled(Component)`
     transition: all 0.2s ease-in-out;
 
     &:hover {
-      background-color: ${({ theme }) => theme.colors.surface.light};
+      background-color: ${({ theme }) => theme.colors.surface.hover};
     }
 
     &.active {
       /* Text color in active menu item */
-      color: ${({ theme }) => theme.colors.text};
-      background-color: ${({ theme }) => theme.colors.surface.dark};
+      color: ${({ theme }) => theme.colors.text.primary};
+      background-color: ${({ theme }) => theme.colors.surface.interactive};
     }
   }
 
@@ -172,12 +186,12 @@ export const SidebarLayout = styled(Component)`
     display: flex;
     align-items: center;
     justify-content: center;
-    color: ${({ theme }) => theme.colors.text};
+    color: ${({ theme }) => theme.colors.text.primary};
     transition: color 0.2s ease-in-out;
   }
 
   &__menuItem.active &__menuIcon {
-    color: ${({ theme }) => theme.colors.secondary.main};
+    color: ${({ theme }) => theme.colors.text.secondary};
   }
 
   &__chevron {
@@ -185,7 +199,7 @@ export const SidebarLayout = styled(Component)`
     align-items: center;
     justify-content: center;
     margin-left: auto;
-    color: ${({ theme }) => theme.colors.secondary.main};
+    color: ${({ theme }) => theme.colors.text.secondary};
     transition: color 0.2s ease-in-out;
   }
 
@@ -215,11 +229,11 @@ export const SidebarLayout = styled(Component)`
     transition: all 0.2s ease-in-out;
 
     &:hover {
-      background-color: ${({ theme }) => theme.colors.surface.light};
+      background-color: ${({ theme }) => theme.colors.surface.sunken};
     }
 
     &.active {
-      background-color: ${({ theme }) => theme.colors.surface.dark};
+      background-color: ${({ theme }) => theme.colors.surface.raised};
     }
   }
 `;

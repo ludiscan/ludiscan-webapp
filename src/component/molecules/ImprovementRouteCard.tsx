@@ -35,7 +35,7 @@ interface ImprovementRoute {
 interface ImprovementRouteCardProps {
   className?: string;
   route: ImprovementRoute;
-  playerId: string;
+  playerId?: string;
   onRouteVisualize?: (route: ImprovementRoute) => void;
 }
 
@@ -48,7 +48,7 @@ const Component: FC<ImprovementRouteCardProps> = ({ className, route, playerId, 
   const { mutate: submitFeedback, isPending } = useSubmitFeedback();
 
   const handleSubmitFeedback = () => {
-    if (!feedbackRating) return;
+    if (!feedbackRating || !playerId) return;
 
     submitFeedback(
       {

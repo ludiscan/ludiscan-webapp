@@ -47,12 +47,12 @@ const Component: FC<DocsPageProps> = ({ currentDoc, error, className }) => {
         <SidebarLayout />
         <InnerContent>
           <div className={`${className}__errorContainer`}>
-            <Text text='Documentation Error' fontSize={fontSizes.large3} color={theme.colors.error} />
-            <Text text={error} fontSize={fontSizes.medium} color={theme.colors.text} />
+            <Text text='Documentation Error' fontSize={fontSizes.large3} color={theme.colors.semantic.error.main} />
+            <Text text={error} fontSize={fontSizes.medium} color={theme.colors.text.primary} />
             <Text
               text='Please check that documentation files are properly set up in src/docs/ directory.'
               fontSize={fontSizes.small}
-              color={theme.colors.secondary.main}
+              color={theme.colors.text.secondary}
             />
           </div>
         </InnerContent>

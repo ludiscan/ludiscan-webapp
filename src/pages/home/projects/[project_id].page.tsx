@@ -2,11 +2,10 @@ import styled from '@emotion/styled';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { BiBarChart, BiUser, BiKey, BiLineChart, BiMap } from 'react-icons/bi';
+import { BiBarChart, BiUser, BiKey, BiLineChart } from 'react-icons/bi';
 
 import { ProjectDetailsApiKeysTab } from './tabs/ProjectDetailsApiKeysTab';
 import { ProjectDetailsMembersTab } from './tabs/ProjectDetailsMembersTab';
-import { ProjectDetailsRouteCoachTab } from './tabs/ProjectDetailsRouteCoachTab';
 import { ProjectDetailsSessionsTab } from './tabs/ProjectDetailsSessionsTab';
 
 import type { Project } from '@src/modeles/project';
@@ -24,7 +23,7 @@ import { createClient } from '@src/modeles/qeury';
 import { InnerContent } from '@src/pages/_app.page';
 import { fontSizes, fontWeights } from '@src/styles/style';
 
-type TabType = 'sessions' | 'members' | 'api-keys' | 'route-coach';
+type TabType = 'sessions' | 'members' | 'api-keys';
 
 export type ProjectDetailsPageProps = {
   className?: string;
@@ -107,7 +106,7 @@ const Component: FC<ProjectDetailsPageProps> = ({ className }) => {
         <SidebarLayout />
         <InnerContent>
           <div className={`${className}__centerContent`}>
-            <Text text='Loading...' fontSize={fontSizes.medium} color={theme.colors.text} />
+            <Text text='Loading...' fontSize={fontSizes.medium} color={theme.colors.text.primary} />
           </div>
         </InnerContent>
       </div>
@@ -121,7 +120,7 @@ const Component: FC<ProjectDetailsPageProps> = ({ className }) => {
         <InnerContent>
           <Header title='Project Details' onClick={handleBack} />
           <div className={`${className}__centerContent`}>
-            <Text text='プロジェクトが見つかりません' fontSize={fontSizes.medium} color={theme.colors.error} />
+            <Text text='プロジェクトが見つかりません' fontSize={fontSizes.medium} color={theme.colors.semantic.error.main} />
           </div>
         </InnerContent>
       </div>
@@ -138,8 +137,8 @@ const Component: FC<ProjectDetailsPageProps> = ({ className }) => {
         <div className={`${className}__header`}>
           <FlexRow gap={16} align={'flex-start'}>
             <FlexColumn gap={8} style={{ flex: 1 }}>
-              <Text text={project.name} fontSize={fontSizes.largest} color={theme.colors.text} fontWeight={fontWeights.bolder} />
-              <Text text={project.description} fontSize={fontSizes.small} color={theme.colors.secondary.main} fontWeight={fontWeights.bold} />
+              <Text text={project.name} fontSize={fontSizes.largest} color={theme.colors.text.primary} fontWeight={fontWeights.bolder} />
+              <Text text={project.description} fontSize={fontSizes.small} color={theme.colors.text.secondary} fontWeight={fontWeights.bold} />
             </FlexColumn>
             <Link href={`/heatmap/projects/${project.id}`} style={{ textDecoration: 'none' }}>
               <BiLineChart size={20} />
@@ -154,7 +153,7 @@ const Component: FC<ProjectDetailsPageProps> = ({ className }) => {
             <Button
               onClick={() => setActiveTab('sessions')}
               scheme={activeTab === 'sessions' ? 'primary' : 'none'}
-              fontSize='small'
+              fontSize={'sm'}
               className={`${className}__tabButton`}
               title='Sessions'
             >
@@ -164,7 +163,7 @@ const Component: FC<ProjectDetailsPageProps> = ({ className }) => {
             <Button
               onClick={() => setActiveTab('members')}
               scheme={activeTab === 'members' ? 'primary' : 'none'}
-              fontSize='small'
+              fontSize={'sm'}
               className={`${className}__tabButton`}
               title='Members'
             >
@@ -174,22 +173,12 @@ const Component: FC<ProjectDetailsPageProps> = ({ className }) => {
             <Button
               onClick={() => setActiveTab('api-keys')}
               scheme={activeTab === 'api-keys' ? 'primary' : 'none'}
-              fontSize='small'
+              fontSize={'sm'}
               className={`${className}__tabButton`}
               title='API Keys'
             >
               <BiKey size={20} />
               <Text text='API Keys' fontSize={fontSizes.medium} />
-            </Button>
-            <Button
-              onClick={() => setActiveTab('route-coach')}
-              scheme={activeTab === 'route-coach' ? 'primary' : 'none'}
-              fontSize='small'
-              className={`${className}__tabButton`}
-              title='Route Coach'
-            >
-              <BiMap size={20} />
-              <Text text='Route Coach' fontSize={fontSizes.medium} />
             </Button>
           </div>
         </div>
@@ -199,7 +188,6 @@ const Component: FC<ProjectDetailsPageProps> = ({ className }) => {
           {activeTab === 'sessions' && <ProjectDetailsSessionsTab project={project} />}
           {activeTab === 'members' && <ProjectDetailsMembersTab project={project} />}
           {activeTab === 'api-keys' && <ProjectDetailsApiKeysTab project={project} />}
-          {activeTab === 'route-coach' && <ProjectDetailsRouteCoachTab project={project} />}
         </div>
       </InnerContent>
     </div>
@@ -212,7 +200,7 @@ const ProjectDetailsPage = styled(Component)`
   &__header {
     padding: 0 24px 24px;
     margin-bottom: 24px;
-    border-bottom: 2px solid ${({ theme }) => theme.colors.border.main};
+    border-bottom: 2px solid ${({ theme }) => theme.colors.border.default};
   }
 
   &__tabsContainer {
@@ -224,7 +212,7 @@ const ProjectDetailsPage = styled(Component)`
     display: flex;
     gap: 8px;
     padding-bottom: 8px;
-    border-bottom: 2px solid ${({ theme }) => theme.colors.border.main};
+    border-bottom: 2px solid ${({ theme }) => theme.colors.border.default};
   }
 
   &__tabButton {
@@ -234,7 +222,7 @@ const ProjectDetailsPage = styled(Component)`
     transition: all 0.2s ease-in-out;
 
     &:hover {
-      background-color: ${({ theme }) => theme.colors.surface.light};
+      background-color: ${({ theme }) => theme.colors.surface.sunken};
     }
   }
 

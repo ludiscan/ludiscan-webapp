@@ -1,0 +1,23 @@
+[
+  {
+    "object_id": "item_001",
+    "object_type": "health_potion",
+    "x": 100.0,
+    "y": 200.0,
+    "z": 50.0,
+    "offset_timestamp": 1000,
+    "event_type": "spawn",
+    "status": null
+  },
+  {
+    "object_id": "item_002",
+    "object_type": "mana_potion",
+    "x": 150.0,
+    "y": 250.0,
+    "z": 45.0,
+    "offset_timestamp": 2000,
+    "event_type": "spawn",
+    "status": null
+  }
+]
+

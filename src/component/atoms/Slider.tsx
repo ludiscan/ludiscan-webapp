@@ -1,6 +1,6 @@
 // atoms/Slider.tsx
 import styled from '@emotion/styled';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import type { FC } from 'react';
 
@@ -57,8 +57,8 @@ const SliderComponent: FC<SliderProps> = (args) => {
       const percentage = ((valueToSet - min) / (max - min)) * 100;
 
       // 2) Get theme colors
-      const primaryColor = theme.colors.primary.main;
-      const secondaryColor = theme.colors.secondary.light;
+      const primaryColor = theme.colors.primary.light;
+      const secondaryColor = theme.colors.text.secondary;
 
       // 3) Build the CSS gradient string
       // 4) Set input's background
@@ -74,6 +74,10 @@ const SliderComponent: FC<SliderProps> = (args) => {
     },
     [min, max, theme],
   );
+
+  useEffect(() => {
+    setInputBackground(sliderValue);
+  }, [theme, setInputBackground, sliderValue]);
 
   const handleInputChange = useCallback(
     (value: string) => {
@@ -167,7 +171,7 @@ export const Slider = styled(SliderComponent)`
     position: absolute; /* sliderWrapper relative to this */
     padding: 4px 8px;
     font-size: ${fontSizes.smallest};
-    color: ${({ theme }) => theme.colors.surface.main};
+    color: ${({ theme }) => theme.colors.surface.base};
     white-space: nowrap;
     pointer-events: none;
     user-select: none;
@@ -183,7 +187,7 @@ export const Slider = styled(SliderComponent)`
     margin: 8px 0;
     appearance: none;
     outline: none;
-    background: ${({ theme }) => theme.colors.secondary.light};
+    background: ${({ theme }) => theme.colors.text.secondary};
     border-radius: 2px;
 
     &::-webkit-slider-thumb {
@@ -191,7 +195,7 @@ export const Slider = styled(SliderComponent)`
       height: 16px;
       appearance: none;
       cursor: pointer;
-      background: ${({ theme }) => theme.colors.surface.main};
+      background: ${({ theme }) => theme.colors.surface.base};
       border: 1px solid ${({ theme }) => theme.colors.primary.main};
       border-radius: 50%;
       transition: background 0.3s;
@@ -201,7 +205,7 @@ export const Slider = styled(SliderComponent)`
       width: 16px;
       height: 16px;
       cursor: pointer;
-      background: ${({ theme }) => theme.colors.surface.main};
+      background: ${({ theme }) => theme.colors.surface.base};
       border: 1px solid ${({ theme }) => theme.colors.primary.main};
       border-radius: 50%;
       transition: background 0.3s;
@@ -221,8 +225,8 @@ export const Slider = styled(SliderComponent)`
   &__textField {
     width: 35px;
     margin-left: 8px;
-    color: ${({ theme }) => theme.colors.text};
-    border: 1px solid ${({ theme }) => theme.colors.border.main} !important;
+    color: ${({ theme }) => theme.colors.text.primary};
+    border: 1px solid ${({ theme }) => theme.colors.border.default} !important;
     border-radius: 4px;
   }
 `;

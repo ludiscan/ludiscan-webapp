@@ -41,7 +41,7 @@ export type SegmentedSwitchProps = Omit<ButtonProps, 'onClick' | 'scheme' | 'chi
  * - Disabled behavior is toggled by adding `.disable` class to RootContainer
  */
 const Component: FC<SegmentedSwitchProps> = (props) => {
-  const { className, options, value, onChange, disabled = false, fontSize = 'medium' } = props;
+  const { className, options, value, onChange, disabled = false, fontSize = 'base' } = props;
   const { theme } = useSharedTheme();
   // Local state to control which segment is active.
   // Initialize to provided `value` or fallback to options[0].
@@ -82,7 +82,7 @@ const Component: FC<SegmentedSwitchProps> = (props) => {
           }
         }}
       >
-        <Text text={leftOption} color={isLeftActive ? colors.white : theme.colors.secondary.main} />
+        <Text text={leftOption} color={isLeftActive ? colors.white : theme.colors.text.secondary} />
       </Button>
 
       {/**
@@ -101,7 +101,7 @@ const Component: FC<SegmentedSwitchProps> = (props) => {
           }
         }}
       >
-        <Text text={rightOption} color={isRightActive ? colors.white : theme.colors.secondary.main} fontSize={fontSize} />
+        <Text text={rightOption} color={isRightActive ? colors.white : theme.colors.text.secondary} fontSize={fontSize} />
       </Button>
     </div>
   );
@@ -110,19 +110,23 @@ const Component: FC<SegmentedSwitchProps> = (props) => {
 const SegmentButtonWidth = (props: SegmentedSwitchProps) => {
   // Calculate width based on fontSize
   switch (props.fontSize) {
-    case 'smallest':
+    case 'xs':
       return '60px';
-    case 'small':
+    case 'sm':
       return '80px';
-    case 'medium':
+    case 'base':
       return '100px';
-    case 'large1':
+    case 'lg':
       return '120px';
-    case 'large2':
+    case 'xl':
       return '140px';
-    case 'large3':
+    case '2xl':
       return '160px';
-    case 'largest':
+    case '3xl':
+      return '180px';
+    case '4xl':
+      return '180px';
+    case '5xl':
       return '180px';
     default:
       return '100px'; // Default fallback
@@ -133,8 +137,8 @@ export const SegmentedSwitch = styled(Component)`
   position: relative; /* English comment: for absolute positioning of Indicator */
   display: inline-flex;
   overflow: hidden; /* English comment: clip child elements */
-  background-color: ${({ theme }) => theme.colors.surface.main};
-  border: 1px solid ${({ theme }) => theme.colors.border.main};
+  background-color: ${({ theme }) => theme.colors.surface.base};
+  border: 1px solid ${({ theme }) => theme.colors.border.default};
   border-radius: 9999px; /* English comment: fully rounded corners */
 
   &.disable {

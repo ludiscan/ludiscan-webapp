@@ -6,6 +6,7 @@ import { CiUser, CiLight, CiDark } from 'react-icons/ci';
 import { FiChevronLeft } from 'react-icons/fi';
 import { MdLogout } from 'react-icons/md';
 
+import type { ThemeType } from '@src/modeles/theme';
 import type { FC, ReactNode } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
@@ -14,9 +15,11 @@ import { FlexRow, InlineFlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { IconLabelRow } from '@src/component/molecules/IconLabelRow';
 import { EllipsisMenu, Menu } from '@src/component/molecules/Menu';
+import { Selector } from '@src/component/molecules/Selector';
 import { DesktopLayout, MobileLayout } from '@src/component/molecules/responsive';
 import { useAuth } from '@src/hooks/useAuth';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
+import themes from '@src/modeles/theme';
 import { dimensions, fontSizes, fontWeights } from '@src/styles/style';
 
 export type HeaderProps = {
@@ -29,7 +32,7 @@ export type HeaderProps = {
 };
 
 const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, iconEnd, isOffline = false }) => {
-  const { theme, toggleTheme } = useSharedTheme();
+  const { theme, themeType, toggleTheme, setThemeType } = useSharedTheme();
 
   const { isAuthorized, logout } = useAuth();
   const router = useRouter();
@@ -37,11 +40,21 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
 
   const isLoginPage = useMemo(() => pathname === '/login', [pathname]);
 
+  const themeTypeOptions = useMemo(() => Object.keys(themes) as ThemeType[], []);
+
   const backIconHandle = useCallback(() => {
     if (onClick) {
       onClick();
     }
   }, [onClick]);
+
+  const handleThemeTypeChange = useCallback(
+    (value: string) => {
+      setThemeType(value as ThemeType);
+    },
+    [setThemeType],
+  );
+
   const handleLogout = useCallback(async () => {
     await logout();
     router.push('/login');
@@ -50,19 +63,19 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
     <header className={className}>
       <FlexRow align={'center'} gap={12} className={`${className}__innerHeader`} wrap={'nowrap'}>
         {onClick && (
-          <Button fontSize={'large2'} onClick={backIconHandle} scheme={'none'}>
+          <Button fontSize={'xl'} onClick={backIconHandle} scheme={'none'}>
             <FiChevronLeft />
           </Button>
         )}
         <Image
-          className={`${className}__logo ${theme.colors.isLight && 'light'}`}
+          className={`${className}__logo ${theme.mode === 'light' && 'light'}`}
           src={'/favicon/favicon.svg'}
           alt={'ludiscan'}
           width={onClick ? 28 : 32}
           height={onClick ? 28 : 32}
         />
         <Text text={'Ludiscan'} href={'/'} target={'_self'} fontSize={fontSizes.large2} fontWeight={fontWeights.bold} />
-        <Text text={title} fontSize={fontSizes.medium} fontWeight={fontWeights.bold} color={theme.colors.secondary.main} />
+        <Text text={title} fontSize={fontSizes.medium} fontWeight={fontWeights.bold} color={theme.colors.text.secondary} />
         {iconTitleEnd && <>{iconTitleEnd}</>}
         <div style={{ flex: 1 }} />
 
@@ -75,7 +88,7 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
         )}
         {iconEnd && (
           <MobileLayout>
-            <EllipsisMenu fontSize={'large2'} scheme={'none'}>
+            <EllipsisMenu fontSize={'xl'} scheme={'none'}>
               <Menu.ContentRow>{iconEnd}</Menu.ContentRow>
             </EllipsisMenu>
           </MobileLayout>
@@ -83,14 +96,24 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
 
         <Divider orientation={'vertical'} />
         <InlineFlexRow align={'center'} gap={4} style={{ height: '100%' }} wrap={'nowrap'}>
-          <Button fontSize={'large2'} onClick={toggleTheme} scheme={'none'}>
-            {theme.colors.isLight ? <CiDark size={24} color={theme.colors.text} /> : <CiLight size={24} color={theme.colors.text} />}
+          <Button fontSize={'xl'} onClick={toggleTheme} scheme={'none'}>
+            {theme.mode === 'light' ? <CiDark size={24} color={theme.colors.text.primary} /> : <CiLight size={24} color={theme.colors.text.primary} />}
           </Button>
+          <Selector
+            options={themeTypeOptions}
+            value={themeType}
+            onChange={handleThemeTypeChange}
+            fontSize={'base'}
+            scheme={'none'}
+            border={false}
+            placement={'bottom'}
+            align={'right'}
+          />
           {!isOffline && !isLoginPage && (
             <>
               <Divider orientation={'vertical'} />
               {isAuthorized ? (
-                <Menu fontSize={'large2'} scheme={'none'} icon={<CiUser size={24} color={theme.colors.text} />}>
+                <Menu fontSize={'xl'} scheme={'none'} icon={<CiUser size={24} color={theme.colors.text.primary} />}>
                   <Menu.ContentColumn gap={4} align={'right'} placement={'bottom'} offset={16}>
                     <IconLabelRow className={`${className}__iconLabelRow`} gap={8} label={'Profile'} icon={<CiUser />} href={'/profile'} target={'_self'} />
                     <Divider orientation={'horizontal'} margin={'0'} />
@@ -111,8 +134,8 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
 export const Header = styled(Component)`
   display: flex;
   height: ${dimensions.headerHeight}px;
-  color: ${({ theme }) => theme.colors.text};
-  background-color: ${({ theme }) => theme.colors.surface.main};
+  color: ${({ theme }) => theme.colors.text.primary};
+  background-color: ${({ theme }) => theme.colors.surface.base};
   transition: margin-left 0.3s ease-in-out;
 
   &__innerHeader {
@@ -128,7 +151,7 @@ export const Header = styled(Component)`
   }
 
   &__iconLabelRow.accent {
-    color: ${({ theme }) => theme.colors.error};
+    color: ${({ theme }) => theme.colors.semantic.error.main};
   }
 
   &__logo {

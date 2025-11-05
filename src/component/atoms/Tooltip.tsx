@@ -21,10 +21,10 @@ const TooltipText = styled(Text)<{ placement: 'top' | 'bottom' | 'left' | 'right
   position: absolute;
   z-index: ${zIndexes.tooltip};
   padding: 4px 8px;
-  color: ${({ theme }) => theme.colors.text || '#fff'};
+  color: ${({ theme }) => theme.colors.text.primary || '#fff'};
   white-space: nowrap;
   pointer-events: none; /* ユーザーの操作に影響させない */
-  background-color: ${({ theme }) => theme.colors.surface.light || '#000'};
+  background-color: ${({ theme }) => theme.colors.surface.sunken || '#000'};
   border-radius: 4px;
   box-shadow: 0 2px 4px rgb(0 0 0 / 20%);
   opacity: 1;
