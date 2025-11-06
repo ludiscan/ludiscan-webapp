@@ -60,7 +60,9 @@ const Component: FC<RouteCoachVisualizationProps> = ({ projectId, playerId }) =>
   }, [selectedClusterId, clusterData]);
 
   // Routes を Vector3 配列に変換（scale と upZ を適用）
-  const routeLines = useMemo(() => {
+  // NOTE: 現在はroutesの描画をコメントアウトしているため、このコードも使用されていません
+  // 必要に応じて復元可能
+  /* const routeLines = useMemo(() => {
     if (!selectedClusterData?.routes) return [];
 
     return selectedClusterData.routes.map((route: RoutePatternData) => {
@@ -72,7 +74,7 @@ const Component: FC<RouteCoachVisualizationProps> = ({ projectId, playerId }) =>
       });
       return { id: route.id, points, success_rate: route.success_rate };
     });
-  }, [selectedClusterData?.routes, scale, upZ]);
+  }, [selectedClusterData?.routes, scale, upZ]); */
 
   // Improvements を Vector3 配列に変換（scale と upZ を適用）
   const improvementLines = useMemo(() => {
@@ -94,12 +96,13 @@ const Component: FC<RouteCoachVisualizationProps> = ({ projectId, playerId }) =>
   }, [selectedClusterData?.improvements, scale, upZ]);
 
   // 成功率に基づいてルートの色を取得
-  const getRouteColor = (success_rate: number) => {
+  // NOTE: 現在はroutesの描画をコメントアウトしているため、この関数も使用されていません
+  /* const getRouteColor = (success_rate: number) => {
     const hue = (success_rate * 120) / 360; // 0-120度（赤から緑）
     const saturation = 100;
     const lightness = 50;
     return `hsl(${hue * 360}, ${saturation}%, ${lightness}%)`;
-  };
+  }; */
 
   // 改善戦略に基づいて色を取得
   const getImprovementColor = (strategy: string) => {
@@ -119,8 +122,8 @@ const Component: FC<RouteCoachVisualizationProps> = ({ projectId, playerId }) =>
 
   return (
     <>
-      {/* Routes を描画 */}
-      {routeLines.map((route) => {
+      {/* Routes を描画 - コメントアウト: 大量の線が描画されるのを防ぐため */}
+      {/* {routeLines.map((route) => {
         if (route.points.length < 2) return null;
 
         const lineObject = new Line(
@@ -132,7 +135,7 @@ const Component: FC<RouteCoachVisualizationProps> = ({ projectId, playerId }) =>
         );
 
         return <primitive key={`route-${route.id}`} object={lineObject} renderOrder={zIndexes.renderOrder.timelinePoints} />;
-      })}
+      })} */}
 
       {/* Improvements を描画 */}
       {improvementLines.map((improvement) => {
