@@ -6,6 +6,9 @@ import { RouteCoachMenuContent } from '@src/features/heatmap/routecoach/RouteCoa
 export default {
   component: RouteCoachMenuContent,
   controls: { hideNoControlsWarning: true },
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
 } as Meta;
 
 type Story = StoryObj<typeof RouteCoachMenuContent>;

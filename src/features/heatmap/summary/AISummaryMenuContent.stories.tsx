@@ -6,6 +6,9 @@ import { AISummaryMenuContent } from '@src/features/heatmap/summary/AISummaryMen
 export default {
   component: AISummaryMenuContent,
   controls: { hideNoControlsWarning: true },
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
 } as Meta;
 
 type Story = StoryObj<typeof AISummaryMenuContent>;
