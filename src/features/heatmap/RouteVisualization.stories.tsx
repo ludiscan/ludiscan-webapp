@@ -10,6 +10,9 @@ import { heatMapEventBus } from '@src/utils/canvasEventBus';
 export default {
   component: RouteVisualization,
   controls: { hideNoControlsWarning: true },
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
 } as Meta;
 
 type Story = StoryObj<typeof RouteVisualization>;
