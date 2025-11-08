@@ -8,6 +8,7 @@ import { Button } from '@src/component/atoms/Button';
 import { FlexColumn } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { MenuContents } from '@src/hooks/useHeatmapSideBarMenus';
+import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { fontSizes, fontWeights } from '@src/styles/style';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
@@ -18,17 +19,19 @@ type MenuItemProps = {
 };
 
 const MenuItemComponent: FC<MenuItemProps & { className?: string }> = ({ className, name, icon, onClick }) => {
+  const { theme } = useSharedTheme();
   return (
-    <Button className={className} onClick={onClick} scheme={'surface'} fontSize={'sm'}>
-      <FlexColumn align={'center'} gap={8}>
+    <Button className={className} onClick={onClick} scheme={'none'} fontSize={'base'}>
+      <FlexColumn align={'center'} gap={4}>
         <div className={`${className}__icon`}>{icon}</div>
-        <Text text={name} fontSize={fontSizes.small} fontWeight={fontWeights.normal} />
+        <Text text={name} fontSize={theme.typography.fontSize.sm} fontWeight={theme.typography.fontWeight.light} />
       </FlexColumn>
     </Button>
   );
 };
 
 const MenuItem = styled(MenuItemComponent)`
+  min-width: 80px;
   padding: 16px;
   border-radius: 8px;
   transition: all 0.2s;
@@ -46,7 +49,7 @@ const MenuItem = styled(MenuItemComponent)`
 
 const GridContainer = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
   gap: 12px;
   width: 100%;
   padding: 8px 0;
@@ -61,7 +64,7 @@ export const MoreMenuContent: FC<HeatmapMenuProps> = () => {
   };
 
   return (
-    <FlexColumn gap={16} align={'flex-start'}>
+    <FlexColumn gap={16} align={'flex-start'} style={{ width: '100%' }}>
       <Text text={'All Features'} fontSize={fontSizes.large1} fontWeight={fontWeights.bold} />
       <GridContainer>
         {availableMenus.map((menu) => (
