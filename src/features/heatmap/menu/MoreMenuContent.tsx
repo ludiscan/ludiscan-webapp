@@ -1,6 +1,5 @@
 import styled from '@emotion/styled';
 
-
 import type { HeatmapMenuProps } from '@src/features/heatmap/HeatmapMenuContent';
 import type { Menus } from '@src/hooks/useHeatmapSideBarMenus';
 import type { FC, ReactElement } from 'react';
