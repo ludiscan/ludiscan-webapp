@@ -1,18 +1,16 @@
 import Image from 'next/image';
+import { useEffect, useState } from 'react';
 import { BsGrid, BsPerson } from 'react-icons/bs';
 import { CiMap, CiMapPin, CiStreamOn } from 'react-icons/ci';
 import { FaCube } from 'react-icons/fa';
 import { GiPathDistance } from 'react-icons/gi';
 import { IoIosInformationCircleOutline } from 'react-icons/io';
 import { SiSvgtrace } from 'react-icons/si';
-import { useStore } from 'react-redux';
 
 import type { HeatmapMenuProps } from '@src/features/heatmap/HeatmapMenuContent';
 import type { HeatmapDataState } from '@src/modeles/heatmapView';
-import type { RootState } from '@src/store';
 import type { FC, JSX } from 'react';
 
-import { Text } from '@src/component/atoms/Text';
 import { EventLogDetail } from '@src/features/heatmap/menu/EventLogDetail';
 import { EventLogContent } from '@src/features/heatmap/menu/EventLogs';
 import { FieldObjectsMenuContent } from '@src/features/heatmap/menu/FieldObjectsMenu';
@@ -20,10 +18,12 @@ import { GeneralMenuContent } from '@src/features/heatmap/menu/GeneralMenuConten
 import { HotspotMenuContent } from '@src/features/heatmap/menu/HotspotMenuContent';
 import { InfoMenuContent } from '@src/features/heatmap/menu/InfoMenuContent';
 import { MapMenuContent } from '@src/features/heatmap/menu/MapMenuContent';
+import { MoreMenuContent } from '@src/features/heatmap/menu/MoreMenuContent';
 import { PlayerTimeline } from '@src/features/heatmap/menu/PlayerTimeline';
 import { RouteCoachMenuContent } from '@src/features/heatmap/routecoach/RouteCoachMenuContent';
 import { AISummaryMenuContent } from '@src/features/heatmap/summary/AISummaryMenuContent';
-import { fontSizes, fontWeights } from '@src/styles/style';
+import { heatMapEventBus } from '@src/utils/canvasEventBus';
+import { getRecentMenus } from '@src/utils/localstrage';
 
 export type SideBarMenuType = {
   name: string;
@@ -80,7 +80,7 @@ export const MenuContents: MenuType[] = [
   {
     name: 'more',
     icon: <BsGrid />,
-    Component: () => <Text text={'More'} fontSize={fontSizes.large1} fontWeight={fontWeights.bold} />,
+    Component: MoreMenuContent,
   },
   {
     name: 'eventLogDetail',
@@ -96,15 +96,62 @@ export const MenuContents: MenuType[] = [
 export type Menus = (typeof MenuContents)[number]['name'];
 
 export function useHeatmapSideBarMenus(): SideBarMenuType[] {
-  const store = useStore<RootState>();
-  return MenuContents.map((content) => {
-    if (content.icon == null || (content.visible ? !content.visible(store.getState().heatmapCanvas) : false)) {
-      return null;
-    }
-    return {
-      name: content.name,
-      icon: content.icon,
-      Component: content.Component,
+  const [recentMenus, setRecentMenus] = useState<string[]>(getRecentMenus());
+
+  // Listen to menu clicks to update recent menus
+  useEffect(() => {
+    const handleMenuClick = () => {
+      setRecentMenus(getRecentMenus());
     };
-  }).filter((menu) => menu != null);
+    heatMapEventBus.on('click-menu-icon', handleMenuClick);
+    return () => {
+      heatMapEventBus.off('click-menu-icon', handleMenuClick);
+    };
+  }, []);
+
+  // Always show general and more
+  const alwaysShowMenus = ['general', 'more'];
+
+  // Get recent menus (max 5, excluding general and more)
+  const recentMenuItems = recentMenus
+    .filter((menuName) => !alwaysShowMenus.includes(menuName))
+    .slice(0, 5)
+    .map((menuName) => MenuContents.find((content) => content.name === menuName))
+    .filter((content) => content != null && content.icon != null);
+
+  // Build the sidebar menu list: general, recent items, more
+  const sidebarMenus: SideBarMenuType[] = [];
+
+  // Add general menu
+  const generalMenu = MenuContents.find((content) => content.name === 'general');
+  if (generalMenu && generalMenu.icon) {
+    sidebarMenus.push({
+      name: generalMenu.name,
+      icon: generalMenu.icon,
+      Component: generalMenu.Component,
+    });
+  }
+
+  // Add recent menus
+  recentMenuItems.forEach((content) => {
+    if (content && content.icon) {
+      sidebarMenus.push({
+        name: content.name,
+        icon: content.icon,
+        Component: content.Component,
+      });
+    }
+  });
+
+  // Add more menu
+  const moreMenu = MenuContents.find((content) => content.name === 'more');
+  if (moreMenu && moreMenu.icon) {
+    sidebarMenus.push({
+      name: moreMenu.name,
+      icon: moreMenu.icon,
+      Component: moreMenu.Component,
+    });
+  }
+
+  return sidebarMenus;
 }

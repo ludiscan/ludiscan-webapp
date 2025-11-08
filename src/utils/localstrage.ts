@@ -106,3 +106,28 @@ export function getThemeType(): ThemeType | null {
   }
   return null;
 }
+
+const MAX_RECENT_MENUS = 5;
+
+export function saveRecentMenu(menuName: string): void {
+  const storage = localStorage.getItem(STORAGE_KEY);
+  const data = storage ? JSON.parse(storage) : {};
+  const recentMenus: string[] = data.recentMenus || [];
+
+  // Remove the menu if it already exists to avoid duplicates
+  const filteredMenus = recentMenus.filter((name) => name !== menuName);
+
+  // Add the menu to the beginning of the array
+  const updatedMenus = [menuName, ...filteredMenus].slice(0, MAX_RECENT_MENUS);
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...data, recentMenus: updatedMenus }));
+}
+
+export function getRecentMenus(): string[] {
+  const storage = localStorage.getItem(STORAGE_KEY);
+  if (storage) {
+    const data = JSON.parse(storage);
+    return data.recentMenus || [];
+  }
+  return [];
+}

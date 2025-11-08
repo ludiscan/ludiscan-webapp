@@ -30,6 +30,7 @@ import { DefaultStaleTime } from '@src/modeles/qeury';
 import { dimensions, zIndexes } from '@src/styles/style';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 import { detectDimensionality } from '@src/utils/heatmap/detectDimensionality';
+import { saveRecentMenu } from '@src/utils/localstrage';
 
 export type HeatmapViewerProps = {
   className?: string | undefined;
@@ -188,7 +189,12 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
 
   useEffect(() => {
     const clickMenuIconHandler = (event: CustomEvent<{ name: Menus }>) => {
-      setOpenMenu(event.detail.name);
+      const menuName = event.detail.name;
+      setOpenMenu(menuName);
+      // Save to recent menus (except for 'more' and 'eventLogDetail')
+      if (menuName !== 'more' && menuName !== 'eventLogDetail') {
+        saveRecentMenu(menuName);
+      }
     };
     const clickEventLogHandler = (event: CustomEvent<{ logName: string; id: number }>) => {
       setMenuExtra(event.detail);
