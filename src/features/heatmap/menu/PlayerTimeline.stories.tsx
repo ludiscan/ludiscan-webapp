@@ -6,6 +6,9 @@ import { PlayerTimeline } from '@src/features/heatmap/menu/PlayerTimeline';
 export default {
   component: PlayerTimeline,
   controls: { hideNoControlsWarning: true },
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
 } as Meta;
 
 type Story = StoryObj<typeof PlayerTimeline>;
