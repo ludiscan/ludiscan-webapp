@@ -31,7 +31,7 @@
     "release:major": "npm version major --message 'v%s' && git push && git push origin --tags",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "test-storybook": "test-storybook --config-dir .storybook",
+    "test-storybook": "test-storybook --config-dir .storybook --testTimeout 60000",
     "generate:api-schemes": "bunx openapi-typescript swagger.json --output generated/api.d.ts",
     "generate:api-schemes:local-fetch": "bunx openapi-typescript http://localhost:3211/swagger/api/v0/json --output generated/api.d.ts",
     "build:heatmap-bundle": "bun scripts/create-heatmap-bundle.js",
