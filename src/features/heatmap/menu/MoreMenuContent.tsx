@@ -1,13 +1,13 @@
 import styled from '@emotion/styled';
 
 import type { HeatmapMenuProps } from '@src/features/heatmap/HeatmapMenuContent';
-import type { Menus } from '@src/hooks/useHeatmapSideBarMenus';
+import type { Menus } from '@src/hooks/menuConfig';
 import type { FC, ReactElement } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
 import { FlexColumn } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
-import { MenuContents } from '@src/hooks/useHeatmapSideBarMenus';
+import { MenuContents } from '@src/hooks/menuConfig';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { fontSizes, fontWeights } from '@src/styles/style';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';

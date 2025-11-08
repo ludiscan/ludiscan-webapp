@@ -1,4 +1,4 @@
-import type { Menus } from '@src/hooks/useHeatmapSideBarMenus';
+import type { Menus } from '@src/hooks/menuConfig';
 
 export interface RouteEdgeData {
   id: number;

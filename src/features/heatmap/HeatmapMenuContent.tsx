@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import { memo, useEffect, useMemo } from 'react';
 import { IoClose } from 'react-icons/io5';
 
-import type { Menus } from '@src/hooks/useHeatmapSideBarMenus';
+import type { Menus } from '@src/hooks/menuConfig';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC } from 'react';
 import type { Group } from 'three';
@@ -11,7 +11,7 @@ import { Button } from '@src/component/atoms/Button';
 import { Card } from '@src/component/atoms/Card';
 import { FlexColumn, InlineFlexRow } from '@src/component/atoms/Flex';
 import { useGeneralPatch, useGeneralSelect } from '@src/hooks/useGeneral';
-import { MenuContents } from '@src/hooks/useHeatmapSideBarMenus';
+import { MenuContents } from '@src/hooks/menuConfig';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { fontSizes, fontWeights, zIndexes } from '@src/styles/style';
 

@@ -7,7 +7,7 @@ import { useSelector, useStore } from 'react-redux';
 
 import type { PerformanceMonitorApi } from '@react-three/drei';
 import type { PlayerTimelinePointsTimeRange } from '@src/features/heatmap/PlayerTimelinePoints';
-import type { Menus } from '@src/hooks/useHeatmapSideBarMenus';
+import type { Menus } from '@src/hooks/menuConfig';
 import type { PositionEventLog } from '@src/modeles/heatmaptask';
 import type { RootState } from '@src/store';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
