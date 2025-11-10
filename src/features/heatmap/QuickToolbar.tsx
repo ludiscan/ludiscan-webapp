@@ -9,7 +9,7 @@ import { InlineFlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { Selector } from '@src/component/molecules/Selector';
 import { useRouteCoachApi } from '@src/features/heatmap/routecoach/api';
-import { useGeneralPatch, useGeneralSelect } from '@src/hooks/useGeneral';
+import { useGeneralPatch } from '@src/hooks/useGeneral';
 import { useApiClient } from '@src/modeles/ApiClientContext';
 import { DefaultStaleTime } from '@src/modeles/qeury';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
