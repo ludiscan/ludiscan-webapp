@@ -98,17 +98,17 @@ function Toolbar({ className, service }: Props) {
 
   // 2D/3Dモード切り替えハンドラー
   const toggleDimensionality = useCallback(() => {
-    if (!dimensionalityOverride) {
-      // nullの場合は、最初にクリックしたら2Dに固定
-      patchGeneral({ dimensionalityOverride: '2d' });
-    } else if (dimensionalityOverride === '2d') {
-      // 2Dの場合は3Dに切り替え
-      patchGeneral({ dimensionalityOverride: '3d' });
-    } else {
+    patchGeneral((prev) => {
+      if (!prev.dimensionalityOverride) {
+        return { ...prev, dimensionalityOverride: '2d' };
+      } else if (prev.dimensionalityOverride === '2d') {
+        // 2Dの場合は3Dに切り替え
+        return { ...prev, dimensionalityOverride: '3d' };
+      }
       // 3Dの場合はnullに戻す（project.is2Dに従う）
-      patchGeneral({ dimensionalityOverride: null });
-    }
-  }, [dimensionalityOverride, patchGeneral]);
+      return { ...prev, dimensionalityOverride: null };
+    });
+  }, [patchGeneral]);
 
   useEffect(() => {
     const onKey = (ev: KeyboardEvent) => {
