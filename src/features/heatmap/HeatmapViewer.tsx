@@ -24,7 +24,7 @@ import { exportHeatmap } from '@src/features/heatmap/export-heatmap';
 import { HeatmapMenuSideBar } from '@src/features/heatmap/menu/HeatmapMenuSideBar';
 import { FocusLinkBridge } from '@src/features/heatmap/selection/FocusLinkBridge';
 import { InspectorModal } from '@src/features/heatmap/selection/InspectorModal';
-import { useGeneralSelect } from '@src/hooks/useGeneral';
+import { useGeneralPatch, useGeneralSelect } from '@src/hooks/useGeneral';
 import { useApiClient } from '@src/modeles/ApiClientContext';
 import { DefaultStaleTime } from '@src/modeles/qeury';
 import { dimensions, zIndexes } from '@src/styles/style';
@@ -50,8 +50,10 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
   const [menuExtra, setMenuExtra] = useState<object | undefined>(undefined);
 
   const mapName = useGeneralSelect((s) => s.mapName);
+  const dimensionalityOverride = useGeneralSelect((s) => s.dimensionalityOverride);
   const splitMode = useSelector((s: RootState) => s.heatmapCanvas.splitMode);
   const apiClient = useApiClient();
+  const setGeneral = useGeneralPatch();
 
   const [visibleTimelineRange, setVisibleTimelineRange] = useState<PlayerTimelinePointsTimeRange>({ start: 0, end: 0 });
 
@@ -71,8 +73,8 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
     enabled: !!service.projectId,
   });
 
-  // 2D/3D判定（プロジェクトのis2Dを優先）
-  const dimensionality = useMemo(() => detectDimensionality(project?.is2D, task), [project?.is2D, task]);
+  // 2D/3D判定（オーバーライド > プロジェクトのis2D > taskのzVisible）
+  const dimensionality = useMemo(() => detectDimensionality(dimensionalityOverride, project?.is2D, task), [dimensionalityOverride, project?.is2D, task]);
 
   const { data: mapList } = useQuery({
     queryKey: ['mapList', service, service.projectId],
@@ -123,6 +125,17 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
     setMap(mapContent);
     setModelType('server');
   }, [mapContent]);
+
+  // 2Dモードに切り替わった時にmapNameをクリア（3D専用機能のため）
+  useEffect(() => {
+    if (dimensionality === '2d') {
+      // 2Dモードになった時、mapNameがあればクリア
+      if (mapName) {
+        setGeneral({ mapName: '' });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dimensionality, setGeneral]); // mapNameは依存配列に含めない
 
   const pointList = useMemo(() => {
     if (!task) return [];
@@ -263,18 +276,18 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
           <FlexRow className={`${className}__splitContainer`} style={{ flex: 1, flexDirection: splitMode.direction === 'horizontal' ? 'row' : 'column' }}>
             <FlexColumn className={`${className}__canvasBox ${className}__canvasBox--split`}>
               {renderCanvas('left')}
-              <QuickToolbar className={`${className}__footToolbar`} service={service} />
+              <QuickToolbar className={`${className}__footToolbar`} service={service} dimensionality={dimensionality} />
             </FlexColumn>
             <FlexColumn className={`${className}__canvasBox ${className}__canvasBox--split`}>
               {renderCanvas('right')}
-              <QuickToolbar className={`${className}__footToolbar`} service={service} />
+              <QuickToolbar className={`${className}__footToolbar`} service={service} dimensionality={dimensionality} />
             </FlexColumn>
           </FlexRow>
         ) : (
           <FlexColumn className={`${className}__canvasBox`}>
             {renderCanvas()}
             {/*{performance && <PerformanceList api={performance} className={`${className}__performance`} />}*/}
-            <QuickToolbar className={`${className}__footToolbar`} service={service} />
+            <QuickToolbar className={`${className}__footToolbar`} service={service} dimensionality={dimensionality} />
           </FlexColumn>
         )}
         <div className={`${className}__player`}>
@@ -291,6 +304,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
           eventLogKeys={generalLogKeys ?? undefined}
           extra={menuExtra}
           service={service}
+          dimensionality={dimensionality}
         />
       </div>
 

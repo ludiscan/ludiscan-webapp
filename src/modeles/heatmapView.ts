@@ -34,6 +34,7 @@ export type GeneralSettings = {
   maxThreshold: number;
   colorScale: number;
   sessionHeatmap: boolean;
+  dimensionalityOverride: '2d' | '3d' | null; // ユーザーによる2D/3Dモード切り替え（nullの場合はproject.is2Dに従う）
 };
 export type HotspotModeSettings = {
   visible: boolean;
@@ -111,6 +112,7 @@ export const initializeValues: HeatmapDataState = {
     maxThreshold: 1,
     colorScale: 1.0,
     sessionHeatmap: false,
+    dimensionalityOverride: null, // 初期状態ではproject.is2Dに従う
   },
   hotspotMode: {
     visible: false,

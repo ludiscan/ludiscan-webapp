@@ -386,17 +386,40 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
     notifyPercent();
   }, [notifyPercent]);
 
+  // 2Dモードにリセットするハンドラー
+  const reset2DCamera = useCallback(() => {
+    const controls = orbitControlsRef.current;
+    const camera = controls?.object as PerspectiveCamera | OrthographicCamera | undefined;
+    if (!controls || !camera || !groupRef.current) return;
+
+    // モデルの中心を取得
+    const box = new Box3().setFromObject(groupRef.current);
+    const center = new Vector3();
+    box.getCenter(center);
+
+    // 2Dモード：真上からの視点にリセット
+    controls.target.copy(center);
+    camera.position.set(center.x, 5000, center.z); // 真上から
+    camera.up.set(0, 0, -1); // Z軸が上
+    camera.updateProjectionMatrix();
+    controls.update();
+    notifyPercent();
+  }, [notifyPercent]);
+
   useEffect(() => {
     const onSet = (e: CustomEvent<{ percent: number }>) => setPercent(e.detail.percent);
     const onFit = () => fitToObject();
+    const onReset2D = () => reset2DCamera();
 
     heatMapEventBus.on('camera:set-zoom-percent', onSet);
     heatMapEventBus.on('camera:fit', onFit);
+    heatMapEventBus.on('camera:reset-2d', onReset2D);
     return () => {
       heatMapEventBus.off('camera:set-zoom-percent', onSet);
       heatMapEventBus.off('camera:fit', onFit);
+      heatMapEventBus.off('camera:reset-2d', onReset2D);
     };
-  }, [fitToObject, setPercent]);
+  }, [fitToObject, setPercent, reset2DCamera]);
 
   // モデルが揃った/サイズが決まったタイミングで実行
   useEffect(() => {
@@ -438,15 +461,15 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
   return (
     <>
       <group ref={groupRef}>
-        {/* 3Dモデルは3Dモード、または2Dモードで明示的にマップが読み込まれている場合のみ表示 */}
-        {modelType && map && modelType !== 'server' && typeof map === 'string' && (dimensionality === '3d' || map) && (
+        {/* 3Dモデルは3Dモードでのみ表示（2Dモードではヒートマップと2D要素のみ） */}
+        {dimensionality === '3d' && modelType && map && modelType !== 'server' && typeof map === 'string' && (
           <LocalModelLoader ref={modelRef} modelPath={map} modelType={modelType} />
         )}
-        {modelType && model && modelType === 'server' && typeof map !== 'string' && (dimensionality === '3d' || map) && (
+        {dimensionality === '3d' && modelType && model && modelType === 'server' && typeof map !== 'string' && (
           <>
             <StreamModelLoader ref={modelRef} model={model} />
-            {/* fillモードは3Dモデル表面に配置するため、3Dモードまたはモデルがある場合のみ */}
-            {pointList && modelRef.current && heatmapType === 'fill' && showHeatmap && dimensionality === '3d' && (
+            {/* fillモードは3Dモデル表面に配置するため、3Dモードでのみ表示 */}
+            {pointList && modelRef.current && heatmapType === 'fill' && showHeatmap && (
               <HeatmapFillOverlay group={modelRef.current} points={pointList} cellSize={(service.task?.stepSize || 50) / 2} opacity={heatmapOpacity} />
             )}
           </>

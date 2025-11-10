@@ -25,6 +25,7 @@ export type HeatmapMenuProps = {
   mapOptions: string[];
   service: HeatmapDataService;
   extra?: object;
+  dimensionality: '2d' | '3d'; // 2D/3Dモード（一部のメニューは3D専用）
 };
 
 const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
@@ -34,12 +35,20 @@ const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
   const { theme } = useSharedTheme();
 
   useEffect(() => {
-    if ((!mapName || mapName === '') && mapOptions.length > 0) {
-      setGeneral({ mapName: mapOptions[0] });
-    } else if (mapOptions.length === 0 && mapName) {
-      setGeneral({ mapName: '' });
+    // mapOptionsが変わった時のみ実行（mapNameは依存配列に含めない）
+    if (mapOptions.length > 0) {
+      // mapNameが空の場合のみ、最初のオプションを設定
+      if (!mapName || mapName === '') {
+        setGeneral({ mapName: mapOptions[0] });
+      }
+    } else if (mapOptions.length === 0) {
+      // mapOptionsが空になったら、mapNameをクリア
+      if (mapName) {
+        setGeneral({ mapName: '' });
+      }
     }
-  }, [mapName, mapOptions, setGeneral]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapOptions, setGeneral]); // mapNameは依存配列に含めない
   const content = useMemo(() => MenuContents.find((content) => content.name === name), [name]);
 
   if (!content) {
