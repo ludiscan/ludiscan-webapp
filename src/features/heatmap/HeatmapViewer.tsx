@@ -128,10 +128,14 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
 
   // 2Dモードに切り替わった時にmapNameをクリア（3D専用機能のため）
   useEffect(() => {
-    if (dimensionality === '2d' && mapName) {
-      setGeneral({ mapName: '' });
+    if (dimensionality === '2d') {
+      // 2Dモードになった時、mapNameがあればクリア
+      if (mapName) {
+        setGeneral({ mapName: '' });
+      }
     }
-  }, [dimensionality, mapName, setGeneral]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dimensionality, setGeneral]); // mapNameは依存配列に含めない
 
   const pointList = useMemo(() => {
     if (!task) return [];
