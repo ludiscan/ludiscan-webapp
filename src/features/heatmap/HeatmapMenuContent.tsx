@@ -25,6 +25,7 @@ export type HeatmapMenuProps = {
   mapOptions: string[];
   service: HeatmapDataService;
   extra?: object;
+  dimensionality: '2d' | '3d'; // 2D/3Dモード（一部のメニューは3D専用）
 };
 
 const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {

@@ -24,7 +24,7 @@ import { exportHeatmap } from '@src/features/heatmap/export-heatmap';
 import { HeatmapMenuSideBar } from '@src/features/heatmap/menu/HeatmapMenuSideBar';
 import { FocusLinkBridge } from '@src/features/heatmap/selection/FocusLinkBridge';
 import { InspectorModal } from '@src/features/heatmap/selection/InspectorModal';
-import { useGeneralSelect } from '@src/hooks/useGeneral';
+import { useGeneralPatch, useGeneralSelect } from '@src/hooks/useGeneral';
 import { useApiClient } from '@src/modeles/ApiClientContext';
 import { DefaultStaleTime } from '@src/modeles/qeury';
 import { dimensions, zIndexes } from '@src/styles/style';
@@ -53,6 +53,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
   const dimensionalityOverride = useGeneralSelect((s) => s.dimensionalityOverride);
   const splitMode = useSelector((s: RootState) => s.heatmapCanvas.splitMode);
   const apiClient = useApiClient();
+  const setGeneral = useGeneralPatch();
 
   const [visibleTimelineRange, setVisibleTimelineRange] = useState<PlayerTimelinePointsTimeRange>({ start: 0, end: 0 });
 
@@ -127,6 +128,13 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
     setMap(mapContent);
     setModelType('server');
   }, [mapContent]);
+
+  // 2Dモードに切り替わった時にmapNameをクリア（3D専用機能のため）
+  useEffect(() => {
+    if (dimensionality === '2d' && mapName) {
+      setGeneral({ mapName: '' });
+    }
+  }, [dimensionality, mapName, setGeneral]);
 
   const pointList = useMemo(() => {
     if (!task) return [];
@@ -295,6 +303,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
           eventLogKeys={generalLogKeys ?? undefined}
           extra={menuExtra}
           service={service}
+          dimensionality={dimensionality}
         />
       </div>
 
