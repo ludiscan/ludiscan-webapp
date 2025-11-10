@@ -25,6 +25,7 @@ export function createMockMenuProps(overrides?: Partial<HeatmapMenuProps>): Heat
     handleExportView: async () => {},
     mapOptions: [],
     service: mockHeatmapDataService,
+    dimensionality: '3d',
     ...overrides,
   };
 }

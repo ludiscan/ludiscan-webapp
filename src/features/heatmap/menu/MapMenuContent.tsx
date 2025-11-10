@@ -11,6 +11,7 @@ import { Selector } from '@src/component/molecules/Selector';
 import { ObjectToggleList } from '@src/features/heatmap/ObjectToggleList';
 import { InputRow } from '@src/features/heatmap/menu/InputRow';
 import { useGeneralPatch, useGeneralSelect } from '@src/hooks/useGeneral';
+import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { fontSizes } from '@src/styles/style';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
@@ -24,6 +25,7 @@ const DisabledMessage = styled.div`
 `;
 
 export const MapMenuContent: FC<HeatmapMenuProps> = ({ mapOptions, model, dimensionality }) => {
+  const { theme } = useSharedTheme();
   const mapName = useGeneralSelect((s) => s.mapName);
   const setData = useGeneralPatch();
   const handleAddWaypoint = useCallback(() => {
@@ -35,8 +37,8 @@ export const MapMenuContent: FC<HeatmapMenuProps> = ({ mapOptions, model, dimens
     return (
       <FlexColumn gap={12}>
         <DisabledMessage>
-          <Text text={'Map visualization is only available in 3D mode.'} fontSize={fontSizes.base} />
-          <Text text={'Switch to 3D mode using the toggle button in the toolbar.'} fontSize={fontSizes.small} />
+          <Text text={'Map visualization is only available in 3D mode.'} fontSize={theme.typography.fontSize.base} />
+          <Text text={'Switch to 3D mode using the toggle button in the toolbar.'} fontSize={theme.typography.fontSize.sm} />
         </DisabledMessage>
       </FlexColumn>
     );

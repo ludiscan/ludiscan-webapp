@@ -109,7 +109,7 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
   });
 
   // is2Dフラグに基づいてzVisibleを動的に決定（2Dの場合はzVisible=false）
-  const zVisible = !project?.is2D ?? true;
+  const zVisible = !(project?.is2D ?? false);
 
   const { data: createdTask } = useQuery({
     queryKey: [projectId, sessionId, stepSize, zVisible, sessionHeatmap, apiClient],

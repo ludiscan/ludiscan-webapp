@@ -74,10 +74,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
   });
 
   // 2D/3D判定（オーバーライド > プロジェクトのis2D > taskのzVisible）
-  const dimensionality = useMemo(
-    () => detectDimensionality(dimensionalityOverride, project?.is2D, task),
-    [dimensionalityOverride, project?.is2D, task],
-  );
+  const dimensionality = useMemo(() => detectDimensionality(dimensionalityOverride, project?.is2D, task), [dimensionalityOverride, project?.is2D, task]);
 
   const { data: mapList } = useQuery({
     queryKey: ['mapList', service, service.projectId],

@@ -142,7 +142,7 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
         sessionId: sessionId!,
         lang: 'ja',
         stepSize: 50,
-        zVisible: !project?.is2D ?? true, // is2Dフラグに基づいて動的に設定
+        zVisible: !(project?.is2D ?? false), // is2Dフラグに基づいて動的に設定
         provider: 'openai', // .envの既定と揃える(gpt-4o-mini)
       }),
     onSuccess: async () => {

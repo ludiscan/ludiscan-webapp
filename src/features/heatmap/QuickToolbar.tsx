@@ -9,8 +9,7 @@ import { InlineFlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { Selector } from '@src/component/molecules/Selector';
 import { useRouteCoachApi } from '@src/features/heatmap/routecoach/api';
-import { useGeneralSelect } from '@src/hooks/useGeneral';
-import { useHeatmapState } from '@src/hooks/useHeatmapState';
+import { useGeneralPatch, useGeneralSelect } from '@src/hooks/useGeneral';
 import { useApiClient } from '@src/modeles/ApiClientContext';
 import { DefaultStaleTime } from '@src/modeles/qeury';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
@@ -29,7 +28,7 @@ function Toolbar({ className, service }: Props) {
 
   // 2D/3Dモード切り替え用のstate取得
   const dimensionalityOverride = useGeneralSelect((s) => s.dimensionalityOverride);
-  const { patchGeneral } = useHeatmapState();
+  const patchGeneral = useGeneralPatch();
 
   const { data: sessions } = useQuery({
     queryKey: ['sessions', service.projectId],
