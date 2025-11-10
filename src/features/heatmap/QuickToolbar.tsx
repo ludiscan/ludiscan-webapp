@@ -16,9 +16,13 @@ import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
 const PRESETS = [25, 50, 75, 100, 150, 200, 300, 400];
 
-type Props = { className?: string; service: HeatmapDataService };
+type Props = {
+  className?: string;
+  service: HeatmapDataService;
+  dimensionality: '2d' | '3d'; // 現在の次元（計算済み）
+};
 
-function Toolbar({ className, service }: Props) {
+function Toolbar({ className, service, dimensionality }: Props) {
   const [open, setOpen] = useState(false);
   const [percent, setPercent] = useState(100);
   const [selectSessionId, setSelectSessionId] = useState<string | undefined>(undefined);
@@ -26,8 +30,7 @@ function Toolbar({ className, service }: Props) {
   const apiClient = useApiClient();
   const routeCoachApi = useRouteCoachApi();
 
-  // 2D/3Dモード切り替え用のstate取得
-  const dimensionalityOverride = useGeneralSelect((s) => s.dimensionalityOverride);
+  // 2D/3Dモード切り替え用
   const patchGeneral = useGeneralPatch();
 
   const { data: sessions } = useQuery({
@@ -96,19 +99,18 @@ function Toolbar({ className, service }: Props) {
   const fit = () => heatMapEventBus.emit('camera:fit');
   const oneToOne = () => heatMapEventBus.emit('camera:set-zoom-percent', { percent: 100 });
 
-  // 2D/3Dモード切り替えハンドラー
+  // 2D/3Dモード切り替えハンドラー（シンプルなトグル）
   const toggleDimensionality = useCallback(() => {
-    patchGeneral((prev) => {
-      if (!prev.dimensionalityOverride) {
-        return { ...prev, dimensionalityOverride: '2d' };
-      } else if (prev.dimensionalityOverride === '2d') {
-        // 2Dの場合は3Dに切り替え
-        return { ...prev, dimensionalityOverride: '3d' };
-      }
-      // 3Dの場合はnullに戻す（project.is2Dに従う）
-      return { ...prev, dimensionalityOverride: null };
-    });
-  }, [patchGeneral]);
+    const newMode = dimensionality === '2d' ? '3d' : '2d';
+    patchGeneral((prev) => ({
+      ...prev,
+      dimensionalityOverride: newMode,
+    }));
+    // 2Dモードに切り替えた時はカメラをリセット
+    if (newMode === '2d') {
+      heatMapEventBus.emit('camera:reset-2d');
+    }
+  }, [dimensionality, patchGeneral]);
 
   useEffect(() => {
     const onKey = (ev: KeyboardEvent) => {
@@ -174,10 +176,10 @@ function Toolbar({ className, service }: Props) {
           fontSize={'sm'}
           onClick={toggleDimensionality}
           scheme={'surface'}
-          title={`現在: ${dimensionalityOverride || 'Auto'}モード。クリックして切り替え`}
+          title={`現在: ${dimensionality === '2d' ? '2D' : '3D'}モード。クリックして${dimensionality === '2d' ? '3D' : '2D'}に切り替え`}
           className='dimension-toggle'
         >
-          <Text text={dimensionalityOverride === '2d' ? '2D' : dimensionalityOverride === '3d' ? '3D' : 'Auto'} />
+          <Text text={dimensionality === '2d' ? '2D' : '3D'} />
         </Button>
         <Button
           fontSize={'sm'}

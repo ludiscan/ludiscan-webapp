@@ -276,18 +276,18 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
           <FlexRow className={`${className}__splitContainer`} style={{ flex: 1, flexDirection: splitMode.direction === 'horizontal' ? 'row' : 'column' }}>
             <FlexColumn className={`${className}__canvasBox ${className}__canvasBox--split`}>
               {renderCanvas('left')}
-              <QuickToolbar className={`${className}__footToolbar`} service={service} />
+              <QuickToolbar className={`${className}__footToolbar`} service={service} dimensionality={dimensionality} />
             </FlexColumn>
             <FlexColumn className={`${className}__canvasBox ${className}__canvasBox--split`}>
               {renderCanvas('right')}
-              <QuickToolbar className={`${className}__footToolbar`} service={service} />
+              <QuickToolbar className={`${className}__footToolbar`} service={service} dimensionality={dimensionality} />
             </FlexColumn>
           </FlexRow>
         ) : (
           <FlexColumn className={`${className}__canvasBox`}>
             {renderCanvas()}
             {/*{performance && <PerformanceList api={performance} className={`${className}__performance`} />}*/}
-            <QuickToolbar className={`${className}__footToolbar`} service={service} />
+            <QuickToolbar className={`${className}__footToolbar`} service={service} dimensionality={dimensionality} />
           </FlexColumn>
         )}
         <div className={`${className}__player`}>

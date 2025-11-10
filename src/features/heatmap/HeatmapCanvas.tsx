@@ -386,17 +386,40 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
     notifyPercent();
   }, [notifyPercent]);
 
+  // 2Dモードにリセットするハンドラー
+  const reset2DCamera = useCallback(() => {
+    const controls = orbitControlsRef.current;
+    const camera = controls?.object as PerspectiveCamera | OrthographicCamera | undefined;
+    if (!controls || !camera || !groupRef.current) return;
+
+    // モデルの中心を取得
+    const box = new Box3().setFromObject(groupRef.current);
+    const center = new Vector3();
+    box.getCenter(center);
+
+    // 2Dモード：真上からの視点にリセット
+    controls.target.copy(center);
+    camera.position.set(center.x, 5000, center.z); // 真上から
+    camera.up.set(0, 0, -1); // Z軸が上
+    camera.updateProjectionMatrix();
+    controls.update();
+    notifyPercent();
+  }, [notifyPercent]);
+
   useEffect(() => {
     const onSet = (e: CustomEvent<{ percent: number }>) => setPercent(e.detail.percent);
     const onFit = () => fitToObject();
+    const onReset2D = () => reset2DCamera();
 
     heatMapEventBus.on('camera:set-zoom-percent', onSet);
     heatMapEventBus.on('camera:fit', onFit);
+    heatMapEventBus.on('camera:reset-2d', onReset2D);
     return () => {
       heatMapEventBus.off('camera:set-zoom-percent', onSet);
       heatMapEventBus.off('camera:fit', onFit);
+      heatMapEventBus.off('camera:reset-2d', onReset2D);
     };
-  }, [fitToObject, setPercent]);
+  }, [fitToObject, setPercent, reset2DCamera]);
 
   // モデルが揃った/サイズが決まったタイミングで実行
   useEffect(() => {
