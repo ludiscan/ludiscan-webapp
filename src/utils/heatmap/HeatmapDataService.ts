@@ -89,11 +89,27 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
   const [taskId, setTaskId] = useState<number | null>(initialTaskId);
   const [sessionId, setSessionId] = useState<number | null>(null);
   const [stepSize] = useState<number>(50);
-  const [zVisible] = useState<boolean>(true);
 
   const { isAuthorized, ready } = useAuth();
   const queryClient = useQueryClient();
   const apiClient = useApiClient();
+
+  // プロジェクトデータを取得してis2Dフラグを取得
+  const { data: project } = useQuery({
+    queryKey: ['project', projectId],
+    queryFn: async () => {
+      if (!projectId) return null;
+      const res = await apiClient.GET('/api/v0/projects/{id}', {
+        params: { path: { id: projectId } },
+      });
+      return res.data ?? null;
+    },
+    staleTime: 1000 * 60 * 5, // 5分
+    enabled: !!projectId && isAuthorized,
+  });
+
+  // is2Dフラグに基づいてzVisibleを動的に決定（2Dの場合はzVisible=false）
+  const zVisible = !project?.is2D ?? true;
 
   const { data: createdTask } = useQuery({
     queryKey: [projectId, sessionId, stepSize, zVisible, sessionHeatmap, apiClient],

@@ -9,6 +9,8 @@ import { InlineFlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { Selector } from '@src/component/molecules/Selector';
 import { useRouteCoachApi } from '@src/features/heatmap/routecoach/api';
+import { useGeneralSelect } from '@src/hooks/useGeneral';
+import { useHeatmapState } from '@src/hooks/useHeatmapState';
 import { useApiClient } from '@src/modeles/ApiClientContext';
 import { DefaultStaleTime } from '@src/modeles/qeury';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
@@ -24,6 +26,10 @@ function Toolbar({ className, service }: Props) {
   const qc = useQueryClient();
   const apiClient = useApiClient();
   const routeCoachApi = useRouteCoachApi();
+
+  // 2D/3Dモード切り替え用のstate取得
+  const dimensionalityOverride = useGeneralSelect((s) => s.dimensionalityOverride);
+  const { patchGeneral } = useHeatmapState();
 
   const { data: sessions } = useQuery({
     queryKey: ['sessions', service.projectId],
@@ -91,6 +97,20 @@ function Toolbar({ className, service }: Props) {
   const fit = () => heatMapEventBus.emit('camera:fit');
   const oneToOne = () => heatMapEventBus.emit('camera:set-zoom-percent', { percent: 100 });
 
+  // 2D/3Dモード切り替えハンドラー
+  const toggleDimensionality = useCallback(() => {
+    if (!dimensionalityOverride) {
+      // nullの場合は、最初にクリックしたら2Dに固定
+      patchGeneral({ dimensionalityOverride: '2d' });
+    } else if (dimensionalityOverride === '2d') {
+      // 2Dの場合は3Dに切り替え
+      patchGeneral({ dimensionalityOverride: '3d' });
+    } else {
+      // 3Dの場合はnullに戻す（project.is2Dに従う）
+      patchGeneral({ dimensionalityOverride: null });
+    }
+  }, [dimensionalityOverride, patchGeneral]);
+
   useEffect(() => {
     const onKey = (ev: KeyboardEvent) => {
       if (ev.key === '+') step(1);
@@ -150,6 +170,15 @@ function Toolbar({ className, service }: Props) {
           disabled={selectSessionId === undefined}
         >
           <Text text={'filter'} />
+        </Button>
+        <Button
+          fontSize={'sm'}
+          onClick={toggleDimensionality}
+          scheme={'surface'}
+          title={`現在: ${dimensionalityOverride || 'Auto'}モード。クリックして切り替え`}
+          className='dimension-toggle'
+        >
+          <Text text={dimensionalityOverride === '2d' ? '2D' : dimensionalityOverride === '3d' ? '3D' : 'Auto'} />
         </Button>
         <Button
           fontSize={'sm'}

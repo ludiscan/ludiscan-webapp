@@ -12,6 +12,7 @@ import { FlexColumn } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { MarkDownText } from '@src/component/molecules/MarkDownText';
 import { useSummaryApi } from '@src/features/heatmap/summary/api';
+import { useApiClient } from '@src/modeles/ApiClientContext';
 import { fontSizes } from '@src/styles/style';
 import { toISOAboutStringWithTimezone } from '@src/utils/locale';
 
@@ -89,8 +90,23 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
   const projectId = service.projectId;
   const sessionId = service.sessionId;
   const enabled = useMemo(() => Number.isFinite(projectId) && sessionId != null, [projectId, sessionId]);
+  const apiClient = useApiClient();
 
   const summaryApi = useSummaryApi();
+
+  // プロジェクトデータを取得してis2Dフラグを取得
+  const { data: project } = useQuery({
+    queryKey: ['project', projectId],
+    queryFn: async () => {
+      if (!projectId) return null;
+      const res = await apiClient.GET('/api/v0/projects/{id}', {
+        params: { path: { id: projectId } },
+      });
+      return res.data ?? null;
+    },
+    staleTime: 1000 * 60 * 5, // 5分
+    enabled: !!projectId,
+  });
 
   // 最新のサマリ取得（queued/running の間だけ 500ms ポーリング）
   const {
@@ -126,7 +142,7 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
         sessionId: sessionId!,
         lang: 'ja',
         stepSize: 50,
-        zVisible: true,
+        zVisible: !project?.is2D ?? true, // is2Dフラグに基づいて動的に設定
         provider: 'openai', // .envの既定と揃える(gpt-4o-mini)
       }),
     onSuccess: async () => {

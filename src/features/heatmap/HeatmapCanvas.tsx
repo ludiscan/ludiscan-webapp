@@ -438,15 +438,15 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
   return (
     <>
       <group ref={groupRef}>
-        {/* 3Dモデルは3Dモード、または2Dモードで明示的にマップが読み込まれている場合のみ表示 */}
-        {modelType && map && modelType !== 'server' && typeof map === 'string' && (dimensionality === '3d' || map) && (
+        {/* 3Dモデルは3Dモードでのみ表示（2Dモードではヒートマップと2D要素のみ） */}
+        {dimensionality === '3d' && modelType && map && modelType !== 'server' && typeof map === 'string' && (
           <LocalModelLoader ref={modelRef} modelPath={map} modelType={modelType} />
         )}
-        {modelType && model && modelType === 'server' && typeof map !== 'string' && (dimensionality === '3d' || map) && (
+        {dimensionality === '3d' && modelType && model && modelType === 'server' && typeof map !== 'string' && (
           <>
             <StreamModelLoader ref={modelRef} model={model} />
-            {/* fillモードは3Dモデル表面に配置するため、3Dモードまたはモデルがある場合のみ */}
-            {pointList && modelRef.current && heatmapType === 'fill' && showHeatmap && dimensionality === '3d' && (
+            {/* fillモードは3Dモデル表面に配置するため、3Dモードでのみ表示 */}
+            {pointList && modelRef.current && heatmapType === 'fill' && showHeatmap && (
               <HeatmapFillOverlay group={modelRef.current} points={pointList} cellSize={(service.task?.stepSize || 50) / 2} opacity={heatmapOpacity} />
             )}
           </>

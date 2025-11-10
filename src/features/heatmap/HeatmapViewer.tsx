@@ -50,6 +50,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
   const [menuExtra, setMenuExtra] = useState<object | undefined>(undefined);
 
   const mapName = useGeneralSelect((s) => s.mapName);
+  const dimensionalityOverride = useGeneralSelect((s) => s.dimensionalityOverride);
   const splitMode = useSelector((s: RootState) => s.heatmapCanvas.splitMode);
   const apiClient = useApiClient();
 
@@ -71,8 +72,11 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
     enabled: !!service.projectId,
   });
 
-  // 2D/3D判定（プロジェクトのis2Dを優先）
-  const dimensionality = useMemo(() => detectDimensionality(project?.is2D, task), [project?.is2D, task]);
+  // 2D/3D判定（オーバーライド > プロジェクトのis2D > taskのzVisible）
+  const dimensionality = useMemo(
+    () => detectDimensionality(dimensionalityOverride, project?.is2D, task),
+    [dimensionalityOverride, project?.is2D, task],
+  );
 
   const { data: mapList } = useQuery({
     queryKey: ['mapList', service, service.projectId],

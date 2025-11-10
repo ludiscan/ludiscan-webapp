@@ -46,12 +46,9 @@ export const InfoMenuContent: FC<HeatmapMenuProps> = ({ handleExportView, servic
           <InlineFlexRow align={'center'} gap={4}>
             <Text text={`name: ${project.name}`} fontSize={fontSizes.small} />
           </InlineFlexRow>
-          {/*<InlineFlexRow align={'center'} gap={4}>*/}
-          {/*  <Text text={`step size: ${task.stepSize}`} fontSize={fontSizes.small} />*/}
-          {/*</InlineFlexRow>*/}
-          {/*<InlineFlexRow align={'center'} gap={4}>*/}
-          {/*  <Text text={`mode: ${task.zVisible ? '3D' : '2D'}`} fontSize={fontSizes.small} />*/}
-          {/*</InlineFlexRow>*/}
+          <InlineFlexRow align={'center'} gap={4}>
+            <Text text={`mode: ${project.is2D ? '2D' : '3D'}`} fontSize={fontSizes.small} />
+          </InlineFlexRow>
         </>
       )}
       <InlineFlexRow align={'center'} gap={8} style={{ marginTop: 8, justifyContent: 'center' }}>
