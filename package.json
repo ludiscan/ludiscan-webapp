@@ -33,7 +33,7 @@
     "build-storybook": "storybook build",
     "test-storybook": "test-storybook --config-dir .storybook --testTimeout 60000",
     "generate:api-schemes": "bunx openapi-typescript swagger.json --output generated/api.d.ts",
-    "generate:api-schemes:local-fetch": "bunx openapi-typescript http://localhost:3211/swagger/api/v0/json --output generated/api.d.ts",
+    "generate:api-schemes:local-fetch": "bunx openapi-typescript http://localhost:3211/swagger/api/v0/json --output generated/api.d.ts && eslint generated/api.d.ts --fix && prettier --write generated/api.d.ts",
     "build:heatmap-bundle": "bun scripts/create-heatmap-bundle.js",
     "prebuild:prod": "bun run build:heatmap-bundle"
   },

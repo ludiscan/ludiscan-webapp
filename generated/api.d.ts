@@ -223,7 +223,8 @@ export interface paths {
     };
     /** Get project by ID */
     get: operations['ProjectsController_findOne'];
-    put?: never;
+    /** Update a project */
+    put: operations['ProjectsController_update'];
     post?: never;
     /** Delete a project */
     delete: operations['ProjectsController_delete'];
@@ -1236,12 +1237,22 @@ export interface components {
       name: string;
       /** @example description */
       description: string;
+      /** @example false */
+      is2D?: boolean;
     };
     DefaultSuccessResponse: {
       /** @example true */
       success: boolean;
       /** @example message */
       message: string | null;
+    };
+    UpdateProjectDto: {
+      /** @example name */
+      name?: string;
+      /** @example description */
+      description?: string;
+      /** @example false */
+      is2D?: boolean;
     };
     CalcFieldResponseDto: {
       /** @example field */
@@ -2204,6 +2215,41 @@ export interface operations {
     requestBody?: never;
     responses: {
       /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProjectResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  ProjectsController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateProjectDto'];
+      };
+    };
+    responses: {
+      /** @description Updated */
       200: {
         headers: {
           [name: string]: unknown;
