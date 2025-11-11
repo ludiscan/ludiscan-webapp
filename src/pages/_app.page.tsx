@@ -9,6 +9,7 @@ import type { AppStore } from '@src/store';
 import type { AppProps } from 'next/app';
 
 import { ToastProvider } from '@src/component/templates/ToastContext';
+import { env } from '@src/config/env';
 import { useIsDesktop } from '@src/hooks/useIsDesktop';
 import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
 import { store } from '@src/store';
@@ -49,7 +50,7 @@ export default function App({ Component, pageProps }: AppProps) {
           </QueryClientProvider>
         </ToastProvider>
       </Provider>
-      <GoogleTagManager gtmId='GTM-WF2D83TS' />
+      <GoogleTagManager gtmId={env.GTM_ID} />
     </>
   );
 }
