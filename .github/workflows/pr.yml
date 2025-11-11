@@ -65,6 +65,8 @@ jobs:
 
   storybook-test:
     runs-on: ubuntu-22.04
+    # Skip Storybook tests for develop → main PRs (only run build checks)
+    if: github.base_ref != 'main' || github.event_name != 'pull_request'
     steps:
       - uses: actions/checkout@v4
 
