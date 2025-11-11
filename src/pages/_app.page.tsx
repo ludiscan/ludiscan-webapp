@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { GoogleTagManager } from '@next/third-parties/google';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useMemo, useRef } from 'react';
 import ReactModal from 'react-modal';
@@ -8,6 +9,7 @@ import type { AppStore } from '@src/store';
 import type { AppProps } from 'next/app';
 
 import { ToastProvider } from '@src/component/templates/ToastContext';
+import { env } from '@src/config/env';
 import { useIsDesktop } from '@src/hooks/useIsDesktop';
 import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
 import { store } from '@src/store';
@@ -36,16 +38,19 @@ export default function App({ Component, pageProps }: AppProps) {
   }
 
   return (
-    <Provider store={storeRef.current}>
-      <ToastProvider position={'top-right'}>
-        <QueryClientProvider client={queryClient}>
-          <SharedThemeProvider>
-            <Content className={isDesktop === undefined ? '' : isDesktop ? 'desktop' : 'mobile'} style={{ height: '100vh' }} data-testid={'app-content'}>
-              <Component {...pageProps} />
-            </Content>
-          </SharedThemeProvider>
-        </QueryClientProvider>
-      </ToastProvider>
-    </Provider>
+    <>
+      <Provider store={storeRef.current}>
+        <ToastProvider position={'top-right'}>
+          <QueryClientProvider client={queryClient}>
+            <SharedThemeProvider>
+              <Content className={isDesktop === undefined ? '' : isDesktop ? 'desktop' : 'mobile'} style={{ height: '100vh' }} data-testid={'app-content'}>
+                <Component {...pageProps} />
+              </Content>
+            </SharedThemeProvider>
+          </QueryClientProvider>
+        </ToastProvider>
+      </Provider>
+      <GoogleTagManager gtmId={env.GTM_ID} />
+    </>
   );
 }
