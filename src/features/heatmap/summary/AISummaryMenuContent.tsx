@@ -11,7 +11,8 @@ import { Button } from '@src/component/atoms/Button';
 import { FlexColumn } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { MarkDownText } from '@src/component/molecules/MarkDownText';
-import { fetchLatestSummary, enqueueSummary } from '@src/features/heatmap/summary/api';
+import { useSummaryApi } from '@src/features/heatmap/summary/api';
+import { useApiClient } from '@src/modeles/ApiClientContext';
 import { fontSizes } from '@src/styles/style';
 import { toISOAboutStringWithTimezone } from '@src/utils/locale';
 
@@ -89,6 +90,23 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
   const projectId = service.projectId;
   const sessionId = service.sessionId;
   const enabled = useMemo(() => Number.isFinite(projectId) && sessionId != null, [projectId, sessionId]);
+  const apiClient = useApiClient();
+
+  const summaryApi = useSummaryApi();
+
+  // プロジェクトデータを取得してis2Dフラグを取得
+  const { data: project } = useQuery({
+    queryKey: ['project', projectId],
+    queryFn: async () => {
+      if (!projectId) return null;
+      const res = await apiClient.GET('/api/v0/projects/{id}', {
+        params: { path: { id: projectId } },
+      });
+      return res.data ?? null;
+    },
+    staleTime: 1000 * 60 * 5, // 5分
+    enabled: !!projectId,
+  });
 
   // 最新のサマリ取得（queued/running の間だけ 500ms ポーリング）
   const {
@@ -101,7 +119,7 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
     queryKey: ['sessionSummary', projectId, sessionId],
     enabled,
     queryFn: () => {
-      return fetchLatestSummary(projectId!, sessionId!);
+      return summaryApi.fetchLatestSummary(projectId!, sessionId!);
     },
     refetchInterval: (data) => {
       if (!data || data.state.data === null) return false;
@@ -119,12 +137,12 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
   // 再生成（queue=true で投入）→ 直後に再取得
   const { mutate: regenMutate, isPending: isRegenPending } = useMutation({
     mutationFn: () =>
-      enqueueSummary({
+      summaryApi.enqueueSummary({
         projectId: projectId!,
         sessionId: sessionId!,
         lang: 'ja',
         stepSize: 50,
-        zVisible: true,
+        zVisible: !(project?.is2D ?? false), // is2Dフラグに基づいて動的に設定
         provider: 'openai', // .envの既定と揃える(gpt-4o-mini)
       }),
     onSuccess: async () => {
@@ -151,7 +169,7 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
   return (
     <FlexColumn gap={12}>
       <Text text={'AI要約'} fontSize={fontSizes.large3} />
-      <Button onClick={() => regenMutate()} disabled={disabled} title='要約を再生成（キュー投入）' scheme={'primary'} fontSize={'small'}>
+      <Button onClick={() => regenMutate()} disabled={disabled} title='要約を再生成（キュー投入）' scheme={'primary'} fontSize={'sm'}>
         {busy ? '生成中…' : '再生成'}
       </Button>
       {isLoading && <Hint>読み込み中…</Hint>}

@@ -37,13 +37,13 @@ const Component: FC<GameApiKeyDeleteConfirmModalProps> = ({ className, isOpen, s
     <Modal isOpen={isOpen} onClose={handleClose} title='Delete API Key'>
       <div className={`${className}__modal`}>
         <FlexColumn gap={16}>
-          <Text text={`API-key "${selectedKey?.name}" を削除してよろしいですか？`} fontSize={fontSizes.medium} color={theme.colors.text} />
-          <Text text='削除されたAPI-keyは二度と使用できなくなります。' fontSize={fontSizes.small} color={theme.colors.secondary.main} fontWeight='lighter' />
+          <Text text={`API-key "${selectedKey?.name}" を削除してよろしいですか？`} fontSize={fontSizes.medium} color={theme.colors.text.primary} />
+          <Text text='削除されたAPI-keyは二度と使用できなくなります。' fontSize={fontSizes.small} color={theme.colors.text.secondary} fontWeight='lighter' />
           <FlexRow gap={8} className={`${className}__buttonRow`}>
-            <Button onClick={handleClose} scheme='none' fontSize='small' disabled={isDeleting}>
+            <Button onClick={handleClose} scheme='none' fontSize={'sm'} disabled={isDeleting}>
               <Text text='Cancel' fontSize={fontSizes.small} />
             </Button>
-            <Button onClick={handleDelete} scheme='primary' fontSize='small' disabled={isDeleting}>
+            <Button onClick={handleDelete} scheme='primary' fontSize={'sm'} disabled={isDeleting}>
               <Text text={isDeleting ? 'Deleting...' : 'Delete'} fontSize={fontSizes.small} />
             </Button>
           </FlexRow>
@@ -56,7 +56,7 @@ const Component: FC<GameApiKeyDeleteConfirmModalProps> = ({ className, isOpen, s
 export const GameApiKeyDeleteConfirmModal = styled(Component)`
   &__modal {
     padding: 16px;
-    color: ${({ theme }) => theme.colors.text};
+    color: ${({ theme }) => theme.colors.text.primary};
   }
 
   &__buttonRow {

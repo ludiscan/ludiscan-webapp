@@ -25,6 +25,7 @@ export type HeatmapMenuProps = {
   mapOptions: string[];
   service: HeatmapDataService;
   extra?: object;
+  dimensionality: '2d' | '3d'; // 2D/3Dモード（一部のメニューは3D専用）
 };
 
 const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
@@ -34,21 +35,29 @@ const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
   const { theme } = useSharedTheme();
 
   useEffect(() => {
-    if ((!mapName || mapName === '') && mapOptions.length > 0) {
-      setGeneral({ mapName: mapOptions[0] });
-    } else if (mapOptions.length === 0 && mapName) {
-      setGeneral({ mapName: '' });
+    // mapOptionsが変わった時のみ実行（mapNameは依存配列に含めない）
+    if (mapOptions.length > 0) {
+      // mapNameが空の場合のみ、最初のオプションを設定
+      if (!mapName || mapName === '') {
+        setGeneral({ mapName: mapOptions[0] });
+      }
+    } else if (mapOptions.length === 0) {
+      // mapOptionsが空になったら、mapNameをクリア
+      if (mapName) {
+        setGeneral({ mapName: '' });
+      }
     }
-  }, [mapName, mapOptions, setGeneral]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapOptions, setGeneral]); // mapNameは依存配列に含めない
   const content = useMemo(() => MenuContents.find((content) => content.name === name), [name]);
 
   if (!content) {
     return null;
   }
   return (
-    <Card className={className} padding={'0px'} color={theme.colors.surface.main} blur>
+    <Card className={className} padding={'0px'} color={theme.colors.surface.base} blur>
       <InlineFlexRow align={'center'} gap={16} style={{ position: 'absolute', top: '20px', right: '20px', zIndex: zIndexes.header }}>
-        <Button onClick={() => toggleMenu(false)} scheme={'none'} fontSize={'small'}>
+        <Button onClick={() => toggleMenu(false)} scheme={'none'} fontSize={'sm'}>
           <IoClose />
         </Button>
       </InlineFlexRow>
@@ -64,7 +73,7 @@ export const HeatmapMenuContent = memo(
     position: relative;
     width: 500px;
     height: 100%;
-    color: ${({ theme }) => theme.colors.text};
+    color: ${({ theme }) => theme.colors.text.primary};
 
     &__content {
       height: calc(100% - 32px);
@@ -86,13 +95,13 @@ export const HeatmapMenuContent = memo(
       padding: 2px 8px;
       font-size: ${fontSizes.small};
       font-weight: ${fontWeights.bold};
-      color: ${({ theme }) => theme.colors.text};
-      background: ${({ theme }) => theme.colors.surface.dark};
+      color: ${({ theme }) => theme.colors.text.primary};
+      background: ${({ theme }) => theme.colors.surface.raised};
       border-radius: 12px;
 
       & input {
         flex: 1;
-        color: ${({ theme }) => theme.colors.text};
+        color: ${({ theme }) => theme.colors.text.primary};
         outline: none;
         background: transparent;
         border: none;
@@ -112,11 +121,6 @@ export const HeatmapMenuContent = memo(
     &__input {
       flex: 1;
       width: fit-content;
-      padding: 0 8px;
-    }
-
-    &__inputNewLine {
-      width: 100%;
       padding: 0 8px;
     }
   `,

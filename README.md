@@ -1,5 +1,7 @@
 # ludiscan-webapp
 
+[![Covered by Argos Visual Testing](https://argos-ci.com/badge.svg)](https://app.argos-ci.com/bird9-yuhi/ludiscan-webapp/reference)
+
 分析ツールのwebapp
 
 ## 開発環境

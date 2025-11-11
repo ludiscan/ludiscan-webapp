@@ -1,7 +1,8 @@
 import styled from '@emotion/styled';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { BiBarChart, BiUser, BiKey } from 'react-icons/bi';
+import { BiBarChart, BiUser, BiKey, BiLineChart } from 'react-icons/bi';
 
 import { ProjectDetailsApiKeysTab } from './tabs/ProjectDetailsApiKeysTab';
 import { ProjectDetailsMembersTab } from './tabs/ProjectDetailsMembersTab';
@@ -11,7 +12,7 @@ import type { Project } from '@src/modeles/project';
 import type { FC } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
-import { FlexColumn } from '@src/component/atoms/Flex';
+import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { Header } from '@src/component/templates/Header';
 import { SidebarLayout } from '@src/component/templates/SidebarLayout';
@@ -105,7 +106,7 @@ const Component: FC<ProjectDetailsPageProps> = ({ className }) => {
         <SidebarLayout />
         <InnerContent>
           <div className={`${className}__centerContent`}>
-            <Text text='Loading...' fontSize={fontSizes.medium} color={theme.colors.text} />
+            <Text text='Loading...' fontSize={fontSizes.medium} color={theme.colors.text.primary} />
           </div>
         </InnerContent>
       </div>
@@ -119,7 +120,7 @@ const Component: FC<ProjectDetailsPageProps> = ({ className }) => {
         <InnerContent>
           <Header title='Project Details' onClick={handleBack} />
           <div className={`${className}__centerContent`}>
-            <Text text='プロジェクトが見つかりません' fontSize={fontSizes.medium} color={theme.colors.error} />
+            <Text text='プロジェクトが見つかりません' fontSize={fontSizes.medium} color={theme.colors.semantic.error.main} />
           </div>
         </InnerContent>
       </div>
@@ -134,10 +135,16 @@ const Component: FC<ProjectDetailsPageProps> = ({ className }) => {
 
         {/* プロジェクト基本情報 */}
         <div className={`${className}__header`}>
-          <FlexColumn gap={8}>
-            <Text text={project.name} fontSize={fontSizes.largest} color={theme.colors.text} fontWeight={fontWeights.bolder} />
-            <Text text={project.description} fontSize={fontSizes.small} color={theme.colors.secondary.main} fontWeight={fontWeights.bold} />
-          </FlexColumn>
+          <FlexRow gap={16} align={'flex-start'}>
+            <FlexColumn gap={8} style={{ flex: 1 }}>
+              <Text text={project.name} fontSize={fontSizes.largest} color={theme.colors.text.primary} fontWeight={fontWeights.bolder} />
+              <Text text={project.description} fontSize={fontSizes.small} color={theme.colors.text.secondary} fontWeight={fontWeights.bold} />
+            </FlexColumn>
+            <Link href={`/heatmap/projects/${project.id}`} style={{ textDecoration: 'none' }}>
+              <BiLineChart size={20} />
+              <Text text='Heatmap' fontWeight={fontWeights.bold} />
+            </Link>
+          </FlexRow>
         </div>
 
         {/* タブナビゲーション */}
@@ -146,7 +153,7 @@ const Component: FC<ProjectDetailsPageProps> = ({ className }) => {
             <Button
               onClick={() => setActiveTab('sessions')}
               scheme={activeTab === 'sessions' ? 'primary' : 'none'}
-              fontSize='small'
+              fontSize={'sm'}
               className={`${className}__tabButton`}
               title='Sessions'
             >
@@ -156,7 +163,7 @@ const Component: FC<ProjectDetailsPageProps> = ({ className }) => {
             <Button
               onClick={() => setActiveTab('members')}
               scheme={activeTab === 'members' ? 'primary' : 'none'}
-              fontSize='small'
+              fontSize={'sm'}
               className={`${className}__tabButton`}
               title='Members'
             >
@@ -166,7 +173,7 @@ const Component: FC<ProjectDetailsPageProps> = ({ className }) => {
             <Button
               onClick={() => setActiveTab('api-keys')}
               scheme={activeTab === 'api-keys' ? 'primary' : 'none'}
-              fontSize='small'
+              fontSize={'sm'}
               className={`${className}__tabButton`}
               title='API Keys'
             >
@@ -193,7 +200,7 @@ const ProjectDetailsPage = styled(Component)`
   &__header {
     padding: 0 24px 24px;
     margin-bottom: 24px;
-    border-bottom: 2px solid ${({ theme }) => theme.colors.border.main};
+    border-bottom: 2px solid ${({ theme }) => theme.colors.border.default};
   }
 
   &__tabsContainer {
@@ -205,7 +212,7 @@ const ProjectDetailsPage = styled(Component)`
     display: flex;
     gap: 8px;
     padding-bottom: 8px;
-    border-bottom: 2px solid ${({ theme }) => theme.colors.border.main};
+    border-bottom: 2px solid ${({ theme }) => theme.colors.border.default};
   }
 
   &__tabButton {
@@ -215,7 +222,7 @@ const ProjectDetailsPage = styled(Component)`
     transition: all 0.2s ease-in-out;
 
     &:hover {
-      background-color: ${({ theme }) => theme.colors.surface.light};
+      background-color: ${({ theme }) => theme.colors.surface.sunken};
     }
   }
 

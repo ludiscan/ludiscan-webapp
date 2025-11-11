@@ -6,6 +6,7 @@ import { AmbientLight, Box3, DirectionalLight, HemisphereLight, Raycaster, SpotL
 import { HeatmapObjectOverlay } from './HeatmapObjectOverlay';
 import { FocusController } from './selection/FocusController';
 
+import type { components } from '@generated/api';
 import type { PlayerTimelinePointsTimeRange } from '@src/features/heatmap/PlayerTimelinePoints';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC } from 'react';
@@ -13,13 +14,17 @@ import type { Group, PerspectiveCamera, OrthographicCamera } from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 
 import { EventLogMarkers } from '@src/features/heatmap/EventLogMarkers';
+import FieldObjectMarkers from '@src/features/heatmap/FieldObjectMarkers';
 import { HeatmapFillOverlay } from '@src/features/heatmap/HeatmapFillOverlay';
 import { HotspotCircles } from '@src/features/heatmap/HotspotCircles';
 import { LocalModelLoader, StreamModelLoader } from '@src/features/heatmap/ModelLoader';
 import { PlayerTimelinePoints } from '@src/features/heatmap/PlayerTimelinePoints';
+import { RouteCoachVisualization } from '@src/features/heatmap/RouteCoachVisualization';
+import { RouteVisualization } from '@src/features/heatmap/RouteVisualization';
 import { WaypointMarker } from '@src/features/heatmap/WaypointMarker';
 import { FocusPingLayer } from '@src/features/heatmap/selection/FocusPingLayer';
 import { useEventLogSelect } from '@src/hooks/useEventLog';
+import { useFieldObjectSelect } from '@src/hooks/useFieldObject';
 import { useGeneralPick } from '@src/hooks/useGeneral';
 import { usePlayerTimelinePick } from '@src/hooks/usePlayerTimeline';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
@@ -33,6 +38,9 @@ type HeatmapCanvasProps = {
   pointList: { x: number; y: number; z?: number; density: number }[];
   visibleTimelineRange: PlayerTimelinePointsTimeRange;
   dimensionality: '2d' | '3d';
+  fieldObjectLogs?: components['schemas']['FieldObjectLogDto'][];
+  projectId?: number;
+  playerId?: string;
 };
 
 type Waypoint = {
@@ -59,6 +67,27 @@ const EventLogs = memo(
 
 EventLogs.displayName = 'EventLogs';
 
+const FieldObjects = memo(
+  ({ service, logs }: { service: HeatmapDataService; logs: components['schemas']['FieldObjectLogDto'][] }) => {
+    const objects = useFieldObjectSelect((s) => s.objects);
+    const queryText = useFieldObjectSelect((s) => s.queryText);
+    const visibleObjects = useMemo(() => objects.filter((obj) => obj.visible), [objects]);
+    return (
+      <>
+        {visibleObjects.length > 0 &&
+          visibleObjects.map((obj, i) => (
+            <FieldObjectMarkers key={i} objectType={obj.objectType} _service={service} pref={obj} logs={logs} queryText={queryText} />
+          ))}
+      </>
+    );
+  },
+  (prev, next) => {
+    return prev.service === next.service && prev.logs === next.logs;
+  },
+);
+
+FieldObjects.displayName = 'FieldObjects';
+
 const TimelinePoints = memo(
   ({ service, visibleTimelineRange }: { service: HeatmapDataService; visibleTimelineRange: PlayerTimelinePointsTimeRange }) => {
     const { visible, details } = usePlayerTimelinePick('visible', 'details');
@@ -78,7 +107,18 @@ const TimelinePoints = memo(
 );
 TimelinePoints.displayName = 'TimelinePoints';
 
-const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({ model, map, modelType, pointList, service, visibleTimelineRange, dimensionality }) => {
+const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
+  model,
+  map,
+  modelType,
+  pointList,
+  service,
+  visibleTimelineRange,
+  dimensionality,
+  fieldObjectLogs = [],
+  projectId,
+  playerId,
+}) => {
   // const { invalidate } = useThree();
   const fitInfoRef = useRef<{ dist: number; center: Vector3 }>({ dist: 1000, center: new Vector3() });
   const { showHeatmap, heatmapOpacity, heatmapType } = useGeneralPick('showHeatmap', 'heatmapOpacity', 'heatmapType');
@@ -99,15 +139,23 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({ model, map, modelType,
   const raycaster = useMemo(() => new Raycaster(), []);
   const modelRef = useRef<Group>(null);
 
-  // 移動量。必要に応じて調整してください（マップのスケールに合わせる）
-  const MOVE_DELTA = 10;
+  // Camera and interaction constants
+  const MOVE_DELTA = 10; // Waypoint movement delta
+  const RAYCAST_HEIGHT = 10000; // Height for raycast origin
+  const DEFAULT_WAYPOINT_Z = 200; // Default Z position for new waypoints
+  const MIN_DISTANCE_MULTIPLIER = 0.2; // Minimum camera distance multiplier
+  const MAX_DISTANCE_MULTIPLIER = 6; // Maximum camera distance multiplier
+  const ZOOM_BASE_VALUE = 100; // Base value for zoom calculations
+  const ZOOM_MIN_PERCENT = 25; // Minimum zoom percentage
+  const ZOOM_MAX_PERCENT = 400; // Maximum zoom percentage
+  const FIT_PADDING = 1.2; // Padding for fit-to-object
 
   // モデル表面での正確な Y 座標を取得する関数
   const getHeightOnModel = useCallback(
     (x: number, z: number): Vector3 | null => {
       if (!modelRef.current) return null;
       // Y を十分大きな位置にして、その直下方向（0,-1,0）に Raycaster を飛ばす
-      const origin = new Vector3(x, 10000, z);
+      const origin = new Vector3(x, RAYCAST_HEIGHT, z);
       const direction = new Vector3(0, -1, 0);
       raycaster.set(origin, direction);
       // モデルのグループ以下すべてを対象に intersection を計算
@@ -168,7 +216,7 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({ model, map, modelType,
       // 例として「モデルのワールド空間の中心 (0,0) あたり」を初期位置とする
       // 必要があればメニュー側から座標を渡しても構いません
       const defaultX = 0;
-      const defaultZ = 200;
+      const defaultZ = DEFAULT_WAYPOINT_Z;
       const hit = getHeightOnModel(defaultX, defaultZ);
       if (!hit) {
         // console.warn('モデル表面の交差点が見つかりませんでした');
@@ -242,7 +290,7 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({ model, map, modelType,
       // 3D: 既存の複雑な照明システム
       const ambientLight = new AmbientLight(0xffffff, 0.2);
       const directionalLight = new DirectionalLight(0xffffff, 0.4);
-      const hemisphereLight = new HemisphereLight(theme.colors.background, theme.colors.surface.dark, 1);
+      const hemisphereLight = new HemisphereLight(theme.colors.background.default, theme.colors.surface.raised, 1);
       const spotLight = new SpotLight(0xffffff, 4, 30, Math.PI / 4, 10, 0.5);
       lights.push(ambientLight, directionalLight, hemisphereLight, spotLight);
     }
@@ -297,10 +345,10 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({ model, map, modelType,
 
       // Perspective: distance = fitDist * (100 / percent)
       const { dist: fitDist } = fitInfoRef.current;
-      const min = controls.minDistance ?? fitDist * 0.2;
-      const max = controls.maxDistance ?? fitDist * 6;
+      const min = controls.minDistance ?? fitDist * MIN_DISTANCE_MULTIPLIER;
+      const max = controls.maxDistance ?? fitDist * MAX_DISTANCE_MULTIPLIER;
 
-      const targetDist = clamp(fitDist * (100 / clamp(percent, 25, 400)), min, max);
+      const targetDist = clamp(fitDist * (ZOOM_BASE_VALUE / clamp(percent, ZOOM_MIN_PERCENT, ZOOM_MAX_PERCENT)), min, max);
       // console.log('targetDist', targetDist, 'min', min, 'max', max, 'percent', percent);
 
       const cam = camera as PerspectiveCamera;
@@ -325,7 +373,7 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({ model, map, modelType,
     box.getCenter(center);
 
     const radius = size.length() / 2;
-    const padding = 1.2;
+    const padding = FIT_PADDING;
     const fov = (camera.fov * Math.PI) / 180;
     const dist = (radius * padding) / Math.tan(fov / 2);
 
@@ -338,17 +386,40 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({ model, map, modelType,
     notifyPercent();
   }, [notifyPercent]);
 
+  // 2Dモードにリセットするハンドラー
+  const reset2DCamera = useCallback(() => {
+    const controls = orbitControlsRef.current;
+    const camera = controls?.object as PerspectiveCamera | OrthographicCamera | undefined;
+    if (!controls || !camera || !groupRef.current) return;
+
+    // モデルの中心を取得
+    const box = new Box3().setFromObject(groupRef.current);
+    const center = new Vector3();
+    box.getCenter(center);
+
+    // 2Dモード：真上からの視点にリセット
+    controls.target.copy(center);
+    camera.position.set(center.x, 5000, center.z); // 真上から
+    camera.up.set(0, 0, -1); // Z軸が上
+    camera.updateProjectionMatrix();
+    controls.update();
+    notifyPercent();
+  }, [notifyPercent]);
+
   useEffect(() => {
     const onSet = (e: CustomEvent<{ percent: number }>) => setPercent(e.detail.percent);
     const onFit = () => fitToObject();
+    const onReset2D = () => reset2DCamera();
 
     heatMapEventBus.on('camera:set-zoom-percent', onSet);
     heatMapEventBus.on('camera:fit', onFit);
+    heatMapEventBus.on('camera:reset-2d', onReset2D);
     return () => {
       heatMapEventBus.off('camera:set-zoom-percent', onSet);
       heatMapEventBus.off('camera:fit', onFit);
+      heatMapEventBus.off('camera:reset-2d', onReset2D);
     };
-  }, [fitToObject, setPercent]);
+  }, [fitToObject, setPercent, reset2DCamera]);
 
   // モデルが揃った/サイズが決まったタイミングで実行
   useEffect(() => {
@@ -390,15 +461,15 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({ model, map, modelType,
   return (
     <>
       <group ref={groupRef}>
-        {/* 3Dモデルは3Dモード、または2Dモードで明示的にマップが読み込まれている場合のみ表示 */}
-        {modelType && map && modelType !== 'server' && typeof map === 'string' && (dimensionality === '3d' || map) && (
+        {/* 3Dモデルは3Dモードでのみ表示（2Dモードではヒートマップと2D要素のみ） */}
+        {dimensionality === '3d' && modelType && map && modelType !== 'server' && typeof map === 'string' && (
           <LocalModelLoader ref={modelRef} modelPath={map} modelType={modelType} />
         )}
-        {modelType && model && modelType === 'server' && typeof map !== 'string' && (dimensionality === '3d' || map) && (
+        {dimensionality === '3d' && modelType && model && modelType === 'server' && typeof map !== 'string' && (
           <>
             <StreamModelLoader ref={modelRef} model={model} />
-            {/* fillモードは3Dモデル表面に配置するため、3Dモードまたはモデルがある場合のみ */}
-            {pointList && modelRef.current && heatmapType === 'fill' && showHeatmap && dimensionality === '3d' && (
+            {/* fillモードは3Dモデル表面に配置するため、3Dモードでのみ表示 */}
+            {pointList && modelRef.current && heatmapType === 'fill' && showHeatmap && (
               <HeatmapFillOverlay group={modelRef.current} points={pointList} cellSize={(service.task?.stepSize || 50) / 2} opacity={heatmapOpacity} />
             )}
           </>
@@ -407,6 +478,7 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({ model, map, modelType,
         {pointList && heatmapType === 'object' && showHeatmap && <HeatmapObjectOverlay points={pointList} />}
         {pointList && showHeatmap && <HotspotCircles points={pointList} />}
         <EventLogs service={service} />
+        {fieldObjectLogs && fieldObjectLogs.length > 0 && <FieldObjects service={service} logs={fieldObjectLogs} />}
         <TimelinePoints service={service} visibleTimelineRange={visibleTimelineRange} />
         {/* --- 追加：ウェイポイントを map して表示 --- */}
         {waypoints.map((wp) => (
@@ -440,6 +512,8 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({ model, map, modelType,
         position0={new Vector3(1, 1, 3000)}
       />
       <FocusPingLayer ttlMs={1800} baseRadius={60} />
+      <RouteVisualization dimensionality={dimensionality} />
+      {projectId && <RouteCoachVisualization projectId={projectId} playerId={playerId} />}
     </>
   );
 };
@@ -453,5 +527,8 @@ export const HeatMapCanvas = memo(
     prev.pointList === next.pointList &&
     prev.visibleTimelineRange === next.visibleTimelineRange &&
     prev.service.task == next.service.task &&
-    prev.dimensionality === next.dimensionality,
+    prev.dimensionality === next.dimensionality &&
+    prev.fieldObjectLogs === next.fieldObjectLogs &&
+    prev.projectId === next.projectId &&
+    prev.playerId === next.playerId,
 );

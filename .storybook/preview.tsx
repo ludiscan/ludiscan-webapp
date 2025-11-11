@@ -1,10 +1,9 @@
 import type { Preview } from '@storybook/nextjs';
 import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
-import darkTheme from '@src/styles/dark';
-import lightTheme from '@src/styles/light';
 import { store } from '@src/store';
 import { Provider } from 'react-redux';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import themes from '@src/modeles/theme';
 
 const preview: Preview = {
   parameters: {
@@ -40,7 +39,7 @@ const preview: Preview = {
           },
         },
       });
-      const theme = context.args.type === 'light' ? lightTheme : darkTheme;
+      const theme = context.args.type === 'light' ? themes.crimsonDusk.light : themes.crimsonDusk.dark;
       return (
         <QueryClientProvider client={queryClient}>
           <Provider store={store()}>

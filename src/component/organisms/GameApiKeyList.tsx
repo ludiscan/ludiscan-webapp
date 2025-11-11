@@ -76,7 +76,7 @@ const Component: FC<GameApiKeyListProps> = ({
 
   return (
     <div className={className}>
-      <Card blur color={theme.colors.surface.main} className={`${className}__card`}>
+      <Card blur color={theme.colors.surface.base} className={`${className}__card`}>
         <FlexRow className={`${className}__header`} gap={16}>
           <div className={`${className}__searchContainer`}>
             <OutlinedTextField value={searchQuery} onChange={onSearchChange} placeholder='API-keyを検索...' fontSize={fontSizes.medium} />
@@ -95,7 +95,7 @@ const Component: FC<GameApiKeyListProps> = ({
               ))}
             </select>
           )}
-          <Button onClick={onCreateKeyClick} scheme='primary' fontSize='small'>
+          <Button onClick={onCreateKeyClick} scheme='primary' fontSize={'sm'}>
             <Text text='+ Create Key' fontSize={fontSizes.small} />
           </Button>
         </FlexRow>
@@ -105,14 +105,14 @@ const Component: FC<GameApiKeyListProps> = ({
           {/* ローディング状態 */}
           {isLoading && !isError && (
             <div className={`${className}__loadingState`}>
-              <Text text='API-keyを読み込み中...' fontSize={fontSizes.medium} color={theme.colors.text} />
+              <Text text='API-keyを読み込み中...' fontSize={fontSizes.medium} color={theme.colors.text.primary} />
             </div>
           )}
 
           {/* エラー状態 */}
           {isError && (
             <div className={`${className}__errorState`}>
-              <Text text='API-key一覧の取得に失敗しました' fontSize={fontSizes.medium} color={theme.colors.text} />
+              <Text text='API-key一覧の取得に失敗しました' fontSize={fontSizes.medium} color={theme.colors.text.primary} />
             </div>
           )}
 
@@ -124,28 +124,28 @@ const Component: FC<GameApiKeyListProps> = ({
               <div key={key.id} className={`${className}__keyItem`}>
                 <FlexRow className={`${className}__keyRow`} align='center' gap={12}>
                   <FlexColumn gap={4} className={`${className}__keyInfo`}>
-                    <Text text={key.name} fontSize={fontSizes.medium} color={theme.colors.text} fontWeight={fontWeights.bold} />
+                    <Text text={key.name} fontSize={fontSizes.medium} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
                     <Text
                       text={`Created: ${formatDate(key.createdAt)}`}
                       fontSize={fontSizes.smallest}
-                      color={theme.colors.secondary.main}
+                      color={theme.colors.text.secondary}
                       fontWeight='lighter'
                     />
                     {key.projects.length > 0 && (
                       <Text
                         text={`Projects: ${key.projects.map((p) => p.name).join(', ')}`}
                         fontSize={fontSizes.smallest}
-                        color={theme.colors.secondary.main}
+                        color={theme.colors.text.secondary}
                         fontWeight='lighter'
                       />
                     )}
                   </FlexColumn>
                   <FlexRow gap={8} className={`${className}__keyActions`}>
-                    <Button onClick={() => onShowDetails(key)} scheme='none' fontSize='small' title='View Details' className={`${className}__actionButton`}>
-                      <BiShow size={18} color={theme.colors.secondary.main} />
+                    <Button onClick={() => onShowDetails(key)} scheme='none' fontSize={'sm'} title='View Details' className={`${className}__actionButton`}>
+                      <BiShow size={18} color={theme.colors.text.secondary} />
                     </Button>
-                    <Button onClick={() => onDeleteKey(key)} scheme='none' fontSize='small' title='Delete' className={`${className}__actionButton`}>
-                      <BiTrash size={18} color={theme.colors.error} />
+                    <Button onClick={() => onDeleteKey(key)} scheme='none' fontSize={'sm'} title='Delete' className={`${className}__actionButton`}>
+                      <BiTrash size={18} color={theme.colors.semantic.error.main} />
                     </Button>
                   </FlexRow>
                 </FlexRow>
@@ -155,7 +155,7 @@ const Component: FC<GameApiKeyListProps> = ({
           {/* 空状態 */}
           {!isLoading && !isError && filteredKeys.length === 0 && (
             <div className={`${className}__emptyState`}>
-              <Text text='API-keyがありません' fontSize={fontSizes.medium} color={theme.colors.secondary.main} />
+              <Text text='API-keyがありません' fontSize={fontSizes.medium} color={theme.colors.text.secondary} />
             </div>
           )}
         </FlexColumn>
@@ -185,26 +185,26 @@ export const GameApiKeyList = styled(Component)`
   &__projectFilter {
     padding: 8px 12px;
     font-size: ${fontSizes.medium}px;
-    color: ${({ theme }) => theme.colors.text};
+    color: ${({ theme }) => theme.colors.text.primary};
     cursor: pointer;
-    background-color: ${({ theme }) => theme.colors.surface.main};
-    border: 1px solid ${({ theme }) => theme.colors.border.main};
+    background-color: ${({ theme }) => theme.colors.surface.base};
+    border: 1px solid ${({ theme }) => theme.colors.border.default};
     border-radius: 4px;
 
     &:hover {
-      border-color: ${({ theme }) => theme.colors.border.dark};
+      border-color: ${({ theme }) => theme.colors.border.strong};
     }
 
     &:focus {
       outline: none;
-      border-color: ${({ theme }) => theme.colors.secondary.main};
+      border-color: ${({ theme }) => theme.colors.text.secondary};
     }
   }
 
   &__keyItem {
     width: 100%;
     padding: 12px 0;
-    border-bottom: 1px solid ${({ theme }) => theme.colors.border.main};
+    border-bottom: 1px solid ${({ theme }) => theme.colors.border.default};
 
     &:last-child {
       border-bottom: none;
@@ -229,7 +229,7 @@ export const GameApiKeyList = styled(Component)`
     transition: background-color 0.2s ease-in-out;
 
     &:hover {
-      background-color: ${({ theme }) => theme.colors.surface.light};
+      background-color: ${({ theme }) => theme.colors.surface.sunken};
     }
   }
 

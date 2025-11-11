@@ -4,10 +4,6 @@ import { Text } from './Text';
 
 import type { Meta, StoryObj } from '@storybook/nextjs';
 
-import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
-import darkTheme from '@src/styles/dark';
-import lightTheme from '@src/styles/light';
-
 export default {
   component: Slider,
   controls: { hideNoControlsWarning: true },
@@ -16,20 +12,16 @@ type Story = StoryObj<typeof Slider>;
 
 const Template: Story = {
   render: (args) => (
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    <SharedThemeProvider initialTheme={args.type === 'light' ? lightTheme : darkTheme}>
-      <div style={{ width: '300px', padding: '16px' }}>
-        <Slider
-          {...args}
-          onChange={(value) => {
-            /* eslint-disable-next-line no-console */
-            console.log('Slider value:', value);
-          }}
-        />
-        <Text text={`Value: ${args.value}`} />
-      </div>
-    </SharedThemeProvider>
+    <div style={{ width: '300px', padding: '16px' }}>
+      <Slider
+        {...args}
+        onChange={(value) => {
+          /* eslint-disable-next-line no-console */
+          console.log('Slider value:', value);
+        }}
+      />
+      <Text text={`Value: ${args.value}`} />
+    </div>
   ),
 };
 

@@ -1,4 +1,5 @@
 import type { HeatmapDataState } from '@src/modeles/heatmapView';
+import type { ThemeType } from '@src/modeles/theme';
 import type { User } from '@src/modeles/user';
 
 import { initializeValues } from '@src/modeles/heatmapView';
@@ -86,4 +87,47 @@ export function getThemeName(): 'light' | 'dark' | null {
     return JSON.parse(storage).theme || null;
   }
   return null;
+}
+
+export function saveThemeType(themeType: ThemeType): void {
+  const storage = localStorage.getItem(STORAGE_KEY);
+  if (storage) {
+    const data = JSON.parse(storage);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...data, themeType }));
+  } else {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ themeType }));
+  }
+}
+
+export function getThemeType(): ThemeType | null {
+  const storage = localStorage.getItem(STORAGE_KEY);
+  if (storage) {
+    return JSON.parse(storage).themeType || null;
+  }
+  return null;
+}
+
+const MAX_RECENT_MENUS = 5;
+
+export function saveRecentMenu(menuName: string): void {
+  const storage = localStorage.getItem(STORAGE_KEY);
+  const data = storage ? JSON.parse(storage) : {};
+  const recentMenus: string[] = data.recentMenus || [];
+
+  // Remove the menu if it already exists to avoid duplicates
+  const filteredMenus = recentMenus.filter((name) => name !== menuName);
+
+  // Add the menu to the beginning of the array
+  const updatedMenus = [menuName, ...filteredMenus].slice(0, MAX_RECENT_MENUS);
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...data, recentMenus: updatedMenus }));
+}
+
+export function getRecentMenus(): string[] {
+  const storage = localStorage.getItem(STORAGE_KEY);
+  if (storage) {
+    const data = JSON.parse(storage);
+    return data.recentMenus || [];
+  }
+  return [];
 }

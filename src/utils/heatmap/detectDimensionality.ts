@@ -2,17 +2,27 @@ import type { HeatmapTask } from '@src/modeles/heatmaptask';
 
 /**
  * プロジェクトまたはヒートマップタスクから2D/3Dゲームを判定する
- * @param projectIs2D プロジェクトの is2D フラグ（優先）
+ * @param dimensionalityOverride ユーザーによる手動切り替え（最優先）
+ * @param projectIs2D プロジェクトの is2D フラグ
  * @param task ヒートマップタスク（後方互換性のため）
  * @returns '2d' | '3d'
  */
-export function detectDimensionality(projectIs2D: boolean | undefined, task?: HeatmapTask | undefined): '2d' | '3d' {
-  // プロジェクトのis2Dフラグを優先的に使用
+export function detectDimensionality(
+  dimensionalityOverride: '2d' | '3d' | null | undefined,
+  projectIs2D: boolean | undefined,
+  task?: HeatmapTask | undefined,
+): '2d' | '3d' {
+  // 1. ユーザーによる手動切り替えを最優先
+  if (dimensionalityOverride) {
+    return dimensionalityOverride;
+  }
+
+  // 2. プロジェクトのis2Dフラグを次に優先
   if (projectIs2D !== undefined) {
     return projectIs2D ? '2d' : '3d';
   }
 
-  // 後方互換性: taskのzVisibleで判定
+  // 3. 後方互換性: taskのzVisibleで判定
   if (!task) return '3d'; // デフォルトは3D
 
   // バックエンドのz_visibleフラグで判定
@@ -21,7 +31,7 @@ export function detectDimensionality(projectIs2D: boolean | undefined, task?: He
   // Note: 型定義が古い場合、zVisibleが存在しない可能性があるため、型アサーションを使用
   const taskWithZVisible = task as HeatmapTask & { zVisible?: boolean };
 
-  // zVisibleが未定義の場合はデフォルトで3Dと判定
+  // 4. zVisibleが未定義の場合はデフォルトで3Dと判定
   return taskWithZVisible.zVisible === false ? '2d' : '3d';
 }
 

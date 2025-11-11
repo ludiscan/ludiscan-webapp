@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
@@ -8,26 +8,43 @@ import { Button } from '@src/component/atoms/Button';
 import { InlineFlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { Selector } from '@src/component/molecules/Selector';
-import { createClient, DefaultStaleTime } from '@src/modeles/qeury';
+import { useRouteCoachApi } from '@src/features/heatmap/routecoach/api';
+import { useGeneralPatch } from '@src/hooks/useGeneral';
+import { useApiClient } from '@src/modeles/ApiClientContext';
+import { DefaultStaleTime } from '@src/modeles/qeury';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
 const PRESETS = [25, 50, 75, 100, 150, 200, 300, 400];
 
-type Props = { className?: string; service: HeatmapDataService };
+type Props = {
+  className?: string;
+  service: HeatmapDataService;
+  dimensionality: '2d' | '3d'; // 現在の次元（計算済み）
+};
 
-function Toolbar({ className, service }: Props) {
+function Toolbar({ className, service, dimensionality }: Props) {
   const [open, setOpen] = useState(false);
   const [percent, setPercent] = useState(100);
   const [selectSessionId, setSelectSessionId] = useState<string | undefined>(undefined);
+  const qc = useQueryClient();
+  const apiClient = useApiClient();
+  const routeCoachApi = useRouteCoachApi();
+
+  // 2D/3Dモード切り替え用
+  const patchGeneral = useGeneralPatch();
 
   const { data: sessions } = useQuery({
     queryKey: ['sessions', service.projectId],
     queryFn: async () => {
       if (!service.projectId) return;
-      const { data, error } = await createClient().GET('/api/v0/projects/{project_id}/play_session', {
+      const { data, error } = await apiClient.GET('/api/v0/projects/{project_id}/play_session', {
         params: {
           path: {
             project_id: service.projectId,
+          },
+          query: {
+            limit: 200,
+            offset: 0,
           },
         },
       });
@@ -42,6 +59,21 @@ function Toolbar({ className, service }: Props) {
     if (!sessions || !Array.isArray(sessions)) return [];
     return sessions?.map((session) => String(session.sessionId)) || [];
   }, [sessions]);
+
+  // RouteCoach改善ルート生成
+  const { mutate: startRouteCoach, isPending: isRouteCoachPending } = useMutation({
+    mutationFn: async () => {
+      if (!service.projectId) throw new Error('Project is required');
+      return routeCoachApi.generateImprovementRoutes(service.projectId);
+    },
+    onSuccess: async () => {
+      // 生成後、RouteCoachメニューのキャッシュを無効化
+      await qc.invalidateQueries({ queryKey: ['eventClusters'] });
+      await qc.invalidateQueries({ queryKey: ['improvementRoutesJob'] });
+      // メニューを自動開く
+      heatMapEventBus.emit('click-menu-icon', { name: 'routecoach' });
+    },
+  });
 
   useEffect(() => {
     const onPercent = (e: CustomEvent<{ percent: number }>) => setPercent(e.detail.percent);
@@ -67,6 +99,19 @@ function Toolbar({ className, service }: Props) {
   const fit = () => heatMapEventBus.emit('camera:fit');
   const oneToOne = () => heatMapEventBus.emit('camera:set-zoom-percent', { percent: 100 });
 
+  // 2D/3Dモード切り替えハンドラー（シンプルなトグル）
+  const toggleDimensionality = useCallback(() => {
+    const newMode = dimensionality === '2d' ? '3d' : '2d';
+    patchGeneral((prev) => ({
+      ...prev,
+      dimensionalityOverride: newMode,
+    }));
+    // 2Dモードに切り替えた時はカメラをリセット
+    if (newMode === '2d') {
+      heatMapEventBus.emit('camera:reset-2d');
+    }
+  }, [dimensionality, patchGeneral]);
+
   useEffect(() => {
     const onKey = (ev: KeyboardEvent) => {
       if (ev.key === '+') step(1);
@@ -79,11 +124,11 @@ function Toolbar({ className, service }: Props) {
 
   return (
     <div className={className} role='toolbar' aria-label='Viewer quick tools'>
-      <Button className='btn' onClick={() => step(-1)} aria-label='Zoom out' scheme={'surface'} fontSize={'small'}>
+      <Button className='btn' onClick={() => step(-1)} aria-label='Zoom out' scheme={'surface'} fontSize={'sm'}>
         −
       </Button>
       <div className='select'>
-        <Button className='btn wide' onClick={() => setOpen((v) => !v)} aria-expanded={open} aria-haspopup='listbox' fontSize={'small'} scheme={'surface'}>
+        <Button className='btn wide' onClick={() => setOpen((v) => !v)} aria-expanded={open} aria-haspopup='listbox' fontSize={'sm'} scheme={'surface'}>
           <span className='tabnum'>{percent}%</span>
           <span className='caret'>▾</span>
         </Button>
@@ -100,24 +145,50 @@ function Toolbar({ className, service }: Props) {
         )}
       </div>
 
-      <Button onClick={() => step(1)} aria-label='Zoom in' scheme={'surface'} fontSize={'small'}>
+      <Button onClick={() => step(1)} aria-label='Zoom in' scheme={'surface'} fontSize={'sm'}>
         ＋
       </Button>
-      <Button className='btn wide' onClick={fit} title='Fit (0)' scheme={'surface'} fontSize={'small'}>
+      <Button className='btn wide' onClick={fit} title='Fit (0)' scheme={'surface'} fontSize={'sm'}>
         Fit
       </Button>
-      <Button className='btn wide' onClick={oneToOne} title='1:1' scheme={'surface'} fontSize={'small'}>
+      <Button className='btn wide' onClick={oneToOne} title='1:1' scheme={'surface'} fontSize={'sm'}>
         1:1
       </Button>
       <InlineFlexRow align={'center'} wrap={'nowrap'}>
-        <Selector placement={'top'} align={'right'} label={'session'} options={sessionIds} value={selectSessionId} onChange={setSelectSessionId} />
+        <Selector
+          placement={'top'}
+          align={'right'}
+          label={'session'}
+          options={sessionIds}
+          value={selectSessionId}
+          onChange={setSelectSessionId}
+          maxHeight={250}
+        />
         <Button
-          fontSize={'small'}
+          fontSize={'sm'}
           onClick={() => service.setSessionId(Number(selectSessionId) || null)}
           scheme={'primary'}
           disabled={selectSessionId === undefined}
         >
           <Text text={'filter'} />
+        </Button>
+        <Button
+          fontSize={'sm'}
+          onClick={toggleDimensionality}
+          scheme={'surface'}
+          title={`現在: ${dimensionality === '2d' ? '2D' : '3D'}モード。クリックして${dimensionality === '2d' ? '3D' : '2D'}に切り替え`}
+          className='dimension-toggle'
+        >
+          <Text text={dimensionality === '2d' ? '2D' : '3D'} />
+        </Button>
+        <Button
+          fontSize={'sm'}
+          onClick={() => startRouteCoach()}
+          scheme={'primary'}
+          disabled={!service.projectId || isRouteCoachPending}
+          title='プロジェクトの改善ルートを生成'
+        >
+          <Text text={isRouteCoachPending ? '生成中…' : 'Generate Routes'} />
         </Button>
       </InlineFlexRow>
     </div>
@@ -134,8 +205,8 @@ export const QuickToolbar = memo(
     justify-content: end;
     width: calc(100% - 64px);
     padding: 4px 32px;
-    background: ${({ theme }) => theme.colors.surface.main};
-    border-bottom: 1px solid ${({ theme }) => theme.colors.border.main};
+    background: ${({ theme }) => theme.colors.surface.base};
+    border-bottom: 1px solid ${({ theme }) => theme.colors.border.default};
 
     .wide {
       min-width: 56px;
@@ -162,8 +233,8 @@ export const QuickToolbar = memo(
       width: 90px;
       padding: 4px;
       list-style: none;
-      background: ${({ theme }) => theme.colors.surface.main};
-      border: 1px solid ${({ theme }) => theme.colors.border.main};
+      background: ${({ theme }) => theme.colors.surface.base};
+      border: 1px solid ${({ theme }) => theme.colors.border.default};
       border-radius: 8px;
       box-shadow: 0 6px 16px rgb(0 0 0 / 8%);
     }
@@ -171,7 +242,7 @@ export const QuickToolbar = memo(
     .item {
       width: 100%;
       padding: 8px;
-      color: ${({ theme }) => theme.colors.text};
+      color: ${({ theme }) => theme.colors.text.primary};
       text-align: left;
       cursor: pointer;
       background: transparent;
@@ -179,7 +250,7 @@ export const QuickToolbar = memo(
       border-radius: 6px;
 
       &:hover {
-        background: ${({ theme }) => theme.colors.surface.dark};
+        background: ${({ theme }) => theme.colors.surface.raised};
       }
     }
   `,

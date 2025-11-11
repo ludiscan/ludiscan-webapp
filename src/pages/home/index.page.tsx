@@ -140,15 +140,15 @@ const Component: FC<HomePageProps> = ({ className }) => {
       <InnerContent>
         <Header title={'Heatmap'} onClick={handleBack} />
         <FlexRow className={`${className}__titleRow`}>
-          <Text text={'Home'} fontSize={fontSizes.largest} color={theme.colors.text} fontWeight={fontWeights.bolder} />
+          <Text text={'Home'} fontSize={fontSizes.largest} color={theme.colors.text.primary} fontWeight={fontWeights.bolder} />
         </FlexRow>
         <VerticalSpacer size={16} />
         <div className={`${className}__projects`}>
-          <Text text={'Projects'} fontSize={fontSizes.large1} color={theme.colors.secondary.main} fontWeight={fontWeights.bold} />
+          <Text text={'Projects'} fontSize={fontSizes.large1} color={theme.colors.text.secondary} fontWeight={fontWeights.bold} />
           <VerticalSpacer size={16} />
-          <Card blur color={theme.colors.surface.main}>
+          <Card blur color={theme.colors.surface.raised}>
             <FlexRow className={`${className}__filtersRow`} gap={16}>
-              <Button onClick={handleRefresh} scheme={'surface'} disabled={isLoadingProjects} fontSize={'small'}>
+              <Button onClick={handleRefresh} scheme={'surface'} disabled={isLoadingProjects} fontSize={'sm'}>
                 <BiRefresh size={20} />
               </Button>
               <div className={`${className}__searchContainer`}>
@@ -162,10 +162,10 @@ const Component: FC<HomePageProps> = ({ className }) => {
                 ))}
               </select>
               <div className={`${className}__displayToggle`}>
-                <Button onClick={() => setDisplayMode('list')} scheme={displayMode === 'list' ? 'primary' : 'none'} fontSize={'small'} title={'List View'}>
+                <Button onClick={() => setDisplayMode('list')} scheme={displayMode === 'list' ? 'primary' : 'none'} fontSize={'sm'} title={'List View'}>
                   <BiMenuAltLeft size={20} />
                 </Button>
-                <Button onClick={() => setDisplayMode('card')} scheme={displayMode === 'card' ? 'primary' : 'none'} fontSize={'small'} title={'Card View'}>
+                <Button onClick={() => setDisplayMode('card')} scheme={displayMode === 'card' ? 'primary' : 'none'} fontSize={'sm'} title={'Card View'}>
                   <BiGridAlt size={20} />
                 </Button>
               </div>
@@ -174,14 +174,14 @@ const Component: FC<HomePageProps> = ({ className }) => {
               {/* ローディング状態 */}
               {isLoadingProjects && !isErrorProjects && (
                 <div className={`${className}__loadingState`}>
-                  <Text text={'プロジェクトを読み込み中...'} fontSize={fontSizes.medium} color={theme.colors.text} />
+                  <Text text={'プロジェクトを読み込み中...'} fontSize={fontSizes.medium} color={theme.colors.text.primary} />
                 </div>
               )}
 
               {/* エラー状態 */}
               {isErrorProjects && (
                 <div className={`${className}__errorState`}>
-                  <Text text={'プロジェクト一覧の取得に失敗しました。リトライしてください。'} fontSize={fontSizes.medium} color={theme.colors.text} />
+                  <Text text={'プロジェクト一覧の取得に失敗しました。リトライしてください。'} fontSize={fontSizes.medium} color={theme.colors.text.primary} />
                 </div>
               )}
 
@@ -216,23 +216,23 @@ const Component: FC<HomePageProps> = ({ className }) => {
                           key={project.id}
                           className={`${className}__projectCard`}
                           shadow={'medium'}
-                          color={theme.colors.surface.main}
-                          border={theme.colors.border.main}
+                          color={theme.colors.surface.base}
+                          border={theme.colors.border.default}
                         >
                           <FlexColumn gap={8}>
                             <FlexColumn gap={4}>
-                              <Text text={project.name} fontSize={fontSizes.large1} color={theme.colors.text} fontWeight={'bold'} />
-                              <Text text={project.description} fontSize={fontSizes.small} color={theme.colors.secondary.main} fontWeight={fontWeights.bold} />
+                              <Text text={project.name} fontSize={fontSizes.large1} color={theme.colors.text.primary} fontWeight={'bold'} />
+                              <Text text={project.description} fontSize={fontSizes.small} color={theme.colors.text.secondary} fontWeight={fontWeights.bold} />
                               <Text
                                 text={`${project.session_count ?? 0} sessions`}
                                 fontSize={fontSizes.smallest}
-                                color={theme.colors.secondary.main}
+                                color={theme.colors.text.secondary}
                                 fontWeight={'lighter'}
                               />
                               <Text
                                 text={`Created: ${new Date(project.createdAt).toLocaleDateString('ja-JP', { year: 'numeric', month: 'short', day: 'numeric' })}`}
                                 fontSize={fontSizes.smallest}
-                                color={theme.colors.secondary.main}
+                                color={theme.colors.text.secondary}
                                 fontWeight={'lighter'}
                               />
                             </FlexColumn>
@@ -248,7 +248,7 @@ const Component: FC<HomePageProps> = ({ className }) => {
               {/* 空状態 */}
               {!isLoadingProjects && !isErrorProjects && (!projects?.pages || projects.pages.length === 0) && (
                 <div className={`${className}__emptyState`}>
-                  <Text text={'プロジェクトがありません'} fontSize={fontSizes.medium} color={theme.colors.secondary.main} />
+                  <Text text={'プロジェクトがありません'} fontSize={fontSizes.medium} color={theme.colors.text.secondary} />
                 </div>
               )}
             </FlexColumn>
@@ -280,27 +280,27 @@ const IndexPage = styled(Component)`
     min-width: 200px;
     padding: 8px 12px;
     font-size: ${fontSizes.medium}px;
-    color: ${({ theme }) => theme.colors.text};
+    color: ${({ theme }) => theme.colors.text.primary};
     cursor: pointer;
-    background-color: ${({ theme }) => theme.colors.surface.main};
-    border: 1px solid ${({ theme }) => theme.colors.border.main};
+    background-color: ${({ theme }) => theme.colors.surface.base};
+    border: 1px solid ${({ theme }) => theme.colors.border.default};
     border-radius: 4px;
   }
 
   &__sortSelect:hover {
-    border-color: ${({ theme }) => theme.colors.border.dark};
+    border-color: ${({ theme }) => theme.colors.border.strong};
   }
 
   &__sortSelect:focus {
     outline: none;
-    border-color: ${({ theme }) => theme.colors.secondary.main};
+    border-color: ${({ theme }) => theme.colors.text.secondary};
   }
 
   &__displayToggle {
     display: flex;
     gap: 4px;
     padding: 4px;
-    border: 1px solid ${({ theme }) => theme.colors.border.main};
+    border: 1px solid ${({ theme }) => theme.colors.border.default};
     border-radius: 4px;
   }
 
@@ -340,7 +340,7 @@ const IndexPage = styled(Component)`
     width: 100%;
     padding: 0;
     margin-bottom: 8px;
-    border-bottom: 2px solid ${({ theme }) => theme.colors.border.main};
+    border-bottom: 2px solid ${({ theme }) => theme.colors.border.default};
   }
 
   &__loadingState {

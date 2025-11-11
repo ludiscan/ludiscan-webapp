@@ -71,7 +71,7 @@ const Component: FC<ToggleProps> = ({ className, buttonStyle, label, trailingIco
         </button>
         <div style={{ flexGrow: 1 }} />
         {trailingIcon && onTrailingIconClick && (
-          <Button onClick={onTrailingIconClick} scheme={'none'} fontSize={'smallest'}>
+          <Button onClick={onTrailingIconClick} scheme={'none'} fontSize={'xs'}>
             {trailingIcon}
           </Button>
         )}

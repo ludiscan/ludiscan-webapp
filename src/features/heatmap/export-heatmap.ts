@@ -5,6 +5,7 @@ import type { HeatmapStates } from '@src/modeles/heatmapView';
 import type { HeatmapTask, PositionEventLog } from '@src/modeles/heatmaptask';
 import type { OfflineHeatmapData } from '@src/utils/heatmap/HeatmapDataService';
 
+import { API_ENDPOINTS } from '@src/config/api';
 import { getOfflineHeatmapTemplate } from '@src/utils/heatmap/getOfflineHeatmapTemplate';
 
 export const exportHeatmap = async (
@@ -16,8 +17,7 @@ export const exportHeatmap = async (
   state: HeatmapStates,
 ) => {
   if (!task) {
-    alert('タスクが取得できませんでした。');
-    return;
+    throw new Error('Task data could not be retrieved');
   }
 
   // ZIPファイルを作成
@@ -35,8 +35,6 @@ export const exportHeatmap = async (
     const uint8Array = new Uint8Array(mapContent);
     const binaryString = uint8Array.reduce((acc, byte) => acc + String.fromCharCode(byte), '');
     mapContentBase64 = btoa(binaryString);
-    // eslint-disable-next-line no-console
-    console.log('モデルデータをBase64エンコードしました');
   }
 
   // 3. データJSONの作成（mapContentをBase64で埋め込み）
@@ -53,10 +51,7 @@ export const exportHeatmap = async (
 
   // 4. バンドルJSの取得
   try {
-    // eslint-disable-next-line
-    console.log('バンドルJSを取得します');
-
-    const bundleResponse = await fetch('/api/export-heatmap-bundle');
+    const bundleResponse = await fetch(API_ENDPOINTS.EXPORT_HEATMAP_BUNDLE);
     if (!bundleResponse.ok) {
       // eslint-disable-next-line
       console.error(`バンドルJSの取得に失敗しました: ${bundleResponse.status}`);
@@ -65,9 +60,6 @@ export const exportHeatmap = async (
 
     const bundleJs = await bundleResponse.text();
     zip.file('bundle.js', bundleJs);
-
-    // eslint-disable-next-line
-    console.log('バンドルJSを正常に取得しました');
   } catch (bundleError) {
     // eslint-disable-next-line
     console.error('バンドルJSの取得中にエラーが発生しました:', bundleError);

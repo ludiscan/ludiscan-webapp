@@ -42,9 +42,9 @@ export const LabeledButton = styled(LabeledButtonBase)`
     padding: 0 6px;
     font-size: 12px;
     line-height: 1;
-    color: ${({ theme }) => theme.colors.text};
+    color: ${({ theme }) => theme.colors.text.primary};
     pointer-events: none; /* クリックはボタンに通す */
-    background: ${({ theme }) => theme.colors.surface.main};
+    background: ${({ theme }) => theme.colors.surface.base};
     border-radius: 6px; /* 角を少し丸めると自然 */
     transform: translateY(-50%);
   }

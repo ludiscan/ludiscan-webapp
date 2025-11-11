@@ -19,7 +19,6 @@ import { env } from '@src/config/env';
 import { useAuth } from '@src/hooks/useAuth';
 import { useIsDesktop } from '@src/hooks/useIsDesktop';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import lightTheme from '@src/styles/light';
 import { fontSizes } from '@src/styles/style';
 
 export type LoginPageProps = {
@@ -181,8 +180,8 @@ const Content: FC<LoginPageProps> = ({ className }) => {
       <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', zIndex: 1, height: '100%' }}>
         <Header title={''} />
         <Card
-          color={isDesktop ? theme.colors.surface.main : 'unset'}
-          border={theme.colors.border.main}
+          color={isDesktop ? theme.colors.surface.base : 'unset'}
+          border={theme.colors.border.default}
           shadow={'medium'}
           padding={'32px 28px'}
           className={`${className}__form`}
@@ -190,19 +189,19 @@ const Content: FC<LoginPageProps> = ({ className }) => {
           <InlineFlexColumn gap={24} className={`${className}__content`} align={'center'}>
             <InlineFlexColumn style={{ width: '100%' }} gap={8} align={'flex-start'}>
               <Text text={'Ludiscan Account'} fontWeight={'bold'} fontSize={fontSizes.largest} />
-              <Text text={'sign in to manage all Ludiscan services and heatmap tools.'} fontSize={fontSizes.medium} color={theme.colors.text} />
+              <Text text={'sign in to manage all Ludiscan services and heatmap tools.'} fontSize={fontSizes.medium} color={theme.colors.text.primary} />
             </InlineFlexColumn>
-            <a className={`${className}__button google-login`} href={`${env.API_BASE_URL}/api/v0/auth/google`} target={'_self'}>
+            <a className={`${className}__button google-login`} href={`${env.API_BASE_URL}/api/v0/auth/google`} target={'_self'} rel={'noopener noreferrer'}>
               <Image src={'/google.svg'} alt={'google'} width={20} height={20} />
               <Text
                 className={`${className}__buttonText`}
                 text={'Continue with Google'}
-                color={theme.colors.text}
+                color={theme.colors.text.primary}
                 fontSize={fontSizes.medium}
                 fontWeight={'bolder'}
               />
             </a>
-            <LinedText color={theme.colors.text} lineColor={theme.colors.secondary.light} text={'or'} lineThickness={'1px'} fullWidth={true} />
+            <LinedText color={theme.colors.text.primary} lineColor={theme.colors.secondary.light} text={'or'} lineThickness={'1px'} fullWidth={true} />
             <OutlinedTextField
               className={`${className}__email`}
               onChange={handleInputEmail}
@@ -224,7 +223,7 @@ const Content: FC<LoginPageProps> = ({ className }) => {
               maxLength={20}
             />
             <VerticalSpacer size={2} />
-            <Button onClick={handleLogin} scheme={'primary'} radius={'default'} fontSize={'large1'} width={'full'} disabled={loginDisabled}>
+            <Button onClick={handleLogin} scheme={'primary'} radius={'default'} fontSize={'lg'} width={'full'} disabled={loginDisabled}>
               <Text text={'Sign in'} />
             </Button>
           </InlineFlexColumn>
@@ -260,8 +259,8 @@ const IndexPage = styled(Component)`
   position: relative;
   height: 100vh;
   overflow: hidden;
-  color: ${({ theme }) => theme.colors.text};
-  background: ${lightTheme.colors.background};
+  color: ${({ theme }) => theme.colors.text.primary};
+  background: #ffeaea;
 
   &__container {
     height: 100%;
@@ -281,7 +280,7 @@ const IndexPage = styled(Component)`
     height: 100%;
     max-height: unset;
     margin: 0;
-    background: ${({ theme }) => hexToRgba(theme.colors.surface.main, 0.5)};
+    background: ${({ theme }) => hexToRgba(theme.colors.surface.base, 0.5)};
   }
 
   &__content {
@@ -291,7 +290,7 @@ const IndexPage = styled(Component)`
   &__email,
   &__password {
     width: calc(100% - 48px);
-    color: ${({ theme }) => theme.colors.text};
+    color: ${({ theme }) => theme.colors.text.primary};
   }
 
   &__button {
@@ -303,8 +302,8 @@ const IndexPage = styled(Component)`
     height: 24px;
     padding: 12px 24px;
     text-decoration: none;
-    background: ${({ theme }) => theme.colors.surface.main};
-    border: 1px solid ${({ theme }) => theme.colors.border.dark};
+    background: ${({ theme }) => theme.colors.surface.base};
+    border: 1px solid ${({ theme }) => theme.colors.border.strong};
     border-radius: 48px;
   }
 

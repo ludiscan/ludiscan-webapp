@@ -34,8 +34,8 @@ const ToggleButtonComponent = ({ className, onClick, isOpen }: { className?: str
   const { theme } = useSharedTheme();
   return (
     <FlexRow className={`${className} ${isOpen ? '' : 'closed'}`} align={'center'}>
-      <Button className={`${className}__button`} onClick={onClick} scheme={'none'} fontSize={'medium'} width={'full'}>
-        {isOpen ? <RiMenu3Fill size={28} color={theme.colors.text} /> : <RiMenu2Fill size={28} color={theme.colors.text} />}
+      <Button className={`${className}__button`} onClick={onClick} scheme={'none'} fontSize={'base'} width={'full'}>
+        {isOpen ? <RiMenu3Fill size={28} color={theme.colors.text.primary} /> : <RiMenu2Fill size={28} color={theme.colors.text.primary} />}
       </Button>
     </FlexRow>
   );
@@ -52,7 +52,7 @@ const ToggleButton = styled(ToggleButtonComponent)`
 
   &.closed {
     left: ${dimensions.sidebarWidth}px;
-    background: ${({ theme }) => theme.colors.surface.main};
+    background: ${({ theme }) => theme.colors.surface.base};
   }
 
   &__button {
@@ -117,7 +117,7 @@ export const ResponsiveSidebar = styled(Component)`
   width: ${dimensions.sidebarWidth}px;
   height: 100%;
   padding: 16px;
-  background-color: ${({ theme }) => theme.colors.surface.main};
+  background-color: ${({ theme }) => theme.colors.surface.base};
   box-shadow: 0 2px 4px rgb(0 0 0 / 30%);
   transform: translateX(-100%);
   transition: transform 0.4s ease-in-out;

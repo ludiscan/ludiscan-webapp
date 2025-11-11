@@ -1,10 +1,8 @@
+import { BiCircle } from 'react-icons/bi';
+
 import { Button } from './Button';
 
 import type { Meta, StoryObj } from '@storybook/nextjs';
-
-import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
-import darkTheme from '@src/styles/dark';
-import lightTheme from '@src/styles/light';
 
 const meta: Meta<typeof Button> = {
   component: Button,
@@ -17,21 +15,26 @@ type Story = StoryObj<typeof Button>;
 const Template: Story = {
   render: (args) => {
     return (
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      <SharedThemeProvider initialTheme={args.type === 'light' ? lightTheme : darkTheme}>
-        <Button {...args}>Plain Text</Button>
-      </SharedThemeProvider>
+      <div>
+        <Button {...args} radius={'small'}>
+          <BiCircle />
+          Plain Text
+        </Button>
+        <Button {...args} radius={'default'}>
+          <BiCircle />
+          Plain Text
+        </Button>
+      </div>
     );
   },
 };
 
 export const Primary: Story = {
   ...Template,
-  name: 'primary style',
+  name: 'primary base style',
   args: {
     scheme: 'primary',
-    fontSize: 'medium',
+    fontSize: 'base',
     onClick: () => {
       alert('click');
     },
@@ -40,10 +43,10 @@ export const Primary: Story = {
 
 export const PrimarySmallest: Story = {
   ...Template,
-  name: 'primary style smallest',
+  name: 'primary style xs',
   args: {
     scheme: 'primary',
-    fontSize: 'smallest',
+    fontSize: 'xs',
     onClick: () => {
       alert('click');
     },
@@ -52,10 +55,10 @@ export const PrimarySmallest: Story = {
 
 export const PrimarySmall: Story = {
   ...Template,
-  name: 'primary style small',
+  name: 'primary style sm',
   args: {
     scheme: 'primary',
-    fontSize: 'small',
+    fontSize: 'sm',
     onClick: () => {
       alert('click');
     },
@@ -64,10 +67,10 @@ export const PrimarySmall: Story = {
 
 export const PrimaryMedium: Story = {
   ...Template,
-  name: 'primary style medium',
+  name: 'primary style lg',
   args: {
     scheme: 'primary',
-    fontSize: 'medium',
+    fontSize: 'lg',
     onClick: () => {
       alert('click');
     },
@@ -76,10 +79,10 @@ export const PrimaryMedium: Story = {
 
 export const PrimaryLarge1: Story = {
   ...Template,
-  name: 'primary style large1',
+  name: 'primary style xl',
   args: {
     scheme: 'primary',
-    fontSize: 'large1',
+    fontSize: 'xl',
     onClick: () => {
       alert('click');
     },
@@ -88,10 +91,10 @@ export const PrimaryLarge1: Story = {
 
 export const PrimaryLarge2: Story = {
   ...Template,
-  name: 'primary style large2',
+  name: 'primary style 2xl',
   args: {
     scheme: 'primary',
-    fontSize: 'large2',
+    fontSize: '2xl',
     onClick: () => {
       alert('click');
     },
@@ -100,10 +103,10 @@ export const PrimaryLarge2: Story = {
 
 export const PrimaryLarge3: Story = {
   ...Template,
-  name: 'primary style large3',
+  name: 'primary style 3xl',
   args: {
     scheme: 'primary',
-    fontSize: 'large3',
+    fontSize: '3xl',
     onClick: () => {
       alert('click');
     },
@@ -112,10 +115,22 @@ export const PrimaryLarge3: Story = {
 
 export const PrimaryLargest: Story = {
   ...Template,
-  name: 'primary style largest',
+  name: 'primary style 4xl',
   args: {
     scheme: 'primary',
-    fontSize: 'largest',
+    fontSize: '4xl',
+    onClick: () => {
+      alert('click');
+    },
+  },
+};
+
+export const PrimaryLargest2: Story = {
+  ...Template,
+  name: 'primary style 5xl',
+  args: {
+    scheme: 'primary',
+    fontSize: '5xl',
     onClick: () => {
       alert('click');
     },
@@ -127,7 +142,7 @@ export const PrimaryFillLarge: Story = {
   name: 'primary style fill',
   args: {
     scheme: 'primary',
-    fontSize: 'medium',
+    fontSize: 'base',
     width: 'full',
     onClick: () => {
       alert('click');
@@ -140,7 +155,7 @@ export const Surface: Story = {
   name: 'surface style',
   args: {
     scheme: 'surface',
-    fontSize: 'medium',
+    fontSize: 'base',
     onClick: () => {
       alert('click');
     },
@@ -152,7 +167,7 @@ export const Warning: Story = {
   name: 'warning style',
   args: {
     scheme: 'warning',
-    fontSize: 'medium',
+    fontSize: 'base',
     onClick: () => {
       alert('click');
     },
@@ -164,7 +179,7 @@ export const None: Story = {
   name: 'none style',
   args: {
     scheme: 'none',
-    fontSize: 'medium',
+    fontSize: 'base',
     onClick: () => {
       alert('click');
     },
@@ -176,7 +191,7 @@ export const Error: Story = {
   name: 'error style',
   args: {
     scheme: 'error',
-    fontSize: 'medium',
+    fontSize: 'base',
     onClick: () => {
       alert('click');
     },

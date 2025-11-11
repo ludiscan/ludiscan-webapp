@@ -3,7 +3,7 @@ import { PerformanceMonitor, Stats } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { useQuery } from '@tanstack/react-query';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useStore } from 'react-redux';
+import { useSelector, useStore } from 'react-redux';
 
 import type { PerformanceMonitorApi } from '@react-three/drei';
 import type { PlayerTimelinePointsTimeRange } from '@src/features/heatmap/PlayerTimelinePoints';
@@ -14,6 +14,7 @@ import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC } from 'react';
 
 import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
+import { useToast } from '@src/component/templates/ToastContext';
 import { HeatMapCanvas } from '@src/features/heatmap/HeatmapCanvas';
 import { HeatmapMenuContent } from '@src/features/heatmap/HeatmapMenuContent';
 import { useOBJFromArrayBuffer } from '@src/features/heatmap/ModelLoader';
@@ -23,11 +24,13 @@ import { exportHeatmap } from '@src/features/heatmap/export-heatmap';
 import { HeatmapMenuSideBar } from '@src/features/heatmap/menu/HeatmapMenuSideBar';
 import { FocusLinkBridge } from '@src/features/heatmap/selection/FocusLinkBridge';
 import { InspectorModal } from '@src/features/heatmap/selection/InspectorModal';
-import { useGeneralSelect } from '@src/hooks/useGeneral';
-import { DefaultStaleTime, createClient } from '@src/modeles/qeury';
+import { useGeneralPatch, useGeneralSelect } from '@src/hooks/useGeneral';
+import { useApiClient } from '@src/modeles/ApiClientContext';
+import { DefaultStaleTime } from '@src/modeles/qeury';
 import { dimensions, zIndexes } from '@src/styles/style';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 import { detectDimensionality } from '@src/utils/heatmap/detectDimensionality';
+import { saveRecentMenu } from '@src/utils/localstrage';
 
 export type HeatmapViewerProps = {
   className?: string | undefined;
@@ -35,6 +38,7 @@ export type HeatmapViewerProps = {
 };
 
 const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
+  const toast = useToast();
   const [map, setMap] = useState<string | ArrayBuffer | null>(null);
   const [modelType, setModelType] = useState<'gltf' | 'glb' | 'obj' | 'server' | null>(null);
   const [dpr, setDpr] = useState(2);
@@ -46,6 +50,10 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
   const [menuExtra, setMenuExtra] = useState<object | undefined>(undefined);
 
   const mapName = useGeneralSelect((s) => s.mapName);
+  const dimensionalityOverride = useGeneralSelect((s) => s.dimensionalityOverride);
+  const splitMode = useSelector((s: RootState) => s.heatmapCanvas.splitMode);
+  const apiClient = useApiClient();
+  const setGeneral = useGeneralPatch();
 
   const [visibleTimelineRange, setVisibleTimelineRange] = useState<PlayerTimelinePointsTimeRange>({ start: 0, end: 0 });
 
@@ -56,7 +64,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
     queryKey: ['project', service.projectId],
     queryFn: async () => {
       if (!service.projectId) return null;
-      const res = await createClient().GET('/api/v0/projects/{id}', {
+      const res = await apiClient.GET('/api/v0/projects/{id}', {
         params: { path: { id: service.projectId } },
       });
       return res.data ?? null;
@@ -65,11 +73,11 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
     enabled: !!service.projectId,
   });
 
-  // 2D/3D判定（プロジェクトのis2Dを優先）
-  const dimensionality = useMemo(() => detectDimensionality(project?.is2D, task), [project?.is2D, task]);
+  // 2D/3D判定（オーバーライド > プロジェクトのis2D > taskのzVisible）
+  const dimensionality = useMemo(() => detectDimensionality(dimensionalityOverride, project?.is2D, task), [dimensionalityOverride, project?.is2D, task]);
 
   const { data: mapList } = useQuery({
-    queryKey: ['mapList', service],
+    queryKey: ['mapList', service, service.projectId],
     queryFn: async () => {
       return service.getMapList();
     },
@@ -94,11 +102,40 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
     staleTime: DefaultStaleTime,
   });
 
+  const { data: fieldObjectLogs } = useQuery({
+    queryKey: ['fieldObjectLogs', service.projectId, service.sessionId],
+    queryFn: async () => {
+      if (!service.projectId || !service.sessionId) return null;
+      return apiClient.GET('/api/v0/projects/{project_id}/play_session/{session_id}/field_object_log', {
+        params: {
+          path: {
+            project_id: service.projectId,
+            session_id: service.sessionId,
+          },
+        },
+      });
+    },
+    staleTime: DefaultStaleTime,
+    enabled: !!service.projectId && !!service.sessionId,
+    // apiClientは関数なので、依存配列に含めない（Contextから毎回取得されるため）
+  });
+
   useEffect(() => {
     if (!mapContent) return;
     setMap(mapContent);
     setModelType('server');
   }, [mapContent]);
+
+  // 2Dモードに切り替わった時にmapNameをクリア（3D専用機能のため）
+  useEffect(() => {
+    if (dimensionality === '2d') {
+      // 2Dモードになった時、mapNameがあればクリア
+      if (mapName) {
+        setGeneral({ mapName: '' });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dimensionality, setGeneral]); // mapNameは依存配列に含めない
 
   const pointList = useMemo(() => {
     if (!task) return [];
@@ -148,17 +185,29 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
         );
       await exportHeatmap(task, d, generalLogKeys, mapContent, mapList, store.getState().heatmapCanvas);
       // 成功メッセージ
-      alert('エクスポートが完了しました！');
+      toast.showToast('Export completed successfully', 3000, 'success');
     } catch (error) {
       // eslint-disable-next-line
       console.error('エクスポート中にエラーが発生しました:', error);
-      alert('エクスポートに失敗しました。');
+      toast.showToast('Export failed', 3000, 'error');
     }
-  }, [generalLogKeys, mapContent, mapList, service, store, task]);
+  }, [generalLogKeys, mapContent, mapList, service, store, task, toast]);
+
+  // セッション選択時にフィールドオブジェクトメニューを自動開く
+  useEffect(() => {
+    if (fieldObjectLogs && fieldObjectLogs.data && fieldObjectLogs.data.length > 0 && service.sessionId) {
+      setOpenMenu('fieldObject');
+    }
+  }, [service.sessionId, fieldObjectLogs]);
 
   useEffect(() => {
     const clickMenuIconHandler = (event: CustomEvent<{ name: Menus }>) => {
-      setOpenMenu(event.detail.name);
+      const menuName = event.detail.name;
+      setOpenMenu(menuName);
+      // Save to recent menus (except for 'more' and 'eventLogDetail')
+      if (menuName !== 'more' && menuName !== 'eventLogDetail') {
+        saveRecentMenu(menuName);
+      }
     };
     const clickEventLogHandler = (event: CustomEvent<{ logName: string; id: number }>) => {
       setMenuExtra(event.detail);
@@ -187,37 +236,60 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
     };
   }, []);
 
+  const renderCanvas = useCallback(
+    (paneId?: string) => (
+      <Canvas
+        key={paneId}
+        style={{ flex: 1 }}
+        camera={
+          dimensionality === '2d'
+            ? { position: [0, 5000, 0], up: [0, 0, -1], near: 10, far: 20000 } // 2D: 真上から俯瞰
+            : { position: [2500, 5000, -2500], fov: 50, near: 10, far: 10000 } // 3D: 斜め視点
+        }
+        orthographic={dimensionality === '2d'} // 2Dは正投影カメラ
+        ref={canvasRef}
+        dpr={dpr}
+      >
+        <PerformanceMonitor factor={1} onChange={handleOnPerformance} />
+        <HeatMapCanvas
+          service={service}
+          pointList={pointList}
+          map={map}
+          modelType={modelType}
+          model={model}
+          visibleTimelineRange={visibleTimelineRange}
+          dimensionality={dimensionality}
+          fieldObjectLogs={fieldObjectLogs?.data}
+          projectId={service.projectId}
+        />
+        <Stats parent={divRef} className={`${className}__stats`} />
+      </Canvas>
+    ),
+    [dimensionality, dpr, handleOnPerformance, service, pointList, map, modelType, model, visibleTimelineRange, divRef, className, fieldObjectLogs?.data],
+  );
+
   return (
     <div className={`${className}__view`}>
       <FlexRow style={{ width: '100%', height: '100%' }} align={'center'} wrap={'nowrap'}>
         <HeatmapMenuSideBar className={`${className}__sideMenu`} service={service} currentMenu={openMenu} />
-        <FlexColumn className={`${className}__canvasBox`}>
-          <Canvas
-            style={{ flex: 1 }}
-            camera={
-              dimensionality === '2d'
-                ? { position: [0, 5000, 0], up: [0, 0, -1], near: 10, far: 20000 } // 2D: 真上から俯瞰
-                : { position: [2500, 5000, -2500], fov: 50, near: 10, far: 10000 } // 3D: 斜め視点
-            }
-            orthographic={dimensionality === '2d'} // 2Dは正投影カメラ
-            ref={canvasRef}
-            dpr={dpr}
-          >
-            <PerformanceMonitor factor={1} onChange={handleOnPerformance} />
-            <HeatMapCanvas
-              service={service}
-              pointList={pointList}
-              map={map}
-              modelType={modelType}
-              model={model}
-              visibleTimelineRange={visibleTimelineRange}
-              dimensionality={dimensionality}
-            />
-            <Stats parent={divRef} className={`${className}__stats`} />
-          </Canvas>
-          {/*{performance && <PerformanceList api={performance} className={`${className}__performance`} />}*/}
-          <QuickToolbar className={`${className}__footToolbar`} service={service} />
-        </FlexColumn>
+        {splitMode.enabled ? (
+          <FlexRow className={`${className}__splitContainer`} style={{ flex: 1, flexDirection: splitMode.direction === 'horizontal' ? 'row' : 'column' }}>
+            <FlexColumn className={`${className}__canvasBox ${className}__canvasBox--split`}>
+              {renderCanvas('left')}
+              <QuickToolbar className={`${className}__footToolbar`} service={service} dimensionality={dimensionality} />
+            </FlexColumn>
+            <FlexColumn className={`${className}__canvasBox ${className}__canvasBox--split`}>
+              {renderCanvas('right')}
+              <QuickToolbar className={`${className}__footToolbar`} service={service} dimensionality={dimensionality} />
+            </FlexColumn>
+          </FlexRow>
+        ) : (
+          <FlexColumn className={`${className}__canvasBox`}>
+            {renderCanvas()}
+            {/*{performance && <PerformanceList api={performance} className={`${className}__performance`} />}*/}
+            <QuickToolbar className={`${className}__footToolbar`} service={service} dimensionality={dimensionality} />
+          </FlexColumn>
+        )}
         <div className={`${className}__player`}>
           <TimelineControlWrapper setOpenMenu={setOpenMenu} setVisibleTimelineRange={setVisibleTimelineRange} visibleTimelineRange={visibleTimelineRange} />
         </div>
@@ -232,6 +304,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
           eventLogKeys={generalLogKeys ?? undefined}
           extra={menuExtra}
           service={service}
+          dimensionality={dimensionality}
         />
       </div>
 
@@ -251,7 +324,7 @@ export const HeatMapViewer = memo(
       width: calc(100% - 2px);
       height: 100%;
       overflow: hidden;
-      border-top: ${({ theme }) => `1px solid ${theme.colors.border.main}`};
+      border-top: ${({ theme }) => `1px solid ${theme.colors.border.default}`};
     }
 
     &__sideMenu {
@@ -260,7 +333,7 @@ export const HeatMapViewer = memo(
       flex-shrink: 0;
       height: 100%;
       overflow-y: auto;
-      background: ${({ theme }) => theme.colors.surface.dark};
+      background: ${({ theme }) => theme.colors.surface.raised};
     }
 
     &__canvasMenuBox {
@@ -287,6 +360,13 @@ export const HeatMapViewer = memo(
       height: 40px;
     }
 
+    &__splitContainer {
+      position: relative;
+      gap: 2px;
+      width: 100%;
+      height: 100%;
+    }
+
     &__canvasBox {
       position: relative;
       flex: 1;
@@ -294,7 +374,12 @@ export const HeatMapViewer = memo(
       max-width: 1900px;
       height: 100%;
       margin: 0 auto;
-      border: ${({ theme }) => `1px solid ${theme.colors.border.main}`};
+      border: ${({ theme }) => `1px solid ${theme.colors.border.default}`};
+    }
+
+    &__canvasBox--split {
+      max-width: none;
+      border: ${({ theme }) => `2px solid ${theme.colors.border.default}`};
     }
 
     &__performance {
@@ -322,10 +407,10 @@ export const HeatMapViewer = memo(
   `,
   (prev, next) => {
     return (
-      prev.className == next.className &&
-      prev.service.task == next.service.task &&
-      prev.service.projectId == next.service.projectId &&
-      prev.service.sessionId == next.service.sessionId
+      prev.className === next.className &&
+      prev.service.task === next.service.task &&
+      prev.service.projectId === next.service.projectId &&
+      prev.service.sessionId === next.service.sessionId
     );
   },
 );

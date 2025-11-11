@@ -4,13 +4,15 @@ import packageJson from '../../package.json';
 
 import type { components } from '@generated/api';
 
-import { createClient, DefaultStaleTime } from '@src/modeles/qeury';
+import { useApiClient } from '@src/modeles/ApiClientContext';
+import { DefaultStaleTime } from '@src/modeles/qeury';
 
 export type EventLogData = {
   key: string;
   visible: boolean;
   color: string;
   iconName: string;
+  hvqlScript?: string; // Optional HVQL script for dynamic icon/style based on event metadata
 };
 
 export type EventLogSettings = {
@@ -32,6 +34,7 @@ export type GeneralSettings = {
   maxThreshold: number;
   colorScale: number;
   sessionHeatmap: boolean;
+  dimensionalityOverride: '2d' | '3d' | null; // ユーザーによる2D/3Dモード切り替え（nullの場合はproject.is2Dに従う）
 };
 export type HotspotModeSettings = {
   visible: boolean;
@@ -56,11 +59,33 @@ export type PlayerTimelineSettings = {
   currentTimelineSeek: number;
 };
 
+export type FieldObjectData = {
+  objectType: string;
+  visible: boolean;
+  color: string;
+  iconName: string;
+  hvqlScript?: string; // Optional HVQL script for dynamic icon/style based on object metadata
+};
+
+export type FieldObjectSettings = {
+  visible: boolean;
+  objects: FieldObjectData[];
+  filters: Record<string, boolean | number>;
+  queryText: string; // HVQL query for dynamic object styling/icons
+};
+
+export type SplitModeSettings = {
+  enabled: boolean;
+  direction: 'horizontal' | 'vertical';
+};
+
 export type HeatmapStates = {
   general: GeneralSettings;
   hotspotMode: HotspotModeSettings;
   eventLog: EventLogSettings;
   playerTimeline: PlayerTimelineSettings;
+  fieldObject: FieldObjectSettings;
+  splitMode: SplitModeSettings;
 };
 
 // Canvas の状態の型定義
@@ -87,6 +112,7 @@ export const initializeValues: HeatmapDataState = {
     maxThreshold: 1,
     colorScale: 1.0,
     sessionHeatmap: false,
+    dimensionalityOverride: null, // 初期状態ではproject.is2Dに従う
   },
   hotspotMode: {
     visible: false,
@@ -107,15 +133,26 @@ export const initializeValues: HeatmapDataState = {
     queryText: '',
     currentTimelineSeek: 0,
   },
+  fieldObject: {
+    visible: false,
+    objects: [],
+    filters: {},
+    queryText: '',
+  },
+  splitMode: {
+    enabled: false,
+    direction: 'horizontal',
+  },
 };
 
 export function usePlayerPositionLogs(player: number | undefined, project_id: number | undefined, session_id: number | undefined) {
+  const apiClient = useApiClient();
   return useQuery({
-    queryKey: ['eventLogDetail', player, project_id, session_id],
+    queryKey: ['eventLogDetail', player, project_id, session_id, apiClient],
     queryFn: async () => {
       if (!project_id || !session_id || player === undefined) return null;
       // Replace with actual data fetching logic
-      return createClient().GET('/api/v0/projects/{project_id}/play_session/{session_id}/player_position_log', {
+      return apiClient.GET('/api/v0/projects/{project_id}/play_session/{session_id}/player_position_log', {
         params: {
           path: {
             project_id: project_id,
@@ -131,5 +168,25 @@ export function usePlayerPositionLogs(player: number | undefined, project_id: nu
     },
     staleTime: DefaultStaleTime,
     enabled: !!project_id && !!session_id && player !== undefined,
+  });
+}
+
+export function useFieldObjectTypes(project_id: number | undefined, session_id: number | undefined) {
+  const apiClient = useApiClient();
+  return useQuery({
+    queryKey: ['fieldObjectTypes', project_id, session_id, apiClient],
+    queryFn: async () => {
+      if (!project_id || !session_id) return null;
+      return apiClient.GET('/api/v0/projects/{project_id}/play_session/{session_id}/field_object_log/object_types', {
+        params: {
+          path: {
+            project_id: project_id,
+            session_id: session_id,
+          },
+        },
+      });
+    },
+    staleTime: DefaultStaleTime,
+    enabled: !!project_id && !!session_id,
   });
 }

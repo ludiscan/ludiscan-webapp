@@ -18,11 +18,36 @@ export type SelectorProps = Omit<LabeledButtonProps, 'onClick' | 'fontSize' | 's
   placement?: 'top' | 'bottom';
   align?: 'left' | 'right';
   scheme?: ButtonProps['scheme'];
+  maxHeight?: number;
 };
+
+// スクロール可能なContentColumnをラップ
+const ScrollableContentColumn = styled(Menu.ContentColumn)`
+  max-height: ${(props: { maxHeight?: number }) => props.maxHeight || 300}px;
+  overflow: hidden auto;
+
+  /* スクロールバーのスタイリング */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: ${({ theme }) => theme.colors.border.default};
+    border-radius: 3px;
+
+    &:hover {
+      background: ${({ theme }) => theme.colors.border.strong};
+    }
+  }
+`;
 
 const Component: FC<SelectorProps> = (props) => {
   const { theme } = useSharedTheme();
-  const { className, options, value, onChange, fontSize = 'medium', scheme = 'none', border = true, radius = 'small' } = props;
+  const { className, options, value, onChange, fontSize = 'base', scheme = 'none', border = true, radius = 'small', maxHeight = 300 } = props;
   const [valueRef, setValueRef] = useState<string>(value || options[0] || '');
   return (
     <Menu
@@ -34,11 +59,11 @@ const Component: FC<SelectorProps> = (props) => {
       icon={
         <div className={`${className}__text`}>
           <Text text={valueRef} />
-          <IoIosArrowDown size={16} color={theme.colors.secondary.light} />
+          <IoIosArrowDown size={16} color={theme.colors.text.secondary} />
         </div>
       }
     >
-      <Menu.ContentColumn padding={'2px'} align={props.align} placement={props.placement}>
+      <ScrollableContentColumn maxHeight={maxHeight} padding={'2px'} align={props.align} placement={props.placement}>
         {options.map((option, index) => {
           return (
             <Menu.ContentButton
@@ -49,13 +74,13 @@ const Component: FC<SelectorProps> = (props) => {
                 onChange?.(option);
               }}
               radius={'small'}
-              fontSize={'large1'}
+              fontSize={'lg'}
             >
               <Text text={option} className={`${className}__text`} />
             </Menu.ContentButton>
           );
         })}
-      </Menu.ContentColumn>
+      </ScrollableContentColumn>
     </Menu>
   );
 };
@@ -81,7 +106,7 @@ export const Selector = styled(Component)`
     padding: 4px 6px;
 
     &:hover {
-      background: ${({ theme }) => theme.colors.surface.dark};
+      background: ${({ theme }) => theme.colors.surface.raised};
     }
   }
 `;

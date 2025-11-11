@@ -12,7 +12,7 @@ export const InputColumn = styled(({ className, label, children }: { className?:
   const { theme } = useSharedTheme();
   return (
     <InlineFlexColumn className={className} align={'flex-start'} wrap={'nowrap'} gap={2}>
-      <Text text={label} fontSize={fontSizes.small} style={{ width: '110px' }} color={theme.colors.secondary.light} />
+      <Text text={label} fontSize={fontSizes.small} style={{ width: '110px' }} color={theme.colors.tertiary.main} />
       <div style={{ width: '100%' }}>{children}</div>
     </InlineFlexColumn>
   );
@@ -27,7 +27,7 @@ export const InputRow = styled(
     const { theme } = useSharedTheme();
     return (
       <InlineFlexRow className={className} align={align} wrap={'nowrap'} gap={4}>
-        <Text text={label} fontSize={fontSizes.small} style={{ width: '90px' }} color={theme.colors.secondary.light} />
+        <Text text={label} fontSize={fontSizes.small} style={{ width: '90px' }} color={theme.colors.tertiary.main} />
         <div style={{ flex: 1, display: 'flex' }}>{children}</div>
       </InlineFlexRow>
     );

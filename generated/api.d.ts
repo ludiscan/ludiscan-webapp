@@ -223,7 +223,8 @@ export interface paths {
     };
     /** Get project by ID */
     get: operations['ProjectsController_findOne'];
-    put?: never;
+    /** Update a project */
+    put: operations['ProjectsController_update'];
     post?: never;
     /** Delete a project */
     delete: operations['ProjectsController_delete'];
@@ -565,7 +566,11 @@ export interface paths {
     /** Get session general log */
     get: operations['PlaySessionController_getGeneralLog'];
     put?: never;
-    /** create general log */
+    /**
+     * create general log
+     * @deprecated
+     * @description DEPRECATED: Use batch upload endpoint instead (POST /projects/:project_id/sessions/:session_id/general-events/upload). This endpoint is for real-time logging and will be removed in a future version.
+     */
     post: operations['PlaySessionController_createGeneralLog'];
     delete?: never;
     options?: never;
@@ -600,7 +605,11 @@ export interface paths {
     /** Get general log */
     get: operations['PlaySessionController_getPositionLog'];
     put?: never;
-    /** create position log */
+    /**
+     * create position log
+     * @deprecated
+     * @description DEPRECATED: Use batch upload endpoint instead (POST /projects/:project_id/sessions/:session_id/general-events/upload). This endpoint is for real-time logging and will be removed in a future version.
+     */
     post: operations['PlaySessionController_createPositionLog'];
     delete?: never;
     options?: never;
@@ -688,6 +697,41 @@ export interface paths {
     put?: never;
     /** Upload binary player data */
     post: operations['PlayerPositionLogV01Controller_post'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/projects/{project_id}/play_session/{session_id}/field_object_log': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get field object logs */
+    get: operations['FieldObjectLogController_get'];
+    put?: never;
+    /** Upload binary field object logs */
+    post: operations['FieldObjectLogController_post'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/projects/{project_id}/play_session/{session_id}/field_object_log/object_types': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get distinct object types from session */
+    get: operations['FieldObjectLogController_getObjectTypes'];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -1003,6 +1047,136 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v0/game/projects/{project_id}/sessions/{session_id}/field-object-logs': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** フィールドオブジェクトログをバイナリでまとめて送信（LSFOフォーマット） */
+    post: operations['GameController_uploadFieldObjectLogs'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/game/projects/{project_id}/sessions/{session_id}/general-events/upload': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Upload batch general event logs */
+    post: operations['GameController_uploadGeneralEventLogs'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/route-coach/projects/{project_id}/event-clusters': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * プロジェクトのイベントクラスタと改善案を取得
+     * @description
+     *     指定したプレイヤーのイベント（死亡/成功）をクラスタリングし、
+     *     各クラスタに対するルートパターンと改善案を返します。
+     *
+     */
+    get: operations['RouteCoachController_getEventClusters'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/route-coach/improvement-routes/{improvement_route_id}/feedback': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * 改善案のフィードバックを送信
+     * @description
+     *     改善案に対して3段階評価（Bad/Neutral/Good）とコメントを送信します。
+     *     同じプレイヤーから同じ改善案への複数フィードバックは上書きされます。
+     *
+     */
+    post: operations['RouteCoachController_submitFeedback'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/route-coach/projects/{project_id}/generate-improvement-routes': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * プロジェクトの改善ルート生成ジョブを投入
+     * @description
+     *     プロジェクト全体の改善ルートを生成するための非同期ジョブをキューに投入します。
+     *     このジョブは死亡イベントをクラスタリングし、各クラスタに対する
+     *     改善提案（Strategy 1: 分岐点検出、Strategy 2: 安全通過、Strategy 3: 時間短縮）を生成します。
+     *
+     *     同じプロジェクト・マップの組み合わせで既に完了したタスクがある場合は、
+     *     新規ジョブを投入せずに既存タスクを返します。
+     *
+     */
+    post: operations['RouteCoachController_generateImprovementRoutes'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/route-coach/improvement-routes-jobs/{job_id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 改善ルート生成タスクの状態を取得
+     * @description
+     *     改善ルート生成タスクの処理状況を確認します。
+     *     完了したタスクは永続化されているため、いつでも結果を取得できます。
+     *
+     */
+    get: operations['RouteCoachController_getImprovementRoutesJobStatus'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1063,12 +1237,22 @@ export interface components {
       name: string;
       /** @example description */
       description: string;
+      /** @example false */
+      is2D?: boolean;
     };
     DefaultSuccessResponse: {
       /** @example true */
       success: boolean;
       /** @example message */
       message: string | null;
+    };
+    UpdateProjectDto: {
+      /** @example name */
+      name?: string;
+      /** @example description */
+      description?: string;
+      /** @example false */
+      is2D?: boolean;
     };
     CalcFieldResponseDto: {
       /** @example field */
@@ -1203,6 +1387,8 @@ export interface components {
     CreateGeneralLogDto: {
       text_data: string | null;
       position_data: components['schemas']['Position'] | null;
+      /** @description Extended metadata for RouteCoach extended events */
+      metadata: Record<string, never> | null;
       offset_timestamp: number;
       player: number;
     };
@@ -1217,6 +1403,30 @@ export interface components {
       z?: number | null;
       offset_timestamp: number;
       location?: string | null;
+      status?: Record<string, never> | null;
+    };
+    FieldObjectLogDto: {
+      /**
+       * @description Unique object identifier in the game
+       * @example item_123
+       */
+      object_id: string;
+      /**
+       * @description Type of the object
+       * @example health_potion
+       */
+      object_type: string;
+      x: number;
+      y: number;
+      z?: number | null;
+      /** @description Milliseconds since session start */
+      offset_timestamp: number;
+      /**
+       * @description Event type for this log entry
+       * @enum {string}
+       */
+      event_type: 'spawn' | 'move' | 'despawn' | 'update';
+      /** @description Additional custom data for this object */
       status?: Record<string, never> | null;
     };
     CreateHeatmapDto: {
@@ -1402,6 +1612,155 @@ export interface components {
        *     ]
        */
       projectIds: number[];
+    };
+    EventRawCoordinateDto: {
+      /** @description X coordinate */
+      x: number;
+      /** @description Y coordinate */
+      y: number;
+      /** @description Z coordinate */
+      z: number;
+      /** @description Event timestamp (milliseconds) */
+      event_timestamp: number;
+      /** @description Session ID */
+      session_id: string;
+      /** @description Player ID */
+      player_id: string;
+    };
+    RoutePatternDto: {
+      /** @description Route pattern ID */
+      id: number;
+      /** @description Trajectory points leading to the cluster */
+      trajectory_points: {
+        x?: number;
+        y?: number;
+        z?: number;
+      }[];
+      /** @description Number of times this route was taken */
+      occurrence_count: number;
+      /** @description Number of times this route led to success */
+      success_count: number;
+      /** @description Average duration in milliseconds */
+      avg_duration_ms?: number;
+      /** @description Success rate (0-1) */
+      success_rate: number;
+      /** @description Whether this route passes near the cluster without triggering the event */
+      passes_near_cluster: boolean;
+      /** @description Number of times this route safely passed near the cluster */
+      cluster_near_count: number;
+    };
+    ImprovementRouteDto: {
+      /** @description Improvement route ID */
+      id: number;
+      /**
+       * @description Type of improvement strategy
+       * @enum {string}
+       */
+      strategy_type: 'divergence' | 'safety_passage' | 'faster';
+      /** @description Recommended trajectory points */
+      trajectory_points: {
+        x?: number;
+        y?: number;
+        z?: number;
+      }[];
+      /** @description Success rate (0-1) */
+      success_rate?: number;
+      /** @description Number of times this route succeeded */
+      success_count?: number;
+      /** @description Average duration in milliseconds */
+      avg_duration_ms?: number;
+      /** @description Time saved compared to death routes (milliseconds) */
+      time_saved_ms?: number;
+      /** @description Analysis for divergence strategy */
+      divergence_analysis?: {
+        [key: string]: unknown;
+      };
+      /** @description Safety score (0-1) for safety_passage strategy */
+      safety_score?: number;
+      /** @description Evidence supporting the improvement */
+      evidence?: {
+        [key: string]: unknown;
+      };
+      /** @description Reasoning behind the improvement */
+      reasoning?: string;
+      /** @description Total feedback count */
+      feedback_total_count: number;
+      /** @description Average feedback rating (1-3) */
+      feedback_avg_rating: number;
+    };
+    EventClusterDetailDto: {
+      /** @description Cluster ID */
+      id: number;
+      /** @description Center X coordinate of the cluster */
+      cluster_center_x: number;
+      /** @description Center Y coordinate of the cluster */
+      cluster_center_y: number;
+      /** @description Center Z coordinate of the cluster */
+      cluster_center_z: number;
+      /** @description Radius of the cluster (meters) */
+      cluster_radius: number;
+      /** @description Total raw event count in this cluster */
+      raw_event_count: number;
+      /**
+       * @description Type of event this cluster represents
+       * @enum {string}
+       */
+      event_type: 'death' | 'success';
+      /** @description Map name */
+      map_name?: string;
+      /** @description Raw event coordinates in this cluster */
+      raw_coordinates: components['schemas']['EventRawCoordinateDto'][];
+      /** @description Route patterns leading to this cluster */
+      routes: components['schemas']['RoutePatternDto'][];
+      /** @description Improvement route recommendations */
+      improvements: components['schemas']['ImprovementRouteDto'][];
+      /**
+       * Format: date-time
+       * @description Cluster creation timestamp
+       */
+      created_at: string;
+      /**
+       * Format: date-time
+       * @description Cluster last update timestamp
+       */
+      updated_at: string;
+    };
+    SubmitImprovementRouteFeedbackRequestDto: {
+      /**
+       * @description Rating: 1=Bad (👎), 2=Neutral (😐), 3=Good (👍)
+       * @enum {number}
+       */
+      rating: 1 | 2 | 3;
+      /** @description Optional comment about the improvement */
+      comment?: string;
+    };
+    ImprovementRouteFeedbackRecordDto: {
+      /** @description Feedback ID */
+      id: number;
+      /** @description Player ID who gave the feedback */
+      player_id: string;
+      /**
+       * @description Rating: 1=Bad, 2=Neutral, 3=Good
+       * @enum {number}
+       */
+      rating: 1 | 2 | 3;
+      /** @description Comment from the player */
+      comment?: string;
+      /**
+       * Format: date-time
+       * @description Feedback submission timestamp
+       */
+      created_at: string;
+    };
+    SubmitImprovementRouteFeedbackResponseDto: {
+      /** @description Improvement route ID */
+      improvement_route_id: number;
+      /** @description Total feedback count for this improvement route */
+      feedback_total_count: number;
+      /** @description Average feedback rating (1-3) */
+      feedback_avg_rating: number;
+      /** @description All feedback records for this improvement route */
+      feedbacks: components['schemas']['ImprovementRouteFeedbackRecordDto'][];
     };
     DefaultErrorResponse: {
       /** @example 400 */
@@ -1856,6 +2215,41 @@ export interface operations {
     requestBody?: never;
     responses: {
       /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProjectResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  ProjectsController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateProjectDto'];
+      };
+    };
+    responses: {
+      /** @description Updated */
       200: {
         headers: {
           [name: string]: unknown;
@@ -3052,6 +3446,117 @@ export interface operations {
       };
     };
   };
+  FieldObjectLogController_get: {
+    parameters: {
+      query?: {
+        /** @description Filter by start offset_timestamp (optional) */
+        start_time?: number;
+        /** @description Filter by end offset_timestamp (optional) */
+        end_time?: number;
+        /** @description Comma-separated object types to filter (optional) */
+        object_types?: string;
+      };
+      header?: never;
+      path: {
+        project_id: number;
+        session_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['FieldObjectLogDto'][];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  FieldObjectLogController_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        project_id: number;
+        session_id: number;
+      };
+      cookie?: never;
+    };
+    /** @description Binary data containing field object events */
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          /** Format: binary */
+          file?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultSuccessResponse'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  FieldObjectLogController_getObjectTypes: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        project_id: number;
+        session_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': string[];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
   HeatmapController_createSessionTask: {
     parameters: {
       query?: never;
@@ -3897,6 +4402,253 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['DefaultSuccessResponse'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  GameController_uploadFieldObjectLogs: {
+    parameters: {
+      query?: never;
+      header: {
+        /** @description ゲームクライアント用APIキー */
+        'X-API-Key': string;
+      };
+      path: {
+        /** @description Project ID */
+        project_id: number;
+        /** @description Session ID */
+        session_id: number;
+      };
+      cookie?: never;
+    };
+    /** @description Binary data containing field object events (LSFO V1 format) */
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          /** Format: binary */
+          file?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultSuccessResponse'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  GameController_uploadGeneralEventLogs: {
+    parameters: {
+      query?: never;
+      header: {
+        /** @description ゲームクライアント用APIキー */
+        'X-API-Key': string;
+      };
+      path: {
+        project_id: number;
+        session_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          /**
+           * Format: binary
+           * @description Binary file in LSEV V1 format
+           */
+          file?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultSuccessResponse'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  RouteCoachController_getEventClusters: {
+    parameters: {
+      query?: {
+        /** @description Player ID to filter events (optional - if not specified, all players are included) */
+        player_id?: string;
+        /** @description Map name to filter by */
+        map_name?: string;
+        /** @description Event type to filter by */
+        event_type?: 'death' | 'success';
+        /** @description Data freshness window in days (default: 30) */
+        freshness_days?: number;
+      };
+      header?: never;
+      path: {
+        project_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description イベントクラスタと改善案リスト */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EventClusterDetailDto'][];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  RouteCoachController_submitFeedback: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        improvement_route_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['SubmitImprovementRouteFeedbackRequestDto'];
+      };
+    };
+    responses: {
+      /** @description フィードバック送信成功 */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SubmitImprovementRouteFeedbackResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  RouteCoachController_generateImprovementRoutes: {
+    parameters: {
+      query?: {
+        /** @description マップ名でフィルタ（指定時はそのマップのみ処理） */
+        map_name?: string;
+        /** @description force=true の場合、既存の completed/failed タスクを削除して強制再生成 */
+        force?: string;
+      };
+      header?: never;
+      path: {
+        project_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description ジョブ投入成功またはキャッシュされたタスク */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            taskId?: number;
+            status?: string;
+            message?: string;
+          };
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  RouteCoachController_getImprovementRoutesJobStatus: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description タスクID */
+        job_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description タスク状態 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            id?: number;
+            /** @enum {string} */
+            status?: 'pending' | 'processing' | 'completed' | 'failed';
+            result?: Record<string, never> | null;
+            error_message?: string | null;
+            /** Format: date-time */
+            created_at?: string;
+            /** Format: date-time */
+            updated_at?: string;
+          };
         };
       };
       /** @description Bad Request */

@@ -5,10 +5,6 @@ import { HeatmapObjectOverlay } from './HeatmapObjectOverlay';
 
 import type { Meta, StoryObj } from '@storybook/nextjs';
 
-import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
-import darkTheme from '@src/styles/dark';
-import lightTheme from '@src/styles/light';
-
 export default {
   component: HeatmapObjectOverlay,
   controls: { hideNoControlsWarning: true },
@@ -18,23 +14,15 @@ type Story = StoryObj<typeof HeatmapObjectOverlay>;
 const Template: Story = {
   render: (args) => {
     return (
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      <SharedThemeProvider initialTheme={args.type === 'light' ? lightTheme : darkTheme}>
-        <div style={{ width: '100%', height: '500px', backgroundColor: '#20232a' }}>
-          <Canvas camera={{ position: [3, 3, 3], fov: 75 }}>
-            <ambientLight intensity={0.5} /> {/* eslint-disable-line react/no-unknown-property */}
-            <directionalLight position={[10, 10, 10]} intensity={1} /> {/* eslint-disable-line react/no-unknown-property */}
-            <HeatmapObjectOverlay {...args} />
-            {/* カメラ移動・回転を可能にする */}
-            <OrbitControls
-              enableZoom={true} // ズーム可能
-              enablePan={true} // 平行移動可能
-              enableRotate={true} // 回転可能
-            />
-          </Canvas>
-        </div>
-      </SharedThemeProvider>
+      <div style={{ width: '100%', height: '500px', backgroundColor: '#20232a' }}>
+        <Canvas camera={{ position: [3, 3, 3], fov: 75 }} frameloop='demand'>
+          <ambientLight intensity={0.5} /> {/* eslint-disable-line react/no-unknown-property */}
+          <directionalLight position={[10, 10, 10]} intensity={1} /> {/* eslint-disable-line react/no-unknown-property */}
+          <HeatmapObjectOverlay {...args} />
+          {/* カメラ移動・回転を可能にする */}
+          <OrbitControls enableZoom={true} enablePan={true} enableRotate={true} enableDamping={false} autoRotate={false} />
+        </Canvas>
+      </div>
     );
   },
 };

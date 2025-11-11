@@ -18,7 +18,7 @@ type LocalModelLoaderProps = {
 
 const LocalModelLoaderContent: FC<LocalModelLoaderProps> = ({ modelPath, modelType, ref }) => {
   const scale = useGeneralSelect((s) => s.scale);
-  const model = useLoader(modelType == 'obj' ? OBJLoader : GLTFLoader, modelPath);
+  const model = useLoader(modelType === 'obj' ? OBJLoader : GLTFLoader, modelPath);
   const handlers = useSelectable('map-mesh', { fit: 'object' });
   return (
     <group
@@ -65,9 +65,11 @@ export function useOBJFromArrayBuffer(arrayBuffer: ArrayBuffer | null): Group | 
       const obj = loader.parse(text);
       setRaycastLayerRecursive(obj, true);
       setObject3d(obj);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (_error) {
-      /* empty */
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to parse OBJ model from ArrayBuffer:', error);
+      // Set null to indicate failed loading
+      setObject3d(null);
     }
   }, [arrayBuffer]);
 

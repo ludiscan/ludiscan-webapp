@@ -85,6 +85,6 @@ export const SelectProjectDetail = styled(Component)`
 
   &__session {
     margin-bottom: 2px;
-    border-bottom: 1px solid ${({ theme }) => theme.colors.border.main};
+    border-bottom: 1px solid ${({ theme }) => theme.colors.border.default};
   }
 `;

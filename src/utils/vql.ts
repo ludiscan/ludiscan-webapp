@@ -22,7 +22,7 @@ export type Document = {
 
 const propMap: Record<string, keyof ViewStyle> = {
   'player-color': 'color',
-  'player-current-point-icon': 'icon',
+  icon: 'icon',
   'player-icon': 'playerIcon',
   label: 'label',
   'trail-color': 'trailColor',
@@ -215,7 +215,7 @@ export function compileHVQL(input: string, baseEnv: Document = {}) {
       const c = b.cases.find(
         (ca) =>
           (typeof ca.match === 'number' && String(ca.match) === String(val)) ||
-          (typeof ca.match === 'string' && String(ca.match) === String(val)) ||
+          (typeof ca.match === 'string' && String(ca.match).toLowerCase() === String(val).toLowerCase()) ||
           (typeof ca.match === 'boolean' && String(ca.match) === String(val)),
       );
       const assigns = c ? c.assigns : b.defaultAssigns;

@@ -3,21 +3,19 @@
 import { ThemeProvider } from '@emotion/react';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
-import darkTheme from '../styles/dark';
-import lightTheme from '../styles/light';
-
 import type { Theme } from '@emotion/react';
+import type { ThemeType } from '@src/modeles/theme';
 import type { FC, ReactNode } from 'react';
 
-import { getThemeName, saveThemeName } from '@src/utils/localstrage';
-
-export type ThemeName = 'light' | 'dark';
+import themes, { toggleTheme } from '@src/modeles/theme';
+import { getThemeName, getThemeType, saveThemeName, saveThemeType } from '@src/utils/localstrage';
 
 // コンテキストの型
 interface SharedThemeContextType {
   theme: Theme;
+  themeType: ThemeType;
   toggleTheme: () => void;
-  setupTheme: (themeName: ThemeName) => void;
+  setThemeType: (type: ThemeType) => void;
 }
 
 export const SharedThemeContext = createContext<SharedThemeContextType | undefined>(undefined);
@@ -27,22 +25,28 @@ export type SharedThemeProviderProps = {
 };
 
 export const SharedThemeProvider: FC<SharedThemeProviderProps> = ({ children, initialTheme }) => {
-  const [theme, setTheme] = useState(initialTheme || lightTheme);
+  const [theme, setTheme] = useState(initialTheme || themes.crimsonDusk.dark);
+  const [themeType, setThemeTypeState] = useState<ThemeType>('crimsonDusk');
 
-  const toggleTheme = useCallback(() => {
-    setTheme((currentTheme) => (currentTheme === lightTheme ? darkTheme : lightTheme));
+  const onToggleTheme = useCallback(() => {
+    setTheme((currentTheme) => toggleTheme(currentTheme));
   }, []);
 
-  const setupTheme = useCallback((themeName: ThemeName) => {
-    if (themeName === 'light') {
-      setTheme(lightTheme);
-    } else {
-      setTheme(darkTheme);
-    }
-  }, []);
+  const onSetThemeType = useCallback(
+    (type: ThemeType) => {
+      setThemeTypeState(type);
+      const newTheme = themes[type][theme.mode];
+      if (newTheme !== undefined) {
+        setTheme(newTheme);
+      }
+    },
+    [theme],
+  );
 
   useEffect(() => {
-    const updateTheme = initialTheme ?? (getThemeName() === 'dark' ? darkTheme : lightTheme);
+    const savedType = getThemeType() || 'crimsonDusk';
+    setThemeTypeState(savedType);
+    const updateTheme = initialTheme ?? themes[savedType][getThemeName() || 'dark'];
     if (updateTheme !== undefined) {
       setTheme(updateTheme);
     }
@@ -50,13 +54,20 @@ export const SharedThemeProvider: FC<SharedThemeProviderProps> = ({ children, in
 
   useEffect(() => {
     const savedTheme = getThemeName();
-    const name = theme === lightTheme ? 'light' : 'dark';
+    const savedThemeType = getThemeType();
+    const name = theme.mode;
     if (savedTheme != name && !initialTheme) {
       saveThemeName(name);
     }
-  }, [initialTheme, theme]);
+    if (savedThemeType != themeType && !initialTheme) {
+      saveThemeType(themeType);
+    }
+  }, [initialTheme, theme, themeType]);
 
-  const value = useMemo(() => ({ theme, toggleTheme, setupTheme }), [setupTheme, theme, toggleTheme]);
+  const value = useMemo(
+    () => ({ theme, themeType, toggleTheme: onToggleTheme, setThemeType: onSetThemeType }),
+    [theme, themeType, onToggleTheme, onSetThemeType],
+  );
 
   return (
     <SharedThemeContext.Provider value={value}>

@@ -184,7 +184,7 @@ const Component: FC<ObjectToggleListProps> = ({ className, model, mapName }) => 
     return half > vs.length / 2 ? 0.5 : 1.0;
   }, [displayState]);
 
-  if (model == undefined) {
+  if (model === undefined) {
     return null;
   }
 
@@ -196,7 +196,7 @@ const Component: FC<ObjectToggleListProps> = ({ className, model, mapName }) => 
         {/* 全体 visible トグル */}
         <Button
           scheme={'none'}
-          fontSize={'large1'}
+          fontSize={'lg'}
           className={`${className}__visibleButton`}
           onClick={() => setAllVisible(!allVisible)}
           aria-label={allVisible ? 'Hide all' : 'Show all'}
@@ -206,7 +206,7 @@ const Component: FC<ObjectToggleListProps> = ({ className, model, mapName }) => 
         {/* 全体 opacity トグル（visible時のデフォルトを合わせるイメージ） */}
         <Button
           scheme={'none'}
-          fontSize={'smallest'}
+          fontSize={'xs'}
           className={`${className}__opacityButton`}
           onClick={() => setAllOpacity(majorityOpacity === 1.0 ? 0.5 : 1.0)}
           disabled={!anyVisible}
@@ -230,7 +230,7 @@ const Component: FC<ObjectToggleListProps> = ({ className, model, mapName }) => 
                 <Button
                   onClick={() => toggleChildVisible(child.uuid)}
                   scheme={'none'}
-                  fontSize={'large1'}
+                  fontSize={'lg'}
                   className={`${className}__visibleButton`}
                   aria-label={visible ? 'Hide' : 'Show'}
                 >
@@ -239,7 +239,7 @@ const Component: FC<ObjectToggleListProps> = ({ className, model, mapName }) => 
                 {/* 個別 opacity：visible の時だけ表示 */}
                 {visible && (
                   <Button
-                    fontSize={'smallest'}
+                    fontSize={'xs'}
                     onClick={() => toggleChildOpacity(child.uuid)}
                     scheme={'none'}
                     className={`${className}__opacityButton`}

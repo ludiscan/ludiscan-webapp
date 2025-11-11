@@ -10,7 +10,7 @@
   "repository": {
     "url": "https://github.com/ludiscan/ludiscan-webapp"
   },
-  "version": "0.15.0",
+  "version": "0.16.0",
   "scripts": {
     "dev": "next dev --turbopack -p 5173",
     "build:dev": "next build --turbopack",
@@ -31,14 +31,15 @@
     "release:major": "npm version major --message 'v%s' && git push && git push origin --tags",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "test-storybook": "test-storybook --config-dir .storybook",
+    "test-storybook": "test-storybook --config-dir .storybook --testTimeout 60000",
     "generate:api-schemes": "bunx openapi-typescript swagger.json --output generated/api.d.ts",
-    "generate:api-schemes:local-fetch": "bunx openapi-typescript http://localhost:3211/swagger/api/v0/json --output generated/api.d.ts",
+    "generate:api-schemes:local-fetch": "bunx openapi-typescript http://localhost:3211/swagger/api/v0/json --output generated/api.d.ts && eslint generated/api.d.ts --fix && prettier --write generated/api.d.ts",
     "build:heatmap-bundle": "bun scripts/create-heatmap-bundle.js",
     "prebuild:prod": "bun run build:heatmap-bundle"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
+    "@next/third-parties": "^16.0.1",
     "@react-three/drei": "^10.0.6",
     "@react-three/fiber": "^9.1.2",
     "@reduxjs/toolkit": "^2.6.1",
@@ -62,6 +63,8 @@
     "three": "^0.175.0"
   },
   "devDependencies": {
+    "@argos-ci/cli": "^3.2.1",
+    "@argos-ci/storybook": "^5.0.4",
     "@chromatic-com/storybook": "^4.1.1",
     "@emotion/babel-plugin": "^11.13.5",
     "@emotion/styled": "^11.14.0",

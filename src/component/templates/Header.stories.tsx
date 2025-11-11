@@ -44,7 +44,7 @@ export const AddIconTitleEnd: Story = {
       <Header
         {...args}
         iconTitleEnd={
-          <Button onClick={() => {}} fontSize={'medium'} scheme={'primary'} width={'fit-content'}>
+          <Button onClick={() => {}} fontSize={'base'} scheme={'primary'} width={'fit-content'}>
             <Text text={'Add'} />
           </Button>
         }
