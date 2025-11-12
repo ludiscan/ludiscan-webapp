@@ -208,7 +208,14 @@ export async function getDocBySlug(slug: string): Promise<DocPage | null> {
 }
 
 /**
- * Get all groups
+ * Filter pages to only include public ones (where public !== false)
+ */
+function filterPublicPages(pages: DocPage[]): DocPage[] {
+  return pages.filter((page) => page.frontmatter.public !== false);
+}
+
+/**
+ * Get all groups (including private docs)
  */
 export async function getDocGroups(): Promise<DocGroup[]> {
   const docs = await loadDocsFromDisk();
@@ -216,7 +223,20 @@ export async function getDocGroups(): Promise<DocGroup[]> {
 }
 
 /**
- * Get all pages
+ * Get only public groups (filtered to exclude private docs)
+ */
+export async function getPublicDocGroups(): Promise<DocGroup[]> {
+  const docs = await loadDocsFromDisk();
+  return docs.groups
+    .map((group) => ({
+      ...group,
+      items: filterPublicPages(group.items),
+    }))
+    .filter((group) => group.items.length > 0); // Remove empty groups
+}
+
+/**
+ * Get all pages (including private docs)
  */
 export async function getAllDocs(): Promise<DocPage[]> {
   const docs = await loadDocsFromDisk();
@@ -224,11 +244,27 @@ export async function getAllDocs(): Promise<DocPage[]> {
 }
 
 /**
- * Get all slugs for static generation
+ * Get only public pages
+ */
+export async function getPublicDocs(): Promise<DocPage[]> {
+  const docs = await loadDocsFromDisk();
+  return filterPublicPages(Array.from(docs.pages.values()));
+}
+
+/**
+ * Get all slugs for static generation (including private docs)
  */
 export async function getDocSlugs(): Promise<string[]> {
   const docs = await loadDocsFromDisk();
   return Array.from(docs.pages.keys());
+}
+
+/**
+ * Get only public slugs for static generation
+ */
+export async function getPublicDocSlugs(): Promise<string[]> {
+  const publicDocs = await getPublicDocs();
+  return publicDocs.map((doc) => doc.slug);
 }
 
 /**
