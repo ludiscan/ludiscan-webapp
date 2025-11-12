@@ -45,14 +45,6 @@ ludiscan-webappを初めて使う場合は、以下のページから始める�
 - **[よくある質問](/heatmap/docs/heatmap/faq)** - トラブルシューティングとFAQ
 - **[用語集](/heatmap/docs/general/glossary)** - 専門用語の説明
 
-### プロジェクト情報（開発者向け）
-
-開発者やプロジェクト管理者向けの技術情報：
-
-- **[プロジェクト概要](/heatmap/docs/project/overview)** - ludiscan-webappの全体像と技術スタック
-- **[アーキテクチャ](/heatmap/docs/project/architecture)** - システムアーキテクチャの詳細
-- **[開発環境セットアップ](/heatmap/docs/project/setup)** - ローカル開発環境の構築
-
 ## 🎯 機能別ガイド
 
 ### データの可視化
