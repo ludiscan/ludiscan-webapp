@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useState } from 'react';
 
+import type { Project } from '@src/modeles/project';
 import type { FC } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
@@ -13,7 +14,6 @@ import { OutlinedTextField } from '@src/component/molecules/OutlinedTextField';
 import { useToast } from '@src/component/templates/ToastContext';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { createClient } from '@src/modeles/qeury';
-import type { Project } from '@src/modeles/project';
 import { fontSizes } from '@src/styles/style';
 
 export type ProjectFormModalProps = {
@@ -33,7 +33,14 @@ const Component: FC<ProjectFormModalProps> = ({ className, isOpen, onClose, proj
   const [description, setDescription] = useState(project?.description || '');
   const [is2D, setIs2D] = useState(project?.is2D || false);
 
-  const createMutation = useMutation({
+  const handleClose = useCallback(() => {
+    setName(project?.name || '');
+    setDescription(project?.description || '');
+    setIs2D(project?.is2D || false);
+    onClose();
+  }, [onClose, project]);
+
+  const { mutate: createMutate, isPending: createMutateIsPending } = useMutation({
     mutationFn: async () => {
       const { data, error } = await createClient().POST('/api/v0/projects', {
         body: {
@@ -57,7 +64,7 @@ const Component: FC<ProjectFormModalProps> = ({ className, isOpen, onClose, proj
     },
   });
 
-  const updateMutation = useMutation({
+  const { mutate: updateMutate, isPending: updateMutateIsPending } = useMutation({
     mutationFn: async () => {
       if (!project) return;
       const { data, error } = await createClient().PUT('/api/v0/projects/{id}', {
@@ -88,13 +95,6 @@ const Component: FC<ProjectFormModalProps> = ({ className, isOpen, onClose, proj
     },
   });
 
-  const handleClose = useCallback(() => {
-    setName(project?.name || '');
-    setDescription(project?.description || '');
-    setIs2D(project?.is2D || false);
-    onClose();
-  }, [onClose, project]);
-
   const handleSubmit = useCallback(() => {
     if (!name.trim()) {
       showToast('プロジェクト名を入力してください', 2, 'error');
@@ -106,13 +106,13 @@ const Component: FC<ProjectFormModalProps> = ({ className, isOpen, onClose, proj
     }
 
     if (isEditMode) {
-      updateMutation.mutate();
+      updateMutate();
     } else {
-      createMutation.mutate();
+      createMutate();
     }
-  }, [name, description, isEditMode, createMutation, updateMutation, showToast]);
+  }, [name, description, isEditMode, showToast, updateMutate, createMutate]);
 
-  const isLoading = createMutation.isPending || updateMutation.isPending;
+  const isLoading = createMutateIsPending || updateMutateIsPending;
 
   return (
     <Modal
@@ -156,7 +156,7 @@ const Component: FC<ProjectFormModalProps> = ({ className, isOpen, onClose, proj
 
         <VerticalSpacer size={8} />
 
-        <FlexRow gap={12} justify={'flex-end'}>
+        <FlexRow gap={12} align={'flex-end'}>
           <Button onClick={handleClose} scheme={'surface'} fontSize={'base'} disabled={isLoading}>
             キャンセル
           </Button>

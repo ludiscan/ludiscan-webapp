@@ -49,9 +49,9 @@ export const login = createAsyncThunk('auth/login', async ({ email, password }: 
     const res = await query.POST('/api/v0/login', {
       body: { email, password },
     });
-    if (res.error) {
+    if (res.error || !res.data) {
       // サーバーからのエラーがある場合は rejectWithValue を利用してエラーメッセージを返す
-      return rejectWithValue(res.error.message);
+      return rejectWithValue(res.error?.message);
     }
     // ローカルストレージに保存
     saveToken(res.data.accessToken);

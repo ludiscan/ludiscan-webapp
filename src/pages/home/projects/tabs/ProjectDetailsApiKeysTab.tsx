@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import { useCallback, useMemo, useState } from 'react';
 
 import type { Project } from '@src/modeles/project';
-import type { GameApiKey } from '@src/types/api-keys';
+import type { CreateGameApiKeyResponse, GameApiKey } from '@src/types/api-keys';
 import type { FC } from 'react';
 
 import { GameApiKeyCreateModal } from '@src/component/organisms/GameApiKeyCreateModal';
@@ -29,6 +29,7 @@ const Component: FC<ProjectDetailsApiKeysTabProps> = ({ className, project }) =>
   const [isUpdatingProjects, setIsUpdatingProjects] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [createdApiKey, setCreatedApiKey] = useState<CreateGameApiKeyResponse | null>(null);
 
   const { allApiKeys, isLoadingKeys, isErrorKeys, userProjects, handleCreateKey, handleDeleteKey, handleUpdateKeyProjects } = useGameApiKeys([
     'api-keys',
@@ -51,14 +52,16 @@ const Component: FC<ProjectDetailsApiKeysTabProps> = ({ className, project }) =>
     }
 
     try {
-      await handleCreateKey(newKeyName);
-      showToast('API-keyを作成しました', 2, 'success');
-      setNewKeyName('');
-      setIsCreateModalOpen(false);
+      const response = await handleCreateKey(newKeyName, [project.id]);
+      if (response) {
+        setCreatedApiKey(response);
+        showToast('API-keyを作成しました', 2, 'success');
+        setNewKeyName('');
+      }
     } catch (err) {
       showToast((err as Error).message, 3, 'error');
     }
-  }, [newKeyName, handleCreateKey, showToast]);
+  }, [newKeyName, showToast, handleCreateKey, project.id]);
 
   const handleShowDetails = useCallback((key: GameApiKey) => {
     setSelectedKey(key);
@@ -120,9 +123,11 @@ const Component: FC<ProjectDetailsApiKeysTabProps> = ({ className, project }) =>
       <GameApiKeyCreateModal
         isOpen={isCreateModalOpen}
         newKeyName={newKeyName}
+        createdApiKey={createdApiKey}
         onClose={() => {
           setIsCreateModalOpen(false);
           setNewKeyName('');
+          setCreatedApiKey(null);
         }}
         onKeyNameChange={setNewKeyName}
         onCreateKey={handleCreateKeySubmit}

@@ -155,12 +155,8 @@ const Component: FC<HomePageProps> = ({ className }) => {
       <SidebarLayout />
       <InnerContent>
         <Header title={'Heatmap'} onClick={handleBack} />
-        <FlexRow className={`${className}__titleRow`} justify={'space-between'} align={'center'}>
+        <FlexRow className={`${className}__titleRow`} align={'center'}>
           <Text text={'Home'} fontSize={fontSizes.largest} color={theme.colors.text.primary} fontWeight={fontWeights.bolder} />
-          <Button onClick={handleCreateProject} scheme={'primary'} fontSize={'base'}>
-            <BiPlus size={20} />
-            新規プロジェクト作成
-          </Button>
         </FlexRow>
         <VerticalSpacer size={16} />
         <div className={`${className}__projects`}>
@@ -189,6 +185,10 @@ const Component: FC<HomePageProps> = ({ className }) => {
                   <BiGridAlt size={20} />
                 </Button>
               </div>
+              <Button onClick={handleCreateProject} scheme={'primary'} fontSize={'base'}>
+                <BiPlus size={20} />
+                新規プロジェクト作成
+              </Button>
             </FlexRow>
             <FlexColumn gap={20}>
               {/* ローディング状態 */}
@@ -232,47 +232,52 @@ const Component: FC<HomePageProps> = ({ className }) => {
                     {projects?.pages?.map((page) => {
                       const sortedPage = page ? sortProjects(page) : [];
                       return sortedPage.map((project: Project) => (
-                        <Card
-                          key={project.id}
-                          className={`${className}__projectCard`}
-                          shadow={'medium'}
-                          color={theme.colors.surface.base}
-                          border={theme.colors.border.default}
-                          onClick={() => router.push(`/home/projects/${project.id}`)}
-                        >
-                          <FlexColumn gap={8}>
-                            <FlexRow justify={'space-between'} align={'flex-start'}>
-                              <FlexColumn gap={4} className={`${className}__cardInfo`}>
-                                <Text text={project.name} fontSize={fontSizes.large1} color={theme.colors.text.primary} fontWeight={'bold'} />
-                                <Text text={project.description} fontSize={fontSizes.small} color={theme.colors.text.secondary} fontWeight={fontWeights.bold} />
-                                <Text
-                                  text={`${project.session_count ?? 0} sessions`}
-                                  fontSize={fontSizes.smallest}
-                                  color={theme.colors.text.secondary}
-                                  fontWeight={'lighter'}
-                                />
-                                <Text
-                                  text={`Created: ${new Date(project.createdAt).toLocaleDateString('ja-JP', { year: 'numeric', month: 'short', day: 'numeric' })}`}
-                                  fontSize={fontSizes.smallest}
-                                  color={theme.colors.text.secondary}
-                                  fontWeight={'lighter'}
-                                />
-                              </FlexColumn>
-                              <Button
-                                className={`${className}__cardEditButton`}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleEditProject(project);
-                                }}
-                                scheme={'surface'}
-                                fontSize={'sm'}
-                                title={'プロジェクトを編集'}
-                              >
-                                <BiEdit size={20} />
-                              </Button>
-                            </FlexRow>
-                          </FlexColumn>
-                        </Card>
+                        <a key={project.id} href={`/home/projects/${project.id}`}>
+                          <Card
+                            className={`${className}__projectCard`}
+                            shadow={'medium'}
+                            color={theme.colors.surface.base}
+                            border={theme.colors.border.default}
+                          >
+                            <FlexColumn gap={8}>
+                              <FlexRow align={'flex-start'}>
+                                <FlexColumn gap={4} className={`${className}__cardInfo`}>
+                                  <Text text={project.name} fontSize={fontSizes.large1} color={theme.colors.text.primary} fontWeight={'bold'} />
+                                  <Text
+                                    text={project.description}
+                                    fontSize={fontSizes.small}
+                                    color={theme.colors.text.secondary}
+                                    fontWeight={fontWeights.bold}
+                                  />
+                                  <Text
+                                    text={`${project.session_count ?? 0} sessions`}
+                                    fontSize={fontSizes.smallest}
+                                    color={theme.colors.text.secondary}
+                                    fontWeight={'lighter'}
+                                  />
+                                  <Text
+                                    text={`Created: ${new Date(project.createdAt).toLocaleDateString('ja-JP', { year: 'numeric', month: 'short', day: 'numeric' })}`}
+                                    fontSize={fontSizes.smallest}
+                                    color={theme.colors.text.secondary}
+                                    fontWeight={'lighter'}
+                                  />
+                                </FlexColumn>
+                                <Button
+                                  className={`${className}__cardEditButton`}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleEditProject(project);
+                                  }}
+                                  scheme={'surface'}
+                                  fontSize={'sm'}
+                                  title={'プロジェクトを編集'}
+                                >
+                                  <BiEdit size={20} />
+                                </Button>
+                              </FlexRow>
+                            </FlexColumn>
+                          </Card>
+                        </a>
                       ));
                     })}
                   </div>
