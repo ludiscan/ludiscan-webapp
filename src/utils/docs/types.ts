@@ -7,6 +7,7 @@ export interface DocFrontmatter {
   title: string;
   order: number;
   description?: string;
+  public?: boolean; // Default: true. Set to false to hide from public docs
 }
 
 export interface DocPage {

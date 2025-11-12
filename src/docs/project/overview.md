@@ -3,6 +3,7 @@ group: project
 title: プロジェクト概要
 order: 1
 description: ludiscan-webappの全体像と目的
+public: false
 ---
 
 # ludiscan-webapp プロジェクト概要

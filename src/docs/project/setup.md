@@ -3,6 +3,7 @@ group: project
 title: 開発環境セットアップ
 order: 2
 description: 開発を始めるための環境構築手順
+public: false
 ---
 
 # 開発環境セットアップ

@@ -3,6 +3,7 @@ group: project
 title: アーキテクチャ
 order: 3
 description: プロジェクトの設計思想とディレクトリ構造
+public: false
 ---
 
 # アーキテクチャ

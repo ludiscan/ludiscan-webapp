@@ -43,6 +43,8 @@ ludiscan-webappは、ゲームプレイデータを3D/2Dのヒートマップと
 
 ## 初めての利用
 
+**💡 5分で始めたい方へ:** まずは[クイックスタートガイド](/heatmap/docs/general/quick-start)で基本操作を習得しましょう！
+
 ludiscan-webappを初めて使う場合は、以下の流れで操作します：
 
 ### 1. ログイン
@@ -79,10 +81,16 @@ ludiscan-webappを初めて使う場合は、以下の流れで操作します�
 
 基本的な使い方を理解したら、以下のページで詳細な操作方法を確認してください：
 
+### 初心者向け
+- [クイックスタート](/heatmap/docs/general/quick-start) - 5分で基本操作を習得
 - [基本操作](/heatmap/docs/heatmap/basic-usage) - プロジェクトやセッションの操作方法
+- [用語集](/heatmap/docs/general/glossary) - わからない用語を調べる
+
+### 詳細機能
 - [カメラ操作](/heatmap/docs/heatmap/controls) - カメラの動かし方
 - [表示モード](/heatmap/docs/heatmap/visualization) - 2D/3Dモードの切り替え
 - [タイムライン機能](/heatmap/docs/heatmap/timeline) - 時間軸の操作方法
+- [Route Coach](/heatmap/docs/heatmap/route-coach) - AIによる改善提案
 
 ## サポートが必要な場合
 
