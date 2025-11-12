@@ -113,10 +113,13 @@ export const ResponsiveSidebar = styled(Component)`
   top: 0;
   left: 0;
   z-index: ${zIndexes.sidebar};
+  display: flex;
+  flex-direction: column;
   box-sizing: border-box;
   width: ${dimensions.sidebarWidth}px;
-  height: 100%;
+  height: 100vh;
   padding: 16px;
+  overflow-y: auto;
   background-color: ${({ theme }) => theme.colors.surface.base};
   box-shadow: 0 2px 4px rgb(0 0 0 / 30%);
   transform: translateX(-100%);
@@ -124,5 +127,26 @@ export const ResponsiveSidebar = styled(Component)`
 
   &.visible {
     transform: translateX(0);
+  }
+
+  /* Smooth scrolling */
+  scroll-behavior: smooth;
+
+  /* Custom scrollbar styling for webkit browsers */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: ${({ theme }) => theme.colors.surface.base};
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: ${({ theme }) => theme.colors.border.default};
+    border-radius: 3px;
+
+    &:hover {
+      background: ${({ theme }) => theme.colors.border.interactive};
+    }
   }
 `;
