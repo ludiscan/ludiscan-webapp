@@ -115,7 +115,13 @@ const Component: FC<ProjectFormModalProps> = ({ className, isOpen, onClose, proj
   const isLoading = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <Modal className={className} isOpen={isOpen} onClose={handleClose} title={isEditMode ? 'プロジェクトを編集' : '新規プロジェクト作成'} closeOutside={!isLoading}>
+    <Modal
+      className={className}
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={isEditMode ? 'プロジェクトを編集' : '新規プロジェクト作成'}
+      closeOutside={!isLoading}
+    >
       <FlexColumn gap={16} className={`${className}__form`}>
         <VerticalSpacer size={8} />
         <FlexColumn gap={8}>
@@ -125,11 +131,24 @@ const Component: FC<ProjectFormModalProps> = ({ className, isOpen, onClose, proj
 
         <FlexColumn gap={8}>
           <Text text={'説明'} fontSize={fontSizes.medium} color={theme.colors.text.primary} fontWeight={'bold'} />
-          <OutlinedTextField value={description} onChange={setDescription} placeholder={'プロジェクトの説明を入力...'} fontSize={fontSizes.medium} disabled={isLoading} />
+          <OutlinedTextField
+            value={description}
+            onChange={setDescription}
+            placeholder={'プロジェクトの説明を入力...'}
+            fontSize={fontSizes.medium}
+            disabled={isLoading}
+          />
         </FlexColumn>
 
         <FlexRow gap={8} align={'center'}>
-          <input type={'checkbox'} id={'is2D-checkbox'} checked={is2D} onChange={(e) => setIs2D(e.target.checked)} disabled={isLoading} className={`${className}__checkbox`} />
+          <input
+            type={'checkbox'}
+            id={'is2D-checkbox'}
+            checked={is2D}
+            onChange={(e) => setIs2D(e.target.checked)}
+            disabled={isLoading}
+            className={`${className}__checkbox`}
+          />
           <label htmlFor={'is2D-checkbox'}>
             <Text text={'2Dモード'} fontSize={fontSizes.medium} color={theme.colors.text.primary} />
           </label>
