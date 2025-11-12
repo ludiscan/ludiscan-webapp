@@ -113,9 +113,9 @@ export const ResponsiveSidebar = styled(Component)`
   top: 0;
   left: 0;
   z-index: ${zIndexes.sidebar};
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  box-sizing: border-box;
   width: ${dimensions.sidebarWidth}px;
   height: 100vh;
   padding: 16px;

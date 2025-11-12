@@ -74,15 +74,15 @@ const Component: FC<DocsPageProps> = ({ currentDoc, error, className }) => {
 };
 
 const DocsPage = styled(Component)`
-  height: 100vh;
   display: flex;
   flex-direction: column;
+  height: 100vh;
 
   &__contentContainer {
     flex: 1;
+    height: calc(100vh - 60px); /* Subtract header height for proper scrolling */
     padding: 24px 48px;
     overflow-y: auto;
-    height: calc(100vh - 60px); /* Subtract header height for proper scrolling */
   }
 
   &__errorContainer {

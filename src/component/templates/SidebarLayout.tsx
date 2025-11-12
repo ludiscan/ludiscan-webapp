@@ -49,8 +49,8 @@ const Component: FC<SidebarLayoutProps> = ({ className }) => {
         if (stored) {
           return new Set(JSON.parse(stored));
         }
-      } catch (error) {
-        console.warn('Failed to load sidebar state from localStorage:', error);
+      } catch {
+        // Ignore errors and default to empty Set
       }
     }
     return new Set();
@@ -86,8 +86,8 @@ const Component: FC<SidebarLayoutProps> = ({ className }) => {
     if (typeof window !== 'undefined') {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(expandedDropdowns)));
-      } catch (error) {
-        console.warn('Failed to save sidebar state to localStorage:', error);
+      } catch {
+        // Ignore write errors
       }
     }
   }, [expandedDropdowns]);
