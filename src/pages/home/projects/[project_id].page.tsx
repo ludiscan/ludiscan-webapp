@@ -68,7 +68,7 @@ const Component: FC<ProjectDetailsPageProps> = ({ className }) => {
           throw new Error('プロジェクト情報の取得に失敗しました');
         }
 
-        const found = data.find((p: Project) => p.id === Number(projectId));
+        const found = data.find((p) => p.id === Number(projectId));
         if (!found) {
           throw new Error('プロジェクトが見つかりません');
         }

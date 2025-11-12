@@ -49,9 +49,12 @@ export const useGameApiKeys = (queryKeyPrefix: (string | number)[] = ['api-keys'
   });
 
   const handleCreateKey = useCallback(
-    async (name: string) => {
+    async (name: string, projectIds?: number[]) => {
       const { data, error } = await createClient().POST('/api/v0/game-api-keys', {
-        body: { name },
+        body: {
+          name,
+          projectIds,
+        },
       });
 
       if (error || !data) {

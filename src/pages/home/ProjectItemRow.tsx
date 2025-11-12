@@ -1,9 +1,11 @@
 import styled from '@emotion/styled';
 import { useRouter } from 'next/navigation';
+import { BiEdit } from 'react-icons/bi';
 
 import type { Project } from '@src/modeles/project';
 import type { FC } from 'react';
 
+import { Button } from '@src/component/atoms/Button';
 import { FlexColumn, FlexRow, InlineFlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { ClampText } from '@src/component/molecules/ClampText';
@@ -13,9 +15,10 @@ import { fontSizes } from '@src/styles/style';
 export type ProjectItemRowProps = {
   className?: string;
   project: Project;
+  onEdit?: (project: Project) => void;
 };
 
-const Component: FC<ProjectItemRowProps> = ({ className, project }) => {
+const Component: FC<ProjectItemRowProps> = ({ className, project, onEdit }) => {
   const { theme } = useSharedTheme();
   const router = useRouter();
 
@@ -33,6 +36,11 @@ const Component: FC<ProjectItemRowProps> = ({ className, project }) => {
 
   const handleClick = () => {
     router.push(`/home/projects/${project.id}`);
+  };
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onEdit?.(project);
   };
 
   return (
@@ -58,6 +66,11 @@ const Component: FC<ProjectItemRowProps> = ({ className, project }) => {
             <Text text={`Created: ${formatDate(project.createdAt)}`} fontSize={fontSizes.smallest} color={theme.colors.text.secondary} fontWeight={'lighter'} />
           </InlineFlexRow>
         </FlexColumn>
+        {onEdit && (
+          <Button className={`${className}__editButton`} onClick={handleEdit} scheme={'surface'} fontSize={'sm'} title={'プロジェクトを編集'}>
+            <BiEdit size={20} />
+          </Button>
+        )}
       </FlexRow>
     </div>
   );
@@ -86,5 +99,15 @@ export const ProjectItemRow = styled(Component)`
 
   &__meta {
     margin-top: 4px;
+  }
+
+  &__editButton {
+    flex-shrink: 0;
+    opacity: 0.7;
+    transition: opacity 0.2s ease-in-out;
+
+    &:hover {
+      opacity: 1;
+    }
   }
 `;

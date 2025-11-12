@@ -18,9 +18,10 @@ type TextFieldOutlinedProps = {
   color?: string;
   backgroundColor?: string;
   maxLength?: number;
+  disabled?: boolean;
 };
 
-const BaseTextFieldOutlined: FC<TextFieldOutlinedProps> = ({ className, value, onChange, placeholder, type = 'text', label, maxLength = 200 }) => {
+const BaseTextFieldOutlined: FC<TextFieldOutlinedProps> = ({ className, value, onChange, placeholder, type = 'text', label, maxLength = 200, disabled }) => {
   return (
     <div className={className}>
       <fieldset className={`${className}__fieldset`}>
@@ -34,6 +35,7 @@ const BaseTextFieldOutlined: FC<TextFieldOutlinedProps> = ({ className, value, o
           placeholder={placeholder}
           type={type}
           maxLength={maxLength}
+          disabled={disabled}
         />
       </fieldset>
     </div>
@@ -67,10 +69,20 @@ export const OutlinedTextField = styled(BaseTextFieldOutlined)`
     padding: 0;
     font-size: ${({ fontSize = fontSizes.medium }) => fontSize};
     font-weight: ${({ fontWeight }) => fontWeight || 'normal'};
-    color: ${({ color }) => color || 'inherit'};
+    color: ${({ color, theme }) => color || theme.colors.text.primary};
     text-shadow: ${({ shadow }) => (shadow ? '0 0 4px rgba(0, 0, 0, 0.2)' : 'none')};
     outline: none;
     background: unset;
     border: none;
+
+    &::placeholder {
+      color: ${({ theme }) => theme.colors.text.tertiary};
+      opacity: 1;
+    }
+
+    &:disabled {
+      color: ${({ theme }) => theme.colors.text.disabled};
+      cursor: not-allowed;
+    }
   }
 `;
