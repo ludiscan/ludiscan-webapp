@@ -165,50 +165,50 @@ const Component: FC<ImprovementRouteCardProps> = ({ className, route, playerId, 
 };
 
 export const ImprovementRouteCard = styled(Component)`
-  padding: 16px;
-  margin-bottom: 12px;
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgb(0 0 0 / 10%);
+  padding: ${({ theme }) => theme.spacing.md};
+  margin-bottom: ${({ theme }) => theme.spacing.sm};
+  background-color: ${({ theme }) => theme.colors.surface.base};
+  border: ${({ theme }) => theme.borders.width.thin} solid ${({ theme }) => theme.colors.border.default};
+  border-radius: ${({ theme }) => theme.borders.radius.md};
+  box-shadow: ${({ theme }) => theme.shadows.sm};
   transition: all 0.2s ease;
 
   &:hover {
-    box-shadow: 0 4px 8px rgb(0 0 0 / 15%);
+    box-shadow: ${({ theme }) => theme.shadows.md};
   }
 
   &__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-bottom: 12px;
-    margin-bottom: 12px;
-    border-bottom: 1px solid #eee;
+    padding-bottom: ${({ theme }) => theme.spacing.sm};
+    margin-bottom: ${({ theme }) => theme.spacing.sm};
+    border-bottom: ${({ theme }) => theme.borders.width.thin} solid ${({ theme }) => theme.colors.border.subtle};
   }
 
   &__badge {
-    padding: 4px 8px;
-    font-size: 12px;
-    font-weight: bold;
-    color: #fff;
-    border-radius: 4px;
+    padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.sm};
+    font-size: ${({ theme }) => theme.typography.fontSize.xs};
+    font-weight: ${({ theme }) => theme.typography.fontWeight.bold};
+    color: ${({ theme }) => theme.colors.text.inverse};
+    border-radius: ${({ theme }) => theme.borders.radius.sm};
 
     &--divergence {
-      background-color: #ff6b6b;
+      background-color: ${({ theme }) => theme.colors.semantic.error.main};
     }
 
     &--safety_passage {
-      background-color: #4ecdc4;
+      background-color: ${({ theme }) => theme.colors.semantic.info.main};
     }
 
     &--faster {
-      background-color: #45b7d1;
+      background-color: ${({ theme }) => theme.colors.primary.main};
     }
   }
 
   &__successRate {
     display: flex;
-    gap: 8px;
+    gap: ${({ theme }) => theme.spacing.sm};
     align-items: center;
   }
 
@@ -216,12 +216,12 @@ export const ImprovementRouteCard = styled(Component)`
     width: 100px;
     height: 6px;
     overflow: hidden;
-    background-color: #eee;
-    border-radius: 3px;
+    background-color: ${({ theme }) => theme.colors.surface.sunken};
+    border-radius: ${({ theme }) => theme.borders.radius.sm};
 
     &__fill {
       height: 100%;
-      background-color: #4caf50;
+      background-color: ${({ theme }) => theme.colors.semantic.success.main};
       transition: width 0.3s ease;
     }
   }
@@ -229,112 +229,115 @@ export const ImprovementRouteCard = styled(Component)`
   &__stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 12px;
-    padding: 12px;
-    margin-bottom: 12px;
-    background-color: #f9f9f9;
-    border-radius: 4px;
+    gap: ${({ theme }) => theme.spacing.sm};
+    padding: ${({ theme }) => theme.spacing.sm};
+    margin-bottom: ${({ theme }) => theme.spacing.sm};
+    background-color: ${({ theme }) => theme.colors.surface.raised};
+    border-radius: ${({ theme }) => theme.borders.radius.sm};
   }
 
   &__statItem {
     & > div {
       display: block;
-      margin-bottom: 4px;
-      font-size: 12px;
-      font-weight: bold;
-      color: #666;
+      margin-bottom: ${({ theme }) => theme.spacing.xs};
+      font-size: ${({ theme }) => theme.typography.fontSize.xs};
+      font-weight: ${({ theme }) => theme.typography.fontWeight.bold};
+      color: ${({ theme }) => theme.colors.text.secondary};
     }
 
     & > span {
       display: block;
-      font-size: 16px;
-      font-weight: bold;
-      color: #333;
+      font-size: ${({ theme }) => theme.typography.fontSize.base};
+      font-weight: ${({ theme }) => theme.typography.fontWeight.bold};
+      color: ${({ theme }) => theme.colors.text.primary};
     }
 
     &__highlight {
-      color: #4caf50 !important;
+      color: ${({ theme }) => theme.colors.semantic.success.main};
     }
   }
 
   &__evidence {
-    padding: 12px;
-    margin-bottom: 12px;
-    font-size: 13px;
-    color: #555;
-    background-color: #f5f5f5;
-    border-radius: 4px;
+    padding: ${({ theme }) => theme.spacing.sm};
+    margin-bottom: ${({ theme }) => theme.spacing.sm};
+    font-size: ${({ theme }) => theme.typography.fontSize.sm};
+    color: ${({ theme }) => theme.colors.text.secondary};
+    background-color: ${({ theme }) => theme.colors.surface.raised};
+    border-radius: ${({ theme }) => theme.borders.radius.sm};
 
     & > p {
-      margin: 4px 0;
+      margin: ${({ theme }) => theme.spacing.xs} 0;
     }
   }
 
   &__feedback {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding: 12px;
-    margin-top: 12px;
-    background-color: #fafafa;
-    border-radius: 4px;
+    gap: ${({ theme }) => theme.spacing.sm};
+    padding: ${({ theme }) => theme.spacing.sm};
+    margin-top: ${({ theme }) => theme.spacing.sm};
+    background-color: ${({ theme }) => theme.colors.surface.raised};
+    border-radius: ${({ theme }) => theme.borders.radius.sm};
   }
 
   &__feedbackStats {
-    margin-bottom: 8px;
-    font-size: 12px;
-    color: #666;
+    margin-bottom: ${({ theme }) => theme.spacing.sm};
+    font-size: ${({ theme }) => theme.typography.fontSize.xs};
+    color: ${({ theme }) => theme.colors.text.secondary};
 
     & > span {
-      margin-right: 16px;
+      margin-right: ${({ theme }) => theme.spacing.md};
     }
   }
 
   &__feedbackPrompt {
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: ${({ theme }) => theme.spacing.sm};
   }
 
   &__feedbackActions {
     display: flex;
-    gap: 8px;
-    margin-top: 8px;
+    gap: ${({ theme }) => theme.spacing.sm};
+    margin-top: ${({ theme }) => theme.spacing.sm};
   }
 
   &__actionButton {
-    padding: 8px 12px;
-    font-size: 13px;
-    font-weight: bold;
-    color: #fff;
+    padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.md};
+    font-size: ${({ theme }) => theme.typography.fontSize.sm};
+    font-weight: ${({ theme }) => theme.typography.fontWeight.bold};
+    color: ${({ theme }) => theme.colors.primary.contrast};
     cursor: pointer;
-    background-color: #2196f3;
+    background-color: ${({ theme }) => theme.colors.primary.main};
     border: none;
-    border-radius: 4px;
+    border-radius: ${({ theme }) => theme.borders.radius.sm};
     transition: background-color 0.2s ease;
 
     &:disabled {
       cursor: not-allowed;
-      background-color: #ccc;
+      background-color: ${({ theme }) => theme.colors.surface.sunken};
+      color: ${({ theme }) => theme.colors.text.disabled};
     }
 
     &:hover:not(:disabled) {
-      background-color: #1976d2;
+      background-color: ${({ theme }) => theme.colors.primary.dark};
     }
 
     &--cancel {
-      background-color: #999;
+      background-color: ${({ theme }) => theme.colors.surface.interactive};
+      color: ${({ theme }) => theme.colors.text.primary};
 
       &:hover:not(:disabled) {
-        background-color: #777;
+        background-color: ${({ theme }) => theme.colors.surface.hover};
       }
     }
 
     &--visualize {
-      margin-top: 12px;
-      background-color: #ff9800;
+      margin-top: ${({ theme }) => theme.spacing.sm};
+      background-color: ${({ theme }) => theme.colors.secondary.main};
+      color: ${({ theme }) => theme.colors.secondary.contrast};
 
       &:hover {
-        background-color: #f57c00;
+        background-color: ${({ theme }) => theme.colors.secondary.dark};
       }
     }
   }

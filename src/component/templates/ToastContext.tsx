@@ -1,11 +1,13 @@
 // ToastContext.tsx
 
+import styled from '@emotion/styled';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createContext, useContext, useState, useCallback } from 'react';
 
 import type { ReactNode, FC, CSSProperties } from 'react';
+import type { Theme } from '@emotion/react';
 
-import { colors, zIndexes } from '@src/styles/style';
+import { zIndexes } from '@src/styles/style';
 
 // =======================
 // 型定義
@@ -64,28 +66,50 @@ function getPositionStyle(position: ToastProviderProps['position']): CSSProperti
     flexDirection: 'column',
   };
   if (position === 'top-right') {
-    return { ...baseStyle, top: 20, right: 20, alignItems: 'flex-end' };
+    return { ...baseStyle, top: '1.5rem', right: '1.5rem', alignItems: 'flex-end' };
   } else if (position === 'bottom-right') {
-    return { ...baseStyle, bottom: 20, right: 20, alignItems: 'flex-end' };
+    return { ...baseStyle, bottom: '1.5rem', right: '1.5rem', alignItems: 'flex-end' };
   } else if (position === 'bottom-left') {
-    return { ...baseStyle, bottom: 20, left: 20, alignItems: 'flex-start' };
+    return { ...baseStyle, bottom: '1.5rem', left: '1.5rem', alignItems: 'flex-start' };
   } else if (position === 'top-left') {
-    return { ...baseStyle, top: 20, left: 20, alignItems: 'flex-start' };
+    return { ...baseStyle, top: '1.5rem', left: '1.5rem', alignItems: 'flex-start' };
   }
-  return { ...baseStyle, bottom: 20, left: '50%', transform: 'translateX(-50%)', alignItems: 'center' };
+  return { ...baseStyle, bottom: '1.5rem', left: '50%', transform: 'translateX(-50%)', alignItems: 'center' };
 }
 
 // トーストの色をタイプに応じて切り替え
-function getBackgroundColor(type: ToastType): string {
+function getBackgroundColor(theme: Theme, type: ToastType): string {
   if (type === 'success') {
-    return colors.primary;
+    return theme.colors.semantic.success.main;
   } else if (type === 'error') {
-    return colors.error;
+    return theme.colors.semantic.error.main;
   } else if (type === 'warning') {
-    return colors.honey05;
+    return theme.colors.semantic.warning.main;
   }
-  return colors.white;
+  return theme.colors.semantic.info.main;
 }
+
+// トーストのテキスト色を取得
+function getTextColor(theme: Theme, type: ToastType): string {
+  if (type === 'success') {
+    return theme.colors.semantic.success.contrast;
+  } else if (type === 'error') {
+    return theme.colors.semantic.error.contrast;
+  } else if (type === 'warning') {
+    return theme.colors.semantic.warning.contrast;
+  }
+  return theme.colors.semantic.info.contrast;
+}
+
+const ToastMessage = styled(motion.div)<{ $type: ToastType }>`
+  padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.md};
+  margin-top: ${({ theme }) => theme.spacing.sm};
+  font-size: ${({ theme }) => theme.typography.fontSize.sm};
+  color: ${({ theme, $type }) => getTextColor(theme, $type)};
+  background-color: ${({ theme, $type }) => getBackgroundColor(theme, $type)};
+  border-radius: ${({ theme }) => theme.borders.radius.sm};
+  box-shadow: ${({ theme }) => theme.shadows.md};
+`;
 
 const ToastContainer: FC<ToastContainerProps> = ({ toasts, position }) => {
   const containerStyle: CSSProperties = getPositionStyle(position);
@@ -94,23 +118,16 @@ const ToastContainer: FC<ToastContainerProps> = ({ toasts, position }) => {
     <div style={containerStyle}>
       <AnimatePresence>
         {toasts.map((toast) => (
-          <motion.div
+          <ToastMessage
             key={toast.id}
+            $type={toast.type}
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 30 }}
             transition={{ duration: 0.3 }}
-            style={{
-              backgroundColor: getBackgroundColor(toast.type),
-              color: '#fff',
-              padding: '8px 16px',
-              borderRadius: 4,
-              marginTop: 8,
-              // 位置によってmarginが上ではなく下に必要なら適宜調整
-            }}
           >
             {toast.message}
-          </motion.div>
+          </ToastMessage>
         ))}
       </AnimatePresence>
     </div>

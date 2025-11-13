@@ -28,23 +28,23 @@ const DividerComponent = ({ className }: DividerProps) => {
   return <div className={className} />;
 };
 
-const Orientation = (props: DividerProps) => {
-  const { orientation, thickness, margin } = props;
+const Orientation = (props: DividerProps & { theme: any }) => {
+  const { orientation, thickness, margin, theme } = props;
   if (orientation === 'vertical') {
     return {
-      width: thickness || '1px',
+      width: thickness || theme.borders.width.thin,
       height: '100%',
-      margin: margin || '0 8px',
+      margin: margin || `0 ${theme.spacing.sm}`,
     };
   }
   return {
-    height: thickness || '1px',
+    height: thickness || theme.borders.width.thin,
     width: '100%',
-    margin: margin || '8px 0',
+    margin: margin || `${theme.spacing.sm} 0`,
   };
 };
 
 export const Divider = styled(DividerComponent)<DividerProps>`
-  background-color: ${({ color, theme }) => color || theme.colors.border.default || '#e0e0e0'};
-  ${(props) => Orientation(props)}
+  background-color: ${({ color, theme }) => color || theme.colors.border.default};
+  ${(props) => Orientation({ ...props, theme: props.theme })}
 `;

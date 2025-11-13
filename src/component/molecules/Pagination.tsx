@@ -8,7 +8,6 @@ import { Button } from '@src/component/atoms/Button';
 import { FlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { fontSizes } from '@src/styles/style';
 
 /**
  * Pagination component - Standard pagination controls
@@ -122,7 +121,7 @@ const Component: FC<PaginationProps> = ({ className, currentPage, totalItems, it
 
   return (
     <div className={className}>
-      <FlexRow gap={8} align={'center'} style={{ justifyContent: 'center' }}>
+      <FlexRow gap={8} align={'center'} className={`${className}__controls`}>
         {/* First Page Button */}
         <Button
           onClick={() => onPageChange(1)}
@@ -192,7 +191,7 @@ const Component: FC<PaginationProps> = ({ className, currentPage, totalItems, it
       {/* Info Text */}
       <Text
         text={`${startItem}–${endItem} / ${totalItems}件`}
-        fontSize={fontSizes.smallest}
+        fontSize={'xs'}
         color={theme.colors.text.secondary}
         className={`${className}__info`}
       />
@@ -203,12 +202,18 @@ const Component: FC<PaginationProps> = ({ className, currentPage, totalItems, it
 export const Pagination = styled(Component)`
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: ${({ theme }) => theme.spacing.sm};
   align-items: center;
-  padding: 12px;
+  padding: ${({ theme }) => theme.spacing.sm};
+
+  &__controls {
+    justify-content: center;
+  }
 
   &__navButton {
-    padding: 4px 8px;
+    padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.sm};
+    min-width: 44px;
+    min-height: 44px;
 
     &:disabled {
       cursor: not-allowed;
@@ -217,16 +222,16 @@ export const Pagination = styled(Component)`
   }
 
   &__pageButton {
-    min-width: 32px;
-    height: 32px;
-    padding: 0 8px;
-    font-size: 14px;
-    font-weight: 500;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 ${({ theme }) => theme.spacing.sm};
+    font-size: ${({ theme }) => theme.typography.fontSize.sm};
+    font-weight: ${({ theme }) => theme.typography.fontWeight.medium};
     color: ${({ theme }) => theme.colors.text.primary};
     cursor: pointer;
-    background-color: ${({ theme }) => theme.colors.surface.sunken ?? 'rgba(255, 255, 255, 0.02)'};
-    border: 1px solid ${({ theme }) => theme.colors.border.default};
-    border-radius: 4px;
+    background-color: ${({ theme }) => theme.colors.surface.sunken};
+    border: ${({ theme }) => theme.borders.width.thin} solid ${({ theme }) => theme.colors.border.default};
+    border-radius: ${({ theme }) => theme.borders.radius.sm};
     transition: all 0.2s ease;
 
     &:disabled {
@@ -235,12 +240,12 @@ export const Pagination = styled(Component)`
     }
 
     &:hover:not(:disabled) {
-      background-color: ${({ theme }) => theme.colors.primary.main}22;
+      background-color: ${({ theme }) => theme.colors.surface.hover};
       border-color: ${({ theme }) => theme.colors.primary.main};
     }
 
     &--active {
-      color: white;
+      color: ${({ theme }) => theme.colors.primary.contrast};
       cursor: default;
       background-color: ${({ theme }) => theme.colors.primary.main};
       border-color: ${({ theme }) => theme.colors.primary.main};
@@ -252,8 +257,8 @@ export const Pagination = styled(Component)`
     }
 
     &--ellipsis {
-      padding: 0 4px;
-      font-weight: 400;
+      padding: 0 ${({ theme }) => theme.spacing.xs};
+      font-weight: ${({ theme }) => theme.typography.fontWeight.regular};
       cursor: default;
       background-color: transparent;
       border: none;
@@ -266,7 +271,7 @@ export const Pagination = styled(Component)`
   }
 
   &__info {
-    font-size: 12px;
+    font-size: ${({ theme }) => theme.typography.fontSize.xs};
     text-align: center;
   }
 `;

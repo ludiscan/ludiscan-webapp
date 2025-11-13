@@ -273,31 +273,35 @@ const createBackgroundGradient = (theme: Theme, currentMinTime: number, currentM
 
 export const TimelineControllerBlock = memo(
   styled(Component)`
-    max-width: 450px;
-    height: 24px;
-    padding: 16px 16px 20px;
+    max-width: 90vw;
+    height: ${({ theme }) => theme.spacing.lg};
+    padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.lg};
     color: ${({ theme }) => theme.colors.text.primary};
-    border-radius: 32px;
+    border-radius: ${({ theme }) => theme.borders.radius.xl};
     transition: all 0.2s ease-in-out;
 
+    @media (min-width: 500px) {
+      max-width: 450px;
+    }
+
     &.open {
-      height: 45px;
+      height: calc(${({ theme }) => theme.spacing.lg} * 2);
     }
 
     &__sliderWrapper {
       position: relative;
       flex: 1;
       min-width: 150px;
-      height: 20px;
+      height: ${({ theme }) => theme.spacing.lg};
     }
 
     &__sliderBackground {
       position: absolute;
       top: 50%;
       width: 100%;
-      height: 4px;
+      height: ${({ theme }) => theme.spacing.xs};
       background: ${({ theme, currentMinTime, currentMaxTime, maxTime }) => createBackgroundGradient(theme, currentMinTime, currentMaxTime, maxTime)};
-      border-radius: 2px;
+      border-radius: ${({ theme }) => theme.borders.radius.sm};
       transform: translateY(-50%);
     }
 
@@ -310,6 +314,15 @@ export const TimelineControllerBlock = memo(
       align-content: center;
       cursor: pointer;
       transform: translate(-50%, -50%);
+
+      &:focus {
+        outline: 2px solid ${({ theme }) => theme.colors.border.focus};
+        outline-offset: 2px;
+      }
+
+      &:focus:not(:focus-visible) {
+        outline: none;
+      }
     }
 
     &__thumb--min {
@@ -334,21 +347,35 @@ export const TimelineControllerBlock = memo(
       &::-webkit-slider-thumb {
         /* English comment: taller thumb for current */
         width: 6px;
-        height: 20px;
+        height: ${({ theme }) => theme.spacing.lg};
         appearance: none;
         cursor: pointer;
         background: ${({ theme }) => theme.colors.surface.base};
-        border: 1px solid ${({ theme }) => theme.colors.primary.main};
-        border-radius: 8px;
+        border: ${({ theme }) => theme.borders.width.thin} solid ${({ theme }) => theme.colors.primary.main};
+        border-radius: ${({ theme }) => theme.borders.radius.md};
       }
 
       &::-moz-range-thumb {
         width: 6px;
-        height: 20px;
+        height: ${({ theme }) => theme.spacing.lg};
         cursor: pointer;
         background: ${({ theme }) => theme.colors.surface.base};
-        border: 1px solid ${({ theme }) => theme.colors.primary.main};
-        border-radius: 8px;
+        border: ${({ theme }) => theme.borders.width.thin} solid ${({ theme }) => theme.colors.primary.main};
+        border-radius: ${({ theme }) => theme.borders.radius.md};
+      }
+
+      &:focus {
+        outline: none;
+      }
+
+      &:focus-visible::-webkit-slider-thumb {
+        outline: 2px solid ${({ theme }) => theme.colors.border.focus};
+        outline-offset: 2px;
+      }
+
+      &:focus-visible::-moz-range-thumb {
+        outline: 2px solid ${({ theme }) => theme.colors.border.focus};
+        outline-offset: 2px;
       }
     }
 
@@ -379,7 +406,7 @@ export const TimelineControllerBlock = memo(
     &__label {
       position: absolute;
       right: 0;
-      bottom: -18px;
+      bottom: calc(-1 * ${({ theme }) => theme.spacing.md});
       transition: all 0.2s ease-in-out;
 
       &.open {
@@ -390,7 +417,7 @@ export const TimelineControllerBlock = memo(
     &__speedLabel {
       position: absolute;
       right: 0;
-      bottom: 13px;
+      bottom: ${({ theme }) => theme.spacing.sm};
     }
 
     &__playSpeedText {

@@ -24,23 +24,8 @@ const SwitchComponent: FC<SwitchProps> = ({ className, label, checked, size = 'm
 export const Switch = styled(SwitchComponent)`
   position: relative;
   display: inline-block;
-  width: 50px;
-  height: 24px;
-
-  &.small {
-    width: 40px;
-    height: 20px;
-  }
-
-  &.medium {
-    width: 50px;
-    height: 24px;
-  }
-
-  &.large {
-    width: 60px;
-    height: 30px;
-  }
+  width: ${({ size }) => (size === 'small' ? '40px' : size === 'large' ? '60px' : '50px')};
+  height: ${({ size }) => (size === 'small' ? '20px' : size === 'large' ? '30px' : '24px')};
 
   .disabled {
     cursor: not-allowed;
@@ -58,28 +43,42 @@ export const Switch = styled(SwitchComponent)`
     inset: 0;
     cursor: pointer;
     background-color: ${({ theme }) => theme.colors.surface.interactive};
-    border: 1px solid ${({ theme }) => theme.colors.border.subtle};
-    border-radius: ${({ size }) => (size === 'small' ? '10px' : size === 'medium' ? '12px' : '14px')};
+    border: ${({ theme }) => theme.borders.width.thin} solid ${({ theme }) => theme.colors.border.subtle};
+    border-radius: ${({ theme }) => theme.borders.radius.full};
     transition: 0.4s;
+  }
+
+  input:focus + &__slider {
+    outline: 2px solid ${({ theme }) => theme.colors.border.focus};
+    outline-offset: 2px;
+  }
+
+  input:focus:not(:focus-visible) + &__slider {
+    outline: none;
   }
 
   input:checked + &__slider {
     background-color: ${({ theme }) => theme.colors.primary.main};
+    border-color: ${({ theme }) => theme.colors.primary.main};
   }
 
   &__slider::before {
     position: absolute;
-    top: ${({ size }) => (size === 'small' ? '2px' : size === 'medium' ? '3px' : '4px')};
-    left: ${({ size }) => (size === 'small' ? '2px' : size === 'medium' ? '3px' : '4px')};
-    width: calc(${({ size }) => (size === 'small' ? '16px' : size === 'medium' ? '20px' : '24px')} - 4px);
-    height: calc(${({ size }) => (size === 'small' ? '16px' : size === 'medium' ? '20px' : '24px')} - 4px);
+    top: ${({ theme }) => theme.borders.width.default};
+    left: ${({ theme }) => theme.borders.width.default};
+    width: calc(
+      ${({ size }) => (size === 'small' ? '16px' : size === 'large' ? '24px' : '20px')} - 2 * ${({ theme }) => theme.borders.width.default}
+    );
+    height: calc(
+      ${({ size }) => (size === 'small' ? '16px' : size === 'large' ? '24px' : '20px')} - 2 * ${({ theme }) => theme.borders.width.default}
+    );
     content: '';
-    background-color: white;
-    border-radius: 50%;
+    background-color: ${({ theme }) => theme.colors.surface.base};
+    border-radius: ${({ theme }) => theme.borders.radius.full};
     transition: 0.4s;
   }
 
   input:checked + &__slider::before {
-    transform: ${({ size }) => (size === 'small' ? 'translateX(20px)' : size === 'medium' ? 'translateX(26px)' : 'translateX(32px)')};
+    transform: ${({ size }) => (size === 'small' ? 'translateX(20px)' : size === 'large' ? 'translateX(30px)' : 'translateX(26px)')};
   }
 `;

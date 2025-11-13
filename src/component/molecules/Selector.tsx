@@ -28,7 +28,7 @@ const ScrollableContentColumn = styled(Menu.ContentColumn)`
 
   /* スクロールバーのスタイリング */
   &::-webkit-scrollbar {
-    width: 6px;
+    width: ${({ theme }) => theme.spacing.xs};
   }
 
   &::-webkit-scrollbar-track {
@@ -37,7 +37,7 @@ const ScrollableContentColumn = styled(Menu.ContentColumn)`
 
   &::-webkit-scrollbar-thumb {
     background: ${({ theme }) => theme.colors.border.default};
-    border-radius: 3px;
+    border-radius: ${({ theme }) => theme.borders.radius.sm};
 
     &:hover {
       background: ${({ theme }) => theme.colors.border.strong};
@@ -94,16 +94,16 @@ export const Selector = styled(Component)`
   }
 
   & option {
-    padding: 8px;
+    padding: ${({ theme }) => theme.spacing.sm};
   }
 
   &__text {
     display: flex;
-    gap: 12px;
+    gap: ${({ theme }) => theme.spacing.sm};
     align-items: center;
     justify-content: space-between;
     min-width: 80px;
-    padding: 4px 6px;
+    padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.sm};
 
     &:hover {
       background: ${({ theme }) => theme.colors.surface.raised};
