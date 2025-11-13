@@ -12,7 +12,6 @@ import { Card } from '@src/component/atoms/Card';
 import { FlexRow, InlineFlexColumn, InlineFlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { fontSizes } from '@src/styles/style';
 
 export const PlaySpeed = [0.25, 0.5, 1, 2, 4] as const;
 export type PlaySpeedType = (typeof PlaySpeed)[number];

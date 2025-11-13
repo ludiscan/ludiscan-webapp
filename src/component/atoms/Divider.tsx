@@ -1,6 +1,8 @@
 // atoms/Divider.tsx
 import styled from '@emotion/styled';
 
+import type { Theme } from '@emotion/react';
+
 export type DividerProps = {
   className?: string;
   /**
@@ -28,7 +30,7 @@ const DividerComponent = ({ className }: DividerProps) => {
   return <div className={className} />;
 };
 
-const Orientation = (props: DividerProps & { theme: any }) => {
+const Orientation = (props: DividerProps & { theme: Theme }) => {
   const { orientation, thickness, margin, theme } = props;
   if (orientation === 'vertical') {
     return {
