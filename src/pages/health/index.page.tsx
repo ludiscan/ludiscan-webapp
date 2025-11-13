@@ -24,7 +24,13 @@ const Component: FC<HealthPageProps> = ({ className }) => {
   const router = useRouter();
   const { theme } = useSharedTheme();
   const [autoRefresh, setAutoRefresh] = useState(true);
-  const { data, isLoading: healthLoading, error, refetch, dataUpdatedAt } = useHealthCheck({
+  const {
+    data,
+    isLoading: healthLoading,
+    error,
+    refetch,
+    dataUpdatedAt,
+  } = useHealthCheck({
     refetchInterval: autoRefresh ? 30000 : undefined,
     enabled: autoRefresh,
   });
@@ -75,7 +81,7 @@ const Component: FC<HealthPageProps> = ({ className }) => {
         <div className={`${className}__container`}>
           {/* Overall Status Card */}
           <Card blur color={theme.colors.surface.base} className={`${className}__card`}>
-            <FlexRow gap={16} align='center' justify='space-between'>
+            <FlexRow gap={16} align='center'>
               <FlexColumn gap={8}>
                 <Text text='Overall Status' fontSize={fontSizes.large2} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
                 <FlexRow gap={12} align='center'>
@@ -123,7 +129,12 @@ const Component: FC<HealthPageProps> = ({ className }) => {
                 <FlexRow gap={12} align='center'>
                   <div className={`${className}__errorIcon`}>!</div>
                   <FlexColumn gap={4}>
-                    <Text text='Failed to fetch health status' fontSize={fontSizes.medium} color={theme.colors.semantic.error.main} fontWeight={fontWeights.bold} />
+                    <Text
+                      text='Failed to fetch health status'
+                      fontSize={fontSizes.medium}
+                      color={theme.colors.semantic.error.main}
+                      fontWeight={fontWeights.bold}
+                    />
                     <Text text={error.message || 'Unknown error'} fontSize={fontSizes.small} color={theme.colors.semantic.error.dark} fontWeight='lighter' />
                   </FlexColumn>
                 </FlexRow>
@@ -148,8 +159,8 @@ const Component: FC<HealthPageProps> = ({ className }) => {
 
                 return (
                   <Card key={serviceName} blur color={theme.colors.surface.base} className={`${className}__serviceCard`}>
-                    <FlexColumn gap={12}>
-                      <FlexRow gap={12} align='center' justify='space-between'>
+                    <FlexColumn gap={12} align={'center'}>
+                      <FlexRow gap={12} align='center'>
                         <Text
                           text={serviceName.charAt(0).toUpperCase() + serviceName.slice(1)}
                           fontSize={fontSizes.large1}
@@ -208,7 +219,8 @@ const HealthPage = styled(Component)`
   height: 100vh;
 
   &__container {
-    padding: 0 24px;
+    max-width: 800px;
+    padding: 12px 24px;
     margin-bottom: 24px;
   }
 
@@ -218,11 +230,13 @@ const HealthPage = styled(Component)`
 
   &__serviceCard {
     padding: 20px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
 
     &:hover {
-      transform: translateY(-2px);
       box-shadow: ${({ theme }) => theme.shadows.md};
+      transform: translateY(-2px);
     }
   }
 
@@ -235,8 +249,8 @@ const HealthPage = styled(Component)`
   &__statusBadge {
     display: inline-flex;
     padding: 6px 12px;
-    border-radius: 16px;
     border: 1px solid;
+    border-radius: 16px;
     backdrop-filter: blur(8px);
   }
 
@@ -252,6 +266,7 @@ const HealthPage = styled(Component)`
     100% {
       opacity: 1;
     }
+
     50% {
       opacity: 0.5;
     }
@@ -265,16 +280,16 @@ const HealthPage = styled(Component)`
   }
 
   &__errorIcon {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background-color: ${({ theme }) => theme.colors.semantic.error.main};
-    color: ${({ theme }) => theme.colors.semantic.error.contrast};
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 32px;
+    height: 32px;
     font-size: 20px;
     font-weight: bold;
+    color: ${({ theme }) => theme.colors.semantic.error.contrast};
+    background-color: ${({ theme }) => theme.colors.semantic.error.main};
+    border-radius: 50%;
   }
 
   &__detailRow {
