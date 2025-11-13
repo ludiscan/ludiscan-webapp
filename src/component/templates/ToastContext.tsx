@@ -101,7 +101,7 @@ function getTextColor(theme: Theme, type: ToastType): string {
   return theme.colors.semantic.info.contrast;
 }
 
-const ToastMessage = styled(motion.div)<{ $type: ToastType }>`
+const ToastMessageBase = styled.div<{ $type: ToastType }>`
   padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.md};
   margin-top: ${({ theme }) => theme.spacing.sm};
   font-size: ${({ theme }) => theme.typography.fontSize.sm};
@@ -110,6 +110,8 @@ const ToastMessage = styled(motion.div)<{ $type: ToastType }>`
   border-radius: ${({ theme }) => theme.borders.radius.sm};
   box-shadow: ${({ theme }) => theme.shadows.md};
 `;
+
+const ToastMessage = motion(ToastMessageBase);
 
 const ToastContainer: FC<ToastContainerProps> = ({ toasts, position }) => {
   const containerStyle: CSSProperties = getPositionStyle(position);

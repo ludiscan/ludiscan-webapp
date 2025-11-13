@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import type { FC } from 'react';
 
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
+import { zIndexes } from '@src/styles/style';
 
 interface Point3D {
   x: number;
@@ -178,7 +179,7 @@ export const ImprovementRouteVisualizer = styled(Component)`
   &__overlay {
     position: fixed;
     inset: 0;
-    z-index: ${({ theme }) => (theme.mode === 'light' ? 1000 : 1000)};
+    z-index: ${zIndexes.modal};
     display: flex;
     align-items: center;
     justify-content: center;
