@@ -189,12 +189,7 @@ const Component: FC<PaginationProps> = ({ className, currentPage, totalItems, it
       </FlexRow>
 
       {/* Info Text */}
-      <Text
-        text={`${startItem}–${endItem} / ${totalItems}件`}
-        fontSize={'xs'}
-        color={theme.colors.text.secondary}
-        className={`${className}__info`}
-      />
+      <Text text={`${startItem}–${endItem} / ${totalItems}件`} fontSize={'xs'} color={theme.colors.text.secondary} className={`${className}__info`} />
     </div>
   );
 };

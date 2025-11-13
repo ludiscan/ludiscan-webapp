@@ -66,12 +66,8 @@ export const Switch = styled(SwitchComponent)`
     position: absolute;
     top: ${({ theme }) => theme.borders.width.default};
     left: ${({ theme }) => theme.borders.width.default};
-    width: calc(
-      ${({ size }) => (size === 'small' ? '16px' : size === 'large' ? '24px' : '20px')} - 2 * ${({ theme }) => theme.borders.width.default}
-    );
-    height: calc(
-      ${({ size }) => (size === 'small' ? '16px' : size === 'large' ? '24px' : '20px')} - 2 * ${({ theme }) => theme.borders.width.default}
-    );
+    width: calc(${({ size }) => (size === 'small' ? '16px' : size === 'large' ? '24px' : '20px')} - 2 * ${({ theme }) => theme.borders.width.default});
+    height: calc(${({ size }) => (size === 'small' ? '16px' : size === 'large' ? '24px' : '20px')} - 2 * ${({ theme }) => theme.borders.width.default});
     content: '';
     background-color: ${({ theme }) => theme.colors.surface.base};
     border-radius: ${({ theme }) => theme.borders.radius.full};

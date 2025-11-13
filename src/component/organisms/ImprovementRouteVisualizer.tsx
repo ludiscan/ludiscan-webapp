@@ -178,7 +178,7 @@ export const ImprovementRouteVisualizer = styled(Component)`
   &__overlay {
     position: fixed;
     inset: 0;
-    z-index: ${({ theme }) => theme.mode === 'light' ? 1000 : 1000};
+    z-index: ${({ theme }) => (theme.mode === 'light' ? 1000 : 1000)};
     display: flex;
     align-items: center;
     justify-content: center;
