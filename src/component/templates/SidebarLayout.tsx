@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { BiHome, BiUser, BiKey, BiLock, BiBook, BiChevronDown, BiChevronRight } from 'react-icons/bi';
+import { BiHome, BiUser, BiKey, BiLock, BiBook, BiChevronDown, BiChevronRight, BiPulse } from 'react-icons/bi';
 
 import type { DocGroup } from '@src/utils/docs/types';
 import type { FC } from 'react';
@@ -31,6 +31,7 @@ const MENU_ITEMS: MenuItem[] = [
   { label: 'Profile', href: '/profile', icon: <BiUser size={20} />, requiresAuth: true },
   { label: 'API Keys', href: '/api-keys', icon: <BiKey size={20} />, requiresAuth: true },
   { label: 'Security', href: '/security', icon: <BiLock size={20} />, requiresAuth: true },
+  { label: 'Health Check', href: '/health', icon: <BiPulse size={20} />, requiresAuth: false },
   { label: 'Docs', icon: <BiBook size={20} />, requiresAuth: true, isDropdown: true },
 ];
 
