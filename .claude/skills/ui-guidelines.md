@@ -1183,6 +1183,419 @@ const StyledModal = styled.div`
 // toast: 600
 ```
 
+## Conditional Rendering Best Practices
+
+### The `&&` Operator Pitfall
+
+**Be careful with `&&` operator** - it can render unexpected values like `0`, `NaN`, or empty strings.
+
+#### ❌ BAD: Renders "0" when count is 0
+
+```tsx
+const Component = ({ count }: { count: number }) => {
+  return (
+    <div>
+      {count && <div>Count: {count}</div>}
+      {/* If count is 0, this renders "0" on the page! */}
+    </div>
+  );
+};
+```
+
+#### ✅ GOOD: Explicit boolean conversion
+
+```tsx
+const Component = ({ count }: { count: number }) => {
+  return (
+    <div>
+      {/* Option 1: Explicit comparison */}
+      {count > 0 && <div>Count: {count}</div>}
+
+      {/* Option 2: Double negation for boolean conversion */}
+      {!!count && <div>Count: {count}</div>}
+
+      {/* Option 3: Ternary operator (most explicit) */}
+      {count ? <div>Count: {count}</div> : null}
+    </div>
+  );
+};
+```
+
+### String and Array Checks
+
+```tsx
+// ❌ BAD: Can render empty string
+{text && <div>{text}</div>}
+{items.length && <List items={items} />} // Renders 0 if empty
+
+// ✅ GOOD: Explicit checks
+{text.length > 0 && <div>{text}</div>}
+{!!text && <div>{text}</div>}
+{items.length > 0 && <List items={items} />}
+{text ? <div>{text}</div> : null}
+```
+
+### Ternary Operator vs &&
+
+**Use ternary when you have both true and false cases.**
+
+```tsx
+// ❌ BAD: Using && with null
+const Component = ({ isLoading }: Props) => {
+  return (
+    <div>
+      {isLoading && <Spinner />}
+      {!isLoading && <Content />}
+    </div>
+  );
+};
+
+// ✅ GOOD: Ternary is clearer
+const Component = ({ isLoading }: Props) => {
+  return (
+    <div>
+      {isLoading ? <Spinner /> : <Content />}
+    </div>
+  );
+};
+```
+
+### Optional Chaining (`?.`)
+
+**Use optional chaining to safely access nested properties.**
+
+```tsx
+// ❌ BAD: Manual null checks
+const Component = ({ user }: Props) => {
+  return (
+    <div>
+      {user && user.profile && user.profile.avatar && (
+        <img src={user.profile.avatar.url} />
+      )}
+    </div>
+  );
+};
+
+// ✅ GOOD: Optional chaining
+const Component = ({ user }: Props) => {
+  return (
+    <div>
+      {user?.profile?.avatar?.url && (
+        <img src={user.profile.avatar.url} />
+      )}
+    </div>
+  );
+};
+
+// ✅ EVEN BETTER: With nullish coalescing for fallback
+const Component = ({ user }: Props) => {
+  const avatarUrl = user?.profile?.avatar?.url ?? '/default-avatar.png';
+  return <img src={avatarUrl} />;
+};
+```
+
+### Nullish Coalescing (`??`)
+
+**Use `??` instead of `||` when you want to preserve falsy values like `0`, `false`, or `''`.**
+
+```tsx
+// ❌ BAD: || ignores 0, false, ''
+const Component = ({ count, enabled, label }: Props) => {
+  const displayCount = count || 10; // If count is 0, uses 10 (wrong!)
+  const isEnabled = enabled || true; // If enabled is false, uses true (wrong!)
+  const displayLabel = label || 'Default'; // If label is '', uses 'Default' (maybe wrong)
+};
+
+// ✅ GOOD: ?? only checks for null/undefined
+const Component = ({ count, enabled, label }: Props) => {
+  const displayCount = count ?? 10; // If count is 0, uses 0 (correct!)
+  const isEnabled = enabled ?? true; // If enabled is false, uses false (correct!)
+  const displayLabel = label ?? 'Default'; // If label is '', uses '' (correct!)
+};
+```
+
+### Complex Conditions
+
+**Extract complex conditions to variables for readability.**
+
+```tsx
+// ❌ BAD: Unreadable nested conditions
+const Component = ({ user, settings }: Props) => {
+  return (
+    <div>
+      {user && user.isPremium && settings && settings.features && settings.features.advancedMode && (
+        <AdvancedFeatures />
+      )}
+    </div>
+  );
+};
+
+// ✅ GOOD: Extract to variable
+const Component = ({ user, settings }: Props) => {
+  const canShowAdvanced =
+    user?.isPremium &&
+    settings?.features?.advancedMode;
+
+  return (
+    <div>
+      {canShowAdvanced && <AdvancedFeatures />}
+    </div>
+  );
+};
+
+// ✅ EVEN BETTER: Extract to helper function or custom hook
+const useCanShowAdvanced = (user: User, settings: Settings) => {
+  return user?.isPremium && settings?.features?.advancedMode;
+};
+
+const Component = ({ user, settings }: Props) => {
+  const canShowAdvanced = useCanShowAdvanced(user, settings);
+
+  return (
+    <div>
+      {canShowAdvanced && <AdvancedFeatures />}
+    </div>
+  );
+};
+```
+
+### Multiple Conditions
+
+**Use early returns or separate components for multiple conditions.**
+
+```tsx
+// ❌ BAD: Deeply nested ternaries
+const Component = ({ status }: Props) => {
+  return (
+    <div>
+      {status === 'loading' ? (
+        <Spinner />
+      ) : status === 'error' ? (
+        <Error />
+      ) : status === 'empty' ? (
+        <Empty />
+      ) : (
+        <Content />
+      )}
+    </div>
+  );
+};
+
+// ✅ GOOD: Early returns
+const Component = ({ status }: Props) => {
+  if (status === 'loading') return <Spinner />;
+  if (status === 'error') return <Error />;
+  if (status === 'empty') return <Empty />;
+
+  return <Content />;
+};
+
+// ✅ ALSO GOOD: Object mapping
+const Component = ({ status }: Props) => {
+  const statusComponents = {
+    loading: <Spinner />,
+    error: <Error />,
+    empty: <Empty />,
+    success: <Content />,
+  };
+
+  return statusComponents[status] || <Content />;
+};
+```
+
+## Naming Conventions
+
+### Component Names
+
+**Use PascalCase for all React components.**
+
+```tsx
+// ✅ GOOD
+const UserProfile = () => { /* ... */ };
+const ProjectList = () => { /* ... */ };
+const HeatmapViewer = () => { /* ... */ };
+
+// ❌ BAD
+const userProfile = () => { /* ... */ };
+const project_list = () => { /* ... */ };
+```
+
+### File Names
+
+**Follow project-specific extensions.**
+
+```tsx
+// ✅ GOOD: Page components
+// src/pages/heatmap/index.page.tsx
+// src/pages/api/projects.api.ts
+
+// ✅ GOOD: Regular components
+// src/component/atoms/Button.tsx
+// src/component/molecules/Modal.tsx
+
+// ✅ GOOD: Storybook stories
+// src/component/atoms/Button.stories.tsx
+
+// ✅ GOOD: Tests
+// src/__tests__/utils/string.test.ts
+```
+
+### Variables and Functions
+
+**Use camelCase for variables and functions.**
+
+```tsx
+// ✅ GOOD
+const userName = 'John';
+const projectList = [];
+const handleClick = () => { /* ... */ };
+const fetchUserData = async () => { /* ... */ };
+
+// ❌ BAD
+const UserName = 'John';
+const project_list = [];
+const HandleClick = () => { /* ... */ };
+```
+
+### Constants
+
+**Use UPPER_SNAKE_CASE for true constants.**
+
+```tsx
+// ✅ GOOD: True constants
+const MAX_RETRY_COUNT = 3;
+const API_BASE_URL = 'https://api.example.com';
+const DEFAULT_TIMEOUT = 5000;
+
+// ✅ GOOD: Const objects (use as const)
+const ROUTES = {
+  HOME: '/home',
+  PROFILE: '/profile',
+  SETTINGS: '/settings',
+} as const;
+
+// ❌ BAD: Not really constants
+const maxRetryCount = 3; // Should be UPPER_SNAKE_CASE
+const apiBaseUrl = 'https://api.example.com'; // Should be UPPER_SNAKE_CASE
+```
+
+### Boolean Variables
+
+**Use `is`, `has`, `should`, or `can` prefix for booleans.**
+
+```tsx
+// ✅ GOOD
+const isLoading = true;
+const hasError = false;
+const shouldRender = true;
+const canEdit = false;
+const isEnabled = true;
+const hasPermission = false;
+
+// ❌ BAD
+const loading = true;
+const error = false;
+const render = true;
+const edit = false;
+```
+
+### Event Handlers
+
+**Use `handle` prefix for event handlers.**
+
+```tsx
+// ✅ GOOD
+const handleClick = () => { /* ... */ };
+const handleSubmit = () => { /* ... */ };
+const handleChange = (e: ChangeEvent) => { /* ... */ };
+const handleKeyPress = (e: KeyboardEvent) => { /* ... */ };
+
+// ❌ BAD
+const onClick = () => { /* ... */ };
+const submit = () => { /* ... */ };
+const change = () => { /* ... */ };
+```
+
+### Custom Hooks
+
+**Always start with `use` prefix.**
+
+```tsx
+// ✅ GOOD
+const useAuth = () => { /* ... */ };
+const useGetApi = () => { /* ... */ };
+const useHeatmapState = () => { /* ... */ };
+const useLocalStorage = <T,>(key: string, initialValue: T) => { /* ... */ };
+
+// ❌ BAD
+const auth = () => { /* ... */ };
+const getApi = () => { /* ... */ };
+const heatmapState = () => { /* ... */ };
+```
+
+### Props Type Names
+
+**Use `ComponentNameProps` pattern.**
+
+```tsx
+// ✅ GOOD
+type ButtonProps = {
+  onClick: () => void;
+  children: ReactNode;
+};
+
+type UserCardProps = {
+  user: User;
+  onEdit: () => void;
+};
+
+type HeatmapViewerProps = {
+  projectId: string;
+  sessionId: string;
+};
+
+// ❌ BAD
+type Props = { /* ... */ }; // Too generic
+type IButton = { /* ... */ }; // Don't use I prefix
+type ButtonProperties = { /* ... */ }; // Too verbose
+```
+
+### API Function Names
+
+**Be descriptive and use verb prefixes.**
+
+```tsx
+// ✅ GOOD
+const getProjects = async () => { /* ... */ };
+const createProject = async (data: Project) => { /* ... */ };
+const updateProject = async (id: string, data: Partial<Project>) => { /* ... */ };
+const deleteProject = async (id: string) => { /* ... */ };
+const fetchUserProfile = async () => { /* ... */ };
+
+// ❌ BAD
+const projects = async () => { /* ... */ };
+const project = async (data: Project) => { /* ... */ };
+const save = async (id: string, data: Partial<Project>) => { /* ... */ };
+```
+
+### Utility Function Names
+
+**Be specific about what the function does.**
+
+```tsx
+// ✅ GOOD
+const formatDate = (date: Date) => { /* ... */ };
+const validateEmail = (email: string) => { /* ... */ };
+const sanitizeFileName = (filename: string) => { /* ... */ };
+const calculateDistance = (p1: Point, p2: Point) => { /* ... */ };
+
+// ❌ BAD
+const format = (date: Date) => { /* ... */ };
+const validate = (email: string) => { /* ... */ };
+const sanitize = (filename: string) => { /* ... */ };
+const calc = (p1: Point, p2: Point) => { /* ... */ };
+```
+
 ## TypeScript Best Practices
 
 ### Never Use `any` Type
@@ -2042,13 +2455,28 @@ const nextConfig = {
 30. ❌ Don't skip PerformanceMonitor - important for dynamic quality adjustment
 31. ❌ Don't forget cleanup in useEffect when loading models
 
+### Conditional Rendering Mistakes
+
+32. ❌ Don't use `&&` with numbers/strings - can render `0` or empty string
+33. ❌ Don't use `||` for nullish coalescing - use `??` to preserve `0`, `false`, `''`
+34. ❌ Don't nest ternaries deeply - use early returns or object mapping
+35. ❌ Don't forget optional chaining (`?.`) for nested properties
+
+### Naming Convention Mistakes
+
+36. ❌ Don't use camelCase for components - use PascalCase
+37. ❌ Don't use generic names for booleans - use `is/has/should/can` prefix
+38. ❌ Don't use generic event handler names - use `handle` prefix
+39. ❌ Don't forget `use` prefix for custom hooks
+40. ❌ Don't use generic `Props` type name - use `ComponentNameProps`
+
 ### Security Mistakes
 
-32. ❌ **NEVER use `dangerouslySetInnerHTML`** - opens XSS vulnerabilities
-33. ❌ Don't use user input directly in URLs - sanitize and validate first
-34. ❌ Don't expose sensitive data in error messages
-35. ❌ Don't skip API response error checking - always check `.error` property
-36. ❌ Don't store auth tokens in component state - use localStorage helpers
+41. ❌ **NEVER use `dangerouslySetInnerHTML`** - opens XSS vulnerabilities
+42. ❌ Don't use user input directly in URLs - sanitize and validate first
+43. ❌ Don't expose sensitive data in error messages
+44. ❌ Don't skip API response error checking - always check `.error` property
+45. ❌ Don't store auth tokens in component state - use localStorage helpers
 
 ## Quick Reference Checklist
 
@@ -2085,6 +2513,25 @@ Before submitting a PR with UI changes, verify:
 - [ ] List items have stable, unique keys (not index or random values)
 - [ ] No components defined inside components
 - [ ] All useEffect hooks have proper cleanup
+
+**Conditional Rendering:**
+- [ ] No `&&` operator with numeric values that could render `0`
+- [ ] Explicit boolean conversion used (`!!value` or `value > 0`)
+- [ ] Optional chaining (`?.`) used for nested property access
+- [ ] Nullish coalescing (`??`) used instead of `||` when `0` or `''` are valid values
+- [ ] Complex conditions extracted to variables for readability
+- [ ] Multiple conditions handled with early returns or object mapping
+
+**Naming Conventions:**
+- [ ] Components use PascalCase (e.g., `UserProfile`)
+- [ ] Files follow project conventions (`.page.tsx`, `.api.ts`, `.stories.tsx`)
+- [ ] Variables and functions use camelCase (e.g., `userData`, `handleClick`)
+- [ ] Constants use UPPER_SNAKE_CASE (e.g., `MAX_RETRY_COUNT`)
+- [ ] Boolean variables have `is/has/should/can` prefix (e.g., `isLoading`, `hasError`)
+- [ ] Event handlers use `handle` prefix (e.g., `handleClick`, `handleSubmit`)
+- [ ] Custom hooks use `use` prefix (e.g., `useAuth`, `useHeatmapData`)
+- [ ] Props types follow `ComponentNameProps` pattern
+- [ ] API functions have clear verb prefixes (e.g., `fetchUser`, `createProject`)
 
 **TypeScript:**
 - [ ] No `any` types used - proper types or `unknown` instead
