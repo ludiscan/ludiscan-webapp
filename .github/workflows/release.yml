@@ -65,7 +65,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          PR_NUMBER=$(gh pr create \
+          PR_URL=$(gh pr create \
             --title "Release ${{ steps.version.outputs.new_version }}" \
             --body "## Release ${{ steps.version.outputs.new_version }}
 
@@ -75,9 +75,11 @@ jobs:
 
           The git tag will be automatically created after merging." \
             --base ${{ github.ref_name }} \
-            --head ${{ steps.version.outputs.branch_name }} \
-            --json number -q .number)
+            --head ${{ steps.version.outputs.branch_name }})
+          PR_NUMBER=$(echo "$PR_URL" | grep -oE '[0-9]+$')
           echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+          echo "PR URL: $PR_URL"
+          echo "PR Number: $PR_NUMBER"
 
       - name: Merge Pull Request
         env:
