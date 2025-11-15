@@ -372,6 +372,455 @@ import { IconContext } from 'react-icons';
 - Use `useCallback` for event handlers in lists
 - Avoid inline style objects (use styled components)
 
+## React Best Practices
+
+### useEffect Usage
+
+**DO NOT overuse useEffect.** It should only be used for synchronizing with external systems (APIs, browser APIs, third-party libraries), not for orchestrating data flow.
+
+#### ❌ BAD: Using useEffect only to update state
+
+```tsx
+// Anti-pattern: useEffect only updating state based on props
+const Component = ({ userId }: Props) => {
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    // This is unnecessary - just derive the value!
+    const foundUser = users.find(u => u.id === userId);
+    setUser(foundUser);
+  }, [userId]);
+
+  return <div>{user?.name}</div>;
+};
+```
+
+#### ✅ GOOD: Derive state during render
+
+```tsx
+// Better: Calculate during render (no useEffect needed)
+const Component = ({ userId }: Props) => {
+  const user = users.find(u => u.id === userId);
+
+  return <div>{user?.name}</div>;
+};
+```
+
+#### ❌ BAD: Cascading useEffects
+
+```tsx
+// Anti-pattern: Chain of useEffects updating each other
+const Component = () => {
+  const [data, setData] = useState(null);
+  const [filtered, setFiltered] = useState(null);
+  const [sorted, setSorted] = useState(null);
+
+  useEffect(() => {
+    fetchData().then(setData);
+  }, []);
+
+  useEffect(() => {
+    if (data) {
+      setFiltered(data.filter(item => item.active));
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (filtered) {
+      setSorted([...filtered].sort());
+    }
+  }, [filtered]);
+
+  return <List items={sorted} />;
+};
+```
+
+#### ✅ GOOD: Single useEffect with derived state
+
+```tsx
+// Better: One useEffect for data fetching, derive the rest
+const Component = () => {
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    fetchData().then(setData);
+  }, []);
+
+  // Derive during render - no extra useEffects needed
+  const filtered = data?.filter(item => item.active) ?? [];
+  const sorted = [...filtered].sort();
+
+  return <List items={sorted} />;
+};
+```
+
+#### ✅ GOOD: Valid useEffect use cases
+
+```tsx
+// Valid: Synchronizing with external API
+useEffect(() => {
+  const controller = new AbortController();
+
+  fetch('/api/data', { signal: controller.signal })
+    .then(res => res.json())
+    .then(setData);
+
+  return () => controller.abort(); // Cleanup
+}, []);
+
+// Valid: Subscribing to external event
+useEffect(() => {
+  const handleResize = () => setWidth(window.innerWidth);
+  window.addEventListener('resize', handleResize);
+
+  return () => window.removeEventListener('resize', handleResize);
+}, []);
+
+// Valid: Synchronizing with third-party library
+useEffect(() => {
+  const map = new MapLibrary('#map');
+  map.setCenter(coordinates);
+
+  return () => map.destroy();
+}, [coordinates]);
+```
+
+### State Management Principles
+
+#### 1. Avoid Redundant State
+
+Don't store values in state that can be calculated from existing state or props.
+
+```tsx
+// ❌ BAD: Redundant state
+const Component = ({ items }: Props) => {
+  const [items, setItems] = useState(items);
+  const [itemCount, setItemCount] = useState(items.length); // Redundant!
+
+  const addItem = (item) => {
+    setItems([...items, item]);
+    setItemCount(items.length + 1); // Can get out of sync!
+  };
+};
+
+// ✅ GOOD: Derive count
+const Component = ({ items }: Props) => {
+  const [items, setItems] = useState(items);
+  const itemCount = items.length; // Always in sync
+
+  const addItem = (item) => {
+    setItems([...items, item]);
+  };
+};
+```
+
+#### 2. Keep State Minimal
+
+Only store the minimal state needed. Derive everything else.
+
+```tsx
+// ❌ BAD: Storing derived values
+const Component = () => {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [fullName, setFullName] = useState(''); // Redundant!
+
+  const updateFirstName = (name) => {
+    setFirstName(name);
+    setFullName(`${name} ${lastName}`); // Easy to forget!
+  };
+};
+
+// ✅ GOOD: Derive fullName
+const Component = () => {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const fullName = `${firstName} ${lastName}`; // Always correct
+};
+```
+
+#### 3. Avoid State Mirroring Props
+
+Don't copy props to state unless you specifically need to "disconnect" from the prop updates.
+
+```tsx
+// ❌ BAD: Mirroring props in state
+const Component = ({ initialValue }: Props) => {
+  const [value, setValue] = useState(initialValue); // Won't update if prop changes!
+
+  return <input value={value} onChange={e => setValue(e.target.value)} />;
+};
+
+// ✅ GOOD: Use prop directly or controlled component
+const Component = ({ value, onChange }: Props) => {
+  return <input value={value} onChange={e => onChange(e.target.value)} />;
+};
+
+// ✅ ALSO GOOD: If you truly need "initial value" behavior, be explicit
+const Component = ({ initialValue }: Props) => {
+  // Key changes when you want to reset - makes intent clear
+  const [value, setValue] = useState(initialValue);
+
+  return <input value={value} onChange={e => setValue(e.target.value)} />;
+};
+```
+
+### useMemo and useCallback
+
+**Only use when necessary.** Don't premature optimize.
+
+#### When to use useMemo
+
+```tsx
+// ✅ GOOD: Expensive calculation
+const Component = ({ items }: Props) => {
+  const sortedItems = useMemo(() => {
+    return [...items].sort((a, b) => {
+      // Complex sorting logic
+      return expensiveCompare(a, b);
+    });
+  }, [items]);
+};
+
+// ❌ BAD: Simple calculation (no need for useMemo)
+const Component = ({ a, b }: Props) => {
+  const sum = useMemo(() => a + b, [a, b]); // Overkill!
+};
+
+// ✅ GOOD: Just calculate directly
+const Component = ({ a, b }: Props) => {
+  const sum = a + b;
+};
+```
+
+#### When to use useCallback
+
+```tsx
+// ✅ GOOD: Passed to memoized child component
+const Parent = () => {
+  const handleClick = useCallback(() => {
+    // handle click
+  }, []);
+
+  return <MemoizedChild onClick={handleClick} />; // Prevents re-render
+};
+
+// ❌ BAD: Not passed to any component
+const Component = () => {
+  const handleClick = useCallback(() => {
+    console.log('clicked');
+  }, []); // Unnecessary!
+
+  return <div onClick={handleClick}>Click me</div>;
+};
+
+// ✅ GOOD: Just use regular function
+const Component = () => {
+  const handleClick = () => {
+    console.log('clicked');
+  };
+
+  return <div onClick={handleClick}>Click me</div>;
+};
+```
+
+### Component Organization
+
+#### 1. Keep Components Small and Focused
+
+```tsx
+// ❌ BAD: Too many responsibilities
+const UserProfile = () => {
+  // 500 lines of code handling:
+  // - User data fetching
+  // - Profile editing
+  // - Avatar upload
+  // - Settings management
+  // - Notifications
+};
+
+// ✅ GOOD: Split into focused components
+const UserProfile = () => {
+  return (
+    <FlexColumn>
+      <UserAvatar />
+      <UserInfo />
+      <UserSettings />
+      <UserNotifications />
+    </FlexColumn>
+  );
+};
+```
+
+#### 2. Extract Complex Logic to Custom Hooks
+
+```tsx
+// ❌ BAD: Logic mixed in component
+const Component = () => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    setLoading(true);
+    fetch('/api/data')
+      .then(res => res.json())
+      .then(setData)
+      .catch(setError)
+      .finally(() => setLoading(false));
+  }, []);
+
+  // ... lots of JSX
+};
+
+// ✅ GOOD: Extract to custom hook
+const useData = () => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    setLoading(true);
+    fetch('/api/data')
+      .then(res => res.json())
+      .then(setData)
+      .catch(setError)
+      .finally(() => setLoading(false));
+  }, []);
+
+  return { data, loading, error };
+};
+
+const Component = () => {
+  const { data, loading, error } = useData();
+
+  // Clean, focused JSX
+};
+```
+
+### Props and Context
+
+#### 1. Avoid Prop Drilling
+
+```tsx
+// ❌ BAD: Passing through many levels
+const App = () => {
+  const [user, setUser] = useState(null);
+  return <Dashboard user={user} />;
+};
+
+const Dashboard = ({ user }) => <Sidebar user={user} />;
+const Sidebar = ({ user }) => <UserMenu user={user} />;
+const UserMenu = ({ user }) => <UserAvatar user={user} />;
+
+// ✅ GOOD: Use Context or Redux
+const App = () => {
+  return (
+    <AuthProvider>
+      <Dashboard />
+    </AuthProvider>
+  );
+};
+
+const UserAvatar = () => {
+  const { user } = useAuth(); // Direct access
+};
+```
+
+#### 2. Use Composition Over Props
+
+```tsx
+// ❌ BAD: Boolean props for variations
+const Modal = ({ showHeader, showFooter, title, actions }) => {
+  return (
+    <div>
+      {showHeader && <Header title={title} />}
+      <Content />
+      {showFooter && <Footer actions={actions} />}
+    </div>
+  );
+};
+
+// ✅ GOOD: Use composition with children
+const Modal = ({ children }) => {
+  return <div>{children}</div>;
+};
+
+// Usage
+<Modal>
+  <Modal.Header title="My Modal" />
+  <Modal.Content>...</Modal.Content>
+  <Modal.Footer>...</Modal.Footer>
+</Modal>
+```
+
+### Lists and Keys
+
+#### Always use stable, unique keys
+
+```tsx
+// ❌ BAD: Using index as key
+items.map((item, index) => <Item key={index} {...item} />);
+
+// ❌ BAD: Using random values
+items.map(item => <Item key={Math.random()} {...item} />);
+
+// ✅ GOOD: Using stable unique ID
+items.map(item => <Item key={item.id} {...item} />);
+
+// ✅ GOOD: Combining fields if no ID exists
+items.map(item => <Item key={`${item.name}-${item.timestamp}`} {...item} />);
+```
+
+### Common React Anti-Patterns to Avoid
+
+1. ❌ **Don't mutate state directly**
+   ```tsx
+   // Bad
+   state.items.push(newItem);
+   setState(state);
+
+   // Good
+   setState({ ...state, items: [...state.items, newItem] });
+   ```
+
+2. ❌ **Don't use setState in render**
+   ```tsx
+   // Bad - infinite loop!
+   const Component = () => {
+     const [count, setCount] = useState(0);
+     setCount(count + 1); // Never do this!
+   };
+   ```
+
+3. ❌ **Don't forget cleanup in useEffect**
+   ```tsx
+   // Bad - memory leak!
+   useEffect(() => {
+     const interval = setInterval(() => {}, 1000);
+     // Missing cleanup!
+   }, []);
+
+   // Good
+   useEffect(() => {
+     const interval = setInterval(() => {}, 1000);
+     return () => clearInterval(interval);
+   }, []);
+   ```
+
+4. ❌ **Don't create components inside components**
+   ```tsx
+   // Bad - recreated on every render!
+   const Parent = () => {
+     const Child = () => <div>Child</div>;
+     return <Child />;
+   };
+
+   // Good - define outside
+   const Child = () => <div>Child</div>;
+   const Parent = () => <Child />;
+   ```
+
 ## Z-Index Layering
 
 Use predefined z-index values from `@src/styles/style.ts`:
@@ -396,6 +845,8 @@ const StyledModal = styled.div`
 
 ## Common Mistakes to Avoid
 
+### Styling Mistakes
+
 1. ❌ Don't use inline styles: `<div style={{color: 'red'}}>`
 2. ❌ Don't hardcode colors: `background: #C41E3A`
 3. ❌ Don't use deprecated constants: `fontSizes.large1`
@@ -404,21 +855,55 @@ const StyledModal = styled.div`
 6. ❌ Don't create custom layout components when Flex utilities exist
 7. ❌ Don't access theme without useSharedTheme() hook
 
+### React Mistakes
+
+8. ❌ Don't overuse useEffect - use derived state for calculations
+9. ❌ Don't create useEffect chains - derive in render instead
+10. ❌ Don't store redundant state - calculate from existing state/props
+11. ❌ Don't mirror props in state - use controlled components
+12. ❌ Don't use index as key in lists
+13. ❌ Don't create components inside components
+14. ❌ Don't forget cleanup functions in useEffect
+15. ❌ Don't mutate state directly - always create new objects/arrays
+16. ❌ Don't call setState during render - infinite loop!
+17. ❌ Don't overuse useMemo/useCallback - only optimize when needed
+
 ## Quick Reference Checklist
 
 Before submitting a PR with UI changes, verify:
 
+**Styling:**
 - [ ] All styling uses Emotion styled components (no inline styles)
 - [ ] Theme tokens used instead of hardcoded values
 - [ ] `useSharedTheme()` hook used to access theme
+- [ ] Z-index uses predefined values
+- [ ] No deprecated constants used (fontSizes, fontWeights, colors from style.ts)
+
+**Component Structure:**
 - [ ] Component follows atomic design principles
 - [ ] Props include `className?: string`
 - [ ] TypeScript types are properly defined
+- [ ] Components are small and focused (single responsibility)
+- [ ] Complex logic extracted to custom hooks
+- [ ] Storybook story created (if new component)
+
+**React Best Practices:**
+- [ ] No overuse of useEffect (only for external system synchronization)
+- [ ] No useEffect chains - use derived state instead
+- [ ] No redundant state - derive values when possible
+- [ ] State is minimal and normalized
+- [ ] No prop mirroring in state (unless intentional)
+- [ ] useMemo/useCallback only used when necessary
+- [ ] Event handlers use useCallback only when passed to memoized children
+- [ ] List items have stable, unique keys (not index or random values)
+- [ ] No components defined inside components
+- [ ] All useEffect hooks have proper cleanup
+
+**General:**
 - [ ] Responsive design considered (mobile/desktop)
 - [ ] Icons sized consistently
-- [ ] Z-index uses predefined values
-- [ ] No deprecated constants used (fontSizes, fontWeights, colors from style.ts)
-- [ ] Storybook story created (if new component)
+- [ ] Accessibility requirements met
+- [ ] No prop drilling (use Context/Redux when needed)
 
 ## Examples
 
