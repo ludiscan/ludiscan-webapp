@@ -128,18 +128,12 @@ const Component: FC<ImprovementRouteVisualizerProps> = ({ className, route, clus
       currentContainer?.removeChild(renderer.domElement);
       renderer.dispose();
     };
-  }, [route, cluster]);
+  }, [route, cluster, theme]);
 
   const strategyLabels = {
     divergence: '分岐点検出',
     safety_passage: '安全通過',
     faster: '時間短縮',
-  };
-
-  const strategyColors = {
-    divergence: theme.colors.primary.main,
-    safety_passage: theme.colors.semantic.success.main,
-    faster: theme.colors.secondary.main,
   };
 
   return (
