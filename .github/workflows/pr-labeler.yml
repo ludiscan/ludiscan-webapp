@@ -1,0 +1,144 @@
+name: PR Auto Labeler
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: 'pr-labeler-${{ github.head_ref }}'
+  cancel-in-progress: true
+
+jobs:
+  label:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v45
+        with:
+          files: |
+            src/**
+
+      - name: Calculate PR size and determine labels
+        id: calculate-labels
+        run: |
+          # Get PR diff stats
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          DIFF_STATS=$(gh pr diff $PR_NUMBER --repo ${{ github.repository }})
+
+          # Calculate total lines changed (additions + deletions)
+          ADDITIONS=$(echo "$DIFF_STATS" | grep -E '^\+' | grep -v '^\+\+\+' | wc -l || echo 0)
+          DELETIONS=$(echo "$DIFF_STATS" | grep -E '^-' | grep -v '^---' | wc -l || echo 0)
+          TOTAL_CHANGES=$((ADDITIONS + DELETIONS))
+
+          echo "Total changes: $TOTAL_CHANGES lines"
+
+          # Determine size label based on total changes
+          if [ $TOTAL_CHANGES -lt 50 ]; then
+            SIZE_LABEL="size:XS"
+          elif [ $TOTAL_CHANGES -lt 200 ]; then
+            SIZE_LABEL="size:S"
+          elif [ $TOTAL_CHANGES -lt 500 ]; then
+            SIZE_LABEL="size:M"
+          elif [ $TOTAL_CHANGES -lt 1000 ]; then
+            SIZE_LABEL="size:L"
+          else
+            SIZE_LABEL="size:XL"
+          fi
+
+          echo "size_label=$SIZE_LABEL" >> $GITHUB_OUTPUT
+          echo "Size label: $SIZE_LABEL"
+
+          # Determine area labels based on changed files
+          AREA_LABELS=""
+
+          if echo "${{ steps.changed-files.outputs.all_changed_files }}" | grep -q "src/component/"; then
+            AREA_LABELS="$AREA_LABELS area:components"
+          fi
+
+          if echo "${{ steps.changed-files.outputs.all_changed_files }}" | grep -q "src/features/"; then
+            AREA_LABELS="$AREA_LABELS area:features"
+          fi
+
+          if echo "${{ steps.changed-files.outputs.all_changed_files }}" | grep -q "src/pages/"; then
+            AREA_LABELS="$AREA_LABELS area:pages"
+          fi
+
+          if echo "${{ steps.changed-files.outputs.all_changed_files }}" | grep -q "src/hooks/"; then
+            AREA_LABELS="$AREA_LABELS area:hooks"
+          fi
+
+          if echo "${{ steps.changed-files.outputs.all_changed_files }}" | grep -q "src/slices/"; then
+            AREA_LABELS="$AREA_LABELS area:state"
+          fi
+
+          if echo "${{ steps.changed-files.outputs.all_changed_files }}" | grep -q "src/modeles/"; then
+            AREA_LABELS="$AREA_LABELS area:api"
+          fi
+
+          if echo "${{ steps.changed-files.outputs.all_changed_files }}" | grep -q "src/utils/"; then
+            AREA_LABELS="$AREA_LABELS area:utils"
+          fi
+
+          if echo "${{ steps.changed-files.outputs.all_changed_files }}" | grep -q "src/styles/"; then
+            AREA_LABELS="$AREA_LABELS area:styles"
+          fi
+
+          if echo "${{ steps.changed-files.outputs.all_changed_files }}" | grep -q ".github/workflows/"; then
+            AREA_LABELS="$AREA_LABELS area:ci"
+          fi
+
+          if echo "${{ steps.changed-files.outputs.all_changed_files }}" | grep -q "src/__tests__/\|\.test\.ts\|\.test\.tsx"; then
+            AREA_LABELS="$AREA_LABELS area:tests"
+          fi
+
+          if echo "${{ steps.changed-files.outputs.all_changed_files }}" | grep -q "\.stories\.tsx"; then
+            AREA_LABELS="$AREA_LABELS area:storybook"
+          fi
+
+          if echo "${{ steps.changed-files.outputs.all_changed_files }}" | grep -q "src/docs/\|\.md$"; then
+            AREA_LABELS="$AREA_LABELS area:docs"
+          fi
+
+          echo "area_labels=$AREA_LABELS" >> $GITHUB_OUTPUT
+          echo "Area labels: $AREA_LABELS"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Apply size label
+        if: steps.calculate-labels.outputs.size_label != ''
+        run: |
+          # Remove existing size labels
+          gh pr edit ${{ github.event.pull_request.number }} \
+            --remove-label "size:XS" \
+            --remove-label "size:S" \
+            --remove-label "size:M" \
+            --remove-label "size:L" \
+            --remove-label "size:XL" \
+            --repo ${{ github.repository }} || true
+
+          # Add new size label
+          gh pr edit ${{ github.event.pull_request.number }} \
+            --add-label "${{ steps.calculate-labels.outputs.size_label }}" \
+            --repo ${{ github.repository }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Apply area labels
+        if: steps.calculate-labels.outputs.area_labels != ''
+        run: |
+          for label in ${{ steps.calculate-labels.outputs.area_labels }}; do
+            gh pr edit ${{ github.event.pull_request.number }} \
+              --add-label "$label" \
+              --repo ${{ github.repository }} || true
+          done
+        env:
+          GH_TOKEN: ${{ github.token }}
