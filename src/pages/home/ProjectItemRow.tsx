@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import { useRouter } from 'next/navigation';
+import { memo } from 'react';
 import { BiEdit } from 'react-icons/bi';
 
 import type { Project } from '@src/modeles/project';
@@ -17,7 +18,7 @@ export type ProjectItemRowProps = {
   onEdit?: (project: Project) => void;
 };
 
-const Component: FC<ProjectItemRowProps> = ({ className, project, onEdit }) => {
+const Component: FC<ProjectItemRowProps> = memo(({ className, project, onEdit }) => {
   const { theme } = useSharedTheme();
   const router = useRouter();
 
@@ -73,7 +74,7 @@ const Component: FC<ProjectItemRowProps> = ({ className, project, onEdit }) => {
       </FlexRow>
     </div>
   );
-};
+});
 
 export const ProjectItemRow = styled(Component)`
   width: 100%;

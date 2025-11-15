@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { memo } from 'react';
 
 import type { Session } from '@src/modeles/session';
 import type { FC } from 'react';
@@ -37,14 +38,14 @@ const calculateDuration = (startTime: string, endTime: string | null) => {
   return `${hours}時${minutes}分`;
 };
 
-const Component: FC<SessionItemRowProps> = ({ className, session }) => {
+const Component: FC<SessionItemRowProps> = memo(({ className, session }) => {
   const { theme } = useSharedTheme();
 
   return (
     <div className={className}>
-      <FlexRow gap={16} align={'center'} style={{ width: '100%' }}>
+      <FlexRow gap={16} align={'center'} className={`${className}__row`}>
         {/* Main Info */}
-        <FlexColumn gap={6} style={{ flex: 1, minWidth: 0 }}>
+        <FlexColumn gap={6} className={`${className}__mainInfo`}>
           <Tooltip tooltip={session.name}>
             <ClampText text={session.name} fontSize={theme.typography.fontSize.base} fontWeight={theme.typography.fontWeight.bold} lines={1} />
           </Tooltip>
@@ -71,25 +72,38 @@ const Component: FC<SessionItemRowProps> = ({ className, session }) => {
         </FlexColumn>
 
         {/* Meta Info - Right aligned */}
-        <FlexColumn gap={4} align={'flex-end'} style={{ flexShrink: 0 }}>
+        <FlexColumn gap={4} align={'flex-end'} className={`${className}__metaInfo`}>
           <Text text={formatDate(session.startTime)} fontSize={theme.typography.fontSize.xs} color={theme.colors.text.secondary} fontWeight={theme.typography.fontWeight.light} />
           <Text
             text={calculateDuration(session.startTime, session.endTime)}
             fontSize={theme.typography.fontSize.xs}
-            color={session.isPlaying ? '#4caf50' : theme.colors.text.secondary}
+            color={session.isPlaying ? theme.colors.semantic.success.main : theme.colors.text.secondary}
             fontWeight={theme.typography.fontWeight.light}
           />
         </FlexColumn>
       </FlexRow>
     </div>
   );
-};
+});
 
 export const SessionItemRow = styled(Component)`
   width: 100%;
   height: fit-content;
   padding: 12px 0;
   transition: all 0.2s ease;
+
+  &__row {
+    width: 100%;
+  }
+
+  &__mainInfo {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__metaInfo {
+    flex-shrink: 0;
+  }
 
   &:hover {
     padding-right: 8px;
