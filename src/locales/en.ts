@@ -2,8 +2,6 @@
  * English translations
  */
 
-import type { TranslationKeys } from './ja';
-
 export const en = {
   // Common
   common: {
