@@ -11,6 +11,7 @@ import { Card } from '@src/component/atoms/Card';
 import { InlineFlexColumn } from '@src/component/atoms/Flex';
 import { VerticalSpacer } from '@src/component/atoms/Spacer';
 import { Text } from '@src/component/atoms/Text';
+import { LanguageSelector } from '@src/component/molecules/LanguageSelector';
 import { LinedText } from '@src/component/molecules/LinedText';
 import { OutlinedTextField } from '@src/component/molecules/OutlinedTextField';
 import { Header } from '@src/component/templates/Header';
@@ -18,6 +19,7 @@ import { useToast } from '@src/component/templates/ToastContext';
 import { env } from '@src/config/env';
 import { useAuth } from '@src/hooks/useAuth';
 import { useIsDesktop } from '@src/hooks/useIsDesktop';
+import { useLocale } from '@src/hooks/useLocale';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 
 export type LoginPageProps = {
@@ -142,6 +144,7 @@ const Content: FC<LoginPageProps> = ({ className }) => {
   const router = useRouter();
   const isDesktop = useIsDesktop();
   const { theme } = useSharedTheme();
+  const { t } = useLocale();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { showToast } = useToast();
@@ -157,19 +160,19 @@ const Content: FC<LoginPageProps> = ({ className }) => {
 
   const { isLoading, login } = useAuth({
     onSuccessLogin: () => {
-      showToast('Login success', 1, 'success');
+      showToast(t('login.success'), 1, 'success');
       onClose();
     },
   });
   const handleLogin = useCallback(async () => {
     if (email === '' || password === '') {
-      showToast('Please enter email and password', 1, 'error');
+      showToast(t('login.errorEmptyFields'), 1, 'error');
       return;
     }
     if (!isLoading) {
       await login({ email, password });
     }
-  }, [email, isLoading, login, password, showToast]);
+  }, [email, isLoading, login, password, showToast, t]);
 
   const loginDisabled = useMemo(() => email === '' || password === '' || isLoading, [email, password, isLoading]);
   return (
@@ -186,31 +189,30 @@ const Content: FC<LoginPageProps> = ({ className }) => {
           className={`${className}__form`}
         >
           <InlineFlexColumn gap={24} className={`${className}__content`} align={'center'}>
+            <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end' }}>
+              <LanguageSelector />
+            </div>
             <InlineFlexColumn style={{ width: '100%' }} gap={8} align={'flex-start'}>
-              <Text text={'Ludiscan Account'} fontWeight={'bold'} fontSize={theme.typography.fontSize['3xl']} />
-              <Text
-                text={'sign in to manage all Ludiscan services and heatmap tools.'}
-                fontSize={theme.typography.fontSize.base}
-                color={theme.colors.text.primary}
-              />
+              <Text text={t('login.title')} fontWeight={'bold'} fontSize={theme.typography.fontSize['3xl']} />
+              <Text text={t('login.description')} fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} />
             </InlineFlexColumn>
             <a className={`${className}__button google-login`} href={`${env.API_BASE_URL}/api/v0/auth/google`} target={'_self'} rel={'noopener noreferrer'}>
               <Image src={'/google.svg'} alt={'google'} width={20} height={20} />
               <Text
                 className={`${className}__buttonText`}
-                text={'Continue with Google'}
+                text={t('login.continueWithGoogle')}
                 color={theme.colors.text.primary}
                 fontSize={theme.typography.fontSize.base}
                 fontWeight={'bolder'}
               />
             </a>
-            <LinedText color={theme.colors.text.primary} lineColor={theme.colors.secondary.light} text={'or'} lineThickness={'1px'} fullWidth={true} />
+            <LinedText color={theme.colors.text.primary} lineColor={theme.colors.secondary.light} text={t('common.or')} lineThickness={'1px'} fullWidth={true} />
             <OutlinedTextField
               className={`${className}__email`}
               onChange={handleInputEmail}
               value={email}
-              label={'Email'}
-              placeholder={'example@email.com'}
+              label={t('common.email')}
+              placeholder={t('login.emailPlaceholder')}
               type={'email'}
               fontSize={theme.typography.fontSize.base}
               maxLength={50}
@@ -219,15 +221,15 @@ const Content: FC<LoginPageProps> = ({ className }) => {
               className={`${className}__password`}
               onChange={handleInputPassword}
               value={password}
-              label={'Password'}
+              label={t('common.password')}
               type={'password'}
-              placeholder={'password'}
+              placeholder={t('login.passwordPlaceholder')}
               fontSize={theme.typography.fontSize.base}
               maxLength={20}
             />
             <VerticalSpacer size={2} />
             <Button onClick={handleLogin} scheme={'primary'} radius={'default'} fontSize={'lg'} width={'full'} disabled={loginDisabled}>
-              <Text text={'Sign in'} />
+              <Text text={t('login.signIn')} />
             </Button>
           </InlineFlexColumn>
         </Card>
