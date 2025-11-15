@@ -4,6 +4,9 @@ import * as THREE from 'three';
 
 import type { FC } from 'react';
 
+import { useSharedTheme } from '@src/hooks/useSharedTheme';
+import { zIndexes } from '@src/styles/style';
+
 interface Point3D {
   x: number;
   y: number;
@@ -39,13 +42,14 @@ const Component: FC<ImprovementRouteVisualizerProps> = ({ className, route, clus
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const { theme } = useSharedTheme();
 
   useEffect(() => {
     if (!containerRef.current) return;
 
     // Scene setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xf5f5f5);
+    scene.background = new THREE.Color(theme.colors.background.default);
     sceneRef.current = scene;
 
     // Camera setup
@@ -124,18 +128,12 @@ const Component: FC<ImprovementRouteVisualizerProps> = ({ className, route, clus
       currentContainer?.removeChild(renderer.domElement);
       renderer.dispose();
     };
-  }, [route, cluster]);
+  }, [route, cluster, theme]);
 
   const strategyLabels = {
     divergence: '分岐点検出',
     safety_passage: '安全通過',
     faster: '時間短縮',
-  };
-
-  const strategyColors = {
-    divergence: '#0066ff',
-    safety_passage: '#00cc00',
-    faster: '#ffaa00',
   };
 
   return (
@@ -155,11 +153,11 @@ const Component: FC<ImprovementRouteVisualizerProps> = ({ className, route, clus
         <div className={`${className}__canvas`} ref={containerRef} />
         <div className={`${className}__legend`}>
           <div className={`${className}__legendItem`}>
-            <div className={`${className}__legendColor`} style={{ backgroundColor: '#ff0000' }} />
+            <div className={`${className}__legendColor ${className}__legendColor--error`} />
             <span>死亡クラスタ（半径: {cluster.cluster_radius}m）</span>
           </div>
           <div className={`${className}__legendItem`}>
-            <div className={`${className}__legendColor`} style={{ backgroundColor: strategyColors[route.strategy_type] }} />
+            <div className={`${className}__legendColor ${className}__legendColor--${route.strategy_type}`} />
             <span>改善案ルート ({route.trajectory_points.length} points)</span>
           </div>
           <div className={`${className}__legendItem`}>
@@ -175,11 +173,11 @@ export const ImprovementRouteVisualizer = styled(Component)`
   &__overlay {
     position: fixed;
     inset: 0;
-    z-index: 1000;
+    z-index: ${zIndexes.modal};
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: rgb(0 0 0 / 70%);
+    background-color: ${({ theme }) => theme.colors.background.overlay};
   }
 
   &__window {
@@ -187,68 +185,97 @@ export const ImprovementRouteVisualizer = styled(Component)`
     flex-direction: column;
     max-width: 90vw;
     max-height: 90vh;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 8px 32px rgb(0 0 0 / 20%);
+    background-color: ${({ theme }) => theme.colors.surface.base};
+    border-radius: ${({ theme }) => theme.borders.radius.md};
+    box-shadow: ${({ theme }) => theme.shadows.xl};
   }
 
   &__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px;
-    border-bottom: 1px solid #ddd;
+    padding: ${({ theme }) => theme.spacing.md};
+    border-bottom: ${({ theme }) => theme.borders.width.thin} solid ${({ theme }) => theme.colors.border.default};
   }
 
   &__title {
-    margin: 0 0 4px;
+    margin: 0 0 ${({ theme }) => theme.spacing.xs};
+    color: ${({ theme }) => theme.colors.text.primary};
   }
 
   &__subtitle {
-    font-size: 12px;
-    color: #666;
+    font-size: ${({ theme }) => theme.typography.fontSize.xs};
+    color: ${({ theme }) => theme.colors.text.secondary};
   }
 
   &__closeButton {
-    padding: 8px 12px;
-    font-size: 13px;
-    font-weight: bold;
-    color: #fff;
+    padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.md};
+    font-size: ${({ theme }) => theme.typography.fontSize.sm};
+    font-weight: ${({ theme }) => theme.typography.fontWeight.bold};
+    color: ${({ theme }) => theme.colors.semantic.error.contrast};
     cursor: pointer;
-    background-color: #f44336;
+    background-color: ${({ theme }) => theme.colors.semantic.error.main};
     border: none;
-    border-radius: 4px;
+    border-radius: ${({ theme }) => theme.borders.radius.sm};
+    transition: background-color 0.2s ease;
 
     &:hover {
-      background-color: #d32f2f;
+      background-color: ${({ theme }) => theme.colors.semantic.error.dark};
     }
   }
 
   &__canvas {
     position: relative;
-    width: 800px;
-    height: 600px;
+    width: 100%;
+    max-width: 800px;
+    height: auto;
+    aspect-ratio: 4 / 3;
+
+    @media (width <= 900px) {
+      max-width: 100%;
+    }
+
+    & > canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
   }
 
   &__legend {
     display: flex;
     flex-wrap: wrap;
-    gap: 16px;
-    padding: 12px 16px;
-    font-size: 12px;
-    color: #666;
-    border-top: 1px solid #ddd;
+    gap: ${({ theme }) => theme.spacing.md};
+    padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.md};
+    font-size: ${({ theme }) => theme.typography.fontSize.xs};
+    color: ${({ theme }) => theme.colors.text.secondary};
+    border-top: ${({ theme }) => theme.borders.width.thin} solid ${({ theme }) => theme.colors.border.default};
   }
 
   &__legendItem {
     display: flex;
-    gap: 6px;
+    gap: ${({ theme }) => theme.spacing.xs};
     align-items: center;
   }
 
   &__legendColor {
     width: 12px;
     height: 12px;
-    border-radius: 2px;
+    border-radius: ${({ theme }) => theme.borders.radius.sm};
+
+    &--error {
+      background-color: ${({ theme }) => theme.colors.semantic.error.main};
+    }
+
+    &--divergence {
+      background-color: ${({ theme }) => theme.colors.primary.main};
+    }
+
+    &--safety_passage {
+      background-color: ${({ theme }) => theme.colors.semantic.success.main};
+    }
+
+    &--faster {
+      background-color: ${({ theme }) => theme.colors.secondary.main};
+    }
   }
 `;

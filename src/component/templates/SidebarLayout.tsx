@@ -2,8 +2,8 @@ import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
-import { BiHome, BiUser, BiKey, BiLock, BiBook, BiChevronDown, BiChevronRight } from 'react-icons/bi';
+import { useState, useEffect } from 'react';
+import { BiHome, BiUser, BiKey, BiLock, BiBook, BiChevronDown, BiChevronRight, BiPulse } from 'react-icons/bi';
 
 import type { DocGroup } from '@src/utils/docs/types';
 import type { FC } from 'react';
@@ -31,14 +31,31 @@ const MENU_ITEMS: MenuItem[] = [
   { label: 'Profile', href: '/profile', icon: <BiUser size={20} />, requiresAuth: true },
   { label: 'API Keys', href: '/api-keys', icon: <BiKey size={20} />, requiresAuth: true },
   { label: 'Security', href: '/security', icon: <BiLock size={20} />, requiresAuth: true },
+  { label: 'Health Check', href: '/health', icon: <BiPulse size={20} />, requiresAuth: false },
   { label: 'Docs', icon: <BiBook size={20} />, requiresAuth: true, isDropdown: true },
 ];
+
+const STORAGE_KEY = 'sidebar-expanded-dropdowns';
 
 const Component: FC<SidebarLayoutProps> = ({ className }) => {
   const pathname = usePathname();
   const { theme } = useSharedTheme();
   const { isAuthorized } = useAuth();
-  const [expandedDropdowns, setExpandedDropdowns] = useState<Set<string>>(new Set());
+
+  // Initialize state from localStorage or default to empty Set
+  const [expandedDropdowns, setExpandedDropdowns] = useState<Set<string>>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          return new Set(JSON.parse(stored));
+        }
+      } catch {
+        // Ignore errors and default to empty Set
+      }
+    }
+    return new Set();
+  });
 
   // Fetch docs groups for the dropdown
   const { data: docsGroups = [] } = useQuery<DocGroup[]>({
@@ -53,6 +70,28 @@ const Component: FC<SidebarLayoutProps> = ({ className }) => {
     enabled: isAuthorized,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
+
+  // Auto-expand Docs dropdown when on a docs page
+  useEffect(() => {
+    if (pathname?.startsWith('/heatmap/docs')) {
+      setExpandedDropdowns((prev) => {
+        const next = new Set(prev);
+        next.add('Docs');
+        return next;
+      });
+    }
+  }, [pathname]);
+
+  // Save expanded state to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(expandedDropdowns)));
+      } catch {
+        // Ignore write errors
+      }
+    }
+  }, [expandedDropdowns]);
 
   const isActive = (href: string) => {
     return pathname === href || pathname?.startsWith(href + '/');

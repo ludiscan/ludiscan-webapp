@@ -20,9 +20,10 @@ A: ludiscan-webappは、ゲームプレイデータを3D/2Dのヒートマップ
 A: 以下の手順で始めてください：
 
 1. ログインする
-2. [はじめに](/heatmap/docs/heatmap/getting-started)ページを読む
-3. ホーム画面からプロジェクトを選択
-4. セッションを開いてヒートマップを確認
+2. [クイックスタート](/heatmap/docs/general/quick-start)で5分で基本操作を習得（推奨）
+3. または[はじめに](/heatmap/docs/heatmap/getting-started)ページを読む
+4. ホーム画面からプロジェクトを選択
+5. セッションを開いてヒートマップを確認
 
 ### Q: アカウントを作成するにはどうすればいいですか？
 

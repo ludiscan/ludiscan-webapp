@@ -3,7 +3,7 @@ import { IoCloseOutline } from 'react-icons/io5';
 import ReactModal, { defaultStyles } from 'react-modal';
 
 import { Divider } from '../atoms/Divider';
-import { FlexColumn } from '../atoms/Flex';
+import { FlexColumn, FlexRow } from '../atoms/Flex';
 import { Text } from '../atoms/Text';
 
 import type { Theme } from '@emotion/react';
@@ -69,17 +69,17 @@ const Component = ({ className, isOpen, onClose, children, title, closeOutside, 
       onRequestClose={onClose}
       shouldCloseOnOverlayClick={closeOutside}
     >
-      {title && (
-        <FlexColumn align={'center'} gap={2}>
-          <Text text={title} fontSize={fontSizes.large1} fontWeight={fontWeights.black} />
-          <Divider orientation={'horizontal'} thickness={'2px'} />
-        </FlexColumn>
+      {(title || onClose) && (
+        <FlexRow className={`${className}__header`} align={'center'} gap={8}>
+          {title && <Text text={title} fontSize={fontSizes.large1} fontWeight={fontWeights.black} color={theme.colors.text.primary} />}
+          {onClose && (
+            <Button className={`${className}__closeButton`} onClick={onClose} scheme={'none'} fontSize={'base'}>
+              <IoCloseOutline size={24} />
+            </Button>
+          )}
+        </FlexRow>
       )}
-      {onClose && (
-        <Button className={`${className}__closeButton`} onClick={onClose} scheme={'none'} fontSize={'base'}>
-          <IoCloseOutline size={24} />
-        </Button>
-      )}
+      {title && <Divider orientation={'horizontal'} thickness={'2px'} />}
       <FlexColumn className={`${className}__innerContent`} align={'center'}>
         {children}
       </FlexColumn>
@@ -91,13 +91,17 @@ export const Modal = styled(Component)`
   z-index: ${zIndexes.modal};
   transition: all 0.5s ease-in-out;
 
+  &__header {
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+  }
+
   &__innerContent {
     padding: 0 16px 16px;
   }
 
   &__closeButton {
-    position: absolute;
-    top: 8px;
-    right: 12px;
+    margin-left: auto;
   }
 `;

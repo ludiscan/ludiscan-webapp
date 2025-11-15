@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { BiRefresh, BiMenuAltLeft, BiGridAlt } from 'react-icons/bi';
+import { BiRefresh, BiMenuAltLeft, BiGridAlt, BiPlus, BiEdit } from 'react-icons/bi';
 
 import { ProjectItemRow } from './ProjectItemRow';
 
@@ -16,6 +16,7 @@ import { Observer } from '@src/component/atoms/Observer';
 import { VerticalSpacer } from '@src/component/atoms/Spacer';
 import { Text } from '@src/component/atoms/Text';
 import { OutlinedTextField } from '@src/component/molecules/OutlinedTextField';
+import { ProjectFormModal } from '@src/component/organisms/ProjectFormModal';
 import { Header } from '@src/component/templates/Header';
 import { SidebarLayout } from '@src/component/templates/SidebarLayout';
 import { useToast } from '@src/component/templates/ToastContext';
@@ -47,6 +48,8 @@ const Component: FC<HomePageProps> = ({ className }) => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortBy, setSortBy] = useState<SortOption>('created_desc');
   const [displayMode, setDisplayMode] = useState<DisplayMode>('list');
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | undefined>(undefined);
   const { isAuthorized, isLoading, ready } = useAuth();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -105,6 +108,19 @@ const Component: FC<HomePageProps> = ({ className }) => {
     showToast('プロジェクト一覧を更新しました', 2, 'success');
   }, [queryClient, isAuthorized, searchQuery, showToast]);
 
+  const handleCreateProject = useCallback(() => {
+    setIsCreateModalOpen(true);
+  }, []);
+
+  const handleEditProject = useCallback((project: Project) => {
+    setEditingProject(project);
+  }, []);
+
+  const handleCloseModal = useCallback(() => {
+    setIsCreateModalOpen(false);
+    setEditingProject(undefined);
+  }, []);
+
   // ソート関数
   const sortProjects = useCallback(
     (projectsToSort: Project[]): Project[] => {
@@ -139,7 +155,7 @@ const Component: FC<HomePageProps> = ({ className }) => {
       <SidebarLayout />
       <InnerContent>
         <Header title={'Heatmap'} onClick={handleBack} />
-        <FlexRow className={`${className}__titleRow`}>
+        <FlexRow className={`${className}__titleRow`} align={'center'}>
           <Text text={'Home'} fontSize={fontSizes.largest} color={theme.colors.text.primary} fontWeight={fontWeights.bolder} />
         </FlexRow>
         <VerticalSpacer size={16} />
@@ -169,6 +185,10 @@ const Component: FC<HomePageProps> = ({ className }) => {
                   <BiGridAlt size={20} />
                 </Button>
               </div>
+              <Button onClick={handleCreateProject} scheme={'primary'} fontSize={'base'}>
+                <BiPlus size={20} />
+                新規プロジェクト作成
+              </Button>
             </FlexRow>
             <FlexColumn gap={20}>
               {/* ローディング状態 */}
@@ -195,7 +215,7 @@ const Component: FC<HomePageProps> = ({ className }) => {
                         {sortedPage &&
                           sortedPage.map((project: Project) => (
                             <li key={project.id} className={`${className}__listItem`}>
-                              <ProjectItemRow key={project.id} project={project} />
+                              <ProjectItemRow key={project.id} project={project} onEdit={handleEditProject} />
                             </li>
                           ))}
                         {hasNextPageProjects && !isLoadingProjects && <Observer callback={fetchNextPageProjects} />}
@@ -212,32 +232,52 @@ const Component: FC<HomePageProps> = ({ className }) => {
                     {projects?.pages?.map((page) => {
                       const sortedPage = page ? sortProjects(page) : [];
                       return sortedPage.map((project: Project) => (
-                        <Card
-                          key={project.id}
-                          className={`${className}__projectCard`}
-                          shadow={'medium'}
-                          color={theme.colors.surface.base}
-                          border={theme.colors.border.default}
-                        >
-                          <FlexColumn gap={8}>
-                            <FlexColumn gap={4}>
-                              <Text text={project.name} fontSize={fontSizes.large1} color={theme.colors.text.primary} fontWeight={'bold'} />
-                              <Text text={project.description} fontSize={fontSizes.small} color={theme.colors.text.secondary} fontWeight={fontWeights.bold} />
-                              <Text
-                                text={`${project.session_count ?? 0} sessions`}
-                                fontSize={fontSizes.smallest}
-                                color={theme.colors.text.secondary}
-                                fontWeight={'lighter'}
-                              />
-                              <Text
-                                text={`Created: ${new Date(project.createdAt).toLocaleDateString('ja-JP', { year: 'numeric', month: 'short', day: 'numeric' })}`}
-                                fontSize={fontSizes.smallest}
-                                color={theme.colors.text.secondary}
-                                fontWeight={'lighter'}
-                              />
+                        <a key={project.id} href={`/home/projects/${project.id}`}>
+                          <Card
+                            className={`${className}__projectCard`}
+                            shadow={'medium'}
+                            color={theme.colors.surface.base}
+                            border={theme.colors.border.default}
+                          >
+                            <FlexColumn gap={8}>
+                              <FlexRow align={'flex-start'}>
+                                <FlexColumn gap={4} className={`${className}__cardInfo`}>
+                                  <Text text={project.name} fontSize={fontSizes.large1} color={theme.colors.text.primary} fontWeight={'bold'} />
+                                  <Text
+                                    text={project.description}
+                                    fontSize={fontSizes.small}
+                                    color={theme.colors.text.secondary}
+                                    fontWeight={fontWeights.bold}
+                                  />
+                                  <Text
+                                    text={`${project.session_count ?? 0} sessions`}
+                                    fontSize={fontSizes.smallest}
+                                    color={theme.colors.text.secondary}
+                                    fontWeight={'lighter'}
+                                  />
+                                  <Text
+                                    text={`Created: ${new Date(project.createdAt).toLocaleDateString('ja-JP', { year: 'numeric', month: 'short', day: 'numeric' })}`}
+                                    fontSize={fontSizes.smallest}
+                                    color={theme.colors.text.secondary}
+                                    fontWeight={'lighter'}
+                                  />
+                                </FlexColumn>
+                                <Button
+                                  className={`${className}__cardEditButton`}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleEditProject(project);
+                                  }}
+                                  scheme={'surface'}
+                                  fontSize={'sm'}
+                                  title={'プロジェクトを編集'}
+                                >
+                                  <BiEdit size={20} />
+                                </Button>
+                              </FlexRow>
                             </FlexColumn>
-                          </FlexColumn>
-                        </Card>
+                          </Card>
+                        </a>
                       ));
                     })}
                   </div>
@@ -255,6 +295,7 @@ const Component: FC<HomePageProps> = ({ className }) => {
           </Card>
         </div>
       </InnerContent>
+      <ProjectFormModal isOpen={isCreateModalOpen || !!editingProject} onClose={handleCloseModal} project={editingProject} />
     </div>
   );
 };
@@ -319,6 +360,7 @@ const IndexPage = styled(Component)`
     display: flex;
     flex-direction: column;
     min-height: 160px;
+    cursor: pointer;
     transition:
       box-shadow 0.2s ease-in-out,
       transform 0.2s ease-in-out;
@@ -326,6 +368,20 @@ const IndexPage = styled(Component)`
     &:hover {
       box-shadow: 0 8px 16px rgb(0 0 0 / 15%);
       transform: translateY(-2px);
+    }
+  }
+
+  &__cardInfo {
+    flex: 1;
+  }
+
+  &__cardEditButton {
+    flex-shrink: 0;
+    opacity: 0.7;
+    transition: opacity 0.2s ease-in-out;
+
+    &:hover {
+      opacity: 1;
     }
   }
 

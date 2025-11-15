@@ -52,6 +52,57 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/health': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** 総合ヘルスチェック */
+    get: operations['HealthController_check'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/health/liveness': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Liveness Probe（生存確認） */
+    get: operations['HealthController_liveness'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/health/readiness': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Readiness Probe（準備完了確認） */
+    get: operations['HealthController_readiness'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v0/users': {
     parameters: {
       query?: never;
@@ -159,6 +210,22 @@ export interface paths {
      * @description 唯一のログイン手段になる場合は拒否するなどのポリシーをAuthService側で実装してください。
      */
     delete: operations['AuthController_unlinkGoogle'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/auth/health': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AuthController_health'];
+    put?: never;
+    post?: never;
+    delete?: never;
     options?: never;
     head?: never;
     patch?: never;
@@ -1385,8 +1452,8 @@ export interface components {
       avg: number;
     };
     CreateGeneralLogDto: {
-      text_data: string | null;
-      position_data: components['schemas']['Position'] | null;
+      text_data: Record<string, never> | null;
+      position_data: Record<string, never> | null;
       /** @description Extended metadata for RouteCoach extended events */
       metadata: Record<string, never> | null;
       offset_timestamp: number;
@@ -1549,7 +1616,7 @@ export interface components {
       /** @enum {string} */
       provider: 'template' | 'ollama' | 'openai';
       /** @example gpt-4o-mini */
-      model: string | null;
+      model: string;
       summary_md: string | null;
       summary_json: {
         [key: string]: unknown;
@@ -1563,6 +1630,15 @@ export interface components {
        * @example My Unity Game Client
        */
       name: string;
+      /**
+       * @description 初期段階でアクセス可能にするプロジェクトIDの配列（オプション）
+       * @example [
+       *       1,
+       *       2,
+       *       3
+       *     ]
+       */
+      projectIds?: number[];
     };
     CreateGameApiKeyResponseDto: {
       /** @description APIキーID */
@@ -1584,11 +1660,8 @@ export interface components {
       name: string;
       /** @description アクティブ状態 */
       isActive: boolean;
-      /**
-       * Format: date-time
-       * @description 最終使用日時
-       */
-      lastUsedAt: string | null;
+      /** @description 最終使用日時 */
+      lastUsedAt: Record<string, never> | null;
       /**
        * Format: date-time
        * @description 作成日時
@@ -1635,6 +1708,7 @@ export interface components {
         x?: number;
         y?: number;
         z?: number;
+        offset_timestamp?: number;
       }[];
       /** @description Number of times this route was taken */
       occurrence_count: number;
@@ -1662,6 +1736,7 @@ export interface components {
         x?: number;
         y?: number;
         z?: number;
+        offset_timestamp?: number;
       }[];
       /** @description Success rate (0-1) */
       success_rate?: number;
@@ -1858,6 +1933,357 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  HealthController_check: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The Health Check is successful */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @example ok */
+            status?: string;
+            /** @example {
+             *       "database": {
+             *         "status": "up"
+             *       }
+             *     } */
+            info?: {
+              [key: string]: {
+                status: string;
+              } & {
+                [key: string]: unknown;
+              };
+            } | null;
+            /** @example {} */
+            error?: {
+              [key: string]: {
+                status: string;
+              } & {
+                [key: string]: unknown;
+              };
+            } | null;
+            /** @example {
+             *       "database": {
+             *         "status": "up"
+             *       }
+             *     } */
+            details?: {
+              [key: string]: {
+                status: string;
+              } & {
+                [key: string]: unknown;
+              };
+            };
+          };
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+      /** @description The Health Check is not successful */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @example error */
+            status?: string;
+            /** @example {
+             *       "database": {
+             *         "status": "up"
+             *       }
+             *     } */
+            info?: {
+              [key: string]: {
+                status: string;
+              } & {
+                [key: string]: unknown;
+              };
+            } | null;
+            /** @example {
+             *       "redis": {
+             *         "status": "down",
+             *         "message": "Could not connect"
+             *       }
+             *     } */
+            error?: {
+              [key: string]: {
+                status: string;
+              } & {
+                [key: string]: unknown;
+              };
+            } | null;
+            /** @example {
+             *       "database": {
+             *         "status": "up"
+             *       },
+             *       "redis": {
+             *         "status": "down",
+             *         "message": "Could not connect"
+             *       }
+             *     } */
+            details?: {
+              [key: string]: {
+                status: string;
+              } & {
+                [key: string]: unknown;
+              };
+            };
+          };
+        };
+      };
+    };
+  };
+  HealthController_liveness: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The Health Check is successful */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @example ok */
+            status?: string;
+            /** @example {
+             *       "database": {
+             *         "status": "up"
+             *       }
+             *     } */
+            info?: {
+              [key: string]: {
+                status: string;
+              } & {
+                [key: string]: unknown;
+              };
+            } | null;
+            /** @example {} */
+            error?: {
+              [key: string]: {
+                status: string;
+              } & {
+                [key: string]: unknown;
+              };
+            } | null;
+            /** @example {
+             *       "database": {
+             *         "status": "up"
+             *       }
+             *     } */
+            details?: {
+              [key: string]: {
+                status: string;
+              } & {
+                [key: string]: unknown;
+              };
+            };
+          };
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+      /** @description The Health Check is not successful */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @example error */
+            status?: string;
+            /** @example {
+             *       "database": {
+             *         "status": "up"
+             *       }
+             *     } */
+            info?: {
+              [key: string]: {
+                status: string;
+              } & {
+                [key: string]: unknown;
+              };
+            } | null;
+            /** @example {
+             *       "redis": {
+             *         "status": "down",
+             *         "message": "Could not connect"
+             *       }
+             *     } */
+            error?: {
+              [key: string]: {
+                status: string;
+              } & {
+                [key: string]: unknown;
+              };
+            } | null;
+            /** @example {
+             *       "database": {
+             *         "status": "up"
+             *       },
+             *       "redis": {
+             *         "status": "down",
+             *         "message": "Could not connect"
+             *       }
+             *     } */
+            details?: {
+              [key: string]: {
+                status: string;
+              } & {
+                [key: string]: unknown;
+              };
+            };
+          };
+        };
+      };
+    };
+  };
+  HealthController_readiness: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The Health Check is successful */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @example ok */
+            status?: string;
+            /** @example {
+             *       "database": {
+             *         "status": "up"
+             *       }
+             *     } */
+            info?: {
+              [key: string]: {
+                status: string;
+              } & {
+                [key: string]: unknown;
+              };
+            } | null;
+            /** @example {} */
+            error?: {
+              [key: string]: {
+                status: string;
+              } & {
+                [key: string]: unknown;
+              };
+            } | null;
+            /** @example {
+             *       "database": {
+             *         "status": "up"
+             *       }
+             *     } */
+            details?: {
+              [key: string]: {
+                status: string;
+              } & {
+                [key: string]: unknown;
+              };
+            };
+          };
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+      /** @description The Health Check is not successful */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @example error */
+            status?: string;
+            /** @example {
+             *       "database": {
+             *         "status": "up"
+             *       }
+             *     } */
+            info?: {
+              [key: string]: {
+                status: string;
+              } & {
+                [key: string]: unknown;
+              };
+            } | null;
+            /** @example {
+             *       "redis": {
+             *         "status": "down",
+             *         "message": "Could not connect"
+             *       }
+             *     } */
+            error?: {
+              [key: string]: {
+                status: string;
+              } & {
+                [key: string]: unknown;
+              };
+            } | null;
+            /** @example {
+             *       "database": {
+             *         "status": "up"
+             *       },
+             *       "redis": {
+             *         "status": "down",
+             *         "message": "Could not connect"
+             *       }
+             *     } */
+            details?: {
+              [key: string]: {
+                status: string;
+              } & {
+                [key: string]: unknown;
+              };
+            };
+          };
         };
       };
     };
@@ -2078,6 +2504,32 @@ export interface operations {
       };
     };
   };
+  AuthController_health: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
   LoginController_login: {
     parameters: {
       query?: never;
@@ -2107,6 +2559,13 @@ export interface operations {
         content: {
           'application/json': components['schemas']['DefaultErrorResponse'];
         };
+      };
+      /** @description Too Many Requests - Rate limit exceeded */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
@@ -3298,12 +3757,12 @@ export interface operations {
   PlayerPositionLogController_get: {
     parameters: {
       query?: {
-        /** @description Filter by player ID (optional) */
-        player?: number;
         /** @description Number of logs to return (default: 20) */
         limit?: number;
         /** @description Offset for pagination (default: 0) */
         offset?: number;
+        /** @description Filter by player ID (optional) */
+        player?: number;
       };
       header?: never;
       path: {

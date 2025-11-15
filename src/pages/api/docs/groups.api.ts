@@ -6,7 +6,7 @@
 import type { DocGroup } from '@src/utils/docs/types';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import { getDocGroups } from '@src/utils/docs/loader';
+import { getPublicDocGroups } from '@src/utils/docs/loader';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<DocGroup[] | { error: string }>) {
   // Only allow GET requests
@@ -16,7 +16,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   }
 
   try {
-    const groups = await getDocGroups();
+    // Only return public docs (where public !== false)
+    const groups = await getPublicDocGroups();
 
     // Set cache headers to reduce server load
     res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
