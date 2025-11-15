@@ -1,0 +1,60 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  create-deploy-pr:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create Pull Request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Check if develop branch exists
+          if ! git ls-remote --heads origin develop | grep -q develop; then
+            echo "Error: develop branch does not exist"
+            exit 1
+          fi
+
+          # Check if main branch exists
+          if ! git ls-remote --heads origin main | grep -q main; then
+            echo "Error: main branch does not exist"
+            exit 1
+          fi
+
+          # Check if there are differences between develop and main
+          git fetch origin develop:develop
+          git fetch origin main:main
+
+          if git diff --quiet main...develop; then
+            echo "No changes to deploy. develop and main are identical."
+            exit 0
+          fi
+
+          # Create PR from develop to main
+          PR_URL=$(gh pr create \
+            --title "Deploy to Production" \
+            --body "## Deploy to Production
+
+          This PR deploys changes from \`develop\` to \`main\`.
+
+          ### Summary
+          - Merging this PR will trigger automatic deployment to production via AWS Amplify
+
+          ### Checklist
+          - [ ] All tests are passing
+          - [ ] Changes have been tested in development environment
+          - [ ] Ready for production deployment" \
+            --base main \
+            --head develop)
+
+          echo "✅ PR created: $PR_URL"
