@@ -70,35 +70,6 @@ export function useFocusActions() {
   return { setSelected: setSelectedAny, focusBox3, focusPoint, focusSphere, focusByCoord };
 }
 
-/* ========= オプション型定義 ========= */
-type SelectableOptions =
-  | {
-      fit?: 'object' | 'point' | 'none';
-      fitPadding?: number;
-      stopPropagation?: boolean;
-      extra?: Record<string, never>;
-      getSelection?: never;
-    }
-  | {
-      getSelection: (e: ThreeEvent<MouseEvent>) => {
-        kind: 'heatmap-cell';
-        index: number;
-        worldPosition: Vec3;
-        density?: number;
-      };
-      fit?: 'point' | 'none';
-      stopPropagation?: boolean;
-      extra?: never;
-      fitPadding?: never;
-    }
-  | {
-      extra: PlayerArrowExtra;
-      fit?: 'point' | 'sphere' | 'none';
-      fitPadding?: number;
-      stopPropagation?: boolean;
-      getSelection?: never;
-    };
-
 /* ========= useSelectable オーバーロード ========= */
 // map-mesh
 export function useSelectable(
