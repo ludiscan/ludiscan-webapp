@@ -32,10 +32,10 @@ jobs:
           fi
 
           # Check if there are differences between develop and main
-          git fetch origin develop:develop
-          git fetch origin main:main
+          git fetch origin develop
+          git fetch origin main
 
-          if git diff --quiet main...develop; then
+          if git diff --quiet origin/main...origin/develop; then
             echo "No changes to deploy. develop and main are identical."
             exit 0
           fi
