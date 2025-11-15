@@ -7,6 +7,7 @@ on:
 permissions:
   contents: read
   pull-requests: write
+  issues: write
 
 concurrency:
   group: 'pr-labeler-${{ github.head_ref }}'
@@ -19,6 +20,48 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Ensure labels exist
+        run: |
+          # Function to create label if it doesn't exist
+          create_label_if_not_exists() {
+            local label_name=$1
+            local label_color=$2
+            local label_description=$3
+
+            if ! gh label list --repo ${{ github.repository }} | grep -q "^$label_name"; then
+              echo "Creating label: $label_name"
+              gh label create "$label_name" \
+                --color "$label_color" \
+                --description "$label_description" \
+                --repo ${{ github.repository }}
+            else
+              echo "Label already exists: $label_name"
+            fi
+          }
+
+          # Create size labels
+          create_label_if_not_exists "size:XS" "00ff00" "Extra small PR (< 50 lines)"
+          create_label_if_not_exists "size:S" "00cc00" "Small PR (50-199 lines)"
+          create_label_if_not_exists "size:M" "ffcc00" "Medium PR (200-499 lines)"
+          create_label_if_not_exists "size:L" "ff9900" "Large PR (500-999 lines)"
+          create_label_if_not_exists "size:XL" "ff0000" "Extra large PR (1000+ lines)"
+
+          # Create area labels
+          create_label_if_not_exists "area:components" "0052cc" "Changes to UI components"
+          create_label_if_not_exists "area:features" "5319e7" "Changes to feature modules"
+          create_label_if_not_exists "area:pages" "1d76db" "Changes to pages"
+          create_label_if_not_exists "area:hooks" "0e8a16" "Changes to React hooks"
+          create_label_if_not_exists "area:state" "d93f0b" "Changes to state management"
+          create_label_if_not_exists "area:api" "fbca04" "Changes to API client"
+          create_label_if_not_exists "area:utils" "c5def5" "Changes to utility functions"
+          create_label_if_not_exists "area:styles" "f9d0c4" "Changes to styles/theme"
+          create_label_if_not_exists "area:ci" "bfd4f2" "Changes to CI/CD workflows"
+          create_label_if_not_exists "area:tests" "d4c5f9" "Changes to tests"
+          create_label_if_not_exists "area:storybook" "e99695" "Changes to Storybook"
+          create_label_if_not_exists "area:docs" "c2e0c6" "Changes to documentation"
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Get changed files
         id: changed-files
