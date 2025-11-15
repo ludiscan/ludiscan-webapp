@@ -61,10 +61,11 @@ jobs:
           git push -u origin "$BRANCH_NAME"
 
       - name: Create Pull Request
+        id: pr
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh pr create \
+          PR_URL=$(gh pr create \
             --title "Release ${{ steps.version.outputs.new_version }}" \
             --body "$(cat <<'EOF'
           ## Release ${{ steps.version.outputs.new_version }}
@@ -73,14 +74,49 @@ jobs:
 
           **Release type**: ${{ github.event.inputs.release_type }}
 
-          ### After merging
-
-          Please create and push the git tag manually:
-          ```bash
-          git tag ${{ steps.version.outputs.new_version }}
-          git push origin --tags
-          ```
+          This PR will be automatically merged and tagged by the release workflow.
           EOF
           )" \
             --base ${{ github.ref_name }} \
-            --head ${{ steps.version.outputs.branch_name }}
+            --head ${{ steps.version.outputs.branch_name }})
+          echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
+          echo "pr_number=$(echo $PR_URL | grep -oP '\d+$')" >> $GITHUB_OUTPUT
+
+      - name: Auto-merge Pull Request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Wait a moment for CI checks to start
+          sleep 5
+
+          # Enable auto-merge
+          gh pr merge ${{ steps.pr.outputs.pr_number }} --auto --squash --delete-branch
+
+      - name: Wait for PR to be merged
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Waiting for PR to be merged..."
+          for i in {1..60}; do
+            STATE=$(gh pr view ${{ steps.pr.outputs.pr_number }} --json state -q .state)
+            if [ "$STATE" = "MERGED" ]; then
+              echo "PR has been merged!"
+              exit 0
+            fi
+            echo "PR state: $STATE (attempt $i/60)"
+            sleep 5
+          done
+          echo "Timeout waiting for PR to be merged"
+          exit 1
+
+      - name: Checkout base branch
+        run: |
+          git fetch origin
+          git checkout ${{ github.ref_name }}
+          git pull origin ${{ github.ref_name }}
+
+      - name: Create and push tag
+        run: |
+          git tag ${{ steps.version.outputs.new_version }}
+          git push origin --tags
+          echo "✅ Tag ${{ steps.version.outputs.new_version }} has been created and pushed!"
