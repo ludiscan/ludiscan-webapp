@@ -12,7 +12,6 @@ import { Card } from '@src/component/atoms/Card';
 import { FlexRow, InlineFlexColumn, InlineFlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { fontSizes } from '@src/styles/style';
 
 export const PlaySpeed = [0.25, 0.5, 1, 2, 4] as const;
 export type PlaySpeedType = (typeof PlaySpeed)[number];
@@ -170,7 +169,7 @@ const Component: FC<TimelineControllerBlockProps> = ({
                     <Text
                       className={`${className}__playSpeedText`}
                       text={`${value}x`}
-                      fontSize={playSpeed === value ? fontSizes.medium : fontSizes.small}
+                      fontSize={'sm'}
                       color={playSpeed === value ? theme.colors.text.primary : theme.colors.text.secondary}
                     />
                   </Button>
@@ -199,8 +198,8 @@ const Component: FC<TimelineControllerBlockProps> = ({
             <div className={`${className}__sliderWrapper`} ref={trackRef}>
               {!isDetailOpen && (
                 <>
-                  <Text className={`${className}__speedLabel`} text={`${playSpeed}x`} fontSize={fontSizes.small} color={theme.colors.text.secondary} />
-                  <Text className={`${className}__label`} text={`${currentTimeLabel}/${maxTimeLabel}`} fontSize={fontSizes.small} />
+                  <Text className={`${className}__speedLabel`} text={`${playSpeed}x`} fontSize={'xs'} color={theme.colors.text.secondary} />
+                  <Text className={`${className}__label`} text={`${currentTimeLabel}/${maxTimeLabel}`} fontSize={'xs'} />
                 </>
               )}
               <div className={`${className}__sliderBackground`} />
@@ -231,7 +230,7 @@ const Component: FC<TimelineControllerBlockProps> = ({
                 <RiPlayReverseMiniFill color={theme.colors.primary.main} size={20} />
               </div>
             </div>
-            {isDetailOpen && <Text className={`${className}__label open`} text={`${currentTimeLabel}/${maxTimeLabel}`} fontSize={fontSizes.small} />}
+            {isDetailOpen && <Text className={`${className}__label open`} text={`${currentTimeLabel}/${maxTimeLabel}`} fontSize={'xs'} />}
             <Button
               className={`${className}__toggleButton ${isDetailOpen ? 'open' : ''}`}
               onClick={() => setIsDetailOpen(!isDetailOpen)}
@@ -273,31 +272,35 @@ const createBackgroundGradient = (theme: Theme, currentMinTime: number, currentM
 
 export const TimelineControllerBlock = memo(
   styled(Component)`
-    max-width: 450px;
-    height: 24px;
-    padding: 16px 16px 20px;
+    max-width: 90vw;
+    height: ${({ theme }) => theme.spacing.lg};
+    padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.lg};
     color: ${({ theme }) => theme.colors.text.primary};
-    border-radius: 32px;
+    border-radius: ${({ theme }) => theme.borders.radius.xl};
     transition: all 0.2s ease-in-out;
 
+    @media (width >= 500px) {
+      max-width: 450px;
+    }
+
     &.open {
-      height: 45px;
+      height: calc(${({ theme }) => theme.spacing.lg} * 2);
     }
 
     &__sliderWrapper {
       position: relative;
       flex: 1;
       min-width: 150px;
-      height: 20px;
+      height: ${({ theme }) => theme.spacing.lg};
     }
 
     &__sliderBackground {
       position: absolute;
       top: 50%;
       width: 100%;
-      height: 4px;
+      height: ${({ theme }) => theme.spacing.xs};
       background: ${({ theme, currentMinTime, currentMaxTime, maxTime }) => createBackgroundGradient(theme, currentMinTime, currentMaxTime, maxTime)};
-      border-radius: 2px;
+      border-radius: ${({ theme }) => theme.borders.radius.sm};
       transform: translateY(-50%);
     }
 
@@ -310,6 +313,15 @@ export const TimelineControllerBlock = memo(
       align-content: center;
       cursor: pointer;
       transform: translate(-50%, -50%);
+
+      &:focus {
+        outline: 2px solid ${({ theme }) => theme.colors.border.focus};
+        outline-offset: 2px;
+      }
+
+      &:focus:not(:focus-visible) {
+        outline: none;
+      }
     }
 
     &__thumb--min {
@@ -334,21 +346,35 @@ export const TimelineControllerBlock = memo(
       &::-webkit-slider-thumb {
         /* English comment: taller thumb for current */
         width: 6px;
-        height: 20px;
+        height: ${({ theme }) => theme.spacing.lg};
         appearance: none;
         cursor: pointer;
         background: ${({ theme }) => theme.colors.surface.base};
-        border: 1px solid ${({ theme }) => theme.colors.primary.main};
-        border-radius: 8px;
+        border: ${({ theme }) => theme.borders.width.thin} solid ${({ theme }) => theme.colors.primary.main};
+        border-radius: ${({ theme }) => theme.borders.radius.md};
       }
 
       &::-moz-range-thumb {
         width: 6px;
-        height: 20px;
+        height: ${({ theme }) => theme.spacing.lg};
         cursor: pointer;
         background: ${({ theme }) => theme.colors.surface.base};
-        border: 1px solid ${({ theme }) => theme.colors.primary.main};
-        border-radius: 8px;
+        border: ${({ theme }) => theme.borders.width.thin} solid ${({ theme }) => theme.colors.primary.main};
+        border-radius: ${({ theme }) => theme.borders.radius.md};
+      }
+
+      &:focus {
+        outline: none;
+      }
+
+      &:focus-visible::-webkit-slider-thumb {
+        outline: 2px solid ${({ theme }) => theme.colors.border.focus};
+        outline-offset: 2px;
+      }
+
+      &:focus-visible::-moz-range-thumb {
+        outline: 2px solid ${({ theme }) => theme.colors.border.focus};
+        outline-offset: 2px;
       }
     }
 
@@ -379,7 +405,7 @@ export const TimelineControllerBlock = memo(
     &__label {
       position: absolute;
       right: 0;
-      bottom: -18px;
+      bottom: calc(-1 * ${({ theme }) => theme.spacing.md});
       transition: all 0.2s ease-in-out;
 
       &.open {
@@ -390,7 +416,7 @@ export const TimelineControllerBlock = memo(
     &__speedLabel {
       position: absolute;
       right: 0;
-      bottom: 13px;
+      bottom: ${({ theme }) => theme.spacing.sm};
     }
 
     &__playSpeedText {

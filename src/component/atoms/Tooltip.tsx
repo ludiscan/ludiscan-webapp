@@ -20,13 +20,13 @@ export type TooltipProps = Pick<TextProps, 'fontSize' | 'fontWeight' | 'color'> 
 const TooltipText = styled(Text)<{ placement: 'top' | 'bottom' | 'left' | 'right' }>`
   position: absolute;
   z-index: ${zIndexes.tooltip};
-  padding: 4px 8px;
-  color: ${({ theme }) => theme.colors.text.primary || '#fff'};
+  padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.sm};
+  color: ${({ theme }) => theme.colors.text.inverse};
   white-space: nowrap;
   pointer-events: none; /* ユーザーの操作に影響させない */
-  background-color: ${({ theme }) => theme.colors.surface.sunken || '#000'};
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgb(0 0 0 / 20%);
+  background-color: ${({ theme }) => theme.colors.surface.sunken};
+  border-radius: ${({ theme }) => theme.borders.radius.sm};
+  box-shadow: ${({ theme }) => theme.shadows.md};
   opacity: 1;
   transform: translate(-50%, -100%);
   transition: opacity 0.3s ease-in-out;
@@ -56,7 +56,7 @@ const TooltipComponent: FC<TooltipProps> = (props) => {
         left = rect.left + rect.width / 2;
       } else if (placement === 'left') {
         top = rect.top + rect.height / 2;
-        left = rect.left - 8;
+        left = rect.left;
       } else if (placement === 'right') {
         top = rect.top + rect.height / 2;
         left = rect.right + rect.width;
