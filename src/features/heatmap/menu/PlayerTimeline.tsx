@@ -159,6 +159,7 @@ const queryPlaceholder =
   '}';
 
 const PlayerTimelineComponent: FC<HeatmapMenuProps> = ({ className, service }) => {
+  const { theme } = useSharedTheme();
   const setData = usePlayerTimelinePatch();
   const { details, queryText: queryTextState, visible } = usePlayerTimelinePick('details', 'queryText', 'visible');
   const [queryText, setQueryText] = useState<string>('');
@@ -366,7 +367,7 @@ export const PlayerTimeline = memo(
       min-height: 92px;
       padding: 0;
       margin: 0;
-      font-size: ${theme.typography.fontSize.sm};
+      font-size: ${({ theme }) => theme.typography.fontSize.sm};
     }
   `,
   (prev, next) => {

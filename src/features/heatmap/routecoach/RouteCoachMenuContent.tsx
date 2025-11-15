@@ -14,6 +14,7 @@ import { EventClusterViewer } from '@src/component/organisms/EventClusterViewer'
 import { useRouteCoachApi } from '@src/features/heatmap/routecoach/api';
 import { useImprovementRoutes } from '@src/hooks/useImprovementRoutes';
 import { useRouteCoachPatch } from '@src/hooks/useRouteCoach';
+import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { useApiClient } from '@src/modeles/ApiClientContext';
 
 const POLL_MS = 2000;
@@ -98,6 +99,7 @@ const ScrollableClusterSection = styled(ScrollableClusterSectionComponent)`
 `;
 
 const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
+  const { theme } = useSharedTheme();
   const qc = useQueryClient();
   const projectId = service.projectId;
   const sessionId = service.sessionId;

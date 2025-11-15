@@ -379,7 +379,7 @@ export const ProjectDetailsMembersTab = styled(Component)`
   &__roleSelect {
     width: 100%;
     padding: 8px 12px;
-    font-size: ${theme.typography.fontSize.base}px;
+    font-size: ${({ theme }) => theme.typography.fontSize.base};
     color: ${({ theme }) => theme.colors.text.primary};
     cursor: pointer;
     background-color: ${({ theme }) => theme.colors.surface.base};
