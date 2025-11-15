@@ -17,7 +17,7 @@ import { useAuth } from '@src/hooks/useAuth';
 import { useGeneralSelect } from '@src/hooks/useGeneral';
 import { useHeatmapState } from '@src/hooks/useHeatmapState';
 import { patchSplitMode } from '@src/slices/canvasSlice';
-import { dimensions, fontSizes } from '@src/styles/style';
+import { dimensions } from '@src/styles/style';
 import { useOnlineHeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 
 export type HeatMapTaskIdPageProps = {
@@ -68,7 +68,7 @@ const HeaderWrapper = memo(
       <Header
         title={'Heatmap'}
         onClick={onBackClick}
-        iconTitleEnd={<Text className={`${className}__headerV`} text={`${version || 'debug'}`} fontSize={fontSizes.small} fontWeight={'bold'} />}
+        iconTitleEnd={<Text className={`${className}__headerV`} text={`${version || 'debug'}`} fontSize={theme.typography.fontSize.sm} fontWeight={'bold'} />}
         iconEnd={
           <>
             <Button fontSize={'sm'} onClick={handleSplitHorizontal} scheme={splitMode.enabled && splitMode.direction === 'horizontal' ? 'primary' : 'surface'}>

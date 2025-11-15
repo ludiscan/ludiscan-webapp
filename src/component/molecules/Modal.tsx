@@ -12,7 +12,7 @@ import type { Styles } from 'react-modal';
 
 import { Button } from '@src/component/atoms/Button';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { fontSizes, fontWeights, zIndexes } from '@src/styles/style';
+import { zIndexes } from '@src/styles/style';
 
 export type ModalProps = {
   className?: string | undefined;
@@ -71,7 +71,9 @@ const Component = ({ className, isOpen, onClose, children, title, closeOutside, 
     >
       {(title || onClose) && (
         <FlexRow className={`${className}__header`} align={'center'} gap={8}>
-          {title && <Text text={title} fontSize={fontSizes.large1} fontWeight={fontWeights.black} color={theme.colors.text.primary} />}
+          {title && (
+            <Text text={title} fontSize={theme.typography.fontSize.lg} fontWeight={theme.typography.fontWeight.bold} color={theme.colors.text.primary} />
+          )}
           {onClose && (
             <Button className={`${className}__closeButton`} onClick={onClose} scheme={'none'} fontSize={'base'}>
               <IoCloseOutline size={24} />

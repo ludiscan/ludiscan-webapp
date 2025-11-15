@@ -6,13 +6,12 @@ import type { ReactNode } from 'react';
 import { InlineFlexColumn, InlineFlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { fontSizes } from '@src/styles/style';
 
 export const InputColumn = styled(({ className, label, children }: { className?: string; label: string; children: ReactNode }) => {
   const { theme } = useSharedTheme();
   return (
     <InlineFlexColumn className={className} align={'flex-start'} wrap={'nowrap'} gap={2}>
-      <Text text={label} fontSize={fontSizes.small} style={{ width: '110px' }} color={theme.colors.tertiary.main} />
+      <Text text={label} fontSize={theme.typography.fontSize.sm} style={{ width: '110px' }} color={theme.colors.tertiary.main} />
       <div style={{ width: '100%' }}>{children}</div>
     </InlineFlexColumn>
   );
@@ -27,7 +26,7 @@ export const InputRow = styled(
     const { theme } = useSharedTheme();
     return (
       <InlineFlexRow className={className} align={align} wrap={'nowrap'} gap={4}>
-        <Text text={label} fontSize={fontSizes.small} style={{ width: '90px' }} color={theme.colors.tertiary.main} />
+        <Text text={label} fontSize={theme.typography.fontSize.sm} style={{ width: '90px' }} color={theme.colors.tertiary.main} />
         <div style={{ flex: 1, display: 'flex' }}>{children}</div>
       </InlineFlexRow>
     );

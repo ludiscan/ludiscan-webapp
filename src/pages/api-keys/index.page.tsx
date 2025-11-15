@@ -17,7 +17,6 @@ import { useAuth } from '@src/hooks/useAuth';
 import { useGameApiKeys } from '@src/hooks/useGameApiKeys';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { InnerContent } from '@src/pages/_app.page';
-import { fontSizes } from '@src/styles/style';
 
 export type ApiKeysPageProps = {
   className?: string;
@@ -123,7 +122,7 @@ const Component: FC<ApiKeysPageProps> = ({ className }) => {
         <SidebarLayout />
         <InnerContent>
           <div className={`${className}__centerContent`}>
-            <Text text='Loading...' fontSize={fontSizes.medium} color={theme.colors.text.primary} />
+            <Text text='Loading...' fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} />
           </div>
         </InnerContent>
       </div>

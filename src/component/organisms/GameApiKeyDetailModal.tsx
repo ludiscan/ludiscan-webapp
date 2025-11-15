@@ -10,7 +10,6 @@ import { VerticalSpacer } from '@src/component/atoms/Spacer';
 import { Text } from '@src/component/atoms/Text';
 import { Modal } from '@src/component/molecules/Modal';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { fontSizes, fontWeights } from '@src/styles/style';
 
 export type GameApiKeyDetailModalProps = {
   className?: string;
@@ -74,39 +73,54 @@ const Component: FC<GameApiKeyDetailModalProps> = ({ className, isOpen, selected
           {selectedKey && (
             <>
               <div>
-                <Text text='Name' fontSize={fontSizes.small} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
+                <Text text='Name' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bold} />
                 <VerticalSpacer size={4} />
-                <Text text={selectedKey.name} fontSize={fontSizes.medium} color={theme.colors.text.secondary} />
+                <Text text={selectedKey.name} fontSize={theme.typography.fontSize.base} color={theme.colors.text.secondary} />
               </div>
 
               <div>
-                <Text text='Key ID' fontSize={fontSizes.small} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
+                <Text text='Key ID' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bold} />
                 <VerticalSpacer size={4} />
                 <div className={`${className}__keyValueContainer`}>
-                  <Text text={maskKeyValue(selectedKey.id)} fontSize={fontSizes.smallest} color={theme.colors.text.secondary} />
+                  <Text text={maskKeyValue(selectedKey.id)} fontSize={theme.typography.fontSize.xs} color={theme.colors.text.secondary} />
                 </div>
               </div>
 
               <div>
-                <Text text='Created' fontSize={fontSizes.small} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
+                <Text text='Created' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bold} />
                 <VerticalSpacer size={4} />
-                <Text text={formatDate(selectedKey.createdAt)} fontSize={fontSizes.small} color={theme.colors.text.secondary} />
+                <Text text={formatDate(selectedKey.createdAt)} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
               </div>
 
               {selectedKey.lastUsedAt && (
                 <div>
-                  <Text text='Last Used' fontSize={fontSizes.small} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
+                  <Text
+                    text='Last Used'
+                    fontSize={theme.typography.fontSize.sm}
+                    color={theme.colors.text.primary}
+                    fontWeight={theme.typography.fontWeight.bold}
+                  />
                   <VerticalSpacer size={4} />
-                  <Text text={formatDate(selectedKey.lastUsedAt)} fontSize={fontSizes.small} color={theme.colors.text.secondary} />
+                  <Text text={formatDate(selectedKey.lastUsedAt)} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
                 </div>
               )}
 
               <div>
                 <FlexRow gap={8} align='center' className={`${className}__projectsHeader`}>
-                  <Text text='Projects' fontSize={fontSizes.small} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
+                  <Text
+                    text='Projects'
+                    fontSize={theme.typography.fontSize.sm}
+                    color={theme.colors.text.primary}
+                    fontWeight={theme.typography.fontWeight.bold}
+                  />
                   {!isEditingProjects && (
                     <Button onClick={handleOpenEdit} scheme='none' fontSize={'sm'} className={`${className}__editButton`}>
-                      <Text text='Edit' fontSize={fontSizes.smallest} color={theme.colors.primary.main} fontWeight={fontWeights.bold} />
+                      <Text
+                        text='Edit'
+                        fontSize={theme.typography.fontSize.xs}
+                        color={theme.colors.primary.main}
+                        fontWeight={theme.typography.fontWeight.bold}
+                      />
                     </Button>
                   )}
                 </FlexRow>
@@ -127,16 +141,18 @@ const Component: FC<GameApiKeyDetailModalProps> = ({ className, isOpen, selected
                             }
                           }}
                         />
-                        <Text text={proj.name} fontSize={fontSizes.small} color={theme.colors.text.primary} />
+                        <Text text={proj.name} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.primary} />
                       </label>
                     ))}
                   </FlexColumn>
                 ) : (
                   <FlexColumn gap={4}>
                     {selectedKey.projects.length > 0 ? (
-                      selectedKey.projects.map((proj) => <Text key={proj.id} text={proj.name} fontSize={fontSizes.small} color={theme.colors.text.secondary} />)
+                      selectedKey.projects.map((proj) => (
+                        <Text key={proj.id} text={proj.name} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
+                      ))
                     ) : (
-                      <Text text='No projects assigned' fontSize={fontSizes.small} color={theme.colors.text.secondary} fontWeight='lighter' />
+                      <Text text='No projects assigned' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} fontWeight='lighter' />
                     )}
                   </FlexColumn>
                 )}
@@ -156,15 +172,15 @@ const Component: FC<GameApiKeyDetailModalProps> = ({ className, isOpen, selected
                   fontSize={'sm'}
                   disabled={isUpdatingProjects}
                 >
-                  <Text text='Cancel' fontSize={fontSizes.small} />
+                  <Text text='Cancel' fontSize={theme.typography.fontSize.sm} />
                 </Button>
                 <Button onClick={handleSaveProjects} scheme='primary' fontSize={'sm'} disabled={isUpdatingProjects}>
-                  <Text text={isUpdatingProjects ? 'Saving...' : 'Save'} fontSize={fontSizes.small} />
+                  <Text text={isUpdatingProjects ? 'Saving...' : 'Save'} fontSize={theme.typography.fontSize.sm} />
                 </Button>
               </>
             ) : (
               <Button onClick={handleCloseModal} scheme='primary' fontSize={'sm'}>
-                <Text text='Close' fontSize={fontSizes.small} />
+                <Text text='Close' fontSize={theme.typography.fontSize.sm} />
               </Button>
             )}
           </FlexRow>

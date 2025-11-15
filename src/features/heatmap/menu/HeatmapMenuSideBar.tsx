@@ -9,7 +9,7 @@ import { Button } from '@src/component/atoms/Button';
 import { FlexColumn } from '@src/component/atoms/Flex';
 import { Tooltip } from '@src/component/atoms/Tooltip';
 import { useHeatmapSideBarMenus } from '@src/hooks/useHeatmapSideBarMenus';
-import { fontSizes } from '@src/styles/style';
+import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
 export type MenuSideBarProps = {
@@ -19,6 +19,7 @@ export type MenuSideBarProps = {
 };
 
 const Component: FC<MenuSideBarProps> = ({ className, currentMenu }) => {
+  const { theme } = useSharedTheme();
   const menus = useHeatmapSideBarMenus();
   return (
     <FlexColumn className={className} gap={12} wrap={'nowrap'}>
@@ -33,7 +34,7 @@ const Component: FC<MenuSideBarProps> = ({ className, currentMenu }) => {
           fontSize={'xl'}
           radius={'small'}
         >
-          <Tooltip tooltip={name} placement={'bottom'} fontSize={fontSizes.small}>
+          <Tooltip tooltip={name} placement={'bottom'} fontSize={theme.typography.fontSize.sm}>
             {icon}
           </Tooltip>
         </Button>

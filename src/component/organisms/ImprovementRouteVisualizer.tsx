@@ -125,6 +125,20 @@ const Component: FC<ImprovementRouteVisualizerProps> = ({ className, route, clus
     // Cleanup
     const currentContainer = containerRef.current;
     return () => {
+      // Dispose all geometries
+      clusterGeometry.dispose();
+      routeGeometry.dispose();
+      pointsGeometry.dispose();
+
+      // Dispose all materials
+      clusterMaterial.dispose();
+      routeMaterial.dispose();
+      pointsMaterial.dispose();
+
+      // Remove all objects from scene
+      scene.clear();
+
+      // Dispose renderer and remove from DOM
       currentContainer?.removeChild(renderer.domElement);
       renderer.dispose();
     };

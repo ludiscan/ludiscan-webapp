@@ -11,8 +11,8 @@ import { Text } from '@src/component/atoms/Text';
 import { Selector } from '@src/component/molecules/Selector';
 import { InputRow } from '@src/features/heatmap/menu/InputRow';
 import { useFieldObjectPatch, useFieldObjectSelect } from '@src/hooks/useFieldObject';
+import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { useFieldObjectTypes } from '@src/modeles/heatmapView';
-import { fontSizes, fontWeights } from '@src/styles/style';
 import { getRandomPrimitiveColor } from '@src/utils/color';
 import { availableIcons } from '@src/utils/heatmapIconMap';
 
@@ -27,6 +27,7 @@ map status.hand {
 `;
 
 const Component: FC<HeatmapMenuProps> = ({ service }) => {
+  const { theme } = useSharedTheme();
   const objects = useFieldObjectSelect((s) => s.objects);
   const queryText = useFieldObjectSelect((s) => s.queryText);
   const setFieldObjects = useFieldObjectPatch();
@@ -68,11 +69,11 @@ const Component: FC<HeatmapMenuProps> = ({ service }) => {
   return (
     <InlineFlexColumn gap={8}>
       <InlineFlexRow align={'center'} gap={4}>
-        <Text text={'Field Objects'} fontSize={fontSizes.large1} fontWeight={fontWeights.bold} />
+        <Text text={'Field Objects'} fontSize={theme.typography.fontSize.lg} fontWeight={theme.typography.fontWeight.bold} />
       </InlineFlexRow>
       <Divider orientation={'horizontal'} />
       <InlineFlexRow align={'center'} gap={4}>
-        <Text text={'HVQL Query'} fontSize={fontSizes.small} />
+        <Text text={'HVQL Query'} fontSize={theme.typography.fontSize.sm} />
       </InlineFlexRow>
       <textarea
         value={queryText}
@@ -93,7 +94,7 @@ const Component: FC<HeatmapMenuProps> = ({ service }) => {
       />
       <Divider orientation={'horizontal'} />
       <InlineFlexRow align={'center'} gap={4}>
-        <Text text={'Object Types'} fontSize={fontSizes.small} />
+        <Text text={'Object Types'} fontSize={theme.typography.fontSize.sm} />
       </InlineFlexRow>
       <InlineFlexRow align={'center'} gap={4}>
         {objectTypes?.data &&

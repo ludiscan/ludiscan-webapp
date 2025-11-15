@@ -21,7 +21,6 @@ import { useAuth } from '@src/hooks/useAuth';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { createClient } from '@src/modeles/qeury';
 import { InnerContent } from '@src/pages/_app.page';
-import { fontSizes, fontWeights } from '@src/styles/style';
 
 type TabType = 'sessions' | 'members' | 'api-keys';
 
@@ -106,7 +105,7 @@ const Component: FC<ProjectDetailsPageProps> = ({ className }) => {
         <SidebarLayout />
         <InnerContent>
           <div className={`${className}__centerContent`}>
-            <Text text='Loading...' fontSize={fontSizes.medium} color={theme.colors.text.primary} />
+            <Text text='Loading...' fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} />
           </div>
         </InnerContent>
       </div>
@@ -120,7 +119,7 @@ const Component: FC<ProjectDetailsPageProps> = ({ className }) => {
         <InnerContent>
           <Header title='Project Details' onClick={handleBack} />
           <div className={`${className}__centerContent`}>
-            <Text text='プロジェクトが見つかりません' fontSize={fontSizes.medium} color={theme.colors.semantic.error.main} />
+            <Text text='プロジェクトが見つかりません' fontSize={theme.typography.fontSize.base} color={theme.colors.semantic.error.main} />
           </div>
         </InnerContent>
       </div>
@@ -137,12 +136,22 @@ const Component: FC<ProjectDetailsPageProps> = ({ className }) => {
         <div className={`${className}__header`}>
           <FlexRow gap={16} align={'flex-start'}>
             <FlexColumn gap={8} style={{ flex: 1 }}>
-              <Text text={project.name} fontSize={fontSizes.largest} color={theme.colors.text.primary} fontWeight={fontWeights.bolder} />
-              <Text text={project.description} fontSize={fontSizes.small} color={theme.colors.text.secondary} fontWeight={fontWeights.bold} />
+              <Text
+                text={project.name}
+                fontSize={theme.typography.fontSize['3xl']}
+                color={theme.colors.text.primary}
+                fontWeight={theme.typography.fontWeight.bolder}
+              />
+              <Text
+                text={project.description}
+                fontSize={theme.typography.fontSize.sm}
+                color={theme.colors.text.secondary}
+                fontWeight={theme.typography.fontWeight.bold}
+              />
             </FlexColumn>
             <Link href={`/heatmap/projects/${project.id}`} style={{ textDecoration: 'none' }}>
               <BiLineChart size={20} />
-              <Text text='Heatmap' fontWeight={fontWeights.bold} />
+              <Text text='Heatmap' fontWeight={theme.typography.fontWeight.bold} />
             </Link>
           </FlexRow>
         </div>
@@ -158,7 +167,7 @@ const Component: FC<ProjectDetailsPageProps> = ({ className }) => {
               title='Sessions'
             >
               <BiBarChart size={20} />
-              <Text text='Sessions' fontSize={fontSizes.medium} />
+              <Text text='Sessions' fontSize={theme.typography.fontSize.base} />
             </Button>
             <Button
               onClick={() => setActiveTab('members')}
@@ -168,7 +177,7 @@ const Component: FC<ProjectDetailsPageProps> = ({ className }) => {
               title='Members'
             >
               <BiUser size={20} />
-              <Text text='Members' fontSize={fontSizes.medium} />
+              <Text text='Members' fontSize={theme.typography.fontSize.base} />
             </Button>
             <Button
               onClick={() => setActiveTab('api-keys')}
@@ -178,7 +187,7 @@ const Component: FC<ProjectDetailsPageProps> = ({ className }) => {
               title='API Keys'
             >
               <BiKey size={20} />
-              <Text text='API Keys' fontSize={fontSizes.medium} />
+              <Text text='API Keys' fontSize={theme.typography.fontSize.base} />
             </Button>
           </div>
         </div>

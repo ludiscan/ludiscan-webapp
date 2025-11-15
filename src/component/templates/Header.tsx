@@ -20,7 +20,7 @@ import { DesktopLayout, MobileLayout } from '@src/component/molecules/responsive
 import { useAuth } from '@src/hooks/useAuth';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import themes from '@src/modeles/theme';
-import { dimensions, fontSizes, fontWeights } from '@src/styles/style';
+import { dimensions } from '@src/styles/style';
 
 export type HeaderProps = {
   className?: string | undefined;
@@ -74,8 +74,8 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
           width={onClick ? 28 : 32}
           height={onClick ? 28 : 32}
         />
-        <Text text={'Ludiscan'} href={'/'} target={'_self'} fontSize={fontSizes.large2} fontWeight={fontWeights.bold} />
-        <Text text={title} fontSize={fontSizes.medium} fontWeight={fontWeights.bold} color={theme.colors.text.secondary} />
+        <Text text={'Ludiscan'} href={'/'} target={'_self'} fontSize={theme.typography.fontSize.xl} fontWeight={theme.typography.fontWeight.bold} />
+        <Text text={title} fontSize={theme.typography.fontSize.base} fontWeight={theme.typography.fontWeight.bold} color={theme.colors.text.secondary} />
         {iconTitleEnd && <>{iconTitleEnd}</>}
         <div style={{ flex: 1 }} />
 
@@ -121,7 +121,13 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
                   </Menu.ContentColumn>
                 </Menu>
               ) : (
-                <Text text={'Sign in'} href={'/login'} target={'_self'} fontSize={fontSizes.medium} fontWeight={fontWeights.bold} />
+                <Text
+                  text={'Sign in'}
+                  href={'/login'}
+                  target={'_self'}
+                  fontSize={theme.typography.fontSize.base}
+                  fontWeight={theme.typography.fontWeight.bold}
+                />
               )}
             </>
           )}

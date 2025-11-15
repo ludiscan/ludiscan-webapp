@@ -7,7 +7,7 @@ import type { FC, ReactNode } from 'react';
 import { ButtonIconSize, Button } from '@src/component/atoms/Button';
 import { FlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
-import { fontSizes } from '@src/styles/style';
+import { useSharedTheme } from '@src/hooks/useSharedTheme';
 
 type IconLabelRowProps = {
   className?: string;
@@ -26,6 +26,7 @@ export type IconLabelRowLinkProps = IconLabelRowProps & {
 };
 
 const Component: FC<IconLabelRowButtonProps | IconLabelRowLinkProps> = (props) => {
+  const { theme } = useSharedTheme();
   if ('onClick' in props) {
     const { className, icon, label, onClick, gap } = props as IconLabelRowButtonProps;
     return (
@@ -43,7 +44,7 @@ const Component: FC<IconLabelRowButtonProps | IconLabelRowLinkProps> = (props) =
       <IconContext.Provider value={{ size: ButtonIconSize({ fontSize: 'base' }) }}>
         <FlexRow gap={gap} align={'center'} wrap={'nowrap'} className={`${className}__linkedRow`}>
           {icon}
-          <Text className={`${className}__linkedText`} text={label} fontSize={fontSizes.medium} />
+          <Text className={`${className}__linkedText`} text={label} fontSize={theme.typography.fontSize.base} />
         </FlexRow>
       </IconContext.Provider>
     </a>

@@ -24,7 +24,6 @@ import { useAuth } from '@src/hooks/useAuth';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { createClient } from '@src/modeles/qeury';
 import { InnerContent } from '@src/pages/_app.page';
-import { fontSizes, fontWeights } from '@src/styles/style';
 
 const fetchCount = 20;
 
@@ -156,11 +155,11 @@ const Component: FC<HomePageProps> = ({ className }) => {
       <InnerContent>
         <Header title={'Heatmap'} onClick={handleBack} />
         <FlexRow className={`${className}__titleRow`} align={'center'}>
-          <Text text={'Home'} fontSize={fontSizes.largest} color={theme.colors.text.primary} fontWeight={fontWeights.bolder} />
+          <Text text={'Home'} fontSize={theme.typography.fontSize['3xl']} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bolder} />
         </FlexRow>
         <VerticalSpacer size={16} />
         <div className={`${className}__projects`}>
-          <Text text={'Projects'} fontSize={fontSizes.large1} color={theme.colors.text.secondary} fontWeight={fontWeights.bold} />
+          <Text text={'Projects'} fontSize={theme.typography.fontSize.lg} color={theme.colors.text.secondary} fontWeight={theme.typography.fontWeight.bold} />
           <VerticalSpacer size={16} />
           <Card blur color={theme.colors.surface.raised}>
             <FlexRow className={`${className}__filtersRow`} gap={16}>
@@ -168,7 +167,12 @@ const Component: FC<HomePageProps> = ({ className }) => {
                 <BiRefresh size={20} />
               </Button>
               <div className={`${className}__searchContainer`}>
-                <OutlinedTextField value={searchQuery} onChange={setSearchQuery} placeholder={'プロジェクト名で検索...'} fontSize={fontSizes.medium} />
+                <OutlinedTextField
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  placeholder={'プロジェクト名で検索...'}
+                  fontSize={theme.typography.fontSize.base}
+                />
               </div>
               <select value={sortBy} onChange={(e) => setSortBy(e.target.value as SortOption)} className={`${className}__sortSelect`}>
                 {SORT_OPTIONS.map((option) => (
@@ -194,14 +198,18 @@ const Component: FC<HomePageProps> = ({ className }) => {
               {/* ローディング状態 */}
               {isLoadingProjects && !isErrorProjects && (
                 <div className={`${className}__loadingState`}>
-                  <Text text={'プロジェクトを読み込み中...'} fontSize={fontSizes.medium} color={theme.colors.text.primary} />
+                  <Text text={'プロジェクトを読み込み中...'} fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} />
                 </div>
               )}
 
               {/* エラー状態 */}
               {isErrorProjects && (
                 <div className={`${className}__errorState`}>
-                  <Text text={'プロジェクト一覧の取得に失敗しました。リトライしてください。'} fontSize={fontSizes.medium} color={theme.colors.text.primary} />
+                  <Text
+                    text={'プロジェクト一覧の取得に失敗しました。リトライしてください。'}
+                    fontSize={theme.typography.fontSize.base}
+                    color={theme.colors.text.primary}
+                  />
                 </div>
               )}
 
@@ -242,22 +250,22 @@ const Component: FC<HomePageProps> = ({ className }) => {
                             <FlexColumn gap={8}>
                               <FlexRow align={'flex-start'}>
                                 <FlexColumn gap={4} className={`${className}__cardInfo`}>
-                                  <Text text={project.name} fontSize={fontSizes.large1} color={theme.colors.text.primary} fontWeight={'bold'} />
+                                  <Text text={project.name} fontSize={theme.typography.fontSize.lg} color={theme.colors.text.primary} fontWeight={'bold'} />
                                   <Text
                                     text={project.description}
-                                    fontSize={fontSizes.small}
+                                    fontSize={theme.typography.fontSize.sm}
                                     color={theme.colors.text.secondary}
-                                    fontWeight={fontWeights.bold}
+                                    fontWeight={theme.typography.fontWeight.bold}
                                   />
                                   <Text
                                     text={`${project.session_count ?? 0} sessions`}
-                                    fontSize={fontSizes.smallest}
+                                    fontSize={theme.typography.fontSize.xs}
                                     color={theme.colors.text.secondary}
                                     fontWeight={'lighter'}
                                   />
                                   <Text
                                     text={`Created: ${new Date(project.createdAt).toLocaleDateString('ja-JP', { year: 'numeric', month: 'short', day: 'numeric' })}`}
-                                    fontSize={fontSizes.smallest}
+                                    fontSize={theme.typography.fontSize.xs}
                                     color={theme.colors.text.secondary}
                                     fontWeight={'lighter'}
                                   />
@@ -288,7 +296,7 @@ const Component: FC<HomePageProps> = ({ className }) => {
               {/* 空状態 */}
               {!isLoadingProjects && !isErrorProjects && (!projects?.pages || projects.pages.length === 0) && (
                 <div className={`${className}__emptyState`}>
-                  <Text text={'プロジェクトがありません'} fontSize={fontSizes.medium} color={theme.colors.text.secondary} />
+                  <Text text={'プロジェクトがありません'} fontSize={theme.typography.fontSize.base} color={theme.colors.text.secondary} />
                 </div>
               )}
             </FlexColumn>
@@ -320,7 +328,7 @@ const IndexPage = styled(Component)`
   &__sortSelect {
     min-width: 200px;
     padding: 8px 12px;
-    font-size: ${fontSizes.medium}px;
+    font-size: ${theme.typography.fontSize.base}px;
     color: ${({ theme }) => theme.colors.text.primary};
     cursor: pointer;
     background-color: ${({ theme }) => theme.colors.surface.base};

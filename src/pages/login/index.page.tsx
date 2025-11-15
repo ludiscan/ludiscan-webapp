@@ -19,7 +19,6 @@ import { env } from '@src/config/env';
 import { useAuth } from '@src/hooks/useAuth';
 import { useIsDesktop } from '@src/hooks/useIsDesktop';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { fontSizes } from '@src/styles/style';
 
 export type LoginPageProps = {
   className?: string | undefined;
@@ -188,8 +187,12 @@ const Content: FC<LoginPageProps> = ({ className }) => {
         >
           <InlineFlexColumn gap={24} className={`${className}__content`} align={'center'}>
             <InlineFlexColumn style={{ width: '100%' }} gap={8} align={'flex-start'}>
-              <Text text={'Ludiscan Account'} fontWeight={'bold'} fontSize={fontSizes.largest} />
-              <Text text={'sign in to manage all Ludiscan services and heatmap tools.'} fontSize={fontSizes.medium} color={theme.colors.text.primary} />
+              <Text text={'Ludiscan Account'} fontWeight={'bold'} fontSize={theme.typography.fontSize['3xl']} />
+              <Text
+                text={'sign in to manage all Ludiscan services and heatmap tools.'}
+                fontSize={theme.typography.fontSize.base}
+                color={theme.colors.text.primary}
+              />
             </InlineFlexColumn>
             <a className={`${className}__button google-login`} href={`${env.API_BASE_URL}/api/v0/auth/google`} target={'_self'} rel={'noopener noreferrer'}>
               <Image src={'/google.svg'} alt={'google'} width={20} height={20} />
@@ -197,7 +200,7 @@ const Content: FC<LoginPageProps> = ({ className }) => {
                 className={`${className}__buttonText`}
                 text={'Continue with Google'}
                 color={theme.colors.text.primary}
-                fontSize={fontSizes.medium}
+                fontSize={theme.typography.fontSize.base}
                 fontWeight={'bolder'}
               />
             </a>
@@ -209,7 +212,7 @@ const Content: FC<LoginPageProps> = ({ className }) => {
               label={'Email'}
               placeholder={'example@email.com'}
               type={'email'}
-              fontSize={fontSizes.medium}
+              fontSize={theme.typography.fontSize.base}
               maxLength={50}
             />
             <OutlinedTextField
@@ -219,7 +222,7 @@ const Content: FC<LoginPageProps> = ({ className }) => {
               label={'Password'}
               type={'password'}
               placeholder={'password'}
-              fontSize={fontSizes.medium}
+              fontSize={theme.typography.fontSize.base}
               maxLength={20}
             />
             <VerticalSpacer size={2} />

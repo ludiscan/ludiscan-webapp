@@ -12,7 +12,6 @@ import { VerticalSpacer } from '@src/component/atoms/Spacer';
 import { Text } from '@src/component/atoms/Text';
 import { OutlinedTextField } from '@src/component/molecules/OutlinedTextField';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { fontSizes, fontWeights } from '@src/styles/style';
 
 export type GameApiKeyListProps = {
   className?: string;
@@ -79,7 +78,7 @@ const Component: FC<GameApiKeyListProps> = ({
       <Card blur color={theme.colors.surface.base} className={`${className}__card`}>
         <FlexRow className={`${className}__header`} gap={16}>
           <div className={`${className}__searchContainer`}>
-            <OutlinedTextField value={searchQuery} onChange={onSearchChange} placeholder='API-keyを検索...' fontSize={fontSizes.medium} />
+            <OutlinedTextField value={searchQuery} onChange={onSearchChange} placeholder='API-keyを検索...' fontSize={theme.typography.fontSize.base} />
           </div>
           {showProjectFilter && onProjectFilterChange && (
             <select
@@ -96,7 +95,7 @@ const Component: FC<GameApiKeyListProps> = ({
             </select>
           )}
           <Button onClick={onCreateKeyClick} scheme='primary' fontSize={'sm'}>
-            <Text text='+ Create Key' fontSize={fontSizes.small} />
+            <Text text='+ Create Key' fontSize={theme.typography.fontSize.sm} />
           </Button>
         </FlexRow>
         <VerticalSpacer size={16} />
@@ -105,14 +104,14 @@ const Component: FC<GameApiKeyListProps> = ({
           {/* ローディング状態 */}
           {isLoading && !isError && (
             <div className={`${className}__loadingState`}>
-              <Text text='API-keyを読み込み中...' fontSize={fontSizes.medium} color={theme.colors.text.primary} />
+              <Text text='API-keyを読み込み中...' fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} />
             </div>
           )}
 
           {/* エラー状態 */}
           {isError && (
             <div className={`${className}__errorState`}>
-              <Text text='API-key一覧の取得に失敗しました' fontSize={fontSizes.medium} color={theme.colors.text.primary} />
+              <Text text='API-key一覧の取得に失敗しました' fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} />
             </div>
           )}
 
@@ -124,17 +123,22 @@ const Component: FC<GameApiKeyListProps> = ({
               <div key={key.id} className={`${className}__keyItem`}>
                 <FlexRow className={`${className}__keyRow`} align='center' gap={12}>
                   <FlexColumn gap={4} className={`${className}__keyInfo`}>
-                    <Text text={key.name} fontSize={fontSizes.medium} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
+                    <Text
+                      text={key.name}
+                      fontSize={theme.typography.fontSize.base}
+                      color={theme.colors.text.primary}
+                      fontWeight={theme.typography.fontWeight.bold}
+                    />
                     <Text
                       text={`Created: ${formatDate(key.createdAt)}`}
-                      fontSize={fontSizes.smallest}
+                      fontSize={theme.typography.fontSize.xs}
                       color={theme.colors.text.secondary}
                       fontWeight='lighter'
                     />
                     {key.projects.length > 0 && (
                       <Text
                         text={`Projects: ${key.projects.map((p) => p.name).join(', ')}`}
-                        fontSize={fontSizes.smallest}
+                        fontSize={theme.typography.fontSize.xs}
                         color={theme.colors.text.secondary}
                         fontWeight='lighter'
                       />
@@ -155,7 +159,7 @@ const Component: FC<GameApiKeyListProps> = ({
           {/* 空状態 */}
           {!isLoading && !isError && filteredKeys.length === 0 && (
             <div className={`${className}__emptyState`}>
-              <Text text='API-keyがありません' fontSize={fontSizes.medium} color={theme.colors.text.secondary} />
+              <Text text='API-keyがありません' fontSize={theme.typography.fontSize.base} color={theme.colors.text.secondary} />
             </div>
           )}
         </FlexColumn>
@@ -184,7 +188,7 @@ export const GameApiKeyList = styled(Component)`
 
   &__projectFilter {
     padding: 8px 12px;
-    font-size: ${fontSizes.medium}px;
+    font-size: ${({ theme }) => theme.typography.fontSize.base};
     color: ${({ theme }) => theme.colors.text.primary};
     cursor: pointer;
     background-color: ${({ theme }) => theme.colors.surface.base};

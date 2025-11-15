@@ -12,9 +12,10 @@ import { SegmentedSwitch } from '@src/component/molecules/SegmentedSwitch';
 import { Selector } from '@src/component/molecules/Selector';
 import { InputRow } from '@src/features/heatmap/menu/InputRow';
 import { useGeneralPatch, useGeneralPick } from '@src/hooks/useGeneral';
-import { fontSizes } from '@src/styles/style';
+import { useSharedTheme } from '@src/hooks/useSharedTheme';
 
 export const GeneralMenuContent: FC<HeatmapMenuProps> = () => {
+  const { theme } = useSharedTheme();
   const { upZ, scale, heatmapOpacity, heatmapType, colorScale, blockSize, showHeatmap, minThreshold } = useGeneralPick(
     'upZ',
     'scale',
@@ -80,7 +81,7 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = () => {
       <InputRow label={''}>
         <div style={{ flex: 1 }} />
         <Button onClick={handleReload} scheme={'surface'} fontSize={'sm'}>
-          <Text text={'Reload'} fontSize={fontSizes.small} />
+          <Text text={'Reload'} fontSize={theme.typography.fontSize.sm} />
         </Button>
       </InputRow>
     </>
