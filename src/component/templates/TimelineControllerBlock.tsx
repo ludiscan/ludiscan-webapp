@@ -169,7 +169,7 @@ const Component: FC<TimelineControllerBlockProps> = ({
                     <Text
                       className={`${className}__playSpeedText`}
                       text={`${value}x`}
-                      fontSize={playSpeed === value ? fontSizes.medium : fontSizes.small}
+                      fontSize={'sm'}
                       color={playSpeed === value ? theme.colors.text.primary : theme.colors.text.secondary}
                     />
                   </Button>
@@ -198,8 +198,8 @@ const Component: FC<TimelineControllerBlockProps> = ({
             <div className={`${className}__sliderWrapper`} ref={trackRef}>
               {!isDetailOpen && (
                 <>
-                  <Text className={`${className}__speedLabel`} text={`${playSpeed}x`} fontSize={fontSizes.small} color={theme.colors.text.secondary} />
-                  <Text className={`${className}__label`} text={`${currentTimeLabel}/${maxTimeLabel}`} fontSize={fontSizes.small} />
+                  <Text className={`${className}__speedLabel`} text={`${playSpeed}x`} fontSize={'xs'} color={theme.colors.text.secondary} />
+                  <Text className={`${className}__label`} text={`${currentTimeLabel}/${maxTimeLabel}`} fontSize={'xs'} />
                 </>
               )}
               <div className={`${className}__sliderBackground`} />
@@ -230,7 +230,7 @@ const Component: FC<TimelineControllerBlockProps> = ({
                 <RiPlayReverseMiniFill color={theme.colors.primary.main} size={20} />
               </div>
             </div>
-            {isDetailOpen && <Text className={`${className}__label open`} text={`${currentTimeLabel}/${maxTimeLabel}`} fontSize={fontSizes.small} />}
+            {isDetailOpen && <Text className={`${className}__label open`} text={`${currentTimeLabel}/${maxTimeLabel}`} fontSize={'xs'} />}
             <Button
               className={`${className}__toggleButton ${isDetailOpen ? 'open' : ''}`}
               onClick={() => setIsDetailOpen(!isDetailOpen)}

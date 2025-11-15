@@ -48,6 +48,11 @@ export const Switch = styled(SwitchComponent)`
     transition: 0.4s;
   }
 
+  input:checked + &__slider {
+    background-color: ${({ theme }) => theme.colors.primary.main};
+    border-color: ${({ theme }) => theme.colors.primary.main};
+  }
+
   input:focus + &__slider {
     outline: 2px solid ${({ theme }) => theme.colors.border.focus};
     outline-offset: 2px;
@@ -55,11 +60,6 @@ export const Switch = styled(SwitchComponent)`
 
   input:focus:not(:focus-visible) + &__slider {
     outline: none;
-  }
-
-  input:checked + &__slider {
-    background-color: ${({ theme }) => theme.colors.primary.main};
-    border-color: ${({ theme }) => theme.colors.primary.main};
   }
 
   &__slider::before {

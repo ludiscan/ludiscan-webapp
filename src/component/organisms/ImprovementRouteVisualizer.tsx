@@ -42,7 +42,7 @@ const Component: FC<ImprovementRouteVisualizerProps> = ({ className, route, clus
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
-  const theme = useSharedTheme();
+  const { theme } = useSharedTheme();
 
   useEffect(() => {
     if (!containerRef.current) return;
