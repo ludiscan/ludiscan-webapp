@@ -4,6 +4,7 @@
  */
 
 import { useContext } from 'react';
+
 import { LocaleContext } from '@src/contexts/LocaleContext';
 
 /**

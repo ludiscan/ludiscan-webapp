@@ -4,9 +4,11 @@
  */
 
 import React, { createContext, useCallback, useMemo, useState } from 'react';
+
 import type { SupportedLocale, LocaleContextValue } from '@src/types/locale';
-import { ja } from '@src/locales/ja';
+
 import { en } from '@src/locales/en';
+import { ja } from '@src/locales/ja';
 
 const translations = {
   ja,
@@ -55,12 +57,13 @@ export const LocaleProvider: React.FC<LocaleProviderProps> = ({ children }) => {
   const t = useCallback(
     (key: string): string => {
       const keys = key.split('.');
-      let value: any = translations[locale];
+      let value: unknown = translations[locale];
 
       for (const k of keys) {
         if (value && typeof value === 'object' && k in value) {
-          value = value[k];
+          value = (value as Record<string, unknown>)[k];
         } else {
+          // eslint-disable-next-line no-console
           console.warn(`Translation key not found: ${key} for locale: ${locale}`);
           return key;
         }
@@ -68,7 +71,7 @@ export const LocaleProvider: React.FC<LocaleProviderProps> = ({ children }) => {
 
       return typeof value === 'string' ? value : key;
     },
-    [locale]
+    [locale],
   );
 
   const contextValue = useMemo(
@@ -77,7 +80,7 @@ export const LocaleProvider: React.FC<LocaleProviderProps> = ({ children }) => {
       setLocale,
       t,
     }),
-    [locale, setLocale, t]
+    [locale, setLocale, t],
   );
 
   return <LocaleContext.Provider value={contextValue}>{children}</LocaleContext.Provider>;

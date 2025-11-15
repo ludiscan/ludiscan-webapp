@@ -4,8 +4,10 @@
  */
 
 import styled from '@emotion/styled';
-import { useLocale } from '@src/hooks/useLocale';
+
 import type { SupportedLocale } from '@src/types/locale';
+
+import { useLocale } from '@src/hooks/useLocale';
 
 const SelectorContainer = styled.div`
   display: flex;
@@ -15,12 +17,12 @@ const SelectorContainer = styled.div`
 
 const LanguageButton = styled.button<{ isActive: boolean }>`
   padding: 6px 12px;
+  font-size: 14px;
+  color: ${({ theme, isActive }) => (isActive ? '#fff' : theme.colors.text.primary)};
+  cursor: pointer;
+  background: ${({ theme, isActive }) => (isActive ? theme.colors.primary : 'transparent')};
   border: 1px solid ${({ theme, isActive }) => (isActive ? theme.colors.primary : theme.colors.border)};
   border-radius: 4px;
-  background: ${({ theme, isActive }) => (isActive ? theme.colors.primary : 'transparent')};
-  color: ${({ theme, isActive }) => (isActive ? '#fff' : theme.colors.text.primary)};
-  font-size: 14px;
-  cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
@@ -46,10 +48,10 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({ className })
 
   return (
     <SelectorContainer className={className}>
-      <LanguageButton isActive={locale === 'ja'} onClick={() => handleLocaleChange('ja')} type="button" aria-label="日本語">
+      <LanguageButton isActive={locale === 'ja'} onClick={() => handleLocaleChange('ja')} type='button' aria-label='日本語'>
         日本語
       </LanguageButton>
-      <LanguageButton isActive={locale === 'en'} onClick={() => handleLocaleChange('en')} type="button" aria-label="English">
+      <LanguageButton isActive={locale === 'en'} onClick={() => handleLocaleChange('en')} type='button' aria-label='English'>
         English
       </LanguageButton>
     </SelectorContainer>

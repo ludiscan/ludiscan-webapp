@@ -157,11 +157,21 @@ const Component: FC<HomePageProps> = ({ className }) => {
       <InnerContent>
         <Header title={'Heatmap'} onClick={handleBack} />
         <FlexRow className={`${className}__titleRow`} align={'center'}>
-          <Text text={t('home.title')} fontSize={theme.typography.fontSize['3xl']} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.extrabold} />
+          <Text
+            text={t('home.title')}
+            fontSize={theme.typography.fontSize['3xl']}
+            color={theme.colors.text.primary}
+            fontWeight={theme.typography.fontWeight.extrabold}
+          />
         </FlexRow>
         <VerticalSpacer size={16} />
         <div className={`${className}__projects`}>
-          <Text text={t('home.projects')} fontSize={theme.typography.fontSize.lg} color={theme.colors.text.secondary} fontWeight={theme.typography.fontWeight.bold} />
+          <Text
+            text={t('home.projects')}
+            fontSize={theme.typography.fontSize.lg}
+            color={theme.colors.text.secondary}
+            fontWeight={theme.typography.fontWeight.bold}
+          />
           <VerticalSpacer size={16} />
           <Card blur color={theme.colors.surface.raised}>
             <FlexRow className={`${className}__filtersRow`} gap={16}>

@@ -206,7 +206,13 @@ const Content: FC<LoginPageProps> = ({ className }) => {
                 fontWeight={'bolder'}
               />
             </a>
-            <LinedText color={theme.colors.text.primary} lineColor={theme.colors.secondary.light} text={t('common.or')} lineThickness={'1px'} fullWidth={true} />
+            <LinedText
+              color={theme.colors.text.primary}
+              lineColor={theme.colors.secondary.light}
+              text={t('common.or')}
+              lineThickness={'1px'}
+              fullWidth={true}
+            />
             <OutlinedTextField
               className={`${className}__email`}
               onChange={handleInputEmail}

@@ -146,7 +146,7 @@ export const en: TranslationKeys = {
     namePlaceholder: 'e.g., Production API Key',
     creating: 'Creating...',
     successMessage: 'API Key created successfully!',
-    warning: 'Make sure to copy your API key now. You won\'t be able to see it again!',
+    warning: "Make sure to copy your API key now. You won't be able to see it again!",
     yourApiKey: 'Your API Key',
     copyTooltip: 'Copy to clipboard',
   },
