@@ -75,6 +75,7 @@ const Component: FC<ProjectItemRowProps> = memo(({ className, project, onEdit })
     </div>
   );
 });
+Component.displayName = 'ProjectItemRow';
 
 export const ProjectItemRow = styled(Component)`
   width: 100%;

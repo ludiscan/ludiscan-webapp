@@ -2,7 +2,6 @@
 import styled from '@emotion/styled';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useEffect, useCallback, useState, memo } from 'react';
-import { useSharedTheme } from '@src/hooks/useSharedTheme';
 
 import type { HeatmapMenuProps } from '@src/features/heatmap/HeatmapMenuContent';
 import type { FC } from 'react';
@@ -26,11 +25,10 @@ interface HintProps {
 }
 
 const HintComponent: FC<HintProps> = ({ children, className }) => <div className={className}>{children}</div>;
-  const { theme } = useSharedTheme();
 
 const Hint = styled(HintComponent)`
-  font-size: 12px;
-  color: #666;
+  font-size: ${({ theme }) => theme.typography.fontSize.xs};
+  color: ${({ theme }) => theme.colors.text.secondary};
 `;
 
 interface EmptyBoxProps {

@@ -2,8 +2,6 @@ import styled from '@emotion/styled';
 
 import type { FC } from 'react';
 
-import { useSharedTheme } from '@src/hooks/useSharedTheme';
-
 type TextFieldOutlinedProps = {
   className?: string;
   value?: string;

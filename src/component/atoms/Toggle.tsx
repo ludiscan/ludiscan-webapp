@@ -6,7 +6,6 @@ import type { FC, ReactNode, CSSProperties } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
 import { FlexColumn, InlineFlexRow } from '@src/component/atoms/Flex';
-import { useSharedTheme } from '@src/hooks/useSharedTheme';
 
 export type ToggleProps = {
   className?: string;

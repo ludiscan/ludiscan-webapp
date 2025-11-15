@@ -104,7 +104,6 @@ const HeaderWrapper = memo(
 HeaderWrapper.displayName = 'HeaderWrapper';
 
 export const HeatmapIdPageLayoutComponent: FC<HeatmapIdPageLayoutProps> = ({ className, service, onBackClick }) => {
-  const { theme } = useSharedTheme();
   const statusContentStatus = useMemo(() => {
     if (!service.task) return 'success';
     if (service.task.status === 'pending' || service.task.status === 'processing') return 'loading';

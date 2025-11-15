@@ -85,6 +85,7 @@ const Component: FC<SessionItemRowProps> = memo(({ className, session }) => {
     </div>
   );
 });
+Component.displayName = 'SessionItemRow';
 
 export const SessionItemRow = styled(Component)`
   width: 100%;
