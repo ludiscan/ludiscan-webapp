@@ -73,7 +73,7 @@ jobs:
 
           **Release type**: ${{ github.event.inputs.release_type }}
 
-          The git tag will be automatically created after merging." \
+          The git tag has been automatically created and pushed." \
             --base ${{ github.ref_name }} \
             --head ${{ steps.version.outputs.branch_name }})
           PR_NUMBER=$(echo "$PR_URL" | grep -oE '[0-9]+$')
@@ -81,32 +81,8 @@ jobs:
           echo "PR URL: $PR_URL"
           echo "PR Number: $PR_NUMBER"
 
-      - name: Merge Pull Request
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh pr merge ${{ steps.pr.outputs.pr_number }} --squash --delete-branch --auto
-
-      - name: Wait for PR merge
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "Waiting for PR to merge..."
-          for i in {1..60}; do
-            STATE=$(gh pr view ${{ steps.pr.outputs.pr_number }} --json state -q .state)
-            if [ "$STATE" = "MERGED" ]; then
-              echo "✅ PR merged successfully!"
-              break
-            fi
-            echo "Waiting... ($i/60)"
-            sleep 5
-          done
-
       - name: Create and push tag
         run: |
-          git fetch origin
-          git checkout ${{ github.ref_name }}
-          git pull origin ${{ github.ref_name }}
           git tag ${{ steps.version.outputs.new_version }}
           git push origin ${{ steps.version.outputs.new_version }}
           echo "✅ Tag ${{ steps.version.outputs.new_version }} created and pushed!"
