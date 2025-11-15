@@ -16,6 +16,7 @@ import { HeatMapViewer } from '@src/features/heatmap/HeatmapViewer';
 import { useAuth } from '@src/hooks/useAuth';
 import { useGeneralSelect } from '@src/hooks/useGeneral';
 import { useHeatmapState } from '@src/hooks/useHeatmapState';
+import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { patchSplitMode } from '@src/slices/canvasSlice';
 import { dimensions } from '@src/styles/style';
 import { useOnlineHeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
@@ -47,6 +48,7 @@ export type HeatmapIdPageLayoutProps = {
 
 const HeaderWrapper = memo(
   ({ className, onBackClick }: { className?: string; onBackClick?: () => void }) => {
+    const { theme } = useSharedTheme();
     const { apply, hasDiff, discard } = useHeatmapState();
     const version = useSelector((s: RootState) => s.heatmapCanvas.version);
     const splitMode = useSelector((s: RootState) => s.heatmapCanvas.splitMode);

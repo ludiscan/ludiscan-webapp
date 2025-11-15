@@ -118,37 +118,9 @@ export function useSelectable(
   },
 ): Handlers;
 
-/* ========= オプション型定義 ========= */
-type SelectableOptions =
-  | {
-      fit?: 'object' | 'point' | 'none';
-      fitPadding?: number;
-      stopPropagation?: boolean;
-      extra?: Record<string, never>;
-      getSelection?: never;
-    }
-  | {
-      getSelection: (e: ThreeEvent<MouseEvent>) => {
-        kind: 'heatmap-cell';
-        index: number;
-        worldPosition: Vec3;
-        density?: number;
-      };
-      fit?: 'point' | 'none';
-      stopPropagation?: boolean;
-      extra?: never;
-      fitPadding?: never;
-    }
-  | {
-      extra: PlayerArrowExtra;
-      fit?: 'point' | 'sphere' | 'none';
-      fitPadding?: number;
-      stopPropagation?: boolean;
-      getSelection?: never;
-    };
-
 /* ========= 実装 ========= */
-export function useSelectable(kind: 'map-mesh' | 'point' | 'heatmap-cell' | 'player-arrow', options?: SelectableOptions): Handlers {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function useSelectable(kind: 'map-mesh' | 'point' | 'heatmap-cell' | 'player-arrow', options?: any): Handlers {
   const { setSelected, focusBox3, focusPoint, focusSphere } = useFocusActions();
 
   return useMemo(() => {
@@ -205,7 +177,7 @@ export function useSelectable(kind: 'map-mesh' | 'point' | 'heatmap-cell' | 'pla
           break;
         }
         case 'player-arrow': {
-          const { playerId, tick, liveRefKey } = options.extra as PlayerArrowExtra;
+          const { playerId, tick, liveRefKey } = options.extra! as PlayerArrowExtra;
           setSelected({
             kind: 'player-arrow',
             playerId: String(playerId),

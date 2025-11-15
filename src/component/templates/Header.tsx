@@ -94,44 +94,90 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
           </MobileLayout>
         )}
 
-        <Divider orientation={'vertical'} />
-        <InlineFlexRow align={'center'} gap={4} style={{ height: '100%' }} wrap={'nowrap'}>
-          <Button fontSize={'xl'} onClick={toggleTheme} scheme={'none'}>
-            {theme.mode === 'light' ? <CiDark size={24} color={theme.colors.text.primary} /> : <CiLight size={24} color={theme.colors.text.primary} />}
-          </Button>
-          <Selector
-            options={themeTypeOptions}
-            value={themeType}
-            onChange={handleThemeTypeChange}
-            fontSize={'base'}
-            scheme={'none'}
-            border={false}
-            placement={'bottom'}
-            align={'right'}
-          />
-          {!isOffline && !isLoginPage && (
-            <>
-              <Divider orientation={'vertical'} />
-              {isAuthorized ? (
-                <Menu fontSize={'xl'} scheme={'none'} icon={<CiUser size={24} color={theme.colors.text.primary} />}>
-                  <Menu.ContentColumn gap={4} align={'right'} placement={'bottom'} offset={16}>
-                    <IconLabelRow className={`${className}__iconLabelRow`} gap={8} label={'Profile'} icon={<CiUser />} href={'/profile'} target={'_self'} />
-                    <Divider orientation={'horizontal'} margin={'0'} />
-                    <IconLabelRow className={`${className}__iconLabelRow accent`} gap={8} label={'Logout'} icon={<MdLogout />} onClick={handleLogout} />
-                  </Menu.ContentColumn>
-                </Menu>
-              ) : (
-                <Text
-                  text={'Sign in'}
-                  href={'/login'}
-                  target={'_self'}
-                  fontSize={theme.typography.fontSize.base}
-                  fontWeight={theme.typography.fontWeight.bold}
+        {/* Desktop Layout - 全ての要素を横並びで表示 */}
+        <DesktopLayout>
+          <Divider orientation={'vertical'} />
+          <InlineFlexRow align={'center'} gap={4} style={{ height: '100%' }} wrap={'nowrap'}>
+            <Button fontSize={'xl'} onClick={toggleTheme} scheme={'none'}>
+              {theme.mode === 'light' ? <CiDark size={24} color={theme.colors.text.primary} /> : <CiLight size={24} color={theme.colors.text.primary} />}
+            </Button>
+            <Selector
+              options={themeTypeOptions}
+              value={themeType}
+              onChange={handleThemeTypeChange}
+              fontSize={'base'}
+              scheme={'none'}
+              border={false}
+              placement={'bottom'}
+              align={'right'}
+            />
+            {!isOffline && !isLoginPage && (
+              <>
+                <Divider orientation={'vertical'} />
+                {isAuthorized ? (
+                  <Menu fontSize={'xl'} scheme={'none'} icon={<CiUser size={24} color={theme.colors.text.primary} />}>
+                    <Menu.ContentColumn gap={4} align={'right'} placement={'bottom'} offset={16}>
+                      <IconLabelRow className={`${className}__iconLabelRow`} gap={8} label={'Profile'} icon={<CiUser />} href={'/profile'} target={'_self'} />
+                      <Divider orientation={'horizontal'} margin={'0'} />
+                      <IconLabelRow className={`${className}__iconLabelRow accent`} gap={8} label={'Logout'} icon={<MdLogout />} onClick={handleLogout} />
+                    </Menu.ContentColumn>
+                  </Menu>
+                ) : (
+                  <Text
+                    text={'Sign in'}
+                    href={'/login'}
+                    target={'_self'}
+                    fontSize={theme.typography.fontSize.base}
+                    fontWeight={theme.typography.fontWeight.bold}
+                  />
+                )}
+              </>
+            )}
+          </InlineFlexRow>
+        </DesktopLayout>
+
+        {/* Mobile Layout - 3点メニューに統合 */}
+        <MobileLayout>
+          <EllipsisMenu fontSize={'xl'} scheme={'none'}>
+            <Menu.ContentColumn gap={8} align={'right'} placement={'bottom'} offset={16}>
+              <IconLabelRow
+                className={`${className}__iconLabelRow`}
+                gap={8}
+                label={theme.mode === 'light' ? 'Dark mode' : 'Light mode'}
+                icon={theme.mode === 'light' ? <CiDark /> : <CiLight />}
+                onClick={toggleTheme}
+              />
+              <Divider orientation={'horizontal'} margin={'0'} />
+              <FlexRow align={'center'} gap={8} style={{ padding: '0 8px' }}>
+                <Text text={'Theme:'} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
+                <Selector
+                  options={themeTypeOptions}
+                  value={themeType}
+                  onChange={handleThemeTypeChange}
+                  fontSize={'base'}
+                  scheme={'none'}
+                  border={false}
+                  placement={'bottom'}
+                  align={'right'}
                 />
+              </FlexRow>
+              {!isOffline && !isLoginPage && (
+                <>
+                  <Divider orientation={'horizontal'} margin={'0'} />
+                  {isAuthorized ? (
+                    <>
+                      <IconLabelRow className={`${className}__iconLabelRow`} gap={8} label={'Profile'} icon={<CiUser />} href={'/profile'} target={'_self'} />
+                      <Divider orientation={'horizontal'} margin={'0'} />
+                      <IconLabelRow className={`${className}__iconLabelRow accent`} gap={8} label={'Logout'} icon={<MdLogout />} onClick={handleLogout} />
+                    </>
+                  ) : (
+                    <IconLabelRow className={`${className}__iconLabelRow`} gap={8} label={'Sign in'} icon={<CiUser />} href={'/login'} target={'_self'} />
+                  )}
+                </>
               )}
-            </>
-          )}
-        </InlineFlexRow>
+            </Menu.ContentColumn>
+          </EllipsisMenu>
+        </MobileLayout>
       </FlexRow>
     </header>
   );

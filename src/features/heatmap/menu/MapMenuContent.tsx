@@ -16,7 +16,7 @@ import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
 const DisabledMessage = styled.div`
   padding: 16px;
-  font-size: ${theme.typography.fontSize.sm};
+  font-size: ${({ theme }) => theme.typography.fontSize.sm};
   color: #666;
   text-align: center;
   background: #f5f5f5;

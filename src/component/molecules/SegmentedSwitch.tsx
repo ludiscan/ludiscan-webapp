@@ -81,7 +81,7 @@ const Component: FC<SegmentedSwitchProps> = (props) => {
           }
         }}
       >
-        <Text text={leftOption} color={isLeftActive ? theme.colors.white : theme.colors.text.secondary} />
+        <Text text={leftOption} color={isLeftActive ? theme.colors.text.inverse : theme.colors.text.secondary} />
       </Button>
 
       {/**
@@ -100,7 +100,7 @@ const Component: FC<SegmentedSwitchProps> = (props) => {
           }
         }}
       >
-        <Text text={rightOption} color={isRightActive ? theme.colors.white : theme.colors.text.secondary} fontSize={fontSize} />
+        <Text text={rightOption} color={isRightActive ? theme.colors.text.inverse : theme.colors.text.secondary} fontSize={fontSize} />
       </Button>
     </div>
   );
