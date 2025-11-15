@@ -121,7 +121,13 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
                   </Menu.ContentColumn>
                 </Menu>
               ) : (
-                <Text text={'Sign in'} href={'/login'} target={'_self'} fontSize={theme.typography.fontSize.base} fontWeight={theme.typography.fontWeight.bold} />
+                <Text
+                  text={'Sign in'}
+                  href={'/login'}
+                  target={'_self'}
+                  fontSize={theme.typography.fontSize.base}
+                  fontWeight={theme.typography.fontWeight.bold}
+                />
               )}
             </>
           )}

@@ -82,7 +82,12 @@ const Component: FC<HealthPageProps> = ({ className }) => {
           <Card blur color={theme.colors.surface.base} className={`${className}__card`}>
             <FlexRow gap={16} align='center'>
               <FlexColumn gap={8}>
-                <Text text='Overall Status' fontSize={theme.typography.fontSize.xl} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bold} />
+                <Text
+                  text='Overall Status'
+                  fontSize={theme.typography.fontSize.xl}
+                  color={theme.colors.text.primary}
+                  fontWeight={theme.typography.fontWeight.bold}
+                />
                 <FlexRow gap={12} align='center'>
                   <div
                     className={`${className}__statusBadge`}
@@ -134,7 +139,12 @@ const Component: FC<HealthPageProps> = ({ className }) => {
                       color={theme.colors.semantic.error.main}
                       fontWeight={theme.typography.fontWeight.bold}
                     />
-                    <Text text={error.message || 'Unknown error'} fontSize={theme.typography.fontSize.sm} color={theme.colors.semantic.error.dark} fontWeight='lighter' />
+                    <Text
+                      text={error.message || 'Unknown error'}
+                      fontSize={theme.typography.fontSize.sm}
+                      color={theme.colors.semantic.error.dark}
+                      fontWeight='lighter'
+                    />
                   </FlexColumn>
                 </FlexRow>
               </Card>
@@ -182,7 +192,12 @@ const Component: FC<HealthPageProps> = ({ className }) => {
                           borderColor: statusColor,
                         }}
                       >
-                        <Text text={status.toUpperCase()} fontSize={theme.typography.fontSize.sm} color={statusColor} fontWeight={theme.typography.fontWeight.bold} />
+                        <Text
+                          text={status.toUpperCase()}
+                          fontSize={theme.typography.fontSize.sm}
+                          color={statusColor}
+                          fontWeight={theme.typography.fontWeight.bold}
+                        />
                       </div>
 
                       {/* Additional Details */}

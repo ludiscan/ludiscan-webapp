@@ -57,7 +57,12 @@ const Component: FC<SecurityPageProps> = ({ className }) => {
             <FlexColumn gap={24}>
               {/* パスワード変更セクション */}
               <div>
-                <Text text='Password Management' fontSize={theme.typography.fontSize.lg} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bold} />
+                <Text
+                  text='Password Management'
+                  fontSize={theme.typography.fontSize.lg}
+                  color={theme.colors.text.primary}
+                  fontWeight={theme.typography.fontWeight.bold}
+                />
                 <VerticalSpacer size={12} />
                 <Text
                   text='Password change functionality will be available in a future update.'
@@ -71,7 +76,12 @@ const Component: FC<SecurityPageProps> = ({ className }) => {
 
               {/* 2段階認証セクション */}
               <div>
-                <Text text='Two-Factor Authentication' fontSize={theme.typography.fontSize.lg} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bold} />
+                <Text
+                  text='Two-Factor Authentication'
+                  fontSize={theme.typography.fontSize.lg}
+                  color={theme.colors.text.primary}
+                  fontWeight={theme.typography.fontWeight.bold}
+                />
                 <VerticalSpacer size={12} />
                 <Text
                   text='Two-factor authentication will be available in a future update.'
@@ -85,7 +95,12 @@ const Component: FC<SecurityPageProps> = ({ className }) => {
 
               {/* セッション管理セクション */}
               <div>
-                <Text text='Session Management' fontSize={theme.typography.fontSize.lg} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bold} />
+                <Text
+                  text='Session Management'
+                  fontSize={theme.typography.fontSize.lg}
+                  color={theme.colors.text.primary}
+                  fontWeight={theme.typography.fontWeight.bold}
+                />
                 <VerticalSpacer size={12} />
                 <Text
                   text='Session management features will be available in a future update.'
@@ -99,7 +114,12 @@ const Component: FC<SecurityPageProps> = ({ className }) => {
 
               {/* ログイン履歴セクション */}
               <div>
-                <Text text='Login History' fontSize={theme.typography.fontSize.lg} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bold} />
+                <Text
+                  text='Login History'
+                  fontSize={theme.typography.fontSize.lg}
+                  color={theme.colors.text.primary}
+                  fontWeight={theme.typography.fontWeight.bold}
+                />
                 <VerticalSpacer size={12} />
                 <Text
                   text='Login history tracking will be available in a future update.'
@@ -113,7 +133,12 @@ const Component: FC<SecurityPageProps> = ({ className }) => {
 
               {/* セキュリティ情報セクション */}
               <div>
-                <Text text='Security Information' fontSize={theme.typography.fontSize.lg} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bold} />
+                <Text
+                  text='Security Information'
+                  fontSize={theme.typography.fontSize.lg}
+                  color={theme.colors.text.primary}
+                  fontWeight={theme.typography.fontWeight.bold}
+                />
                 <VerticalSpacer size={12} />
                 <FlexColumn gap={8}>
                   <Text

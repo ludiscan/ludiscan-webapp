@@ -194,8 +194,18 @@ const Component: FC<ProjectDetailsMembersTabProps> = ({ className, project }) =>
               <div key={member.user_id} className={`${className}__memberItem`}>
                 <FlexRow className={`${className}__memberRow`} align='center' gap={12}>
                   <FlexColumn gap={4} className={`${className}__memberInfo`}>
-                    <Text text={member.name} fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bold} />
-                    <Text text={member.email} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} fontWeight={theme.typography.fontWeight.bold} />
+                    <Text
+                      text={member.name}
+                      fontSize={theme.typography.fontSize.base}
+                      color={theme.colors.text.primary}
+                      fontWeight={theme.typography.fontWeight.bold}
+                    />
+                    <Text
+                      text={member.email}
+                      fontSize={theme.typography.fontSize.sm}
+                      color={theme.colors.text.secondary}
+                      fontWeight={theme.typography.fontWeight.bold}
+                    />
                     <Text
                       text={`Added: ${formatDate(member.created_at)}`}
                       fontSize={theme.typography.fontSize.xs}
@@ -204,7 +214,12 @@ const Component: FC<ProjectDetailsMembersTabProps> = ({ className, project }) =>
                     />
                   </FlexColumn>
                   <div className={`${className}__memberRole`}>
-                    <Text text={member.role} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} fontWeight={theme.typography.fontWeight.bold} />
+                    <Text
+                      text={member.role}
+                      fontSize={theme.typography.fontSize.sm}
+                      color={theme.colors.text.secondary}
+                      fontWeight={theme.typography.fontWeight.bold}
+                    />
                   </div>
                   <Button onClick={() => handleDeleteMember(member)} scheme='none' fontSize={'sm'} className={`${className}__deleteButton`}>
                     <BiTrash size={18} color={theme.colors.semantic.error.main} />
@@ -227,9 +242,19 @@ const Component: FC<ProjectDetailsMembersTabProps> = ({ className, project }) =>
         <div className={`${className}__modal`}>
           <FlexColumn gap={16}>
             <div>
-              <Text text='Email Address' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bold} />
+              <Text
+                text='Email Address'
+                fontSize={theme.typography.fontSize.sm}
+                color={theme.colors.text.primary}
+                fontWeight={theme.typography.fontWeight.bold}
+              />
               <VerticalSpacer size={8} />
-              <OutlinedTextField value={newMemberEmail} onChange={setNewMemberEmail} placeholder='member@example.com' fontSize={theme.typography.fontSize.base} />
+              <OutlinedTextField
+                value={newMemberEmail}
+                onChange={setNewMemberEmail}
+                placeholder='member@example.com'
+                fontSize={theme.typography.fontSize.base}
+              />
             </div>
 
             <div>

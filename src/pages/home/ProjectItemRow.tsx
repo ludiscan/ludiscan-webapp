@@ -61,9 +61,19 @@ const Component: FC<ProjectItemRowProps> = memo(({ className, project, onEdit })
           <ClampText text={project.description} fontSize={theme.typography.fontSize.sm} fontWeight={'lighter'} lines={1} color={theme.colors.text.secondary} />
           <InlineFlexRow gap={8} className={`${className}__meta`}>
             {project.session_count !== undefined && (
-              <Text text={`${project.session_count} sessions`} fontSize={theme.typography.fontSize.xs} color={theme.colors.text.secondary} fontWeight={'lighter'} />
+              <Text
+                text={`${project.session_count} sessions`}
+                fontSize={theme.typography.fontSize.xs}
+                color={theme.colors.text.secondary}
+                fontWeight={'lighter'}
+              />
             )}
-            <Text text={`Created: ${formatDate(project.createdAt)}`} fontSize={theme.typography.fontSize.xs} color={theme.colors.text.secondary} fontWeight={'lighter'} />
+            <Text
+              text={`Created: ${formatDate(project.createdAt)}`}
+              fontSize={theme.typography.fontSize.xs}
+              color={theme.colors.text.secondary}
+              fontWeight={'lighter'}
+            />
           </InlineFlexRow>
         </FlexColumn>
         {onEdit && (

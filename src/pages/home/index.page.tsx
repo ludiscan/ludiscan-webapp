@@ -167,7 +167,12 @@ const Component: FC<HomePageProps> = ({ className }) => {
                 <BiRefresh size={20} />
               </Button>
               <div className={`${className}__searchContainer`}>
-                <OutlinedTextField value={searchQuery} onChange={setSearchQuery} placeholder={'プロジェクト名で検索...'} fontSize={theme.typography.fontSize.base} />
+                <OutlinedTextField
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  placeholder={'プロジェクト名で検索...'}
+                  fontSize={theme.typography.fontSize.base}
+                />
               </div>
               <select value={sortBy} onChange={(e) => setSortBy(e.target.value as SortOption)} className={`${className}__sortSelect`}>
                 {SORT_OPTIONS.map((option) => (
@@ -200,7 +205,11 @@ const Component: FC<HomePageProps> = ({ className }) => {
               {/* エラー状態 */}
               {isErrorProjects && (
                 <div className={`${className}__errorState`}>
-                  <Text text={'プロジェクト一覧の取得に失敗しました。リトライしてください。'} fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} />
+                  <Text
+                    text={'プロジェクト一覧の取得に失敗しました。リトライしてください。'}
+                    fontSize={theme.typography.fontSize.base}
+                    color={theme.colors.text.primary}
+                  />
                 </div>
               )}
 

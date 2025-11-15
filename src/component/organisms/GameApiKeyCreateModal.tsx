@@ -89,7 +89,12 @@ const Component: FC<GameApiKeyCreateModalProps> = ({
           ) : (
             <>
               <div className={`${className}__successMessage`}>
-                <Text text='API Key created successfully!' fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bold} />
+                <Text
+                  text='API Key created successfully!'
+                  fontSize={theme.typography.fontSize.base}
+                  color={theme.colors.text.primary}
+                  fontWeight={theme.typography.fontWeight.bold}
+                />
                 <VerticalSpacer size={8} />
                 <Text
                   text="Make sure to copy your API key now. You won't be able to see it again!"
@@ -99,7 +104,12 @@ const Component: FC<GameApiKeyCreateModalProps> = ({
               </div>
 
               <div className={`${className}__apiKeyContainer`}>
-                <Text text='Your API Key' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bold} />
+                <Text
+                  text='Your API Key'
+                  fontSize={theme.typography.fontSize.sm}
+                  color={theme.colors.text.primary}
+                  fontWeight={theme.typography.fontWeight.bold}
+                />
                 <VerticalSpacer size={8} />
                 <FlexRow gap={8} align='center' className={`${className}__apiKeyRow`}>
                   <OutlinedTextField value={createdApiKey.apiKey} onChange={() => {}} fontSize={theme.typography.fontSize.sm} disabled />

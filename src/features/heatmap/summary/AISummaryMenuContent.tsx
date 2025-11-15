@@ -2,7 +2,6 @@
 import styled from '@emotion/styled';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useEffect, useCallback } from 'react';
-import { useSharedTheme } from '@src/hooks/useSharedTheme';
 
 import type { HeatmapMenuProps } from '@src/features/heatmap/HeatmapMenuContent';
 import type { SessionSummary } from '@src/modeles/heatmaptask';
@@ -13,6 +12,7 @@ import { FlexColumn } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { MarkDownText } from '@src/component/molecules/MarkDownText';
 import { useSummaryApi } from '@src/features/heatmap/summary/api';
+import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { useApiClient } from '@src/modeles/ApiClientContext';
 import { toISOAboutStringWithTimezone } from '@src/utils/locale';
 

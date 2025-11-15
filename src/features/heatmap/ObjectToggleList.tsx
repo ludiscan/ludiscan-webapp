@@ -1,7 +1,6 @@
 import styled from '@emotion/styled';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { IoMdEye, IoMdEyeOff } from 'react-icons/io';
-import { useSharedTheme } from '@src/hooks/useSharedTheme';
 
 import type { FC } from 'react';
 import type { Group, Material, Object3D } from 'three';
@@ -9,6 +8,7 @@ import type { Group, Material, Object3D } from 'three';
 import { Button } from '@src/component/atoms/Button';
 import { FlexRow, InlineFlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
+import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { layers } from '@src/styles/style';
 
 export type ObjectToggleListProps = {

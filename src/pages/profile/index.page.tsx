@@ -72,7 +72,12 @@ const Component: FC<ProfilePageProps> = ({ className }) => {
           <Card blur color={theme.colors.surface.base} className={`${className}__card`}>
             <FlexColumn gap={16}>
               <div>
-                <Text text='Basic Information' fontSize={theme.typography.fontSize.lg} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bold} />
+                <Text
+                  text='Basic Information'
+                  fontSize={theme.typography.fontSize.lg}
+                  color={theme.colors.text.primary}
+                  fontWeight={theme.typography.fontWeight.bold}
+                />
               </div>
 
               {isLoadingProfile ? (
@@ -80,17 +85,32 @@ const Component: FC<ProfilePageProps> = ({ className }) => {
               ) : userProfile ? (
                 <FlexColumn gap={16}>
                   <div className={`${className}__infoField`}>
-                    <Text text='Name' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} fontWeight={theme.typography.fontWeight.bold} />
+                    <Text
+                      text='Name'
+                      fontSize={theme.typography.fontSize.sm}
+                      color={theme.colors.text.secondary}
+                      fontWeight={theme.typography.fontWeight.bold}
+                    />
                     <Text text={userProfile.name || '-'} fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} />
                   </div>
 
                   <div className={`${className}__infoField`}>
-                    <Text text='Email' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} fontWeight={theme.typography.fontWeight.bold} />
+                    <Text
+                      text='Email'
+                      fontSize={theme.typography.fontSize.sm}
+                      color={theme.colors.text.secondary}
+                      fontWeight={theme.typography.fontWeight.bold}
+                    />
                     <Text text={userProfile.email || '-'} fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} />
                   </div>
 
                   <div className={`${className}__infoField`}>
-                    <Text text='User ID' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} fontWeight={theme.typography.fontWeight.bold} />
+                    <Text
+                      text='User ID'
+                      fontSize={theme.typography.fontSize.sm}
+                      color={theme.colors.text.secondary}
+                      fontWeight={theme.typography.fontWeight.bold}
+                    />
                     <Text text={userProfile.id || '-'} fontSize={theme.typography.fontSize.xs} color={theme.colors.text.secondary} fontWeight='lighter' />
                   </div>
                 </FlexColumn>

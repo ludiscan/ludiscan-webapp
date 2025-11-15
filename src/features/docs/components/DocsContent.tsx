@@ -35,8 +35,15 @@ const Component: FC<DocsContentProps> = ({ doc, className }) => {
       <FlexColumn gap={24}>
         {/* Header */}
         <div className={`${className}__header`}>
-          <Text text={doc.frontmatter.title} fontSize={theme.typography.fontSize['3xl']} fontWeight={theme.typography.fontWeight.bold} color={theme.colors.text.primary} />
-          {doc.frontmatter.description && <Text text={doc.frontmatter.description} fontSize={theme.typography.fontSize.lg} color={theme.colors.text.secondary} />}
+          <Text
+            text={doc.frontmatter.title}
+            fontSize={theme.typography.fontSize['3xl']}
+            fontWeight={theme.typography.fontWeight.bold}
+            color={theme.colors.text.primary}
+          />
+          {doc.frontmatter.description && (
+            <Text text={doc.frontmatter.description} fontSize={theme.typography.fontSize.lg} color={theme.colors.text.secondary} />
+          )}
         </div>
 
         {/* Content - Rendered with MarkDownText */}

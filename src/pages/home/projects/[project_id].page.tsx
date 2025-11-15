@@ -136,8 +136,18 @@ const Component: FC<ProjectDetailsPageProps> = ({ className }) => {
         <div className={`${className}__header`}>
           <FlexRow gap={16} align={'flex-start'}>
             <FlexColumn gap={8} style={{ flex: 1 }}>
-              <Text text={project.name} fontSize={theme.typography.fontSize['3xl']} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bolder} />
-              <Text text={project.description} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} fontWeight={theme.typography.fontWeight.bold} />
+              <Text
+                text={project.name}
+                fontSize={theme.typography.fontSize['3xl']}
+                color={theme.colors.text.primary}
+                fontWeight={theme.typography.fontWeight.bolder}
+              />
+              <Text
+                text={project.description}
+                fontSize={theme.typography.fontSize.sm}
+                color={theme.colors.text.secondary}
+                fontWeight={theme.typography.fontWeight.bold}
+              />
             </FlexColumn>
             <Link href={`/heatmap/projects/${project.id}`} style={{ textDecoration: 'none' }}>
               <BiLineChart size={20} />

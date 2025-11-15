@@ -123,7 +123,12 @@ const Component: FC<GameApiKeyListProps> = ({
               <div key={key.id} className={`${className}__keyItem`}>
                 <FlexRow className={`${className}__keyRow`} align='center' gap={12}>
                   <FlexColumn gap={4} className={`${className}__keyInfo`}>
-                    <Text text={key.name} fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bold} />
+                    <Text
+                      text={key.name}
+                      fontSize={theme.typography.fontSize.base}
+                      color={theme.colors.text.primary}
+                      fontWeight={theme.typography.fontWeight.bold}
+                    />
                     <Text
                       text={`Created: ${formatDate(key.createdAt)}`}
                       fontSize={theme.typography.fontSize.xs}

@@ -105,8 +105,15 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
           <Button onClick={handleRefresh} scheme='surface' disabled={isLoadingSessions || isRefreshing} fontSize={'sm'}>
             <BiRefresh size={20} />
           </Button>
-          <Text text={`Total: ${project.session_count ?? 0}`} fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bold} />
-          {searchQuery && <Text text={`(${filteredAndSortedSessions.length}件一致)`} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />}
+          <Text
+            text={`Total: ${project.session_count ?? 0}`}
+            fontSize={theme.typography.fontSize.base}
+            color={theme.colors.text.primary}
+            fontWeight={theme.typography.fontWeight.bold}
+          />
+          {searchQuery && (
+            <Text text={`(${filteredAndSortedSessions.length}件一致)`} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
+          )}
         </FlexRow>
 
         {/* Search and Sort Controls */}
@@ -159,7 +166,11 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
           {/* 検索結果なし */}
           {!isLoadingSessions && !isErrorSessions && searchQuery && filteredAndSortedSessions.length === 0 && (
             <div className={`${className}__emptyState`}>
-              <Text text={`「${searchQuery}」に一致するセッションが見つかりません`} fontSize={theme.typography.fontSize.base} color={theme.colors.text.secondary} />
+              <Text
+                text={`「${searchQuery}」に一致するセッションが見つかりません`}
+                fontSize={theme.typography.fontSize.base}
+                color={theme.colors.text.secondary}
+              />
             </div>
           )}
 

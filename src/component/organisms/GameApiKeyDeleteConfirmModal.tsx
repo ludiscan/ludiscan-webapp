@@ -36,8 +36,17 @@ const Component: FC<GameApiKeyDeleteConfirmModalProps> = ({ className, isOpen, s
     <Modal isOpen={isOpen} onClose={handleClose} title='Delete API Key'>
       <div className={`${className}__modal`}>
         <FlexColumn gap={16}>
-          <Text text={`API-key "${selectedKey?.name}" を削除してよろしいですか？`} fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} />
-          <Text text='削除されたAPI-keyは二度と使用できなくなります。' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} fontWeight='lighter' />
+          <Text
+            text={`API-key "${selectedKey?.name}" を削除してよろしいですか？`}
+            fontSize={theme.typography.fontSize.base}
+            color={theme.colors.text.primary}
+          />
+          <Text
+            text='削除されたAPI-keyは二度と使用できなくなります。'
+            fontSize={theme.typography.fontSize.sm}
+            color={theme.colors.text.secondary}
+            fontWeight='lighter'
+          />
           <FlexRow gap={8} className={`${className}__buttonRow`}>
             <Button onClick={handleClose} scheme='none' fontSize={'sm'} disabled={isDeleting}>
               <Text text='Cancel' fontSize={theme.typography.fontSize.sm} />

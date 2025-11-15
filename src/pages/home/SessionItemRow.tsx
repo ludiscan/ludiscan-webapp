@@ -53,19 +53,34 @@ const Component: FC<SessionItemRowProps> = memo(({ className, session }) => {
           <FlexRow gap={12} align={'center'}>
             {session.deviceId && (
               <Tooltip tooltip={`Device: ${session.deviceId}`}>
-                <Text text={`ID: ${session.deviceId}`} fontSize={theme.typography.fontSize.xs} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.light} />
+                <Text
+                  text={`ID: ${session.deviceId}`}
+                  fontSize={theme.typography.fontSize.xs}
+                  color={theme.colors.text.primary}
+                  fontWeight={theme.typography.fontWeight.light}
+                />
               </Tooltip>
             )}
 
             {session.platform && (
               <Tooltip tooltip={`Platform: ${session.platform}`}>
-                <Text text={session.platform} fontSize={theme.typography.fontSize.xs} color={theme.colors.text.secondary} fontWeight={theme.typography.fontWeight.light} />
+                <Text
+                  text={session.platform}
+                  fontSize={theme.typography.fontSize.xs}
+                  color={theme.colors.text.secondary}
+                  fontWeight={theme.typography.fontWeight.light}
+                />
               </Tooltip>
             )}
 
             {session.appVersion && (
               <Tooltip tooltip={`App Version: ${session.appVersion}`}>
-                <Text text={`v${session.appVersion}`} fontSize={theme.typography.fontSize.xs} color={theme.colors.text.secondary} fontWeight={theme.typography.fontWeight.light} />
+                <Text
+                  text={`v${session.appVersion}`}
+                  fontSize={theme.typography.fontSize.xs}
+                  color={theme.colors.text.secondary}
+                  fontWeight={theme.typography.fontWeight.light}
+                />
               </Tooltip>
             )}
           </FlexRow>
@@ -73,7 +88,12 @@ const Component: FC<SessionItemRowProps> = memo(({ className, session }) => {
 
         {/* Meta Info - Right aligned */}
         <FlexColumn gap={4} align={'flex-end'} className={`${className}__metaInfo`}>
-          <Text text={formatDate(session.startTime)} fontSize={theme.typography.fontSize.xs} color={theme.colors.text.secondary} fontWeight={theme.typography.fontWeight.light} />
+          <Text
+            text={formatDate(session.startTime)}
+            fontSize={theme.typography.fontSize.xs}
+            color={theme.colors.text.secondary}
+            fontWeight={theme.typography.fontWeight.light}
+          />
           <Text
             text={calculateDuration(session.startTime, session.endTime)}
             fontSize={theme.typography.fontSize.xs}

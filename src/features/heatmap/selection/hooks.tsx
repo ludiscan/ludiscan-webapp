@@ -148,10 +148,7 @@ type SelectableOptions =
     };
 
 /* ========= 実装 ========= */
-export function useSelectable(
-  kind: 'map-mesh' | 'point' | 'heatmap-cell' | 'player-arrow',
-  options?: SelectableOptions,
-): Handlers {
+export function useSelectable(kind: 'map-mesh' | 'point' | 'heatmap-cell' | 'player-arrow', options?: SelectableOptions): Handlers {
   const { setSelected, focusBox3, focusPoint, focusSphere } = useFocusActions();
 
   return useMemo(() => {

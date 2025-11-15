@@ -188,7 +188,11 @@ const Content: FC<LoginPageProps> = ({ className }) => {
           <InlineFlexColumn gap={24} className={`${className}__content`} align={'center'}>
             <InlineFlexColumn style={{ width: '100%' }} gap={8} align={'flex-start'}>
               <Text text={'Ludiscan Account'} fontWeight={'bold'} fontSize={theme.typography.fontSize['3xl']} />
-              <Text text={'sign in to manage all Ludiscan services and heatmap tools.'} fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} />
+              <Text
+                text={'sign in to manage all Ludiscan services and heatmap tools.'}
+                fontSize={theme.typography.fontSize.base}
+                color={theme.colors.text.primary}
+              />
             </InlineFlexColumn>
             <a className={`${className}__button google-login`} href={`${env.API_BASE_URL}/api/v0/auth/google`} target={'_self'} rel={'noopener noreferrer'}>
               <Image src={'/google.svg'} alt={'google'} width={20} height={20} />

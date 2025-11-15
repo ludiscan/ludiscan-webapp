@@ -94,7 +94,12 @@ const Component: FC<GameApiKeyDetailModalProps> = ({ className, isOpen, selected
 
               {selectedKey.lastUsedAt && (
                 <div>
-                  <Text text='Last Used' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bold} />
+                  <Text
+                    text='Last Used'
+                    fontSize={theme.typography.fontSize.sm}
+                    color={theme.colors.text.primary}
+                    fontWeight={theme.typography.fontWeight.bold}
+                  />
                   <VerticalSpacer size={4} />
                   <Text text={formatDate(selectedKey.lastUsedAt)} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
                 </div>
@@ -102,10 +107,20 @@ const Component: FC<GameApiKeyDetailModalProps> = ({ className, isOpen, selected
 
               <div>
                 <FlexRow gap={8} align='center' className={`${className}__projectsHeader`}>
-                  <Text text='Projects' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bold} />
+                  <Text
+                    text='Projects'
+                    fontSize={theme.typography.fontSize.sm}
+                    color={theme.colors.text.primary}
+                    fontWeight={theme.typography.fontWeight.bold}
+                  />
                   {!isEditingProjects && (
                     <Button onClick={handleOpenEdit} scheme='none' fontSize={'sm'} className={`${className}__editButton`}>
-                      <Text text='Edit' fontSize={theme.typography.fontSize.xs} color={theme.colors.primary.main} fontWeight={theme.typography.fontWeight.bold} />
+                      <Text
+                        text='Edit'
+                        fontSize={theme.typography.fontSize.xs}
+                        color={theme.colors.primary.main}
+                        fontWeight={theme.typography.fontWeight.bold}
+                      />
                     </Button>
                   )}
                 </FlexRow>
@@ -133,7 +148,9 @@ const Component: FC<GameApiKeyDetailModalProps> = ({ className, isOpen, selected
                 ) : (
                   <FlexColumn gap={4}>
                     {selectedKey.projects.length > 0 ? (
-                      selectedKey.projects.map((proj) => <Text key={proj.id} text={proj.name} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />)
+                      selectedKey.projects.map((proj) => (
+                        <Text key={proj.id} text={proj.name} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
+                      ))
                     ) : (
                       <Text text='No projects assigned' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} fontWeight='lighter' />
                     )}

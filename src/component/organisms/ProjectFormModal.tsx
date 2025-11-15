@@ -125,7 +125,13 @@ const Component: FC<ProjectFormModalProps> = ({ className, isOpen, onClose, proj
         <VerticalSpacer size={8} />
         <FlexColumn gap={8}>
           <Text text={'プロジェクト名'} fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} fontWeight={'bold'} />
-          <OutlinedTextField value={name} onChange={setName} placeholder={'プロジェクト名を入力...'} fontSize={theme.typography.fontSize.base} disabled={isLoading} />
+          <OutlinedTextField
+            value={name}
+            onChange={setName}
+            placeholder={'プロジェクト名を入力...'}
+            fontSize={theme.typography.fontSize.base}
+            disabled={isLoading}
+          />
         </FlexColumn>
 
         <FlexColumn gap={8}>
