@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   release:
@@ -44,5 +45,42 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
 
-      - name: Run release
-        run: bun run release:${{ github.event.inputs.release_type }}
+      - name: Bump version
+        id: version
+        run: |
+          NEW_VERSION=$(npm version ${{ github.event.inputs.release_type }} --no-git-tag-version --message 'v%s')
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "branch_name=release/$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create release branch and commit
+        run: |
+          BRANCH_NAME="${{ steps.version.outputs.branch_name }}"
+          git checkout -b "$BRANCH_NAME"
+          git add package.json
+          git commit -m "chore: bump version to ${{ steps.version.outputs.new_version }}"
+          git push -u origin "$BRANCH_NAME"
+
+      - name: Create Pull Request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr create \
+            --title "Release ${{ steps.version.outputs.new_version }}" \
+            --body "$(cat <<'EOF'
+          ## Release ${{ steps.version.outputs.new_version }}
+
+          This PR bumps the version to ${{ steps.version.outputs.new_version }}.
+
+          **Release type**: ${{ github.event.inputs.release_type }}
+
+          ### After merging
+
+          Please create and push the git tag manually:
+          ```bash
+          git tag ${{ steps.version.outputs.new_version }}
+          git push origin --tags
+          ```
+          EOF
+          )" \
+            --base ${{ github.ref_name }} \
+            --head ${{ steps.version.outputs.branch_name }}
