@@ -2,7 +2,6 @@ import styled from '@emotion/styled';
 import { useRouter } from 'next/navigation';
 import { memo, useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useSharedTheme } from '@src/hooks/useSharedTheme';
 
 import type { RootState } from '@src/store';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
