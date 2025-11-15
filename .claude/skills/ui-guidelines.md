@@ -1183,6 +1183,820 @@ const StyledModal = styled.div`
 // toast: 600
 ```
 
+## TypeScript Best Practices
+
+### Never Use `any` Type
+
+**The `any` type defeats the purpose of TypeScript.** Always use proper types.
+
+#### ❌ BAD: Using any
+
+```tsx
+// Bad - loses all type safety
+const handleData = (data: any) => {
+  console.log(data.name); // No error even if name doesn't exist!
+};
+
+// Bad - any array
+const items: any[] = [];
+
+// Bad - any props
+type ComponentProps = {
+  data: any;
+  onClick: any;
+};
+```
+
+#### ✅ GOOD: Use proper types
+
+```tsx
+// Good - explicit interface
+interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
+const handleData = (data: User) => {
+  console.log(data.name); // Type safe!
+};
+
+// Good - typed array
+const items: User[] = [];
+
+// Good - proper function types
+type ComponentProps = {
+  data: User;
+  onClick: (id: string) => void;
+};
+```
+
+#### ✅ GOOD: Use `unknown` when type is truly unknown
+
+```tsx
+// When you don't know the type, use unknown (not any)
+const parseData = (data: unknown) => {
+  // Must check type before using
+  if (typeof data === 'string') {
+    return JSON.parse(data);
+  }
+
+  if (typeof data === 'object' && data !== null) {
+    return data;
+  }
+
+  throw new Error('Invalid data type');
+};
+```
+
+### Use Generated API Types
+
+**Always use types from `@generated/api.d.ts`** for API responses.
+
+```tsx
+import type { components } from '@generated/api.d.ts';
+
+// ✅ GOOD: Use generated types
+type Project = components['schemas']['Project'];
+type Session = components['schemas']['Session'];
+type HeatmapTask = components['schemas']['HeatmapTask'];
+
+const ProjectList = ({ projects }: { projects: Project[] }) => {
+  return (
+    <div>
+      {projects.map(project => (
+        <div key={project.id}>{project.name}</div>
+      ))}
+    </div>
+  );
+};
+
+// ❌ BAD: Manual type definition (can get out of sync with API)
+type Project = {
+  id: string;
+  name: string;
+  // Missing fields that API returns!
+};
+```
+
+### Type vs Interface
+
+**Prefer `type` for props, use `interface` for extensible objects.**
+
+```tsx
+// ✅ GOOD: Use type for component props (more flexible)
+type ButtonProps = {
+  onClick: () => void;
+  scheme: 'primary' | 'secondary';
+  children: ReactNode;
+};
+
+// ✅ GOOD: Use interface for data models (can be extended)
+interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
+interface AdminUser extends User {
+  permissions: string[];
+}
+
+// ✅ GOOD: Use type for unions
+type Status = 'idle' | 'loading' | 'success' | 'error';
+
+// ✅ GOOD: Use type for complex compositions
+type ButtonVariant = {
+  scheme: 'primary' | 'secondary';
+  size: 'small' | 'medium' | 'large';
+};
+```
+
+### Utility Types
+
+Use TypeScript's built-in utility types for cleaner code.
+
+```tsx
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+  createdAt: Date;
+}
+
+// Partial - all properties optional
+type UserUpdate = Partial<User>;
+// { id?: string; name?: string; email?: string; ... }
+
+// Pick - select specific properties
+type UserPreview = Pick<User, 'id' | 'name' | 'avatar'>;
+// { id: string; name: string; avatar?: string; }
+
+// Omit - exclude specific properties
+type UserWithoutDates = Omit<User, 'createdAt'>;
+// { id: string; name: string; email: string; avatar?: string; }
+
+// Required - all properties required
+type UserRequired = Required<User>;
+// { id: string; name: string; email: string; avatar: string; createdAt: Date; }
+
+// Record - create object type with specific keys
+type UserRoles = Record<string, 'admin' | 'user' | 'guest'>;
+// { [key: string]: 'admin' | 'user' | 'guest' }
+```
+
+### Type Guards
+
+Use type guards to narrow types safely.
+
+```tsx
+// Type guard function
+const isUser = (value: unknown): value is User => {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'id' in value &&
+    'name' in value &&
+    'email' in value
+  );
+};
+
+// Usage
+const processData = (data: unknown) => {
+  if (isUser(data)) {
+    // TypeScript knows data is User here
+    console.log(data.email); // Safe!
+  }
+};
+
+// Built-in type guards
+const processValue = (value: string | number) => {
+  if (typeof value === 'string') {
+    return value.toUpperCase(); // TypeScript knows it's string
+  }
+  return value.toFixed(2); // TypeScript knows it's number
+};
+
+// Array type guard
+const processArray = (items: unknown) => {
+  if (Array.isArray(items)) {
+    return items.length; // TypeScript knows it's an array
+  }
+};
+```
+
+### Generics for Reusable Components
+
+Use generics for components that work with multiple types.
+
+```tsx
+// ✅ GOOD: Generic component
+type ListProps<T> = {
+  items: T[];
+  renderItem: (item: T) => ReactNode;
+  keyExtractor: (item: T) => string;
+};
+
+const List = <T,>({ items, renderItem, keyExtractor }: ListProps<T>) => {
+  return (
+    <div>
+      {items.map(item => (
+        <div key={keyExtractor(item)}>
+          {renderItem(item)}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// Usage - TypeScript infers the type!
+<List
+  items={users}
+  renderItem={(user) => <div>{user.name}</div>} // user is typed as User
+  keyExtractor={(user) => user.id}
+/>
+
+// ✅ GOOD: Generic hook
+const useLocalStorage = <T,>(key: string, initialValue: T) => {
+  const [value, setValue] = useState<T>(() => {
+    const stored = localStorage.getItem(key);
+    return stored ? JSON.parse(stored) : initialValue;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(key, JSON.stringify(value));
+  }, [key, value]);
+
+  return [value, setValue] as const;
+};
+
+// Usage
+const [user, setUser] = useLocalStorage<User>('user', { id: '', name: '', email: '' });
+// user is typed as User, setUser accepts User
+```
+
+### Avoid Type Assertions (unless necessary)
+
+```tsx
+// ❌ BAD: Unnecessary type assertion
+const name = (data as User).name;
+
+// ✅ GOOD: Use type guard instead
+if (isUser(data)) {
+  const name = data.name;
+}
+
+// ✅ ACCEPTABLE: When you know better than TypeScript
+const element = document.getElementById('root') as HTMLDivElement;
+
+// ✅ ACCEPTABLE: When parsing JSON
+const user = JSON.parse(userJson) as User;
+```
+
+### Const Assertions
+
+Use `as const` for readonly values and tuples.
+
+```tsx
+// ✅ GOOD: Const assertion for readonly object
+const ROUTES = {
+  HOME: '/home',
+  PROFILE: '/profile',
+  SETTINGS: '/settings',
+} as const;
+// Type: { readonly HOME: "/home"; readonly PROFILE: "/profile"; ... }
+
+// ✅ GOOD: Const assertion for tuple
+const useToggle = (initial: boolean) => {
+  const [value, setValue] = useState(initial);
+  return [value, () => setValue(v => !v)] as const;
+};
+// Return type: readonly [boolean, () => void]
+
+// Without as const:
+// Return type would be: (boolean | (() => void))[] - less precise!
+```
+
+## Data Types & Mock Data
+
+### Creating Mock Data with Default Values
+
+**Always provide factory functions for mock data** that can be called without arguments.
+
+#### ✅ GOOD: Mock factory with defaults
+
+```tsx
+import type { components } from '@generated/api.d.ts';
+
+type Project = components['schemas']['Project'];
+type Session = components['schemas']['Session'];
+
+// Mock factory - can be called without arguments
+export const createMockProject = (overrides?: Partial<Project>): Project => {
+  return {
+    id: 'mock-project-1',
+    name: 'Mock Project',
+    description: 'A mock project for testing',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    owner_id: 'mock-user-1',
+    ...overrides,
+  };
+};
+
+export const createMockSession = (overrides?: Partial<Session>): Session => {
+  return {
+    id: 'mock-session-1',
+    project_id: 'mock-project-1',
+    name: 'Mock Session',
+    created_at: new Date().toISOString(),
+    map_data_url: '/mock/map.obj',
+    ...overrides,
+  };
+};
+
+// Usage - no arguments needed for basic case
+const mockProject = createMockProject();
+
+// Can override specific fields
+const customProject = createMockProject({
+  name: 'Custom Project',
+  description: 'Custom description',
+});
+
+// Create multiple with different IDs
+const projects = [
+  createMockProject({ id: '1', name: 'Project 1' }),
+  createMockProject({ id: '2', name: 'Project 2' }),
+  createMockProject({ id: '3', name: 'Project 3' }),
+];
+```
+
+#### ✅ GOOD: Mock data for Storybook
+
+```tsx
+// Component.stories.tsx
+import { createMockProject } from '@src/utils/mockData';
+
+export const Default: Story = {
+  args: {
+    project: createMockProject(), // Easy to use!
+  },
+};
+
+export const WithCustomName: Story = {
+  args: {
+    project: createMockProject({ name: 'Custom Name' }),
+  },
+};
+```
+
+#### ✅ GOOD: Mock data for tests
+
+```tsx
+// Component.test.ts
+import { createMockProject, createMockSession } from '@src/utils/mockData';
+
+describe('ProjectList', () => {
+  it('renders projects', () => {
+    const projects = [
+      createMockProject({ id: '1', name: 'Project 1' }),
+      createMockProject({ id: '2', name: 'Project 2' }),
+    ];
+
+    render(<ProjectList projects={projects} />);
+
+    expect(screen.getByText('Project 1')).toBeInTheDocument();
+    expect(screen.getByText('Project 2')).toBeInTheDocument();
+  });
+});
+```
+
+#### ❌ BAD: Mock data without factory
+
+```tsx
+// Bad - have to specify all fields every time
+const mockProject = {
+  id: 'mock-1',
+  name: 'Mock',
+  description: 'Mock description',
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+  owner_id: 'user-1',
+};
+
+// Bad - missing fields, TypeScript error
+const mockProject2 = {
+  id: 'mock-2',
+  name: 'Mock 2',
+  // Missing required fields!
+};
+```
+
+### Mock API Responses
+
+Use the project's mock API system for development.
+
+```tsx
+// See src/modeles/MOCK_API_GUIDE.md for details
+
+import { MockApiClient } from '@src/modeles/MockApiClient';
+import { createMockProject } from '@src/utils/mockData';
+
+// Example mock implementation
+class MyMockApiClient extends MockApiClient {
+  async getProjects() {
+    return {
+      data: [
+        createMockProject({ id: '1', name: 'Project 1' }),
+        createMockProject({ id: '2', name: 'Project 2' }),
+      ],
+      error: undefined,
+      response: new Response(),
+    };
+  }
+}
+```
+
+## Three.js & 3D Visualization
+
+This project uses **Three.js with @react-three/fiber** for 3D heatmap visualization.
+
+### Basic Setup
+
+```tsx
+import { Canvas } from '@react-three/fiber';
+import { OrthographicCamera, PerspectiveCamera } from '@react-three/drei';
+
+const HeatmapViewer = ({ dimensionality }: { dimensionality: '2D' | '3D' }) => {
+  return (
+    <Canvas>
+      {dimensionality === '2D' ? (
+        <OrthographicCamera makeDefault position={[0, 10, 0]} zoom={50} />
+      ) : (
+        <PerspectiveCamera makeDefault position={[0, 5, 10]} fov={75} />
+      )}
+
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[10, 10, 5]} />
+
+      {/* Your 3D content */}
+      <MapModel />
+      <HeatmapPoints />
+    </Canvas>
+  );
+};
+```
+
+### Performance Optimization
+
+**Always implement performance monitoring** to adjust rendering quality dynamically.
+
+```tsx
+import { PerformanceMonitor } from '@react-three/drei';
+
+const HeatmapCanvas = () => {
+  const [dpr, setDpr] = useState(1.5);
+
+  return (
+    <Canvas dpr={dpr}>
+      <PerformanceMonitor
+        onIncline={() => setDpr(2)} // Increase quality when performance is good
+        onDecline={() => setDpr(1)} // Decrease quality when performance drops
+      >
+        {/* Your 3D scene */}
+      </PerformanceMonitor>
+    </Canvas>
+  );
+};
+```
+
+### Memory Management - Critical!
+
+**Always cleanup Three.js resources** to prevent memory leaks.
+
+```tsx
+import { useEffect, useRef } from 'react';
+import * as THREE from 'three';
+
+const MapModel = ({ modelUrl }: { modelUrl: string }) => {
+  const meshRef = useRef<THREE.Mesh>(null);
+
+  useEffect(() => {
+    // Load model
+    const loader = new OBJLoader();
+    loader.load(modelUrl, (object) => {
+      // Use model
+    });
+
+    // CRITICAL: Cleanup function
+    return () => {
+      if (meshRef.current) {
+        // Dispose geometry
+        meshRef.current.geometry?.dispose();
+
+        // Dispose materials
+        if (Array.isArray(meshRef.current.material)) {
+          meshRef.current.material.forEach(mat => mat.dispose());
+        } else {
+          meshRef.current.material?.dispose();
+        }
+
+        // Dispose textures
+        if (meshRef.current.material) {
+          const material = meshRef.current.material as THREE.MeshStandardMaterial;
+          material.map?.dispose();
+          material.normalMap?.dispose();
+          material.roughnessMap?.dispose();
+        }
+      }
+    };
+  }, [modelUrl]);
+
+  return <mesh ref={meshRef} />;
+};
+```
+
+### Model Loading
+
+Support multiple formats: OBJ, GLTF, GLB.
+
+```tsx
+import { useLoader } from '@react-three/fiber';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+
+const MapModel = ({ url, format }: { url: string; format: 'obj' | 'gltf' | 'glb' }) => {
+  // Choose loader based on format
+  const model = useLoader(
+    format === 'obj' ? OBJLoader : GLTFLoader,
+    url
+  );
+
+  return <primitive object={format === 'obj' ? model : model.scene} />;
+};
+```
+
+### Dimensionality Detection
+
+Use the project's detection system for 2D vs 3D maps.
+
+```tsx
+import { detectDimensionality } from '@src/utils/heatmap/detectDimensionality';
+
+const HeatmapViewer = ({ mapObject }: { mapObject: THREE.Object3D }) => {
+  const dimensionality = detectDimensionality(mapObject);
+
+  // Use different cameras based on dimensionality
+  return (
+    <Canvas>
+      {dimensionality === '2D' ? (
+        <OrthographicCamera makeDefault position={[0, 10, 0]} />
+      ) : (
+        <PerspectiveCamera makeDefault position={[0, 5, 10]} />
+      )}
+    </Canvas>
+  );
+};
+```
+
+### Render Layers (Z-Index for Three.js)
+
+Use predefined render layers from `@src/styles/style.ts`:
+
+```tsx
+import { layers } from '@src/styles/style';
+
+// Heatmap layer (renders first)
+<mesh layers={layers.default}>
+  <sphereGeometry />
+  <meshBasicMaterial />
+</mesh>
+
+// Interactive layer (renders on top)
+<mesh layers={layers.raycast}>
+  <boxGeometry />
+  <meshStandardMaterial />
+</mesh>
+
+// Available layers:
+// layers.default: 0
+// layers.raycast: 7
+```
+
+### Common Three.js Patterns
+
+```tsx
+// ✅ GOOD: Memoize expensive geometries
+const geometry = useMemo(() => new THREE.SphereGeometry(1, 32, 32), []);
+
+// ✅ GOOD: Use refs for direct access
+const meshRef = useRef<THREE.Mesh>(null);
+
+useFrame(() => {
+  if (meshRef.current) {
+    meshRef.current.rotation.y += 0.01;
+  }
+});
+
+// ✅ GOOD: Update materials efficiently
+const material = useMemo(
+  () => new THREE.MeshStandardMaterial({ color: color }),
+  [color]
+);
+
+// ❌ BAD: Creating objects every render
+const BadComponent = () => {
+  const geometry = new THREE.SphereGeometry(1, 32, 32); // Recreated every render!
+  return <mesh geometry={geometry} />;
+};
+```
+
+## Security Best Practices
+
+### Never Use dangerouslySetInnerHTML
+
+**Avoid `dangerouslySetInnerHTML` - it opens XSS vulnerabilities.**
+
+```tsx
+// ❌ BAD: XSS vulnerability
+const Component = ({ userInput }: { userInput: string }) => {
+  return <div dangerouslySetInnerHTML={{ __html: userInput }} />;
+  // If userInput = "<script>alert('XSS')</script>", code executes!
+};
+
+// ✅ GOOD: Use text content
+const Component = ({ userInput }: { userInput: string }) => {
+  return <div>{userInput}</div>; // Automatically escaped
+};
+
+// ✅ GOOD: Use markdown library for rich text
+import { MarkDownText } from '@src/component/molecules/MarkDownText';
+
+const Component = ({ markdown }: { markdown: string }) => {
+  return <MarkDownText text={markdown} />; // Sanitized
+};
+```
+
+### Sanitize User Input
+
+**Always validate and sanitize user input** before using it.
+
+```tsx
+// ✅ GOOD: Validate input
+const isValidEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+const handleEmailSubmit = (email: string) => {
+  if (!isValidEmail(email)) {
+    throw new Error('Invalid email format');
+  }
+
+  // Safe to proceed
+  submitEmail(email);
+};
+
+// ✅ GOOD: Sanitize before display
+const sanitizeFileName = (filename: string): string => {
+  // Remove path traversal attempts
+  return filename.replace(/[./\\]/g, '');
+};
+
+// ❌ BAD: Using user input directly in URLs
+const badUrl = `/api/files/${userInput}`; // Path traversal vulnerability!
+
+// ✅ GOOD: Validate and encode
+const goodUrl = `/api/files/${encodeURIComponent(sanitizeFileName(userInput))}`;
+```
+
+### Authentication Token Management
+
+Use the project's existing auth pattern with localStorage.
+
+```tsx
+import { getAccessToken, saveAccessToken, removeAccessToken } from '@src/utils/localstrage';
+
+// ✅ GOOD: Use helper functions
+const login = async (credentials: Credentials) => {
+  const response = await fetch('/api/login', {
+    method: 'POST',
+    body: JSON.stringify(credentials),
+  });
+
+  const { token } = await response.json();
+  saveAccessToken(token); // Safely stored
+};
+
+const logout = () => {
+  removeAccessToken(); // Clean removal
+};
+
+// ✅ GOOD: Include token in API requests (done automatically by createClient)
+import { createClient } from '@src/modeles/qeury';
+
+const client = createClient(); // Automatically adds auth headers
+const { data } = await client.GET('/api/projects');
+
+// ❌ BAD: Don't store tokens in component state
+const [token, setToken] = useState(localStorage.getItem('token')); // Can get out of sync!
+```
+
+### API Security
+
+**Always validate API responses** before using data.
+
+```tsx
+import { createClient } from '@src/modeles/qeury';
+
+// ✅ GOOD: Check for errors
+const getProjects = async () => {
+  const client = createClient();
+  const response = await client.GET('/api/projects');
+
+  if (response.error) {
+    console.error('Failed to fetch projects:', response.error);
+    throw new Error('Failed to fetch projects');
+  }
+
+  return response.data; // Safe to use
+};
+
+// ❌ BAD: Not checking errors
+const getBadProjects = async () => {
+  const client = createClient();
+  const response = await client.GET('/api/projects');
+  return response.data; // Might be undefined if error occurred!
+};
+```
+
+### Prevent Information Leakage
+
+**Don't expose sensitive information in errors or logs.**
+
+```tsx
+// ❌ BAD: Exposing internal details
+const handleError = (error: Error) => {
+  alert(`Database error: ${error.message}`); // Exposes DB structure!
+  console.log('SQL query:', query); // Logs sensitive data!
+};
+
+// ✅ GOOD: Generic user-facing messages
+const handleError = (error: Error) => {
+  // Log full error for debugging (server-side only)
+  console.error('Error details:', error);
+
+  // Show generic message to user
+  alert('An error occurred. Please try again later.');
+};
+
+// ✅ GOOD: Separate dev and production behavior
+const handleError = (error: Error) => {
+  if (process.env.NODE_ENV === 'development') {
+    console.error('Full error:', error);
+  } else {
+    console.error('Error occurred'); // Minimal info in production
+  }
+
+  alert('An error occurred. Please try again.');
+};
+```
+
+### HTTPS and Secure Cookies
+
+```tsx
+// API calls should use HTTPS in production
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.ludiscan.com';
+
+// When setting cookies (if needed), use secure flags
+document.cookie = "session=abc123; Secure; HttpOnly; SameSite=Strict";
+```
+
+### Content Security Policy (CSP)
+
+Consider adding CSP headers in `next.config.ts`:
+
+```ts
+// next.config.ts
+const nextConfig = {
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline';",
+          },
+        ],
+      },
+    ];
+  },
+};
+```
+
 ## Common Mistakes to Avoid
 
 ### Styling Mistakes
@@ -1211,6 +2025,30 @@ const StyledModal = styled.div`
 19. ❌ Don't call all hooks at the top - split components and place hooks where needed
 20. ❌ Don't pass too many props (>5-7) - group into objects or use Context/Redux
 21. ❌ Don't prop drill through multiple levels - use Context or Redux instead
+
+### TypeScript Mistakes
+
+22. ❌ **NEVER use `any` type** - use `unknown` or proper types instead
+23. ❌ Don't manually define API types - use generated types from `@generated/api.d.ts`
+24. ❌ Don't overuse type assertions (`as`) - use type guards instead
+25. ❌ Don't ignore TypeScript errors - fix them properly
+26. ❌ Don't use `any[]` - specify the array type
+27. ❌ Don't skip return types on functions - be explicit
+
+### Three.js Mistakes
+
+28. ❌ **Don't forget to dispose Three.js resources** - causes memory leaks!
+29. ❌ Don't create geometries/materials in render - use `useMemo`
+30. ❌ Don't skip PerformanceMonitor - important for dynamic quality adjustment
+31. ❌ Don't forget cleanup in useEffect when loading models
+
+### Security Mistakes
+
+32. ❌ **NEVER use `dangerouslySetInnerHTML`** - opens XSS vulnerabilities
+33. ❌ Don't use user input directly in URLs - sanitize and validate first
+34. ❌ Don't expose sensitive data in error messages
+35. ❌ Don't skip API response error checking - always check `.error` property
+36. ❌ Don't store auth tokens in component state - use localStorage helpers
 
 ## Quick Reference Checklist
 
@@ -1248,11 +2086,34 @@ Before submitting a PR with UI changes, verify:
 - [ ] No components defined inside components
 - [ ] All useEffect hooks have proper cleanup
 
+**TypeScript:**
+- [ ] No `any` types used - proper types or `unknown` instead
+- [ ] Generated API types used from `@generated/api.d.ts`
+- [ ] Type guards used instead of excessive type assertions
+- [ ] All function return types explicitly defined
+- [ ] Utility types used where appropriate (Partial, Pick, Omit, etc.)
+
+**Three.js (if applicable):**
+- [ ] All Three.js resources disposed in cleanup functions
+- [ ] Geometries and materials memoized with `useMemo`
+- [ ] PerformanceMonitor implemented for dynamic quality adjustment
+- [ ] Model loading includes proper cleanup in useEffect
+- [ ] Render layers used correctly (layers.default, layers.raycast)
+
+**Security:**
+- [ ] No `dangerouslySetInnerHTML` used
+- [ ] User input validated and sanitized
+- [ ] API responses checked for errors before using data
+- [ ] No sensitive information exposed in error messages
+- [ ] Auth tokens managed via localStorage helpers (not component state)
+- [ ] URLs with user input properly encoded and validated
+
 **General:**
 - [ ] Responsive design considered (mobile/desktop)
 - [ ] Icons sized consistently
 - [ ] Accessibility requirements met
 - [ ] No prop drilling (use Context/Redux when needed)
+- [ ] Mock data factories created with default values (no required arguments)
 
 ## Examples
 
