@@ -157,7 +157,7 @@ const Component: FC<HomePageProps> = ({ className }) => {
       <InnerContent>
         <Header title={'Heatmap'} onClick={handleBack} />
         <FlexRow className={`${className}__titleRow`} align={'center'}>
-          <Text text={t('home.title')} fontSize={theme.typography.fontSize['3xl']} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bolder} />
+          <Text text={t('home.title')} fontSize={theme.typography.fontSize['3xl']} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.extrabold} />
         </FlexRow>
         <VerticalSpacer size={16} />
         <div className={`${className}__projects`}>
@@ -326,7 +326,7 @@ const IndexPage = styled(Component)`
   &__sortSelect {
     min-width: 200px;
     padding: 8px 12px;
-    font-size: ${theme.typography.fontSize.base}px;
+    font-size: ${({ theme }) => theme.typography.fontSize.base};
     color: ${({ theme }) => theme.colors.text.primary};
     cursor: pointer;
     background-color: ${({ theme }) => theme.colors.surface.base};
