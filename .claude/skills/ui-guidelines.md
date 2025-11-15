@@ -624,6 +624,106 @@ const Component = () => {
 };
 ```
 
+### React.memo for Component Memoization
+
+**Use React.memo to prevent unnecessary re-renders**, especially for expensive components or components that receive the same props frequently.
+
+#### ✅ GOOD: Memoize expensive list items
+
+```tsx
+// Memoize the item component to prevent re-renders when parent updates
+const ListItem = React.memo(({ item, onClick }: Props) => {
+  return (
+    <div onClick={() => onClick(item.id)}>
+      <ExpensiveVisualization data={item} />
+    </div>
+  );
+});
+
+const List = ({ items }: Props) => {
+  const [selectedId, setSelectedId] = useState(null);
+
+  // handleClick is memoized so ListItem doesn't re-render
+  const handleClick = useCallback((id: string) => {
+    setSelectedId(id);
+  }, []);
+
+  return (
+    <div>
+      {items.map(item => (
+        <ListItem key={item.id} item={item} onClick={handleClick} />
+      ))}
+    </div>
+  );
+};
+```
+
+#### ✅ GOOD: Memoize components that rarely change
+
+```tsx
+// Header rarely changes, memo prevents re-render when parent updates
+const Header = React.memo(({ title, onLogout }: Props) => {
+  return (
+    <header>
+      <h1>{title}</h1>
+      <Button onClick={onLogout}>Logout</Button>
+    </header>
+  );
+});
+
+const App = () => {
+  const [data, setData] = useState(null); // Changes frequently
+
+  const handleLogout = useCallback(() => {
+    // logout logic
+  }, []);
+
+  // Header won't re-render when data changes
+  return (
+    <div>
+      <Header title="My App" onLogout={handleLogout} />
+      <Content data={data} />
+    </div>
+  );
+};
+```
+
+#### ❌ BAD: Over-memoizing simple components
+
+```tsx
+// Don't memo simple components - the overhead isn't worth it
+const SimpleText = React.memo(({ text }: Props) => {
+  return <span>{text}</span>; // Too simple to benefit from memo
+});
+
+// Don't memo if props always change
+const Clock = React.memo(() => {
+  const [time, setTime] = useState(Date.now());
+
+  useEffect(() => {
+    const interval = setInterval(() => setTime(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return <div>{time}</div>; // Always re-renders anyway!
+});
+```
+
+#### Custom comparison for React.memo
+
+```tsx
+// Use custom comparison for complex props
+const ExpensiveComponent = React.memo(
+  ({ data, config }: Props) => {
+    return <ComplexVisualization data={data} config={config} />;
+  },
+  (prevProps, nextProps) => {
+    // Only re-render if data.id changes
+    return prevProps.data.id === nextProps.data.id;
+  }
+);
+```
+
 ### Component Organization
 
 #### 1. Keep Components Small and Focused
@@ -698,36 +798,276 @@ const Component = () => {
 };
 ```
 
+#### 3. Hooks Placement - Don't Overuse at Top Level
+
+**Don't call all hooks at the top of the component.** Place hooks close to where they're used for better readability and performance.
+
+```tsx
+// ❌ BAD: All hooks at the top, even if not always needed
+const Component = ({ mode }: Props) => {
+  const { user } = useAuth(); // Used everywhere
+  const { data: projectData } = useGetApi('/api/projects'); // Only for mode="project"
+  const { data: userData } = useGetApi('/api/user-stats'); // Only for mode="user"
+  const { data: settingsData } = useGetApi('/api/settings'); // Only for mode="settings"
+
+  if (mode === 'project') {
+    return <ProjectView data={projectData} />;
+  }
+
+  if (mode === 'user') {
+    return <UserView data={userData} />;
+  }
+
+  return <SettingsView data={settingsData} />;
+};
+
+// ✅ GOOD: Split components, use hooks only where needed
+const Component = ({ mode }: Props) => {
+  const { user } = useAuth(); // Used by all
+
+  if (mode === 'project') {
+    return <ProjectView />;
+  }
+
+  if (mode === 'user') {
+    return <UserView />;
+  }
+
+  return <SettingsView />;
+};
+
+const ProjectView = () => {
+  const { data } = useGetApi('/api/projects'); // Only fetches when this component renders
+  return <div>{/* ... */}</div>;
+};
+
+const UserView = () => {
+  const { data } = useGetApi('/api/user-stats'); // Only fetches when this component renders
+  return <div>{/* ... */}</div>;
+};
+
+const SettingsView = () => {
+  const { data } = useGetApi('/api/settings'); // Only fetches when this component renders
+  return <div>{/* ... */}</div>;
+};
+```
+
+```tsx
+// ❌ BAD: useCallback at top for handlers only used in one section
+const Component = ({ showAdvanced }: Props) => {
+  const handleBasicSubmit = useCallback(() => {
+    // basic logic
+  }, []);
+
+  const handleAdvancedSubmit = useCallback(() => {
+    // advanced logic
+  }, []);
+
+  const handleAdvancedReset = useCallback(() => {
+    // reset logic
+  }, []); // Only used when showAdvanced=true
+
+  return (
+    <div>
+      <BasicForm onSubmit={handleBasicSubmit} />
+      {showAdvanced && (
+        <AdvancedForm
+          onSubmit={handleAdvancedSubmit}
+          onReset={handleAdvancedReset}
+        />
+      )}
+    </div>
+  );
+};
+
+// ✅ GOOD: Split components, define handlers where used
+const Component = ({ showAdvanced }: Props) => {
+  return (
+    <div>
+      <BasicFormSection />
+      {showAdvanced && <AdvancedFormSection />}
+    </div>
+  );
+};
+
+const BasicFormSection = () => {
+  const handleSubmit = useCallback(() => {
+    // basic logic
+  }, []);
+
+  return <BasicForm onSubmit={handleSubmit} />;
+};
+
+const AdvancedFormSection = () => {
+  const handleSubmit = useCallback(() => {
+    // advanced logic
+  }, []);
+
+  const handleReset = useCallback(() => {
+    // reset logic
+  }, []);
+
+  return <AdvancedForm onSubmit={handleSubmit} onReset={handleReset} />;
+};
+```
+
 ### Props and Context
 
-#### 1. Avoid Prop Drilling
+#### 1. Avoid Excessive Props - Keep Props Count Low
+
+**Don't pass too many props to a component.** If a component needs many props, it's a sign to refactor.
+
+```tsx
+// ❌ BAD: Too many props (hard to maintain)
+const UserCard = ({
+  id,
+  name,
+  email,
+  avatar,
+  role,
+  department,
+  joinedDate,
+  isActive,
+  isPremium,
+  onEdit,
+  onDelete,
+  onActivate,
+  onDeactivate,
+  showActions,
+  showBadge,
+}: Props) => {
+  // Component implementation
+};
+
+// Usage becomes unwieldy
+<UserCard
+  id={user.id}
+  name={user.name}
+  email={user.email}
+  avatar={user.avatar}
+  role={user.role}
+  department={user.department}
+  joinedDate={user.joinedDate}
+  isActive={user.isActive}
+  isPremium={user.isPremium}
+  onEdit={handleEdit}
+  onDelete={handleDelete}
+  onActivate={handleActivate}
+  onDeactivate={handleDeactivate}
+  showActions={true}
+  showBadge={true}
+/>
+```
+
+```tsx
+// ✅ GOOD: Group related props into objects
+const UserCard = ({
+  user, // Single user object
+  actions, // Group action handlers
+  options, // Group display options
+}: Props) => {
+  const { id, name, email, avatar, role, department, joinedDate, isActive, isPremium } = user;
+  const { onEdit, onDelete, onActivate, onDeactivate } = actions;
+  const { showActions, showBadge } = options;
+
+  // Component implementation
+};
+
+// Usage is cleaner
+<UserCard
+  user={user}
+  actions={{
+    onEdit: handleEdit,
+    onDelete: handleDelete,
+    onActivate: handleActivate,
+    onDeactivate: handleDeactivate,
+  }}
+  options={{ showActions: true, showBadge: true }}
+/>
+```
+
+```tsx
+// ✅ EVEN BETTER: Use Context for global state
+const UserCard = ({ userId }: Props) => {
+  const { users, actions } = useUserContext();
+  const user = users.find(u => u.id === userId);
+
+  // No need to pass many props - get from context
+  return <div>{/* ... */}</div>;
+};
+
+// Usage is simplest
+<UserCard userId={user.id} />
+```
+
+#### 2. Avoid Prop Drilling
+
+**Don't pass props through multiple component layers.** Use Context or Redux instead.
 
 ```tsx
 // ❌ BAD: Passing through many levels
 const App = () => {
   const [user, setUser] = useState(null);
-  return <Dashboard user={user} />;
+  const [theme, setTheme] = useState('dark');
+  const [settings, setSettings] = useState({});
+
+  return (
+    <Dashboard user={user} theme={theme} settings={settings} />
+  );
 };
 
-const Dashboard = ({ user }) => <Sidebar user={user} />;
-const Sidebar = ({ user }) => <UserMenu user={user} />;
-const UserMenu = ({ user }) => <UserAvatar user={user} />;
+const Dashboard = ({ user, theme, settings }) => (
+  <Sidebar user={user} theme={theme} settings={settings} />
+);
 
-// ✅ GOOD: Use Context or Redux
+const Sidebar = ({ user, theme, settings }) => (
+  <UserMenu user={user} theme={theme} settings={settings} />
+);
+
+const UserMenu = ({ user, theme, settings }) => (
+  <UserAvatar user={user} theme={theme} settings={settings} />
+);
+// Every intermediate component has to receive and pass down props it doesn't use!
+```
+
+```tsx
+// ✅ GOOD: Use Context for global state
 const App = () => {
   return (
     <AuthProvider>
-      <Dashboard />
+      <ThemeProvider>
+        <SettingsProvider>
+          <Dashboard />
+        </SettingsProvider>
+      </ThemeProvider>
     </AuthProvider>
   );
 };
 
+const Dashboard = () => <Sidebar />;
+const Sidebar = () => <UserMenu />;
+const UserMenu = () => <UserAvatar />;
+
 const UserAvatar = () => {
   const { user } = useAuth(); // Direct access
+  const { theme } = useTheme(); // Direct access
+  const { settings } = useSettings(); // Direct access
+
+  // No prop drilling needed!
 };
 ```
 
-#### 2. Use Composition Over Props
+```tsx
+// ✅ ALSO GOOD: For this project, use existing Redux hooks
+const UserAvatar = () => {
+  const { user } = useAuth(); // From Redux
+  const { theme } = useSharedTheme(); // From theme context
+
+  return <div>{/* ... */}</div>;
+};
+```
+
+#### 3. Use Composition Over Props
 
 ```tsx
 // ❌ BAD: Boolean props for variations
@@ -867,6 +1207,10 @@ const StyledModal = styled.div`
 15. ❌ Don't mutate state directly - always create new objects/arrays
 16. ❌ Don't call setState during render - infinite loop!
 17. ❌ Don't overuse useMemo/useCallback - only optimize when needed
+18. ❌ Don't forget React.memo for expensive list items or rarely changing components
+19. ❌ Don't call all hooks at the top - split components and place hooks where needed
+20. ❌ Don't pass too many props (>5-7) - group into objects or use Context/Redux
+21. ❌ Don't prop drill through multiple levels - use Context or Redux instead
 
 ## Quick Reference Checklist
 
@@ -894,6 +1238,11 @@ Before submitting a PR with UI changes, verify:
 - [ ] State is minimal and normalized
 - [ ] No prop mirroring in state (unless intentional)
 - [ ] useMemo/useCallback only used when necessary
+- [ ] React.memo used for expensive list items and rarely changing components
+- [ ] Hooks placed close to where they're used (not all at component top)
+- [ ] Components split when multiple conditional hooks are needed
+- [ ] Props count kept low (<5-7) - grouped into objects when needed
+- [ ] No prop drilling - Context/Redux used for shared state
 - [ ] Event handlers use useCallback only when passed to memoized children
 - [ ] List items have stable, unique keys (not index or random values)
 - [ ] No components defined inside components
