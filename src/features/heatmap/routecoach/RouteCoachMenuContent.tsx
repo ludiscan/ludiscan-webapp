@@ -2,6 +2,7 @@
 import styled from '@emotion/styled';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useEffect, useCallback, useState, memo } from 'react';
+import { useSharedTheme } from '@src/hooks/useSharedTheme';
 
 import type { HeatmapMenuProps } from '@src/features/heatmap/HeatmapMenuContent';
 import type { FC } from 'react';
@@ -15,7 +16,6 @@ import { useRouteCoachApi } from '@src/features/heatmap/routecoach/api';
 import { useImprovementRoutes } from '@src/hooks/useImprovementRoutes';
 import { useRouteCoachPatch } from '@src/hooks/useRouteCoach';
 import { useApiClient } from '@src/modeles/ApiClientContext';
-import { fontSizes } from '@src/styles/style';
 
 const POLL_MS = 2000;
 
@@ -26,6 +26,7 @@ interface HintProps {
 }
 
 const HintComponent: FC<HintProps> = ({ children, className }) => <div className={className}>{children}</div>;
+  const { theme } = useSharedTheme();
 
 const Hint = styled(HintComponent)`
   font-size: 12px;
@@ -240,7 +241,7 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
 
   return (
     <FlexColumn gap={12} className={className} wrap={'nowrap'}>
-      <Text text={'Route Coach v2'} fontSize={fontSizes.large3} />
+      <Text text={'Route Coach v2'} fontSize={theme.typography.fontSize['2xl']} />
 
       {/* 改善ルート生成ボタン */}
       <FlexRow gap={8}>
@@ -272,10 +273,10 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
         <Hint>プレイヤー一覧を読み込み中...</Hint>
       ) : players && players.length > 0 ? (
         <FlexColumn gap={8}>
-          <Text text={'プレイヤーを選択'} fontSize={fontSizes.medium} />
+          <Text text={'プレイヤーを選択'} fontSize={theme.typography.fontSize.base} />
           <FlexRow gap={8} align={'center'}>
-            <TextField value={selectedPlayerId} onChange={handlePlayerSelect} placeholder={'プレイヤーIDを入力'} fontSize={fontSizes.small} />
-            <Text text={'利用可能なプレイヤー: ' + players.join(', ')} fontSize={fontSizes.small} />
+            <TextField value={selectedPlayerId} onChange={handlePlayerSelect} placeholder={'プレイヤーIDを入力'} fontSize={theme.typography.fontSize.sm} />
+            <Text text={'利用可能なプレイヤー: ' + players.join(', ')} fontSize={theme.typography.fontSize.sm} />
           </FlexRow>
         </FlexColumn>
       ) : (
@@ -286,7 +287,7 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
       {taskStatus && clusterData && clusterData.length > 0 ? (
         <ScrollableClusterSection>
           <FlexColumn gap={16}>
-            <Text text='クラスター選択' fontSize={fontSizes.large1} />
+            <Text text='クラスター選択' fontSize={theme.typography.fontSize.lg} />
             <EventClusterViewer
               projectId={projectId!}
               playerId={selectedPlayerId}

@@ -10,7 +10,6 @@ import { FlexColumn, FlexRow, InlineFlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { ClampText } from '@src/component/molecules/ClampText';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { fontSizes } from '@src/styles/style';
 
 export type ProjectItemRowProps = {
   className?: string;
@@ -57,13 +56,13 @@ const Component: FC<ProjectItemRowProps> = ({ className, project, onEdit }) => {
     >
       <FlexRow align={'center'} className={`${className}__content`}>
         <FlexColumn gap={2} className={`${className}__info`}>
-          <ClampText text={project.name} fontSize={fontSizes.large1} color={theme.colors.text.primary} fontWeight={'bold'} lines={1} />
-          <ClampText text={project.description} fontSize={fontSizes.small} fontWeight={'lighter'} lines={1} color={theme.colors.text.secondary} />
+          <ClampText text={project.name} fontSize={theme.typography.fontSize.lg} color={theme.colors.text.primary} fontWeight={'bold'} lines={1} />
+          <ClampText text={project.description} fontSize={theme.typography.fontSize.sm} fontWeight={'lighter'} lines={1} color={theme.colors.text.secondary} />
           <InlineFlexRow gap={8} className={`${className}__meta`}>
             {project.session_count !== undefined && (
-              <Text text={`${project.session_count} sessions`} fontSize={fontSizes.smallest} color={theme.colors.text.secondary} fontWeight={'lighter'} />
+              <Text text={`${project.session_count} sessions`} fontSize={theme.typography.fontSize.xs} color={theme.colors.text.secondary} fontWeight={'lighter'} />
             )}
-            <Text text={`Created: ${formatDate(project.createdAt)}`} fontSize={fontSizes.smallest} color={theme.colors.text.secondary} fontWeight={'lighter'} />
+            <Text text={`Created: ${formatDate(project.createdAt)}`} fontSize={theme.typography.fontSize.xs} color={theme.colors.text.secondary} fontWeight={'lighter'} />
           </InlineFlexRow>
         </FlexColumn>
         {onEdit && (

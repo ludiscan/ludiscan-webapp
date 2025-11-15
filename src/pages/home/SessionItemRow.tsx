@@ -8,7 +8,6 @@ import { Text } from '@src/component/atoms/Text';
 import { Tooltip } from '@src/component/atoms/Tooltip';
 import { ClampText } from '@src/component/molecules/ClampText';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { fontSizes, fontWeights } from '@src/styles/style';
 
 export type SessionItemRowProps = {
   className?: string | undefined;
@@ -47,25 +46,25 @@ const Component: FC<SessionItemRowProps> = ({ className, session }) => {
         {/* Main Info */}
         <FlexColumn gap={6} style={{ flex: 1, minWidth: 0 }}>
           <Tooltip tooltip={session.name}>
-            <ClampText text={session.name} fontSize={fontSizes.medium} fontWeight={fontWeights.bold} lines={1} />
+            <ClampText text={session.name} fontSize={theme.typography.fontSize.base} fontWeight={theme.typography.fontWeight.bold} lines={1} />
           </Tooltip>
 
           <FlexRow gap={12} align={'center'}>
             {session.deviceId && (
               <Tooltip tooltip={`Device: ${session.deviceId}`}>
-                <Text text={`ID: ${session.deviceId}`} fontSize={fontSizes.smallest} color={theme.colors.text.primary} fontWeight={fontWeights.light} />
+                <Text text={`ID: ${session.deviceId}`} fontSize={theme.typography.fontSize.xs} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.light} />
               </Tooltip>
             )}
 
             {session.platform && (
               <Tooltip tooltip={`Platform: ${session.platform}`}>
-                <Text text={session.platform} fontSize={fontSizes.smallest} color={theme.colors.text.secondary} fontWeight={fontWeights.light} />
+                <Text text={session.platform} fontSize={theme.typography.fontSize.xs} color={theme.colors.text.secondary} fontWeight={theme.typography.fontWeight.light} />
               </Tooltip>
             )}
 
             {session.appVersion && (
               <Tooltip tooltip={`App Version: ${session.appVersion}`}>
-                <Text text={`v${session.appVersion}`} fontSize={fontSizes.smallest} color={theme.colors.text.secondary} fontWeight={fontWeights.light} />
+                <Text text={`v${session.appVersion}`} fontSize={theme.typography.fontSize.xs} color={theme.colors.text.secondary} fontWeight={theme.typography.fontWeight.light} />
               </Tooltip>
             )}
           </FlexRow>
@@ -73,12 +72,12 @@ const Component: FC<SessionItemRowProps> = ({ className, session }) => {
 
         {/* Meta Info - Right aligned */}
         <FlexColumn gap={4} align={'flex-end'} style={{ flexShrink: 0 }}>
-          <Text text={formatDate(session.startTime)} fontSize={fontSizes.smallest} color={theme.colors.text.secondary} fontWeight={fontWeights.light} />
+          <Text text={formatDate(session.startTime)} fontSize={theme.typography.fontSize.xs} color={theme.colors.text.secondary} fontWeight={theme.typography.fontWeight.light} />
           <Text
             text={calculateDuration(session.startTime, session.endTime)}
-            fontSize={fontSizes.smallest}
+            fontSize={theme.typography.fontSize.xs}
             color={session.isPlaying ? '#4caf50' : theme.colors.text.secondary}
-            fontWeight={fontWeights.light}
+            fontWeight={theme.typography.fontWeight.light}
           />
         </FlexColumn>
       </FlexRow>

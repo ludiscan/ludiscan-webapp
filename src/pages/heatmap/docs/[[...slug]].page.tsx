@@ -18,7 +18,6 @@ import { SidebarLayout } from '@src/component/templates/SidebarLayout';
 import { DocsContent } from '@src/features/docs/components/DocsContent';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { InnerContent } from '@src/pages/_app.page';
-import { fontSizes } from '@src/styles/style';
 import { getDocBySlug, getDocSlugs } from '@src/utils/docs/loader';
 /* eslint-enable import/order */
 
@@ -47,11 +46,11 @@ const Component: FC<DocsPageProps> = ({ currentDoc, error, className }) => {
         <SidebarLayout />
         <InnerContent>
           <div className={`${className}__errorContainer`}>
-            <Text text='Documentation Error' fontSize={fontSizes.large3} color={theme.colors.semantic.error.main} />
-            <Text text={error} fontSize={fontSizes.medium} color={theme.colors.text.primary} />
+            <Text text='Documentation Error' fontSize={theme.typography.fontSize['2xl']} color={theme.colors.semantic.error.main} />
+            <Text text={error} fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} />
             <Text
               text='Please check that documentation files are properly set up in src/docs/ directory.'
-              fontSize={fontSizes.small}
+              fontSize={theme.typography.fontSize.sm}
               color={theme.colors.text.secondary}
             />
           </div>

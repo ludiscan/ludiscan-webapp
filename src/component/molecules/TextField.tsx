@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 
 import { FlexColumn } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
-import { fontSizes, fontWeights } from '@src/styles/style';
+import { useSharedTheme } from '@src/hooks/useSharedTheme';
 
 export type TextFieldProps = {
   className?: string | undefined;
@@ -18,13 +18,15 @@ export type TextFieldProps = {
 };
 
 const Component = ({ className, value, onChange, placeholder, type = 'text', label }: TextFieldProps) => {
+  const { theme } = useSharedTheme();
+
   const Input = (
     <input id={label ?? className} className={className} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} type={type} />
   );
   if (label) {
     return (
       <FlexColumn gap={2}>
-        <Text text={label} fontSize={fontSizes.small} fontWeight={fontWeights.bold} />
+        <Text text={label} fontSize={theme.typography.fontSize.sm} fontWeight={theme.typography.fontWeight.bold} />
         {Input}
       </FlexColumn>
     );
@@ -34,7 +36,7 @@ const Component = ({ className, value, onChange, placeholder, type = 'text', lab
 
 export const TextField = styled(Component)`
   padding: 6px;
-  ${({ fontSize = fontSizes.medium }) => `font-size: ${fontSize}`};
+  ${({ fontSize, theme }) => `font-size: ${fontSize ?? theme.typography.fontSize.base}`};
   font-weight: ${({ fontWeight }) => fontWeight || 'normal'};
   text-shadow: ${({ shadow }) => (shadow ? '0 0 4px rgba(0, 0, 0, 0.2)' : 'none')};
   background: unset;

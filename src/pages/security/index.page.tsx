@@ -13,7 +13,6 @@ import { SidebarLayout } from '@src/component/templates/SidebarLayout';
 import { useAuth } from '@src/hooks/useAuth';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { InnerContent } from '@src/pages/_app.page';
-import { fontSizes, fontWeights } from '@src/styles/style';
 
 export type SecurityPageProps = {
   className?: string;
@@ -40,7 +39,7 @@ const Component: FC<SecurityPageProps> = ({ className }) => {
         <SidebarLayout />
         <InnerContent>
           <div className={`${className}__centerContent`}>
-            <Text text='Loading...' fontSize={fontSizes.medium} color={theme.colors.text.primary} />
+            <Text text='Loading...' fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} />
           </div>
         </InnerContent>
       </div>
@@ -58,11 +57,11 @@ const Component: FC<SecurityPageProps> = ({ className }) => {
             <FlexColumn gap={24}>
               {/* パスワード変更セクション */}
               <div>
-                <Text text='Password Management' fontSize={fontSizes.large1} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
+                <Text text='Password Management' fontSize={theme.typography.fontSize.lg} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bold} />
                 <VerticalSpacer size={12} />
                 <Text
                   text='Password change functionality will be available in a future update.'
-                  fontSize={fontSizes.small}
+                  fontSize={theme.typography.fontSize.sm}
                   color={theme.colors.text.secondary}
                   fontWeight='lighter'
                 />
@@ -72,11 +71,11 @@ const Component: FC<SecurityPageProps> = ({ className }) => {
 
               {/* 2段階認証セクション */}
               <div>
-                <Text text='Two-Factor Authentication' fontSize={fontSizes.large1} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
+                <Text text='Two-Factor Authentication' fontSize={theme.typography.fontSize.lg} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bold} />
                 <VerticalSpacer size={12} />
                 <Text
                   text='Two-factor authentication will be available in a future update.'
-                  fontSize={fontSizes.small}
+                  fontSize={theme.typography.fontSize.sm}
                   color={theme.colors.text.secondary}
                   fontWeight='lighter'
                 />
@@ -86,11 +85,11 @@ const Component: FC<SecurityPageProps> = ({ className }) => {
 
               {/* セッション管理セクション */}
               <div>
-                <Text text='Session Management' fontSize={fontSizes.large1} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
+                <Text text='Session Management' fontSize={theme.typography.fontSize.lg} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bold} />
                 <VerticalSpacer size={12} />
                 <Text
                   text='Session management features will be available in a future update.'
-                  fontSize={fontSizes.small}
+                  fontSize={theme.typography.fontSize.sm}
                   color={theme.colors.text.secondary}
                   fontWeight='lighter'
                 />
@@ -100,11 +99,11 @@ const Component: FC<SecurityPageProps> = ({ className }) => {
 
               {/* ログイン履歴セクション */}
               <div>
-                <Text text='Login History' fontSize={fontSizes.large1} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
+                <Text text='Login History' fontSize={theme.typography.fontSize.lg} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bold} />
                 <VerticalSpacer size={12} />
                 <Text
                   text='Login history tracking will be available in a future update.'
-                  fontSize={fontSizes.small}
+                  fontSize={theme.typography.fontSize.sm}
                   color={theme.colors.text.secondary}
                   fontWeight='lighter'
                 />
@@ -114,30 +113,30 @@ const Component: FC<SecurityPageProps> = ({ className }) => {
 
               {/* セキュリティ情報セクション */}
               <div>
-                <Text text='Security Information' fontSize={fontSizes.large1} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
+                <Text text='Security Information' fontSize={theme.typography.fontSize.lg} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bold} />
                 <VerticalSpacer size={12} />
                 <FlexColumn gap={8}>
                   <Text
                     text='• All API keys are encrypted and securely stored'
-                    fontSize={fontSizes.small}
+                    fontSize={theme.typography.fontSize.sm}
                     color={theme.colors.text.secondary}
                     fontWeight='lighter'
                   />
                   <Text
                     text='• Never share your API keys with untrusted parties'
-                    fontSize={fontSizes.small}
+                    fontSize={theme.typography.fontSize.sm}
                     color={theme.colors.text.secondary}
                     fontWeight='lighter'
                   />
                   <Text
                     text='• Regularly review your API keys and delete unused ones'
-                    fontSize={fontSizes.small}
+                    fontSize={theme.typography.fontSize.sm}
                     color={theme.colors.text.secondary}
                     fontWeight='lighter'
                   />
                   <Text
                     text='• Report any suspicious activity to our support team'
-                    fontSize={fontSizes.small}
+                    fontSize={theme.typography.fontSize.sm}
                     color={theme.colors.text.secondary}
                     fontWeight='lighter'
                   />

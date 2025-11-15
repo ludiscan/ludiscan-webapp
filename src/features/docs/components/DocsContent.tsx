@@ -13,7 +13,6 @@ import { FlexColumn } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { MarkDownText } from '@src/component/molecules/MarkDownText';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { fontSizes, fontWeights } from '@src/styles/style';
 
 interface DocsContentProps {
   doc: DocPage | null;
@@ -26,7 +25,7 @@ const Component: FC<DocsContentProps> = ({ doc, className }) => {
   if (!doc) {
     return (
       <div className={className}>
-        <Text text='Select a documentation page to view its content' fontSize={fontSizes.large1} color={theme.colors.text.secondary} />
+        <Text text='Select a documentation page to view its content' fontSize={theme.typography.fontSize.lg} color={theme.colors.text.secondary} />
       </div>
     );
   }
@@ -36,8 +35,8 @@ const Component: FC<DocsContentProps> = ({ doc, className }) => {
       <FlexColumn gap={24}>
         {/* Header */}
         <div className={`${className}__header`}>
-          <Text text={doc.frontmatter.title} fontSize={fontSizes.largest} fontWeight={fontWeights.bold} color={theme.colors.text.primary} />
-          {doc.frontmatter.description && <Text text={doc.frontmatter.description} fontSize={fontSizes.large1} color={theme.colors.text.secondary} />}
+          <Text text={doc.frontmatter.title} fontSize={theme.typography.fontSize['3xl']} fontWeight={theme.typography.fontWeight.bold} color={theme.colors.text.primary} />
+          {doc.frontmatter.description && <Text text={doc.frontmatter.description} fontSize={theme.typography.fontSize.lg} color={theme.colors.text.secondary} />}
         </div>
 
         {/* Content - Rendered with MarkDownText */}
@@ -68,7 +67,7 @@ export const DocsContent = styled(Component)`
   }
 
   &__markdown {
-    font-size: ${fontSizes.medium};
+    font-size: ${({ theme }) => theme.typography.fontSize.base};
     line-height: 1.7;
     color: ${({ theme }) => theme.colors.text.primary};
 
@@ -76,8 +75,8 @@ export const DocsContent = styled(Component)`
     h1 {
       padding-bottom: 8px;
       margin: 24px 0 16px;
-      font-size: ${fontSizes.largest};
-      font-weight: ${fontWeights.bold};
+      font-size: ${({ theme }) => theme.typography.fontSize['3xl']};
+      font-weight: ${({ theme }) => theme.typography.fontWeight.bold};
       color: ${({ theme }) => theme.colors.text.primary};
       border-bottom: 2px solid ${({ theme }) => theme.colors.border.default};
 
@@ -89,23 +88,23 @@ export const DocsContent = styled(Component)`
     h2 {
       padding-bottom: 6px;
       margin: 20px 0 12px;
-      font-size: ${fontSizes.large3};
-      font-weight: ${fontWeights.bold};
+      font-size: ${({ theme }) => theme.typography.fontSize['2xl']};
+      font-weight: ${({ theme }) => theme.typography.fontWeight.bold};
       color: ${({ theme }) => theme.colors.text.primary};
       border-bottom: 1px solid ${({ theme }) => theme.colors.border.default};
     }
 
     h3 {
       margin: 16px 0 8px;
-      font-size: ${fontSizes.large2};
-      font-weight: ${fontWeights.bold};
+      font-size: ${({ theme }) => theme.typography.fontSize.xl};
+      font-weight: ${({ theme }) => theme.typography.fontWeight.bold};
       color: ${({ theme }) => theme.colors.text.primary};
     }
 
     h4 {
       margin: 12px 0 8px;
-      font-size: ${fontSizes.large1};
-      font-weight: ${fontWeights.bold};
+      font-size: ${({ theme }) => theme.typography.fontSize.lg};
+      font-weight: ${({ theme }) => theme.typography.fontWeight.bold};
       color: ${({ theme }) => theme.colors.text.primary};
     }
 
@@ -165,7 +164,7 @@ export const DocsContent = styled(Component)`
 
       code {
         padding: 0;
-        font-size: ${fontSizes.small};
+        font-size: ${({ theme }) => theme.typography.fontSize.sm};
         color: ${({ theme }) => theme.colors.text.primary};
         background-color: transparent;
         border-radius: 0;
@@ -200,7 +199,7 @@ export const DocsContent = styled(Component)`
       }
 
       th {
-        font-weight: ${fontWeights.bold};
+        font-weight: ${({ theme }) => theme.typography.fontWeight.bold};
         background-color: ${({ theme }) => theme.colors.surface.base};
       }
 
@@ -218,7 +217,7 @@ export const DocsContent = styled(Component)`
 
     /* Strong and emphasis */
     strong {
-      font-weight: ${fontWeights.bold};
+      font-weight: ${({ theme }) => theme.typography.fontWeight.bold};
       color: ${({ theme }) => theme.colors.text.primary};
     }
 

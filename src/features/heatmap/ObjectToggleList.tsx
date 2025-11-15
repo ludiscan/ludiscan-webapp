@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { IoMdEye, IoMdEyeOff } from 'react-icons/io';
+import { useSharedTheme } from '@src/hooks/useSharedTheme';
 
 import type { FC } from 'react';
 import type { Group, Material, Object3D } from 'three';
@@ -8,7 +9,7 @@ import type { Group, Material, Object3D } from 'three';
 import { Button } from '@src/component/atoms/Button';
 import { FlexRow, InlineFlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
-import { fontSizes, layers } from '@src/styles/style';
+import { layers } from '@src/styles/style';
 
 export type ObjectToggleListProps = {
   className?: string;
@@ -60,6 +61,7 @@ const makeStorageKey = (mapName: string, model: ObjectToggleListProps['model']) 
 };
 
 const Component: FC<ObjectToggleListProps> = ({ className, model, mapName }) => {
+  const { theme } = useSharedTheme();
   const storageKey = useMemo(() => makeStorageKey(mapName, model), [mapName, model]);
 
   // child.uuid -> { visible, opacity }
@@ -192,7 +194,7 @@ const Component: FC<ObjectToggleListProps> = ({ className, model, mapName }) => 
     <div className={className}>
       {/* 親ラベル */}
       <FlexRow className={`${className}__parent-label`} align={'center'} gap={8}>
-        <Text text={(model as Group).name || 'Mesh'} fontSize={fontSizes.medium} />
+        <Text text={(model as Group).name || 'Mesh'} fontSize={theme.typography.fontSize.base} />
         {/* 全体 visible トグル */}
         <Button
           scheme={'none'}
@@ -212,7 +214,7 @@ const Component: FC<ObjectToggleListProps> = ({ className, model, mapName }) => 
           disabled={!anyVisible}
           aria-label={'Toggle opacity for all visible'}
         >
-          <Text text={majorityOpacity.toFixed(1)} fontSize={fontSizes.small} fontWeight={'bold'} />
+          <Text text={majorityOpacity.toFixed(1)} fontSize={theme.typography.fontSize.sm} fontWeight={'bold'} />
         </Button>
       </FlexRow>
 
@@ -225,7 +227,7 @@ const Component: FC<ObjectToggleListProps> = ({ className, model, mapName }) => 
           return (
             <li key={child.uuid}>
               <InlineFlexRow align={'center'} gap={6}>
-                <Text text={child.name || child.type} fontSize={fontSizes.small} />
+                <Text text={child.name || child.type} fontSize={theme.typography.fontSize.sm} />
                 {/* 個別 visible */}
                 <Button
                   onClick={() => toggleChildVisible(child.uuid)}
@@ -245,7 +247,7 @@ const Component: FC<ObjectToggleListProps> = ({ className, model, mapName }) => 
                     className={`${className}__opacityButton`}
                     aria-label={'Toggle opacity'}
                   >
-                    <Text text={opacity.toFixed(1)} fontSize={fontSizes.small} fontWeight={'bold'} />
+                    <Text text={opacity.toFixed(1)} fontSize={theme.typography.fontSize.sm} fontWeight={'bold'} />
                   </Button>
                 )}
               </InlineFlexRow>

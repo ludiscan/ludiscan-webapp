@@ -14,7 +14,6 @@ import { getLiveObject } from '@src/features/heatmap/selection/liveObjectRegistr
 import { useAppDispatch, useAppSelector } from '@src/hooks/useDispatch';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { followLive, setFocusTarget, setSelected, stopFollow } from '@src/slices/selectionSlice';
-import { fontSizes } from '@src/styles/style';
 
 export function useLiveWorldPosition(liveRefKey?: string, fps = 15) {
   const [pos, setPos] = useState<Vec3 | null>(null);
@@ -95,7 +94,7 @@ export const InspectorModalComponent: FC<{ className?: string }> = ({ className 
 
   return (
     <Card className={className} color={theme.colors.surface.sunken} border={theme.colors.border.default} blur>
-      {title && <Text text={title} fontSize={fontSizes.large3} />}
+      {title && <Text text={title} fontSize={theme.typography.fontSize['2xl']} />}
 
       <div style={{ display: 'grid', gap: 6 }}>
         <Field label='Position' value={`${pos?.x.toFixed(3)}, ${pos?.y.toFixed(3)}, ${pos?.z.toFixed(3)}`} />

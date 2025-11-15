@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 
 import type { FC } from 'react';
 
-import { fontSizes, fontWeights } from '@src/styles/style';
+import { useSharedTheme } from '@src/hooks/useSharedTheme';
 
 type TextFieldOutlinedProps = {
   className?: string;
@@ -56,8 +56,8 @@ export const OutlinedTextField = styled(BaseTextFieldOutlined)`
     width: fit-content;
     padding: 0 4px;
     margin: 0 -4px;
-    font-size: ${fontSizes.small};
-    font-weight: ${fontWeights.bold};
+    font-size: ${({ theme }) => theme.typography.fontSize.sm};
+    font-weight: ${({ theme }) => theme.typography.fontWeight.bold};
 
     /* デフォルトだとラベルが両端に余白を取るので必要に応じて調整 */
   }
@@ -67,7 +67,7 @@ export const OutlinedTextField = styled(BaseTextFieldOutlined)`
     display: block;
     width: 100%;
     padding: 0;
-    font-size: ${({ fontSize = fontSizes.medium }) => fontSize};
+    font-size: ${({ fontSize, theme }) => fontSize || theme.typography.fontSize.base};
     font-weight: ${({ fontWeight }) => fontWeight || 'normal'};
     color: ${({ color, theme }) => color || theme.colors.text.primary};
     text-shadow: ${({ shadow }) => (shadow ? '0 0 4px rgba(0, 0, 0, 0.2)' : 'none')};

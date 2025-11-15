@@ -27,7 +27,6 @@ import { usePlayerTimelinePatch, usePlayerTimelinePick } from '@src/hooks/usePla
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { useApiClient } from '@src/modeles/ApiClientContext';
 import { DefaultStaleTime } from '@src/modeles/qeury';
-import { fontSizes } from '@src/styles/style';
 import { toISOAboutStringWithTimezone } from '@src/utils/locale';
 import { compileHVQL, parseHVQL } from '@src/utils/vql';
 
@@ -74,7 +73,7 @@ const DetailBlockInternal: FC<{ className?: string; details: PlayerTimelineDetai
     <InlineFlexColumn gap={4} className={className}>
       <Divider />
       <FlexRow className={`${className}__row`} wrap={'nowrap'} align={'center'}>
-        <Text text={`Session: ${session_id}`} fontSize={fontSizes.small} color={theme.colors.text.secondary} />
+        <Text text={`Session: ${session_id}`} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
         <div style={{ flex: 1 }} />
         <Button
           fontSize={'base'}
@@ -91,7 +90,7 @@ const DetailBlockInternal: FC<{ className?: string; details: PlayerTimelineDetai
       </FlexRow>
       {details.map((detail, index) => (
         <InlineFlexRow key={index} wrap={'nowrap'} align={'center'} className={`${className}__row`} gap={4}>
-          <Text text={`Player: ${detail.player}`} fontSize={fontSizes.small} color={theme.colors.text.secondary} />
+          <Text text={`Player: ${detail.player}`} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
           <Switch
             checked={detail.visible}
             onChange={() => {
@@ -118,16 +117,16 @@ const DetailBlockInternal: FC<{ className?: string; details: PlayerTimelineDetai
         <InlineFlexColumn gap={2}>
           <Toggle buttonStyle={toggleButtonStyle(theme)} label={<Text text={'Sesssion'} />}>
             <InputRow label={'name'}>
-              <Text text={session.data.name} fontSize={fontSizes.small} />
+              <Text text={session.data.name} fontSize={theme.typography.fontSize.sm} />
             </InputRow>
             <InlineFlexRow wrap={'nowrap'} align={'center'} className={`${className}__row`} gap={4}>
-              <Text text={'Start Time'} fontSize={fontSizes.small} color={theme.colors.text.secondary} />
+              <Text text={'Start Time'} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
               <div className={`${className}__weight1`}>
-                <Text text={toISOAboutStringWithTimezone(new Date(session.data.startTime))} fontSize={fontSizes.small} />
+                <Text text={toISOAboutStringWithTimezone(new Date(session.data.startTime))} fontSize={theme.typography.fontSize.sm} />
               </div>
               {session.data.endTime && (
                 <div className={`${className}__weight1`}>
-                  <Text text={toISOAboutStringWithTimezone(new Date(session.data.endTime))} fontSize={fontSizes.small} />
+                  <Text text={toISOAboutStringWithTimezone(new Date(session.data.endTime))} fontSize={theme.typography.fontSize.sm} />
                 </div>
               )}
             </InlineFlexRow>
@@ -315,7 +314,7 @@ const PlayerTimelineComponent: FC<HeatmapMenuProps> = ({ className, service }) =
       <InputRow label={'visibility'} align={'center'}>
         <Switch disabled={visibilityDisabled} checked={visible} onChange={onVisibilityChange} size={'small'} label={'visibility'} />
       </InputRow>
-      {visibilityDisabled && <Text text={'please select project and session'} fontSize={fontSizes.small} />}
+      {visibilityDisabled && <Text text={'please select project and session'} fontSize={theme.typography.fontSize.sm} />}
       {sessionByDetail.size > 0 && (
         <>
           <Toggle
@@ -367,7 +366,7 @@ export const PlayerTimeline = memo(
       min-height: 92px;
       padding: 0;
       margin: 0;
-      font-size: ${fontSizes.small};
+      font-size: ${theme.typography.fontSize.sm};
     }
   `,
   (prev, next) => {

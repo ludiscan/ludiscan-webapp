@@ -14,7 +14,6 @@ import { SidebarLayout } from '@src/component/templates/SidebarLayout';
 import { useHealthCheck } from '@src/hooks/useHealthCheck';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { InnerContent } from '@src/pages/_app.page';
-import { fontSizes, fontWeights } from '@src/styles/style';
 
 export type HealthPageProps = {
   className?: string;
@@ -83,7 +82,7 @@ const Component: FC<HealthPageProps> = ({ className }) => {
           <Card blur color={theme.colors.surface.base} className={`${className}__card`}>
             <FlexRow gap={16} align='center'>
               <FlexColumn gap={8}>
-                <Text text='Overall Status' fontSize={fontSizes.large2} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
+                <Text text='Overall Status' fontSize={theme.typography.fontSize.xl} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bold} />
                 <FlexRow gap={12} align='center'>
                   <div
                     className={`${className}__statusBadge`}
@@ -94,15 +93,15 @@ const Component: FC<HealthPageProps> = ({ className }) => {
                   >
                     <Text
                       text={hasErrors ? 'Degraded' : 'Healthy'}
-                      fontSize={fontSizes.small}
+                      fontSize={theme.typography.fontSize.sm}
                       color={getStatusColor(hasErrors ? 'down' : 'up')}
-                      fontWeight={fontWeights.bold}
+                      fontWeight={theme.typography.fontWeight.bold}
                     />
                   </div>
                   {dataUpdatedAt && (
                     <Text
                       text={`Last updated: ${formatTimestamp(dataUpdatedAt)}`}
-                      fontSize={fontSizes.small}
+                      fontSize={theme.typography.fontSize.sm}
                       color={theme.colors.text.secondary}
                       fontWeight='lighter'
                     />
@@ -131,11 +130,11 @@ const Component: FC<HealthPageProps> = ({ className }) => {
                   <FlexColumn gap={4}>
                     <Text
                       text='Failed to fetch health status'
-                      fontSize={fontSizes.medium}
+                      fontSize={theme.typography.fontSize.base}
                       color={theme.colors.semantic.error.main}
-                      fontWeight={fontWeights.bold}
+                      fontWeight={theme.typography.fontWeight.bold}
                     />
-                    <Text text={error.message || 'Unknown error'} fontSize={fontSizes.small} color={theme.colors.semantic.error.dark} fontWeight='lighter' />
+                    <Text text={error.message || 'Unknown error'} fontSize={theme.typography.fontSize.sm} color={theme.colors.semantic.error.dark} fontWeight='lighter' />
                   </FlexColumn>
                 </FlexRow>
               </Card>
@@ -147,7 +146,7 @@ const Component: FC<HealthPageProps> = ({ className }) => {
           {healthLoading && !data ? (
             <Card blur color={theme.colors.surface.base} className={`${className}__card`}>
               <div className={`${className}__centerContent`}>
-                <Text text='Loading health status...' fontSize={fontSizes.medium} color={theme.colors.text.secondary} />
+                <Text text='Loading health status...' fontSize={theme.typography.fontSize.base} color={theme.colors.text.secondary} />
               </div>
             </Card>
           ) : (
@@ -163,9 +162,9 @@ const Component: FC<HealthPageProps> = ({ className }) => {
                       <FlexRow gap={12} align='center'>
                         <Text
                           text={serviceName.charAt(0).toUpperCase() + serviceName.slice(1)}
-                          fontSize={fontSizes.large1}
+                          fontSize={theme.typography.fontSize.lg}
                           color={theme.colors.text.primary}
-                          fontWeight={fontWeights.bold}
+                          fontWeight={theme.typography.fontWeight.bold}
                         />
                         <div
                           className={`${className}__statusIndicator`}
@@ -183,7 +182,7 @@ const Component: FC<HealthPageProps> = ({ className }) => {
                           borderColor: statusColor,
                         }}
                       >
-                        <Text text={status.toUpperCase()} fontSize={fontSizes.small} color={statusColor} fontWeight={fontWeights.bold} />
+                        <Text text={status.toUpperCase()} fontSize={theme.typography.fontSize.sm} color={statusColor} fontWeight={theme.typography.fontWeight.bold} />
                       </div>
 
                       {/* Additional Details */}
@@ -191,8 +190,8 @@ const Component: FC<HealthPageProps> = ({ className }) => {
                         .filter(([key]) => key !== 'status')
                         .map(([key, value]) => (
                           <div key={key} className={`${className}__detailRow`}>
-                            <Text text={`${key}:`} fontSize={fontSizes.small} color={theme.colors.text.secondary} fontWeight='lighter' />
-                            <Text text={String(value)} fontSize={fontSizes.small} color={theme.colors.text.primary} fontWeight='lighter' />
+                            <Text text={`${key}:`} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} fontWeight='lighter' />
+                            <Text text={String(value)} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.primary} fontWeight='lighter' />
                           </div>
                         ))}
                     </FlexColumn>
@@ -205,7 +204,7 @@ const Component: FC<HealthPageProps> = ({ className }) => {
           {!healthLoading && data && Object.keys(details).length === 0 && (
             <Card blur color={theme.colors.surface.base} className={`${className}__card`}>
               <div className={`${className}__centerContent`}>
-                <Text text='No service details available' fontSize={fontSizes.medium} color={theme.colors.text.secondary} />
+                <Text text='No service details available' fontSize={theme.typography.fontSize.base} color={theme.colors.text.secondary} />
               </div>
             </Card>
           )}

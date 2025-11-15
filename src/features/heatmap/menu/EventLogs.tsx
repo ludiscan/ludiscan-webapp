@@ -11,7 +11,7 @@ import { Text } from '@src/component/atoms/Text';
 import { Selector } from '@src/component/molecules/Selector';
 import { InputRow } from '@src/features/heatmap/menu/InputRow';
 import { useEventLogPatch, useEventLogSelect } from '@src/hooks/useEventLog';
-import { fontSizes, fontWeights } from '@src/styles/style';
+import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { getRandomPrimitiveColor } from '@src/utils/color';
 import { availableIcons } from '@src/utils/heatmapIconMap';
 
@@ -26,6 +26,7 @@ map status.hand {
 `;
 
 const Component: FC<HeatmapMenuProps> = ({ eventLogKeys }) => {
+  const { theme } = useSharedTheme();
   const logs = useEventLogSelect((s) => s.logs);
   const setEventLogs = useEventLogPatch();
 
@@ -80,17 +81,17 @@ const Component: FC<HeatmapMenuProps> = ({ eventLogKeys }) => {
   return (
     <InlineFlexColumn gap={8}>
       <InlineFlexRow align={'center'} gap={4}>
-        <Text text={'Event Log'} fontSize={fontSizes.large1} fontWeight={fontWeights.bold} />
+        <Text text={'Event Log'} fontSize={theme.typography.fontSize.lg} fontWeight={theme.typography.fontWeight.bold} />
       </InlineFlexRow>
       <InlineFlexRow align={'center'} gap={4}>
-        <Text text={'filter'} fontSize={fontSizes.small} />
+        <Text text={'filter'} fontSize={theme.typography.fontSize.sm} />
       </InlineFlexRow>
       <InputRow label={'player'}>
         <Selector options={['all', '0', '1', '2', '3']} onChange={handleFilterPlayer} />
       </InputRow>
       <Divider orientation={'horizontal'} />
       <InlineFlexRow align={'center'} gap={4}>
-        <Text text={'Event Log Keys'} fontSize={fontSizes.small} />
+        <Text text={'Event Log Keys'} fontSize={theme.typography.fontSize.sm} />
       </InlineFlexRow>
       <InlineFlexRow align={'center'} gap={4}>
         {eventLogKeys?.map((key) => {

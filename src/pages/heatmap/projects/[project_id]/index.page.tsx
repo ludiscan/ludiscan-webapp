@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import { useRouter } from 'next/navigation';
 import { memo, useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useSharedTheme } from '@src/hooks/useSharedTheme';
 
 import type { RootState } from '@src/store';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
@@ -17,7 +18,7 @@ import { useAuth } from '@src/hooks/useAuth';
 import { useGeneralSelect } from '@src/hooks/useGeneral';
 import { useHeatmapState } from '@src/hooks/useHeatmapState';
 import { patchSplitMode } from '@src/slices/canvasSlice';
-import { dimensions, fontSizes } from '@src/styles/style';
+import { dimensions } from '@src/styles/style';
 import { useOnlineHeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 
 export type HeatMapTaskIdPageProps = {
@@ -68,7 +69,7 @@ const HeaderWrapper = memo(
       <Header
         title={'Heatmap'}
         onClick={onBackClick}
-        iconTitleEnd={<Text className={`${className}__headerV`} text={`${version || 'debug'}`} fontSize={fontSizes.small} fontWeight={'bold'} />}
+        iconTitleEnd={<Text className={`${className}__headerV`} text={`${version || 'debug'}`} fontSize={theme.typography.fontSize.sm} fontWeight={'bold'} />}
         iconEnd={
           <>
             <Button fontSize={'sm'} onClick={handleSplitHorizontal} scheme={splitMode.enabled && splitMode.direction === 'horizontal' ? 'primary' : 'surface'}>
@@ -103,6 +104,7 @@ const HeaderWrapper = memo(
 HeaderWrapper.displayName = 'HeaderWrapper';
 
 export const HeatmapIdPageLayoutComponent: FC<HeatmapIdPageLayoutProps> = ({ className, service, onBackClick }) => {
+  const { theme } = useSharedTheme();
   const statusContentStatus = useMemo(() => {
     if (!service.task) return 'success';
     if (service.task.status === 'pending' || service.task.status === 'processing') return 'loading';

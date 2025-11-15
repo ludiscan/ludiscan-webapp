@@ -8,7 +8,6 @@ import { FlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { TextField } from '@src/component/molecules/TextField';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { fontSizes } from '@src/styles/style';
 
 export type SliderProps = {
   className?: string;
@@ -112,7 +111,7 @@ const SliderComponent: FC<SliderProps> = (args) => {
   );
   return (
     <FlexRow className={className} wrap={'nowrap'} align={'center'} gap={4}>
-      {sideLabel && <Text fontSize={fontSizes.smallest} className={`${className}__label`} text={String(min)} />}
+      {sideLabel && <Text fontSize={theme.typography.fontSize.xs} className={`${className}__label`} text={String(min)} />}
       <div className={`${className}__sliderWrapper`}>
         <input
           ref={inputRef}
@@ -138,11 +137,11 @@ const SliderComponent: FC<SliderProps> = (args) => {
               left: `${tooltipLeft}px`,
             }}
           >
-            <Text text={String(sliderValue)} fontSize={fontSizes.smallest} />
+            <Text text={String(sliderValue)} fontSize={theme.typography.fontSize.xs} />
           </div>
         )}
       </div>
-      {sideLabel && <Text fontSize={fontSizes.smallest} className={`${className}__label`} text={String(max)} />}
+      {sideLabel && <Text fontSize={theme.typography.fontSize.xs} className={`${className}__label`} text={String(max)} />}
       {textField && (
         <TextField
           className={`${className}__textField`}
@@ -150,7 +149,7 @@ const SliderComponent: FC<SliderProps> = (args) => {
           value={String(sliderValue)}
           onChange={handleTextFieldChange}
           placeholder={String(min)}
-          fontSize={fontSizes.smallest}
+          fontSize={theme.typography.fontSize.xs}
         />
       )}
     </FlexRow>
@@ -170,7 +169,7 @@ export const Slider = styled(SliderComponent)`
   &__tooltip {
     position: absolute; /* sliderWrapper relative to this */
     padding: 4px 8px;
-    font-size: ${fontSizes.smallest};
+    font-size: ${({ theme }) => theme.typography.fontSize.xs};
     color: ${({ theme }) => theme.colors.surface.base};
     white-space: nowrap;
     pointer-events: none;

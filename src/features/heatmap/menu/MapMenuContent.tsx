@@ -12,12 +12,11 @@ import { ObjectToggleList } from '@src/features/heatmap/ObjectToggleList';
 import { InputRow } from '@src/features/heatmap/menu/InputRow';
 import { useGeneralPatch, useGeneralSelect } from '@src/hooks/useGeneral';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { fontSizes } from '@src/styles/style';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
 const DisabledMessage = styled.div`
   padding: 16px;
-  font-size: ${fontSizes.small};
+  font-size: ${theme.typography.fontSize.sm};
   color: #666;
   text-align: center;
   background: #f5f5f5;

@@ -14,7 +14,6 @@ import { OutlinedTextField } from '@src/component/molecules/OutlinedTextField';
 import { useToast } from '@src/component/templates/ToastContext';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { createClient } from '@src/modeles/qeury';
-import { fontSizes } from '@src/styles/style';
 
 export type ProjectFormModalProps = {
   className?: string;
@@ -125,17 +124,17 @@ const Component: FC<ProjectFormModalProps> = ({ className, isOpen, onClose, proj
       <FlexColumn gap={16} className={`${className}__form`}>
         <VerticalSpacer size={8} />
         <FlexColumn gap={8}>
-          <Text text={'プロジェクト名'} fontSize={fontSizes.medium} color={theme.colors.text.primary} fontWeight={'bold'} />
-          <OutlinedTextField value={name} onChange={setName} placeholder={'プロジェクト名を入力...'} fontSize={fontSizes.medium} disabled={isLoading} />
+          <Text text={'プロジェクト名'} fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} fontWeight={'bold'} />
+          <OutlinedTextField value={name} onChange={setName} placeholder={'プロジェクト名を入力...'} fontSize={theme.typography.fontSize.base} disabled={isLoading} />
         </FlexColumn>
 
         <FlexColumn gap={8}>
-          <Text text={'説明'} fontSize={fontSizes.medium} color={theme.colors.text.primary} fontWeight={'bold'} />
+          <Text text={'説明'} fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} fontWeight={'bold'} />
           <OutlinedTextField
             value={description}
             onChange={setDescription}
             placeholder={'プロジェクトの説明を入力...'}
-            fontSize={fontSizes.medium}
+            fontSize={theme.typography.fontSize.base}
             disabled={isLoading}
           />
         </FlexColumn>
@@ -150,7 +149,7 @@ const Component: FC<ProjectFormModalProps> = ({ className, isOpen, onClose, proj
             className={`${className}__checkbox`}
           />
           <label htmlFor={'is2D-checkbox'}>
-            <Text text={'2Dモード'} fontSize={fontSizes.medium} color={theme.colors.text.primary} />
+            <Text text={'2Dモード'} fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} />
           </label>
         </FlexRow>
 

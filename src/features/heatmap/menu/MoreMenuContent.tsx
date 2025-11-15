@@ -9,7 +9,6 @@ import { FlexColumn } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { MenuContents } from '@src/hooks/useHeatmapSideBarMenus';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { fontSizes, fontWeights } from '@src/styles/style';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
 type MenuItemProps = {
@@ -72,7 +71,7 @@ export const MoreMenuContent: FC<HeatmapMenuProps> = ({ dimensionality }) => {
 
   return (
     <FlexColumn gap={16} align={'flex-start'} style={{ width: '100%' }}>
-      <Text text={'All Features'} fontSize={fontSizes.large1} fontWeight={fontWeights.bold} />
+      <Text text={'All Features'} fontSize={theme.typography.fontSize.lg} fontWeight={theme.typography.fontWeight.bold} />
       <GridContainer>
         {availableMenus.map((menu) => (
           <MenuItem key={menu.name} name={menu.name} icon={menu.icon!} onClick={() => handleMenuClick(menu.name)} />

@@ -9,7 +9,6 @@ import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { Modal } from '@src/component/molecules/Modal';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { fontSizes } from '@src/styles/style';
 
 export type GameApiKeyDeleteConfirmModalProps = {
   className?: string;
@@ -37,14 +36,14 @@ const Component: FC<GameApiKeyDeleteConfirmModalProps> = ({ className, isOpen, s
     <Modal isOpen={isOpen} onClose={handleClose} title='Delete API Key'>
       <div className={`${className}__modal`}>
         <FlexColumn gap={16}>
-          <Text text={`API-key "${selectedKey?.name}" を削除してよろしいですか？`} fontSize={fontSizes.medium} color={theme.colors.text.primary} />
-          <Text text='削除されたAPI-keyは二度と使用できなくなります。' fontSize={fontSizes.small} color={theme.colors.text.secondary} fontWeight='lighter' />
+          <Text text={`API-key "${selectedKey?.name}" を削除してよろしいですか？`} fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} />
+          <Text text='削除されたAPI-keyは二度と使用できなくなります。' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} fontWeight='lighter' />
           <FlexRow gap={8} className={`${className}__buttonRow`}>
             <Button onClick={handleClose} scheme='none' fontSize={'sm'} disabled={isDeleting}>
-              <Text text='Cancel' fontSize={fontSizes.small} />
+              <Text text='Cancel' fontSize={theme.typography.fontSize.sm} />
             </Button>
             <Button onClick={handleDelete} scheme='primary' fontSize={'sm'} disabled={isDeleting}>
-              <Text text={isDeleting ? 'Deleting...' : 'Delete'} fontSize={fontSizes.small} />
+              <Text text={isDeleting ? 'Deleting...' : 'Delete'} fontSize={theme.typography.fontSize.sm} />
             </Button>
           </FlexRow>
         </FlexColumn>

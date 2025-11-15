@@ -13,7 +13,7 @@ import { FlexColumn, InlineFlexRow } from '@src/component/atoms/Flex';
 import { useGeneralPatch, useGeneralSelect } from '@src/hooks/useGeneral';
 import { MenuContents } from '@src/hooks/useHeatmapSideBarMenus';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { fontSizes, fontWeights, zIndexes } from '@src/styles/style';
+import { zIndexes } from '@src/styles/style';
 
 export type HeatmapMenuProps = {
   model: Group | null;
@@ -93,8 +93,8 @@ export const HeatmapMenuContent = memo(
       align-items: center;
       width: 100%;
       padding: 2px 8px;
-      font-size: ${fontSizes.small};
-      font-weight: ${fontWeights.bold};
+      font-size: ${({ theme }) => theme.typography.fontSize.sm};
+      font-weight: ${({ theme }) => theme.typography.fontWeight.bold};
       color: ${({ theme }) => theme.colors.text.primary};
       background: ${({ theme }) => theme.colors.surface.raised};
       border-radius: 12px;

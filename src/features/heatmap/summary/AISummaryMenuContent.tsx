@@ -2,6 +2,7 @@
 import styled from '@emotion/styled';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useEffect, useCallback } from 'react';
+import { useSharedTheme } from '@src/hooks/useSharedTheme';
 
 import type { HeatmapMenuProps } from '@src/features/heatmap/HeatmapMenuContent';
 import type { SessionSummary } from '@src/modeles/heatmaptask';
@@ -13,7 +14,6 @@ import { Text } from '@src/component/atoms/Text';
 import { MarkDownText } from '@src/component/molecules/MarkDownText';
 import { useSummaryApi } from '@src/features/heatmap/summary/api';
 import { useApiClient } from '@src/modeles/ApiClientContext';
-import { fontSizes } from '@src/styles/style';
 import { toISOAboutStringWithTimezone } from '@src/utils/locale';
 
 const POLL_MS = 1000;
@@ -86,6 +86,7 @@ const ChatCard = styled.div`
 `;
 
 const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
+  const { theme } = useSharedTheme();
   const qc = useQueryClient();
   const projectId = service.projectId;
   const sessionId = service.sessionId;
@@ -168,7 +169,7 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
 
   return (
     <FlexColumn gap={12}>
-      <Text text={'AI要約'} fontSize={fontSizes.large3} />
+      <Text text={'AI要約'} fontSize={theme.typography.fontSize['2xl']} />
       <Button onClick={() => regenMutate()} disabled={disabled} title='要約を再生成（キュー投入）' scheme={'primary'} fontSize={'sm'}>
         {busy ? '生成中…' : '再生成'}
       </Button>

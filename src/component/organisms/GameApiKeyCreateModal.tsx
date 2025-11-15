@@ -12,7 +12,6 @@ import { Text } from '@src/component/atoms/Text';
 import { Modal } from '@src/component/molecules/Modal';
 import { OutlinedTextField } from '@src/component/molecules/OutlinedTextField';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { fontSizes, fontWeights } from '@src/styles/style';
 
 export type GameApiKeyCreateModalProps = {
   className?: string;
@@ -67,43 +66,43 @@ const Component: FC<GameApiKeyCreateModalProps> = ({
           {!createdApiKey ? (
             <>
               <div>
-                <Text text='Key Name' fontSize={fontSizes.small} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
+                <Text text='Key Name' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bold} />
                 <VerticalSpacer size={8} />
                 <OutlinedTextField
                   value={newKeyName}
                   onChange={onKeyNameChange}
                   placeholder='e.g., Production API Key'
-                  fontSize={fontSizes.medium}
+                  fontSize={theme.typography.fontSize.base}
                   disabled={isCreating || isCreatingKey}
                 />
               </div>
 
               <FlexRow gap={8} className={`${className}__buttonRow`}>
                 <Button onClick={onClose} scheme='none' fontSize={'sm'} disabled={isCreating || isCreatingKey}>
-                  <Text text='Cancel' fontSize={fontSizes.small} />
+                  <Text text='Cancel' fontSize={theme.typography.fontSize.sm} />
                 </Button>
                 <Button onClick={handleCreate} scheme='primary' fontSize={'sm'} disabled={isCreating || isCreatingKey}>
-                  <Text text={isCreating || isCreatingKey ? 'Creating...' : 'Create'} fontSize={fontSizes.small} />
+                  <Text text={isCreating || isCreatingKey ? 'Creating...' : 'Create'} fontSize={theme.typography.fontSize.sm} />
                 </Button>
               </FlexRow>
             </>
           ) : (
             <>
               <div className={`${className}__successMessage`}>
-                <Text text='API Key created successfully!' fontSize={fontSizes.medium} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
+                <Text text='API Key created successfully!' fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bold} />
                 <VerticalSpacer size={8} />
                 <Text
                   text="Make sure to copy your API key now. You won't be able to see it again!"
-                  fontSize={fontSizes.small}
+                  fontSize={theme.typography.fontSize.sm}
                   color={theme.colors.semantic.warning.main}
                 />
               </div>
 
               <div className={`${className}__apiKeyContainer`}>
-                <Text text='Your API Key' fontSize={fontSizes.small} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
+                <Text text='Your API Key' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bold} />
                 <VerticalSpacer size={8} />
                 <FlexRow gap={8} align='center' className={`${className}__apiKeyRow`}>
-                  <OutlinedTextField value={createdApiKey.apiKey} onChange={() => {}} fontSize={fontSizes.small} disabled />
+                  <OutlinedTextField value={createdApiKey.apiKey} onChange={() => {}} fontSize={theme.typography.fontSize.sm} disabled />
                   <Button onClick={handleCopy} scheme='surface' fontSize={'sm'} title='Copy to clipboard'>
                     {copied ? <BiCheck size={18} /> : <BiCopy size={18} />}
                   </Button>
@@ -112,7 +111,7 @@ const Component: FC<GameApiKeyCreateModalProps> = ({
 
               <FlexRow gap={8} className={`${className}__buttonRow`}>
                 <Button onClick={onClose} scheme='primary' fontSize={'sm'}>
-                  <Text text='Done' fontSize={fontSizes.small} />
+                  <Text text='Done' fontSize={theme.typography.fontSize.sm} />
                 </Button>
               </FlexRow>
             </>
