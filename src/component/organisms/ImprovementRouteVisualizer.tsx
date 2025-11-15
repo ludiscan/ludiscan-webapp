@@ -231,7 +231,7 @@ export const ImprovementRouteVisualizer = styled(Component)`
     height: auto;
     aspect-ratio: 4 / 3;
 
-    @media (max-width: 900px) {
+    @media (width <= 900px) {
       max-width: 100%;
     }
 

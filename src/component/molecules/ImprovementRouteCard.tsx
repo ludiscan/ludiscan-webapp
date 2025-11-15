@@ -313,9 +313,9 @@ export const ImprovementRouteCard = styled(Component)`
     transition: background-color 0.2s ease;
 
     &:disabled {
+      color: ${({ theme }) => theme.colors.text.disabled};
       cursor: not-allowed;
       background-color: ${({ theme }) => theme.colors.surface.sunken};
-      color: ${({ theme }) => theme.colors.text.disabled};
     }
 
     &:hover:not(:disabled) {
@@ -323,8 +323,8 @@ export const ImprovementRouteCard = styled(Component)`
     }
 
     &--cancel {
-      background-color: ${({ theme }) => theme.colors.surface.interactive};
       color: ${({ theme }) => theme.colors.text.primary};
+      background-color: ${({ theme }) => theme.colors.surface.interactive};
 
       &:hover:not(:disabled) {
         background-color: ${({ theme }) => theme.colors.surface.hover};
@@ -333,8 +333,8 @@ export const ImprovementRouteCard = styled(Component)`
 
     &--visualize {
       margin-top: ${({ theme }) => theme.spacing.sm};
-      background-color: ${({ theme }) => theme.colors.secondary.main};
       color: ${({ theme }) => theme.colors.secondary.contrast};
+      background-color: ${({ theme }) => theme.colors.secondary.main};
 
       &:hover {
         background-color: ${({ theme }) => theme.colors.secondary.dark};

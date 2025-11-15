@@ -279,7 +279,7 @@ export const TimelineControllerBlock = memo(
     border-radius: ${({ theme }) => theme.borders.radius.xl};
     transition: all 0.2s ease-in-out;
 
-    @media (min-width: 500px) {
+    @media (width >= 500px) {
       max-width: 450px;
     }
 

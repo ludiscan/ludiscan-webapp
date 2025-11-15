@@ -206,9 +206,9 @@ export const Pagination = styled(Component)`
   }
 
   &__navButton {
-    padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.sm};
     min-width: 44px;
     min-height: 44px;
+    padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.sm};
 
     &:disabled {
       cursor: not-allowed;

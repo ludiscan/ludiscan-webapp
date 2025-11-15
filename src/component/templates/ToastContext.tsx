@@ -4,8 +4,8 @@ import styled from '@emotion/styled';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createContext, useContext, useState, useCallback } from 'react';
 
-import type { ReactNode, FC, CSSProperties } from 'react';
 import type { Theme } from '@emotion/react';
+import type { ReactNode, FC, CSSProperties } from 'react';
 
 import { zIndexes } from '@src/styles/style';
 
