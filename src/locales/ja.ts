@@ -237,6 +237,6 @@ export const ja = {
     more: 'その他',
     summary: 'サマリー',
   },
-} as const;
+};
 
 export type TranslationKeys = typeof ja;

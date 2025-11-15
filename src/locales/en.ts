@@ -4,7 +4,7 @@
 
 import type { TranslationKeys } from './ja';
 
-export const en: TranslationKeys = {
+export const en = {
   // Common
   common: {
     loading: 'Loading...',
@@ -239,4 +239,4 @@ export const en: TranslationKeys = {
     more: 'More',
     summary: 'Summary',
   },
-} as const;
+};

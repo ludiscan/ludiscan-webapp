@@ -26,7 +26,7 @@ const LanguageButton = styled.button<{ isActive: boolean }>`
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${({ theme, isActive }) => (isActive ? theme.colors.primary : theme.colors.background.hover)};
+    background: ${({ theme, isActive }) => (isActive ? theme.colors.primary : theme.colors.surface.raised)};
   }
 
   &:focus {
