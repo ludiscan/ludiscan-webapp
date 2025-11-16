@@ -8,8 +8,8 @@ import { FiChevronLeft } from 'react-icons/fi';
 import { IoBell } from 'react-icons/io5';
 import { MdLogout } from 'react-icons/md';
 
-import type { ReleaseResponse } from '@src/pages/api/releases.api';
 import type { ThemeType } from '@src/modeles/theme';
+import type { ReleaseResponse } from '@src/pages/api/releases.api';
 import type { FC, ReactNode } from 'react';
 
 import { Button } from '@src/component/atoms/Button';

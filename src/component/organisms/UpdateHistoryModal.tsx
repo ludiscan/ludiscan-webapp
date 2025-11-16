@@ -140,12 +140,12 @@ const Component: FC<UpdateHistoryModalProps> = ({ className, isOpen, onClose }) 
 export const UpdateHistoryModal = styled(Component)`
   &__content {
     width: 100%;
-    max-width: 800px;
     min-width: 600px;
+    max-width: 800px;
     max-height: 70vh;
     overflow-y: auto;
 
-    @media (max-width: 768px) {
+    @media (width <= 768px) {
       min-width: unset;
       max-width: 90vw;
     }
@@ -218,8 +218,8 @@ export const UpdateHistoryModal = styled(Component)`
 
     ul,
     ol {
-      margin: 8px 0;
       padding-left: 24px;
+      margin: 8px 0;
     }
 
     li {
@@ -228,7 +228,7 @@ export const UpdateHistoryModal = styled(Component)`
 
     code {
       padding: 2px 6px;
-      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      font-family: Monaco, Menlo, 'Ubuntu Mono', monospace;
       font-size: ${({ theme }) => theme.typography.fontSize.xs};
       background-color: ${({ theme }) => theme.colors.surface.sunken};
       border-radius: 3px;
@@ -259,8 +259,8 @@ export const UpdateHistoryModal = styled(Component)`
     blockquote {
       padding-left: 12px;
       margin: 12px 0;
-      border-left: 4px solid ${({ theme }) => theme.colors.border.strong};
       color: ${({ theme }) => theme.colors.text.secondary};
+      border-left: 4px solid ${({ theme }) => theme.colors.border.strong};
     }
 
     img {
