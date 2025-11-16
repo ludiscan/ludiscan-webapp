@@ -12,10 +12,9 @@ import { Modal } from '@src/component/molecules/Modal';
 import { Header } from '@src/component/templates/Header';
 import { ToastProvider } from '@src/component/templates/ToastContext';
 import { HeatMapViewer } from '@src/features/heatmap/HeatmapViewer';
-import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
+import { SharedThemeProvider, useSharedTheme } from '@src/hooks/useSharedTheme';
 import theme from '@src/modeles/theme';
 import { type AppStore, store } from '@src/store';
-import { fontSizes } from '@src/styles/style';
 import { useOfflineHeatmapDataService } from '@src/utils/heatmap/useOfflineHeatmapDataService';
 
 // Providerプロパティ
@@ -25,6 +24,7 @@ interface OfflineHeatmapProviderProps {
 
 // オフラインヒートマップProvider
 export const Component: FC<OfflineHeatmapProviderProps> = ({ className }) => {
+  const { theme: currentTheme } = useSharedTheme();
   const queryClient = useMemo(() => new QueryClient(), []);
   const dataInput = useRef<HTMLInputElement>(null);
 
@@ -115,7 +115,7 @@ export const Component: FC<OfflineHeatmapProviderProps> = ({ className }) => {
               title={'Heatmap'}
               onClick={() => {}}
               isOffline={true}
-              iconTitleEnd={<Text className={`${className}__headerV`} text={'offline'} fontSize={fontSizes.small} fontWeight={'bold'} />}
+              iconTitleEnd={<Text className={`${className}__headerV`} text={'offline'} fontSize={currentTheme.typography.fontSize.sm} fontWeight={'bold'} />}
               iconEnd={
                 <>
                   <Button fontSize={'sm'} onClick={() => {}} scheme={'surface'}>

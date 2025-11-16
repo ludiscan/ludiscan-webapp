@@ -17,7 +17,6 @@ import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { useApiClient } from '@src/modeles/ApiClientContext';
 import { DefaultStaleTime } from '@src/modeles/qeury';
 import { SessionItemRow } from '@src/pages/home/SessionItemRow';
-import { fontSizes, fontWeights } from '@src/styles/style';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -106,8 +105,15 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
           <Button onClick={handleRefresh} scheme='surface' disabled={isLoadingSessions || isRefreshing} fontSize={'sm'}>
             <BiRefresh size={20} />
           </Button>
-          <Text text={`Total: ${project.session_count ?? 0}`} fontSize={fontSizes.medium} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
-          {searchQuery && <Text text={`(${filteredAndSortedSessions.length}件一致)`} fontSize={fontSizes.small} color={theme.colors.text.secondary} />}
+          <Text
+            text={`Total: ${project.session_count ?? 0}`}
+            fontSize={theme.typography.fontSize.base}
+            color={theme.colors.text.primary}
+            fontWeight={theme.typography.fontWeight.bold}
+          />
+          {searchQuery && (
+            <Text text={`(${filteredAndSortedSessions.length}件一致)`} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
+          )}
         </FlexRow>
 
         {/* Search and Sort Controls */}
@@ -135,14 +141,14 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
           {/* ローディング状態 */}
           {isLoadingSessions && !isErrorSessions && (
             <div className={`${className}__loadingState`}>
-              <Text text='セッションを読み込み中...' fontSize={fontSizes.medium} color={theme.colors.text.primary} />
+              <Text text='セッションを読み込み中...' fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} />
             </div>
           )}
 
           {/* エラー状態 */}
           {isErrorSessions && (
             <div className={`${className}__errorState`}>
-              <Text text='セッション一覧の取得に失敗しました' fontSize={fontSizes.medium} color={theme.colors.text.primary} />
+              <Text text='セッション一覧の取得に失敗しました' fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} />
             </div>
           )}
 
@@ -160,14 +166,18 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
           {/* 検索結果なし */}
           {!isLoadingSessions && !isErrorSessions && searchQuery && filteredAndSortedSessions.length === 0 && (
             <div className={`${className}__emptyState`}>
-              <Text text={`「${searchQuery}」に一致するセッションが見つかりません`} fontSize={fontSizes.medium} color={theme.colors.text.secondary} />
+              <Text
+                text={`「${searchQuery}」に一致するセッションが見つかりません`}
+                fontSize={theme.typography.fontSize.base}
+                color={theme.colors.text.secondary}
+              />
             </div>
           )}
 
           {/* 空状態 */}
           {!isLoadingSessions && !isErrorSessions && sessions.length === 0 && !searchQuery && (
             <div className={`${className}__emptyState`}>
-              <Text text='セッションがありません' fontSize={fontSizes.medium} color={theme.colors.text.secondary} />
+              <Text text='セッションがありません' fontSize={theme.typography.fontSize.base} color={theme.colors.text.secondary} />
             </div>
           )}
         </FlexColumn>

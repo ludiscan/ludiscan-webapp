@@ -17,7 +17,6 @@ import { useToast } from '@src/component/templates/ToastContext';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { useApiClient } from '@src/modeles/ApiClientContext';
 import { DefaultStaleTime } from '@src/modeles/qeury';
-import { fontSizes, fontWeights } from '@src/styles/style';
 
 export type ProjectDetailsMembersTabProps = {
   className?: string;
@@ -164,10 +163,10 @@ const Component: FC<ProjectDetailsMembersTabProps> = ({ className, project }) =>
       <Card blur color={theme.colors.surface.base} className={`${className}__card`}>
         <FlexRow className={`${className}__header`} gap={16}>
           <div className={`${className}__searchContainer`}>
-            <OutlinedTextField value={searchQuery} onChange={setSearchQuery} placeholder='メンバーを検索...' fontSize={fontSizes.medium} />
+            <OutlinedTextField value={searchQuery} onChange={setSearchQuery} placeholder='メンバーを検索...' fontSize={theme.typography.fontSize.base} />
           </div>
           <Button onClick={() => setIsAddMemberModalOpen(true)} scheme='primary' fontSize={'sm'}>
-            <Text text='+ Add Member' fontSize={fontSizes.small} />
+            <Text text='+ Add Member' fontSize={theme.typography.fontSize.sm} />
           </Button>
         </FlexRow>
         <VerticalSpacer size={16} />
@@ -176,14 +175,14 @@ const Component: FC<ProjectDetailsMembersTabProps> = ({ className, project }) =>
           {/* ローディング状態 */}
           {isLoadingMembers && !isErrorMembers && (
             <div className={`${className}__loadingState`}>
-              <Text text='メンバーを読み込み中...' fontSize={fontSizes.medium} color={theme.colors.text.primary} />
+              <Text text='メンバーを読み込み中...' fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} />
             </div>
           )}
 
           {/* エラー状態 */}
           {isErrorMembers && (
             <div className={`${className}__errorState`}>
-              <Text text='メンバー一覧の取得に失敗しました' fontSize={fontSizes.medium} color={theme.colors.text.primary} />
+              <Text text='メンバー一覧の取得に失敗しました' fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} />
             </div>
           )}
 
@@ -195,17 +194,32 @@ const Component: FC<ProjectDetailsMembersTabProps> = ({ className, project }) =>
               <div key={member.user_id} className={`${className}__memberItem`}>
                 <FlexRow className={`${className}__memberRow`} align='center' gap={12}>
                   <FlexColumn gap={4} className={`${className}__memberInfo`}>
-                    <Text text={member.name} fontSize={fontSizes.medium} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
-                    <Text text={member.email} fontSize={fontSizes.small} color={theme.colors.text.secondary} fontWeight={fontWeights.bold} />
+                    <Text
+                      text={member.name}
+                      fontSize={theme.typography.fontSize.base}
+                      color={theme.colors.text.primary}
+                      fontWeight={theme.typography.fontWeight.bold}
+                    />
+                    <Text
+                      text={member.email}
+                      fontSize={theme.typography.fontSize.sm}
+                      color={theme.colors.text.secondary}
+                      fontWeight={theme.typography.fontWeight.bold}
+                    />
                     <Text
                       text={`Added: ${formatDate(member.created_at)}`}
-                      fontSize={fontSizes.smallest}
+                      fontSize={theme.typography.fontSize.xs}
                       color={theme.colors.text.secondary}
                       fontWeight='lighter'
                     />
                   </FlexColumn>
                   <div className={`${className}__memberRole`}>
-                    <Text text={member.role} fontSize={fontSizes.small} color={theme.colors.text.secondary} fontWeight={fontWeights.bold} />
+                    <Text
+                      text={member.role}
+                      fontSize={theme.typography.fontSize.sm}
+                      color={theme.colors.text.secondary}
+                      fontWeight={theme.typography.fontWeight.bold}
+                    />
                   </div>
                   <Button onClick={() => handleDeleteMember(member)} scheme='none' fontSize={'sm'} className={`${className}__deleteButton`}>
                     <BiTrash size={18} color={theme.colors.semantic.error.main} />
@@ -217,7 +231,7 @@ const Component: FC<ProjectDetailsMembersTabProps> = ({ className, project }) =>
           {/* 空状態 */}
           {!isLoadingMembers && !isErrorMembers && filteredMembers.length === 0 && (
             <div className={`${className}__emptyState`}>
-              <Text text='メンバーがありません' fontSize={fontSizes.medium} color={theme.colors.text.secondary} />
+              <Text text='メンバーがありません' fontSize={theme.typography.fontSize.base} color={theme.colors.text.secondary} />
             </div>
           )}
         </FlexColumn>
@@ -228,13 +242,23 @@ const Component: FC<ProjectDetailsMembersTabProps> = ({ className, project }) =>
         <div className={`${className}__modal`}>
           <FlexColumn gap={16}>
             <div>
-              <Text text='Email Address' fontSize={fontSizes.small} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
+              <Text
+                text='Email Address'
+                fontSize={theme.typography.fontSize.sm}
+                color={theme.colors.text.primary}
+                fontWeight={theme.typography.fontWeight.bold}
+              />
               <VerticalSpacer size={8} />
-              <OutlinedTextField value={newMemberEmail} onChange={setNewMemberEmail} placeholder='member@example.com' fontSize={fontSizes.medium} />
+              <OutlinedTextField
+                value={newMemberEmail}
+                onChange={setNewMemberEmail}
+                placeholder='member@example.com'
+                fontSize={theme.typography.fontSize.base}
+              />
             </div>
 
             <div>
-              <Text text='Role' fontSize={fontSizes.small} color={theme.colors.text.primary} fontWeight={fontWeights.bold} />
+              <Text text='Role' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bold} />
               <VerticalSpacer size={8} />
               <select value={newMemberRole} onChange={(e) => setNewMemberRole(e.target.value as 'viewer' | 'admin')} className={`${className}__roleSelect`}>
                 <option value='viewer'>Viewer</option>
@@ -244,10 +268,10 @@ const Component: FC<ProjectDetailsMembersTabProps> = ({ className, project }) =>
 
             <FlexRow gap={8} className={`${className}__buttonRow`}>
               <Button onClick={() => setIsAddMemberModalOpen(false)} scheme='none' fontSize={'sm'}>
-                <Text text='Cancel' fontSize={fontSizes.small} />
+                <Text text='Cancel' fontSize={theme.typography.fontSize.sm} />
               </Button>
               <Button onClick={handleAddMember} scheme='primary' fontSize={'sm'} disabled={isSubmittingMember}>
-                <Text text={isSubmittingMember ? 'Adding...' : 'Add Member'} fontSize={fontSizes.small} />
+                <Text text={isSubmittingMember ? 'Adding...' : 'Add Member'} fontSize={theme.typography.fontSize.sm} />
               </Button>
             </FlexRow>
           </FlexColumn>
@@ -266,7 +290,7 @@ const Component: FC<ProjectDetailsMembersTabProps> = ({ className, project }) =>
           <FlexColumn gap={16}>
             <Text
               text={`${memberToDelete?.name} (${memberToDelete?.email}) を削除してよろしいですか？`}
-              fontSize={fontSizes.medium}
+              fontSize={theme.typography.fontSize.base}
               color={theme.colors.text.primary}
             />
             <FlexRow gap={8} className={`${className}__buttonRow`}>
@@ -278,10 +302,10 @@ const Component: FC<ProjectDetailsMembersTabProps> = ({ className, project }) =>
                 fontSize={'sm'}
                 disabled={isDeleting}
               >
-                <Text text='Cancel' fontSize={fontSizes.small} />
+                <Text text='Cancel' fontSize={theme.typography.fontSize.sm} />
               </Button>
               <Button onClick={handleConfirmDelete} scheme='primary' fontSize={'sm'} disabled={isDeleting}>
-                <Text text={isDeleting ? 'Deleting...' : 'Delete'} fontSize={fontSizes.small} />
+                <Text text={isDeleting ? 'Deleting...' : 'Delete'} fontSize={theme.typography.fontSize.sm} />
               </Button>
             </FlexRow>
           </FlexColumn>
@@ -355,7 +379,7 @@ export const ProjectDetailsMembersTab = styled(Component)`
   &__roleSelect {
     width: 100%;
     padding: 8px 12px;
-    font-size: ${fontSizes.medium}px;
+    font-size: ${({ theme }) => theme.typography.fontSize.base};
     color: ${({ theme }) => theme.colors.text.primary};
     cursor: pointer;
     background-color: ${({ theme }) => theme.colors.surface.base};

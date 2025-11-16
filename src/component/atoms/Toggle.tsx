@@ -6,7 +6,6 @@ import type { FC, ReactNode, CSSProperties } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
 import { FlexColumn, InlineFlexRow } from '@src/component/atoms/Flex';
-import { fontSizes } from '@src/styles/style';
 
 export type ToggleProps = {
   className?: string;
@@ -84,7 +83,7 @@ const Component: FC<ToggleProps> = ({ className, buttonStyle, label, trailingIco
 };
 
 export const Toggle = styled(Component)`
-  font-size: ${fontSizes.medium};
+  font-size: ${({ theme }) => theme.typography.fontSize.base};
 
   &__header {
     width: 100%;

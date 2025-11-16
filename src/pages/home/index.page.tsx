@@ -21,10 +21,10 @@ import { Header } from '@src/component/templates/Header';
 import { SidebarLayout } from '@src/component/templates/SidebarLayout';
 import { useToast } from '@src/component/templates/ToastContext';
 import { useAuth } from '@src/hooks/useAuth';
+import { useLocale } from '@src/hooks/useLocale';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { createClient } from '@src/modeles/qeury';
 import { InnerContent } from '@src/pages/_app.page';
-import { fontSizes, fontWeights } from '@src/styles/style';
 
 const fetchCount = 20;
 
@@ -34,15 +34,6 @@ export type HomePageProps = {
 
 type SortOption = 'created_desc' | 'created_asc' | 'name_asc' | 'name_desc' | 'updated_desc' | 'updated_asc';
 type DisplayMode = 'card' | 'list';
-
-const SORT_OPTIONS: { label: string; value: SortOption }[] = [
-  { label: '作成日 (新しい順)', value: 'created_desc' },
-  { label: '作成日 (古い順)', value: 'created_asc' },
-  { label: 'プロジェクト名 (A-Z)', value: 'name_asc' },
-  { label: 'プロジェクト名 (Z-A)', value: 'name_desc' },
-  { label: '更新日 (新しい順)', value: 'updated_desc' },
-  { label: '更新日 (古い順)', value: 'updated_asc' },
-];
 
 const Component: FC<HomePageProps> = ({ className }) => {
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -54,7 +45,17 @@ const Component: FC<HomePageProps> = ({ className }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { showToast } = useToast();
+  const { t } = useLocale();
   const toastShownRef = useRef<boolean>(false);
+
+  const SORT_OPTIONS: { label: string; value: SortOption }[] = [
+    { label: t('home.sortOptions.createdDesc'), value: 'created_desc' },
+    { label: t('home.sortOptions.createdAsc'), value: 'created_asc' },
+    { label: t('home.sortOptions.nameAsc'), value: 'name_asc' },
+    { label: t('home.sortOptions.nameDesc'), value: 'name_desc' },
+    { label: t('home.sortOptions.updatedDesc'), value: 'updated_desc' },
+    { label: t('home.sortOptions.updatedAsc'), value: 'updated_asc' },
+  ];
 
   const {
     data: projects,
@@ -77,7 +78,7 @@ const Component: FC<HomePageProps> = ({ className }) => {
         },
       });
       if (error) {
-        throw new Error('プロジェクト一覧の取得に失敗しました');
+        throw new Error(t('home.fetchError'));
       }
       return data;
     },
@@ -91,10 +92,10 @@ const Component: FC<HomePageProps> = ({ className }) => {
   // エラー通知（一度だけ表示）
   useEffect(() => {
     if (isErrorProjects && !toastShownRef.current) {
-      showToast(projectsError?.message || 'プロジェクト一覧の取得に失敗しました', 3, 'error');
+      showToast(projectsError?.message || t('home.fetchError'), 3, 'error');
       toastShownRef.current = true;
     }
-  }, [isErrorProjects, projectsError, showToast]);
+  }, [isErrorProjects, projectsError, showToast, t]);
 
   const { theme } = useSharedTheme();
 
@@ -105,8 +106,8 @@ const Component: FC<HomePageProps> = ({ className }) => {
   const handleRefresh = useCallback(() => {
     toastShownRef.current = false;
     queryClient.invalidateQueries({ queryKey: ['projects', isAuthorized, searchQuery] });
-    showToast('プロジェクト一覧を更新しました', 2, 'success');
-  }, [queryClient, isAuthorized, searchQuery, showToast]);
+    showToast(t('home.listUpdated'), 2, 'success');
+  }, [queryClient, isAuthorized, searchQuery, showToast, t]);
 
   const handleCreateProject = useCallback(() => {
     setIsCreateModalOpen(true);
@@ -156,11 +157,21 @@ const Component: FC<HomePageProps> = ({ className }) => {
       <InnerContent>
         <Header title={'Heatmap'} onClick={handleBack} />
         <FlexRow className={`${className}__titleRow`} align={'center'}>
-          <Text text={'Home'} fontSize={fontSizes.largest} color={theme.colors.text.primary} fontWeight={fontWeights.bolder} />
+          <Text
+            text={t('home.title')}
+            fontSize={theme.typography.fontSize['3xl']}
+            color={theme.colors.text.primary}
+            fontWeight={theme.typography.fontWeight.extrabold}
+          />
         </FlexRow>
         <VerticalSpacer size={16} />
         <div className={`${className}__projects`}>
-          <Text text={'Projects'} fontSize={fontSizes.large1} color={theme.colors.text.secondary} fontWeight={fontWeights.bold} />
+          <Text
+            text={t('home.projects')}
+            fontSize={theme.typography.fontSize.lg}
+            color={theme.colors.text.secondary}
+            fontWeight={theme.typography.fontWeight.bold}
+          />
           <VerticalSpacer size={16} />
           <Card blur color={theme.colors.surface.raised}>
             <FlexRow className={`${className}__filtersRow`} gap={16}>
@@ -168,7 +179,12 @@ const Component: FC<HomePageProps> = ({ className }) => {
                 <BiRefresh size={20} />
               </Button>
               <div className={`${className}__searchContainer`}>
-                <OutlinedTextField value={searchQuery} onChange={setSearchQuery} placeholder={'プロジェクト名で検索...'} fontSize={fontSizes.medium} />
+                <OutlinedTextField
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  placeholder={t('home.searchPlaceholder')}
+                  fontSize={theme.typography.fontSize.base}
+                />
               </div>
               <select value={sortBy} onChange={(e) => setSortBy(e.target.value as SortOption)} className={`${className}__sortSelect`}>
                 {SORT_OPTIONS.map((option) => (
@@ -178,30 +194,30 @@ const Component: FC<HomePageProps> = ({ className }) => {
                 ))}
               </select>
               <div className={`${className}__displayToggle`}>
-                <Button onClick={() => setDisplayMode('list')} scheme={displayMode === 'list' ? 'primary' : 'none'} fontSize={'sm'} title={'List View'}>
+                <Button onClick={() => setDisplayMode('list')} scheme={displayMode === 'list' ? 'primary' : 'none'} fontSize={'sm'} title={t('home.listView')}>
                   <BiMenuAltLeft size={20} />
                 </Button>
-                <Button onClick={() => setDisplayMode('card')} scheme={displayMode === 'card' ? 'primary' : 'none'} fontSize={'sm'} title={'Card View'}>
+                <Button onClick={() => setDisplayMode('card')} scheme={displayMode === 'card' ? 'primary' : 'none'} fontSize={'sm'} title={t('home.cardView')}>
                   <BiGridAlt size={20} />
                 </Button>
               </div>
               <Button onClick={handleCreateProject} scheme={'primary'} fontSize={'base'}>
                 <BiPlus size={20} />
-                新規プロジェクト作成
+                {t('home.createProject')}
               </Button>
             </FlexRow>
             <FlexColumn gap={20}>
               {/* ローディング状態 */}
               {isLoadingProjects && !isErrorProjects && (
                 <div className={`${className}__loadingState`}>
-                  <Text text={'プロジェクトを読み込み中...'} fontSize={fontSizes.medium} color={theme.colors.text.primary} />
+                  <Text text={t('home.loadingProjects')} fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} />
                 </div>
               )}
 
               {/* エラー状態 */}
               {isErrorProjects && (
                 <div className={`${className}__errorState`}>
-                  <Text text={'プロジェクト一覧の取得に失敗しました。リトライしてください。'} fontSize={fontSizes.medium} color={theme.colors.text.primary} />
+                  <Text text={t('home.fetchError')} fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} />
                 </div>
               )}
 
@@ -242,22 +258,22 @@ const Component: FC<HomePageProps> = ({ className }) => {
                             <FlexColumn gap={8}>
                               <FlexRow align={'flex-start'}>
                                 <FlexColumn gap={4} className={`${className}__cardInfo`}>
-                                  <Text text={project.name} fontSize={fontSizes.large1} color={theme.colors.text.primary} fontWeight={'bold'} />
+                                  <Text text={project.name} fontSize={theme.typography.fontSize.lg} color={theme.colors.text.primary} fontWeight={'bold'} />
                                   <Text
                                     text={project.description}
-                                    fontSize={fontSizes.small}
+                                    fontSize={theme.typography.fontSize.sm}
                                     color={theme.colors.text.secondary}
-                                    fontWeight={fontWeights.bold}
+                                    fontWeight={theme.typography.fontWeight.bold}
                                   />
                                   <Text
                                     text={`${project.session_count ?? 0} sessions`}
-                                    fontSize={fontSizes.smallest}
+                                    fontSize={theme.typography.fontSize.xs}
                                     color={theme.colors.text.secondary}
                                     fontWeight={'lighter'}
                                   />
                                   <Text
                                     text={`Created: ${new Date(project.createdAt).toLocaleDateString('ja-JP', { year: 'numeric', month: 'short', day: 'numeric' })}`}
-                                    fontSize={fontSizes.smallest}
+                                    fontSize={theme.typography.fontSize.xs}
                                     color={theme.colors.text.secondary}
                                     fontWeight={'lighter'}
                                   />
@@ -288,7 +304,7 @@ const Component: FC<HomePageProps> = ({ className }) => {
               {/* 空状態 */}
               {!isLoadingProjects && !isErrorProjects && (!projects?.pages || projects.pages.length === 0) && (
                 <div className={`${className}__emptyState`}>
-                  <Text text={'プロジェクトがありません'} fontSize={fontSizes.medium} color={theme.colors.text.secondary} />
+                  <Text text={t('home.noProjects')} fontSize={theme.typography.fontSize.base} color={theme.colors.text.secondary} />
                 </div>
               )}
             </FlexColumn>
@@ -320,7 +336,7 @@ const IndexPage = styled(Component)`
   &__sortSelect {
     min-width: 200px;
     padding: 8px 12px;
-    font-size: ${fontSizes.medium}px;
+    font-size: ${({ theme }) => theme.typography.fontSize.base};
     color: ${({ theme }) => theme.colors.text.primary};
     cursor: pointer;
     background-color: ${({ theme }) => theme.colors.surface.base};

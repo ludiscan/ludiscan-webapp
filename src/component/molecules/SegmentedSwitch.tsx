@@ -16,7 +16,6 @@ import type { FC } from 'react';
 import { Button } from '@src/component/atoms/Button'; // adjust path if needed
 import { Text } from '@src/component/atoms/Text';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { colors } from '@src/styles/style';
 
 export type SegmentedSwitchProps = Omit<ButtonProps, 'onClick' | 'scheme' | 'children'> & {
   /** className for styled-components */
@@ -82,7 +81,7 @@ const Component: FC<SegmentedSwitchProps> = (props) => {
           }
         }}
       >
-        <Text text={leftOption} color={isLeftActive ? colors.white : theme.colors.text.secondary} />
+        <Text text={leftOption} color={isLeftActive ? theme.colors.text.inverse : theme.colors.text.secondary} />
       </Button>
 
       {/**
@@ -101,7 +100,7 @@ const Component: FC<SegmentedSwitchProps> = (props) => {
           }
         }}
       >
-        <Text text={rightOption} color={isRightActive ? colors.white : theme.colors.text.secondary} fontSize={fontSize} />
+        <Text text={rightOption} color={isRightActive ? theme.colors.text.inverse : theme.colors.text.secondary} fontSize={fontSize} />
       </Button>
     </div>
   );

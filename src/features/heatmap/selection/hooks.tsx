@@ -119,11 +119,8 @@ export function useSelectable(
 ): Handlers;
 
 /* ========= 実装 ========= */
-export function useSelectable(
-  kind: 'map-mesh' | 'point' | 'heatmap-cell' | 'player-arrow',
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  options?: any,
-): Handlers {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function useSelectable(kind: 'map-mesh' | 'point' | 'heatmap-cell' | 'player-arrow', options?: any): Handlers {
   const { setSelected, focusBox3, focusPoint, focusSphere } = useFocusActions();
 
   return useMemo(() => {
@@ -180,7 +177,7 @@ export function useSelectable(
           break;
         }
         case 'player-arrow': {
-          const { playerId, tick, liveRefKey } = options.extra as PlayerArrowExtra;
+          const { playerId, tick, liveRefKey } = options.extra! as PlayerArrowExtra;
           setSelected({
             kind: 'player-arrow',
             playerId: String(playerId),

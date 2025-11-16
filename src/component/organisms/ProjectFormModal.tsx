@@ -12,9 +12,9 @@ import { Text } from '@src/component/atoms/Text';
 import { Modal } from '@src/component/molecules/Modal';
 import { OutlinedTextField } from '@src/component/molecules/OutlinedTextField';
 import { useToast } from '@src/component/templates/ToastContext';
+import { useLocale } from '@src/hooks/useLocale';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { createClient } from '@src/modeles/qeury';
-import { fontSizes } from '@src/styles/style';
 
 export type ProjectFormModalProps = {
   className?: string;
@@ -25,6 +25,7 @@ export type ProjectFormModalProps = {
 
 const Component: FC<ProjectFormModalProps> = ({ className, isOpen, onClose, project }) => {
   const { theme } = useSharedTheme();
+  const { t } = useLocale();
   const { showToast } = useToast();
   const queryClient = useQueryClient();
   const isEditMode = !!project;
@@ -50,17 +51,17 @@ const Component: FC<ProjectFormModalProps> = ({ className, isOpen, onClose, proj
         },
       });
       if (error) {
-        throw new Error('プロジェクトの作成に失敗しました');
+        throw new Error(t('projectForm.projectCreated'));
       }
       return data;
     },
     onSuccess: () => {
-      showToast('プロジェクトを作成しました', 2, 'success');
+      showToast(t('projectForm.projectCreated'), 2, 'success');
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       handleClose();
     },
     onError: (error: Error) => {
-      showToast(error.message || 'プロジェクトの作成に失敗しました', 3, 'error');
+      showToast(error.message, 3, 'error');
     },
   });
 
@@ -80,28 +81,28 @@ const Component: FC<ProjectFormModalProps> = ({ className, isOpen, onClose, proj
         },
       });
       if (error) {
-        throw new Error('プロジェクトの更新に失敗しました');
+        throw new Error(t('projectForm.projectUpdated'));
       }
       return data;
     },
     onSuccess: () => {
-      showToast('プロジェクトを更新しました', 2, 'success');
+      showToast(t('projectForm.projectUpdated'), 2, 'success');
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       queryClient.invalidateQueries({ queryKey: ['project', project?.id] });
       handleClose();
     },
     onError: (error: Error) => {
-      showToast(error.message || 'プロジェクトの更新に失敗しました', 3, 'error');
+      showToast(error.message, 3, 'error');
     },
   });
 
   const handleSubmit = useCallback(() => {
     if (!name.trim()) {
-      showToast('プロジェクト名を入力してください', 2, 'error');
+      showToast(t('projectForm.enterName'), 2, 'error');
       return;
     }
     if (!description.trim()) {
-      showToast('説明を入力してください', 2, 'error');
+      showToast(t('projectForm.enterDescription'), 2, 'error');
       return;
     }
 
@@ -110,7 +111,7 @@ const Component: FC<ProjectFormModalProps> = ({ className, isOpen, onClose, proj
     } else {
       createMutate();
     }
-  }, [name, description, isEditMode, showToast, updateMutate, createMutate]);
+  }, [name, description, isEditMode, showToast, t, updateMutate, createMutate]);
 
   const isLoading = createMutateIsPending || updateMutateIsPending;
 
@@ -119,23 +120,29 @@ const Component: FC<ProjectFormModalProps> = ({ className, isOpen, onClose, proj
       className={className}
       isOpen={isOpen}
       onClose={handleClose}
-      title={isEditMode ? 'プロジェクトを編集' : '新規プロジェクト作成'}
+      title={isEditMode ? t('projectForm.editTitle') : t('projectForm.createTitle')}
       closeOutside={!isLoading}
     >
       <FlexColumn gap={16} className={`${className}__form`}>
         <VerticalSpacer size={8} />
         <FlexColumn gap={8}>
-          <Text text={'プロジェクト名'} fontSize={fontSizes.medium} color={theme.colors.text.primary} fontWeight={'bold'} />
-          <OutlinedTextField value={name} onChange={setName} placeholder={'プロジェクト名を入力...'} fontSize={fontSizes.medium} disabled={isLoading} />
+          <Text text={t('projectForm.projectName')} fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} fontWeight={'bold'} />
+          <OutlinedTextField
+            value={name}
+            onChange={setName}
+            placeholder={t('projectForm.namePlaceholder')}
+            fontSize={theme.typography.fontSize.base}
+            disabled={isLoading}
+          />
         </FlexColumn>
 
         <FlexColumn gap={8}>
-          <Text text={'説明'} fontSize={fontSizes.medium} color={theme.colors.text.primary} fontWeight={'bold'} />
+          <Text text={t('common.description')} fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} fontWeight={'bold'} />
           <OutlinedTextField
             value={description}
             onChange={setDescription}
-            placeholder={'プロジェクトの説明を入力...'}
-            fontSize={fontSizes.medium}
+            placeholder={t('projectForm.descriptionPlaceholder')}
+            fontSize={theme.typography.fontSize.base}
             disabled={isLoading}
           />
         </FlexColumn>
@@ -150,7 +157,7 @@ const Component: FC<ProjectFormModalProps> = ({ className, isOpen, onClose, proj
             className={`${className}__checkbox`}
           />
           <label htmlFor={'is2D-checkbox'}>
-            <Text text={'2Dモード'} fontSize={fontSizes.medium} color={theme.colors.text.primary} />
+            <Text text={t('projectForm.mode2D')} fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} />
           </label>
         </FlexRow>
 
@@ -158,10 +165,10 @@ const Component: FC<ProjectFormModalProps> = ({ className, isOpen, onClose, proj
 
         <FlexRow gap={12} align={'flex-end'}>
           <Button onClick={handleClose} scheme={'surface'} fontSize={'base'} disabled={isLoading}>
-            キャンセル
+            {t('common.cancel')}
           </Button>
           <Button onClick={handleSubmit} scheme={'primary'} fontSize={'base'} disabled={isLoading}>
-            {isLoading ? '処理中...' : isEditMode ? '更新' : '作成'}
+            {isLoading ? t('common.processing') : isEditMode ? t('common.update') : t('common.create')}
           </Button>
         </FlexRow>
       </FlexColumn>

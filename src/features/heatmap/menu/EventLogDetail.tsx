@@ -18,7 +18,6 @@ import { usePlayerTimelinePatch, usePlayerTimelinePick } from '@src/hooks/usePla
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { useApiClient } from '@src/modeles/ApiClientContext';
 import { DefaultStaleTime } from '@src/modeles/qeury';
-import { fontSizes } from '@src/styles/style';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 import { toISOAboutStringWithTimezone } from '@src/utils/locale';
 
@@ -143,42 +142,42 @@ const Component: FC<HeatmapMenuProps> = ({ extra = {}, className }) => {
       <InlineFlexColumn gap={4} style={{ width: '100%' }}>
         {logDetail && logDetail.data && (
           <>
-            <Text text={'Event Log'} fontSize={fontSizes.large1} style={{ marginBottom: '8px' }} />
+            <Text text={'Event Log'} fontSize={theme.typography.fontSize.lg} style={{ marginBottom: '8px' }} />
             <InlineFlexColumn wrap={'nowrap'} gap={0} style={{ width: '100%', position: 'relative' }}>
               <InputRow label={'log type'}>
-                <Text text={logDetail.data.event_type} fontSize={fontSizes.small} />
+                <Text text={logDetail.data.event_type} fontSize={theme.typography.fontSize.sm} />
               </InputRow>
               <InputRow label={'player id'}>
-                <Text text={String(logDetail.data.player)} fontSize={fontSizes.medium} />
+                <Text text={String(logDetail.data.player)} fontSize={theme.typography.fontSize.base} />
               </InputRow>
               <InlineFlexColumn className={`${className}__row`} wrap={'nowrap'} gap={2} align={'flex-start'}>
-                <Text text={'Position'} fontSize={fontSizes.medium} />
+                <Text text={'Position'} fontSize={theme.typography.fontSize.base} />
                 <InlineFlexColumn wrap={'nowrap'} gap={4} align={'flex-end'} style={{ width: '100%' }}>
-                  <Text text={`X: ${logDetail.data.event_data.x.toFixed(3)},`} fontSize={fontSizes.small} style={{ width: '100px' }} />
-                  <Text text={`Y: ${logDetail.data.event_data.y.toFixed(3)},`} fontSize={fontSizes.small} style={{ width: '100px' }} />
-                  <Text text={`Z: ${logDetail.data.event_data.z.toFixed(3)}`} fontSize={fontSizes.small} style={{ width: '100px' }} />
+                  <Text text={`X: ${logDetail.data.event_data.x.toFixed(3)},`} fontSize={theme.typography.fontSize.sm} style={{ width: '100px' }} />
+                  <Text text={`Y: ${logDetail.data.event_data.y.toFixed(3)},`} fontSize={theme.typography.fontSize.sm} style={{ width: '100px' }} />
+                  <Text text={`Z: ${logDetail.data.event_data.z.toFixed(3)}`} fontSize={theme.typography.fontSize.sm} style={{ width: '100px' }} />
                 </InlineFlexColumn>
               </InlineFlexColumn>
               <Divider orientation={'horizontal'} />
               <InputRow label={'timestamp'}>
-                <Text text={String(logDetail.data.offset_timestamp) + ' ms'} fontSize={fontSizes.small} />
+                <Text text={String(logDetail.data.offset_timestamp) + ' ms'} fontSize={theme.typography.fontSize.sm} />
               </InputRow>
               {session && session.data && (
                 <Toggle buttonStyle={toggleButtonStyle(theme)} label={<Text text={'Sesssion'} />}>
                   <InputRow label={'id'}>
-                    <Text text={String(session.data.sessionId)} fontSize={fontSizes.small} />
+                    <Text text={String(session.data.sessionId)} fontSize={theme.typography.fontSize.sm} />
                   </InputRow>
                   <InputRow label={'name'}>
-                    <Text text={session.data.name} fontSize={fontSizes.small} />
+                    <Text text={session.data.name} fontSize={theme.typography.fontSize.sm} />
                   </InputRow>
                   <InlineFlexRow wrap={'nowrap'} align={'center'} className={`${className}__row`} gap={4}>
-                    <Text text={'Start Time'} fontSize={fontSizes.small} color={theme.colors.text.secondary} />
+                    <Text text={'Start Time'} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
                     <div className={`${className}__weight1`}>
-                      <Text text={toISOAboutStringWithTimezone(new Date(session.data.startTime))} fontSize={fontSizes.small} />
+                      <Text text={toISOAboutStringWithTimezone(new Date(session.data.startTime))} fontSize={theme.typography.fontSize.sm} />
                     </div>
                     {session.data.endTime && (
                       <div className={`${className}__weight1`}>
-                        <Text text={toISOAboutStringWithTimezone(new Date(session.data.endTime))} fontSize={fontSizes.small} />
+                        <Text text={toISOAboutStringWithTimezone(new Date(session.data.endTime))} fontSize={theme.typography.fontSize.sm} />
                       </div>
                     )}
                   </InlineFlexRow>
@@ -187,13 +186,13 @@ const Component: FC<HeatmapMenuProps> = ({ extra = {}, className }) => {
               {project && project.data && (
                 <Toggle buttonStyle={toggleButtonStyle(theme)} label={<Text text={'Project'} />}>
                   <InputRow label={'id'}>
-                    <Text text={String(project.data.id)} fontSize={fontSizes.small} />
+                    <Text text={String(project.data.id)} fontSize={theme.typography.fontSize.sm} />
                   </InputRow>
                   <InputRow label={'name'}>
-                    <Text text={project.data.name} fontSize={fontSizes.small} />
+                    <Text text={project.data.name} fontSize={theme.typography.fontSize.sm} />
                   </InputRow>
                   <InputRow label={'description'} align={'flex-start'}>
-                    <Text text={project.data.description} fontSize={fontSizes.small} />
+                    <Text text={project.data.description} fontSize={theme.typography.fontSize.sm} />
                   </InputRow>
                 </Toggle>
               )}
@@ -203,13 +202,13 @@ const Component: FC<HeatmapMenuProps> = ({ extra = {}, className }) => {
         <InlineFlexRow align={'flex-end'} className={`${className}__row`}>
           <div style={{ flex: 1 }} />
           <Button fontSize={'base'} onClick={handleTimelineClick} scheme={'surface'} disabled={timelineDisable}>
-            <Text text={'timeline'} fontSize={fontSizes.medium} />
+            <Text text={'timeline'} fontSize={theme.typography.fontSize.base} />
           </Button>
         </InlineFlexRow>
         <InputRow label={''}>
           <div style={{ flex: 1 }} />
           <Button onClick={handleReload} scheme={'surface'} fontSize={'sm'}>
-            <Text text={'Reload'} fontSize={fontSizes.small} />
+            <Text text={'Reload'} fontSize={theme.typography.fontSize.sm} />
           </Button>
         </InputRow>
       </InlineFlexColumn>

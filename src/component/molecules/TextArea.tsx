@@ -4,7 +4,7 @@ import type { FC } from 'react';
 
 import { FlexColumn } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
-import { fontSizes, fontWeights } from '@src/styles/style';
+import { useSharedTheme } from '@src/hooks/useSharedTheme';
 
 export type TextAreaProps = {
   className?: string | undefined;
@@ -20,6 +20,7 @@ export type TextAreaProps = {
 };
 
 const Component: FC<TextAreaProps> = ({ className, value, onChange, placeholder, label, maxLength, minLength }) => {
+  const { theme } = useSharedTheme();
   const Input = (
     <textarea
       maxLength={maxLength}
@@ -34,7 +35,7 @@ const Component: FC<TextAreaProps> = ({ className, value, onChange, placeholder,
   if (label) {
     return (
       <FlexColumn gap={2}>
-        <Text text={label} fontSize={fontSizes.small} fontWeight={fontWeights.bold} />
+        <Text text={label} fontSize={theme.typography.fontSize.sm} fontWeight={theme.typography.fontWeight.bold} />
         {Input}
       </FlexColumn>
     );
@@ -43,7 +44,7 @@ const Component: FC<TextAreaProps> = ({ className, value, onChange, placeholder,
 };
 
 export const TextArea = styled(Component)`
-  ${({ fontSize = fontSizes.medium }) => `font-size: ${fontSize}`};
+  ${({ fontSize, theme }) => `font-size: ${fontSize || theme.typography.fontSize.base}`};
   box-sizing: border-box; /* better resizing */
   min-width: 120px;
   max-width: 100%;
