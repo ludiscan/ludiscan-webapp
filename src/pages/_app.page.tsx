@@ -10,6 +10,7 @@ import type { AppProps } from 'next/app';
 
 import { ToastProvider } from '@src/component/templates/ToastContext';
 import { env } from '@src/config/env';
+import { LocaleProvider } from '@src/contexts/LocaleContext';
 import { useIsDesktop } from '@src/hooks/useIsDesktop';
 import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
 import { store } from '@src/store';
@@ -40,15 +41,17 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <Provider store={storeRef.current}>
-        <ToastProvider position={'top-right'}>
-          <QueryClientProvider client={queryClient}>
-            <SharedThemeProvider>
-              <Content className={isDesktop === undefined ? '' : isDesktop ? 'desktop' : 'mobile'} style={{ height: '100vh' }} data-testid={'app-content'}>
-                <Component {...pageProps} />
-              </Content>
-            </SharedThemeProvider>
-          </QueryClientProvider>
-        </ToastProvider>
+        <LocaleProvider>
+          <ToastProvider position={'top-right'}>
+            <QueryClientProvider client={queryClient}>
+              <SharedThemeProvider>
+                <Content className={isDesktop === undefined ? '' : isDesktop ? 'desktop' : 'mobile'} style={{ height: '100vh' }} data-testid={'app-content'}>
+                  <Component {...pageProps} />
+                </Content>
+              </SharedThemeProvider>
+            </QueryClientProvider>
+          </ToastProvider>
+        </LocaleProvider>
       </Provider>
       <GoogleTagManager gtmId={env.GTM_ID} />
     </>
