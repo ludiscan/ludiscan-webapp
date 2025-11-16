@@ -20,7 +20,7 @@ export function getInitialState(): HeatmapDataState {
 
 const canvasSlice = createSlice({
   name: 'heatmapCanvas',
-  initialState: initializeValues,
+  initialState: getInitialState(),
   reducers: {
     set: (state, action: PayloadAction<HeatmapDataState>) => {
       state.version = action.payload.version;

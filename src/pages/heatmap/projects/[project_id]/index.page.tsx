@@ -85,7 +85,7 @@ const HeaderWrapper = memo(
               </Button>
             )}
             <Button fontSize={'sm'} onClick={discard} scheme={'surface'} disabled={!hasDiff}>
-              <Text text={'Discord'} fontWeight={'bold'} />
+              <Text text={'Discard'} fontWeight={'bold'} />
             </Button>
             <Button fontSize={'sm'} onClick={apply} scheme={'surface'} className={`${className}__badgeButton ${hasDiff ? 'badge' : ''}`}>
               <Text text={'Save'} fontWeight={'bold'} />
