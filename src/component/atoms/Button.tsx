@@ -112,19 +112,20 @@ const ButtonWidth = (props: ButtonProps) => {
 };
 
 const ButtonPadding = (props: ButtonProps) => {
+  // Use logical properties for padding (Design Implementation Guide Rule 4)
   if (props.scheme === 'none') {
     return '2px';
   }
   if (props.fontSize === 'xs') {
-    return '0 12px';
+    return 'var(--spacing-xs) var(--spacing-sm)';
   }
   if (props.fontSize === 'sm') {
-    return '0 14px';
+    return 'var(--spacing-xs) var(--spacing-md)';
   }
   if (props.fontSize === 'base') {
-    return '0 16px';
+    return 'var(--spacing-sm) var(--spacing-md)';
   }
-  return '0 22px';
+  return 'var(--spacing-sm) var(--spacing-lg)';
 };
 
 const ButtonBorderRadius = (props: ButtonProps) => {
@@ -162,8 +163,15 @@ export const Button = styled(Component)`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: ${(props) => ButtonWidth(props)};
-  height: ${(props) => ButtonHeight(props)};
+
+  /* Use logical properties for sizing (Design Implementation Guide Rule 4) */
+  inline-size: ${(props) => ButtonWidth(props)};
+  block-size: ${(props) => ButtonHeight(props)};
+
+  /* Ensure minimum touch target size (WCAG 2.2 SC 2.5.8, Design Guide Rule 10) */
+  min-block-size: var(--touch-target-min-size-mobile);
+  min-inline-size: var(--touch-target-min-size-mobile);
+
   padding: ${(props) => ButtonPadding(props)};
   font-size: ${(props) => props.theme.typography.fontSize[props.fontSize] || commonTypography.fontSize.base};
   font-weight: bold;
