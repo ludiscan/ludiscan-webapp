@@ -21,6 +21,16 @@
 
 ## Quality Check Process
 
+### Step 0: Install Dependencies (MANDATORY)
+
+**まず最初に、必ず依存関係をインストールしてください:**
+
+```bash
+bun install
+```
+
+**重要**: このステップをスキップすると、lintやtype checkが失敗する可能性があります。**必ず実行してください。**
+
 ### Step 1: Run Auto-Fix Commands
 
 まず、自動修正可能な問題を修正します:
@@ -62,6 +72,7 @@ bun run lint
 PR作成時は以下の順序で実行してください:
 
 ```markdown
+0. `bun install` を実行 (MANDATORY - 最初に必ず実行)
 1. コード変更を完了
 2. `bun run fix` を実行 → ファイルが変更された場合は git add
 3. `bun run format` を実行 → ファイルが変更された場合は git add
@@ -83,6 +94,7 @@ PR作成時は以下の順序で実行してください:
 git push前は以下の順序で実行してください:
 
 ```markdown
+0. `bun install` を実行 (MANDATORY - 最初に必ず実行)
 1. コード変更を完了
 2. `bun run fix` を実行 → ファイルが変更された場合は git add
 3. `bun run format` を実行 → ファイルが変更された場合は git add
@@ -91,6 +103,30 @@ git push前は以下の順序で実行してください:
 6. すべてのチェックが通ったら git commit
 7. git push
 ```
+
+## CRITICAL: All Errors Must Be Fixed
+
+**🚨 絶対に守るべきルール 🚨**
+
+検出された**すべてのエラー**を修正する必要があります。以下の言い訳は**一切認められません**:
+
+❌ **禁止される言い訳**:
+- ❌ 「このエラーは既存のもので、私の変更によるものではありません」
+- ❌ 「このエラーは以前から存在していました」
+- ❌ 「この型エラーは自分のコードとは関係ありません」
+- ❌ 「このlintエラーは別の人が作ったコードです」
+
+✅ **正しい対応**:
+- ✅ 検出されたエラーが既存のものであっても、**全て修正する**
+- ✅ エラーの原因が自分の変更かどうかに関わらず、**全て修正する**
+- ✅ エラーが見つかった時点で、**その場で全て修正する**
+
+**理由**:
+- コード品質を維持するためには、既存のエラーも含めて全て修正する必要があります
+- 「既存のエラー」という概念は品質チェックにおいては存在しません
+- エラーが検出された時点で、それは修正すべき問題です
+
+**重要**: このルールに違反した場合、PRやpushは**絶対に許可されません**。
 
 ## Error Handling
 
@@ -149,17 +185,21 @@ src/component/atoms/Button.tsx
 **Status**: PENDING
 
 **What to do**:
+- Run `bun install` to ensure dependencies are installed (MANDATORY)
 - Run `bun run fix` to auto-fix linting issues
 - Run `bun run format` to format code
 - Run `bun run type` to check TypeScript errors
 - Run `bun run lint` to verify no linting errors
+- Fix ALL errors found (既存のエラーも含めて全て修正)
 - Commit any changes from auto-fix
 - Ready for PR creation
 
 **Completion criteria**:
-- Type check passes (no errors)
-- Lint check passes (no errors)
+- Dependencies installed successfully
+- Type check passes (no errors - including existing errors)
+- Lint check passes (no errors - including existing errors)
 - All code properly formatted
+- No excuses about "existing errors" - all errors must be fixed
 ```
 
 ## Example Execution
@@ -167,6 +207,10 @@ src/component/atoms/Button.tsx
 ### Successful Case
 
 ```bash
+# Step 0: Install dependencies (MANDATORY)
+$ bun install
+✓ Dependencies installed successfully
+
 # Step 1: Auto-fix
 $ bun run fix
 ✓ ESLint: Fixed 5 issues automatically
@@ -198,6 +242,10 @@ $ bun run lint
 ### Error Case
 
 ```bash
+# Step 0: Install dependencies (MANDATORY)
+$ bun install
+✓ Dependencies installed successfully
+
 # Step 1: Auto-fix
 $ bun run fix
 ✓ ESLint: Fixed 5 issues automatically
@@ -211,6 +259,9 @@ $ bun run type
 ❌ Error: Type errors found
 
 src/component/atoms/Button.tsx(15,7): error TS2322: Type 'string' is not assignable to type 'number'.
+
+# ⚠️ 重要: このエラーが既存のものでも、必ず修正してください
+# 「既存のエラー」という言い訳は認められません
 
 # エラーを修正する
 # ... ファイルを修正 ...
@@ -238,6 +289,7 @@ $ bun run lint
 ✅ コード品質チェックが完了しました
 
 **実行したチェック:**
+- [x] bun install (dependencies)
 - [x] ESLint & Stylelint auto-fix
 - [x] Prettier format
 - [x] TypeScript type check
@@ -257,6 +309,7 @@ PRの作成またはpushを実行できます。
 ⚠️ コード品質チェックでエラーが見つかりました
 
 **実行したチェック:**
+- [x] bun install (dependencies)
 - [x] ESLint & Stylelint auto-fix
 - [x] Prettier format
 - [ ] TypeScript type check (エラーあり)
@@ -266,16 +319,22 @@ PRの作成またはpushを実行できます。
 src/component/atoms/Button.tsx(15,7): error TS2322: Type 'string' is not assignable to type 'number'.
 ```
 
+⚠️ **重要**: このエラーが既存のものでも、必ず修正してください。
+「既存のエラー」や「私の変更によるものではない」という言い訳は認められません。
+
 エラーを修正してから、再度チェックを実行してください。
 ```
 
 ## Important Notes
 
-1. **品質チェックは必須です** - スキップしないでください
-2. **エラーがある場合、PRやpushは禁止** - すべてのエラーを修正してください
-3. **自動修正を優先** - `bun run fix` と `bun run format` を先に実行
-4. **型安全性を維持** - `any` 型や `@ts-ignore` でエラーを隠さない
-5. **ユーザーに報告** - チェック結果を明確に伝える
+1. **必ず`bun install`から開始** - 最初に依存関係をインストールしてください
+2. **品質チェックは必須です** - スキップしないでください
+3. **すべてのエラーを修正** - 既存のエラーも含めて、検出された全てのエラーを修正してください
+4. **エラーがある場合、PRやpushは禁止** - すべてのエラーを修正してください
+5. **自動修正を優先** - `bun run fix` と `bun run format` を先に実行
+6. **型安全性を維持** - `any` 型や `@ts-ignore` でエラーを隠さない
+7. **言い訳は禁止** - 「既存のエラー」や「私の変更ではない」という言い訳は認められません
+8. **ユーザーに報告** - チェック結果を明確に伝える
 
 ## Automation Reminder
 
@@ -292,9 +351,15 @@ src/component/atoms/Button.tsx(15,7): error TS2322: Type 'string' is not assigna
 
 このスキルにより以下が保証されます:
 
-1. **コード品質の一貫性** - すべてのコードがlintとformatルールに従う
-2. **型安全性** - TypeScriptエラーがない状態を維持
-3. **スムーズなCI/CD** - ローカルでチェックするため、CIでのエラーを防ぐ
-4. **効率的な開発** - 自動修正により手動修正の手間を削減
+1. **依存関係の整合性** - `bun install`により常に最新の依存関係が利用可能
+2. **コード品質の一貫性** - すべてのコードがlintとformatルールに従う
+3. **型安全性** - TypeScriptエラーがない状態を維持
+4. **スムーズなCI/CD** - ローカルでチェックするため、CIでのエラーを防ぐ
+5. **効率的な開発** - 自動修正により手動修正の手間を削減
+6. **完全なエラー修正** - 既存のエラーも含めて全て修正され、コードベース全体の品質が向上
 
-**Remember**: 品質チェックは面倒に見えますが、長期的にはバグを減らし、コードの保守性を高めます。絶対にスキップしないでください。
+**Remember**:
+- **必ず`bun install`から開始してください**
+- 品質チェックは面倒に見えますが、長期的にはバグを減らし、コードの保守性を高めます
+- **「既存のエラー」という言い訳は絶対に認められません** - 検出されたエラーは全て修正してください
+- 絶対にスキップしないでください
