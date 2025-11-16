@@ -3,9 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { CiUser, CiLight, CiDark } from 'react-icons/ci';
+import { CiUser, CiLight, CiDark, CiBellOn } from 'react-icons/ci';
 import { FiChevronLeft } from 'react-icons/fi';
-import { IoBell } from 'react-icons/io5';
 import { MdLogout } from 'react-icons/md';
 
 import type { ThemeType } from '@src/modeles/theme';
@@ -157,7 +156,7 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
                 <Divider orientation={'vertical'} />
                 <div className={`${className}__bellIconWrapper`}>
                   <Button fontSize={'xl'} onClick={handleOpenUpdateModal} scheme={'none'} title='Update History'>
-                    <IoBell size={24} color={theme.colors.text.primary} />
+                    <CiBellOn size={24} color={theme.colors.text.primary} />
                   </Button>
                   {hasUnreadUpdates && <span className={`${className}__unreadBadge`} />}
                 </div>
@@ -213,7 +212,13 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
                 <>
                   <Divider orientation={'horizontal'} margin={'0'} />
                   <FlexRow className={`${className}__bellIconWrapperMobile`}>
-                    <IconLabelRow className={`${className}__iconLabelRow`} gap={8} label={'Update History'} icon={<IoBell />} onClick={handleOpenUpdateModal} />
+                    <IconLabelRow
+                      className={`${className}__iconLabelRow`}
+                      gap={8}
+                      label={'Update History'}
+                      icon={<CiBellOn />}
+                      onClick={handleOpenUpdateModal}
+                    />
                     {hasUnreadUpdates && <span className={`${className}__unreadBadgeMobile`} />}
                   </FlexRow>
                   <Divider orientation={'horizontal'} margin={'0'} />

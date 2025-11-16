@@ -75,6 +75,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       cacheTime: new Date(now).toISOString(),
     });
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Error fetching releases:', error);
     return res.status(500).json({ error: 'Failed to fetch releases' });
   }
