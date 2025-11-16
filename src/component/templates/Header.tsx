@@ -1,11 +1,14 @@
 import styled from '@emotion/styled';
+import { useQuery } from '@tanstack/react-query';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CiUser, CiLight, CiDark } from 'react-icons/ci';
 import { FiChevronLeft } from 'react-icons/fi';
+import { IoBell } from 'react-icons/io5';
 import { MdLogout } from 'react-icons/md';
 
+import type { ReleaseResponse } from '@src/pages/api/releases.api';
 import type { ThemeType } from '@src/modeles/theme';
 import type { FC, ReactNode } from 'react';
 
@@ -17,10 +20,13 @@ import { IconLabelRow } from '@src/component/molecules/IconLabelRow';
 import { EllipsisMenu, Menu } from '@src/component/molecules/Menu';
 import { Selector } from '@src/component/molecules/Selector';
 import { DesktopLayout, MobileLayout } from '@src/component/molecules/responsive';
+import { UpdateHistoryModal } from '@src/component/organisms/UpdateHistoryModal';
 import { useAuth } from '@src/hooks/useAuth';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import themes from '@src/modeles/theme';
 import { dimensions } from '@src/styles/style';
+
+const LAST_VIEWED_VERSION_KEY = 'ludiscan-last-viewed-version';
 
 export type HeaderProps = {
   className?: string | undefined;
@@ -38,9 +44,35 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
   const router = useRouter();
   const pathname = usePathname();
 
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [hasUnreadUpdates, setHasUnreadUpdates] = useState(false);
+
   const isLoginPage = useMemo(() => pathname === '/login', [pathname]);
 
   const themeTypeOptions = useMemo(() => Object.keys(themes) as ThemeType[], []);
+
+  // Fetch releases to check for new updates
+  const { data: releaseData } = useQuery<ReleaseResponse>({
+    queryKey: ['releases'],
+    queryFn: async () => {
+      const response = await fetch('/api/releases');
+      if (!response.ok) {
+        throw new Error('Failed to fetch releases');
+      }
+      return response.json();
+    },
+    staleTime: 1000 * 60 * 60 * 12, // 12 hours
+    enabled: !isOffline,
+  });
+
+  // Check if there are new updates
+  useEffect(() => {
+    if (releaseData?.releases && releaseData.releases.length > 0) {
+      const latestVersion = releaseData.releases[0].tag_name;
+      const lastViewedVersion = localStorage.getItem(LAST_VIEWED_VERSION_KEY);
+      setHasUnreadUpdates(lastViewedVersion !== latestVersion);
+    }
+  }, [releaseData]);
 
   const backIconHandle = useCallback(() => {
     if (onClick) {
@@ -59,6 +91,15 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
     await logout();
     router.push('/login');
   }, [logout, router]);
+
+  const handleOpenUpdateModal = useCallback(() => {
+    setIsUpdateModalOpen(true);
+    setHasUnreadUpdates(false);
+  }, []);
+
+  const handleCloseUpdateModal = useCallback(() => {
+    setIsUpdateModalOpen(false);
+  }, []);
   return (
     <header className={className}>
       <FlexRow align={'center'} gap={12} className={`${className}__innerHeader`} wrap={'nowrap'}>
@@ -114,6 +155,13 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
             {!isOffline && !isLoginPage && (
               <>
                 <Divider orientation={'vertical'} />
+                <div className={`${className}__bellIconWrapper`}>
+                  <Button fontSize={'xl'} onClick={handleOpenUpdateModal} scheme={'none'} title='Update History'>
+                    <IoBell size={24} color={theme.colors.text.primary} />
+                  </Button>
+                  {hasUnreadUpdates && <span className={`${className}__unreadBadge`} />}
+                </div>
+                <Divider orientation={'vertical'} />
                 {isAuthorized ? (
                   <Menu fontSize={'xl'} scheme={'none'} icon={<CiUser size={24} color={theme.colors.text.primary} />}>
                     <Menu.ContentColumn gap={4} align={'right'} placement={'bottom'} offset={16}>
@@ -164,6 +212,11 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
               {!isOffline && !isLoginPage && (
                 <>
                   <Divider orientation={'horizontal'} margin={'0'} />
+                  <FlexRow className={`${className}__bellIconWrapperMobile`}>
+                    <IconLabelRow className={`${className}__iconLabelRow`} gap={8} label={'Update History'} icon={<IoBell />} onClick={handleOpenUpdateModal} />
+                    {hasUnreadUpdates && <span className={`${className}__unreadBadgeMobile`} />}
+                  </FlexRow>
+                  <Divider orientation={'horizontal'} margin={'0'} />
                   {isAuthorized ? (
                     <>
                       <IconLabelRow className={`${className}__iconLabelRow`} gap={8} label={'Profile'} icon={<CiUser />} href={'/profile'} target={'_self'} />
@@ -179,6 +232,7 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
           </EllipsisMenu>
         </MobileLayout>
       </FlexRow>
+      <UpdateHistoryModal isOpen={isUpdateModalOpen} onClose={handleCloseUpdateModal} />
     </header>
   );
 };
@@ -214,5 +268,39 @@ export const Header = styled(Component)`
 
   &__logo.light {
     filter: invert(0%);
+  }
+
+  &__bellIconWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  &__unreadBadge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 10px;
+    height: 10px;
+    background-color: ${({ theme }) => theme.colors.semantic.error.main};
+    border: 2px solid ${({ theme }) => theme.colors.surface.base};
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  &__bellIconWrapperMobile {
+    position: relative;
+  }
+
+  &__unreadBadgeMobile {
+    position: absolute;
+    top: 8px;
+    left: 18px;
+    width: 8px;
+    height: 8px;
+    background-color: ${({ theme }) => theme.colors.semantic.error.main};
+    border: 2px solid ${({ theme }) => theme.colors.surface.base};
+    border-radius: 50%;
+    pointer-events: none;
   }
 `;
