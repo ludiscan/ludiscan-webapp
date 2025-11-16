@@ -282,10 +282,10 @@ export const Header = styled(Component)`
     right: 2px;
     width: 10px;
     height: 10px;
+    pointer-events: none;
     background-color: ${({ theme }) => theme.colors.semantic.error.main};
     border: 2px solid ${({ theme }) => theme.colors.surface.base};
     border-radius: 50%;
-    pointer-events: none;
   }
 
   &__bellIconWrapperMobile {
@@ -298,9 +298,9 @@ export const Header = styled(Component)`
     left: 18px;
     width: 8px;
     height: 8px;
+    pointer-events: none;
     background-color: ${({ theme }) => theme.colors.semantic.error.main};
     border: 2px solid ${({ theme }) => theme.colors.surface.base};
     border-radius: 50%;
-    pointer-events: none;
   }
 `;
