@@ -42,15 +42,15 @@ export default function App({ Component, pageProps }: AppProps) {
     <>
       <Provider store={storeRef.current}>
         <LocaleProvider>
-          <ToastProvider position={'top-right'}>
-            <QueryClientProvider client={queryClient}>
-              <SharedThemeProvider>
+          <QueryClientProvider client={queryClient}>
+            <SharedThemeProvider>
+              <ToastProvider position={'top-right'}>
                 <Content className={isDesktop === undefined ? '' : isDesktop ? 'desktop' : 'mobile'} style={{ height: '100vh' }} data-testid={'app-content'}>
                   <Component {...pageProps} />
                 </Content>
-              </SharedThemeProvider>
-            </QueryClientProvider>
-          </ToastProvider>
+              </ToastProvider>
+            </SharedThemeProvider>
+          </QueryClientProvider>
         </LocaleProvider>
       </Provider>
       <GoogleTagManager gtmId={env.GTM_ID} />
