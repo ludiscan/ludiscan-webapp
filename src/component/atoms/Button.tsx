@@ -166,12 +166,11 @@ export const Button = styled(Component)`
 
   /* Use logical properties for sizing (Design Implementation Guide Rule 4) */
   inline-size: ${(props) => ButtonWidth(props)};
+  min-inline-size: var(--touch-target-min-size-mobile);
   block-size: ${(props) => ButtonHeight(props)};
 
   /* Ensure minimum touch target size (WCAG 2.2 SC 2.5.8, Design Guide Rule 10) */
   min-block-size: var(--touch-target-min-size-mobile);
-  min-inline-size: var(--touch-target-min-size-mobile);
-
   padding: ${(props) => ButtonPadding(props)};
   font-size: ${(props) => props.theme.typography.fontSize[props.fontSize] || commonTypography.fontSize.base};
   font-weight: bold;

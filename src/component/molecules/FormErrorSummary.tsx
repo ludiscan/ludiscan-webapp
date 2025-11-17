@@ -34,10 +34,10 @@ const ErrorSummaryContainer = styled.div`
   padding-block: var(--spacing-md);
   padding-inline: var(--spacing-md);
   margin-block-end: var(--spacing-md);
+  color: ${({ theme }) => theme.colors.semantic.error.contrast};
 
   /* Semantic error color with sufficient contrast (WCAG AA) */
   background-color: ${({ theme }) => theme.colors.semantic.error.light};
-  color: ${({ theme }) => theme.colors.semantic.error.contrast};
 
   /* Visual indicator using logical property */
   border-inline-start: var(--border-width-thick) solid ${({ theme }) => theme.colors.semantic.error.main};
@@ -56,8 +56,7 @@ const ErrorSummaryContainer = styled.div`
 `;
 
 const ErrorTitle = styled.h2`
-  margin-block-start: 0;
-  margin-block-end: var(--spacing-sm);
+  margin-block: 0 var(--spacing-sm);
   font-size: var(--typography-font-size-lg);
   font-weight: var(--typography-font-weight-bold);
   line-height: var(--typography-line-height-tight);
@@ -65,8 +64,8 @@ const ErrorTitle = styled.h2`
 `;
 
 const ErrorList = styled.ul`
-  margin: 0;
   padding-inline-start: var(--spacing-md);
+  margin: 0;
   list-style-type: disc;
 `;
 
@@ -76,17 +75,16 @@ const ErrorListItem = styled.li`
 `;
 
 const ErrorLink = styled.a`
-  color: ${({ theme }) => theme.colors.semantic.error.dark};
-  text-decoration: underline;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 2px;
-  font-weight: var(--typography-font-weight-medium);
-  cursor: pointer;
-
   /* Minimum touch target size (Design Guide Rule 10) */
   display: inline-block;
   min-block-size: var(--touch-target-min-size-desktop);
   padding-block: var(--spacing-xs);
+  font-weight: var(--typography-font-weight-medium);
+  color: ${({ theme }) => theme.colors.semantic.error.dark};
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+  cursor: pointer;
 
   &:hover {
     color: ${({ theme }) => theme.colors.semantic.error.main};
@@ -153,20 +151,16 @@ export const FormErrorSummary: FC<FormErrorSummaryProps> = ({ errors, show, titl
   return (
     <ErrorSummaryContainer
       ref={summaryRef}
-      role="alert" // Announces to screen readers (WCAG 2.2 SC 3.3.1)
-      aria-labelledby="error-summary-title"
+      role='alert' // Announces to screen readers (WCAG 2.2 SC 3.3.1)
+      aria-labelledby='error-summary-title'
       tabIndex={-1} // Allow focus but not in tab order
-      data-testid="form-error-summary"
+      data-testid='form-error-summary'
     >
-      <ErrorTitle id="error-summary-title">{title}</ErrorTitle>
+      <ErrorTitle id='error-summary-title'>{title}</ErrorTitle>
       <ErrorList>
         {errors.map((error, index) => (
           <ErrorListItem key={`${error.fieldId}-${index}`}>
-            <ErrorLink
-              href={`#${error.fieldId}`}
-              onClick={(e) => handleErrorLinkClick(e, error.fieldId)}
-              data-testid={`error-link-${error.fieldId}`}
-            >
+            <ErrorLink href={`#${error.fieldId}`} onClick={(e) => handleErrorLinkClick(e, error.fieldId)} data-testid={`error-link-${error.fieldId}`}>
               {error.message}
             </ErrorLink>
           </ErrorListItem>

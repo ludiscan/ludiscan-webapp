@@ -4,8 +4,6 @@ import { useId } from 'react';
 import type { FC, ReactNode } from 'react';
 
 import { FlexColumn } from '@src/component/atoms/Flex';
-import { Text } from '@src/component/atoms/Text';
-import { useSharedTheme } from '@src/hooks/useSharedTheme';
 
 /**
  * Form field wrapper with accessible error handling
@@ -43,60 +41,60 @@ const FieldContainer = styled(FlexColumn)`
 `;
 
 const Label = styled.label`
-  font-size: var(--typography-font-size-base);
-  font-weight: var(--typography-font-weight-semibold);
-  line-height: var(--typography-line-height-normal);
-  margin-block-end: var(--spacing-xs);
-  color: ${({ theme }) => theme.colors.text.primary};
+  display: flex;
+  align-items: center;
 
   /* Ensure minimum touch target for clickable labels */
   min-block-size: var(--touch-target-min-size-desktop);
-  display: flex;
-  align-items: center;
+  margin-block-end: var(--spacing-xs);
+  font-size: var(--typography-font-size-base);
+  font-weight: var(--typography-font-weight-semibold);
+  line-height: var(--typography-line-height-normal);
+  color: ${({ theme }) => theme.colors.text.primary};
 `;
 
 const RequiredIndicator = styled.span`
-  color: ${({ theme }) => theme.colors.semantic.error.main};
   margin-inline-start: var(--spacing-xs);
   font-weight: var(--typography-font-weight-bold);
+  color: ${({ theme }) => theme.colors.semantic.error.main};
 
   /* Screen reader text for asterisk */
   &::after {
-    content: ' (required)';
     position: absolute;
     inline-size: 1px;
     block-size: 1px;
     padding: 0;
     margin: -1px;
     overflow: hidden;
-    clip: rect(0, 0, 0, 0);
     white-space: nowrap;
+    content: ' (required)';
     border-width: 0;
+    clip: rect(0, 0, 0, 0);
   }
 `;
 
 const HintText = styled.span`
+  display: block;
+  margin-block-end: var(--spacing-xs);
   font-size: var(--typography-font-size-sm);
   line-height: var(--typography-line-height-normal);
   color: ${({ theme }) => theme.colors.text.secondary};
-  margin-block-end: var(--spacing-xs);
-  display: block;
 `;
 
 const ErrorText = styled.span`
   /* Use role="alert" for immediate announcement */
   display: block;
+  margin-block-start: var(--spacing-xs);
   font-size: var(--typography-font-size-sm);
   font-weight: var(--typography-font-weight-medium);
   line-height: var(--typography-line-height-normal);
   color: ${({ theme }) => theme.colors.semantic.error.main};
-  margin-block-start: var(--spacing-xs);
 
   /* Visual indicator (not relying on color alone - WCAG 2.2 SC 1.4.1) */
   &::before {
-    content: '⚠ ';
-    font-size: var(--typography-font-size-base);
     margin-inline-end: var(--spacing-xs);
+    font-size: var(--typography-font-size-base);
+    content: '⚠ ';
   }
 `;
 
@@ -110,16 +108,12 @@ const FieldWrapper = styled.div`
     /* Logical properties for padding */
     padding-block: var(--spacing-sm);
     padding-inline: var(--spacing-sm);
-
     font-size: var(--typography-font-size-base);
     line-height: var(--typography-line-height-normal);
-
+    color: ${({ theme }) => theme.colors.text.primary};
+    background-color: ${({ theme }) => theme.colors.surface.base};
     border: var(--border-width-default) solid ${({ theme }) => theme.colors.border.default};
     border-radius: var(--border-radius-sm);
-
-    background-color: ${({ theme }) => theme.colors.surface.base};
-    color: ${({ theme }) => theme.colors.text.primary};
-
     transition: border-color 0.2s ease;
 
     &:focus {
@@ -144,9 +138,9 @@ const FieldWrapper = styled.div`
     }
 
     &:disabled {
-      background-color: ${({ theme }) => theme.colors.surface.sunken};
       color: ${({ theme }) => theme.colors.text.disabled};
       cursor: not-allowed;
+      background-color: ${({ theme }) => theme.colors.surface.sunken};
       opacity: 0.6;
     }
   }
@@ -175,7 +169,6 @@ const FieldWrapper = styled.div`
  * ```
  */
 export const FormFieldWithError: FC<FormFieldWithErrorProps> = ({ label, fieldId: providedFieldId, children, error, hint, required = false, className }) => {
-  const { theme } = useSharedTheme();
   const autoFieldId = useId();
   const fieldId = providedFieldId || autoFieldId;
 
@@ -205,7 +198,7 @@ export const FormFieldWithError: FC<FormFieldWithErrorProps> = ({ label, fieldId
     <FieldContainer gap={0} className={className}>
       <Label htmlFor={fieldId}>
         {label}
-        {required && <RequiredIndicator aria-hidden="true">*</RequiredIndicator>}
+        {required && <RequiredIndicator aria-hidden='true'>*</RequiredIndicator>}
       </Label>
 
       {hint && <HintText id={hintId}>{hint}</HintText>}
@@ -215,8 +208,8 @@ export const FormFieldWithError: FC<FormFieldWithErrorProps> = ({ label, fieldId
       {error && (
         <ErrorText
           id={errorId}
-          role="alert" // Immediate announcement for errors
-          aria-live="polite" // For dynamic validation
+          role='alert' // Immediate announcement for errors
+          aria-live='polite' // For dynamic validation
           data-testid={`${fieldId}-error`}
         >
           {error}

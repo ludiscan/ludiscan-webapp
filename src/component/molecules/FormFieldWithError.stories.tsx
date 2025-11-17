@@ -73,7 +73,7 @@ export const Default: Story = {
   args: {
     label: 'Email Address',
     required: true,
-    children: <input type="email" placeholder="user@example.com" />,
+    children: <input type='email' placeholder='user@example.com' />,
   },
 };
 
@@ -85,7 +85,7 @@ export const WithHint: Story = {
     label: 'Password',
     hint: '8文字以上、数字を含む必要があります',
     required: true,
-    children: <input type="password" />,
+    children: <input type='password' />,
   },
 };
 
@@ -97,7 +97,7 @@ export const WithError: Story = {
     label: 'Email Address',
     error: 'メールアドレスに@を含めてください（例: user@example.com）',
     required: true,
-    children: <input type="email" value="invalid-email" readOnly />,
+    children: <input type='email' value='invalid-email' readOnly />,
   },
 };
 
@@ -110,7 +110,7 @@ export const WithHintAndError: Story = {
     hint: '8文字以上、数字を含む必要があります',
     error: 'パスワードは8文字以上必要です',
     required: true,
-    children: <input type="password" value="short" readOnly />,
+    children: <input type='password' value='short' readOnly />,
   },
 };
 
@@ -122,7 +122,7 @@ export const TextareaField: Story = {
     label: 'Description',
     hint: '最大500文字まで入力できます',
     required: false,
-    children: <textarea rows={4} placeholder="説明を入力してください..." />,
+    children: <textarea rows={4} placeholder='説明を入力してください...' />,
   },
 };
 
@@ -136,10 +136,10 @@ export const SelectField: Story = {
     required: true,
     children: (
       <select>
-        <option value="">選択してください</option>
-        <option value="jp">日本</option>
-        <option value="us">アメリカ</option>
-        <option value="uk">イギリス</option>
+        <option value=''>選択してください</option>
+        <option value='jp'>日本</option>
+        <option value='us'>アメリカ</option>
+        <option value='uk'>イギリス</option>
       </select>
     ),
   },
@@ -153,7 +153,7 @@ export const OptionalField: Story = {
     label: 'Middle Name',
     hint: '任意項目です',
     required: false,
-    children: <input type="text" placeholder="(Optional)" />,
+    children: <input type='text' placeholder='(Optional)' />,
   },
 };
 
@@ -164,7 +164,7 @@ export const DisabledField: Story = {
   args: {
     label: 'Email Address',
     hint: 'このフィールドは変更できません',
-    children: <input type="email" value="locked@example.com" disabled />,
+    children: <input type='email' value='locked@example.com' disabled />,
   },
 };
 
@@ -212,15 +212,15 @@ export const InteractiveValidation: Story = {
       <form onSubmit={handleSubmit}>
         <FormErrorSummary errors={formErrors} show={formErrors.length > 0} />
 
-        <FormFieldWithError label="Email Address" fieldId="email" error={errors.email} required>
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} onBlur={validateForm} />
+        <FormFieldWithError label='Email Address' fieldId='email' error={errors.email} required>
+          <input type='email' value={email} onChange={(e) => setEmail(e.target.value)} onBlur={validateForm} />
         </FormFieldWithError>
 
-        <FormFieldWithError label="Password" fieldId="password" error={errors.password} hint="8文字以上、数字を含む必要があります" required>
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} onBlur={validateForm} />
+        <FormFieldWithError label='Password' fieldId='password' error={errors.password} hint='8文字以上、数字を含む必要があります' required>
+          <input type='password' value={password} onChange={(e) => setPassword(e.target.value)} onBlur={validateForm} />
         </FormFieldWithError>
 
-        <Button type="submit" scheme="primary" fontSize="base">
+        <Button type='submit' scheme='primary' fontSize='base'>
           送信
         </Button>
       </form>
@@ -247,24 +247,30 @@ export const CompleteFormExample: Story = {
 
         <FormErrorSummary errors={formErrors} show={showErrors} />
 
-        <FormFieldWithError label="Username" fieldId="username" error={showErrors ? formErrors[0].message : undefined} required>
-          <input type="text" placeholder="Enter your username" />
+        <FormFieldWithError label='Username' fieldId='username' error={showErrors ? formErrors[0].message : undefined} required>
+          <input type='text' placeholder='Enter your username' />
         </FormFieldWithError>
 
-        <FormFieldWithError label="Email Address" fieldId="email" error={showErrors ? formErrors[1].message : undefined} hint="We'll never share your email" required>
-          <input type="email" placeholder="user@example.com" value="invalid" readOnly />
+        <FormFieldWithError
+          label='Email Address'
+          fieldId='email'
+          error={showErrors ? formErrors[1].message : undefined}
+          hint="We'll never share your email"
+          required
+        >
+          <input type='email' placeholder='user@example.com' value='invalid' readOnly />
         </FormFieldWithError>
 
-        <FormFieldWithError label="Password" fieldId="password" error={showErrors ? formErrors[2].message : undefined} hint="8文字以上、数字を含む" required>
-          <input type="password" value="short" readOnly />
+        <FormFieldWithError label='Password' fieldId='password' error={showErrors ? formErrors[2].message : undefined} hint='8文字以上、数字を含む' required>
+          <input type='password' value='short' readOnly />
         </FormFieldWithError>
 
-        <FormFieldWithError label="Bio" hint="Tell us about yourself (optional)">
-          <textarea rows={4} placeholder="I am a..." />
+        <FormFieldWithError label='Bio' hint='Tell us about yourself (optional)'>
+          <textarea rows={4} placeholder='I am a...' />
         </FormFieldWithError>
 
         <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
-          <Button scheme="primary" fontSize="base" onClick={() => setShowErrors(!showErrors)}>
+          <Button scheme='primary' fontSize='base' onClick={() => setShowErrors(!showErrors)}>
             {showErrors ? 'Hide Errors' : 'Show Errors'}
           </Button>
         </div>

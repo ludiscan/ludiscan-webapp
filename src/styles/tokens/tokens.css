@@ -20,7 +20,7 @@
   --color-neutral-90: #e5d5d5;
   --color-neutral-95: #f5e5e5;
   --color-neutral-99: #fff5f5;
-  --color-neutral-100: #ffffff;
+  --color-neutral-100: #fff;
   --color-error-40: #a00020;
   --color-error-60: #dc143c;
   --color-error-80: #ff6b8b;
@@ -71,10 +71,10 @@
   --border-width-thin: 1px;
   --border-width-default: 2px;
   --border-width-thick: 4px;
-  --shadow-sm: 0 1px 2px 0 rgba(26, 15, 15, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(26, 15, 15, 0.1), 0 2px 4px -1px rgba(26, 15, 15, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(26, 15, 15, 0.1), 0 4px 6px -2px rgba(26, 15, 15, 0.05);
-  --shadow-xl: 0 20px 25px -5px rgba(26, 15, 15, 0.1), 0 10px 10px -5px rgba(26, 15, 15, 0.04);
+  --shadow-sm: 0 1px 2px 0 rgb(26 15 15 / 5%);
+  --shadow-md: 0 4px 6px -1px rgb(26 15 15 / 10%), 0 2px 4px -1px rgb(26 15 15 / 6%);
+  --shadow-lg: 0 10px 15px -3px rgb(26 15 15 / 10%), 0 4px 6px -2px rgb(26 15 15 / 5%);
+  --shadow-xl: 0 20px 25px -5px rgb(26 15 15 / 10%), 0 10px 10px -5px rgb(26 15 15 / 4%);
   --touch-target-min-size-mobile: 44px;
   --touch-target-min-size-desktop: 24px;
   --accessibility-focus-ring-width: 3px;

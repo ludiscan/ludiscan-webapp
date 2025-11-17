@@ -4,7 +4,7 @@
  */
 
 /* Import generated design tokens (CSS Custom Properties) */
-@import './tokens/tokens.css';
+@import url('./tokens/tokens.css');
 
 /**
  * Base styles with accessibility and responsive design
@@ -20,29 +20,27 @@ html {
   scroll-behavior: smooth;
 
   /* Prevent text size adjustment on orientation change */
-  -webkit-text-size-adjust: 100%;
-  -moz-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
 
 body {
-  margin: 0;
   padding: 0;
+  margin: 0;
+
+  /* Prevent horizontal overflow */
+  overflow-x: hidden;
+
+  /* Use system fonts for better performance and native feel */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
 
   /* Fluid typography using design tokens */
   font-size: var(--typography-font-size-base);
-  line-height: var(--typography-line-height-normal); /* WCAG 2.2 recommended 1.5 */
   font-weight: var(--typography-font-weight-regular);
-
-  /* Use system fonts for better performance and native feel */
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  line-height: var(--typography-line-height-normal); /* WCAG 2.2 recommended 1.5 */
 
   /* Improve font rendering */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  /* Prevent horizontal overflow */
-  overflow-x: hidden;
 }
 
 /**
@@ -86,45 +84,45 @@ blockquote {
  * Headings with fluid typography
  */
 h1 {
-  font-size: var(--typography-font-size-4xl);
-  line-height: var(--typography-line-height-tight);
-  font-weight: var(--typography-font-weight-bold);
   margin-block: var(--spacing-lg) var(--spacing-md);
+  font-size: var(--typography-font-size-4xl);
+  font-weight: var(--typography-font-weight-bold);
+  line-height: var(--typography-line-height-tight);
 }
 
 h2 {
-  font-size: var(--typography-font-size-3xl);
-  line-height: var(--typography-line-height-tight);
-  font-weight: var(--typography-font-weight-bold);
   margin-block: var(--spacing-lg) var(--spacing-md);
+  font-size: var(--typography-font-size-3xl);
+  font-weight: var(--typography-font-weight-bold);
+  line-height: var(--typography-line-height-tight);
 }
 
 h3 {
-  font-size: var(--typography-font-size-2xl);
-  line-height: var(--typography-line-height-tight);
-  font-weight: var(--typography-font-weight-semibold);
   margin-block: var(--spacing-md) var(--spacing-sm);
+  font-size: var(--typography-font-size-2xl);
+  font-weight: var(--typography-font-weight-semibold);
+  line-height: var(--typography-line-height-tight);
 }
 
 h4 {
-  font-size: var(--typography-font-size-xl);
-  line-height: var(--typography-line-height-normal);
-  font-weight: var(--typography-font-weight-semibold);
   margin-block: var(--spacing-md) var(--spacing-sm);
+  font-size: var(--typography-font-size-xl);
+  font-weight: var(--typography-font-weight-semibold);
+  line-height: var(--typography-line-height-normal);
 }
 
 h5 {
-  font-size: var(--typography-font-size-lg);
-  line-height: var(--typography-line-height-normal);
-  font-weight: var(--typography-font-weight-medium);
   margin-block: var(--spacing-sm) var(--spacing-xs);
+  font-size: var(--typography-font-size-lg);
+  font-weight: var(--typography-font-weight-medium);
+  line-height: var(--typography-line-height-normal);
 }
 
 h6 {
-  font-size: var(--typography-font-size-base);
-  line-height: var(--typography-line-height-normal);
-  font-weight: var(--typography-font-weight-medium);
   margin-block: var(--spacing-sm) var(--spacing-xs);
+  font-size: var(--typography-font-size-base);
+  font-weight: var(--typography-font-weight-medium);
+  line-height: var(--typography-line-height-normal);
 }
 
 /**
@@ -151,8 +149,8 @@ a:focus-visible {
  * Buttons with minimum touch target size (WCAG 2.2 SC 2.5.8)
  */
 button {
-  min-block-size: var(--touch-target-min-size-mobile); /* 44px for mobile */
   min-inline-size: var(--touch-target-min-size-mobile); /* 44px for mobile */
+  min-block-size: var(--touch-target-min-size-mobile); /* 44px for mobile */
   cursor: pointer;
 }
 
@@ -167,9 +165,9 @@ button:disabled {
 input,
 textarea,
 select {
-  font-size: var(--typography-font-size-base);
   padding-block: var(--spacing-sm);
   padding-inline: var(--spacing-sm);
+  font-size: var(--typography-font-size-base);
   border: var(--border-width-thin) solid var(--color-neutral-80);
   border-radius: var(--border-radius-sm);
 }
@@ -228,26 +226,26 @@ pre {
 
 pre {
   padding: var(--spacing-md);
-  border-radius: var(--border-radius-md);
   overflow-x: auto;
   background-color: var(--color-neutral-95);
+  border-radius: var(--border-radius-md);
 }
 
 /**
  * Tables with logical properties
  */
 table {
-  border-collapse: collapse;
   inline-size: 100%;
   margin-block: var(--spacing-md);
+  border-collapse: collapse;
 }
 
 th,
 td {
   padding-block: var(--spacing-sm);
   padding-inline: var(--spacing-md);
-  border-block-end: var(--border-width-thin) solid var(--color-neutral-90);
   text-align: start;
+  border-block-end: var(--border-width-thin) solid var(--color-neutral-90);
 }
 
 th {
@@ -265,9 +263,9 @@ th {
   padding: 0;
   margin: -1px;
   overflow: hidden;
-  clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border-width: 0;
+  clip: rect(0, 0, 0, 0);
 }
 
 /**
@@ -277,9 +275,9 @@ th {
   *,
   *::before,
   *::after {
+    transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
 }
@@ -290,6 +288,7 @@ th {
 @media (prefers-color-scheme: dark) {
   :root {
     /* Override token values for dark mode if needed */
+
     /* This will be enhanced when we implement theme switching */
   }
 }
@@ -297,7 +296,7 @@ th {
 /**
  * High contrast mode support
  */
-@media (prefers-contrast: high) {
+@media (prefers-contrast: more) {
   * {
     border-width: var(--border-width-thick);
   }

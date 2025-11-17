@@ -38,7 +38,6 @@ export const TextField = styled(Component)`
   /* Use logical properties for padding (Design Implementation Guide Rule 4) */
   padding-block: var(--spacing-sm);
   padding-inline: var(--spacing-sm);
-
   ${({ fontSize, theme }) => `font-size: ${fontSize ?? theme.typography.fontSize.base}`};
   font-weight: ${({ fontWeight }) => fontWeight || 'normal'};
   text-shadow: ${({ shadow }) => (shadow ? '0 0 4px rgba(0, 0, 0, 0.2)' : 'none')};

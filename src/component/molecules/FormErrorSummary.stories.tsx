@@ -147,8 +147,7 @@ export const LongMessages: Story = {
     errors: [
       {
         fieldId: 'description',
-        message:
-          '説明文は最大500文字までです。現在の文字数は650文字です。150文字削減してください。重要な情報のみを含めるようにしてください。',
+        message: '説明文は最大500文字までです。現在の文字数は650文字です。150文字削減してください。重要な情報のみを含めるようにしてください。',
       },
       {
         fieldId: 'terms',
@@ -173,13 +172,13 @@ export const WithFormFields: Story = {
 
       <form>
         <div style={{ marginBottom: '1rem' }}>
-          <label htmlFor="email" style={{ display: 'block', marginBottom: '0.5rem' }}>
+          <label htmlFor='email' style={{ display: 'block', marginBottom: '0.5rem' }}>
             Email
           </label>
           <input
-            type="email"
-            id="email"
-            aria-invalid="true"
+            type='email'
+            id='email'
+            aria-invalid='true'
             style={{
               width: '100%',
               padding: '0.5rem',
@@ -190,13 +189,13 @@ export const WithFormFields: Story = {
         </div>
 
         <div style={{ marginBottom: '1rem' }}>
-          <label htmlFor="password" style={{ display: 'block', marginBottom: '0.5rem' }}>
+          <label htmlFor='password' style={{ display: 'block', marginBottom: '0.5rem' }}>
             Password
           </label>
           <input
-            type="password"
-            id="password"
-            aria-invalid="true"
+            type='password'
+            id='password'
+            aria-invalid='true'
             style={{
               width: '100%',
               padding: '0.5rem',
@@ -207,13 +206,13 @@ export const WithFormFields: Story = {
         </div>
 
         <div style={{ marginBottom: '1rem' }}>
-          <label htmlFor="confirm-password" style={{ display: 'block', marginBottom: '0.5rem' }}>
+          <label htmlFor='confirm-password' style={{ display: 'block', marginBottom: '0.5rem' }}>
             Confirm Password
           </label>
           <input
-            type="password"
-            id="confirm-password"
-            aria-invalid="true"
+            type='password'
+            id='confirm-password'
+            aria-invalid='true'
             style={{
               width: '100%',
               padding: '0.5rem',
