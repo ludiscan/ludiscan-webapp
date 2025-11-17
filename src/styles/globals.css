@@ -146,11 +146,10 @@ a:focus-visible {
 }
 
 /**
- * Buttons with minimum touch target size (WCAG 2.2 SC 2.5.8)
+ * Buttons - basic cursor behavior
+ * Touch target size is handled by individual button components via ::before pseudo-element
  */
 button {
-  min-inline-size: var(--touch-target-min-size-mobile); /* 44px for mobile */
-  min-block-size: var(--touch-target-min-size-mobile); /* 44px for mobile */
   cursor: pointer;
 }
 

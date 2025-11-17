@@ -168,7 +168,6 @@ export const Button = styled(Component)`
 
   /* Use logical properties for sizing (Design Implementation Guide Rule 4) */
   inline-size: ${(props) => ButtonWidth(props)};
-  min-inline-size: var(--touch-target-min-size-mobile);
   block-size: ${(props) => ButtonHeight(props)};
 
   padding: ${(props) => ButtonPadding(props)};
