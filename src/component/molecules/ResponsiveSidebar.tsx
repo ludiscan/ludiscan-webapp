@@ -113,10 +113,12 @@ const Component: FC<ResponsiveSidebarProps> = ({ className, children, onChange }
   }, [isOpen]);
 
   return isOpen !== undefined ? (
-    <div className={`${className} ${isOpen ? 'visible' : ''}`}>
+    <>
       <ToggleButton onClick={toggleSidebar} isOpen={isOpen} />
-      {children}
-    </div>
+      <div className={`${className} ${isOpen ? 'visible' : ''}`}>
+        {children}
+      </div>
+    </>
   ) : null;
 };
 
