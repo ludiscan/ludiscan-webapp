@@ -44,6 +44,7 @@ const ToggleButton = styled(ToggleButtonComponent)`
   /* Fixed positioning to stay visible when sidebar is closed */
   position: fixed;
   inset-block-start: var(--spacing-md); /* 16px from top */
+
   /* Use logical properties (Design Implementation Guide Rule 4) */
   inset-inline-start: 0; /* Start from left edge */
   z-index: ${zIndexes.sidebar + 1};
@@ -51,7 +52,6 @@ const ToggleButton = styled(ToggleButtonComponent)`
   /* Ensure minimum touch target size (Design Guide Rule 10) */
   inline-size: 56px; /* Increased from 46px to accommodate touch target */
   block-size: 44px; /* Increased from 32px for WCAG 2.2 SC 2.5.8 */
-
   background: ${({ theme }) => theme.colors.surface.base};
   border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
   box-shadow: 2px 0 4px rgb(0 0 0 / 20%);
@@ -115,20 +115,18 @@ const Component: FC<ResponsiveSidebarProps> = ({ className, children, onChange }
   return isOpen !== undefined ? (
     <>
       <ToggleButton onClick={toggleSidebar} isOpen={isOpen} />
-      <div className={`${className} ${isOpen ? 'visible' : ''}`}>
-        {children}
-      </div>
+      <div className={`${className} ${isOpen ? 'visible' : ''}`}>{children}</div>
     </>
   ) : null;
 };
 
 export const ResponsiveSidebar = styled(Component)`
   position: fixed;
+
   /* Use logical properties for positioning (Design Implementation Guide Rule 4) */
   inset-block-start: 0;
   inset-inline-start: 0;
   z-index: ${zIndexes.sidebar};
-
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -140,7 +138,6 @@ export const ResponsiveSidebar = styled(Component)`
   /* Use logical properties for padding */
   padding-block: var(--spacing-md);
   padding-inline: var(--spacing-md);
-
   overflow-y: auto;
   background-color: ${({ theme }) => theme.colors.surface.base};
   box-shadow: 0 2px 4px rgb(0 0 0 / 30%);

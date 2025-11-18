@@ -175,7 +175,7 @@ export const DisabledField: Story = {
 export const InteractiveValidation: Story = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   args: {} as any,
-   
+
   render: () => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const [email, setEmail] = useState('');
@@ -216,7 +216,7 @@ export const InteractiveValidation: Story = {
     }));
 
     return (
-      <form onSubmit={handleSubmit}>
+      <form>
         <FormErrorSummary errors={formErrors} show={formErrors.length > 0} />
 
         <FormFieldWithError label='Email Address' fieldId='email' error={errors.email} required>
@@ -227,7 +227,7 @@ export const InteractiveValidation: Story = {
           <input type='password' value={password} onChange={(e) => setPassword(e.target.value)} onBlur={validateForm} />
         </FormFieldWithError>
 
-        <Button type='submit' scheme='primary' fontSize='base'>
+        <Button scheme='primary' fontSize='base' onClick={handleSubmit}>
           送信
         </Button>
       </form>
@@ -241,7 +241,7 @@ export const InteractiveValidation: Story = {
 export const CompleteFormExample: Story = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   args: {} as any,
-   
+
   render: () => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const [showErrors, setShowErrors] = useState(true);

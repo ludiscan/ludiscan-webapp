@@ -170,7 +170,6 @@ export const Button = styled(Component)`
   /* Use logical properties for sizing (Design Implementation Guide Rule 4) */
   inline-size: ${(props) => ButtonWidth(props)};
   block-size: ${(props) => ButtonHeight(props)};
-
   padding: ${(props) => ButtonPadding(props)};
   font-size: ${(props) => props.theme.typography.fontSize[props.fontSize] || commonTypography.fontSize.base};
   font-weight: bold;
@@ -186,15 +185,15 @@ export const Button = styled(Component)`
    * Material Design 3 approach: visual size can be compact, but touch target is 44×44px
    */
   &::before {
-    content: '';
     position: absolute;
     inset-block-start: 50%;
     inset-inline-start: 50%;
-    transform: translate(-50%, -50%);
-    min-inline-size: var(--touch-target-min-size-mobile); /* 44px */
-    min-block-size: var(--touch-target-min-size-mobile); /* 44px */
     inline-size: 100%;
+    min-inline-size: var(--touch-target-min-size-mobile); /* 44px */
     block-size: 100%;
+    min-block-size: var(--touch-target-min-size-mobile); /* 44px */
+    content: '';
+    transform: translate(-50%, -50%);
   }
 
   &.primary {

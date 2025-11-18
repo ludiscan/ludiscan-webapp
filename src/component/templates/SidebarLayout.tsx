@@ -237,6 +237,7 @@ export const SidebarLayout = styled(Component)`
     display: flex;
     align-items: center;
     justify-content: center;
+
     /* Use logical property for auto margin (Design Implementation Guide Rule 4) */
     margin-inline-start: auto;
     color: ${({ theme }) => theme.colors.text.secondary};
@@ -247,6 +248,7 @@ export const SidebarLayout = styled(Component)`
     display: flex;
     flex-direction: column;
     gap: var(--spacing-xs);
+
     /* Use logical properties for padding and margin */
     padding-inline-start: var(--spacing-2xl);
     margin-block-start: var(--spacing-xs);
