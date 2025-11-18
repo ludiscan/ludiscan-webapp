@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
-import { useId } from 'react';
+import { cloneElement, isValidElement, useId } from 'react';
 
-import type { FC, ReactNode } from 'react';
+import type { FC, ReactElement } from 'react';
 
 import { FlexColumn } from '@src/component/atoms/Flex';
 
@@ -24,8 +24,8 @@ export interface FormFieldWithErrorProps {
   label: string;
   /** Field ID (auto-generated if not provided) */
   fieldId?: string;
-  /** The form input element */
-  children: ReactNode;
+  /** The form input element (must be a single React element) */
+  children: ReactElement;
   /** Error message (shown when present) */
   error?: string;
   /** Optional hint text */
@@ -179,20 +179,16 @@ export const FormFieldWithError: FC<FormFieldWithErrorProps> = ({ label, fieldId
   // Combine hint and error IDs for aria-describedby
   const describedBy = [hintId, errorId].filter(Boolean).join(' ');
 
-  // Clone children to add necessary ARIA attributes
-  const childWithProps =
-    typeof children === 'object' && children !== null && 'props' in children
-      ? {
-          ...children,
-          props: {
-            ...children.props,
-            id: fieldId,
-            'aria-describedby': describedBy || undefined,
-            'aria-invalid': error ? 'true' : 'false',
-            'aria-required': required ? 'true' : undefined,
-          },
-        }
-      : children;
+  // Clone child element to add necessary ARIA attributes
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const childWithProps = isValidElement(children)
+    ? cloneElement(children, {
+        id: fieldId,
+        'aria-describedby': describedBy || undefined,
+        'aria-invalid': error ? 'true' : 'false',
+        'aria-required': required ? 'true' : undefined,
+      } as any)
+    : children;
 
   return (
     <FieldContainer gap={0} className={className}>

@@ -172,6 +172,7 @@ export const DisabledField: Story = {
  * Interactive validation example
  */
 export const InteractiveValidation: Story = {
+  args: {} as any,
   render: () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -232,6 +233,7 @@ export const InteractiveValidation: Story = {
  * Complete form example with error summary
  */
 export const CompleteFormExample: Story = {
+  args: {} as any,
   render: () => {
     const [showErrors, setShowErrors] = useState(true);
 

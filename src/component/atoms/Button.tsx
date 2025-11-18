@@ -8,7 +8,7 @@ import { commonTypography } from '@src/styles/commonTheme';
 
 export type ButtonProps = {
   className?: string | undefined;
-  onClick: (() => Promise<void> | void) | MouseEventHandler<HTMLButtonElement>;
+  onClick?: (() => Promise<void> | void) | MouseEventHandler<HTMLButtonElement>;
   scheme: 'primary' | 'surface' | 'warning' | 'none' | 'error' | 'secondary' | 'tertiary';
   fontSize: keyof typeof commonTypography.fontSize;
   width?: 'full' | 'fit-content';
@@ -17,6 +17,7 @@ export type ButtonProps = {
   children: ReactNode;
   disabled?: boolean | undefined;
   title?: string;
+  type?: 'button' | 'submit' | 'reset';
 };
 
 export const ButtonIconSize = (props: Pick<ButtonProps, 'fontSize'>) => {
@@ -50,7 +51,7 @@ export const ButtonIconSize = (props: Pick<ButtonProps, 'fontSize'>) => {
 };
 
 const Component: FC<ButtonProps> = (props) => {
-  const { className, onClick, scheme, children, disabled = false, title } = props;
+  const { className, onClick, scheme, children, disabled = false, title, type = 'button' } = props;
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       // stopping propagation to prevent parent click event by default
@@ -58,13 +59,13 @@ const Component: FC<ButtonProps> = (props) => {
       if (disabled) {
         return;
       }
-      onClick(e);
+      onClick?.(e);
     },
     [disabled, onClick],
   );
   return (
     <IconContext.Provider value={{ size: ButtonIconSize(props) }}>
-      <button className={`${className} ${scheme}`} onClick={handleClick} disabled={disabled} title={title}>
+      <button className={`${className} ${scheme}`} onClick={handleClick} disabled={disabled} title={title} type={type}>
         {children}
       </button>
     </IconContext.Provider>
