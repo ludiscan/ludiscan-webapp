@@ -3,7 +3,6 @@ import { FormErrorSummary } from './FormErrorSummary';
 import type { FormError } from './FormErrorSummary';
 import type { Meta, StoryObj } from '@storybook/react';
 
-
 const meta = {
   title: 'Molecules/FormErrorSummary',
   component: FormErrorSummary,

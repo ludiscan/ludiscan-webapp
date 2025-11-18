@@ -8,7 +8,6 @@ import type { Meta, StoryObj } from '@storybook/react';
 
 import { Button } from '@src/component/atoms/Button';
 
-
 const meta = {
   title: 'Molecules/FormFieldWithError',
   component: FormFieldWithError,
