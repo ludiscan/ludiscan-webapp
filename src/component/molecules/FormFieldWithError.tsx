@@ -180,13 +180,13 @@ export const FormFieldWithError: FC<FormFieldWithErrorProps> = ({ label, fieldId
   const describedBy = [hintId, errorId].filter(Boolean).join(' ');
 
   // Clone child element to add necessary ARIA attributes
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const childWithProps = isValidElement(children)
     ? cloneElement(children, {
         id: fieldId,
         'aria-describedby': describedBy || undefined,
         'aria-invalid': error ? 'true' : 'false',
         'aria-required': required ? 'true' : undefined,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any)
     : children;
 
