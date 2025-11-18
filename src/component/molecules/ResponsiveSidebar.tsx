@@ -41,22 +41,30 @@ const ToggleButtonComponent = ({ className, onClick, isOpen }: { className?: str
   );
 };
 const ToggleButton = styled(ToggleButtonComponent)`
-  position: relative;
-  top: 2px;
+  /* Fixed positioning to stay visible when sidebar is closed */
+  position: fixed;
+  inset-block-start: var(--spacing-md); /* 16px from top */
   /* Use logical properties (Design Implementation Guide Rule 4) */
-  inset-inline-start: ${dimensions.sidebarWidth - 50}px;
+  inset-inline-start: 0; /* Start from left edge */
   z-index: ${zIndexes.sidebar + 1};
 
   /* Ensure minimum touch target size (Design Guide Rule 10) */
   inline-size: 56px; /* Increased from 46px to accommodate touch target */
   block-size: 44px; /* Increased from 32px for WCAG 2.2 SC 2.5.8 */
 
-  transform: translateX(-50%);
+  background: ${({ theme }) => theme.colors.surface.base};
+  border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+  box-shadow: 2px 0 4px rgb(0 0 0 / 20%);
   transition: all 0.25s ease-in-out;
 
   &.closed {
+    /* When closed, button is at left edge */
+    inset-inline-start: 0;
+  }
+
+  &:not(.closed) {
+    /* When open, button moves with sidebar */
     inset-inline-start: ${dimensions.sidebarWidth}px;
-    background: ${({ theme }) => theme.colors.surface.base};
   }
 
   &__button {
