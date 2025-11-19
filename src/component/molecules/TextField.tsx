@@ -35,16 +35,30 @@ const Component = ({ className, value, onChange, placeholder, type = 'text', lab
 };
 
 export const TextField = styled(Component)`
-  padding: 6px;
+  /* Use logical properties for padding (Design Implementation Guide Rule 4) */
+  padding-block: var(--spacing-sm);
+  padding-inline: var(--spacing-sm);
   ${({ fontSize, theme }) => `font-size: ${fontSize ?? theme.typography.fontSize.base}`};
   font-weight: ${({ fontWeight }) => fontWeight || 'normal'};
   text-shadow: ${({ shadow }) => (shadow ? '0 0 4px rgba(0, 0, 0, 0.2)' : 'none')};
   background: unset;
-  border: 1px solid ${({ theme }) => theme.colors.border.strong};
-  border-radius: 4px;
+  border: var(--border-width-thin) solid ${({ theme }) => theme.colors.border.strong};
+  border-radius: var(--border-radius-sm);
 
+  /* Accessible focus styles (WCAG 2.2, Design Guide Rule 5) */
   &:focus {
-    outline: none;
-    border: 1px solid ${({ theme }) => theme.colors.primary.main};
+    outline: var(--accessibility-focus-ring-width) solid ${({ theme }) => theme.colors.primary.main};
+    outline-offset: var(--accessibility-focus-ring-offset);
+    border-color: ${({ theme }) => theme.colors.primary.main};
+  }
+
+  &:focus-visible {
+    outline: var(--accessibility-focus-ring-width) solid ${({ theme }) => theme.colors.primary.main};
+    outline-offset: var(--accessibility-focus-ring-offset);
+  }
+
+  /* Invalid state styling (Design Guide Rule 7) */
+  &[aria-invalid='true'] {
+    border-color: ${({ theme }) => theme.colors.semantic.error.main};
   }
 `;

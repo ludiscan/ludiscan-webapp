@@ -45,17 +45,19 @@ const Component: FC<MenuSideBarProps> = ({ className, currentMenu }) => {
 
 export const HeatmapMenuSideBar = memo(
   styled(Component)`
-    width: 38px;
-    height: 100%;
-    padding: 8px;
+    /* Use logical properties (Design Implementation Guide Rule 4) */
+    inline-size: 60px; /* Increased from 38px to accommodate 44px touch target + padding */
+    block-size: 100%;
+    padding-block: var(--spacing-sm);
+    padding-inline: var(--spacing-sm);
     background: ${({ theme }) => theme.colors.surface.base};
-    border-right: ${({ theme }) => `1px solid ${theme.colors.border.default}`};
+    border-inline-end: ${({ theme }) => `1px solid ${theme.colors.border.default}`};
 
     &__button {
       align-items: center;
       justify-content: center;
-      width: 100%;
-      height: 38px;
+      inline-size: 100%;
+      block-size: 44px; /* Match touch target height */
       transition: background 0.2s;
 
       &:hover {

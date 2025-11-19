@@ -35,7 +35,9 @@
     "generate:api-schemes": "bunx openapi-typescript swagger.json --output generated/api.d.ts",
     "generate:api-schemes:local-fetch": "bunx openapi-typescript http://localhost:3211/swagger/api/v0/json --output generated/api.d.ts && eslint generated/api.d.ts --fix && prettier --write generated/api.d.ts",
     "build:heatmap-bundle": "bun scripts/create-heatmap-bundle.js",
-    "prebuild:prod": "bun run build:heatmap-bundle"
+    "prebuild:prod": "bun run build:heatmap-bundle",
+    "tokens:build": "style-dictionary build --config style-dictionary.config.js",
+    "tokens:watch": "style-dictionary build --config style-dictionary.config.js --watch"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -107,6 +109,7 @@
     "raw-loader": "^4.0.2",
     "rimraf": "^6.0.1",
     "storybook": "^9.1.8",
+    "style-dictionary": "^5.1.1",
     "stylelint": "^16.18.0",
     "stylelint-config-recess-order": "^6.0.0",
     "stylelint-config-standard": "^38.0.0",
