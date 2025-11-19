@@ -1,0 +1,308 @@
+/**
+ * Global styles and design tokens
+ * Following Material Design 3, WCAG 2.2, and Design Implementation Guide
+ */
+
+/* Import generated design tokens (CSS Custom Properties) */
+@import url('./tokens/tokens.css');
+
+/**
+ * Base styles with accessibility and responsive design
+ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  /* Enable smooth scrolling for accessibility */
+  scroll-behavior: smooth;
+
+  /* Prevent text size adjustment on orientation change */
+  text-size-adjust: 100%;
+}
+
+body {
+  padding: 0;
+  margin: 0;
+
+  /* Prevent horizontal overflow */
+  overflow-x: hidden;
+
+  /* Use system fonts for better performance and native feel */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+
+  /* Fluid typography using design tokens */
+  font-size: var(--typography-font-size-base);
+  font-weight: var(--typography-font-weight-regular);
+  line-height: var(--typography-line-height-normal); /* WCAG 2.2 recommended 1.5 */
+
+  /* Improve font rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/**
+ * Accessibility: Focus visible styles (WCAG 2.2 compliant)
+ * Uses dynamic theme colors from Emotion theme
+ */
+*:focus-visible {
+  outline: var(--accessibility-focus-ring-width) solid var(--theme-colors-primary-main);
+  outline-offset: var(--accessibility-focus-ring-offset);
+  border-radius: var(--border-radius-sm);
+}
+
+/**
+ * Remove default focus outline for mouse users (but keep for keyboard)
+ * This is handled by :focus-visible above
+ */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/**
+ * Logical properties for text alignment (RTL/LTR support)
+ */
+[dir='ltr'] {
+  text-align: start;
+}
+
+[dir='rtl'] {
+  text-align: start;
+}
+
+/**
+ * Improve readability with max line length
+ */
+p,
+li,
+blockquote {
+  max-inline-size: var(--layout-max-line-length); /* 65ch for optimal readability */
+}
+
+/**
+ * Headings with fluid typography
+ */
+h1 {
+  margin-block: var(--spacing-lg) var(--spacing-md);
+  font-size: var(--typography-font-size-4xl);
+  font-weight: var(--typography-font-weight-bold);
+  line-height: var(--typography-line-height-tight);
+}
+
+h2 {
+  margin-block: var(--spacing-lg) var(--spacing-md);
+  font-size: var(--typography-font-size-3xl);
+  font-weight: var(--typography-font-weight-bold);
+  line-height: var(--typography-line-height-tight);
+}
+
+h3 {
+  margin-block: var(--spacing-md) var(--spacing-sm);
+  font-size: var(--typography-font-size-2xl);
+  font-weight: var(--typography-font-weight-semibold);
+  line-height: var(--typography-line-height-tight);
+}
+
+h4 {
+  margin-block: var(--spacing-md) var(--spacing-sm);
+  font-size: var(--typography-font-size-xl);
+  font-weight: var(--typography-font-weight-semibold);
+  line-height: var(--typography-line-height-normal);
+}
+
+h5 {
+  margin-block: var(--spacing-sm) var(--spacing-xs);
+  font-size: var(--typography-font-size-lg);
+  font-weight: var(--typography-font-weight-medium);
+  line-height: var(--typography-line-height-normal);
+}
+
+h6 {
+  margin-block: var(--spacing-sm) var(--spacing-xs);
+  font-size: var(--typography-font-size-base);
+  font-weight: var(--typography-font-weight-medium);
+  line-height: var(--typography-line-height-normal);
+}
+
+/**
+ * Links with accessible focus and hover states
+ * Uses dynamic theme colors from Emotion theme
+ */
+a {
+  color: var(--theme-colors-text-link);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--theme-colors-text-link-hover);
+}
+
+a:focus-visible {
+  outline: var(--accessibility-focus-ring-width) solid var(--theme-colors-border-focus);
+  outline-offset: var(--accessibility-focus-ring-offset);
+}
+
+/**
+ * Buttons - basic cursor behavior
+ * Touch target size is handled by individual button components via ::before pseudo-element
+ */
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.38; /* Material Design 3 disabled opacity */
+}
+
+/**
+ * Form inputs with logical properties
+ * Uses dynamic theme colors from Emotion theme
+ */
+input,
+textarea,
+select {
+  padding-block: var(--spacing-sm);
+  padding-inline: var(--spacing-sm);
+  font-size: var(--typography-font-size-base);
+  border: var(--border-width-thin) solid var(--theme-colors-border-default);
+  border-radius: var(--border-radius-sm);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: var(--accessibility-focus-ring-width) solid var(--theme-colors-border-focus);
+  outline-offset: var(--accessibility-focus-ring-offset);
+  border-color: var(--theme-colors-border-interactive);
+}
+
+/**
+ * Invalid input states
+ * Uses dynamic theme colors from Emotion theme
+ */
+input[aria-invalid='true'],
+textarea[aria-invalid='true'],
+select[aria-invalid='true'] {
+  border-color: var(--theme-colors-semantic-error-main);
+}
+
+/**
+ * Lists with logical spacing
+ */
+ul,
+ol {
+  padding-inline-start: var(--spacing-lg);
+  margin-block: var(--spacing-md);
+}
+
+li {
+  margin-block: var(--spacing-xs);
+}
+
+/**
+ * Images and media
+ */
+img,
+video,
+canvas,
+svg {
+  display: block;
+  max-inline-size: 100%;
+  block-size: auto;
+}
+
+/**
+ * Code blocks
+ * Uses dynamic theme colors from Emotion theme
+ */
+code,
+pre {
+  font-family: 'Fira Code', 'Courier New', monospace;
+  font-size: var(--typography-font-size-sm);
+  line-height: 1.6; /* Slightly more spacing for code readability */
+}
+
+pre {
+  padding: var(--spacing-md);
+  overflow-x: auto;
+  background-color: var(--theme-colors-surface-raised);
+  border-radius: var(--border-radius-md);
+}
+
+/**
+ * Tables with logical properties
+ * Uses dynamic theme colors from Emotion theme
+ */
+table {
+  inline-size: 100%;
+  margin-block: var(--spacing-md);
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding-block: var(--spacing-sm);
+  padding-inline: var(--spacing-md);
+  text-align: start;
+  border-block-end: var(--border-width-thin) solid var(--theme-colors-border-subtle);
+}
+
+th {
+  font-weight: var(--typography-font-weight-semibold);
+  background-color: var(--theme-colors-surface-base);
+}
+
+/**
+ * Utility classes for accessibility
+ */
+.sr-only {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  white-space: nowrap;
+  border-width: 0;
+  clip: rect(0, 0, 0, 0);
+}
+
+/**
+ * Reduced motion for accessibility (WCAG 2.2)
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/**
+ * Dark mode support (using prefers-color-scheme)
+ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Override token values for dark mode if needed */
+
+    /* This will be enhanced when we implement theme switching */
+  }
+}
+
+/**
+ * High contrast mode support
+ */
+@media (prefers-contrast: more) {
+  * {
+    border-width: var(--border-width-thick);
+  }
+}

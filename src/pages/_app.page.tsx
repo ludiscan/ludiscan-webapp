@@ -8,6 +8,8 @@ import { Provider } from 'react-redux';
 import type { AppStore } from '@src/store';
 import type { AppProps } from 'next/app';
 
+import '@src/styles/globals.css';
+
 import { ToastProvider } from '@src/component/templates/ToastContext';
 import { env } from '@src/config/env';
 import { LocaleProvider } from '@src/contexts/LocaleContext';
@@ -23,9 +25,10 @@ const Content = styled.div`
 `;
 
 export const InnerContent = styled.div<{ showSidebar?: boolean }>`
+  /* Use logical property for RTL/LTR support (Design Implementation Guide Rule 4) */
   /* stylelint-disable-next-line */
   @media (min-width: ${dimensions.mobileWidth}px) {
-    margin-left: ${(props) => (props.showSidebar !== false ? dimensions.sidebarWidth : 0)}px;
+    margin-inline-start: ${(props) => (props.showSidebar !== false ? dimensions.sidebarWidth : 0)}px;
   }
 `;
 
@@ -42,15 +45,15 @@ export default function App({ Component, pageProps }: AppProps) {
     <>
       <Provider store={storeRef.current}>
         <LocaleProvider>
-          <ToastProvider position={'top-right'}>
-            <QueryClientProvider client={queryClient}>
-              <SharedThemeProvider>
+          <QueryClientProvider client={queryClient}>
+            <SharedThemeProvider>
+              <ToastProvider position={'top-right'}>
                 <Content className={isDesktop === undefined ? '' : isDesktop ? 'desktop' : 'mobile'} style={{ height: '100vh' }} data-testid={'app-content'}>
                   <Component {...pageProps} />
                 </Content>
-              </SharedThemeProvider>
-            </QueryClientProvider>
-          </ToastProvider>
+              </ToastProvider>
+            </SharedThemeProvider>
+          </QueryClientProvider>
         </LocaleProvider>
       </Provider>
       <GoogleTagManager gtmId={env.GTM_ID} />

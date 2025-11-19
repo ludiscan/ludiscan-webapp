@@ -8,7 +8,7 @@ import { commonTypography } from '@src/styles/commonTheme';
 
 export type ButtonProps = {
   className?: string | undefined;
-  onClick: (() => Promise<void> | void) | MouseEventHandler<HTMLButtonElement>;
+  onClick?: (() => Promise<void> | void) | MouseEventHandler<HTMLButtonElement>;
   scheme: 'primary' | 'surface' | 'warning' | 'none' | 'error' | 'secondary' | 'tertiary';
   fontSize: keyof typeof commonTypography.fontSize;
   width?: 'full' | 'fit-content';
@@ -17,6 +17,7 @@ export type ButtonProps = {
   children: ReactNode;
   disabled?: boolean | undefined;
   title?: string;
+  type?: 'button' | 'submit' | 'reset';
 };
 
 export const ButtonIconSize = (props: Pick<ButtonProps, 'fontSize'>) => {
@@ -50,7 +51,7 @@ export const ButtonIconSize = (props: Pick<ButtonProps, 'fontSize'>) => {
 };
 
 const Component: FC<ButtonProps> = (props) => {
-  const { className, onClick, scheme, children, disabled = false, title } = props;
+  const { className, onClick, scheme, children, disabled = false, title, type = 'button' } = props;
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       // stopping propagation to prevent parent click event by default
@@ -58,13 +59,13 @@ const Component: FC<ButtonProps> = (props) => {
       if (disabled) {
         return;
       }
-      onClick(e);
+      onClick?.(e);
     },
     [disabled, onClick],
   );
   return (
     <IconContext.Provider value={{ size: ButtonIconSize(props) }}>
-      <button className={`${className} ${scheme}`} onClick={handleClick} disabled={disabled} title={title}>
+      <button className={`${className} ${scheme}`} onClick={handleClick} disabled={disabled} title={title} type={type}>
         {children}
       </button>
     </IconContext.Provider>
@@ -75,32 +76,33 @@ export const ButtonHeight = (props: Pick<ButtonProps, 'fontSize' | 'scheme'>) =>
   if (props.scheme === 'none') {
     return 'fit-content';
   }
+  // Compact heights - touch target is ensured by ::before pseudo-element
   if (props.fontSize === 'xs') {
-    return '24px';
-  }
-  if (props.fontSize === 'sm') {
     return '28px';
   }
-  if (props.fontSize === 'base') {
+  if (props.fontSize === 'sm') {
     return '32px';
   }
-  if (props.fontSize === 'lg') {
+  if (props.fontSize === 'base') {
     return '36px';
   }
-  if (props.fontSize === 'xl') {
+  if (props.fontSize === 'lg') {
     return '40px';
   }
-  if (props.fontSize === '2xl') {
+  if (props.fontSize === 'xl') {
     return '44px';
+  }
+  if (props.fontSize === '2xl') {
+    return '48px';
   }
   if (props.fontSize === '3xl') {
-    return '44px';
+    return '52px';
   }
   if (props.fontSize === '4xl') {
-    return '44px';
+    return '56px';
   }
   if (props.fontSize === '5xl') {
-    return '44px';
+    return '60px';
   }
 };
 
@@ -112,19 +114,20 @@ const ButtonWidth = (props: ButtonProps) => {
 };
 
 const ButtonPadding = (props: ButtonProps) => {
+  // Use logical properties for padding (Design Implementation Guide Rule 4)
   if (props.scheme === 'none') {
     return '2px';
   }
   if (props.fontSize === 'xs') {
-    return '0 12px';
+    return 'var(--spacing-xs) var(--spacing-sm)';
   }
   if (props.fontSize === 'sm') {
-    return '0 14px';
+    return 'var(--spacing-xs) var(--spacing-md)';
   }
   if (props.fontSize === 'base') {
-    return '0 16px';
+    return 'var(--spacing-sm) var(--spacing-md)';
   }
-  return '0 22px';
+  return 'var(--spacing-sm) var(--spacing-lg)';
 };
 
 const ButtonBorderRadius = (props: ButtonProps) => {
@@ -159,11 +162,14 @@ const ButtonBorderRadius = (props: ButtonProps) => {
 };
 
 export const Button = styled(Component)`
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: ${(props) => ButtonWidth(props)};
-  height: ${(props) => ButtonHeight(props)};
+
+  /* Use logical properties for sizing (Design Implementation Guide Rule 4) */
+  inline-size: ${(props) => ButtonWidth(props)};
+  block-size: ${(props) => ButtonHeight(props)};
   padding: ${(props) => ButtonPadding(props)};
   font-size: ${(props) => props.theme.typography.fontSize[props.fontSize] || commonTypography.fontSize.base};
   font-weight: bold;
@@ -172,6 +178,23 @@ export const Button = styled(Component)`
   border: none;
   border-radius: ${(props) => ButtonBorderRadius(props)};
   transition: opacity 0.2s;
+
+  /*
+   * Ensure minimum touch target size (WCAG 2.2 SC 2.5.8, Design Guide Rule 10)
+   * Use ::before pseudo-element to expand touch area without changing visual size
+   * Material Design 3 approach: visual size can be compact, but touch target is 44×44px
+   */
+  &::before {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    inline-size: 100%;
+    min-inline-size: var(--touch-target-min-size-mobile); /* 44px */
+    block-size: 100%;
+    min-block-size: var(--touch-target-min-size-mobile); /* 44px */
+    content: '';
+    transform: translate(-50%, -50%);
+  }
 
   &.primary {
     color: ${({ theme }) => theme.colors.primary.contrast};

@@ -237,7 +237,9 @@ export const SidebarLayout = styled(Component)`
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-left: auto;
+
+    /* Use logical property for auto margin (Design Implementation Guide Rule 4) */
+    margin-inline-start: auto;
     color: ${({ theme }) => theme.colors.text.secondary};
     transition: color 0.2s ease-in-out;
   }
@@ -245,23 +247,25 @@ export const SidebarLayout = styled(Component)`
   &__dropdown {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    padding-left: 32px;
-    margin-top: 4px;
+    gap: var(--spacing-xs);
+
+    /* Use logical properties for padding and margin */
+    padding-inline-start: var(--spacing-md);
+    margin-block-start: var(--spacing-xs);
   }
 
   &__dropdownGroup {
-    margin-bottom: 8px;
+    margin-block-end: var(--spacing-sm);
   }
 
   &__dropdownGroupTitle {
-    padding: 8px 4px;
+    padding: 4px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
 
   &__dropdownItem {
-    padding: 8px 12px;
+    padding: 4px 8px;
     cursor: pointer;
     background-color: transparent;
     border-radius: 6px;

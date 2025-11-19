@@ -16,7 +16,6 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
   pull-requests: write
   checks: write
   statuses: write
@@ -30,9 +29,6 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -48,21 +44,6 @@ jobs:
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
-
-      - name: Auto-fix lint and format issues
-        if: github.event_name == 'pull_request'
-        run: |
-          bun run fix
-          bun run format
-
-      - name: Commit and push auto-fixes
-        if: github.event_name == 'pull_request'
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add -A
-          git diff --staged --quiet || git commit -m "chore: auto-fix lint and format issues"
-          git push
 
       - name: Lint
         run: bun run lint

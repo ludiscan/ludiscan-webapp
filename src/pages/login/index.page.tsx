@@ -281,7 +281,7 @@ const IndexPage = styled(Component)`
     position: relative;
     z-index: 1;
     width: 100%;
-    max-width: 320px;
+    max-width: 500px;
     max-height: 600px;
     margin: 20px;
   }
@@ -310,7 +310,7 @@ const IndexPage = styled(Component)`
     gap: 2px;
     align-content: center;
     align-items: center;
-    height: 24px;
+    min-height: 24px;
     padding: 12px 24px;
     text-decoration: none;
     background: ${({ theme }) => theme.colors.surface.base};

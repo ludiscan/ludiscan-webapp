@@ -7,6 +7,9 @@ import { initializeValues } from '@src/modeles/heatmapView';
 const STORAGE_KEY = 'ludiscan';
 
 export function saveToken(token: string): void {
+  // SSR safety check - localStorage is only available in browser
+  if (typeof window === 'undefined') return;
+
   const storage = localStorage.getItem(STORAGE_KEY);
   if (storage) {
     const data = JSON.parse(storage);
@@ -17,6 +20,9 @@ export function saveToken(token: string): void {
 }
 
 export function getToken(): string | null {
+  // SSR safety check - localStorage is only available in browser
+  if (typeof window === 'undefined') return null;
+
   const storage = localStorage.getItem(STORAGE_KEY);
   if (storage) {
     return JSON.parse(storage).token || null;
@@ -25,6 +31,9 @@ export function getToken(): string | null {
 }
 
 export function saveUser(user: User | null): void {
+  // SSR safety check - localStorage is only available in browser
+  if (typeof window === 'undefined') return;
+
   const storage = localStorage.getItem(STORAGE_KEY);
   if (storage) {
     const data = JSON.parse(storage);
@@ -35,6 +44,9 @@ export function saveUser(user: User | null): void {
 }
 
 export function getUser(): User | null {
+  // SSR safety check - localStorage is only available in browser
+  if (typeof window === 'undefined') return null;
+
   const storage = localStorage.getItem(STORAGE_KEY);
   if (storage) {
     return JSON.parse(storage).user || null;
@@ -43,6 +55,9 @@ export function getUser(): User | null {
 }
 
 export function saveCanvasValues(canvas: HeatmapDataState) {
+  // SSR safety check - localStorage is only available in browser
+  if (typeof window === 'undefined') return;
+
   const storage = localStorage.getItem(STORAGE_KEY);
   if (storage) {
     const data = JSON.parse(storage);
@@ -53,6 +68,9 @@ export function saveCanvasValues(canvas: HeatmapDataState) {
 }
 
 export function getCanvasValues(): HeatmapDataState | null {
+  // SSR safety check - localStorage is only available in browser
+  if (typeof window === 'undefined') return null;
+
   const storage = localStorage.getItem(STORAGE_KEY);
   if (storage && JSON.parse(storage).canvas) {
     return JSON.parse(storage).canvas;
@@ -61,17 +79,26 @@ export function getCanvasValues(): HeatmapDataState | null {
 }
 
 export function saveCanvasPartial<T>(key: keyof HeatmapDataState, value: T) {
+  // SSR safety check - localStorage is only available in browser
+  if (typeof window === 'undefined') return;
+
   const storage = getCanvasValues() ?? initializeValues;
   localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...storage, [key]: value }));
 }
 
 export function loadCanvasPartial<T>(key: keyof HeatmapDataState): T {
+  // SSR safety check - localStorage is only available in browser
+  if (typeof window === 'undefined') throw new Error(`localStorage not available in SSR context`);
+
   const storage = getCanvasValues();
   if (storage) return storage[key] as T;
   throw new Error(`No data for key: ${key}`);
 }
 
 export function saveThemeName(theme: 'light' | 'dark'): void {
+  // SSR safety check - localStorage is only available in browser
+  if (typeof window === 'undefined') return;
+
   const storage = localStorage.getItem(STORAGE_KEY);
   if (storage) {
     const data = JSON.parse(storage);
@@ -82,6 +109,9 @@ export function saveThemeName(theme: 'light' | 'dark'): void {
 }
 
 export function getThemeName(): 'light' | 'dark' | null {
+  // SSR safety check - localStorage is only available in browser
+  if (typeof window === 'undefined') return null;
+
   const storage = localStorage.getItem(STORAGE_KEY);
   if (storage) {
     return JSON.parse(storage).theme || null;
@@ -90,6 +120,9 @@ export function getThemeName(): 'light' | 'dark' | null {
 }
 
 export function saveThemeType(themeType: ThemeType): void {
+  // SSR safety check - localStorage is only available in browser
+  if (typeof window === 'undefined') return;
+
   const storage = localStorage.getItem(STORAGE_KEY);
   if (storage) {
     const data = JSON.parse(storage);
@@ -100,6 +133,9 @@ export function saveThemeType(themeType: ThemeType): void {
 }
 
 export function getThemeType(): ThemeType | null {
+  // SSR safety check - localStorage is only available in browser
+  if (typeof window === 'undefined') return null;
+
   const storage = localStorage.getItem(STORAGE_KEY);
   if (storage) {
     return JSON.parse(storage).themeType || null;
@@ -110,6 +146,9 @@ export function getThemeType(): ThemeType | null {
 const MAX_RECENT_MENUS = 5;
 
 export function saveRecentMenu(menuName: string): void {
+  // SSR safety check - localStorage is only available in browser
+  if (typeof window === 'undefined') return;
+
   const storage = localStorage.getItem(STORAGE_KEY);
   const data = storage ? JSON.parse(storage) : {};
   const recentMenus: string[] = data.recentMenus || [];
@@ -124,6 +163,9 @@ export function saveRecentMenu(menuName: string): void {
 }
 
 export function getRecentMenus(): string[] {
+  // SSR safety check - localStorage is only available in browser
+  if (typeof window === 'undefined') return [];
+
   const storage = localStorage.getItem(STORAGE_KEY);
   if (storage) {
     const data = JSON.parse(storage);

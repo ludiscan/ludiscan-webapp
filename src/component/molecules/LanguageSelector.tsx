@@ -18,7 +18,7 @@ const SelectorContainer = styled.div`
 const LanguageButton = styled.button<{ isActive: boolean }>`
   padding: 6px 12px;
   font-size: 14px;
-  color: ${({ theme, isActive }) => (isActive ? '#fff' : theme.colors.text.primary)};
+  color: ${({ theme }) => theme.colors.text.primary};
   cursor: pointer;
   background: ${({ theme, isActive }) => (isActive ? theme.colors.primary : 'transparent')};
   border: 1px solid ${({ theme, isActive }) => (isActive ? theme.colors.primary : theme.colors.border)};
