@@ -1,8 +1,95 @@
 /**
- * Do not edit directly, this file was auto-generated.
+ * Design tokens for ludiscan-webapp
+ *
+ * NOTE: Color variables have been moved to dynamic theme system.
+ * Colors are now generated from Emotion theme via SharedThemeProvider
+ * and injected as CSS custom properties with the prefix --theme-colors-*
+ *
+ * Static design tokens (spacing, typography, borders, etc.) remain here.
+ *
+ * Legacy color tokens below are commented out but kept for reference.
  */
 
 :root {
+  /* ============================================
+   * COLORS - Now dynamically generated from Emotion theme
+   * ============================================
+   * The following color variables are now provided by the theme system:
+   *
+   * Primary colors:
+   *   --theme-colors-primary-main
+   *   --theme-colors-primary-dark
+   *   --theme-colors-primary-light
+   *   --theme-colors-primary-contrast
+   *
+   * Secondary colors:
+   *   --theme-colors-secondary-main
+   *   --theme-colors-secondary-dark
+   *   --theme-colors-secondary-light
+   *   --theme-colors-secondary-contrast
+   *
+   * Tertiary colors:
+   *   --theme-colors-tertiary-main
+   *   --theme-colors-tertiary-dark
+   *   --theme-colors-tertiary-light
+   *   --theme-colors-tertiary-contrast
+   *
+   * Background colors:
+   *   --theme-colors-background-default
+   *   --theme-colors-background-paper
+   *   --theme-colors-background-elevated
+   *   --theme-colors-background-overlay
+   *
+   * Surface colors:
+   *   --theme-colors-surface-base
+   *   --theme-colors-surface-raised
+   *   --theme-colors-surface-sunken
+   *   --theme-colors-surface-interactive
+   *   --theme-colors-surface-hover
+   *   --theme-colors-surface-pressed
+   *
+   * Text colors:
+   *   --theme-colors-text-primary
+   *   --theme-colors-text-secondary
+   *   --theme-colors-text-tertiary
+   *   --theme-colors-text-disabled
+   *   --theme-colors-text-inverse
+   *   --theme-colors-text-link
+   *   --theme-colors-text-link-hover
+   *
+   * Border colors:
+   *   --theme-colors-border-subtle
+   *   --theme-colors-border-default
+   *   --theme-colors-border-strong
+   *   --theme-colors-border-interactive
+   *   --theme-colors-border-focus
+   *
+   * Semantic colors:
+   *   --theme-colors-semantic-success-main
+   *   --theme-colors-semantic-success-light
+   *   --theme-colors-semantic-success-dark
+   *   --theme-colors-semantic-success-contrast
+   *   --theme-colors-semantic-warning-main
+   *   --theme-colors-semantic-warning-light
+   *   --theme-colors-semantic-warning-dark
+   *   --theme-colors-semantic-warning-contrast
+   *   --theme-colors-semantic-error-main
+   *   --theme-colors-semantic-error-light
+   *   --theme-colors-semantic-error-dark
+   *   --theme-colors-semantic-error-contrast
+   *   --theme-colors-semantic-info-main
+   *   --theme-colors-semantic-info-light
+   *   --theme-colors-semantic-info-dark
+   *   --theme-colors-semantic-info-contrast
+   *
+   * Effect colors:
+   *   --theme-colors-effects-shimmer
+   *   --theme-colors-effects-glow
+   *   --theme-colors-effects-shadow
+   *   --theme-colors-effects-highlight
+   */
+
+  /* Legacy color tokens (commented out - now provided by theme system)
   --color-primary-40: #c41e3a;
   --color-primary-80: #e63946;
   --color-primary-90: #ff6b7a;
@@ -33,6 +120,11 @@
   --color-info-40: #4a1942;
   --color-info-60: #6b2d5c;
   --color-info-80: #a876a0;
+  */
+
+  /* ============================================
+   * SPACING - Fluid, responsive spacing scale
+   * ============================================ */
   --spacing-xs: clamp(0.25rem, 0.2rem + 0.25vw, 0.375rem);
   --spacing-sm: clamp(0.5rem, 0.4rem + 0.5vw, 0.75rem);
   --spacing-md: clamp(1rem, 0.875rem + 0.625vw, 1.5rem);
