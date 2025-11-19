@@ -11,6 +11,15 @@ import themes, { toggleTheme } from '@src/modeles/theme';
 import { getThemeName, getThemeType, saveThemeName, saveThemeType } from '@src/utils/localstrage';
 
 /**
+ * Converts camelCase to kebab-case
+ * @param str - The string to convert
+ * @returns The kebab-case string
+ */
+function toKebabCase(str: string): string {
+  return str.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+}
+
+/**
  * Recursively converts a theme object to CSS custom properties
  * @param obj - The object to convert (e.g., theme.colors)
  * @param prefix - The CSS variable prefix (e.g., '--theme-colors')
@@ -20,7 +29,8 @@ function objectToCssVars(obj: Record<string, unknown>, prefix = ''): Record<stri
   const result: Record<string, string> = {};
 
   for (const [key, value] of Object.entries(obj)) {
-    const cssVarName = prefix ? `${prefix}-${key}` : `--theme-${key}`;
+    const kebabKey = toKebabCase(key);
+    const cssVarName = prefix ? `${prefix}-${kebabKey}` : `--theme-${kebabKey}`;
 
     if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
       // Recursively handle nested objects

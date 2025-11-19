@@ -139,7 +139,7 @@ a {
 }
 
 a:hover {
-  color: var(--theme-colors-text-linkHover);
+  color: var(--theme-colors-text-link-hover);
 }
 
 a:focus-visible {
