@@ -45,9 +45,10 @@ body {
 
 /**
  * Accessibility: Focus visible styles (WCAG 2.2 compliant)
+ * Uses dynamic theme colors from Emotion theme
  */
 *:focus-visible {
-  outline: var(--accessibility-focus-ring-width) solid var(--color-primary-80);
+  outline: var(--accessibility-focus-ring-width) solid var(--theme-colors-primary-main);
   outline-offset: var(--accessibility-focus-ring-offset);
   border-radius: var(--border-radius-sm);
 }
@@ -127,9 +128,10 @@ h6 {
 
 /**
  * Links with accessible focus and hover states
+ * Uses dynamic theme colors from Emotion theme
  */
 a {
-  color: var(--color-primary-80);
+  color: var(--theme-colors-text-link);
   text-decoration: underline;
   text-decoration-thickness: 2px;
   text-underline-offset: 2px;
@@ -137,11 +139,11 @@ a {
 }
 
 a:hover {
-  color: var(--color-primary-90);
+  color: var(--theme-colors-text-linkHover);
 }
 
 a:focus-visible {
-  outline: var(--accessibility-focus-ring-width) solid var(--color-primary-80);
+  outline: var(--accessibility-focus-ring-width) solid var(--theme-colors-border-focus);
   outline-offset: var(--accessibility-focus-ring-offset);
 }
 
@@ -160,6 +162,7 @@ button:disabled {
 
 /**
  * Form inputs with logical properties
+ * Uses dynamic theme colors from Emotion theme
  */
 input,
 textarea,
@@ -167,25 +170,26 @@ select {
   padding-block: var(--spacing-sm);
   padding-inline: var(--spacing-sm);
   font-size: var(--typography-font-size-base);
-  border: var(--border-width-thin) solid var(--color-neutral-80);
+  border: var(--border-width-thin) solid var(--theme-colors-border-default);
   border-radius: var(--border-radius-sm);
 }
 
 input:focus,
 textarea:focus,
 select:focus {
-  outline: var(--accessibility-focus-ring-width) solid var(--color-primary-80);
+  outline: var(--accessibility-focus-ring-width) solid var(--theme-colors-border-focus);
   outline-offset: var(--accessibility-focus-ring-offset);
-  border-color: var(--color-primary-80);
+  border-color: var(--theme-colors-border-interactive);
 }
 
 /**
  * Invalid input states
+ * Uses dynamic theme colors from Emotion theme
  */
 input[aria-invalid='true'],
 textarea[aria-invalid='true'],
 select[aria-invalid='true'] {
-  border-color: var(--color-error-60);
+  border-color: var(--theme-colors-semantic-error-main);
 }
 
 /**
@@ -215,6 +219,7 @@ svg {
 
 /**
  * Code blocks
+ * Uses dynamic theme colors from Emotion theme
  */
 code,
 pre {
@@ -226,12 +231,13 @@ pre {
 pre {
   padding: var(--spacing-md);
   overflow-x: auto;
-  background-color: var(--color-neutral-95);
+  background-color: var(--theme-colors-surface-raised);
   border-radius: var(--border-radius-md);
 }
 
 /**
  * Tables with logical properties
+ * Uses dynamic theme colors from Emotion theme
  */
 table {
   inline-size: 100%;
@@ -244,12 +250,12 @@ td {
   padding-block: var(--spacing-sm);
   padding-inline: var(--spacing-md);
   text-align: start;
-  border-block-end: var(--border-width-thin) solid var(--color-neutral-90);
+  border-block-end: var(--border-width-thin) solid var(--theme-colors-border-subtle);
 }
 
 th {
   font-weight: var(--typography-font-weight-semibold);
-  background-color: var(--color-neutral-99);
+  background-color: var(--theme-colors-surface-base);
 }
 
 /**

@@ -10,6 +10,54 @@ import type { FC, ReactNode } from 'react';
 import themes, { toggleTheme } from '@src/modeles/theme';
 import { getThemeName, getThemeType, saveThemeName, saveThemeType } from '@src/utils/localstrage';
 
+/**
+ * Recursively converts a theme object to CSS custom properties
+ * @param obj - The object to convert (e.g., theme.colors)
+ * @param prefix - The CSS variable prefix (e.g., '--theme-colors')
+ * @returns An object mapping CSS variable names to their values
+ */
+function objectToCssVars(obj: Record<string, unknown>, prefix = ''): Record<string, string> {
+  const result: Record<string, string> = {};
+
+  for (const [key, value] of Object.entries(obj)) {
+    const cssVarName = prefix ? `${prefix}-${key}` : `--theme-${key}`;
+
+    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      // Recursively handle nested objects
+      Object.assign(result, objectToCssVars(value as Record<string, unknown>, cssVarName));
+    } else if (typeof value === 'string' || typeof value === 'number') {
+      // Convert to CSS variable
+      result[cssVarName] = String(value);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Applies theme colors as CSS custom properties to the document root
+ * @param theme - The theme object containing colors and other properties
+ */
+function applyThemeToCssVars(theme: Theme): void {
+  if (typeof document === 'undefined') return;
+
+  const root = document.documentElement;
+  const cssVars = objectToCssVars({
+    colors: theme.colors,
+    spacing: theme.spacing,
+    shadows: theme.shadows,
+    borders: theme.borders,
+  });
+
+  // Apply all CSS variables to :root
+  for (const [varName, value] of Object.entries(cssVars)) {
+    root.style.setProperty(varName, value);
+  }
+
+  // Add data attribute for mode (light/dark) for CSS selectors
+  root.setAttribute('data-theme-mode', theme.mode);
+}
+
 // コンテキストの型
 interface SharedThemeContextType {
   theme: Theme;
@@ -63,6 +111,11 @@ export const SharedThemeProvider: FC<SharedThemeProviderProps> = ({ children, in
       saveThemeType(themeType);
     }
   }, [initialTheme, theme, themeType]);
+
+  // Apply theme as CSS custom properties whenever theme changes
+  useEffect(() => {
+    applyThemeToCssVars(theme);
+  }, [theme]);
 
   const value = useMemo(
     () => ({ theme, themeType, toggleTheme: onToggleTheme, setThemeType: onSetThemeType }),
