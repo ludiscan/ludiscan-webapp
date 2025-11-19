@@ -250,7 +250,7 @@ export const SidebarLayout = styled(Component)`
     gap: var(--spacing-xs);
 
     /* Use logical properties for padding and margin */
-    padding-inline-start: var(--spacing-2xl);
+    padding-inline-start: var(--spacing-md);
     margin-block-start: var(--spacing-xs);
   }
 
@@ -259,13 +259,13 @@ export const SidebarLayout = styled(Component)`
   }
 
   &__dropdownGroupTitle {
-    padding: 8px 4px;
+    padding: 4px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
 
   &__dropdownItem {
-    padding: 8px 12px;
+    padding: 4px 8px;
     cursor: pointer;
     background-color: transparent;
     border-radius: 6px;
