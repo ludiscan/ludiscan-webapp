@@ -42,13 +42,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const { token, redirect } = req.query as SocialCallbackQuery;
 
+    // eslint-disable-next-line no-console
+    console.log('[Auth] Social callback - Received request, token present:', !!token);
+
     // Validate token parameter
     if (!token || typeof token !== 'string') {
+      // eslint-disable-next-line no-console
+      console.log('[Auth] Social callback - Missing or invalid token');
       return res.status(400).json({ error: 'Missing or invalid token parameter' });
     }
 
     // Validate token by fetching user profile from backend
-    const apiResponse = await fetch(`${env.NEXT_PUBLIC_API_BASE_URL}/api/v0/login/profile`, {
+    const apiUrl = `${env.NEXT_PUBLIC_API_BASE_URL}/api/v0/login/profile`;
+    // eslint-disable-next-line no-console
+    console.log('[Auth] Social callback - Validating token with:', apiUrl);
+
+    const apiResponse = await fetch(apiUrl, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -56,11 +65,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       },
     });
 
+    // eslint-disable-next-line no-console
+    console.log('[Auth] Social callback - Backend response status:', apiResponse.status);
+
     if (!apiResponse.ok) {
+      // eslint-disable-next-line no-console
+      console.log('[Auth] Social callback - Token validation failed');
       return res.status(401).json({ error: 'Invalid token' });
     }
 
     const userData = await apiResponse.json();
+    // eslint-disable-next-line no-console
+    console.log('[Auth] Social callback - User data received:', userData.email || userData.id);
 
     if (!userData) {
       return res.status(500).json({ error: 'Failed to fetch user data' });
@@ -70,11 +86,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const csrfToken = generateCsrfToken();
 
     // Set httpOnly cookies for security
+    // eslint-disable-next-line no-console
+    console.log('[Auth] Social callback - Setting httpOnly cookies');
     setAuthToken(res, token);
     setCsrfToken(res, csrfToken);
 
     // Determine redirect URL (default to callback success page)
     const redirectUrl = typeof redirect === 'string' && redirect.startsWith('/') ? redirect : '/auth/social-callback';
+    // eslint-disable-next-line no-console
+    console.log('[Auth] Social callback - Redirecting to:', redirectUrl);
 
     // Redirect to client page
     // The client page will validate the session and fetch user data

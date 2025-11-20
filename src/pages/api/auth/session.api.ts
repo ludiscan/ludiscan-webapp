@@ -41,12 +41,21 @@ export default async function handler(
     // Get auth token from httpOnly cookie
     const authToken = getCookie(req.headers.cookie, COOKIE_NAMES.AUTH_TOKEN);
 
+    // eslint-disable-next-line no-console
+    console.log('[Auth] Session check - Cookie found:', !!authToken);
+
     if (!authToken) {
+      // eslint-disable-next-line no-console
+      console.log('[Auth] Session check - No auth token in cookie');
       return res.status(200).json({ authenticated: false });
     }
 
-    // Verify token with backend API
-    const apiResponse = await fetch(`${env.NEXT_PUBLIC_API_BASE_URL}/api/v0/user/me`, {
+    // Verify token with backend API (use same endpoint as social-callback)
+    const apiUrl = `${env.NEXT_PUBLIC_API_BASE_URL}/api/v0/login/profile`;
+    // eslint-disable-next-line no-console
+    console.log('[Auth] Session check - Verifying with backend:', apiUrl);
+
+    const apiResponse = await fetch(apiUrl, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${authToken}`,
@@ -54,12 +63,19 @@ export default async function handler(
       },
     });
 
+    // eslint-disable-next-line no-console
+    console.log('[Auth] Session check - Backend response status:', apiResponse.status);
+
     if (!apiResponse.ok) {
       // Token is invalid or expired
+      // eslint-disable-next-line no-console
+      console.log('[Auth] Session check - Token validation failed');
       return res.status(200).json({ authenticated: false });
     }
 
     const userData = await apiResponse.json();
+    // eslint-disable-next-line no-console
+    console.log('[Auth] Session check - Success, user:', userData.email || userData.id);
 
     return res.status(200).json({
       user: userData,
