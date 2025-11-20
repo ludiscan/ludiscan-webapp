@@ -5,18 +5,21 @@ import { useAppDispatch } from '@src/hooks/useDispatch';
 import { checkSession } from '@src/slices/authSlice';
 
 /**
- * Social Login Callback Success Page
+ * Social Login Callback Page
  *
- * This page is shown after OAuth callback completes.
- * The authentication token has already been set as httpOnly cookie by the API route.
+ * Handles OAuth callback from backend in two ways:
  *
- * Flow:
- * 1. User clicks "Login with Google" -> redirects to backend OAuth URL
- * 2. Backend handles OAuth and redirects to /api/auth/social-callback?token=xxx
- * 3. API route sets httpOnly cookie and redirects here
- * 4. This page validates the session and redirects to home
+ * Case 1: Backend redirects to /api/auth/social-callback?token=xxx (RECOMMENDED)
+ *   - API route sets httpOnly cookie and redirects here without token
+ *   - This page validates session using the cookie
  *
- * Security: Token is never exposed to client JavaScript (XSS protection)
+ * Case 2: Backend redirects to /auth/social-callback?token=xxx (LEGACY)
+ *   - This page receives token in URL
+ *   - Redirects to API route to set httpOnly cookie
+ *   - API route redirects back here without token
+ *   - This page validates session using the cookie
+ *
+ * Security: Token is removed from URL as soon as possible to prevent XSS
  */
 
 export default function SocialCallback() {
@@ -26,9 +29,27 @@ export default function SocialCallback() {
   const [isValidating, setIsValidating] = useState(true);
 
   useEffect(() => {
-    const validateSession = async () => {
+    const handleCallback = async () => {
       try {
+        // Check if we have a token in the URL (legacy backend behavior)
+        const { token } = router.query;
+
+        if (token && typeof token === 'string') {
+          // Legacy flow: Backend redirected here with token in URL
+          // Redirect to API route to set httpOnly cookie
+          // eslint-disable-next-line no-console
+          console.log('[Social Callback] Token in URL detected, redirecting to API route');
+
+          // Redirect to API route which will set cookie and redirect back
+          window.location.href = `/api/auth/social-callback?token=${encodeURIComponent(token)}`;
+          return;
+        }
+
+        // No token in URL means cookie should already be set (new flow)
         // Validate session using httpOnly cookie
+        // eslint-disable-next-line no-console
+        console.log('[Social Callback] No token in URL, validating session with cookie');
+
         const resultAction = await dispatch(checkSession());
 
         if (checkSession.fulfilled.match(resultAction)) {
@@ -57,8 +78,11 @@ export default function SocialCallback() {
       }
     };
 
-    validateSession();
-  }, [dispatch, router]);
+    // Only run when router is ready
+    if (router.isReady) {
+      handleCallback();
+    }
+  }, [dispatch, router, router.isReady, router.query]);
 
   return (
     <div style={{ padding: 24, textAlign: 'center' }}>
