@@ -7,6 +7,7 @@ import type { DocGroup } from '@src/utils/docs/types';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 import { getPublicDocGroups } from '@src/utils/docs/loader';
+import { rateLimitMiddleware, RATE_LIMITS } from '@src/utils/security/rateLimit';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<DocGroup[] | { error: string }>) {
   // Only allow GET requests
@@ -14,6 +15,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     res.setHeader('Allow', ['GET']);
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  // Apply rate limiting
+  const rateLimit = rateLimitMiddleware(RATE_LIMITS.READ_ONLY)(req, res);
+  if (!rateLimit.allowed) return;
 
   try {
     // Only return public docs (where public !== false)

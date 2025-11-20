@@ -1,5 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
+import { rateLimitMiddleware, RATE_LIMITS } from '@src/utils/security/rateLimit';
+
 export interface GitHubRelease {
   id: number;
   tag_name: string;
@@ -25,8 +27,13 @@ let cachedData: { data: GitHubRelease[]; timestamp: number } | null = null;
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<ReleaseResponse | { error: string }>) {
   if (req.method !== 'GET') {
+    res.setHeader('Allow', ['GET']);
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  // Apply rate limiting
+  const rateLimit = rateLimitMiddleware(RATE_LIMITS.READ_ONLY)(req, res);
+  if (!rateLimit.allowed) return;
 
   const now = Date.now();
   const isCacheValid = cachedData && now - cachedData.timestamp < CACHE_DURATION * 1000;

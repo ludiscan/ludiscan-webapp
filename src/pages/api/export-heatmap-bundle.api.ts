@@ -3,6 +3,8 @@ import path from 'path';
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 
+import { rateLimitMiddleware, RATE_LIMITS } from '@src/utils/security/rateLimit';
+
 /**
  * HeatMapViewerコンポーネントをスタンドアロンで使用するためのバンドルJSを提供するAPI
  *
@@ -10,6 +12,10 @@ import type { NextApiRequest, NextApiResponse } from 'next';
  * 本番環境では、ビルド時にバンドルファイルを生成する方法が推奨されます。
  */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // Apply rate limiting
+  const rateLimit = rateLimitMiddleware(RATE_LIMITS.API)(req, res);
+  if (!rateLimit.allowed) return;
+
   try {
     // 事前にビルドされたバンドルファイルのパスを指定
     // この例では、publicフォルダに配置されたファイルを使用
