@@ -82,7 +82,7 @@ function getClientIp(req: NextApiRequest): string {
  */
 export function checkRateLimit(
   req: NextApiRequest,
-  config: RateLimitConfig
+  config: RateLimitConfig,
 ): {
   allowed: boolean;
   remaining: number;

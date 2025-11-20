@@ -23,10 +23,7 @@ interface SessionResponse {
   authenticated: boolean;
 }
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<SessionResponse | { authenticated: false } | { error: string }>
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse<SessionResponse | { authenticated: false } | { error: string }>) {
   // Only allow GET requests
   if (req.method !== 'GET') {
     res.setHeader('Allow', ['GET']);

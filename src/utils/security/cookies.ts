@@ -40,12 +40,7 @@ export const COOKIE_NAMES = {
  * @param value - Cookie value
  * @param options - Additional cookie options
  */
-export function setSecureCookie(
-  res: NextApiResponse,
-  name: string,
-  value: string,
-  options: Partial<SerializeOptions> = {}
-): void {
+export function setSecureCookie(res: NextApiResponse, name: string, value: string, options: Partial<SerializeOptions> = {}): void {
   const cookieOptions: SerializeOptions = {
     ...DEFAULT_COOKIE_OPTIONS,
     ...options,
