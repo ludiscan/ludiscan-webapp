@@ -9,11 +9,17 @@ import type { NextApiResponse } from 'next';
 
 /**
  * Default cookie options for secure cookies
+ *
+ * Development vs Production settings:
+ * - Development: Works with HTTP, sameSite 'lax' for local testing
+ * - Production: Enforces HTTPS, stricter security
+ *
+ * Note: sameSite 'none' requires secure: true, so we use 'lax' for development
  */
 const DEFAULT_COOKIE_OPTIONS: SerializeOptions = {
   httpOnly: true, // Prevent JavaScript access (XSS protection)
   secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-  sameSite: 'lax', // CSRF protection
+  sameSite: 'lax', // CSRF protection, works with top-level navigation
   path: '/',
   maxAge: 60 * 60 * 24 * 7, // 7 days
 };

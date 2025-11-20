@@ -94,11 +94,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Determine redirect URL (default to callback success page)
     const redirectUrl = typeof redirect === 'string' && redirect.startsWith('/') ? redirect : '/auth/social-callback';
     // eslint-disable-next-line no-console
-    console.log('[Auth] Social callback - Redirecting to:', redirectUrl);
+    console.log('[Auth] Social callback - Cookies set, redirecting to:', redirectUrl);
 
-    // Redirect to client page
-    // The client page will validate the session and fetch user data
-    return res.redirect(302, redirectUrl);
+    // Return HTML page that redirects client-side
+    // This ensures cookies are set before navigation
+    res.setHeader('Content-Type', 'text/html');
+    return res.status(200).send(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Authenticating...</title>
+        </head>
+        <body>
+          <p>Authenticating... Please wait.</p>
+          <script>
+            // Wait a moment to ensure cookies are set, then redirect
+            setTimeout(function() {
+              window.location.href = '${redirectUrl}';
+            }, 100);
+          </script>
+        </body>
+      </html>
+    `);
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('[Auth] Social callback error:', error);
