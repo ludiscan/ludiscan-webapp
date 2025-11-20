@@ -121,6 +121,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v0/users/search': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** ユーザーを検索 */
+    get: operations['UsersController_search'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v0/users/{id}': {
     parameters: {
       query?: never;
@@ -2295,7 +2312,6 @@ export interface operations {
       path?: never;
       cookie?: never;
     };
-    requestBody?: never;
     responses: {
       /** @description 成功 */
       200: {
@@ -2306,17 +2322,30 @@ export interface operations {
           'application/json': components['schemas']['UserResponseDto'][];
         };
       };
-      /** @description Bad Request */
-      400: {
+    };
+  };
+  UsersController_search: {
+    parameters: {
+      query: {
+        'q': string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    responses: {
+      /** @description 成功 */
+      200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['DefaultErrorResponse'];
+          'application/json': components['schemas']['UserResponseDto'][];
         };
       };
     };
   };
+
   UsersController_create: {
     parameters: {
       query?: never;
