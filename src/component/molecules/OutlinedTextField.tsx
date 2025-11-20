@@ -43,7 +43,8 @@ const BaseTextFieldOutlined: FC<TextFieldOutlinedProps> = ({ className, value, o
 export const OutlinedTextField = styled(BaseTextFieldOutlined)`
   &__fieldset {
     position: relative;
-    padding: 4px 16px;
+    padding: 4px;
+    margin-inline: 0;
     background: ${({ backgroundColor }) => backgroundColor || 'unset'};
     border: ${({ border = true, theme }) => (border ? `1px solid ${theme.colors.border.strong}` : 'none')};
     border-radius: 4px;
