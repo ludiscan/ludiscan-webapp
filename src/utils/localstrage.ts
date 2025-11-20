@@ -6,9 +6,20 @@ import { initializeValues } from '@src/modeles/heatmapView';
 
 const STORAGE_KEY = 'ludiscan';
 
+/**
+ * @deprecated Authentication tokens are now stored in httpOnly cookies for security.
+ * This function is kept for backward compatibility but should not be used for new code.
+ * Use the authentication API routes (/api/auth/login) instead.
+ *
+ * Security note: Storing tokens in localStorage is vulnerable to XSS attacks.
+ * httpOnly cookies provide better protection.
+ */
 export function saveToken(token: string): void {
   // SSR safety check - localStorage is only available in browser
   if (typeof window === 'undefined') return;
+
+  // eslint-disable-next-line no-console
+  console.warn('[Security] saveToken is deprecated. Tokens are now stored in httpOnly cookies.');
 
   const storage = localStorage.getItem(STORAGE_KEY);
   if (storage) {
@@ -19,6 +30,14 @@ export function saveToken(token: string): void {
   }
 }
 
+/**
+ * @deprecated Authentication tokens are now stored in httpOnly cookies for security.
+ * This function is kept for backward compatibility but should not be used for new code.
+ * Use the authentication API routes (/api/auth/session) instead.
+ *
+ * Security note: Storing tokens in localStorage is vulnerable to XSS attacks.
+ * httpOnly cookies provide better protection.
+ */
 export function getToken(): string | null {
   // SSR safety check - localStorage is only available in browser
   if (typeof window === 'undefined') return null;

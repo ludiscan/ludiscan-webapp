@@ -5,11 +5,10 @@ import type { RootState } from '../store';
 import type { User } from '@src/modeles/user';
 
 import { useAppDispatch } from '@src/hooks/useDispatch';
-import { login, logout, setReady, setToken, setUser } from '@src/slices/authSlice';
-import { getToken, getUser } from '@src/utils/localstrage';
+import { checkSession, login, logout, setUser } from '@src/slices/authSlice';
+import { getUser } from '@src/utils/localstrage';
 
 export type UseAuthType = {
-  token: string | null;
   user: User | null;
   isLoading: boolean;
   isAuthorized: boolean;
@@ -31,7 +30,7 @@ export type UseAuthOptions = {
 
 export function useAuth(props?: UseAuthOptions): UseAuthType {
   const dispatch = useAppDispatch();
-  const { token, user, isLoading, error, ready } = useSelector((state: RootState) => state.auth);
+  const { user, isLoading, error, ready } = useSelector((state: RootState) => state.auth);
 
   const handleLogin = useCallback(
     async (values: LoginType) => {
@@ -51,25 +50,28 @@ export function useAuth(props?: UseAuthOptions): UseAuthType {
     [dispatch, props],
   );
 
+  // Check session on mount (validates httpOnly cookie)
   useEffect(() => {
-    if (token || user) return;
-    const t = getToken();
-    const u = getUser();
-    if (t && u) {
-      dispatch(setUser(u));
-      dispatch(setToken(t));
+    if (user || ready) return;
+
+    // Try to restore from localStorage first (for UX)
+    const storedUser = getUser();
+    if (storedUser) {
+      dispatch(setUser(storedUser));
     }
-    dispatch(setReady(true));
-  }, [dispatch, token, user]);
+
+    // Then validate session with server
+    dispatch(checkSession());
+  }, [dispatch, user, ready]);
 
   const handleLogout = useCallback(async () => {
-    dispatch(logout());
+    await dispatch(logout());
   }, [dispatch]);
+
   return {
-    token,
     user,
     isLoading: isLoading,
-    isAuthorized: token !== null && token !== '',
+    isAuthorized: user !== null,
     login: handleLogin,
     logout: handleLogout,
     error,

@@ -196,7 +196,12 @@ const Content: FC<LoginPageProps> = ({ className }) => {
               <Text text={t('login.title')} fontWeight={'bold'} fontSize={theme.typography.fontSize['3xl']} />
               <Text text={t('login.description')} fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} />
             </InlineFlexColumn>
-            <a className={`${className}__button google-login`} href={`${env.API_BASE_URL}/api/v0/auth/google`} target={'_self'} rel={'noopener noreferrer'}>
+            <a
+              className={`${className}__button google-login`}
+              href={`${env.NEXT_PUBLIC_API_BASE_URL}/api/v0/auth/google`}
+              target={'_self'}
+              rel={'noopener noreferrer'}
+            >
               <Image src={'/google.svg'} alt={'google'} width={20} height={20} />
               <Text
                 className={`${className}__buttonText`}

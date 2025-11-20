@@ -46,7 +46,9 @@
     "@react-three/fiber": "^9.1.2",
     "@reduxjs/toolkit": "^2.6.1",
     "@tanstack/react-query": "^5.73.3",
+    "@types/cookie": "^1.0.0",
     "@types/file-saver": "^2.0.7",
+    "cookie": "^1.0.2",
     "esbuild": "^0.25.4",
     "file-saver": "^2.0.5",
     "framer-motion": "^12.6.5",
@@ -62,7 +64,8 @@
     "react-redux": "^9.2.0",
     "redux": "^5.0.1",
     "remark-gfm": "^4.0.1",
-    "three": "^0.175.0"
+    "three": "^0.175.0",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@argos-ci/cli": "^3.2.1",
