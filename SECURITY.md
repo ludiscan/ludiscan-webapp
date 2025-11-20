@@ -116,8 +116,9 @@ export default async function handler(req, res) {
 ### 5. Environment Variable Validation
 
 **Zod Schema Validation**
-- All environment variables validated at startup
-- Prevents runtime errors from invalid configuration
+- Environment variables validated with flexible build/runtime behavior
+- Uses default values during CI/CD builds (allows empty .env)
+- Validates strictly at production runtime with warnings
 - Type-safe access throughout application
 
 **Configuration:** See `src/config/env.ts`
@@ -126,6 +127,11 @@ export default async function handler(req, res) {
 import { env } from '@src/config/env';
 // env.NEXT_PUBLIC_API_BASE_URL is validated and type-safe
 ```
+
+**Build vs Runtime:**
+- **Build time (CI/CD)**: Uses defaults if env vars not set → build succeeds
+- **Runtime (production)**: Validates actual values → warns if invalid (doesn't crash)
+- This allows CI builds without exposing secrets in build logs
 
 ### 6. API Proxy Pattern
 
