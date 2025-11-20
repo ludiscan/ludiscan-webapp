@@ -1,0 +1,87 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
+
+import { env } from '@src/config/env';
+import { setAuthToken, setCsrfToken } from '@src/utils/security/cookies';
+import { generateCsrfToken } from '@src/utils/security/csrf';
+import { rateLimitMiddleware, RATE_LIMITS } from '@src/utils/security/rateLimit';
+
+/**
+ * Social Login Callback API Route
+ *
+ * This endpoint handles OAuth callbacks from social providers (Google, etc.)
+ * and sets httpOnly cookies for secure token storage.
+ *
+ * Flow:
+ * 1. Backend redirects to: /api/auth/social-callback?token=<access_token>&redirect=<redirect_url>
+ * 2. This API sets httpOnly cookie with the token
+ * 3. Redirects to the client page which validates the session
+ *
+ * Security features:
+ * - Rate limiting
+ * - httpOnly cookies for token storage
+ * - CSRF token generation
+ * - Secure cookie settings (sameSite, secure)
+ */
+
+interface SocialCallbackQuery {
+  token?: string;
+  redirect?: string;
+}
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // Only allow GET requests
+  if (req.method !== 'GET') {
+    res.setHeader('Allow', ['GET']);
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  // Apply rate limiting
+  const rateLimit = rateLimitMiddleware(RATE_LIMITS.AUTH)(req, res);
+  if (!rateLimit.allowed) return;
+
+  try {
+    const { token, redirect } = req.query as SocialCallbackQuery;
+
+    // Validate token parameter
+    if (!token || typeof token !== 'string') {
+      return res.status(400).json({ error: 'Missing or invalid token parameter' });
+    }
+
+    // Validate token by fetching user profile from backend
+    const apiResponse = await fetch(`${env.NEXT_PUBLIC_API_BASE_URL}/api/v0/login/profile`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!apiResponse.ok) {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    const userData = await apiResponse.json();
+
+    if (!userData) {
+      return res.status(500).json({ error: 'Failed to fetch user data' });
+    }
+
+    // Generate CSRF token
+    const csrfToken = generateCsrfToken();
+
+    // Set httpOnly cookies for security
+    setAuthToken(res, token);
+    setCsrfToken(res, csrfToken);
+
+    // Determine redirect URL (default to callback success page)
+    const redirectUrl = typeof redirect === 'string' && redirect.startsWith('/') ? redirect : '/auth/social-callback';
+
+    // Redirect to client page
+    // The client page will validate the session and fetch user data
+    return res.redirect(302, redirectUrl);
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('[Auth] Social callback error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+}

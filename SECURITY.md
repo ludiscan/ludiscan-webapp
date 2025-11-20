@@ -28,6 +28,30 @@ const response = await fetch('/api/auth/login', {
 - `sameSite: 'lax'` - CSRF protection
 - `maxAge: 7 days` - Auto-expiration
 
+**Social Login (OAuth) Security**
+
+For Google and other OAuth providers:
+```typescript
+// Flow:
+// 1. User clicks "Login with Google" -> redirects to backend OAuth URL
+// 2. Backend handles OAuth and redirects to /api/auth/social-callback?token=xxx
+// 3. API route validates token, sets httpOnly cookie, redirects to /auth/social-callback
+// 4. Page validates session and redirects to home
+
+// Token is NEVER exposed to client JavaScript
+```
+
+**API Route:** `/api/auth/social-callback`
+- Validates token with backend
+- Sets httpOnly cookie
+- Generates CSRF token
+- Redirects to success page
+
+**Client Page:** `/auth/social-callback`
+- Validates session using httpOnly cookie
+- No token handling in client code
+- Automatic redirect after validation
+
 ### 2. CSRF (Cross-Site Request Forgery) Protection
 
 **Double Submit Cookie Pattern**

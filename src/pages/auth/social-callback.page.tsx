@@ -1,52 +1,78 @@
-import { useQuery } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
 
-import type { GetServerSideProps } from 'next';
+import { useAppDispatch } from '@src/hooks/useDispatch';
+import { checkSession } from '@src/slices/authSlice';
 
-import { createClient, DefaultStaleTime } from '@src/modeles/qeury';
-import { saveToken, saveUser } from '@src/utils/localstrage';
+/**
+ * Social Login Callback Success Page
+ *
+ * This page is shown after OAuth callback completes.
+ * The authentication token has already been set as httpOnly cookie by the API route.
+ *
+ * Flow:
+ * 1. User clicks "Login with Google" -> redirects to backend OAuth URL
+ * 2. Backend handles OAuth and redirects to /api/auth/social-callback?token=xxx
+ * 3. API route sets httpOnly cookie and redirects here
+ * 4. This page validates the session and redirects to home
+ *
+ * Security: Token is never exposed to client JavaScript (XSS protection)
+ */
 
-type SocialCallbackProps = {
-  token?: string;
-};
+export default function SocialCallback() {
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [isValidating, setIsValidating] = useState(true);
 
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const token = typeof ctx.query.token === 'string' ? ctx.query.token : null;
-  return {
-    props: {
-      token,
-    },
-  };
-};
-
-export default function SocialCallback({ token }: SocialCallbackProps) {
-  // クライアントで保存＆/auth/me 取得
-  const {
-    data: user,
-    isLoading,
-    isError,
-  } = useQuery({
-    queryKey: ['getMe', token],
-    queryFn: async () => {
-      if (!token) return;
-      saveToken(token);
-      const { data, error } = await createClient().GET('/api/v0/login/profile');
-      if (error) return;
-      return data;
-    },
-    enabled: !!token,
-    retry: false,
-    staleTime: DefaultStaleTime,
-  });
   useEffect(() => {
-    if (isError || isLoading) {
-      return;
-    }
-    if (token && user) {
-      saveToken(token);
-      saveUser(user);
-      window.location.replace('/'); // 任意の遷移先
-    }
-  }, [user, token, isError, isLoading]);
-  return <div style={{ padding: 24 }}>Signing you in…</div>;
+    const validateSession = async () => {
+      try {
+        // Validate session using httpOnly cookie
+        const resultAction = await dispatch(checkSession());
+
+        if (checkSession.fulfilled.match(resultAction)) {
+          // Session is valid, redirect to home
+          setTimeout(() => {
+            router.replace('/');
+          }, 500);
+        } else {
+          // Session validation failed
+          setError('認証に失敗しました。もう一度お試しください。');
+          setIsValidating(false);
+
+          // Redirect to login after 3 seconds
+          setTimeout(() => {
+            router.replace('/login');
+          }, 3000);
+        }
+      } catch {
+        setError('予期しないエラーが発生しました。');
+        setIsValidating(false);
+
+        // Redirect to login after 3 seconds
+        setTimeout(() => {
+          router.replace('/login');
+        }, 3000);
+      }
+    };
+
+    validateSession();
+  }, [dispatch, router]);
+
+  return (
+    <div style={{ padding: 24, textAlign: 'center' }}>
+      {isValidating ? (
+        <>
+          <p>Signing you in…</p>
+          <p style={{ fontSize: 14, color: '#666', marginTop: 8 }}>しばらくお待ちください</p>
+        </>
+      ) : (
+        <>
+          <p style={{ color: 'red' }}>{error}</p>
+          <p style={{ fontSize: 14, color: '#666', marginTop: 8 }}>ログインページにリダイレクトします...</p>
+        </>
+      )}
+    </div>
+  );
 }
