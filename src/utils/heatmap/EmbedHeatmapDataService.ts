@@ -1,83 +1,17 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { FieldObjectLog, HeatmapDataService, Player } from './HeatmapDataService';
 import type { HeatmapTask, PositionEventLog } from '@src/modeles/heatmaptask';
 import type { Project } from '@src/modeles/project';
 import type { Session } from '@src/modeles/session';
 
-import { env } from '@src/config/env';
+import { createEmbedClient } from '@src/modeles/qeury';
 
 /**
  * Embed用のHeatmapDataService
- * トークンベースの認証を使用し、通常のセッション認証をバイパス
+ * x-embed-tokenヘッダーを使用して認証し、通常のAPIクライアントを使用
  */
-
-type EmbedApiResponse<T> = {
-  data?: T;
-  error?: { message: string };
-};
-
-async function embedFetch<T>(endpoint: string, token: string, options?: RequestInit): Promise<EmbedApiResponse<T>> {
-  try {
-    const response = await fetch(`${env.NEXT_PUBLIC_API_BASE_URL}${endpoint}`, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Embed-Token': token,
-        ...options?.headers,
-      },
-    });
-
-    if (!response.ok) {
-      return { error: { message: `HTTP ${response.status}` } };
-    }
-
-    const data = (await response.json()) as T;
-    return { data };
-  } catch (e) {
-    return { error: { message: e instanceof Error ? e.message : 'Unknown error' } };
-  }
-}
-
-async function embedFetchArrayBuffer(endpoint: string, token: string): Promise<ArrayBuffer | null> {
-  try {
-    const response = await fetch(`${env.NEXT_PUBLIC_API_BASE_URL}${endpoint}`, {
-      headers: {
-        'X-Embed-Token': token,
-      },
-    });
-
-    if (!response.ok) {
-      return null;
-    }
-
-    return await response.arrayBuffer();
-  } catch {
-    return null;
-  }
-}
-
-async function sessionCreateTask(token: string, projectId: number, sessionId: number, stepSize: number, zVisible: boolean) {
-  return await embedFetch<HeatmapTask>(`/api/v0/heatmap/projects/${projectId}/play_session/${sessionId}/tasks`, token, {
-    method: 'POST',
-    body: JSON.stringify({ stepSize, zVisible }),
-  });
-}
-
-type ProjectResponse = {
-  id: number;
-  name: string;
-  is2D: boolean;
-};
-
-type MapListResponse = {
-  maps: string[];
-};
-
-type LogKeysResponse = {
-  keys: string[];
-};
 
 export function useEmbedHeatmapDataService(projectId: number | undefined, sessionId: number | undefined, token: string | undefined): HeatmapDataService {
   const timer = useRef<NodeJS.Timeout>(undefined);
@@ -89,32 +23,53 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
 
   const isReady = !!token && projectId !== undefined && sessionId !== undefined;
 
+  // Embed用のAPIクライアントを作成（tokenが変わったら再作成）
+  const apiClient = useMemo(() => {
+    if (!token) return null;
+    return createEmbedClient(token);
+  }, [token]);
+
   // プロジェクトデータを取得してis2Dフラグを取得
   const { data: project } = useQuery({
+    // eslint-disable-next-line @tanstack/query/exhaustive-deps
     queryKey: ['embed-project', projectId, token],
     queryFn: async () => {
-      if (!projectId || !token) return null;
-      const res = await embedFetch<ProjectResponse>(`/api/v0/projects/${projectId}`, token);
+      if (!projectId || !apiClient) return null;
+      const res = await apiClient.GET('/api/v0/projects/{id}', {
+        params: { path: { id: projectId } },
+      });
       return res.data ?? null;
     },
     staleTime: 1000 * 60 * 5,
-    enabled: isReady,
+    enabled: isReady && !!apiClient,
   });
 
   const zVisible = !(project?.is2D ?? false);
 
   const { data: createdTask } = useQuery({
+    // eslint-disable-next-line @tanstack/query/exhaustive-deps
     queryKey: ['embed-create-task', projectId, sessionId, stepSize, zVisible, token],
     queryFn: async (): Promise<HeatmapTask | null> => {
-      if (!projectId || !sessionId || !token) {
+      if (!projectId || !sessionId || !apiClient) {
         return null;
       }
 
-      const { data, error } = await sessionCreateTask(token, projectId, sessionId, stepSize, zVisible);
-      if (error) throw new Error(error.message);
+      const { data, error } = await apiClient.POST('/api/v0/heatmap/projects/{project_id}/play_session/{session_id}/tasks', {
+        params: {
+          path: {
+            project_id: projectId,
+            session_id: sessionId,
+          },
+        },
+        body: {
+          stepSize: stepSize,
+          zVisible: zVisible,
+        },
+      });
+      if (error) throw error;
       return data ?? null;
     },
-    enabled: isReady,
+    enabled: isReady && !!apiClient,
     retry: 3,
   });
 
@@ -124,15 +79,18 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
   }, [createdTask]);
 
   const { data: task } = useQuery({
+    // eslint-disable-next-line @tanstack/query/exhaustive-deps
     queryKey: ['embed-heatmap', taskId, token],
     queryFn: async (): Promise<HeatmapTask | null> => {
-      if (!taskId || isNaN(Number(taskId)) || !token) return null;
-      const { data, error } = await embedFetch<HeatmapTask>(`/api/v0/heatmap/tasks/${taskId}`, token);
-      if (error) throw new Error(error.message);
+      if (!taskId || isNaN(Number(taskId)) || !apiClient) return null;
+      const { data, error } = await apiClient.GET('/api/v0/heatmap/tasks/{task_id}', {
+        params: { path: { task_id: Number(taskId) } },
+      });
+      if (error) throw error;
       return data ?? null;
     },
     initialData: null,
-    enabled: taskId !== null && !!token,
+    enabled: taskId !== null && !!apiClient,
   });
 
   useEffect(() => {
@@ -152,55 +110,81 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
 
   const getMapList = useCallback(async () => {
     try {
-      if (!projectId || !token) {
+      if (!projectId || !apiClient) {
         return [];
       }
-      const { data, error } = await embedFetch<MapListResponse>(`/api/v0.1/projects/${projectId}/maps`, token);
+      const { data, error } = await apiClient.GET('/api/v0.1/projects/{project_id}/maps', {
+        params: {
+          path: {
+            project_id: Number(projectId),
+          },
+        },
+      });
       if (error) return [];
-      return data?.maps || [];
+      return data.maps || [];
     } catch {
       return [];
     }
-  }, [projectId, token]);
+  }, [projectId, apiClient]);
 
   const getMapContent = useCallback(
     async (mapName: string) => {
       try {
-        if (!mapName || mapName === '' || !token) return null;
-        return await embedFetchArrayBuffer(`/api/v0/heatmap/map_data/${mapName}`, token);
+        if (!mapName || mapName === '' || !apiClient) return null;
+        const { data, error } = await apiClient.GET('/api/v0/heatmap/map_data/{map_name}', {
+          params: {
+            path: {
+              map_name: mapName,
+            },
+          },
+          parseAs: 'arrayBuffer',
+        });
+        if (error) return null;
+        return data;
       } catch {
         return null;
       }
     },
-    [token],
+    [apiClient],
   );
 
   const getGeneralLogKeys = useCallback(async () => {
     try {
-      if (projectId === undefined || !token) return null;
+      if (projectId === undefined || !apiClient) return null;
 
-      const queryParams = new URLSearchParams({
-        project_id: String(projectId),
-        ...(currentSessionId && { session_id: String(currentSessionId) }),
+      const { data, error } = await apiClient.GET('/api/v0/general_log/position/keys', {
+        params: {
+          query: {
+            project_id: projectId,
+            session_id: currentSessionId ?? undefined,
+          },
+        },
       });
-
-      const { data, error } = await embedFetch<LogKeysResponse>(`/api/v0/general_log/position/keys?${queryParams}`, token);
       if (error) return null;
-      return data?.keys ?? null;
+      return data.keys;
     } catch {
       return null;
     }
-  }, [projectId, currentSessionId, token]);
+  }, [projectId, currentSessionId, apiClient]);
 
   const getSessionLogs = useCallback(
     async (logName: string) => {
-      if (!projectId || !currentSessionId || !token) return null;
-      return await embedFetch<PositionEventLog[]>(
-        `/api/v0/projects/${projectId}/play_session/${currentSessionId}/general_log/position/${logName}?limit=1000&offset=0`,
-        token,
-      );
+      if (!projectId || !currentSessionId || !apiClient) return null;
+      return await apiClient.GET('/api/v0/projects/{project_id}/play_session/{session_id}/general_log/position/{event_type}', {
+        params: {
+          path: {
+            project_id: projectId,
+            session_id: currentSessionId,
+            event_type: logName,
+          },
+          query: {
+            limit: 1000,
+            offset: 0,
+          },
+        },
+      });
     },
-    [projectId, currentSessionId, token],
+    [projectId, currentSessionId, apiClient],
   );
 
   const eventLogKey = (projectId: number | undefined, sessionId: number | null, logName: string) =>
@@ -209,7 +193,7 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
   const getEventLog = useCallback(
     async (logName: string): Promise<PositionEventLog[] | null> => {
       const res = await getSessionLogs(logName);
-      if (res?.error) throw new Error(res.error.message);
+      if (res?.error) throw res.error;
       const data = res?.data ?? null;
       if (data) {
         queryClient.setQueryData(eventLogKey(projectId, currentSessionId, logName), data);
@@ -227,40 +211,50 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
   );
 
   const getProject = useCallback(async (): Promise<Project | null> => {
-    if (!projectId || !token) return null;
-    const res = await embedFetch<Project>(`/api/v0/projects/${projectId}`, token);
+    if (!projectId || !apiClient) return null;
+    const res = await apiClient.GET('/api/v0/projects/{id}', {
+      params: { path: { id: projectId } },
+    });
     return res.data ?? null;
-  }, [projectId, token]);
+  }, [projectId, apiClient]);
 
   const getSession = useCallback(async (): Promise<Session | null> => {
-    if (!projectId || !currentSessionId || !token) return null;
-    const res = await embedFetch<Session>(`/api/v0/projects/${projectId}/play_session/${currentSessionId}`, token);
+    if (!projectId || !currentSessionId || !apiClient) return null;
+    const res = await apiClient.GET('/api/v0/projects/{project_id}/play_session/{session_id}', {
+      params: { path: { project_id: projectId, session_id: currentSessionId } },
+    });
     return res.data ?? null;
-  }, [projectId, currentSessionId, token]);
+  }, [projectId, currentSessionId, apiClient]);
 
   const getSessions = useCallback(
     async (limit = 100, offset = 0): Promise<Session[]> => {
-      if (!projectId || !token) return [];
-      const res = await embedFetch<{ sessions: Session[] }>(`/api/v0/projects/${projectId}/play_sessions?limit=${limit}&offset=${offset}`, token);
-      return res.data?.sessions ?? [];
+      if (!projectId || !apiClient) return [];
+      const res = await apiClient.GET('/api/v0/projects/{project_id}/play_session', {
+        params: { path: { project_id: projectId }, query: { limit, offset } },
+      });
+      return (res.data as Session[]) ?? [];
     },
-    [projectId, token],
+    [projectId, apiClient],
   );
 
   const getPlayers = useCallback(async (): Promise<Player[]> => {
-    if (!projectId || !currentSessionId || !token) return [];
-    const res = await embedFetch<{ players: Player[] }>(`/api/v0/projects/${projectId}/play_session/${currentSessionId}/players`, token);
-    return res.data?.players ?? [];
-  }, [projectId, currentSessionId, token]);
+    if (!projectId || !currentSessionId || !apiClient) return [];
+    const res = await apiClient.GET('/api/v0/projects/{project_id}/play_session/{session_id}/player_position_log/{session_id}/players', {
+      params: { path: { project_id: projectId, session_id: currentSessionId } },
+    });
+    return (res.data as unknown as Player[]) ?? [];
+  }, [projectId, currentSessionId, apiClient]);
 
   const getFieldObjectLogs = useCallback(async (): Promise<FieldObjectLog[]> => {
-    if (!projectId || !currentSessionId || !token) return [];
-    const res = await embedFetch<FieldObjectLog[]>(`/api/v0/projects/${projectId}/play_session/${currentSessionId}/field_object_log`, token);
-    return res.data ?? [];
-  }, [projectId, currentSessionId, token]);
+    if (!projectId || !currentSessionId || !apiClient) return [];
+    const res = await apiClient.GET('/api/v0/projects/{project_id}/play_session/{session_id}/field_object_log', {
+      params: { path: { project_id: projectId, session_id: currentSessionId } },
+    });
+    return (res.data as unknown as FieldObjectLog[]) ?? [];
+  }, [projectId, currentSessionId, apiClient]);
 
   return {
-    isInitialized: isReady && projectId !== undefined,
+    isInitialized: isReady && projectId !== undefined && !!apiClient,
     getMapList,
     getMapContent,
     getGeneralLogKeys,

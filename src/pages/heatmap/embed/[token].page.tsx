@@ -1,12 +1,14 @@
 import styled from '@emotion/styled';
 import { memo, useEffect, useMemo, useState } from 'react';
 
+import type { components } from '@generated/api';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { GetServerSideProps } from 'next';
 import type { FC } from 'react';
 
 import { Text } from '@src/component/atoms/Text';
 import { StatusContent } from '@src/component/molecules/StatusContent';
+import { env } from '@src/config/env';
 import { HeatMapViewer } from '@src/features/heatmap/HeatmapViewer';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { useEmbedHeatmapDataService } from '@src/utils/heatmap/EmbedHeatmapDataService';
@@ -74,11 +76,7 @@ const EmbedLayout = styled(EmbedLayoutComponent)`
   }
 `;
 
-type TokenVerifyResult = {
-  projectId: number;
-  sessionId: number;
-  expiresAt: number;
-};
+type TokenVerifyResult = components['schemas']['VerifyEmbedTokenResponseDto'];
 
 const EmbedHeatmapPage: FC<EmbedHeatmapPageProps> = ({ className, token }) => {
   const [verifyResult, setVerifyResult] = useState<TokenVerifyResult | null>(null);
@@ -89,7 +87,7 @@ const EmbedHeatmapPage: FC<EmbedHeatmapPageProps> = ({ className, token }) => {
   useEffect(() => {
     const verifyToken = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v0/embed/verify`, {
+        const response = await fetch(`${env.NEXT_PUBLIC_API_BASE_URL}/api/v0/embed/verify`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -98,7 +96,7 @@ const EmbedHeatmapPage: FC<EmbedHeatmapPageProps> = ({ className, token }) => {
         });
 
         if (!response.ok) {
-          if (response.status === 401 || response.status === 403) {
+          if (response.status === 400) {
             setError('Invalid or expired token');
           } else {
             setError('Failed to verify token');
@@ -109,8 +107,8 @@ const EmbedHeatmapPage: FC<EmbedHeatmapPageProps> = ({ className, token }) => {
 
         const data = (await response.json()) as TokenVerifyResult;
 
-        // Check expiration
-        if (data.expiresAt && Date.now() > data.expiresAt) {
+        // Check expiration (expiresAt is ISO 8601 string)
+        if (data.expiresAt && Date.now() > Date.parse(data.expiresAt)) {
           setError('Token has expired');
           setIsVerifying(false);
           return;
@@ -129,7 +127,7 @@ const EmbedHeatmapPage: FC<EmbedHeatmapPageProps> = ({ className, token }) => {
 
   const service = useEmbedHeatmapDataService(verifyResult?.projectId, verifyResult?.sessionId, token);
 
-  const emptyService = {
+  const emptyService: HeatmapDataService = {
     isInitialized: false,
     getMapList: async () => [],
     getMapContent: async () => null,
