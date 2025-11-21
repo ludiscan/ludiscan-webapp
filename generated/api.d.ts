@@ -1165,6 +1165,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v0/game/projects/{project_id}/sessions/{session_id}/heatmap-embed-url': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * ヒートマップ埋め込みページのURLを取得
+     * @description セッション完了後にWebViewで直接ヒートマップを表示するためのURL（1時間有効なトークン付き）を生成します
+     */
+    get: operations['GameController_getHeatmapEmbedUrl'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v0/route-coach/projects/{project_id}/event-clusters': {
     parameters: {
       query?: never;
@@ -1793,6 +1813,18 @@ export interface components {
        *     ]
        */
       projectIds: number[];
+    };
+    HeatmapEmbedUrlResponseDto: {
+      /**
+       * @description ヒートマップ埋め込みページのURL（トークン付き）
+       * @example https://ludiscan.com/heatmap/embed/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+       */
+      url: string;
+      /**
+       * @description トークンの有効期限（ISO 8601形式）
+       * @example 2024-01-01T12:00:00.000Z
+       */
+      expiresAt: string;
     };
     EventRawCoordinateDto: {
       /** @description X coordinate */
@@ -5134,6 +5166,43 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['DefaultSuccessResponse'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  GameController_getHeatmapEmbedUrl: {
+    parameters: {
+      query?: never;
+      header: {
+        /** @description ゲームクライアント用APIキー */
+        'X-API-Key': string;
+      };
+      path: {
+        /** @description Project ID */
+        project_id: number;
+        /** @description Session ID */
+        session_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HeatmapEmbedUrlResponseDto'];
         };
       };
       /** @description Bad Request */
