@@ -129,45 +129,30 @@ const EmbedHeatmapPage: FC<EmbedHeatmapPageProps> = ({ className, token }) => {
 
   const service = useEmbedHeatmapDataService(verifyResult?.projectId, verifyResult?.sessionId, token);
 
+  const emptyService = {
+    isInitialized: false,
+    getMapList: async () => [],
+    getMapContent: async () => null,
+    getGeneralLogKeys: async () => null,
+    task: undefined,
+    getEventLog: async () => null,
+    getEventLogSnapshot: () => null,
+    projectId: undefined,
+    sessionId: null,
+    setSessionId: () => {},
+    getProject: async () => null,
+    getSession: async () => null,
+    getSessions: async () => [],
+    getPlayers: async () => [],
+    getFieldObjectLogs: async () => [],
+  };
+
   if (isVerifying) {
-    return (
-      <EmbedLayout
-        className={className}
-        service={{
-          isInitialized: false,
-          getMapList: async () => [],
-          getMapContent: async () => null,
-          getGeneralLogKeys: async () => null,
-          task: undefined,
-          getEventLog: async () => null,
-          getEventLogSnapshot: () => null,
-          projectId: undefined,
-          sessionId: null,
-          setSessionId: () => {},
-        }}
-      />
-    );
+    return <EmbedLayout className={className} service={emptyService} />;
   }
 
   if (error) {
-    return (
-      <EmbedLayout
-        className={className}
-        service={{
-          isInitialized: false,
-          getMapList: async () => [],
-          getMapContent: async () => null,
-          getGeneralLogKeys: async () => null,
-          task: undefined,
-          getEventLog: async () => null,
-          getEventLogSnapshot: () => null,
-          projectId: undefined,
-          sessionId: null,
-          setSessionId: () => {},
-        }}
-        error={error}
-      />
-    );
+    return <EmbedLayout className={className} service={emptyService} error={error} />;
   }
 
   return <EmbedLayout className={className} service={service} />;

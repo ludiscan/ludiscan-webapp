@@ -9,7 +9,6 @@ import { Button } from '@src/component/atoms/Button';
 import { InlineFlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { useApiClient } from '@src/modeles/ApiClientContext';
 import { DefaultStaleTime } from '@src/modeles/qeury';
 
 export const InfoMenuContent: FC<HeatmapMenuProps> = ({ handleExportView, service }) => {
@@ -17,22 +16,10 @@ export const InfoMenuContent: FC<HeatmapMenuProps> = ({ handleExportView, servic
   const handleExportHeatmap = useCallback(async () => {
     await handleExportView();
   }, [handleExportView]);
-  const apiClient = useApiClient();
 
   const { data: project } = useQuery({
-    queryKey: [service.projectId],
-    queryFn: async () => {
-      if (!service.projectId) return;
-      const { data, error } = await apiClient.GET('/api/v0/projects/{id}', {
-        params: {
-          path: {
-            id: service.projectId,
-          },
-        },
-      });
-      if (error) return;
-      return data;
-    },
+    queryKey: ['project', service.projectId],
+    queryFn: () => service.getProject(),
     staleTime: DefaultStaleTime,
     enabled: service.projectId !== undefined,
   });

@@ -1,8 +1,10 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import type { HeatmapDataService } from './HeatmapDataService';
+import type { FieldObjectLog, HeatmapDataService, Player } from './HeatmapDataService';
 import type { HeatmapTask, PositionEventLog } from '@src/modeles/heatmaptask';
+import type { Project } from '@src/modeles/project';
+import type { Session } from '@src/modeles/session';
 
 import { env } from '@src/config/env';
 
@@ -224,6 +226,39 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
     [projectId, currentSessionId, queryClient],
   );
 
+  const getProject = useCallback(async (): Promise<Project | null> => {
+    if (!projectId || !token) return null;
+    const res = await embedFetch<Project>(`/api/v0/projects/${projectId}`, token);
+    return res.data ?? null;
+  }, [projectId, token]);
+
+  const getSession = useCallback(async (): Promise<Session | null> => {
+    if (!projectId || !currentSessionId || !token) return null;
+    const res = await embedFetch<Session>(`/api/v0/projects/${projectId}/play_session/${currentSessionId}`, token);
+    return res.data ?? null;
+  }, [projectId, currentSessionId, token]);
+
+  const getSessions = useCallback(
+    async (limit = 100, offset = 0): Promise<Session[]> => {
+      if (!projectId || !token) return [];
+      const res = await embedFetch<{ sessions: Session[] }>(`/api/v0/projects/${projectId}/play_sessions?limit=${limit}&offset=${offset}`, token);
+      return res.data?.sessions ?? [];
+    },
+    [projectId, token],
+  );
+
+  const getPlayers = useCallback(async (): Promise<Player[]> => {
+    if (!projectId || !currentSessionId || !token) return [];
+    const res = await embedFetch<{ players: Player[] }>(`/api/v0/projects/${projectId}/play_session/${currentSessionId}/players`, token);
+    return res.data?.players ?? [];
+  }, [projectId, currentSessionId, token]);
+
+  const getFieldObjectLogs = useCallback(async (): Promise<FieldObjectLog[]> => {
+    if (!projectId || !currentSessionId || !token) return [];
+    const res = await embedFetch<FieldObjectLog[]>(`/api/v0/projects/${projectId}/play_session/${currentSessionId}/field_object_log`, token);
+    return res.data ?? [];
+  }, [projectId, currentSessionId, token]);
+
   return {
     isInitialized: isReady && projectId !== undefined,
     getMapList,
@@ -235,5 +270,10 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
     projectId,
     sessionId: currentSessionId,
     setSessionId: setCurrentSessionId,
+    getProject,
+    getSession,
+    getSessions,
+    getPlayers,
+    getFieldObjectLogs,
   };
 }
