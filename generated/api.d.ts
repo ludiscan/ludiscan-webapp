@@ -121,6 +121,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v0/users/search': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** ユーザーを検索 */
+    get: operations['UsersController_search'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v0/users/{id}': {
     parameters: {
       query?: never;
@@ -1148,6 +1165,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v0/game/projects/{project_id}/sessions/{session_id}/heatmap-embed-url': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * ヒートマップ埋め込みページのURLを取得
+     * @description セッション完了後にWebViewで直接ヒートマップを表示するためのURL（1時間有効なトークン付き）を生成します
+     */
+    get: operations['GameController_getHeatmapEmbedUrl'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v0/route-coach/projects/{project_id}/event-clusters': {
     parameters: {
       query?: never;
@@ -1238,6 +1275,26 @@ export interface paths {
     get: operations['RouteCoachController_getImprovementRoutesJobStatus'];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/embed/verify': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Embedトークンを検証
+     * @description heatmap埋め込み用トークンを検証し、projectIdとsessionIdを返します
+     */
+    post: operations['EmbedController_verifyToken'];
     delete?: never;
     options?: never;
     head?: never;
@@ -1452,11 +1509,35 @@ export interface components {
       avg: number;
     };
     CreateGeneralLogDto: {
+      /**
+       * @description テキストデータ
+       * @example Player collected item
+       */
       text_data: Record<string, never> | null;
-      position_data: Record<string, never> | null;
-      /** @description Extended metadata for RouteCoach extended events */
+      /** @description 位置データ */
+      position_data: components['schemas']['Position'] | null;
+      /**
+       * @description RouteCoach拡張イベント用のメタデータ
+       * @example {
+       *       "type": "achievement",
+       *       "category": "collectible",
+       *       "severity": "low",
+       *       "tags": [
+       *         "item",
+       *         "collect"
+       *       ]
+       *     }
+       */
       metadata: Record<string, never> | null;
+      /**
+       * @description オフセットタイムスタンプ（ミリ秒）
+       * @example 1500
+       */
       offset_timestamp: number;
+      /**
+       * @description プレイヤーID
+       * @example 1
+       */
       player: number;
     };
     PlayPositionLogDto: {
@@ -1465,11 +1546,24 @@ export interface components {
        * @example 1
        */
       player: number;
+      /** @description X coordinate */
       x: number;
+      /** @description Y coordinate */
       y: number;
+      /** @description Z coordinate */
       z?: number | null;
+      /** @description Milliseconds since session start */
       offset_timestamp: number;
+      /** @description Location name or identifier */
       location?: string | null;
+      /**
+       * @description Player status data (health, state, score, etc.)
+       * @example {
+       *       "health": 100,
+       *       "state": "running",
+       *       "score": 1000
+       *     }
+       */
       status?: Record<string, never> | null;
     };
     FieldObjectLogDto: {
@@ -1483,8 +1577,11 @@ export interface components {
        * @example health_potion
        */
       object_type: string;
+      /** @description X coordinate */
       x: number;
+      /** @description Y coordinate */
       y: number;
+      /** @description Z coordinate */
       z?: number | null;
       /** @description Milliseconds since session start */
       offset_timestamp: number;
@@ -1493,7 +1590,14 @@ export interface components {
        * @enum {string}
        */
       event_type: 'spawn' | 'move' | 'despawn' | 'update';
-      /** @description Additional custom data for this object */
+      /**
+       * @description Additional status data for this object (health, state, score, etc.)
+       * @example {
+       *       "health": 100,
+       *       "state": "active",
+       *       "score": 50
+       *     }
+       */
       status?: Record<string, never> | null;
     };
     CreateHeatmapDto: {
@@ -1611,17 +1715,41 @@ export interface components {
       id: string;
       /** @enum {string} */
       status: 'queued' | 'running' | 'done' | 'error';
-      /** @enum {string} */
+      /**
+       * @description Summary language
+       * @enum {string}
+       */
       lang: 'ja' | 'en';
-      /** @enum {string} */
+      /**
+       * @description AI provider used for generation
+       * @enum {string}
+       */
       provider: 'template' | 'ollama' | 'openai';
-      /** @example gpt-4o-mini */
+      /**
+       * @description AI model name
+       * @example gpt-4o-mini
+       */
       model: string;
+      /** @description Summary in Markdown format */
       summary_md: string | null;
+      /**
+       * @description Summary in JSON format with structured data
+       * @example {
+       *       "title": "Session Summary",
+       *       "description": "Player completed level 1",
+       *       "keyFindings": [
+       *         "Fast completion",
+       *         "No deaths"
+       *       ]
+       *     }
+       */
       summary_json: {
         [key: string]: unknown;
       } | null;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Summary creation timestamp
+       */
       created_at: string;
     };
     CreateGameApiKeyDto: {
@@ -1686,6 +1814,18 @@ export interface components {
        */
       projectIds: number[];
     };
+    HeatmapEmbedUrlResponseDto: {
+      /**
+       * @description ヒートマップ埋め込みページのURL（トークン付き）
+       * @example https://ludiscan.com/heatmap/embed/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+       */
+      url: string;
+      /**
+       * @description トークンの有効期限（ISO 8601形式）
+       * @example 2024-01-01T12:00:00.000Z
+       */
+      expiresAt: string;
+    };
     EventRawCoordinateDto: {
       /** @description X coordinate */
       x: number;
@@ -1746,13 +1886,32 @@ export interface components {
       avg_duration_ms?: number;
       /** @description Time saved compared to death routes (milliseconds) */
       time_saved_ms?: number;
-      /** @description Analysis for divergence strategy */
+      /**
+       * @description Analysis for divergence strategy
+       * @example {
+       *       "divergence_point": {
+       *         "x": 100,
+       *         "y": 200,
+       *         "z": 0
+       *       },
+       *       "distance_to_event_cluster": 15.5,
+       *       "common_prefix_length": 10
+       *     }
+       */
       divergence_analysis?: {
         [key: string]: unknown;
       };
       /** @description Safety score (0-1) for safety_passage strategy */
       safety_score?: number;
-      /** @description Evidence supporting the improvement */
+      /**
+       * @description Evidence supporting the improvement
+       * @example {
+       *       "description": "Based on successful player routes",
+       *       "reference_player_count": 5,
+       *       "data_source": "success_route",
+       *       "confidence": "high"
+       *     }
+       */
       evidence?: {
         [key: string]: unknown;
       };
@@ -1836,6 +1995,30 @@ export interface components {
       feedback_avg_rating: number;
       /** @description All feedback records for this improvement route */
       feedbacks: components['schemas']['ImprovementRouteFeedbackRecordDto'][];
+    };
+    VerifyEmbedTokenRequestDto: {
+      /**
+       * @description 検証するembedトークン
+       * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+       */
+      token: string;
+    };
+    VerifyEmbedTokenResponseDto: {
+      /**
+       * @description プロジェクトID
+       * @example 1
+       */
+      projectId: number;
+      /**
+       * @description セッションID
+       * @example 123
+       */
+      sessionId: number;
+      /**
+       * @description トークンの有効期限（ISO 8601形式）
+       * @example 2024-01-01T12:00:00.000Z
+       */
+      expiresAt: string;
     };
     DefaultErrorResponse: {
       /** @example 400 */
@@ -2337,6 +2520,38 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['UserResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  UsersController_search: {
+    parameters: {
+      query: {
+        /** @description 検索クエリ（メールアドレスまたは名前） */
+        q: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description 成功 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['UserResponseDto'][];
         };
       };
       /** @description Bad Request */
@@ -4964,6 +5179,43 @@ export interface operations {
       };
     };
   };
+  GameController_getHeatmapEmbedUrl: {
+    parameters: {
+      query?: never;
+      header: {
+        /** @description ゲームクライアント用APIキー */
+        'X-API-Key': string;
+      };
+      path: {
+        /** @description Project ID */
+        project_id: number;
+        /** @description Session ID */
+        session_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HeatmapEmbedUrlResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
   RouteCoachController_getEventClusters: {
     parameters: {
       query?: {
@@ -5108,6 +5360,39 @@ export interface operations {
             /** Format: date-time */
             updated_at?: string;
           };
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  EmbedController_verifyToken: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['VerifyEmbedTokenRequestDto'];
+      };
+    };
+    responses: {
+      /** @description トークンが有効な場合 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['VerifyEmbedTokenResponseDto'];
         };
       };
       /** @description Bad Request */

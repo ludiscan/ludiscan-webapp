@@ -11,6 +11,7 @@ import { Card } from '@src/component/atoms/Card';
 import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { VerticalSpacer } from '@src/component/atoms/Spacer';
 import { Text } from '@src/component/atoms/Text';
+import { MemberSuggestionInput } from '@src/component/molecules/MemberSuggestionInput';
 import { Modal } from '@src/component/molecules/Modal';
 import { OutlinedTextField } from '@src/component/molecules/OutlinedTextField';
 import { useToast } from '@src/component/templates/ToastContext';
@@ -249,7 +250,7 @@ const Component: FC<ProjectDetailsMembersTabProps> = ({ className, project }) =>
                 fontWeight={theme.typography.fontWeight.bold}
               />
               <VerticalSpacer size={8} />
-              <OutlinedTextField
+              <MemberSuggestionInput
                 value={newMemberEmail}
                 onChange={setNewMemberEmail}
                 placeholder='member@example.com'
