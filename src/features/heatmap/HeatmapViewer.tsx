@@ -25,7 +25,6 @@ import { HeatmapMenuSideBar } from '@src/features/heatmap/menu/HeatmapMenuSideBa
 import { FocusLinkBridge } from '@src/features/heatmap/selection/FocusLinkBridge';
 import { InspectorModal } from '@src/features/heatmap/selection/InspectorModal';
 import { useGeneralPatch, useGeneralSelect } from '@src/hooks/useGeneral';
-import { useApiClient } from '@src/modeles/ApiClientContext';
 import { DefaultStaleTime } from '@src/modeles/qeury';
 import { dimensions, zIndexes } from '@src/styles/style';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
@@ -52,23 +51,16 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
   const mapName = useGeneralSelect((s) => s.mapName);
   const dimensionalityOverride = useGeneralSelect((s) => s.dimensionalityOverride);
   const splitMode = useSelector((s: RootState) => s.heatmapCanvas.splitMode);
-  const apiClient = useApiClient();
   const setGeneral = useGeneralPatch();
 
   const [visibleTimelineRange, setVisibleTimelineRange] = useState<PlayerTimelinePointsTimeRange>({ start: 0, end: 0 });
 
   const task = useMemo(() => service.task, [service.task]);
 
-  // プロジェクトデータを取得
+  // プロジェクトデータを取得 (via service)
   const { data: project } = useQuery({
     queryKey: ['project', service.projectId],
-    queryFn: async () => {
-      if (!service.projectId) return null;
-      const res = await apiClient.GET('/api/v0/projects/{id}', {
-        params: { path: { id: service.projectId } },
-      });
-      return res.data ?? null;
-    },
+    queryFn: () => service.getProject(),
     staleTime: DefaultStaleTime,
     enabled: !!service.projectId,
   });
@@ -104,20 +96,9 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
 
   const { data: fieldObjectLogs } = useQuery({
     queryKey: ['fieldObjectLogs', service.projectId, service.sessionId],
-    queryFn: async () => {
-      if (!service.projectId || !service.sessionId) return null;
-      return apiClient.GET('/api/v0/projects/{project_id}/play_session/{session_id}/field_object_log', {
-        params: {
-          path: {
-            project_id: service.projectId,
-            session_id: service.sessionId,
-          },
-        },
-      });
-    },
+    queryFn: () => service.getFieldObjectLogs(),
     staleTime: DefaultStaleTime,
     enabled: !!service.projectId && !!service.sessionId,
-    // apiClientは関数なので、依存配列に含めない（Contextから毎回取得されるため）
   });
 
   useEffect(() => {
@@ -195,7 +176,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
 
   // セッション選択時にフィールドオブジェクトメニューを自動開く
   useEffect(() => {
-    if (fieldObjectLogs && fieldObjectLogs.data && fieldObjectLogs.data.length > 0 && service.sessionId) {
+    if (fieldObjectLogs && fieldObjectLogs.length > 0 && service.sessionId) {
       setOpenMenu('fieldObject');
     }
   }, [service.sessionId, fieldObjectLogs]);
@@ -259,13 +240,13 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
           model={model}
           visibleTimelineRange={visibleTimelineRange}
           dimensionality={dimensionality}
-          fieldObjectLogs={fieldObjectLogs?.data}
+          fieldObjectLogs={fieldObjectLogs}
           projectId={service.projectId}
         />
         <Stats parent={divRef} className={`${className}__stats`} />
       </Canvas>
     ),
-    [dimensionality, dpr, handleOnPerformance, service, pointList, map, modelType, model, visibleTimelineRange, divRef, className, fieldObjectLogs?.data],
+    [dimensionality, dpr, handleOnPerformance, service, pointList, map, modelType, model, visibleTimelineRange, divRef, className, fieldObjectLogs],
   );
 
   return (
