@@ -72,6 +72,8 @@ const IndexPage = styled(Component)`
   &__content {
     position: relative;
     z-index: 1;
+    height: 100vh;
+    overflow: auto;
   }
 
   &__loading {
