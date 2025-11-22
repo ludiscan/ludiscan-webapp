@@ -12,18 +12,18 @@ type TrustItem = {
 const trustItems: TrustItem[] = [
   {
     icon: '🎮',
-    title: '1000+のゲーム分析',
-    description: 'モバイルからPCまで、多様なゲームジャンルで活用されています',
+    title: '多様なゲームに対応',
+    description: 'モバイルからPCまで、様々なゲームジャンルで利用できます',
   },
   {
     icon: '🔒',
-    title: 'エンタープライズセキュリティ',
-    description: 'SOC2準拠、データ暗号化、安全なクラウドインフラストラクチャ',
+    title: 'セキュアなデータ管理',
+    description: 'データ暗号化と安全なクラウドインフラストラクチャ',
   },
   {
     icon: '⚡',
     title: 'リアルタイム処理',
-    description: '大規模データを高速処理し、即座にインサイトを提供します',
+    description: 'データを高速処理し、即座にインサイトを提供します',
   },
 ];
 

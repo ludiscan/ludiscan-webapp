@@ -82,16 +82,6 @@ const Component: FC<ProductVisualizationProps> = ({ className }) => {
             <div className={`${className}__mockup-content`}>
               <div className={`${className}__mockup-canvas`}>
                 <div className={`${className}__mockup-gradient`} />
-                <div className={`${className}__mockup-overlay`}>
-                  <div className={`${className}__mockup-stat`}>
-                    <span className={`${className}__mockup-stat-label`}>アクティブセッション</span>
-                    <span className={`${className}__mockup-stat-value`}>1,234</span>
-                  </div>
-                  <div className={`${className}__mockup-stat`}>
-                    <span className={`${className}__mockup-stat-label`}>分析済みイベント</span>
-                    <span className={`${className}__mockup-stat-value`}>45.6K</span>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
