@@ -31,10 +31,10 @@ const Component: FC<HeroSectionProps> = ({ className }) => {
           リアルタイムに分析・改善
         </p>
         <div className={`${className}__cta`}>
-          <Link href="/login" className={`${className}__primary-button`}>
+          <Link href='/login' className={`${className}__primary-button`}>
             無料で始める
           </Link>
-          <Link href="/heatmap/docs" className={`${className}__secondary-button`}>
+          <Link href='/heatmap/docs' className={`${className}__secondary-button`}>
             デモを見る
           </Link>
         </div>
@@ -53,7 +53,9 @@ export const HeroSection = styled(Component)`
   text-align: center;
   opacity: 0;
   transform: translateY(30px);
-  transition: opacity 1s ease-out, transform 1s ease-out;
+  transition:
+    opacity 1s ease-out,
+    transform 1s ease-out;
 
   &.visible {
     opacity: 1;
@@ -73,14 +75,8 @@ export const HeroSection = styled(Component)`
     line-height: 1.1;
     color: ${({ theme }) => theme.colors.text.primary};
     letter-spacing: -0.02em;
-
-    background: linear-gradient(
-      135deg,
-      ${({ theme }) => theme.colors.primary.main} 0%,
-      ${({ theme }) => theme.colors.primary.light} 100%
-    );
+    background: linear-gradient(135deg, ${({ theme }) => theme.colors.primary.main} 0%, ${({ theme }) => theme.colors.primary.light} 100%);
     background-clip: text;
-    -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
 
@@ -95,32 +91,32 @@ export const HeroSection = styled(Component)`
 
   &__cta {
     display: flex;
+    flex-wrap: wrap;
     gap: 1.5rem;
     align-items: center;
     justify-content: center;
-    flex-wrap: wrap;
   }
 
   &__primary-button,
   &__secondary-button {
+    display: inline-block;
     padding: 1rem 2.5rem;
     font-size: 1.1rem;
     font-weight: 600;
     text-decoration: none;
     border-radius: 50px;
     transition: all 0.3s ease;
-    display: inline-block;
   }
 
   &__primary-button {
+    color: ${({ theme }) => theme.colors.background.default};
     background: ${({ theme }) => theme.colors.primary.main};
-    color: ${({ theme }) => theme.colors.background.primary};
-    box-shadow: 0 10px 30px rgba(0, 112, 243, 0.3);
+    box-shadow: 0 10px 30px rgb(0 112 243 / 30%);
 
     &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 15px 40px rgba(0, 112, 243, 0.4);
       background: ${({ theme }) => theme.colors.primary.light};
+      box-shadow: 0 15px 40px rgb(0 112 243 / 40%);
+      transform: translateY(-2px);
     }
 
     &:active {
@@ -129,8 +125,8 @@ export const HeroSection = styled(Component)`
   }
 
   &__secondary-button {
-    background: transparent;
     color: ${({ theme }) => theme.colors.text.primary};
+    background: transparent;
     border: 2px solid ${({ theme }) => theme.colors.primary.main};
 
     &:hover {
@@ -143,7 +139,7 @@ export const HeroSection = styled(Component)`
     }
   }
 
-  @media (max-width: 768px) {
+  @media (width <= 768px) {
     min-height: 90vh;
     padding: 2rem 1.5rem;
 
@@ -153,6 +149,7 @@ export const HeroSection = styled(Component)`
 
     &__subtitle {
       margin-bottom: 2rem;
+
       br {
         display: none;
       }

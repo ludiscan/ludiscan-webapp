@@ -44,16 +44,17 @@ const Component: FC<ProductVisualizationProps> = ({ className }) => {
           }
         });
       },
-      { threshold: 0.2 }
+      { threshold: 0.2 },
     );
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
+    const currentRef = sectionRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
     }
 
     return () => {
-      if (sectionRef.current) {
-        observer.unobserve(sectionRef.current);
+      if (currentRef) {
+        observer.unobserve(currentRef);
       }
     };
   }, []);
@@ -66,9 +67,7 @@ const Component: FC<ProductVisualizationProps> = ({ className }) => {
           <br />
           インサイトに変える
         </h2>
-        <p className={`${className}__subheading`}>
-          プレイヤーの行動を可視化し、データドリブンな改善を実現
-        </p>
+        <p className={`${className}__subheading`}>プレイヤーの行動を可視化し、データドリブンな改善を実現</p>
 
         <div className={`${className}__visualization`}>
           <div className={`${className}__mockup`}>
@@ -100,11 +99,7 @@ const Component: FC<ProductVisualizationProps> = ({ className }) => {
 
         <div className={`${className}__features`}>
           {features.map((feature, index) => (
-            <div
-              key={index}
-              className={`${className}__feature`}
-              style={{ transitionDelay: `${index * 0.15}s` }}
-            >
+            <div key={index} className={`${className}__feature`} style={{ transitionDelay: `${index * 0.15}s` }}>
               <span className={`${className}__feature-highlight`}>{feature.highlight}</span>
               <h3 className={`${className}__feature-title`}>{feature.title}</h3>
               <p className={`${className}__feature-description`}>{feature.description}</p>
@@ -119,7 +114,7 @@ const Component: FC<ProductVisualizationProps> = ({ className }) => {
 export const ProductVisualization = styled(Component)`
   position: relative;
   padding: 8rem 2rem;
-  background: ${({ theme }) => theme.colors.background.primary};
+  background: ${({ theme }) => theme.colors.background.default};
 
   &__container {
     max-width: 1200px;
@@ -135,7 +130,9 @@ export const ProductVisualization = styled(Component)`
     color: ${({ theme }) => theme.colors.text.primary};
     opacity: 0;
     transform: translateY(30px);
-    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+    transition:
+      opacity 0.8s ease-out,
+      transform 0.8s ease-out;
   }
 
   &.visible &__heading {
@@ -149,7 +146,9 @@ export const ProductVisualization = styled(Component)`
     color: ${({ theme }) => theme.colors.text.secondary};
     opacity: 0;
     transform: translateY(30px);
-    transition: opacity 0.8s ease-out 0.1s, transform 0.8s ease-out 0.1s;
+    transition:
+      opacity 0.8s ease-out 0.1s,
+      transform 0.8s ease-out 0.1s;
   }
 
   &.visible &__subheading {
@@ -161,7 +160,9 @@ export const ProductVisualization = styled(Component)`
     margin-bottom: 4rem;
     opacity: 0;
     transform: scale(0.95);
-    transition: opacity 0.8s ease-out 0.2s, transform 0.8s ease-out 0.2s;
+    transition:
+      opacity 0.8s ease-out 0.2s,
+      transform 0.8s ease-out 0.2s;
   }
 
   &.visible &__visualization {
@@ -172,19 +173,19 @@ export const ProductVisualization = styled(Component)`
   &__mockup {
     max-width: 900px;
     margin: 0 auto;
-    background: ${({ theme }) => theme.colors.background.secondary};
-    border: 1px solid ${({ theme }) => theme.colors.border.primary};
-    border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 25px 50px -12px ${({ theme }) => theme.colors.shadow.large};
+    background: ${({ theme }) => theme.colors.background.paper};
+    border: 1px solid ${({ theme }) => theme.colors.border.default};
+    border-radius: 16px;
+    box-shadow: ${({ theme }) => theme.shadows.lg};
   }
 
   &__mockup-header {
     display: flex;
     align-items: center;
     padding: 1rem 1.5rem;
-    background: ${({ theme }) => theme.colors.background.tertiary};
-    border-bottom: 1px solid ${({ theme }) => theme.colors.border.primary};
+    background: ${({ theme }) => theme.colors.background.elevated};
+    border-bottom: 1px solid ${({ theme }) => theme.colors.border.default};
   }
 
   &__mockup-dots {
@@ -194,15 +195,17 @@ export const ProductVisualization = styled(Component)`
     span {
       width: 12px;
       height: 12px;
+      background: ${({ theme }) => theme.colors.border.subtle};
       border-radius: 50%;
-      background: ${({ theme }) => theme.colors.border.secondary};
 
       &:nth-of-type(1) {
         background: #ff5f56;
       }
+
       &:nth-of-type(2) {
         background: #ffbd2e;
       }
+
       &:nth-of-type(3) {
         background: #27c93f;
       }
@@ -211,16 +214,16 @@ export const ProductVisualization = styled(Component)`
 
   &__mockup-title {
     flex: 1;
-    text-align: center;
     font-size: 0.9rem;
     font-weight: 600;
     color: ${({ theme }) => theme.colors.text.secondary};
+    text-align: center;
   }
 
   &__mockup-content {
     position: relative;
     aspect-ratio: 16 / 9;
-    background: ${({ theme }) => theme.colors.background.primary};
+    background: ${({ theme }) => theme.colors.background.default};
   }
 
   &__mockup-canvas {
@@ -234,10 +237,10 @@ export const ProductVisualization = styled(Component)`
     inset: 0;
     background: radial-gradient(
       circle at 30% 40%,
-      rgba(255, 0, 0, 0.3) 0%,
-      rgba(255, 255, 0, 0.2) 30%,
-      rgba(0, 255, 0, 0.15) 50%,
-      rgba(0, 0, 255, 0.2) 70%,
+      rgb(255 0 0 / 30%) 0%,
+      rgb(255 255 0 / 20%) 30%,
+      rgb(0 255 0 / 15%) 50%,
+      rgb(0 0 255 / 20%) 70%,
       transparent 100%
     );
     animation: pulse 4s ease-in-out infinite;
@@ -248,6 +251,7 @@ export const ProductVisualization = styled(Component)`
     100% {
       opacity: 0.6;
     }
+
     50% {
       opacity: 1;
     }
@@ -266,16 +270,16 @@ export const ProductVisualization = styled(Component)`
     display: flex;
     flex-direction: column;
     padding: 1rem;
-    background: ${({ theme }) => theme.colors.background.secondary}dd;
-    border: 1px solid ${({ theme }) => theme.colors.border.primary};
+    background: ${({ theme }) => theme.colors.background.paper}dd;
+    border: 1px solid ${({ theme }) => theme.colors.border.default};
     border-radius: 8px;
     backdrop-filter: blur(10px);
   }
 
   &__mockup-stat-label {
+    margin-bottom: 0.25rem;
     font-size: 0.75rem;
     color: ${({ theme }) => theme.colors.text.secondary};
-    margin-bottom: 0.25rem;
   }
 
   &__mockup-stat-value {
@@ -296,7 +300,9 @@ export const ProductVisualization = styled(Component)`
     text-align: left;
     opacity: 0;
     transform: translateY(30px);
-    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    transition:
+      opacity 0.6s ease-out,
+      transform 0.6s ease-out;
   }
 
   &.visible &__feature {
@@ -311,10 +317,10 @@ export const ProductVisualization = styled(Component)`
     font-size: 0.75rem;
     font-weight: 600;
     color: ${({ theme }) => theme.colors.primary.main};
-    background: ${({ theme }) => theme.colors.primary.main}22;
-    border-radius: 20px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    background: ${({ theme }) => theme.colors.primary.main}22;
+    border-radius: 20px;
   }
 
   &__feature-title {
@@ -331,7 +337,7 @@ export const ProductVisualization = styled(Component)`
     color: ${({ theme }) => theme.colors.text.secondary};
   }
 
-  @media (max-width: 768px) {
+  @media (width <= 768px) {
     padding: 4rem 1.5rem;
 
     &__heading {

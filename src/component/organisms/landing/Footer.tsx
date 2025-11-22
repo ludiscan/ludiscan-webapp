@@ -22,25 +22,20 @@ const Component: FC<FooterProps> = ({ className }) => {
           <div className={`${className}__links`}>
             <div className={`${className}__links-group`}>
               <h4 className={`${className}__links-title`}>製品</h4>
-              <Link href="/heatmap/docs" className={`${className}__link`}>
+              <Link href='/heatmap/docs' className={`${className}__link`}>
                 ドキュメント
               </Link>
-              <Link href="/login" className={`${className}__link`}>
+              <Link href='/login' className={`${className}__link`}>
                 ログイン
               </Link>
             </div>
 
             <div className={`${className}__links-group`}>
               <h4 className={`${className}__links-title`}>会社</h4>
-              <Link href="/security" className={`${className}__link`}>
+              <Link href='/security' className={`${className}__link`}>
                 セキュリティ
               </Link>
-              <a
-                href="https://github.com/ludiscan"
-                className={`${className}__link`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href='https://github.com/ludiscan' className={`${className}__link`} target='_blank' rel='noopener noreferrer'>
                 GitHub
               </a>
             </div>
@@ -48,9 +43,7 @@ const Component: FC<FooterProps> = ({ className }) => {
         </div>
 
         <div className={`${className}__bottom`}>
-          <p className={`${className}__copyright`}>
-            © {currentYear} Ludiscan. All rights reserved.
-          </p>
+          <p className={`${className}__copyright`}>© {currentYear} Ludiscan. All rights reserved.</p>
         </div>
       </div>
     </footer>
@@ -60,8 +53,8 @@ const Component: FC<FooterProps> = ({ className }) => {
 export const Footer = styled(Component)`
   position: relative;
   padding: 4rem 2rem 2rem;
-  background: ${({ theme }) => theme.colors.background.tertiary};
-  border-top: 1px solid ${({ theme }) => theme.colors.border.primary};
+  background: ${({ theme }) => theme.colors.background.elevated};
+  border-top: 1px solid ${({ theme }) => theme.colors.border.default};
 
   &__container {
     max-width: 1200px;
@@ -129,8 +122,8 @@ export const Footer = styled(Component)`
 
   &__bottom {
     padding-top: 2rem;
-    border-top: 1px solid ${({ theme }) => theme.colors.border.primary};
     text-align: center;
+    border-top: 1px solid ${({ theme }) => theme.colors.border.default};
   }
 
   &__copyright {
@@ -140,7 +133,7 @@ export const Footer = styled(Component)`
     opacity: 0.7;
   }
 
-  @media (max-width: 768px) {
+  @media (width <= 768px) {
     padding: 3rem 1.5rem 1.5rem;
 
     &__content {

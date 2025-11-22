@@ -44,16 +44,17 @@ const Component: FC<TrustSectionProps> = ({ className }) => {
           }
         });
       },
-      { threshold: 0.2 }
+      { threshold: 0.2 },
     );
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
+    const currentRef = sectionRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
     }
 
     return () => {
-      if (sectionRef.current) {
-        observer.unobserve(sectionRef.current);
+      if (currentRef) {
+        observer.unobserve(currentRef);
       }
     };
   }, []);
@@ -63,11 +64,7 @@ const Component: FC<TrustSectionProps> = ({ className }) => {
       <div className={`${className}__container`}>
         <div className={`${className}__grid`}>
           {trustItems.map((item, index) => (
-            <div
-              key={index}
-              className={`${className}__item`}
-              style={{ transitionDelay: `${index * 0.1}s` }}
-            >
+            <div key={index} className={`${className}__item`} style={{ transitionDelay: `${index * 0.1}s` }}>
               <div className={`${className}__icon`}>{item.icon}</div>
               <h3 className={`${className}__title`}>{item.title}</h3>
               <p className={`${className}__description`}>{item.description}</p>
@@ -82,7 +79,7 @@ const Component: FC<TrustSectionProps> = ({ className }) => {
 export const TrustSection = styled(Component)`
   position: relative;
   padding: 8rem 2rem;
-  background: ${({ theme }) => theme.colors.background.secondary};
+  background: ${({ theme }) => theme.colors.background.paper};
 
   &__container {
     max-width: 1200px;
@@ -97,18 +94,20 @@ export const TrustSection = styled(Component)`
 
   &__item {
     padding: 2.5rem;
-    background: ${({ theme }) => theme.colors.background.primary};
-    border: 1px solid ${({ theme }) => theme.colors.border.primary};
-    border-radius: 20px;
     text-align: center;
+    background: ${({ theme }) => theme.colors.background.default};
+    border: 1px solid ${({ theme }) => theme.colors.border.default};
+    border-radius: 20px;
     opacity: 0;
     transform: translateY(30px);
-    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    transition:
+      opacity 0.6s ease-out,
+      transform 0.6s ease-out;
 
     &:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 20px 40px ${({ theme }) => theme.colors.shadow.medium};
       border-color: ${({ theme }) => theme.colors.primary.main};
+      box-shadow: ${({ theme }) => theme.shadows.md};
+      transform: translateY(-10px);
     }
   }
 
@@ -118,8 +117,8 @@ export const TrustSection = styled(Component)`
   }
 
   &__icon {
-    font-size: 4rem;
     margin-bottom: 1.5rem;
+    font-size: 4rem;
   }
 
   &__title {
@@ -137,7 +136,7 @@ export const TrustSection = styled(Component)`
     opacity: 0.8;
   }
 
-  @media (max-width: 768px) {
+  @media (width <= 768px) {
     padding: 4rem 1.5rem;
 
     &__grid {

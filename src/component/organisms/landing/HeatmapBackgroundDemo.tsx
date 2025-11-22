@@ -74,13 +74,18 @@ const HeatmapParticles: FC = () => {
   });
 
   return (
+    // eslint-disable-next-line react/no-unknown-property
     <points ref={particlesRef} geometry={geometry}>
       <pointsMaterial
         size={0.15}
+        // eslint-disable-next-line react/no-unknown-property
         vertexColors
+        // eslint-disable-next-line react/no-unknown-property
         transparent
         opacity={0.6}
+        // eslint-disable-next-line react/no-unknown-property
         sizeAttenuation
+        // eslint-disable-next-line react/no-unknown-property
         blending={THREE.AdditiveBlending}
       />
     </points>
@@ -102,7 +107,9 @@ const GridFloor: FC = () => {
   return (
     <gridHelper
       ref={gridRef}
+      // eslint-disable-next-line react/no-unknown-property
       args={[50, 50, 0x00ffff, 0x004466]}
+      // eslint-disable-next-line react/no-unknown-property
       position={[0, -5, 0]}
     />
   );
@@ -125,7 +132,9 @@ const Component: FC<HeatmapBackgroundDemoProps> = ({ className }) => {
           antialias: true,
         }}
       >
+        {/* eslint-disable-next-line react/no-unknown-property */}
         <ambientLight intensity={0.5} />
+        {/* eslint-disable-next-line react/no-unknown-property */}
         <pointLight position={[10, 10, 10]} intensity={1} />
         <HeatmapParticles />
         <GridFloor />
@@ -138,11 +147,11 @@ export const HeatmapBackgroundDemo = styled(Component)`
   position: fixed;
   top: 0;
   left: 0;
+  z-index: 0;
   width: 100vw;
   height: 100vh;
-  z-index: 0;
-  opacity: 0.3;
   pointer-events: none;
+  opacity: 0.3;
 
   canvas {
     width: 100% !important;

@@ -63,8 +63,11 @@ const Component: FC<IndexPageProps> = ({ className }) => {
 const IndexPage = styled(Component)`
   position: relative;
   min-height: 100vh;
-  background: ${({ theme }) => theme.colors.background.primary};
   overflow-x: hidden;
+  background: ${({ theme }) => theme.colors.background.default};
+
+  /* Smooth scrolling */
+  scroll-behavior: smooth;
 
   &__content {
     position: relative;
@@ -76,13 +79,13 @@ const IndexPage = styled(Component)`
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    background: ${({ theme }) => theme.colors.background.primary};
+    background: ${({ theme }) => theme.colors.background.default};
   }
 
   &__loading-spinner {
     width: 50px;
     height: 50px;
-    border: 4px solid ${({ theme }) => theme.colors.border.primary};
+    border: 4px solid ${({ theme }) => theme.colors.border.default};
     border-top-color: ${({ theme }) => theme.colors.primary.main};
     border-radius: 50%;
     animation: spin 1s linear infinite;
@@ -94,13 +97,10 @@ const IndexPage = styled(Component)`
     }
   }
 
-  /* Smooth scrolling */
-  scroll-behavior: smooth;
-
   /* Selection styling */
   ::selection {
-    background: ${({ theme }) => theme.colors.primary.main}44;
     color: ${({ theme }) => theme.colors.text.primary};
+    background: ${({ theme }) => theme.colors.primary.main}44;
   }
 `;
 
