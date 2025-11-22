@@ -1682,54 +1682,21 @@ export interface components {
        */
       offset: number;
     };
-    SessionSummaryDto: {
+    SearchSessionSummaryDto: {
       /**
-       * @description Summary UUID
-       * @example 8c7b3c7a-1c6a-41a4-9a9b-9b1c1d2e3f4a
+       * @description Session ID
+       * @example 1
        */
-      id: string;
-      /** @enum {string} */
-      status: 'queued' | 'running' | 'done' | 'error';
+      id: number;
       /**
-       * @description Summary language
-       * @enum {string}
+       * @description Display text for the session (includes name, platform, version, and start time)
+       * @example Session_2025-01-15_Morning (Android, v1.2.3) - 2025-01-15 10:30
        */
-      lang: 'ja' | 'en';
-      /**
-       * @description AI provider used for generation
-       * @enum {string}
-       */
-      provider: 'template' | 'ollama' | 'openai';
-      /**
-       * @description AI model name
-       * @example gpt-4o-mini
-       */
-      model: string;
-      /** @description Summary in Markdown format */
-      summary_md: string | null;
-      /**
-       * @description Summary in JSON format with structured data
-       * @example {
-       *       "title": "Session Summary",
-       *       "description": "Player completed level 1",
-       *       "keyFindings": [
-       *         "Fast completion",
-       *         "No deaths"
-       *       ]
-       *     }
-       */
-      summary_json: {
-        [key: string]: unknown;
-      } | null;
-      /**
-       * Format: date-time
-       * @description Summary creation timestamp
-       */
-      created_at: string;
+      display: string;
     };
     SearchSessionSummaryResponseDto: {
       /** @description Array of session summaries matching the search criteria (no pagination) */
-      sessions: components['schemas']['SessionSummaryDto'][];
+      sessions: components['schemas']['SearchSessionSummaryDto'][];
       /**
        * @description Total number of sessions found
        * @example 42
@@ -1975,6 +1942,51 @@ export interface components {
        * @example 2021-01-01T00:00:00.000Z
        */
       updatedAt: string;
+    };
+    SessionSummaryDto: {
+      /**
+       * @description Summary UUID
+       * @example 8c7b3c7a-1c6a-41a4-9a9b-9b1c1d2e3f4a
+       */
+      id: string;
+      /** @enum {string} */
+      status: 'queued' | 'running' | 'done' | 'error';
+      /**
+       * @description Summary language
+       * @enum {string}
+       */
+      lang: 'ja' | 'en';
+      /**
+       * @description AI provider used for generation
+       * @enum {string}
+       */
+      provider: 'template' | 'ollama' | 'openai';
+      /**
+       * @description AI model name
+       * @example gpt-4o-mini
+       */
+      model: string;
+      /** @description Summary in Markdown format */
+      summary_md: string | null;
+      /**
+       * @description Summary in JSON format with structured data
+       * @example {
+       *       "title": "Session Summary",
+       *       "description": "Player completed level 1",
+       *       "keyFindings": [
+       *         "Fast completion",
+       *         "No deaths"
+       *       ]
+       *     }
+       */
+      summary_json: {
+        [key: string]: unknown;
+      } | null;
+      /**
+       * Format: date-time
+       * @description Summary creation timestamp
+       */
+      created_at: string;
     };
     CreateGameApiKeyDto: {
       /**
