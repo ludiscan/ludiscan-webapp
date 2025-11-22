@@ -5,7 +5,6 @@ import type { FC } from 'react';
 
 import { usePublicStats } from '@src/hooks/usePublicStats';
 
-
 type Feature = {
   title: string;
   description: string;
@@ -96,9 +95,7 @@ const Component: FC<ProductVisualizationProps> = ({ className }) => {
                   <div className={`${className}__mockup-stat`}>
                     <span className={`${className}__mockup-stat-label`}>分析済みイベント</span>
                     <span className={`${className}__mockup-stat-value`}>
-                      {stats.total_events > 1000
-                        ? `${(stats.total_events / 1000).toFixed(1)}K`
-                        : stats.total_events.toLocaleString()}
+                      {stats.total_events > 1000 ? `${(stats.total_events / 1000).toFixed(1)}K` : stats.total_events.toLocaleString()}
                     </span>
                   </div>
                 </div>
