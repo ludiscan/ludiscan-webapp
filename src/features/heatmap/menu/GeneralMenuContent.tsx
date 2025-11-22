@@ -1,8 +1,8 @@
 import styled from '@emotion/styled';
-import { useCallback, useState, useEffect, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useCallback, useState, useMemo, useEffect } from 'react';
 import { FiFilter } from 'react-icons/fi';
 
-import type { components } from '@generated/api';
 import type { HeatmapMenuProps } from '@src/features/heatmap/HeatmapMenuContent';
 import type { GeneralSettings } from '@src/modeles/heatmapView';
 import type { FC } from 'react';
@@ -16,11 +16,10 @@ import { SegmentedSwitch } from '@src/component/molecules/SegmentedSwitch';
 import { Selector } from '@src/component/molecules/Selector';
 import { useToast } from '@src/component/templates/ToastContext';
 import { InputRow } from '@src/features/heatmap/menu/InputRow';
+import { useDebouncedValue } from '@src/hooks/useDebouncedValue';
 import { useGeneralPatch, useGeneralPick } from '@src/hooks/useGeneral';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { useApiClient } from '@src/modeles/ApiClientContext';
-
-type SearchSessionSummaryDto = components['schemas']['SearchSessionSummaryDto'];
 
 const Divider = styled.div`
   width: 100%;
@@ -106,68 +105,63 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
 
   // Session Filter state
   const [searchQuery, setSearchQuery] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
   const [isCreatingTask, setIsCreatingTask] = useState(false);
-  const [searchResults, setSearchResults] = useState<SearchSessionSummaryDto[] | null>(null);
-  const [totalCount, setTotalCount] = useState<number>(0);
+
+  // デバウンスされた検索クエリ（1秒）
+  const debouncedSearchQuery = useDebouncedValue(searchQuery, 1000);
 
   // プロジェクトデータを取得してzVisibleを決定
-  const [zVisible, setZVisible] = useState(true);
-
-  useMemo(() => {
-    if (!projectId) return;
-    (async () => {
+  const { data: project } = useQuery({
+    queryKey: ['project', projectId],
+    queryFn: async () => {
+      if (!projectId) return null;
       const res = await apiClient.GET('/api/v0/projects/{id}', {
         params: { path: { id: projectId } },
       });
-      if (res.data) {
-        setZVisible(!(res.data.is2D ?? false));
-      }
-    })();
-  }, [projectId, apiClient]);
+      return res.data ?? null;
+    },
+    enabled: !!projectId,
+    staleTime: 1000 * 60 * 5, // 5分
+  });
 
-  // 検索実行（デバウンス対応）
+  const zVisible = useMemo(() => !(project?.is2D ?? false), [project?.is2D]);
+
+  // セッション検索（デバウンスされたクエリで実行）
+  const {
+    data: searchData,
+    isLoading: isSearching,
+    error: searchError,
+  } = useQuery({
+    queryKey: ['sessionSearchSummary', projectId, debouncedSearchQuery],
+    queryFn: async () => {
+      if (!projectId || !debouncedSearchQuery.trim()) return null;
+
+      const res = await apiClient.GET('/api/v0.1/projects/{project_id}/sessions/search/summary', {
+        params: {
+          path: { project_id: projectId },
+          query: { q: debouncedSearchQuery.trim() },
+        },
+      });
+
+      if (res.error) {
+        throw new Error(`検索に失敗しました: ${res.error}`);
+      }
+
+      return res.data ?? null;
+    },
+    enabled: !!projectId && debouncedSearchQuery.trim().length > 0,
+    staleTime: 1000 * 60, // 1分
+  });
+
+  const searchResults = searchData?.sessions ?? null;
+  const totalCount = searchData?.total ?? 0;
+
+  // 検索エラーの表示
   useEffect(() => {
-    if (!projectId) return;
-
-    // 検索クエリが空の場合は検索をスキップ
-    if (!searchQuery.trim()) {
-      setSearchResults(null);
-      setTotalCount(0);
-      return;
+    if (searchError) {
+      toast.showToast(`検索エラー: ${searchError}`, 5, 'error');
     }
-
-    const timerId = setTimeout(async () => {
-      setIsSearching(true);
-
-      try {
-        const res = await apiClient.GET('/api/v0.1/projects/{project_id}/sessions/search/summary', {
-          params: {
-            path: { project_id: projectId },
-            query: { q: searchQuery.trim() },
-          },
-        });
-
-        if (res.error) {
-          toast.showToast(`検索に失敗しました: ${res.error}`, 5, 'error');
-          setSearchResults(null);
-          return;
-        }
-
-        if (res.data) {
-          setSearchResults(res.data.sessions);
-          setTotalCount(res.data.total);
-        }
-      } catch (error) {
-        toast.showToast(`検索エラー: ${error}`, 5, 'error');
-        setSearchResults(null);
-      } finally {
-        setIsSearching(false);
-      }
-    }, 1000); // 1秒のデバウンス
-
-    return () => clearTimeout(timerId);
-  }, [projectId, searchQuery, apiClient, toast]);
+  }, [searchError, toast]);
 
   // Heatmap Task作成
   const handleCreateTask = useCallback(async () => {
