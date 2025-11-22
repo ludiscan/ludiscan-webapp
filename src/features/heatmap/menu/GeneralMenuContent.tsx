@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useState, useMemo, useEffect } from 'react';
 import { FiFilter } from 'react-icons/fi';
 
@@ -20,6 +20,7 @@ import { useDebouncedValue } from '@src/hooks/useDebouncedValue';
 import { useGeneralPatch, useGeneralPick } from '@src/hooks/useGeneral';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { useApiClient } from '@src/modeles/ApiClientContext';
+import { projectCreateTask } from '@src/utils/heatmap/HeatmapDataService';
 
 const Divider = styled.div`
   width: 100%;
@@ -88,6 +89,7 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
   const { theme } = useSharedTheme();
   const toast = useToast();
   const apiClient = useApiClient();
+  const queryClient = useQueryClient();
   const projectId = service.projectId;
 
   const { upZ, scale, heatmapOpacity, heatmapType, colorScale, blockSize, showHeatmap, minThreshold } = useGeneralPick(
@@ -175,16 +177,7 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
     try {
       const sessionIds = searchResults?.map((s) => s.id) ?? undefined;
 
-      const res = await apiClient.POST('/api/v0/heatmap/projects/{project_id}/tasks', {
-        params: {
-          path: { project_id: projectId },
-        },
-        body: {
-          stepSize: 50,
-          zVisible: zVisible,
-          ...(sessionIds && sessionIds.length > 0 ? { sessionIds } : {}),
-        },
-      });
+      const res = await projectCreateTask(apiClient, projectId, 50, zVisible, sessionIds);
 
       if (res.error) {
         toast.showToast(`Heatmap Task作成に失敗しました: ${res.error}`, 5, 'error');
@@ -192,18 +185,16 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
       }
 
       if (res.data) {
-        toast.showToast('Heatmap Taskを作成しました。ページをリロードします...', 3, 'success');
-        // ページをリロードして新しいheatmapを表示
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
+        toast.showToast('Heatmap Taskを作成しました', 3, 'success');
+        // クエリを無効化して再取得
+        await queryClient.invalidateQueries({ queryKey: ['heatmap'] });
       }
     } catch (error) {
       toast.showToast(`作成エラー: ${error}`, 5, 'error');
     } finally {
       setIsCreatingTask(false);
     }
-  }, [projectId, searchResults, zVisible, apiClient, toast]);
+  }, [projectId, searchResults, zVisible, apiClient, toast, queryClient]);
   return (
     <>
       <InputRow label={'上向ベクトル'}>
