@@ -20,16 +20,8 @@ const Component: FC<HeroSectionProps> = ({ className }) => {
   return (
     <section className={`${className} ${isVisible ? 'visible' : ''}`}>
       <div className={`${className}__content`}>
-        <h1 className={`${className}__title`}>
-          ゲームプレイを
-          <br />
-          可視化する次世代ツール
-        </h1>
-        <p className={`${className}__subtitle`}>
-          3D/2Dヒートマップで、プレイヤーの行動パターンとイベントを
-          <br />
-          リアルタイムに分析・改善
-        </p>
+        <h1 className={`${className}__title`}>ゲームプレイデータの可視化</h1>
+        <p className={`${className}__subtitle`}>3D/2Dヒートマップでプレイヤーの行動を分析</p>
         <div className={`${className}__cta`}>
           <Link href='/login' className={`${className}__primary-button`}>
             無料で始める
@@ -48,8 +40,8 @@ export const HeroSection = styled(Component)`
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  padding: 4rem 2rem;
+  min-height: 80vh;
+  padding: 6rem 2rem 4rem;
   text-align: center;
   opacity: 0;
   transform: translateY(30px);
@@ -140,8 +132,8 @@ export const HeroSection = styled(Component)`
   }
 
   @media (width <= 768px) {
-    min-height: 90vh;
-    padding: 2rem 1.5rem;
+    min-height: 70vh;
+    padding: 4rem 1.5rem 2rem;
 
     &__title {
       margin-bottom: 1rem;
