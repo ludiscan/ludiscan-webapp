@@ -22,7 +22,7 @@ const Component: FC<FooterProps> = ({ className }) => {
           <div className={`${className}__links`}>
             <div className={`${className}__links-group`}>
               <h4 className={`${className}__links-title`}>製品</h4>
-              <Link href='/heatmap/docs' className={`${className}__link`}>
+              <Link href='/heatmap/docs/heatmap/getting-started' className={`${className}__link`}>
                 ドキュメント
               </Link>
               <Link href='/login' className={`${className}__link`}>

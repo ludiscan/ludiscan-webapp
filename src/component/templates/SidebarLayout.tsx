@@ -32,7 +32,7 @@ const MENU_ITEMS: MenuItem[] = [
   { label: 'API Keys', href: '/api-keys', icon: <BiKey size={20} />, requiresAuth: true },
   { label: 'Security', href: '/security', icon: <BiLock size={20} />, requiresAuth: true },
   { label: 'Health Check', href: '/health', icon: <BiPulse size={20} />, requiresAuth: false },
-  { label: 'Docs', icon: <BiBook size={20} />, requiresAuth: true, isDropdown: true },
+  { label: 'Docs', icon: <BiBook size={20} />, requiresAuth: false, isDropdown: true },
 ];
 
 const STORAGE_KEY = 'sidebar-expanded-dropdowns';
@@ -57,7 +57,7 @@ const Component: FC<SidebarLayoutProps> = ({ className }) => {
     return new Set();
   });
 
-  // Fetch docs groups for the dropdown
+  // Fetch docs groups for the dropdown (available to all users)
   const { data: docsGroups = [] } = useQuery<DocGroup[]>({
     queryKey: ['docs-groups'],
     queryFn: async () => {
@@ -67,7 +67,6 @@ const Component: FC<SidebarLayoutProps> = ({ className }) => {
       }
       return response.json();
     },
-    enabled: isAuthorized,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 

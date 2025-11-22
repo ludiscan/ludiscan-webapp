@@ -13,7 +13,7 @@ type SecondaryLink = {
 const secondaryLinks: SecondaryLink[] = [
   {
     label: 'ドキュメント',
-    href: '/heatmap/docs',
+    href: '/heatmap/docs/heatmap/getting-started',
   },
   {
     label: 'セキュリティ',

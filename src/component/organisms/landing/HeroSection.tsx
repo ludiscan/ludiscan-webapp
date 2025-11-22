@@ -26,7 +26,7 @@ const Component: FC<HeroSectionProps> = ({ className }) => {
           <Link href='/login' className={`${className}__primary-button`}>
             無料で始める
           </Link>
-          <Link href='/heatmap/docs' className={`${className}__secondary-button`}>
+          <Link href='/heatmap/docs/heatmap/getting-started' className={`${className}__secondary-button`}>
             デモを見る
           </Link>
         </div>
