@@ -3,6 +3,9 @@ import { useEffect, useRef, useState } from 'react';
 
 import type { FC } from 'react';
 
+import { usePublicStats } from '@src/hooks/usePublicStats';
+
+
 type Feature = {
   title: string;
   description: string;
@@ -34,6 +37,7 @@ type ProductVisualizationProps = {
 const Component: FC<ProductVisualizationProps> = ({ className }) => {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
+  const { data: stats } = usePublicStats();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -83,6 +87,22 @@ const Component: FC<ProductVisualizationProps> = ({ className }) => {
               <div className={`${className}__mockup-canvas`}>
                 <div className={`${className}__mockup-gradient`} />
               </div>
+              {stats && (
+                <div className={`${className}__mockup-overlay`}>
+                  <div className={`${className}__mockup-stat`}>
+                    <span className={`${className}__mockup-stat-label`}>総セッション数</span>
+                    <span className={`${className}__mockup-stat-value`}>{stats.total_sessions.toLocaleString()}</span>
+                  </div>
+                  <div className={`${className}__mockup-stat`}>
+                    <span className={`${className}__mockup-stat-label`}>分析済みイベント</span>
+                    <span className={`${className}__mockup-stat-value`}>
+                      {stats.total_events > 1000
+                        ? `${(stats.total_events / 1000).toFixed(1)}K`
+                        : stats.total_events.toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
