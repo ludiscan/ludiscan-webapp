@@ -3045,6 +3045,488 @@
         ]
       }
     },
+    "/api/v0.1/projects/{project_id}/sessions/search": {
+      "get": {
+        "description": "\nSearch play sessions with flexible query parameters.\n\n**Search Methods:**\n1. Individual parameters (name, platform, device_id, etc.)\n2. Unified search using 'q' parameter (plain text keyword OR GitHub-style filters)\n3. Both combined (parameters are merged with AND logic)\n\n**'q' Parameter Examples:**\n\n*Plain text keyword search (searches across name, device_id, platform, app_version, metadata keys and values):*\n- `q=Session_2025` - Find sessions with \"Session_2025\" in any searchable field\n- `q=Android` - Find sessions with \"Android\" in any searchable field\n- `q=MapA` - Find sessions with \"MapA\" in metadata (key or value)\n- `q=score` - Find sessions with \"score\" metadata key or value\n\n*GitHub-style filters:*\n- `q=platform:Android is:playing` - Android sessions currently playing\n- `q=name:Session is:finished` - Finished sessions with \"Session\" in name\n- `q=metadata.mapName:Level1 platform:iOS` - iOS sessions with mapName=Level1\n- `q=start_time:>2025-01-01 is:finished` - Finished sessions after 2025-01-01\n\n*Mixed (keyword + filters):*\n- `q=Session_2025 platform:Android` - Sessions with \"Session_2025\" in name/device/platform/version AND on Android\n- `q=Level1 is:finished` - Finished sessions with \"Level1\" in any searchable field\n\n**Metadata Search (using individual parameters):**\n- `metadata_key=mapName` - Sessions that have mapName key (any value)\n- `metadata_key=mapName&metadata_value=Level1` - Sessions with mapName=Level1\n        ",
+        "operationId": "PlaySessionV01Controller_search",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "name",
+            "required": false,
+            "in": "query",
+            "description": "Session name (partial match)",
+            "schema": {
+              "example": "Session_2025",
+              "type": "string"
+            }
+          },
+          {
+            "name": "device_id",
+            "required": false,
+            "in": "query",
+            "description": "Device ID (exact match)",
+            "schema": {
+              "example": "device-123",
+              "type": "string"
+            }
+          },
+          {
+            "name": "platform",
+            "required": false,
+            "in": "query",
+            "description": "Platform (exact match)",
+            "schema": {
+              "example": "Android",
+              "type": "string"
+            }
+          },
+          {
+            "name": "app_version",
+            "required": false,
+            "in": "query",
+            "description": "App version (exact match)",
+            "schema": {
+              "example": "1.0.0",
+              "type": "string"
+            }
+          },
+          {
+            "name": "start_time_from",
+            "required": false,
+            "in": "query",
+            "description": "Start time from (ISO 8601)",
+            "schema": {
+              "example": "2025-01-01T00:00:00Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "start_time_to",
+            "required": false,
+            "in": "query",
+            "description": "Start time to (ISO 8601)",
+            "schema": {
+              "example": "2025-01-31T23:59:59Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "end_time_from",
+            "required": false,
+            "in": "query",
+            "description": "End time from (ISO 8601)",
+            "schema": {
+              "example": "2025-01-01T00:00:00Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "end_time_to",
+            "required": false,
+            "in": "query",
+            "description": "End time to (ISO 8601)",
+            "schema": {
+              "example": "2025-01-31T23:59:59Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at_from",
+            "required": false,
+            "in": "query",
+            "description": "Updated at from (ISO 8601)",
+            "schema": {
+              "example": "2025-01-01T00:00:00Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at_to",
+            "required": false,
+            "in": "query",
+            "description": "Updated at to (ISO 8601)",
+            "schema": {
+              "example": "2025-01-31T23:59:59Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "is_playing",
+            "required": false,
+            "in": "query",
+            "description": "Filter by playing status (true: currently playing, false: finished)",
+            "schema": {
+              "example": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "metadata_key",
+            "required": false,
+            "in": "query",
+            "description": "Metadata key to search for (can be used alone to check key existence)",
+            "schema": {
+              "example": "mapName",
+              "type": "string"
+            }
+          },
+          {
+            "name": "metadata_value",
+            "required": false,
+            "in": "query",
+            "description": "Metadata value to search for (requires metadata_key to be specified)",
+            "schema": {
+              "example": "Level1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Unified search query. Supports: (1) Plain text keyword search across name, device_id, platform, app_version, and metadata keys/values (e.g., \"Session_2025\" or \"MapA\"), (2) GitHub-style filters (e.g., \"platform:Android is:playing\"), (3) Mixed (e.g., \"Session_2025 platform:Android is:finished\"). Keywords and filters are combined with AND logic.",
+            "schema": {
+              "example": "Session_2025 platform:Android is:finished",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Maximum number of results to return",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Number of results to skip",
+            "schema": {
+              "minimum": 0,
+              "default": 0,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort_by",
+            "required": false,
+            "in": "query",
+            "description": "Field to sort by",
+            "schema": {
+              "default": "start_time",
+              "type": "string",
+              "enum": [
+                "id",
+                "name",
+                "start_time",
+                "end_time",
+                "updated_at"
+              ]
+            }
+          },
+          {
+            "name": "sort_order",
+            "required": false,
+            "in": "query",
+            "description": "Sort order",
+            "schema": {
+              "default": "desc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchPlaySessionResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Search play sessions",
+        "tags": [
+          "v0.1"
+        ]
+      }
+    },
+    "/api/v0.1/projects/{project_id}/sessions/search/summary": {
+      "get": {
+        "description": "\nGet lightweight summary of all matching sessions (no pagination).\nThis endpoint is useful for previewing which sessions will be included in a heatmap task before creating it.\n\nAccepts the same search parameters as the regular search endpoint, but returns only session IDs and display text.\n\n**Display Format:** \"SessionName (Platform, Version) - YYYY-MM-DD HH:mm\"\n\n**Use Case:**\n1. Call this endpoint to preview filtered sessions\n2. User confirms the session list\n3. Use the same search query in heatmap task creation API\n        ",
+        "operationId": "PlaySessionV01Controller_searchSummary",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "name",
+            "required": false,
+            "in": "query",
+            "description": "Session name (partial match)",
+            "schema": {
+              "example": "Session_2025",
+              "type": "string"
+            }
+          },
+          {
+            "name": "device_id",
+            "required": false,
+            "in": "query",
+            "description": "Device ID (exact match)",
+            "schema": {
+              "example": "device-123",
+              "type": "string"
+            }
+          },
+          {
+            "name": "platform",
+            "required": false,
+            "in": "query",
+            "description": "Platform (exact match)",
+            "schema": {
+              "example": "Android",
+              "type": "string"
+            }
+          },
+          {
+            "name": "app_version",
+            "required": false,
+            "in": "query",
+            "description": "App version (exact match)",
+            "schema": {
+              "example": "1.0.0",
+              "type": "string"
+            }
+          },
+          {
+            "name": "start_time_from",
+            "required": false,
+            "in": "query",
+            "description": "Start time from (ISO 8601)",
+            "schema": {
+              "example": "2025-01-01T00:00:00Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "start_time_to",
+            "required": false,
+            "in": "query",
+            "description": "Start time to (ISO 8601)",
+            "schema": {
+              "example": "2025-01-31T23:59:59Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "end_time_from",
+            "required": false,
+            "in": "query",
+            "description": "End time from (ISO 8601)",
+            "schema": {
+              "example": "2025-01-01T00:00:00Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "end_time_to",
+            "required": false,
+            "in": "query",
+            "description": "End time to (ISO 8601)",
+            "schema": {
+              "example": "2025-01-31T23:59:59Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at_from",
+            "required": false,
+            "in": "query",
+            "description": "Updated at from (ISO 8601)",
+            "schema": {
+              "example": "2025-01-01T00:00:00Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at_to",
+            "required": false,
+            "in": "query",
+            "description": "Updated at to (ISO 8601)",
+            "schema": {
+              "example": "2025-01-31T23:59:59Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "is_playing",
+            "required": false,
+            "in": "query",
+            "description": "Filter by playing status (true: currently playing, false: finished)",
+            "schema": {
+              "example": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "metadata_key",
+            "required": false,
+            "in": "query",
+            "description": "Metadata key to search for (can be used alone to check key existence)",
+            "schema": {
+              "example": "mapName",
+              "type": "string"
+            }
+          },
+          {
+            "name": "metadata_value",
+            "required": false,
+            "in": "query",
+            "description": "Metadata value to search for (requires metadata_key to be specified)",
+            "schema": {
+              "example": "Level1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Unified search query. Supports: (1) Plain text keyword search across name, device_id, platform, app_version, and metadata keys/values (e.g., \"Session_2025\" or \"MapA\"), (2) GitHub-style filters (e.g., \"platform:Android is:playing\"), (3) Mixed (e.g., \"Session_2025 platform:Android is:finished\"). Keywords and filters are combined with AND logic.",
+            "schema": {
+              "example": "Session_2025 platform:Android is:finished",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Maximum number of results to return",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Number of results to skip",
+            "schema": {
+              "minimum": 0,
+              "default": 0,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort_by",
+            "required": false,
+            "in": "query",
+            "description": "Field to sort by",
+            "schema": {
+              "default": "start_time",
+              "type": "string",
+              "enum": [
+                "id",
+                "name",
+                "start_time",
+                "end_time",
+                "updated_at"
+              ]
+            }
+          },
+          {
+            "name": "sort_order",
+            "required": false,
+            "in": "query",
+            "description": "Sort order",
+            "schema": {
+              "default": "desc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchSessionSummaryResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Search play sessions summary",
+        "tags": [
+          "v0.1"
+        ]
+      }
+    },
     "/api/v0.1/projects/{project_id}/sessions/{session_id}/maps": {
       "get": {
         "operationId": "PlaySessionV01Controller_getSessionMaps",
@@ -3664,6 +4146,7 @@
     },
     "/api/v0/heatmap/projects/{project_id}/tasks": {
       "post": {
+        "description": "\nCreate a heatmap task for a project with optional session filtering.\n\n**Filtering Options:**\n1. No filter: Use all sessions in the project\n2. sessionIds: Specify exact session IDs (array of numbers)\n3. searchQuery: Use search parameters to filter sessions (same as session search API)\n\n**Note:** sessionIds and searchQuery cannot be used together.\n\n**Example with searchQuery:**\n```json\n{\n  \"stepSize\": 300,\n  \"searchQuery\": {\n    \"q\": \"platform:Android is:finished\"\n  }\n}\n```\n        ",
         "operationId": "HeatmapController_createProjectTask",
         "parameters": [
           {
@@ -5567,7 +6050,7 @@
   "info": {
     "title": "Ludiscan API Documentation",
     "description": "Ludiscan API for game analytics and session tracking",
-    "version": "1.11.0",
+    "version": "1.12.0",
     "contact": {}
   },
   "tags": [],
@@ -6306,6 +6789,135 @@
           "player"
         ]
       },
+      "SearchPlaySessionResponseDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "description": "Array of play sessions matching the search criteria",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlaySessionResponseDto"
+            }
+          },
+          "total": {
+            "type": "number",
+            "description": "Total number of sessions matching the criteria",
+            "example": 100
+          },
+          "limit": {
+            "type": "number",
+            "description": "Number of results returned",
+            "example": 20
+          },
+          "offset": {
+            "type": "number",
+            "description": "Number of results skipped",
+            "example": 0
+          }
+        },
+        "required": [
+          "data",
+          "total",
+          "limit",
+          "offset"
+        ]
+      },
+      "SessionSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Summary UUID",
+            "example": "8c7b3c7a-1c6a-41a4-9a9b-9b1c1d2e3f4a"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "done",
+              "error"
+            ]
+          },
+          "lang": {
+            "type": "string",
+            "enum": [
+              "ja",
+              "en"
+            ],
+            "description": "Summary language"
+          },
+          "provider": {
+            "type": "string",
+            "enum": [
+              "template",
+              "ollama",
+              "openai"
+            ],
+            "description": "AI provider used for generation"
+          },
+          "model": {
+            "type": "string",
+            "example": "gpt-4o-mini",
+            "description": "AI model name"
+          },
+          "summary_md": {
+            "type": "string",
+            "nullable": true,
+            "description": "Summary in Markdown format"
+          },
+          "summary_json": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": true,
+            "description": "Summary in JSON format with structured data",
+            "example": {
+              "title": "Session Summary",
+              "description": "Player completed level 1",
+              "keyFindings": [
+                "Fast completion",
+                "No deaths"
+              ]
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Summary creation timestamp"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "lang",
+          "provider",
+          "model",
+          "summary_md",
+          "summary_json",
+          "created_at"
+        ]
+      },
+      "SearchSessionSummaryResponseDto": {
+        "type": "object",
+        "properties": {
+          "sessions": {
+            "description": "Array of session summaries matching the search criteria (no pagination)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SessionSummaryDto"
+            }
+          },
+          "total": {
+            "type": "number",
+            "description": "Total number of sessions found",
+            "example": 42
+          }
+        },
+        "required": [
+          "sessions",
+          "total"
+        ]
+      },
       "PlayPositionLogDto": {
         "type": "object",
         "properties": {
@@ -6417,6 +7029,71 @@
           "event_type"
         ]
       },
+      "HeatmapSearchQueryDto": {
+        "type": "object",
+        "properties": {
+          "q": {
+            "type": "string",
+            "description": "Unified search query (plain text keyword OR GitHub-style filters)",
+            "example": "platform:Android is:finished"
+          },
+          "name": {
+            "type": "string",
+            "description": "Session name (partial match)",
+            "example": "Session_2025"
+          },
+          "device_id": {
+            "type": "string",
+            "description": "Device ID (exact match)",
+            "example": "device-123"
+          },
+          "platform": {
+            "type": "string",
+            "description": "Platform (exact match)",
+            "example": "Android"
+          },
+          "app_version": {
+            "type": "string",
+            "description": "App version (exact match)",
+            "example": "1.0.0"
+          },
+          "start_time_from": {
+            "type": "string",
+            "description": "Start time from (ISO 8601)",
+            "example": "2025-01-01T00:00:00Z"
+          },
+          "start_time_to": {
+            "type": "string",
+            "description": "Start time to (ISO 8601)",
+            "example": "2025-01-31T23:59:59Z"
+          },
+          "end_time_from": {
+            "type": "string",
+            "description": "End time from (ISO 8601)",
+            "example": "2025-01-01T00:00:00Z"
+          },
+          "end_time_to": {
+            "type": "string",
+            "description": "End time to (ISO 8601)",
+            "example": "2025-01-31T23:59:59Z"
+          },
+          "is_playing": {
+            "type": "boolean",
+            "description": "Filter by playing status (true: currently playing, false: finished)",
+            "example": false
+          },
+          "metadata_key": {
+            "type": "string",
+            "description": "Metadata key to search for",
+            "example": "mapName"
+          },
+          "metadata_value": {
+            "type": "string",
+            "description": "Metadata value to search for (requires metadata_key)",
+            "example": "Level1"
+          }
+        }
+      },
       "CreateHeatmapDto": {
         "type": "object",
         "properties": {
@@ -6430,6 +7107,26 @@
             "type": "boolean",
             "example": false,
             "description": "Whether to display the Z-axis"
+          },
+          "sessionIds": {
+            "example": [
+              1,
+              2,
+              3
+            ],
+            "description": "Filter by specific session IDs (for project heatmap). Cannot be used together with searchQuery.",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "searchQuery": {
+            "description": "Search query to filter sessions (for project heatmap). Cannot be used together with sessionIds. Use the same parameters as the search summary endpoint.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/HeatmapSearchQueryDto"
+              }
+            ]
           }
         }
       },
@@ -6563,81 +7260,6 @@
           "status",
           "createdAt",
           "updatedAt"
-        ]
-      },
-      "SessionSummaryDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "Summary UUID",
-            "example": "8c7b3c7a-1c6a-41a4-9a9b-9b1c1d2e3f4a"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "queued",
-              "running",
-              "done",
-              "error"
-            ]
-          },
-          "lang": {
-            "type": "string",
-            "enum": [
-              "ja",
-              "en"
-            ],
-            "description": "Summary language"
-          },
-          "provider": {
-            "type": "string",
-            "enum": [
-              "template",
-              "ollama",
-              "openai"
-            ],
-            "description": "AI provider used for generation"
-          },
-          "model": {
-            "type": "string",
-            "example": "gpt-4o-mini",
-            "description": "AI model name"
-          },
-          "summary_md": {
-            "type": "string",
-            "nullable": true,
-            "description": "Summary in Markdown format"
-          },
-          "summary_json": {
-            "type": "object",
-            "nullable": true,
-            "additionalProperties": true,
-            "description": "Summary in JSON format with structured data",
-            "example": {
-              "title": "Session Summary",
-              "description": "Player completed level 1",
-              "keyFindings": [
-                "Fast completion",
-                "No deaths"
-              ]
-            }
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "Summary creation timestamp"
-          }
-        },
-        "required": [
-          "id",
-          "status",
-          "lang",
-          "provider",
-          "model",
-          "summary_md",
-          "summary_json",
-          "created_at"
         ]
       },
       "CreateGameApiKeyDto": {
