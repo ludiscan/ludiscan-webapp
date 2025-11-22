@@ -5526,12 +5526,48 @@
           "Embed"
         ]
       }
+    },
+    "/api/v0/public-stats": {
+      "get": {
+        "description": "システム全体の統計情報を取得します。認証は不要です。",
+        "operationId": "PublicStatsController_getPublicStats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "統計情報の取得に成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicStatsResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "サーバーエラー"
+          }
+        },
+        "summary": "公開統計情報を取得",
+        "tags": [
+          "Public Stats"
+        ]
+      }
     }
   },
   "info": {
     "title": "Ludiscan API Documentation",
     "description": "Ludiscan API for game analytics and session tracking",
-    "version": "1.10.1",
+    "version": "1.11.0",
     "contact": {}
   },
   "tags": [],
@@ -7160,6 +7196,43 @@
           "projectId",
           "sessionId",
           "expiresAt"
+        ]
+      },
+      "PublicStatsResponseDto": {
+        "type": "object",
+        "properties": {
+          "total_projects": {
+            "type": "number",
+            "description": "総プロジェクト数",
+            "example": 150
+          },
+          "total_sessions": {
+            "type": "number",
+            "description": "総セッション数",
+            "example": 1234
+          },
+          "total_events": {
+            "type": "number",
+            "description": "総イベント数（処理済み）",
+            "example": 567890
+          },
+          "active_sessions_7d": {
+            "type": "number",
+            "description": "過去7日間のアクティブセッション数",
+            "example": 42
+          },
+          "total_users": {
+            "type": "number",
+            "description": "総ユーザー数",
+            "example": 89
+          }
+        },
+        "required": [
+          "total_projects",
+          "total_sessions",
+          "total_events",
+          "active_sessions_7d",
+          "total_users"
         ]
       },
       "DefaultErrorResponse": {

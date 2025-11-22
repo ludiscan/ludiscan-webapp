@@ -1301,6 +1301,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v0/public-stats': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 公開統計情報を取得
+     * @description システム全体の統計情報を取得します。認証は不要です。
+     */
+    get: operations['PublicStatsController_getPublicStats'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2019,6 +2039,33 @@ export interface components {
        * @example 2024-01-01T12:00:00.000Z
        */
       expiresAt: string;
+    };
+    PublicStatsResponseDto: {
+      /**
+       * @description 総プロジェクト数
+       * @example 150
+       */
+      total_projects: number;
+      /**
+       * @description 総セッション数
+       * @example 1234
+       */
+      total_sessions: number;
+      /**
+       * @description 総イベント数（処理済み）
+       * @example 567890
+       */
+      total_events: number;
+      /**
+       * @description 過去7日間のアクティブセッション数
+       * @example 42
+       */
+      active_sessions_7d: number;
+      /**
+       * @description 総ユーザー数
+       * @example 89
+       */
+      total_users: number;
     };
     DefaultErrorResponse: {
       /** @example 400 */
@@ -5403,6 +5450,42 @@ export interface operations {
         content: {
           'application/json': components['schemas']['DefaultErrorResponse'];
         };
+      };
+    };
+  };
+  PublicStatsController_getPublicStats: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description 統計情報の取得に成功 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PublicStatsResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+      /** @description サーバーエラー */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
