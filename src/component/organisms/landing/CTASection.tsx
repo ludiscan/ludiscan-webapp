@@ -62,11 +62,11 @@ const Component: FC<CTASectionProps> = ({ className }) => {
     <section ref={sectionRef} className={`${className} ${isVisible ? 'visible' : ''}`}>
       <div className={`${className}__container`}>
         <h2 className={`${className}__heading`}>今すぐ始めよう</h2>
-        <p className={`${className}__subheading`}>数分でセットアップ完了。クレジットカード不要でお試しいただけます</p>
+        <p className={`${className}__subheading`}>数分でセットアップが完了します</p>
 
         <div className={`${className}__primary-cta`}>
           <Link href='/login' className={`${className}__primary-button`}>
-            無料トライアルを開始
+            始める
           </Link>
         </div>
 

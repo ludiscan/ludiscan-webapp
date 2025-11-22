@@ -24,7 +24,7 @@ const Component: FC<HeroSectionProps> = ({ className }) => {
         <p className={`${className}__subtitle`}>3D/2Dヒートマップでプレイヤーの行動を分析</p>
         <div className={`${className}__cta`}>
           <Link href='/login' className={`${className}__primary-button`}>
-            無料で始める
+            始める
           </Link>
           <Link href='/heatmap/docs/heatmap/getting-started' className={`${className}__secondary-button`}>
             デモを見る
