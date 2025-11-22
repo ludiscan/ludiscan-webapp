@@ -102,14 +102,14 @@ jobs:
           # Commit changes
           git add generated/api.d.ts swagger.json
           git commit -m "$(cat <<EOF
-chore: update API client to version ${VERSION}
-
-Update API types from ludiscan-api-specs
-
-- API version: ${VERSION}
-- Generated from: ${{ steps.get-params.outputs.swagger_url }}
-EOF
-)"
+            chore: update API client to version ${VERSION}
+            
+            Update API types from ludiscan-api-specs
+            
+            - API version: ${VERSION}
+            - Generated from: ${{ steps.get-params.outputs.swagger_url }}
+            EOF
+          )"
 
           # Push to remote
           git push -u origin "$BRANCH_NAME"
