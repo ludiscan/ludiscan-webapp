@@ -61,8 +61,8 @@ const SessionItem = styled.div`
 
 const HintText = styled.div`
   font-size: 12px;
-  color: ${({ theme }) => theme.colors.text.secondary};
   line-height: 1.5;
+  color: ${({ theme }) => theme.colors.text.secondary};
 `;
 
 const SearchInput = styled.input`
@@ -70,18 +70,18 @@ const SearchInput = styled.input`
   padding: 8px 12px;
   font-size: 14px;
   color: ${({ theme }) => theme.colors.text.primary};
+  outline: none;
   background: ${({ theme }) => theme.colors.surface.base};
   border: 1px solid ${({ theme }) => theme.colors.border.subtle};
   border-radius: 6px;
-  outline: none;
 
   &:focus {
     border-color: ${({ theme }) => theme.colors.primary.main};
   }
 
   &:disabled {
-    opacity: 0.5;
     cursor: not-allowed;
+    opacity: 0.5;
   }
 `;
 
