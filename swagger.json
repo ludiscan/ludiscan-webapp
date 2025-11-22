@@ -1,0 +1,7193 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "AppController_getHello",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/robots.txt": {
+      "get": {
+        "operationId": "AppController_getRobots",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/ping": {
+      "get": {
+        "operationId": "AppController_getPing",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "pong",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "HealthController_check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The Health Check is successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    },
+                    "info": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "object",
+                      "example": {},
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "details": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The Health Check is not successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "info": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "object",
+                      "example": {
+                        "redis": {
+                          "status": "down",
+                          "message": "Could not connect"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "details": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        },
+                        "redis": {
+                          "status": "down",
+                          "message": "Could not connect"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "総合ヘルスチェック",
+        "tags": [
+          "Health"
+        ]
+      }
+    },
+    "/health/liveness": {
+      "get": {
+        "operationId": "HealthController_liveness",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The Health Check is successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    },
+                    "info": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "object",
+                      "example": {},
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "details": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The Health Check is not successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "info": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "object",
+                      "example": {
+                        "redis": {
+                          "status": "down",
+                          "message": "Could not connect"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "details": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        },
+                        "redis": {
+                          "status": "down",
+                          "message": "Could not connect"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Liveness Probe（生存確認）",
+        "tags": [
+          "Health"
+        ]
+      }
+    },
+    "/health/readiness": {
+      "get": {
+        "operationId": "HealthController_readiness",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The Health Check is successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    },
+                    "info": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "object",
+                      "example": {},
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "details": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The Health Check is not successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "info": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "object",
+                      "example": {
+                        "redis": {
+                          "status": "down",
+                          "message": "Could not connect"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "details": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        },
+                        "redis": {
+                          "status": "down",
+                          "message": "Could not connect"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Readiness Probe（準備完了確認）",
+        "tags": [
+          "Health"
+        ]
+      }
+    },
+    "/api/v0/users": {
+      "get": {
+        "operationId": "UsersController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserResponseDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "すべてのユーザーを取得",
+        "tags": [
+          "v0"
+        ]
+      },
+      "post": {
+        "operationId": "UsersController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "ユーザーを作成",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/users/search": {
+      "get": {
+        "operationId": "UsersController_search",
+        "parameters": [
+          {
+            "name": "q",
+            "required": true,
+            "in": "query",
+            "description": "検索クエリ（メールアドレスまたは名前）",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserResponseDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "ユーザーを検索",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/users/{id}": {
+      "get": {
+        "operationId": "UsersController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "特定のユーザーを取得",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/auth/google": {
+      "get": {
+        "operationId": "AuthController_googleStart",
+        "parameters": [
+          {
+            "name": "state",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/GoogleStartQueryDto"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect to Google consent screen"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Google OAuth開始（サインアップ/ログイン）",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v0/auth/google/link": {
+      "get": {
+        "description": "ログイン済みユーザーのIDを `state` に封入し、/auth/google に302。最終的にコールバックでリンクします。",
+        "operationId": "AuthController_googleLink",
+        "parameters": [
+          {
+            "name": "returnTo",
+            "required": false,
+            "in": "query",
+            "description": "リンク完了後に戻る先（フロントのURL）",
+            "schema": {
+              "$ref": "#/components/schemas/GoogleLinkQueryDto"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect to /api/v0/auth/google with signed state"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "現在のユーザーにGoogleアカウントをリンク",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v0/auth/google/callback": {
+      "get": {
+        "description": "Passportが `req.user` にGoogleプロフィールをセット。`state` がリンクモードならリンク、そうでなければログイン/サインアップ。最後にフロントへ302（?token=... か ?code=...）。",
+        "operationId": "AuthController_googleCallback",
+        "parameters": [
+          {
+            "name": "state",
+            "required": false,
+            "in": "query",
+            "description": "署名付きstate（自前検証用）",
+            "schema": {
+              "$ref": "#/components/schemas/GoogleCallbackQueryDto"
+            }
+          },
+          {
+            "name": "error",
+            "required": false,
+            "in": "query",
+            "description": "Google側エラー（存在する場合）",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "code",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scope",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "authuser",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "prompt",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "hd",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect back to front-end with token or error code"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Google OAuth コールバック",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v0/auth/identity/google": {
+      "delete": {
+        "description": "唯一のログイン手段になる場合は拒否するなどのポリシーをAuthService側で実装してください。",
+        "operationId": "AuthController_unlinkGoogle",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "Unlinked"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "現在のユーザーからGoogleをアンリンク",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v0/auth/health": {
+      "get": {
+        "operationId": "AuthController_health",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v0/login": {
+      "post": {
+        "operationId": "LoginController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/login/profile": {
+      "get": {
+        "operationId": "LoginController_getProfile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/projects": {
+      "get": {
+        "operationId": "ProjectsController_findAll",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProjectResponseDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all projects",
+        "tags": [
+          "v0"
+        ]
+      },
+      "post": {
+        "operationId": "ProjectsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProjectDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a project",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/projects/{id}": {
+      "get": {
+        "operationId": "ProjectsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get project by ID",
+        "tags": [
+          "v0"
+        ]
+      },
+      "delete": {
+        "operationId": "ProjectsController_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a project",
+        "tags": [
+          "v0"
+        ]
+      },
+      "put": {
+        "operationId": "ProjectsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProjectDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a project",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/projects/{id}/meta_fields": {
+      "get": {
+        "operationId": "ProjectsController_getMetaDataKeys",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalcFieldResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List meta data keys",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/projects/{id}/meta_fields/{key}": {
+      "get": {
+        "operationId": "ProjectsController_getMetaData",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "key",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMetaDataDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get meta data",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/projects/{id}/general_log/{event_type}": {
+      "get": {
+        "operationId": "ProjectsController_getGeneralLog",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "event_type",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StringGeneralLogDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get general log in project",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/projects/{id}/general_log/keys": {
+      "get": {
+        "operationId": "ProjectsController_getGeneralLogKeys",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetGeneralLogKeysDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get general log keys in project",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/projects/{id}/general_log/position/{event_type}": {
+      "get": {
+        "operationId": "ProjectsController_getPositionGeneralLog",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "event_type",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PositionGeneralLogDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get position general log in project",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/projects/{id}/general_log/position/keys": {
+      "get": {
+        "operationId": "ProjectsController_getPositionGeneralLogKeys",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetGeneralLogKeysDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get position general log keys in project",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0.1/projects": {
+      "get": {
+        "operationId": "ProjectsV01Controller_myProjects",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Number of logs to return (default: 20)",
+            "schema": {
+              "default": 20,
+              "example": 20,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Offset for pagination (default: 0)",
+            "schema": {
+              "default": 0,
+              "example": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProjectResponseV01Dto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "自分がアクセス可能なプロジェクト一覧（owner or member）",
+        "tags": [
+          "v0.1"
+        ]
+      }
+    },
+    "/api/v0.1/projects/{project_id}/members": {
+      "get": {
+        "operationId": "ProjectsV01Controller_listMembers",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Number of logs to return (default: 20)",
+            "schema": {
+              "default": 20,
+              "example": 20,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Offset for pagination (default: 0)",
+            "schema": {
+              "default": 0,
+              "example": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProjectMemberDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "プロジェクトのメンバー一覧",
+        "tags": [
+          "v0.1"
+        ]
+      }
+    },
+    "/api/v0.1/projects/{project_id}/members/email": {
+      "post": {
+        "operationId": "ProjectsV01Controller_addByEmail",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddMemberByEmailDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectMemberDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "メンバー追加（メール指定・既存ユーザーのみ）",
+        "tags": [
+          "v0.1"
+        ]
+      }
+    },
+    "/api/v0.1/projects/{project_id}/members/{user_id}": {
+      "delete": {
+        "operationId": "ProjectsV01Controller_remove",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "user_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "メンバー削除（管理権限のみ）",
+        "tags": [
+          "v0.1"
+        ]
+      }
+    },
+    "/api/v0.1/projects/{project_id}/maps": {
+      "get": {
+        "operationId": "ProjectsV01Controller_getProjectMaps",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMapsDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "プロジェクトのマップ一覧",
+        "tags": [
+          "v0.1"
+        ]
+      }
+    },
+    "/api/v0/general_log/keys": {
+      "get": {
+        "operationId": "GeneralLogController_getKeys",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "session_id",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetGeneralLogKeysDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/general_log/position/keys": {
+      "get": {
+        "operationId": "GeneralLogController_getPositionKeys",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "session_id",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetGeneralLogKeysDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/general_log/{event_type}/{id}": {
+      "get": {
+        "operationId": "GeneralLogController_getLogDetail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "event_type",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringGeneralLogDetailDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/general_log/position/{event_type}/{id}": {
+      "get": {
+        "operationId": "GeneralLogController_getPositionLogDetail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "event_type",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PositionGeneralLogDetailDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/projects/{project_id}/play_session": {
+      "get": {
+        "operationId": "PlaySessionController_findAll",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "isFinished",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlaySessionResponseDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all play sessions",
+        "tags": [
+          "v0"
+        ]
+      },
+      "post": {
+        "operationId": "PlaySessionController_create",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePlaySessionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaySessionResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a play session",
+        "tags": [
+          "v0"
+        ]
+      },
+      "delete": {
+        "operationId": "PlaySessionController_deleteAll",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaySessionResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete all play sessions",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/projects/{project_id}/play_session/{session_id}": {
+      "get": {
+        "operationId": "PlaySessionController_findOne",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "session_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaySessionResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a play session",
+        "tags": [
+          "v0"
+        ]
+      },
+      "put": {
+        "operationId": "PlaySessionController_update",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "session_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePlaySessionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaySessionResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a play session",
+        "tags": [
+          "v0"
+        ]
+      },
+      "delete": {
+        "operationId": "PlaySessionController_delete",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "session_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a play session",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/projects/{project_id}/play_session/{session_id}/finish": {
+      "post": {
+        "operationId": "PlaySessionController_finish",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "session_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaySessionResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Finish a play session",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/projects/{project_id}/play_session/calc_number_field": {
+      "post": {
+        "operationId": "PlaySessionController_calcNumberField",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalcFieldRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalcNumberFieldDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Calculate number field",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/projects/{project_id}/play_session/{session_id}/general_log/{event_type}": {
+      "get": {
+        "operationId": "PlaySessionController_getGeneralLog",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "session_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "event_type",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StringGeneralLogDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get session general log",
+        "tags": [
+          "v0"
+        ]
+      },
+      "post": {
+        "deprecated": true,
+        "description": "DEPRECATED: Use batch upload endpoint instead (POST /projects/:project_id/sessions/:session_id/general-events/upload). This endpoint is for real-time logging and will be removed in a future version.",
+        "operationId": "PlaySessionController_createGeneralLog",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "session_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "event_type",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGeneralLogDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StringGeneralLogDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "create general log",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/projects/{project_id}/play_session/{session_id}/general_log/keys": {
+      "get": {
+        "operationId": "PlaySessionController_getGeneralLogKeys",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "session_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetGeneralLogKeysDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get general log keys",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/projects/{project_id}/play_session/{session_id}/general_log/position/{event_type}": {
+      "get": {
+        "operationId": "PlaySessionController_getPositionLog",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "session_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "event_type",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PositionGeneralLogDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get general log",
+        "tags": [
+          "v0"
+        ]
+      },
+      "post": {
+        "deprecated": true,
+        "description": "DEPRECATED: Use batch upload endpoint instead (POST /projects/:project_id/sessions/:session_id/general-events/upload). This endpoint is for real-time logging and will be removed in a future version.",
+        "operationId": "PlaySessionController_createPositionLog",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "session_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "event_type",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGeneralLogDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PositionGeneralLogDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "create position log",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/projects/{project_id}/play_session/{session_id}/general_log/position/keys": {
+      "get": {
+        "operationId": "PlaySessionController_getPositionLogKeys",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "session_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetGeneralLogKeysDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get general log keys",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0.1/projects/{project_id}/sessions/{session_id}/maps": {
+      "get": {
+        "operationId": "PlaySessionV01Controller_getSessionMaps",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "session_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "セッションのマップ一覧",
+        "tags": [
+          "v0.1"
+        ]
+      }
+    },
+    "/api/v0/projects/{project_id}/play_session/{session_id}/player_position_log": {
+      "get": {
+        "operationId": "PlayerPositionLogController_get",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "session_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Number of logs to return (default: 20)",
+            "schema": {
+              "default": 200,
+              "example": 200,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Offset for pagination (default: 0)",
+            "schema": {
+              "default": 0,
+              "example": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "player",
+            "required": false,
+            "in": "query",
+            "description": "Filter by player ID (optional)",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlayPositionLogDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get player position logs",
+        "tags": [
+          "v0"
+        ]
+      },
+      "post": {
+        "operationId": "PlayerPositionLogController_post",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "session_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Binary data containing meta information and player positions",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Upload binary player data",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/projects/{project_id}/play_session/{session_id}/player_position_log/{session_id}/players": {
+      "get": {
+        "operationId": "PlayerPositionLogController_getPlayers",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "session_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get player IDs from session",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0.1/projects/{project_id}/play_session/{session_id}/player_position_log": {
+      "post": {
+        "operationId": "PlayerPositionLogV01Controller_post",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "session_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Binary data containing meta information and player positions",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Upload binary player data",
+        "tags": [
+          "v0.1"
+        ]
+      }
+    },
+    "/api/v0/projects/{project_id}/play_session/{session_id}/field_object_log": {
+      "get": {
+        "operationId": "FieldObjectLogController_get",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "session_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "start_time",
+            "required": false,
+            "in": "query",
+            "description": "Filter by start offset_timestamp (optional)",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "end_time",
+            "required": false,
+            "in": "query",
+            "description": "Filter by end offset_timestamp (optional)",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "object_types",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated object types to filter (optional)",
+            "schema": {
+              "example": "health_potion,zombie",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FieldObjectLogDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get field object logs",
+        "tags": [
+          "v0"
+        ]
+      },
+      "post": {
+        "operationId": "FieldObjectLogController_post",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "session_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Binary data containing field object events",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Upload binary field object logs",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/projects/{project_id}/play_session/{session_id}/field_object_log/object_types": {
+      "get": {
+        "operationId": "FieldObjectLogController_getObjectTypes",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "session_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get distinct object types from session",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/heatmap/projects/{project_id}/play_session/{session_id}/tasks": {
+      "post": {
+        "operationId": "HeatmapController_createSessionTask",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "session_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateHeatmapDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Task created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HeatmapTaskDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create heatmap calculation task",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/heatmap/projects/{project_id}/tasks": {
+      "post": {
+        "operationId": "HeatmapController_createProjectTask",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateHeatmapDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Task created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HeatmapTaskDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create heatmap calculation task for project",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/heatmap/tasks/{task_id}": {
+      "get": {
+        "operationId": "HeatmapController_getTask",
+        "parameters": [
+          {
+            "name": "task_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HeatmapTaskDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get heatmap calculation task",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/heatmap/tasks/{task_id}/maps": {
+      "get": {
+        "operationId": "HeatmapController_getTaskMapNames",
+        "parameters": [
+          {
+            "name": "task_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Map names",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMapsDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get heatmap map names",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/heatmap/map_data/{map_name}": {
+      "get": {
+        "operationId": "HeatmapController_getMapData",
+        "parameters": [
+          {
+            "name": "map_name",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Map data",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get heatmap map data",
+        "tags": [
+          "v0"
+        ]
+      },
+      "post": {
+        "operationId": "HeatmapController_postMapData",
+        "parameters": [
+          {
+            "name": "map_name",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Map data uploaded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "ファイルアップロードエンドポイント",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/database/backup": {
+      "post": {
+        "operationId": "BackupController_backup",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0.1/projects/{project_id}/sessions/{session_id}/summary": {
+      "post": {
+        "operationId": "SummariesController_create",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "description": "Project ID",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "session_id",
+            "required": true,
+            "in": "path",
+            "description": "Session ID",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "lang",
+            "required": false,
+            "in": "query",
+            "description": "Language",
+            "schema": {
+              "enum": [
+                "ja",
+                "en"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "step_size",
+            "required": false,
+            "in": "query",
+            "description": "Step size",
+            "schema": {
+              "minimum": 1,
+              "default": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "z_visible",
+            "required": true,
+            "in": "query",
+            "description": "Z-axis visibility",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "provider",
+            "required": false,
+            "in": "query",
+            "description": "Summarization provider",
+            "schema": {
+              "enum": [
+                "template",
+                "openai",
+                "ollama"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionSummaryDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "v0.1"
+        ]
+      },
+      "get": {
+        "operationId": "SummariesController_latest",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "description": "Project ID",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "session_id",
+            "required": true,
+            "in": "path",
+            "description": "Session ID",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionSummaryDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Summary not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "v0.1"
+        ]
+      }
+    },
+    "/api/v0/game-api-keys": {
+      "post": {
+        "description": "ゲームクライアントから使用するAPIキーを新規作成します。作成されたAPIキーは一度だけ表示され、二度と表示されないため必ず保存してください。",
+        "operationId": "GameApiKeysController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGameApiKeyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created - APIキーが正常に作成されました",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateGameApiKeyResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "ゲームクライアント用のAPIキーを作成",
+        "tags": [
+          "v0"
+        ]
+      },
+      "get": {
+        "description": "ユーザーが作成した全てのAPIキーの一覧を取得します。",
+        "operationId": "GameApiKeysController_findAll",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Number of API keys to return (default: 20, max: 100)",
+            "schema": {
+              "default": 20,
+              "example": 20,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Offset for pagination (default: 0)",
+            "schema": {
+              "default": 0,
+              "example": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GameApiKeyResponseDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "APIキー一覧を取得",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/game-api-keys/{id}": {
+      "get": {
+        "description": "指定されたAPIキーIDの詳細情報を取得します。",
+        "operationId": "GameApiKeysController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "API Key ID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameApiKeyResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "APIキーの詳細を取得",
+        "tags": [
+          "v0"
+        ]
+      },
+      "delete": {
+        "description": "指定されたAPIキーを削除します。削除されたAPIキーは使用できなくなります。",
+        "operationId": "GameApiKeysController_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "API Key ID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "APIキーを削除",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/game-api-keys/{id}/projects": {
+      "put": {
+        "description": "このAPIキーがアクセス可能なプロジェクトを更新します。",
+        "operationId": "GameApiKeysController_updateProjects",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "API Key ID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateGameApiKeyProjectsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameApiKeyResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "APIキーがアクセス可能なプロジェクトを設定",
+        "tags": [
+          "v0"
+        ]
+      },
+      "get": {
+        "description": "このAPIキーがアクセス可能なプロジェクトの一覧を取得します。",
+        "operationId": "GameApiKeysController_getProjects",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "API Key ID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProjectResponseDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "APIキーがアクセス可能なプロジェクト一覧を取得",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/game/projects": {
+      "get": {
+        "operationId": "GameController_getProjects",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "ゲームクライアント用APIキー",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Number of projects to return (default: 20, max: 100)",
+            "schema": {
+              "default": 20,
+              "example": 20,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Offset for pagination (default: 0)",
+            "schema": {
+              "default": 0,
+              "example": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProjectResponseDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "X-API-Key": []
+          }
+        ],
+        "summary": "アクセス可能なプロジェクト一覧を取得",
+        "tags": [
+          "Game Client API"
+        ]
+      }
+    },
+    "/api/v0/game/projects/{project_id}/sessions": {
+      "post": {
+        "operationId": "GameController_createSession",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "ゲームクライアント用APIキー",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "description": "Project ID",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePlaySessionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaySessionResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "X-API-Key": []
+          }
+        ],
+        "summary": "セッションを作成",
+        "tags": [
+          "Game Client API"
+        ]
+      }
+    },
+    "/api/v0/game/projects/{project_id}/sessions/{session_id}": {
+      "put": {
+        "operationId": "GameController_updateSession",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "ゲームクライアント用APIキー",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "description": "Project ID",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "session_id",
+            "required": true,
+            "in": "path",
+            "description": "Session ID",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePlaySessionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaySessionResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "X-API-Key": []
+          }
+        ],
+        "summary": "セッションを更新",
+        "tags": [
+          "Game Client API"
+        ]
+      }
+    },
+    "/api/v0/game/projects/{project_id}/sessions/{session_id}/finish": {
+      "post": {
+        "operationId": "GameController_finishSession",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "ゲームクライアント用APIキー",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "description": "Project ID",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "session_id",
+            "required": true,
+            "in": "path",
+            "description": "Session ID",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaySessionResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "X-API-Key": []
+          }
+        ],
+        "summary": "セッションを終了",
+        "tags": [
+          "Game Client API"
+        ]
+      }
+    },
+    "/api/v0/game/projects/{project_id}/sessions/{session_id}/logs/{event_type}": {
+      "post": {
+        "operationId": "GameController_createLog",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "ゲームクライアント用APIキー",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "description": "Project ID",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "session_id",
+            "required": true,
+            "in": "path",
+            "description": "Session ID",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "event_type",
+            "required": true,
+            "in": "path",
+            "description": "Event type",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGeneralLogDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringGeneralLogDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "X-API-Key": []
+          }
+        ],
+        "summary": "テキストログを送信",
+        "tags": [
+          "Game Client API"
+        ]
+      }
+    },
+    "/api/v0/game/projects/{project_id}/sessions/{session_id}/position-logs/{event_type}": {
+      "post": {
+        "operationId": "GameController_createPositionLog",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "ゲームクライアント用APIキー",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "description": "Project ID",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "session_id",
+            "required": true,
+            "in": "path",
+            "description": "Session ID",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "event_type",
+            "required": true,
+            "in": "path",
+            "description": "Event type",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGeneralLogDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PositionGeneralLogDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "X-API-Key": []
+          }
+        ],
+        "summary": "位置ログを送信",
+        "tags": [
+          "Game Client API"
+        ]
+      }
+    },
+    "/api/v0/game/projects/{project_id}/sessions/{session_id}/player-positions": {
+      "post": {
+        "operationId": "GameController_uploadPlayerPositions",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "ゲームクライアント用APIキー",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "description": "Project ID",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "session_id",
+            "required": true,
+            "in": "path",
+            "description": "Session ID",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Binary data containing player positions (V1 or V2 format)",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "X-API-Key": []
+          }
+        ],
+        "summary": "プレイヤー位置ログをバイナリでまとめて送信（V2フォーマット対応）",
+        "tags": [
+          "Game Client API"
+        ]
+      }
+    },
+    "/api/v0/game/projects/{project_id}/sessions/{session_id}/field-object-logs": {
+      "post": {
+        "operationId": "GameController_uploadFieldObjectLogs",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "ゲームクライアント用APIキー",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "description": "Project ID",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "session_id",
+            "required": true,
+            "in": "path",
+            "description": "Session ID",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Binary data containing field object events (LSFO V1 format)",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "X-API-Key": []
+          }
+        ],
+        "summary": "フィールドオブジェクトログをバイナリでまとめて送信（LSFOフォーマット）",
+        "tags": [
+          "Game Client API"
+        ]
+      }
+    },
+    "/api/v0/game/projects/{project_id}/sessions/{session_id}/general-events/upload": {
+      "post": {
+        "operationId": "GameController_uploadGeneralEventLogs",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "ゲームクライアント用APIキー",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "session_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Binary file in LSEV V1 format"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "X-API-Key": []
+          }
+        ],
+        "summary": "Upload batch general event logs",
+        "tags": [
+          "Game Client API"
+        ]
+      }
+    },
+    "/api/v0/game/projects/{project_id}/sessions/{session_id}/heatmap-embed-url": {
+      "get": {
+        "description": "セッション完了後にWebViewで直接ヒートマップを表示するためのURL（1時間有効なトークン付き）を生成します",
+        "operationId": "GameController_getHeatmapEmbedUrl",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "ゲームクライアント用APIキー",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "description": "Project ID",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "session_id",
+            "required": true,
+            "in": "path",
+            "description": "Session ID",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HeatmapEmbedUrlResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "X-API-Key": []
+          }
+        ],
+        "summary": "ヒートマップ埋め込みページのURLを取得",
+        "tags": [
+          "Game Client API"
+        ]
+      }
+    },
+    "/api/v0/route-coach/projects/{project_id}/event-clusters": {
+      "get": {
+        "description": "\n指定したプレイヤーのイベント（死亡/成功）をクラスタリングし、\n各クラスタに対するルートパターンと改善案を返します。\n        ",
+        "operationId": "RouteCoachController_getEventClusters",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "player_id",
+            "required": false,
+            "in": "query",
+            "description": "Player ID to filter events (optional - if not specified, all players are included)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "map_name",
+            "required": false,
+            "in": "query",
+            "description": "Map name to filter by",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "event_type",
+            "required": false,
+            "in": "query",
+            "description": "Event type to filter by",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "death",
+                "success"
+              ]
+            }
+          },
+          {
+            "name": "freshness_days",
+            "required": false,
+            "in": "query",
+            "description": "Data freshness window in days (default: 30)",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "イベントクラスタと改善案リスト",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EventClusterDetailDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "プロジェクトのイベントクラスタと改善案を取得",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/route-coach/improvement-routes/{improvement_route_id}/feedback": {
+      "post": {
+        "description": "\n改善案に対して3段階評価（Bad/Neutral/Good）とコメントを送信します。\n同じプレイヤーから同じ改善案への複数フィードバックは上書きされます。\n        ",
+        "operationId": "RouteCoachController_submitFeedback",
+        "parameters": [
+          {
+            "name": "improvement_route_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitImprovementRouteFeedbackRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "フィードバック送信成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmitImprovementRouteFeedbackResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "改善案のフィードバックを送信",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/route-coach/projects/{project_id}/generate-improvement-routes": {
+      "post": {
+        "description": "\nプロジェクト全体の改善ルートを生成するための非同期ジョブをキューに投入します。\nこのジョブは死亡イベントをクラスタリングし、各クラスタに対する\n改善提案（Strategy 1: 分岐点検出、Strategy 2: 安全通過、Strategy 3: 時間短縮）を生成します。\n\n同じプロジェクト・マップの組み合わせで既に完了したタスクがある場合は、\n新規ジョブを投入せずに既存タスクを返します。\n        ",
+        "operationId": "RouteCoachController_generateImprovementRoutes",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "map_name",
+            "required": false,
+            "in": "query",
+            "description": "マップ名でフィルタ（指定時はそのマップのみ処理）",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "force",
+            "required": false,
+            "in": "query",
+            "description": "force=true の場合、既存の completed/failed タスクを削除して強制再生成",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "ジョブ投入成功またはキャッシュされたタスク",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "taskId": {
+                      "type": "number"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "プロジェクトの改善ルート生成ジョブを投入",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/route-coach/improvement-routes-jobs/{job_id}": {
+      "get": {
+        "description": "\n改善ルート生成タスクの処理状況を確認します。\n完了したタスクは永続化されているため、いつでも結果を取得できます。\n        ",
+        "operationId": "RouteCoachController_getImprovementRoutesJobStatus",
+        "parameters": [
+          {
+            "name": "job_id",
+            "required": true,
+            "in": "path",
+            "description": "タスクID",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "タスク状態",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "id": {
+                      "type": "number"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "pending",
+                        "processing",
+                        "completed",
+                        "failed"
+                      ]
+                    },
+                    "result": {
+                      "type": "object",
+                      "nullable": true
+                    },
+                    "error_message": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "改善ルート生成タスクの状態を取得",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/embed/verify": {
+      "post": {
+        "description": "heatmap埋め込み用トークンを検証し、projectIdとsessionIdを返します",
+        "operationId": "EmbedController_verifyToken",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyEmbedTokenRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "トークンが有効な場合",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyEmbedTokenResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Embedトークンを検証",
+        "tags": [
+          "Embed"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Ludiscan API Documentation",
+    "description": "Ludiscan API for game analytics and session tracking",
+    "version": "1.10.1",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "UserResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "name",
+          "role"
+        ]
+      },
+      "CreateUserDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "name"
+          },
+          "password": {
+            "type": "string",
+            "example": "password"
+          },
+          "email": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "password",
+          "email"
+        ]
+      },
+      "GoogleStartQueryDto": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "string",
+            "description": "署名付きのstate（CSRF防止やモード伝播用）。リンク時はAuthControllerが自動生成。"
+          }
+        }
+      },
+      "GoogleLinkQueryDto": {
+        "type": "object",
+        "properties": {
+          "returnTo": {
+            "type": "string",
+            "description": "リンク完了後に戻る先（フロントのURL）"
+          }
+        }
+      },
+      "GoogleCallbackQueryDto": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "string",
+            "description": "署名付きstate（自前検証用）"
+          },
+          "error": {
+            "type": "string",
+            "description": "Google側エラー（存在する場合）"
+          },
+          "code": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "authuser": {
+            "type": "string"
+          },
+          "prompt": {
+            "type": "string"
+          },
+          "hd": {
+            "type": "string"
+          }
+        }
+      },
+      "LoginUserDto": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "example": "password"
+          },
+          "email": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "password",
+          "email"
+        ]
+      },
+      "LoginResponseDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserResponseDto"
+          }
+        },
+        "required": [
+          "accessToken",
+          "user"
+        ]
+      },
+      "ProjectResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "is2D": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "user": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserResponseDto"
+              }
+            ]
+          },
+          "session_count": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "is2D",
+          "createdAt"
+        ]
+      },
+      "CreateProjectDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "name"
+          },
+          "description": {
+            "type": "string",
+            "example": "description"
+          },
+          "is2D": {
+            "type": "boolean",
+            "example": false
+          }
+        },
+        "required": [
+          "name",
+          "description"
+        ]
+      },
+      "DefaultSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "message",
+            "nullable": true
+          }
+        },
+        "required": [
+          "success",
+          "message"
+        ]
+      },
+      "UpdateProjectDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "name"
+          },
+          "description": {
+            "type": "string",
+            "example": "description"
+          },
+          "is2D": {
+            "type": "boolean",
+            "example": false
+          }
+        }
+      },
+      "CalcFieldResponseDto": {
+        "type": "object",
+        "properties": {
+          "fields": {
+            "example": "field",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "fields"
+        ]
+      },
+      "GetMetaDataDto": {
+        "type": "object",
+        "properties": {
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "values"
+        ]
+      },
+      "StringGeneralLogDataDto": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ]
+      },
+      "StringGeneralLogDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "event_type": {
+            "type": "string"
+          },
+          "event_data": {
+            "$ref": "#/components/schemas/StringGeneralLogDataDto"
+          },
+          "offset_timestamp": {
+            "type": "number"
+          },
+          "player": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "event_type",
+          "event_data",
+          "offset_timestamp",
+          "player"
+        ]
+      },
+      "GetGeneralLogKeysDto": {
+        "type": "object",
+        "properties": {
+          "keys": {
+            "description": "List of keys to retrieve",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "keys"
+        ]
+      },
+      "Position": {
+        "type": "object",
+        "properties": {
+          "x": {
+            "type": "number",
+            "format": "float"
+          },
+          "y": {
+            "type": "number",
+            "format": "float"
+          },
+          "z": {
+            "type": "number",
+            "format": "float"
+          }
+        },
+        "required": [
+          "x",
+          "y",
+          "z"
+        ]
+      },
+      "PositionGeneralLogDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "event_type": {
+            "type": "string"
+          },
+          "event_data": {
+            "$ref": "#/components/schemas/Position"
+          },
+          "offset_timestamp": {
+            "type": "number"
+          },
+          "player": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "event_type",
+          "event_data",
+          "offset_timestamp",
+          "player"
+        ]
+      },
+      "ProjectMemberDto": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string"
+          },
+          "project_id": {
+            "type": "number"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "admin",
+              "viewer"
+            ]
+          },
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id",
+          "project_id",
+          "role",
+          "email",
+          "name",
+          "created_at"
+        ]
+      },
+      "ProjectResponseV01Dto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "is2D": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "user": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserResponseDto"
+              }
+            ]
+          },
+          "memberships": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectMemberDto"
+            }
+          },
+          "session_count": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "is2D",
+          "createdAt",
+          "memberships"
+        ]
+      },
+      "AddMemberByEmailDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "admin",
+              "viewer"
+            ]
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "GetMapsDto": {
+        "type": "object",
+        "properties": {
+          "maps": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "maps"
+        ]
+      },
+      "StringGeneralLogDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "event_type": {
+            "type": "string"
+          },
+          "event_data": {
+            "$ref": "#/components/schemas/StringGeneralLogDataDto"
+          },
+          "offset_timestamp": {
+            "type": "number"
+          },
+          "player": {
+            "type": "integer"
+          },
+          "project_id": {
+            "type": "number"
+          },
+          "session_id": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "event_type",
+          "event_data",
+          "offset_timestamp",
+          "player",
+          "project_id",
+          "session_id"
+        ]
+      },
+      "PositionGeneralLogDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "event_type": {
+            "type": "string"
+          },
+          "event_data": {
+            "$ref": "#/components/schemas/Position"
+          },
+          "offset_timestamp": {
+            "type": "number"
+          },
+          "player": {
+            "type": "integer"
+          },
+          "project_id": {
+            "type": "number"
+          },
+          "session_id": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "event_type",
+          "event_data",
+          "offset_timestamp",
+          "player",
+          "project_id",
+          "session_id"
+        ]
+      },
+      "PlaySessionResponseDto": {
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "number"
+          },
+          "projectId": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "deviceId": {
+            "type": "string",
+            "nullable": true
+          },
+          "platform": {
+            "type": "string",
+            "example": "platform",
+            "nullable": true
+          },
+          "appVersion": {
+            "type": "string",
+            "example": "app_version",
+            "nullable": true
+          },
+          "metaData": {
+            "type": "object",
+            "example": "meta_data",
+            "nullable": true
+          },
+          "startTime": {
+            "format": "date-time",
+            "type": "string",
+            "example": "start_time"
+          },
+          "endTime": {
+            "format": "date-time",
+            "type": "string",
+            "example": "end_time",
+            "nullable": true
+          },
+          "isPlaying": {
+            "type": "boolean",
+            "example": "is_playing"
+          }
+        },
+        "required": [
+          "sessionId",
+          "projectId",
+          "name",
+          "deviceId",
+          "platform",
+          "appVersion",
+          "metaData",
+          "startTime",
+          "endTime",
+          "isPlaying"
+        ]
+      },
+      "CreatePlaySessionDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "deviceId": {
+            "type": "string",
+            "nullable": true
+          },
+          "platform": {
+            "type": "string",
+            "nullable": true
+          },
+          "appVersion": {
+            "type": "string",
+            "nullable": true
+          },
+          "metaData": {
+            "type": "object",
+            "nullable": true
+          }
+        }
+      },
+      "UpdatePlaySessionDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minimum": 1
+          },
+          "deviceId": {
+            "type": "string",
+            "nullable": true
+          },
+          "platform": {
+            "type": "string",
+            "nullable": true
+          },
+          "appVersion": {
+            "type": "string",
+            "nullable": true
+          },
+          "metaData": {
+            "type": "object",
+            "nullable": true
+          }
+        }
+      },
+      "CalcFieldRequestDto": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string",
+            "example": "field"
+          }
+        },
+        "required": [
+          "field"
+        ]
+      },
+      "CalcNumberFieldDto": {
+        "type": "object",
+        "properties": {
+          "min": {
+            "type": "number",
+            "minimum": 1
+          },
+          "max": {
+            "type": "number",
+            "minimum": 1
+          },
+          "avg": {
+            "type": "number",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "min",
+          "max",
+          "avg"
+        ]
+      },
+      "CreateGeneralLogDto": {
+        "type": "object",
+        "properties": {
+          "text_data": {
+            "type": "object",
+            "description": "テキストデータ",
+            "nullable": true,
+            "example": "Player collected item"
+          },
+          "position_data": {
+            "description": "位置データ",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Position"
+              }
+            ]
+          },
+          "metadata": {
+            "type": "object",
+            "description": "RouteCoach拡張イベント用のメタデータ",
+            "nullable": true,
+            "example": {
+              "type": "achievement",
+              "category": "collectible",
+              "severity": "low",
+              "tags": [
+                "item",
+                "collect"
+              ]
+            }
+          },
+          "offset_timestamp": {
+            "type": "number",
+            "description": "オフセットタイムスタンプ（ミリ秒）",
+            "example": 1500
+          },
+          "player": {
+            "type": "integer",
+            "description": "プレイヤーID",
+            "example": 1
+          }
+        },
+        "required": [
+          "text_data",
+          "position_data",
+          "metadata",
+          "offset_timestamp",
+          "player"
+        ]
+      },
+      "PlayPositionLogDto": {
+        "type": "object",
+        "properties": {
+          "player": {
+            "type": "number",
+            "description": "Player identifier",
+            "example": 1
+          },
+          "x": {
+            "type": "number",
+            "minimum": 1,
+            "description": "X coordinate"
+          },
+          "y": {
+            "type": "number",
+            "minimum": 1,
+            "description": "Y coordinate"
+          },
+          "z": {
+            "type": "number",
+            "nullable": true,
+            "description": "Z coordinate"
+          },
+          "offset_timestamp": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Milliseconds since session start"
+          },
+          "location": {
+            "type": "string",
+            "nullable": true,
+            "description": "Location name or identifier"
+          },
+          "status": {
+            "type": "object",
+            "nullable": true,
+            "description": "Player status data (health, state, score, etc.)",
+            "example": {
+              "health": 100,
+              "state": "running",
+              "score": 1000
+            }
+          }
+        },
+        "required": [
+          "player",
+          "x",
+          "y",
+          "offset_timestamp"
+        ]
+      },
+      "FieldObjectLogDto": {
+        "type": "object",
+        "properties": {
+          "object_id": {
+            "type": "string",
+            "description": "Unique object identifier in the game",
+            "example": "item_123"
+          },
+          "object_type": {
+            "type": "string",
+            "description": "Type of the object",
+            "example": "health_potion"
+          },
+          "x": {
+            "type": "number",
+            "description": "X coordinate"
+          },
+          "y": {
+            "type": "number",
+            "description": "Y coordinate"
+          },
+          "z": {
+            "type": "number",
+            "nullable": true,
+            "description": "Z coordinate"
+          },
+          "offset_timestamp": {
+            "type": "integer",
+            "description": "Milliseconds since session start"
+          },
+          "event_type": {
+            "type": "string",
+            "enum": [
+              "spawn",
+              "move",
+              "despawn",
+              "update"
+            ],
+            "description": "Event type for this log entry"
+          },
+          "status": {
+            "type": "object",
+            "nullable": true,
+            "description": "Additional status data for this object (health, state, score, etc.)",
+            "example": {
+              "health": 100,
+              "state": "active",
+              "score": 50
+            }
+          }
+        },
+        "required": [
+          "object_id",
+          "object_type",
+          "x",
+          "y",
+          "offset_timestamp",
+          "event_type"
+        ]
+      },
+      "CreateHeatmapDto": {
+        "type": "object",
+        "properties": {
+          "stepSize": {
+            "type": "number",
+            "minimum": 50,
+            "example": 300,
+            "description": "Heatmap width"
+          },
+          "zVisible": {
+            "type": "boolean",
+            "example": false,
+            "description": "Whether to display the Z-axis"
+          }
+        }
+      },
+      "HeatMapTaskResultListItem": {
+        "type": "object",
+        "properties": {
+          "x": {
+            "type": "number",
+            "description": "X",
+            "example": 0
+          },
+          "y": {
+            "type": "number",
+            "description": "Y",
+            "example": 0
+          },
+          "z": {
+            "type": "number",
+            "description": "Z",
+            "example": 0
+          },
+          "density": {
+            "type": "number",
+            "description": "Density",
+            "example": 0
+          }
+        },
+        "required": [
+          "x",
+          "y",
+          "density"
+        ]
+      },
+      "HeatmapTaskDto": {
+        "type": "object",
+        "properties": {
+          "taskId": {
+            "type": "number",
+            "description": "Task ID",
+            "example": 1
+          },
+          "project": {
+            "description": "Project",
+            "example": {
+              "id": 1,
+              "name": "Project 1",
+              "description": "Project 1 description",
+              "createdAt": "2021-01-01T00:00:00.000Z"
+            },
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProjectResponseDto"
+              }
+            ]
+          },
+          "session": {
+            "description": "Session",
+            "example": {
+              "sessionId": 0,
+              "projectId": 0,
+              "name": "string",
+              "deviceId": "string",
+              "platform": "platform",
+              "appVersion": "app_version",
+              "metaData": "meta_data",
+              "startTime": "2021-01-01T00:00:00.000Z",
+              "endTime": "2021-01-01T00:00:00.000Z",
+              "isPlaying": true
+            },
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PlaySessionResponseDto"
+              }
+            ]
+          },
+          "stepSize": {
+            "type": "number",
+            "description": "Step size",
+            "example": 200
+          },
+          "zVisible": {
+            "type": "boolean",
+            "description": "Z visible",
+            "example": true
+          },
+          "status": {
+            "type": "string",
+            "description": "Status",
+            "example": "completed",
+            "enum": [
+              "pending",
+              "processing",
+              "completed",
+              "failed"
+            ]
+          },
+          "result": {
+            "description": "Result list",
+            "example": [
+              {
+                "x": 0,
+                "y": 0,
+                "z": 0,
+                "density": 0
+              }
+            ],
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HeatMapTaskResultListItem"
+            }
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Created at",
+            "example": "2021-01-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Updated at",
+            "example": "2021-01-01T00:00:00.000Z"
+          }
+        },
+        "required": [
+          "taskId",
+          "project",
+          "stepSize",
+          "zVisible",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "SessionSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Summary UUID",
+            "example": "8c7b3c7a-1c6a-41a4-9a9b-9b1c1d2e3f4a"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "done",
+              "error"
+            ]
+          },
+          "lang": {
+            "type": "string",
+            "enum": [
+              "ja",
+              "en"
+            ],
+            "description": "Summary language"
+          },
+          "provider": {
+            "type": "string",
+            "enum": [
+              "template",
+              "ollama",
+              "openai"
+            ],
+            "description": "AI provider used for generation"
+          },
+          "model": {
+            "type": "string",
+            "example": "gpt-4o-mini",
+            "description": "AI model name"
+          },
+          "summary_md": {
+            "type": "string",
+            "nullable": true,
+            "description": "Summary in Markdown format"
+          },
+          "summary_json": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": true,
+            "description": "Summary in JSON format with structured data",
+            "example": {
+              "title": "Session Summary",
+              "description": "Player completed level 1",
+              "keyFindings": [
+                "Fast completion",
+                "No deaths"
+              ]
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Summary creation timestamp"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "lang",
+          "provider",
+          "model",
+          "summary_md",
+          "summary_json",
+          "created_at"
+        ]
+      },
+      "CreateGameApiKeyDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "APIキーの識別名",
+            "example": "My Unity Game Client"
+          },
+          "projectIds": {
+            "description": "初期段階でアクセス可能にするプロジェクトIDの配列（オプション）",
+            "example": [
+              1,
+              2,
+              3
+            ],
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "CreateGameApiKeyResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "APIキーID"
+          },
+          "name": {
+            "type": "string",
+            "description": "APIキーの識別名"
+          },
+          "apiKey": {
+            "type": "string",
+            "description": "APIキー本体（この画面でのみ表示されます。必ず保存してください）"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "作成日時"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "apiKey",
+          "createdAt"
+        ]
+      },
+      "GameApiKeyResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "APIキーID"
+          },
+          "name": {
+            "type": "string",
+            "description": "APIキーの識別名"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "アクティブ状態"
+          },
+          "lastUsedAt": {
+            "type": "object",
+            "description": "最終使用日時",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "作成日時"
+          },
+          "projects": {
+            "description": "アクセス可能なプロジェクトのリスト",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectResponseDto"
+            }
+          },
+          "projectIds": {
+            "description": "アクセス可能なプロジェクトIDのリスト (deprecated: use projects instead)",
+            "deprecated": true,
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "isActive",
+          "lastUsedAt",
+          "createdAt",
+          "projects",
+          "projectIds"
+        ]
+      },
+      "UpdateGameApiKeyProjectsDto": {
+        "type": "object",
+        "properties": {
+          "projectIds": {
+            "description": "アクセスを許可するプロジェクトIDのリスト",
+            "example": [
+              1,
+              2,
+              3
+            ],
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "projectIds"
+        ]
+      },
+      "HeatmapEmbedUrlResponseDto": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "ヒートマップ埋め込みページのURL（トークン付き）",
+            "example": "https://ludiscan.com/heatmap/embed/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "トークンの有効期限（ISO 8601形式）",
+            "example": "2024-01-01T12:00:00.000Z"
+          }
+        },
+        "required": [
+          "url",
+          "expiresAt"
+        ]
+      },
+      "EventRawCoordinateDto": {
+        "type": "object",
+        "properties": {
+          "x": {
+            "type": "number",
+            "description": "X coordinate"
+          },
+          "y": {
+            "type": "number",
+            "description": "Y coordinate"
+          },
+          "z": {
+            "type": "number",
+            "description": "Z coordinate"
+          },
+          "event_timestamp": {
+            "type": "number",
+            "description": "Event timestamp (milliseconds)"
+          },
+          "session_id": {
+            "type": "string",
+            "description": "Session ID"
+          },
+          "player_id": {
+            "type": "string",
+            "description": "Player ID"
+          }
+        },
+        "required": [
+          "x",
+          "y",
+          "z",
+          "event_timestamp",
+          "session_id",
+          "player_id"
+        ]
+      },
+      "RoutePatternDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Route pattern ID"
+          },
+          "trajectory_points": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "x": {
+                  "type": "number"
+                },
+                "y": {
+                  "type": "number"
+                },
+                "z": {
+                  "type": "number"
+                },
+                "offset_timestamp": {
+                  "type": "number"
+                }
+              }
+            },
+            "description": "Trajectory points leading to the cluster"
+          },
+          "occurrence_count": {
+            "type": "integer",
+            "description": "Number of times this route was taken"
+          },
+          "success_count": {
+            "type": "integer",
+            "description": "Number of times this route led to success"
+          },
+          "avg_duration_ms": {
+            "type": "number",
+            "description": "Average duration in milliseconds"
+          },
+          "success_rate": {
+            "type": "number",
+            "description": "Success rate (0-1)"
+          },
+          "passes_near_cluster": {
+            "type": "boolean",
+            "description": "Whether this route passes near the cluster without triggering the event"
+          },
+          "cluster_near_count": {
+            "type": "integer",
+            "description": "Number of times this route safely passed near the cluster"
+          }
+        },
+        "required": [
+          "id",
+          "trajectory_points",
+          "occurrence_count",
+          "success_count",
+          "success_rate",
+          "passes_near_cluster",
+          "cluster_near_count"
+        ]
+      },
+      "ImprovementRouteDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Improvement route ID"
+          },
+          "strategy_type": {
+            "type": "string",
+            "enum": [
+              "divergence",
+              "safety_passage",
+              "faster"
+            ],
+            "description": "Type of improvement strategy"
+          },
+          "trajectory_points": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "x": {
+                  "type": "number"
+                },
+                "y": {
+                  "type": "number"
+                },
+                "z": {
+                  "type": "number"
+                },
+                "offset_timestamp": {
+                  "type": "number"
+                }
+              }
+            },
+            "description": "Recommended trajectory points"
+          },
+          "success_rate": {
+            "type": "number",
+            "description": "Success rate (0-1)"
+          },
+          "success_count": {
+            "type": "integer",
+            "description": "Number of times this route succeeded"
+          },
+          "avg_duration_ms": {
+            "type": "integer",
+            "description": "Average duration in milliseconds"
+          },
+          "time_saved_ms": {
+            "type": "integer",
+            "description": "Time saved compared to death routes (milliseconds)"
+          },
+          "divergence_analysis": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Analysis for divergence strategy",
+            "example": {
+              "divergence_point": {
+                "x": 100,
+                "y": 200,
+                "z": 0
+              },
+              "distance_to_event_cluster": 15.5,
+              "common_prefix_length": 10
+            }
+          },
+          "safety_score": {
+            "type": "number",
+            "description": "Safety score (0-1) for safety_passage strategy"
+          },
+          "evidence": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Evidence supporting the improvement",
+            "example": {
+              "description": "Based on successful player routes",
+              "reference_player_count": 5,
+              "data_source": "success_route",
+              "confidence": "high"
+            }
+          },
+          "reasoning": {
+            "type": "string",
+            "description": "Reasoning behind the improvement"
+          },
+          "feedback_total_count": {
+            "type": "number",
+            "description": "Total feedback count"
+          },
+          "feedback_avg_rating": {
+            "type": "number",
+            "description": "Average feedback rating (1-3)"
+          }
+        },
+        "required": [
+          "id",
+          "strategy_type",
+          "trajectory_points",
+          "feedback_total_count",
+          "feedback_avg_rating"
+        ]
+      },
+      "EventClusterDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Cluster ID"
+          },
+          "cluster_center_x": {
+            "type": "number",
+            "description": "Center X coordinate of the cluster"
+          },
+          "cluster_center_y": {
+            "type": "number",
+            "description": "Center Y coordinate of the cluster"
+          },
+          "cluster_center_z": {
+            "type": "number",
+            "description": "Center Z coordinate of the cluster"
+          },
+          "cluster_radius": {
+            "type": "number",
+            "description": "Radius of the cluster (meters)"
+          },
+          "raw_event_count": {
+            "type": "integer",
+            "description": "Total raw event count in this cluster"
+          },
+          "event_type": {
+            "type": "string",
+            "enum": [
+              "death",
+              "success"
+            ],
+            "description": "Type of event this cluster represents"
+          },
+          "map_name": {
+            "type": "string",
+            "description": "Map name"
+          },
+          "raw_coordinates": {
+            "description": "Raw event coordinates in this cluster",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventRawCoordinateDto"
+            }
+          },
+          "routes": {
+            "description": "Route patterns leading to this cluster",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoutePatternDto"
+            }
+          },
+          "improvements": {
+            "description": "Improvement route recommendations",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImprovementRouteDto"
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Cluster creation timestamp"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Cluster last update timestamp"
+          }
+        },
+        "required": [
+          "id",
+          "cluster_center_x",
+          "cluster_center_y",
+          "cluster_center_z",
+          "cluster_radius",
+          "raw_event_count",
+          "event_type",
+          "raw_coordinates",
+          "routes",
+          "improvements",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "SubmitImprovementRouteFeedbackRequestDto": {
+        "type": "object",
+        "properties": {
+          "rating": {
+            "type": "number",
+            "enum": [
+              1,
+              2,
+              3
+            ],
+            "description": "Rating: 1=Bad (👎), 2=Neutral (😐), 3=Good (👍)"
+          },
+          "comment": {
+            "type": "string",
+            "description": "Optional comment about the improvement"
+          }
+        },
+        "required": [
+          "rating"
+        ]
+      },
+      "ImprovementRouteFeedbackRecordDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Feedback ID"
+          },
+          "player_id": {
+            "type": "string",
+            "description": "Player ID who gave the feedback"
+          },
+          "rating": {
+            "type": "number",
+            "enum": [
+              1,
+              2,
+              3
+            ],
+            "description": "Rating: 1=Bad, 2=Neutral, 3=Good"
+          },
+          "comment": {
+            "type": "string",
+            "description": "Comment from the player"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Feedback submission timestamp"
+          }
+        },
+        "required": [
+          "id",
+          "player_id",
+          "rating",
+          "created_at"
+        ]
+      },
+      "SubmitImprovementRouteFeedbackResponseDto": {
+        "type": "object",
+        "properties": {
+          "improvement_route_id": {
+            "type": "number",
+            "description": "Improvement route ID"
+          },
+          "feedback_total_count": {
+            "type": "number",
+            "description": "Total feedback count for this improvement route"
+          },
+          "feedback_avg_rating": {
+            "type": "number",
+            "description": "Average feedback rating (1-3)"
+          },
+          "feedbacks": {
+            "description": "All feedback records for this improvement route",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImprovementRouteFeedbackRecordDto"
+            }
+          }
+        },
+        "required": [
+          "improvement_route_id",
+          "feedback_total_count",
+          "feedback_avg_rating",
+          "feedbacks"
+        ]
+      },
+      "VerifyEmbedTokenRequestDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "検証するembedトークン",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "VerifyEmbedTokenResponseDto": {
+        "type": "object",
+        "properties": {
+          "projectId": {
+            "type": "number",
+            "description": "プロジェクトID",
+            "example": 1
+          },
+          "sessionId": {
+            "type": "number",
+            "description": "セッションID",
+            "example": 123
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "トークンの有効期限（ISO 8601形式）",
+            "example": "2024-01-01T12:00:00.000Z"
+          }
+        },
+        "required": [
+          "projectId",
+          "sessionId",
+          "expiresAt"
+        ]
+      },
+      "DefaultErrorResponse": {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "number",
+            "example": 400
+          },
+          "message": {
+            "type": "string",
+            "example": "Bad Request"
+          },
+          "error": {
+            "type": "string",
+            "nullable": true,
+            "example": "Invalid input data"
+          }
+        }
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "/swagger/api/v0/json",
+    "url": "/swagger/api/v0/json"
+  }
+}
