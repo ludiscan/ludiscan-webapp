@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { BsGrid, BsPerson } from 'react-icons/bs';
 import { CiMap, CiMapPin, CiStreamOn } from 'react-icons/ci';
 import { FaCube } from 'react-icons/fa';
+import { FiFilter } from 'react-icons/fi';
 import { GiPathDistance } from 'react-icons/gi';
 import { IoIosInformationCircleOutline } from 'react-icons/io';
 import { SiSvgtrace } from 'react-icons/si';
@@ -20,6 +21,7 @@ import { InfoMenuContent } from '@src/features/heatmap/menu/InfoMenuContent';
 import { MapMenuContent } from '@src/features/heatmap/menu/MapMenuContent';
 import { MoreMenuContent } from '@src/features/heatmap/menu/MoreMenuContent';
 import { PlayerTimeline } from '@src/features/heatmap/menu/PlayerTimeline';
+import { SessionFilterMenuContent } from '@src/features/heatmap/menu/SessionFilterMenuContent';
 import { RouteCoachMenuContent } from '@src/features/heatmap/routecoach/RouteCoachMenuContent';
 import { AISummaryMenuContent } from '@src/features/heatmap/summary/AISummaryMenuContent';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
@@ -46,6 +48,11 @@ export const MenuContents: MenuType[] = [
     name: 'general',
     icon: <BsPerson />,
     Component: GeneralMenuContent,
+  },
+  {
+    name: 'sessionFilter',
+    icon: <FiFilter />,
+    Component: SessionFilterMenuContent,
   },
   {
     name: 'map',
