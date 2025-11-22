@@ -718,6 +718,87 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v0.1/projects/{project_id}/sessions/search': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Search play sessions
+     * @description
+     *     Search play sessions with flexible query parameters.
+     *
+     *     **Search Methods:**
+     *     1. Individual parameters (name, platform, device_id, etc.)
+     *     2. Unified search using 'q' parameter (plain text keyword OR GitHub-style filters)
+     *     3. Both combined (parameters are merged with AND logic)
+     *
+     *     **'q' Parameter Examples:**
+     *
+     *     *Plain text keyword search (searches across name, device_id, platform, app_version, metadata keys and values):*
+     *     - `q=Session_2025` - Find sessions with "Session_2025" in any searchable field
+     *     - `q=Android` - Find sessions with "Android" in any searchable field
+     *     - `q=MapA` - Find sessions with "MapA" in metadata (key or value)
+     *     - `q=score` - Find sessions with "score" metadata key or value
+     *
+     *     *GitHub-style filters:*
+     *     - `q=platform:Android is:playing` - Android sessions currently playing
+     *     - `q=name:Session is:finished` - Finished sessions with "Session" in name
+     *     - `q=metadata.mapName:Level1 platform:iOS` - iOS sessions with mapName=Level1
+     *     - `q=start_time:>2025-01-01 is:finished` - Finished sessions after 2025-01-01
+     *
+     *     *Mixed (keyword + filters):*
+     *     - `q=Session_2025 platform:Android` - Sessions with "Session_2025" in name/device/platform/version AND on Android
+     *     - `q=Level1 is:finished` - Finished sessions with "Level1" in any searchable field
+     *
+     *     **Metadata Search (using individual parameters):**
+     *     - `metadata_key=mapName` - Sessions that have mapName key (any value)
+     *     - `metadata_key=mapName&metadata_value=Level1` - Sessions with mapName=Level1
+     *
+     */
+    get: operations['PlaySessionV01Controller_search'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0.1/projects/{project_id}/sessions/search/summary': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Search play sessions summary
+     * @description
+     *     Get lightweight summary of all matching sessions (no pagination).
+     *     This endpoint is useful for previewing which sessions will be included in a heatmap task before creating it.
+     *
+     *     Accepts the same search parameters as the regular search endpoint, but returns only session IDs and display text.
+     *
+     *     **Display Format:** "SessionName (Platform, Version) - YYYY-MM-DD HH:mm"
+     *
+     *     **Use Case:**
+     *     1. Call this endpoint to preview filtered sessions
+     *     2. User confirms the session list
+     *     3. Use the same search query in heatmap task creation API
+     *
+     */
+    get: operations['PlaySessionV01Controller_searchSummary'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v0.1/projects/{project_id}/sessions/{session_id}/maps': {
     parameters: {
       query?: never;
@@ -848,7 +929,29 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Create heatmap calculation task for project */
+    /**
+     * Create heatmap calculation task for project
+     * @description
+     *     Create a heatmap task for a project with optional session filtering.
+     *
+     *     **Filtering Options:**
+     *     1. No filter: Use all sessions in the project
+     *     2. sessionIds: Specify exact session IDs (array of numbers)
+     *     3. searchQuery: Use search parameters to filter sessions (same as session search API)
+     *
+     *     **Note:** sessionIds and searchQuery cannot be used together.
+     *
+     *     **Example with searchQuery:**
+     *     ```json
+     *     {
+     *       "stepSize": 300,
+     *       "searchQuery": {
+     *         "q": "platform:Android is:finished"
+     *       }
+     *     }
+     *     ```
+     *
+     */
     post: operations['HeatmapController_createProjectTask'];
     delete?: never;
     options?: never;
@@ -1560,6 +1663,79 @@ export interface components {
        */
       player: number;
     };
+    SearchPlaySessionResponseDto: {
+      /** @description Array of play sessions matching the search criteria */
+      data: components['schemas']['PlaySessionResponseDto'][];
+      /**
+       * @description Total number of sessions matching the criteria
+       * @example 100
+       */
+      total: number;
+      /**
+       * @description Number of results returned
+       * @example 20
+       */
+      limit: number;
+      /**
+       * @description Number of results skipped
+       * @example 0
+       */
+      offset: number;
+    };
+    SessionSummaryDto: {
+      /**
+       * @description Summary UUID
+       * @example 8c7b3c7a-1c6a-41a4-9a9b-9b1c1d2e3f4a
+       */
+      id: string;
+      /** @enum {string} */
+      status: 'queued' | 'running' | 'done' | 'error';
+      /**
+       * @description Summary language
+       * @enum {string}
+       */
+      lang: 'ja' | 'en';
+      /**
+       * @description AI provider used for generation
+       * @enum {string}
+       */
+      provider: 'template' | 'ollama' | 'openai';
+      /**
+       * @description AI model name
+       * @example gpt-4o-mini
+       */
+      model: string;
+      /** @description Summary in Markdown format */
+      summary_md: string | null;
+      /**
+       * @description Summary in JSON format with structured data
+       * @example {
+       *       "title": "Session Summary",
+       *       "description": "Player completed level 1",
+       *       "keyFindings": [
+       *         "Fast completion",
+       *         "No deaths"
+       *       ]
+       *     }
+       */
+      summary_json: {
+        [key: string]: unknown;
+      } | null;
+      /**
+       * Format: date-time
+       * @description Summary creation timestamp
+       */
+      created_at: string;
+    };
+    SearchSessionSummaryResponseDto: {
+      /** @description Array of session summaries matching the search criteria (no pagination) */
+      sessions: components['schemas']['SessionSummaryDto'][];
+      /**
+       * @description Total number of sessions found
+       * @example 42
+       */
+      total: number;
+    };
     PlayPositionLogDto: {
       /**
        * @description Player identifier
@@ -1620,6 +1796,68 @@ export interface components {
        */
       status?: Record<string, never> | null;
     };
+    HeatmapSearchQueryDto: {
+      /**
+       * @description Unified search query (plain text keyword OR GitHub-style filters)
+       * @example platform:Android is:finished
+       */
+      q?: string;
+      /**
+       * @description Session name (partial match)
+       * @example Session_2025
+       */
+      name?: string;
+      /**
+       * @description Device ID (exact match)
+       * @example device-123
+       */
+      device_id?: string;
+      /**
+       * @description Platform (exact match)
+       * @example Android
+       */
+      platform?: string;
+      /**
+       * @description App version (exact match)
+       * @example 1.0.0
+       */
+      app_version?: string;
+      /**
+       * @description Start time from (ISO 8601)
+       * @example 2025-01-01T00:00:00Z
+       */
+      start_time_from?: string;
+      /**
+       * @description Start time to (ISO 8601)
+       * @example 2025-01-31T23:59:59Z
+       */
+      start_time_to?: string;
+      /**
+       * @description End time from (ISO 8601)
+       * @example 2025-01-01T00:00:00Z
+       */
+      end_time_from?: string;
+      /**
+       * @description End time to (ISO 8601)
+       * @example 2025-01-31T23:59:59Z
+       */
+      end_time_to?: string;
+      /**
+       * @description Filter by playing status (true: currently playing, false: finished)
+       * @example false
+       */
+      is_playing?: boolean;
+      /**
+       * @description Metadata key to search for
+       * @example mapName
+       */
+      metadata_key?: string;
+      /**
+       * @description Metadata value to search for (requires metadata_key)
+       * @example Level1
+       */
+      metadata_value?: string;
+    };
     CreateHeatmapDto: {
       /**
        * @description Heatmap width
@@ -1631,6 +1869,17 @@ export interface components {
        * @example false
        */
       zVisible?: boolean;
+      /**
+       * @description Filter by specific session IDs (for project heatmap). Cannot be used together with searchQuery.
+       * @example [
+       *       1,
+       *       2,
+       *       3
+       *     ]
+       */
+      sessionIds?: number[];
+      /** @description Search query to filter sessions (for project heatmap). Cannot be used together with sessionIds. Use the same parameters as the search summary endpoint. */
+      searchQuery?: components['schemas']['HeatmapSearchQueryDto'];
     };
     HeatMapTaskResultListItem: {
       /**
@@ -1726,51 +1975,6 @@ export interface components {
        * @example 2021-01-01T00:00:00.000Z
        */
       updatedAt: string;
-    };
-    SessionSummaryDto: {
-      /**
-       * @description Summary UUID
-       * @example 8c7b3c7a-1c6a-41a4-9a9b-9b1c1d2e3f4a
-       */
-      id: string;
-      /** @enum {string} */
-      status: 'queued' | 'running' | 'done' | 'error';
-      /**
-       * @description Summary language
-       * @enum {string}
-       */
-      lang: 'ja' | 'en';
-      /**
-       * @description AI provider used for generation
-       * @enum {string}
-       */
-      provider: 'template' | 'ollama' | 'openai';
-      /**
-       * @description AI model name
-       * @example gpt-4o-mini
-       */
-      model: string;
-      /** @description Summary in Markdown format */
-      summary_md: string | null;
-      /**
-       * @description Summary in JSON format with structured data
-       * @example {
-       *       "title": "Session Summary",
-       *       "description": "Player completed level 1",
-       *       "keyFindings": [
-       *         "Fast completion",
-       *         "No deaths"
-       *       ]
-       *     }
-       */
-      summary_json: {
-        [key: string]: unknown;
-      } | null;
-      /**
-       * Format: date-time
-       * @description Summary creation timestamp
-       */
-      created_at: string;
     };
     CreateGameApiKeyDto: {
       /**
@@ -3972,6 +4176,142 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['GetGeneralLogKeysDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  PlaySessionV01Controller_search: {
+    parameters: {
+      query?: {
+        /** @description Session name (partial match) */
+        name?: string;
+        /** @description Device ID (exact match) */
+        device_id?: string;
+        /** @description Platform (exact match) */
+        platform?: string;
+        /** @description App version (exact match) */
+        app_version?: string;
+        /** @description Start time from (ISO 8601) */
+        start_time_from?: string;
+        /** @description Start time to (ISO 8601) */
+        start_time_to?: string;
+        /** @description End time from (ISO 8601) */
+        end_time_from?: string;
+        /** @description End time to (ISO 8601) */
+        end_time_to?: string;
+        /** @description Updated at from (ISO 8601) */
+        updated_at_from?: string;
+        /** @description Updated at to (ISO 8601) */
+        updated_at_to?: string;
+        /** @description Filter by playing status (true: currently playing, false: finished) */
+        is_playing?: boolean;
+        /** @description Metadata key to search for (can be used alone to check key existence) */
+        metadata_key?: string;
+        /** @description Metadata value to search for (requires metadata_key to be specified) */
+        metadata_value?: string;
+        /** @description Unified search query. Supports: (1) Plain text keyword search across name, device_id, platform, app_version, and metadata keys/values (e.g., "Session_2025" or "MapA"), (2) GitHub-style filters (e.g., "platform:Android is:playing"), (3) Mixed (e.g., "Session_2025 platform:Android is:finished"). Keywords and filters are combined with AND logic. */
+        q?: string;
+        /** @description Maximum number of results to return */
+        limit?: number;
+        /** @description Number of results to skip */
+        offset?: number;
+        /** @description Field to sort by */
+        sort_by?: 'id' | 'name' | 'start_time' | 'end_time' | 'updated_at';
+        /** @description Sort order */
+        sort_order?: 'asc' | 'desc';
+      };
+      header?: never;
+      path: {
+        project_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SearchPlaySessionResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  PlaySessionV01Controller_searchSummary: {
+    parameters: {
+      query?: {
+        /** @description Session name (partial match) */
+        name?: string;
+        /** @description Device ID (exact match) */
+        device_id?: string;
+        /** @description Platform (exact match) */
+        platform?: string;
+        /** @description App version (exact match) */
+        app_version?: string;
+        /** @description Start time from (ISO 8601) */
+        start_time_from?: string;
+        /** @description Start time to (ISO 8601) */
+        start_time_to?: string;
+        /** @description End time from (ISO 8601) */
+        end_time_from?: string;
+        /** @description End time to (ISO 8601) */
+        end_time_to?: string;
+        /** @description Updated at from (ISO 8601) */
+        updated_at_from?: string;
+        /** @description Updated at to (ISO 8601) */
+        updated_at_to?: string;
+        /** @description Filter by playing status (true: currently playing, false: finished) */
+        is_playing?: boolean;
+        /** @description Metadata key to search for (can be used alone to check key existence) */
+        metadata_key?: string;
+        /** @description Metadata value to search for (requires metadata_key to be specified) */
+        metadata_value?: string;
+        /** @description Unified search query. Supports: (1) Plain text keyword search across name, device_id, platform, app_version, and metadata keys/values (e.g., "Session_2025" or "MapA"), (2) GitHub-style filters (e.g., "platform:Android is:playing"), (3) Mixed (e.g., "Session_2025 platform:Android is:finished"). Keywords and filters are combined with AND logic. */
+        q?: string;
+        /** @description Maximum number of results to return */
+        limit?: number;
+        /** @description Number of results to skip */
+        offset?: number;
+        /** @description Field to sort by */
+        sort_by?: 'id' | 'name' | 'start_time' | 'end_time' | 'updated_at';
+        /** @description Sort order */
+        sort_order?: 'asc' | 'desc';
+      };
+      header?: never;
+      path: {
+        project_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SearchSessionSummaryResponseDto'];
         };
       };
       /** @description Bad Request */
