@@ -6050,7 +6050,7 @@
   "info": {
     "title": "Ludiscan API Documentation",
     "description": "Ludiscan API for game analytics and session tracking",
-    "version": "1.12.0",
+    "version": "1.12.1",
     "contact": {}
   },
   "tags": [],
@@ -6822,79 +6822,23 @@
           "offset"
         ]
       },
-      "SessionSummaryDto": {
+      "SearchSessionSummaryDto": {
         "type": "object",
         "properties": {
           "id": {
-            "type": "string",
-            "description": "Summary UUID",
-            "example": "8c7b3c7a-1c6a-41a4-9a9b-9b1c1d2e3f4a"
+            "type": "number",
+            "description": "Session ID",
+            "example": 1
           },
-          "status": {
+          "display": {
             "type": "string",
-            "enum": [
-              "queued",
-              "running",
-              "done",
-              "error"
-            ]
-          },
-          "lang": {
-            "type": "string",
-            "enum": [
-              "ja",
-              "en"
-            ],
-            "description": "Summary language"
-          },
-          "provider": {
-            "type": "string",
-            "enum": [
-              "template",
-              "ollama",
-              "openai"
-            ],
-            "description": "AI provider used for generation"
-          },
-          "model": {
-            "type": "string",
-            "example": "gpt-4o-mini",
-            "description": "AI model name"
-          },
-          "summary_md": {
-            "type": "string",
-            "nullable": true,
-            "description": "Summary in Markdown format"
-          },
-          "summary_json": {
-            "type": "object",
-            "nullable": true,
-            "additionalProperties": true,
-            "description": "Summary in JSON format with structured data",
-            "example": {
-              "title": "Session Summary",
-              "description": "Player completed level 1",
-              "keyFindings": [
-                "Fast completion",
-                "No deaths"
-              ]
-            }
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "Summary creation timestamp"
+            "description": "Display text for the session (includes name, platform, version, and start time)",
+            "example": "Session_2025-01-15_Morning (Android, v1.2.3) - 2025-01-15 10:30"
           }
         },
         "required": [
           "id",
-          "status",
-          "lang",
-          "provider",
-          "model",
-          "summary_md",
-          "summary_json",
-          "created_at"
+          "display"
         ]
       },
       "SearchSessionSummaryResponseDto": {
@@ -6904,7 +6848,7 @@
             "description": "Array of session summaries matching the search criteria (no pagination)",
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/SessionSummaryDto"
+              "$ref": "#/components/schemas/SearchSessionSummaryDto"
             }
           },
           "total": {
@@ -7260,6 +7204,81 @@
           "status",
           "createdAt",
           "updatedAt"
+        ]
+      },
+      "SessionSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Summary UUID",
+            "example": "8c7b3c7a-1c6a-41a4-9a9b-9b1c1d2e3f4a"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "done",
+              "error"
+            ]
+          },
+          "lang": {
+            "type": "string",
+            "enum": [
+              "ja",
+              "en"
+            ],
+            "description": "Summary language"
+          },
+          "provider": {
+            "type": "string",
+            "enum": [
+              "template",
+              "ollama",
+              "openai"
+            ],
+            "description": "AI provider used for generation"
+          },
+          "model": {
+            "type": "string",
+            "example": "gpt-4o-mini",
+            "description": "AI model name"
+          },
+          "summary_md": {
+            "type": "string",
+            "nullable": true,
+            "description": "Summary in Markdown format"
+          },
+          "summary_json": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": true,
+            "description": "Summary in JSON format with structured data",
+            "example": {
+              "title": "Session Summary",
+              "description": "Player completed level 1",
+              "keyFindings": [
+                "Fast completion",
+                "No deaths"
+              ]
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Summary creation timestamp"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "lang",
+          "provider",
+          "model",
+          "summary_md",
+          "summary_json",
+          "created_at"
         ]
       },
       "CreateGameApiKeyDto": {
