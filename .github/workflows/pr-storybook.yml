@@ -31,6 +31,10 @@ jobs:
         with:
           bun-version: 1.3.0
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
       - name: Cache bun dependencies
         uses: actions/cache@v4
         with:
@@ -58,9 +62,9 @@ jobs:
 
       - name: Serve Storybook and run tests
         run: |
-          bunx concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
-            "bunx http-server storybook-static --port 6006 --silent" \
-            "bunx wait-on tcp:6006 && NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules bun run test-storybook"
+          npx concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
+            "npx http-server storybook-static --port 6006 --silent" \
+            "npx wait-on tcp:6006 && NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules npx test-storybook --config-dir .storybook --testTimeout 60000"
 
       - name: Upload screenshots to Argos
         continue-on-error: true
