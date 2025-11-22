@@ -186,7 +186,7 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
 
       if (res.data) {
         toast.showToast('Heatmap Taskを作成しました', 3, 'success');
-        // クエリを無効化して再取得
+        // dataserviceの再取得処理を実行
         await queryClient.invalidateQueries({ queryKey: ['heatmap'] });
       }
     } catch (error) {
