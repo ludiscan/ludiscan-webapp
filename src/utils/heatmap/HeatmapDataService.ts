@@ -51,6 +51,9 @@ export type HeatmapDataService = {
   sessionId: number | null;
   setSessionId: (sessionId: number | null) => void;
 
+  sessionHeatmapIds: number[] | undefined;
+  setSessionHeatmapIds: (sessionIds: number[] | undefined) => void;
+
   // New methods for centralized data access
   getProject(): Promise<Project | null>;
   getSession(): Promise<Session | null>;
@@ -70,6 +73,8 @@ export const mockHeatmapDataService: HeatmapDataService = {
   projectId: 1,
   sessionId: null,
   setSessionId: () => {},
+  sessionHeatmapIds: undefined,
+  setSessionHeatmapIds: () => {},
   getProject: async () => null,
   getSession: async () => null,
   getSessions: async () => [],
@@ -101,7 +106,7 @@ async function sessionCreateTask(apiClient: ReturnType<typeof createClient>, pro
   });
 }
 
-export async function projectCreateTask(
+async function projectCreateTask(
   apiClient: ReturnType<typeof createClient>,
   projectId: number,
   stepSize: number,
@@ -127,6 +132,7 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
   const timer = useRef<NodeJS.Timeout>(undefined);
   const [taskId, setTaskId] = useState<number | null>(initialTaskId);
   const [sessionId, setSessionId] = useState<number | null>(null);
+  const [sessionHeatmapIds, setSessionHeatmapIds] = useState<number[] | undefined>(undefined);
   const [stepSize] = useState<number>(50);
 
   const { isAuthorized, ready } = useAuth();
@@ -151,7 +157,7 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
   const zVisible = !(project?.is2D ?? false);
 
   const { data: createdTask } = useQuery({
-    queryKey: [projectId, sessionId, stepSize, zVisible, sessionHeatmap, apiClient],
+    queryKey: [projectId, sessionId, stepSize, zVisible, sessionHeatmap, sessionHeatmapIds, apiClient],
     queryFn: async (): Promise<HeatmapTask | null> => {
       if (!projectId) {
         return null;
@@ -160,7 +166,7 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
       const { data, error } =
         sessionHeatmap && sessionId && sessionId !== 0
           ? await sessionCreateTask(apiClient, projectId, sessionId, stepSize, zVisible)
-          : await projectCreateTask(apiClient, projectId, stepSize, zVisible);
+          : await projectCreateTask(apiClient, projectId, stepSize, zVisible, sessionHeatmapIds);
       if (error) throw error;
       return data;
     },
@@ -378,6 +384,8 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
     projectId,
     sessionId,
     setSessionId,
+    sessionHeatmapIds,
+    setSessionHeatmapIds,
     getProject,
     getSession,
     getSessions,

@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useState, useMemo, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useCallback, useState, useEffect } from 'react';
 import { FiFilter } from 'react-icons/fi';
 
 import type { HeatmapMenuProps } from '@src/features/heatmap/HeatmapMenuContent';
@@ -20,7 +20,6 @@ import { useDebouncedValue } from '@src/hooks/useDebouncedValue';
 import { useGeneralPatch, useGeneralPick } from '@src/hooks/useGeneral';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { useApiClient } from '@src/modeles/ApiClientContext';
-import { projectCreateTask } from '@src/utils/heatmap/HeatmapDataService';
 
 const Divider = styled.div`
   width: 100%;
@@ -89,7 +88,6 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
   const { theme } = useSharedTheme();
   const toast = useToast();
   const apiClient = useApiClient();
-  const queryClient = useQueryClient();
   const projectId = service.projectId;
 
   const { upZ, scale, heatmapOpacity, heatmapType, colorScale, blockSize, showHeatmap, minThreshold } = useGeneralPick(
@@ -107,26 +105,9 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
 
   // Session Filter state
   const [searchQuery, setSearchQuery] = useState('');
-  const [isCreatingTask, setIsCreatingTask] = useState(false);
 
   // デバウンスされた検索クエリ（1秒）
   const debouncedSearchQuery = useDebouncedValue(searchQuery, 1000);
-
-  // プロジェクトデータを取得してzVisibleを決定
-  const { data: project } = useQuery({
-    queryKey: ['project', projectId],
-    queryFn: async () => {
-      if (!projectId) return null;
-      const res = await apiClient.GET('/api/v0/projects/{id}', {
-        params: { path: { id: projectId } },
-      });
-      return res.data ?? null;
-    },
-    enabled: !!projectId,
-    staleTime: 1000 * 60 * 5, // 5分
-  });
-
-  const zVisible = useMemo(() => !(project?.is2D ?? false), [project?.is2D]);
 
   // セッション検索（デバウンスされたクエリで実行）
   const {
@@ -166,35 +147,11 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
   }, [searchError, toast]);
 
   // Heatmap Task作成
-  const handleCreateTask = useCallback(async () => {
-    if (!projectId) {
-      toast.showToast('プロジェクトIDが不正です', 5, 'error');
-      return;
-    }
-
-    setIsCreatingTask(true);
-
-    try {
-      const sessionIds = searchResults?.map((s) => s.id) ?? undefined;
-
-      const res = await projectCreateTask(apiClient, projectId, 50, zVisible, sessionIds);
-
-      if (res.error) {
-        toast.showToast(`Heatmap Task作成に失敗しました: ${res.error}`, 5, 'error');
-        return;
-      }
-
-      if (res.data) {
-        toast.showToast('Heatmap Taskを作成しました', 3, 'success');
-        // dataserviceの再取得処理を実行
-        await queryClient.invalidateQueries({ queryKey: ['heatmap'] });
-      }
-    } catch (error) {
-      toast.showToast(`作成エラー: ${error}`, 5, 'error');
-    } finally {
-      setIsCreatingTask(false);
-    }
-  }, [projectId, searchResults, zVisible, apiClient, toast, queryClient]);
+  const handleCreateTask = useCallback(() => {
+    const sessionIds = searchResults?.map((s) => s.id) ?? undefined;
+    service.setSessionHeatmapIds(sessionIds);
+    toast.showToast('Heatmap Taskを作成中...', 3, 'info');
+  }, [searchResults, service, toast]);
   return (
     <>
       <InputRow label={'上向ベクトル'}>
@@ -275,7 +232,6 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder='例: platform:Android is:finished'
-            disabled={isCreatingTask}
           />
           {isSearching && (
             <HintText>
@@ -310,8 +266,8 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
 
         {/* Submit ボタン */}
         <FlexColumn gap={8}>
-          <Button onClick={handleCreateTask} disabled={isCreatingTask || isSearching} scheme={'primary'} fontSize={'base'}>
-            {isCreatingTask ? '作成中...' : searchResults ? `${totalCount}件のセッションでHeatmap作成` : '全セッションでHeatmap作成'}
+          <Button onClick={handleCreateTask} disabled={isSearching} scheme={'primary'} fontSize={'base'}>
+            {searchResults ? `${totalCount}件のセッションでHeatmap作成` : '全セッションでHeatmap作成'}
           </Button>
           {!searchResults && (
             <HintText>
