@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 import type { HeatmapMenuProps } from '@src/features/heatmap/HeatmapMenuContent';
 import type { GeneralSettings } from '@src/modeles/heatmapView';
@@ -11,11 +11,14 @@ import { Text } from '@src/component/atoms/Text';
 import { SegmentedSwitch } from '@src/component/molecules/SegmentedSwitch';
 import { Selector } from '@src/component/molecules/Selector';
 import { InputRow } from '@src/features/heatmap/menu/InputRow';
+import { SessionFilterModal } from '@src/features/heatmap/menu/SessionFilterModal';
 import { useGeneralPatch, useGeneralPick } from '@src/hooks/useGeneral';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 
-export const GeneralMenuContent: FC<HeatmapMenuProps> = () => {
+export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
   const { theme } = useSharedTheme();
+  const [isSessionFilterModalOpen, setIsSessionFilterModalOpen] = useState(false);
+
   const { upZ, scale, heatmapOpacity, heatmapType, colorScale, blockSize, showHeatmap, minThreshold } = useGeneralPick(
     'upZ',
     'scale',
@@ -28,6 +31,7 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = () => {
   );
   const setData = useGeneralPatch();
   const handleReload = useCallback(() => {}, []);
+
   return (
     <>
       <InputRow label={'上向ベクトル'}>
@@ -84,6 +88,15 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = () => {
           <Text text={'Reload'} fontSize={theme.typography.fontSize.sm} />
         </Button>
       </InputRow>
+
+      {/* Session Filter ボタン */}
+      <InputRow label={'Session Filter'}>
+        <Button onClick={() => setIsSessionFilterModalOpen(true)} scheme={'primary'} fontSize={'sm'}>
+          <Text text={'セッションフィルター'} fontSize={theme.typography.fontSize.sm} />
+        </Button>
+      </InputRow>
+
+      <SessionFilterModal isOpen={isSessionFilterModalOpen} onClose={() => setIsSessionFilterModalOpen(false)} service={service} />
     </>
   );
 };

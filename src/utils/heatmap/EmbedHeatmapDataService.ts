@@ -264,6 +264,8 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
     projectId,
     sessionId: currentSessionId,
     setSessionId: setCurrentSessionId,
+    sessionHeatmapIds: undefined,
+    setSessionHeatmapIds: () => {},
     getProject,
     getSession,
     getSessions,
