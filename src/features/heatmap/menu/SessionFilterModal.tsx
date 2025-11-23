@@ -213,7 +213,12 @@ export const SessionFilterModal: FC<SessionFilterModalProps> = ({ isOpen, onClos
 
         {/* Submit ボタン */}
         <FlexColumn gap={8}>
-          <Button onClick={handleCreateTask} disabled={isSearching || (searchResults !== null && selectedSessionIds.size === 0)} scheme={'primary'} fontSize={'base'}>
+          <Button
+            onClick={handleCreateTask}
+            disabled={isSearching || (searchResults !== null && selectedSessionIds.size === 0)}
+            scheme={'primary'}
+            fontSize={'base'}
+          >
             {searchResults ? `選択した${selectedSessionIds.size}件のセッションでHeatmap作成` : '全セッションでHeatmap作成'}
           </Button>
           {!searchResults && (

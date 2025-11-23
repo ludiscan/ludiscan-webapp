@@ -106,13 +106,7 @@ async function sessionCreateTask(apiClient: ReturnType<typeof createClient>, pro
   });
 }
 
-async function projectCreateTask(
-  apiClient: ReturnType<typeof createClient>,
-  projectId: number,
-  stepSize: number,
-  zVisible: boolean,
-  sessionIds?: number[],
-) {
+async function projectCreateTask(apiClient: ReturnType<typeof createClient>, projectId: number, stepSize: number, zVisible: boolean, sessionIds?: number[]) {
   return await apiClient.POST('/api/v0/heatmap/projects/{project_id}/tasks', {
     params: {
       path: {
