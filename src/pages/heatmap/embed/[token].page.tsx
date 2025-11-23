@@ -138,6 +138,8 @@ const EmbedHeatmapPage: FC<EmbedHeatmapPageProps> = ({ className, token }) => {
     projectId: undefined,
     sessionId: null,
     setSessionId: () => {},
+    sessionHeatmapIds: undefined,
+    setSessionHeatmapIds: () => {},
     getProject: async () => null,
     getSession: async () => null,
     getSessions: async () => [],
