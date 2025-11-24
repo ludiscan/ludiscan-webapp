@@ -920,6 +920,30 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v0/heatmap/projects/{project_id}/tasks/list': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get heatmap tasks list for project
+     * @description
+     *     Get a list of completed heatmap tasks for a project with pagination.
+     *     Returns tasks ordered by most recent first (by updated_at).
+     *     Does not include heavy result data for better performance.
+     *
+     */
+    get: operations['HeatmapController_getProjectTasksList'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v0/heatmap/projects/{project_id}/tasks': {
     parameters: {
       query?: never;
@@ -1942,6 +1966,64 @@ export interface components {
        * @example 2021-01-01T00:00:00.000Z
        */
       updatedAt: string;
+    };
+    HeatmapTaskListItemDto: {
+      /**
+       * @description Task ID
+       * @example 1
+       */
+      taskId: number;
+      /** @description Project */
+      project: components['schemas']['ProjectResponseDto'];
+      /** @description Session */
+      session?: components['schemas']['PlaySessionResponseDto'] | null;
+      /**
+       * @description Step size
+       * @example 200
+       */
+      stepSize: number;
+      /**
+       * @description Z visible
+       * @example true
+       */
+      zVisible: boolean;
+      /**
+       * @description Status
+       * @example completed
+       * @enum {string}
+       */
+      status: 'pending' | 'processing' | 'completed' | 'failed';
+      /**
+       * Format: date-time
+       * @description Created at
+       * @example 2021-01-01T00:00:00.000Z
+       */
+      createdAt: string;
+      /**
+       * Format: date-time
+       * @description Updated at
+       * @example 2021-01-01T00:00:00.000Z
+       */
+      updatedAt: string;
+    };
+    HeatmapTaskListDto: {
+      /** @description Tasks list */
+      tasks: components['schemas']['HeatmapTaskListItemDto'][];
+      /**
+       * @description Total count
+       * @example 100
+       */
+      total: number;
+      /**
+       * @description Limit
+       * @example 20
+       */
+      limit: number;
+      /**
+       * @description Offset
+       * @example 0
+       */
+      offset: number;
     };
     SessionSummaryDto: {
       /**
@@ -4653,6 +4735,40 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['HeatmapTaskDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  HeatmapController_getProjectTasksList: {
+    parameters: {
+      query: {
+        limit: number;
+        offset: number;
+      };
+      header?: never;
+      path: {
+        project_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Tasks list */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HeatmapTaskListDto'];
         };
       };
       /** @description Bad Request */
