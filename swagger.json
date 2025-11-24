@@ -4144,6 +4144,69 @@
         ]
       }
     },
+    "/api/v0/heatmap/projects/{project_id}/tasks/list": {
+      "get": {
+        "description": "\nGet a list of completed heatmap tasks for a project with pagination.\nReturns tasks ordered by most recent first (by updated_at).\nDoes not include heavy result data for better performance.\n        ",
+        "operationId": "HeatmapController_getProjectTasksList",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tasks list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HeatmapTaskListDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get heatmap tasks list for project",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
     "/api/v0/heatmap/projects/{project_id}/tasks": {
       "post": {
         "description": "\nCreate a heatmap task for a project with optional session filtering.\n\n**Filtering Options:**\n1. No filter: Use all sessions in the project\n2. sessionIds: Specify exact session IDs (array of numbers)\n3. searchQuery: Use search parameters to filter sessions (same as session search API)\n\n**Note:** sessionIds and searchQuery cannot be used together.\n\n**Example with searchQuery:**\n```json\n{\n  \"stepSize\": 300,\n  \"searchQuery\": {\n    \"q\": \"platform:Android is:finished\"\n  }\n}\n```\n        ",
@@ -6050,7 +6113,7 @@
   "info": {
     "title": "Ludiscan API Documentation",
     "description": "Ludiscan API for game analytics and session tracking",
-    "version": "1.12.1",
+    "version": "1.13.0",
     "contact": {}
   },
   "tags": [],
@@ -7204,6 +7267,108 @@
           "status",
           "createdAt",
           "updatedAt"
+        ]
+      },
+      "HeatmapTaskListItemDto": {
+        "type": "object",
+        "properties": {
+          "taskId": {
+            "type": "number",
+            "description": "Task ID",
+            "example": 1
+          },
+          "project": {
+            "description": "Project",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProjectResponseDto"
+              }
+            ]
+          },
+          "session": {
+            "description": "Session",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PlaySessionResponseDto"
+              }
+            ]
+          },
+          "stepSize": {
+            "type": "number",
+            "description": "Step size",
+            "example": 200
+          },
+          "zVisible": {
+            "type": "boolean",
+            "description": "Z visible",
+            "example": true
+          },
+          "status": {
+            "type": "string",
+            "description": "Status",
+            "example": "completed",
+            "enum": [
+              "pending",
+              "processing",
+              "completed",
+              "failed"
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Created at",
+            "example": "2021-01-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Updated at",
+            "example": "2021-01-01T00:00:00.000Z"
+          }
+        },
+        "required": [
+          "taskId",
+          "project",
+          "stepSize",
+          "zVisible",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "HeatmapTaskListDto": {
+        "type": "object",
+        "properties": {
+          "tasks": {
+            "description": "Tasks list",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HeatmapTaskListItemDto"
+            }
+          },
+          "total": {
+            "type": "number",
+            "description": "Total count",
+            "example": 100
+          },
+          "limit": {
+            "type": "number",
+            "description": "Limit",
+            "example": 20
+          },
+          "offset": {
+            "type": "number",
+            "description": "Offset",
+            "example": 0
+          }
+        },
+        "required": [
+          "tasks",
+          "total",
+          "limit",
+          "offset"
         ]
       },
       "SessionSummaryDto": {
