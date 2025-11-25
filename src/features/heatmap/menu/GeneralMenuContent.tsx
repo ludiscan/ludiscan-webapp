@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
 import { IoChevronDown, IoChevronUp } from 'react-icons/io5';
 
 import type { HeatmapMenuProps } from '@src/features/heatmap/HeatmapMenuContent';
@@ -18,6 +19,7 @@ import { InputRow } from '@src/features/heatmap/menu/InputRow';
 import { SessionFilterModal } from '@src/features/heatmap/menu/SessionFilterModal';
 import { useGeneralPatch, useGeneralPick } from '@src/hooks/useGeneral';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
+import { focusByCoord } from '@src/slices/selectionSlice';
 
 const CollapsibleSection = styled.div`
   width: 100%;
@@ -49,6 +51,7 @@ const CollapsibleContent = styled.div<{ isOpen: boolean }>`
 `;
 
 export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
+  const dispatch = useDispatch();
   const { theme } = useSharedTheme();
   const [isSessionFilterModalOpen, setIsSessionFilterModalOpen] = useState(false);
   const [isHeatmapSelectorModalOpen, setIsHeatmapSelectorModalOpen] = useState(false);
@@ -65,9 +68,41 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
     'colorScale',
   );
   const setData = useGeneralPatch();
+
+  // Calculate the center position of all heatmap cells
+  const centerPosition = useMemo(() => {
+    const task = service.task;
+    if (!task || !task.result || task.result.length === 0) {
+      return null;
+    }
+
+    let sumX = 0;
+    let sumY = 0;
+    let sumZ = 0;
+    const count = task.result.length;
+
+    for (const point of task.result) {
+      sumX += point.x;
+      sumY += point.y;
+      sumZ += point.z ?? 0;
+    }
+
+    return {
+      x: sumX / count,
+      y: sumY / count,
+      z: sumZ / count,
+    };
+  }, [service.task]);
+
   const handleReload = useCallback(() => {}, []);
 
   const currentTaskId = service.task?.taskId;
+
+  const handleResetView = useCallback(() => {
+    if (centerPosition) {
+      dispatch(focusByCoord({ point: centerPosition }));
+    }
+  }, [centerPosition, dispatch]);
 
   return (
     <>
@@ -79,6 +114,13 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
             <Text text={'選択'} fontSize={theme.typography.fontSize.sm} />
           </Button>
         </FlexRow>
+      </InputRow>
+
+      {/* Reset View ボタン */}
+      <InputRow label={'ビュー'}>
+        <Button onClick={handleResetView} scheme={'secondary'} fontSize={'sm'} disabled={!centerPosition}>
+          <Text text={'初期位置にリセット'} fontSize={theme.typography.fontSize.sm} />
+        </Button>
       </InputRow>
 
       {/* Session Filter ボタン */}
