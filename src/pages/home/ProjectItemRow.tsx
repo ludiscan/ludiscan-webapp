@@ -60,12 +60,7 @@ const Component: FC<ProjectItemRowProps> = memo(({ className, project, onEdit })
           <ClampText text={project.name} fontSize={theme.typography.fontSize.lg} color={theme.colors.text.primary} fontWeight={'bold'} lines={1} />
           <ClampText text={project.description} fontSize={theme.typography.fontSize.sm} fontWeight={'lighter'} lines={1} color={theme.colors.text.secondary} />
           <InlineFlexRow gap={8} className={`${className}__meta`}>
-            <Text
-              text={`ID: ${project.id}`}
-              fontSize={theme.typography.fontSize.xs}
-              color={theme.colors.text.secondary}
-              fontWeight={'lighter'}
-            />
+            <Text text={`ID: ${project.id}`} fontSize={theme.typography.fontSize.xs} color={theme.colors.text.secondary} fontWeight={'lighter'} />
             {project.session_count !== undefined && (
               <Text
                 text={`${project.session_count} sessions`}
