@@ -74,17 +74,21 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
   const [isOptionsOpen, setIsOptionsOpen] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { upZ, scale, heatmapOpacity, heatmapType, colorScale, blockSize, showHeatmap, minThreshold, backgroundImage } = useGeneralPick(
-    'upZ',
-    'scale',
-    'showHeatmap',
-    'heatmapOpacity',
-    'heatmapType',
-    'blockSize',
-    'minThreshold',
-    'colorScale',
-    'backgroundImage',
-  );
+  const { upZ, scale, heatmapOpacity, heatmapType, colorScale, blockSize, showHeatmap, minThreshold, backgroundImage, backgroundScale, backgroundOffsetX, backgroundOffsetY } =
+    useGeneralPick(
+      'upZ',
+      'scale',
+      'showHeatmap',
+      'heatmapOpacity',
+      'heatmapType',
+      'blockSize',
+      'minThreshold',
+      'colorScale',
+      'backgroundImage',
+      'backgroundScale',
+      'backgroundOffsetX',
+      'backgroundOffsetY',
+    );
   const setData = useGeneralPatch();
 
   // Calculate the center position of all heatmap cells
@@ -194,6 +198,21 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
         </FlexRow>
         <HiddenFileInput ref={fileInputRef} type='file' accept='image/*' onChange={handleFileSelect} />
       </InputRow>
+
+      {/* 背景画像の調整（画像が選択されている場合のみ表示） */}
+      {backgroundImage && (
+        <>
+          <InputRow label={'背景スケール'}>
+            <Slider value={backgroundScale} onChange={(v) => setData({ backgroundScale: v })} min={0.5} step={0.1} max={3.0} textField />
+          </InputRow>
+          <InputRow label={'背景X位置'}>
+            <Slider value={backgroundOffsetX} onChange={(v) => setData({ backgroundOffsetX: v })} min={-50} step={1} max={50} textField />
+          </InputRow>
+          <InputRow label={'背景Y位置'}>
+            <Slider value={backgroundOffsetY} onChange={(v) => setData({ backgroundOffsetY: v })} min={-50} step={1} max={50} textField />
+          </InputRow>
+        </>
+      )}
 
       {/* 折りたたみ可能なオプションセクション */}
       <CollapsibleSection>
