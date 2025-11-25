@@ -718,6 +718,87 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v0.1/projects/{project_id}/sessions/search': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Search play sessions
+     * @description
+     *     Search play sessions with flexible query parameters.
+     *
+     *     **Search Methods:**
+     *     1. Individual parameters (name, platform, device_id, etc.)
+     *     2. Unified search using 'q' parameter (plain text keyword OR GitHub-style filters)
+     *     3. Both combined (parameters are merged with AND logic)
+     *
+     *     **'q' Parameter Examples:**
+     *
+     *     *Plain text keyword search (searches across name, device_id, platform, app_version, metadata keys and values):*
+     *     - `q=Session_2025` - Find sessions with "Session_2025" in any searchable field
+     *     - `q=Android` - Find sessions with "Android" in any searchable field
+     *     - `q=MapA` - Find sessions with "MapA" in metadata (key or value)
+     *     - `q=score` - Find sessions with "score" metadata key or value
+     *
+     *     *GitHub-style filters:*
+     *     - `q=platform:Android is:playing` - Android sessions currently playing
+     *     - `q=name:Session is:finished` - Finished sessions with "Session" in name
+     *     - `q=metadata.mapName:Level1 platform:iOS` - iOS sessions with mapName=Level1
+     *     - `q=start_time:>2025-01-01 is:finished` - Finished sessions after 2025-01-01
+     *
+     *     *Mixed (keyword + filters):*
+     *     - `q=Session_2025 platform:Android` - Sessions with "Session_2025" in name/device/platform/version AND on Android
+     *     - `q=Level1 is:finished` - Finished sessions with "Level1" in any searchable field
+     *
+     *     **Metadata Search (using individual parameters):**
+     *     - `metadata_key=mapName` - Sessions that have mapName key (any value)
+     *     - `metadata_key=mapName&metadata_value=Level1` - Sessions with mapName=Level1
+     *
+     */
+    get: operations['PlaySessionV01Controller_search'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0.1/projects/{project_id}/sessions/search/summary': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Search play sessions summary
+     * @description
+     *     Get lightweight summary of all matching sessions (no pagination).
+     *     This endpoint is useful for previewing which sessions will be included in a heatmap task before creating it.
+     *
+     *     Accepts the same search parameters as the regular search endpoint, but returns only session IDs and display text.
+     *
+     *     **Display Format:** "SessionName (Platform, Version) - YYYY-MM-DD HH:mm"
+     *
+     *     **Use Case:**
+     *     1. Call this endpoint to preview filtered sessions
+     *     2. User confirms the session list
+     *     3. Use the same search query in heatmap task creation API
+     *
+     */
+    get: operations['PlaySessionV01Controller_searchSummary'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v0.1/projects/{project_id}/sessions/{session_id}/maps': {
     parameters: {
       query?: never;
@@ -839,6 +920,30 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v0/heatmap/projects/{project_id}/tasks/list': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get heatmap tasks list for project
+     * @description
+     *     Get a list of completed heatmap tasks for a project with pagination.
+     *     Returns tasks ordered by most recent first (by updated_at).
+     *     Does not include heavy result data for better performance.
+     *
+     */
+    get: operations['HeatmapController_getProjectTasksList'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v0/heatmap/projects/{project_id}/tasks': {
     parameters: {
       query?: never;
@@ -848,7 +953,29 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Create heatmap calculation task for project */
+    /**
+     * Create heatmap calculation task for project
+     * @description
+     *     Create a heatmap task for a project with optional session filtering.
+     *
+     *     **Filtering Options:**
+     *     1. No filter: Use all sessions in the project
+     *     2. sessionIds: Specify exact session IDs (array of numbers)
+     *     3. searchQuery: Use search parameters to filter sessions (same as session search API)
+     *
+     *     **Note:** sessionIds and searchQuery cannot be used together.
+     *
+     *     **Example with searchQuery:**
+     *     ```json
+     *     {
+     *       "stepSize": 300,
+     *       "searchQuery": {
+     *         "q": "platform:Android is:finished"
+     *       }
+     *     }
+     *     ```
+     *
+     */
     post: operations['HeatmapController_createProjectTask'];
     delete?: never;
     options?: never;
@@ -1301,6 +1428,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v0/public-stats': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 公開統計情報を取得
+     * @description システム全体の統計情報を取得します。認証は不要です。
+     */
+    get: operations['PublicStatsController_getPublicStats'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1540,6 +1687,46 @@ export interface components {
        */
       player: number;
     };
+    SearchPlaySessionResponseDto: {
+      /** @description Array of play sessions matching the search criteria */
+      data: components['schemas']['PlaySessionResponseDto'][];
+      /**
+       * @description Total number of sessions matching the criteria
+       * @example 100
+       */
+      total: number;
+      /**
+       * @description Number of results returned
+       * @example 20
+       */
+      limit: number;
+      /**
+       * @description Number of results skipped
+       * @example 0
+       */
+      offset: number;
+    };
+    SearchSessionSummaryDto: {
+      /**
+       * @description Session ID
+       * @example 1
+       */
+      id: number;
+      /**
+       * @description Display text for the session (includes name, platform, version, and start time)
+       * @example Session_2025-01-15_Morning (Android, v1.2.3) - 2025-01-15 10:30
+       */
+      display: string;
+    };
+    SearchSessionSummaryResponseDto: {
+      /** @description Array of session summaries matching the search criteria (no pagination) */
+      sessions: components['schemas']['SearchSessionSummaryDto'][];
+      /**
+       * @description Total number of sessions found
+       * @example 42
+       */
+      total: number;
+    };
     PlayPositionLogDto: {
       /**
        * @description Player identifier
@@ -1600,6 +1787,68 @@ export interface components {
        */
       status?: Record<string, never> | null;
     };
+    HeatmapSearchQueryDto: {
+      /**
+       * @description Unified search query (plain text keyword OR GitHub-style filters)
+       * @example platform:Android is:finished
+       */
+      q?: string;
+      /**
+       * @description Session name (partial match)
+       * @example Session_2025
+       */
+      name?: string;
+      /**
+       * @description Device ID (exact match)
+       * @example device-123
+       */
+      device_id?: string;
+      /**
+       * @description Platform (exact match)
+       * @example Android
+       */
+      platform?: string;
+      /**
+       * @description App version (exact match)
+       * @example 1.0.0
+       */
+      app_version?: string;
+      /**
+       * @description Start time from (ISO 8601)
+       * @example 2025-01-01T00:00:00Z
+       */
+      start_time_from?: string;
+      /**
+       * @description Start time to (ISO 8601)
+       * @example 2025-01-31T23:59:59Z
+       */
+      start_time_to?: string;
+      /**
+       * @description End time from (ISO 8601)
+       * @example 2025-01-01T00:00:00Z
+       */
+      end_time_from?: string;
+      /**
+       * @description End time to (ISO 8601)
+       * @example 2025-01-31T23:59:59Z
+       */
+      end_time_to?: string;
+      /**
+       * @description Filter by playing status (true: currently playing, false: finished)
+       * @example false
+       */
+      is_playing?: boolean;
+      /**
+       * @description Metadata key to search for
+       * @example mapName
+       */
+      metadata_key?: string;
+      /**
+       * @description Metadata value to search for (requires metadata_key)
+       * @example Level1
+       */
+      metadata_value?: string;
+    };
     CreateHeatmapDto: {
       /**
        * @description Heatmap width
@@ -1611,6 +1860,17 @@ export interface components {
        * @example false
        */
       zVisible?: boolean;
+      /**
+       * @description Filter by specific session IDs (for project heatmap). Cannot be used together with searchQuery.
+       * @example [
+       *       1,
+       *       2,
+       *       3
+       *     ]
+       */
+      sessionIds?: number[];
+      /** @description Search query to filter sessions (for project heatmap). Cannot be used together with sessionIds. Use the same parameters as the search summary endpoint. */
+      searchQuery?: components['schemas']['HeatmapSearchQueryDto'];
     };
     HeatMapTaskResultListItem: {
       /**
@@ -1706,6 +1966,64 @@ export interface components {
        * @example 2021-01-01T00:00:00.000Z
        */
       updatedAt: string;
+    };
+    HeatmapTaskListItemDto: {
+      /**
+       * @description Task ID
+       * @example 1
+       */
+      taskId: number;
+      /** @description Project */
+      project: components['schemas']['ProjectResponseDto'];
+      /** @description Session */
+      session?: components['schemas']['PlaySessionResponseDto'] | null;
+      /**
+       * @description Step size
+       * @example 200
+       */
+      stepSize: number;
+      /**
+       * @description Z visible
+       * @example true
+       */
+      zVisible: boolean;
+      /**
+       * @description Status
+       * @example completed
+       * @enum {string}
+       */
+      status: 'pending' | 'processing' | 'completed' | 'failed';
+      /**
+       * Format: date-time
+       * @description Created at
+       * @example 2021-01-01T00:00:00.000Z
+       */
+      createdAt: string;
+      /**
+       * Format: date-time
+       * @description Updated at
+       * @example 2021-01-01T00:00:00.000Z
+       */
+      updatedAt: string;
+    };
+    HeatmapTaskListDto: {
+      /** @description Tasks list */
+      tasks: components['schemas']['HeatmapTaskListItemDto'][];
+      /**
+       * @description Total count
+       * @example 100
+       */
+      total: number;
+      /**
+       * @description Limit
+       * @example 20
+       */
+      limit: number;
+      /**
+       * @description Offset
+       * @example 0
+       */
+      offset: number;
     };
     SessionSummaryDto: {
       /**
@@ -2019,6 +2337,33 @@ export interface components {
        * @example 2024-01-01T12:00:00.000Z
        */
       expiresAt: string;
+    };
+    PublicStatsResponseDto: {
+      /**
+       * @description 総プロジェクト数
+       * @example 150
+       */
+      total_projects: number;
+      /**
+       * @description 総セッション数
+       * @example 1234
+       */
+      total_sessions: number;
+      /**
+       * @description 総イベント数（処理済み）
+       * @example 567890
+       */
+      total_events: number;
+      /**
+       * @description 過去7日間のアクティブセッション数
+       * @example 42
+       */
+      active_sessions_7d: number;
+      /**
+       * @description 総ユーザー数
+       * @example 89
+       */
+      total_users: number;
     };
     DefaultErrorResponse: {
       /** @example 400 */
@@ -3938,6 +4283,142 @@ export interface operations {
       };
     };
   };
+  PlaySessionV01Controller_search: {
+    parameters: {
+      query?: {
+        /** @description Session name (partial match) */
+        name?: string;
+        /** @description Device ID (exact match) */
+        device_id?: string;
+        /** @description Platform (exact match) */
+        platform?: string;
+        /** @description App version (exact match) */
+        app_version?: string;
+        /** @description Start time from (ISO 8601) */
+        start_time_from?: string;
+        /** @description Start time to (ISO 8601) */
+        start_time_to?: string;
+        /** @description End time from (ISO 8601) */
+        end_time_from?: string;
+        /** @description End time to (ISO 8601) */
+        end_time_to?: string;
+        /** @description Updated at from (ISO 8601) */
+        updated_at_from?: string;
+        /** @description Updated at to (ISO 8601) */
+        updated_at_to?: string;
+        /** @description Filter by playing status (true: currently playing, false: finished) */
+        is_playing?: boolean;
+        /** @description Metadata key to search for (can be used alone to check key existence) */
+        metadata_key?: string;
+        /** @description Metadata value to search for (requires metadata_key to be specified) */
+        metadata_value?: string;
+        /** @description Unified search query. Supports: (1) Plain text keyword search across name, device_id, platform, app_version, and metadata keys/values (e.g., "Session_2025" or "MapA"), (2) GitHub-style filters (e.g., "platform:Android is:playing"), (3) Mixed (e.g., "Session_2025 platform:Android is:finished"). Keywords and filters are combined with AND logic. */
+        q?: string;
+        /** @description Maximum number of results to return */
+        limit?: number;
+        /** @description Number of results to skip */
+        offset?: number;
+        /** @description Field to sort by */
+        sort_by?: 'id' | 'name' | 'start_time' | 'end_time' | 'updated_at';
+        /** @description Sort order */
+        sort_order?: 'asc' | 'desc';
+      };
+      header?: never;
+      path: {
+        project_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SearchPlaySessionResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  PlaySessionV01Controller_searchSummary: {
+    parameters: {
+      query?: {
+        /** @description Session name (partial match) */
+        name?: string;
+        /** @description Device ID (exact match) */
+        device_id?: string;
+        /** @description Platform (exact match) */
+        platform?: string;
+        /** @description App version (exact match) */
+        app_version?: string;
+        /** @description Start time from (ISO 8601) */
+        start_time_from?: string;
+        /** @description Start time to (ISO 8601) */
+        start_time_to?: string;
+        /** @description End time from (ISO 8601) */
+        end_time_from?: string;
+        /** @description End time to (ISO 8601) */
+        end_time_to?: string;
+        /** @description Updated at from (ISO 8601) */
+        updated_at_from?: string;
+        /** @description Updated at to (ISO 8601) */
+        updated_at_to?: string;
+        /** @description Filter by playing status (true: currently playing, false: finished) */
+        is_playing?: boolean;
+        /** @description Metadata key to search for (can be used alone to check key existence) */
+        metadata_key?: string;
+        /** @description Metadata value to search for (requires metadata_key to be specified) */
+        metadata_value?: string;
+        /** @description Unified search query. Supports: (1) Plain text keyword search across name, device_id, platform, app_version, and metadata keys/values (e.g., "Session_2025" or "MapA"), (2) GitHub-style filters (e.g., "platform:Android is:playing"), (3) Mixed (e.g., "Session_2025 platform:Android is:finished"). Keywords and filters are combined with AND logic. */
+        q?: string;
+        /** @description Maximum number of results to return */
+        limit?: number;
+        /** @description Number of results to skip */
+        offset?: number;
+        /** @description Field to sort by */
+        sort_by?: 'id' | 'name' | 'start_time' | 'end_time' | 'updated_at';
+        /** @description Sort order */
+        sort_order?: 'asc' | 'desc';
+      };
+      header?: never;
+      path: {
+        project_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SearchSessionSummaryResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
   PlaySessionV01Controller_getSessionMaps: {
     parameters: {
       query?: never;
@@ -4254,6 +4735,40 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['HeatmapTaskDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  HeatmapController_getProjectTasksList: {
+    parameters: {
+      query: {
+        limit: number;
+        offset: number;
+      };
+      header?: never;
+      path: {
+        project_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Tasks list */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HeatmapTaskListDto'];
         };
       };
       /** @description Bad Request */
@@ -5403,6 +5918,42 @@ export interface operations {
         content: {
           'application/json': components['schemas']['DefaultErrorResponse'];
         };
+      };
+    };
+  };
+  PublicStatsController_getPublicStats: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description 統計情報の取得に成功 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PublicStatsResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+      /** @description サーバーエラー */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };

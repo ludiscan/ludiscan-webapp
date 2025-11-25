@@ -1,40 +1,24 @@
 import styled from '@emotion/styled';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 
 import type { FC } from 'react';
 
-import { MarkDownText } from '@src/component/molecules/MarkDownText';
-import { Header } from '@src/component/templates/Header';
-import { SidebarLayout } from '@src/component/templates/SidebarLayout';
-import readmeRaw from '@src/files/heatmapReadme.md';
+import { CTASection } from '@src/component/organisms/landing/CTASection';
+import { Footer } from '@src/component/organisms/landing/Footer';
+import { HeatmapBackgroundDemo } from '@src/component/organisms/landing/HeatmapBackgroundDemo';
+import { HeroSection } from '@src/component/organisms/landing/HeroSection';
+import { ProductVisualization } from '@src/component/organisms/landing/ProductVisualization';
+import { TrustSection } from '@src/component/organisms/landing/TrustSection';
 import { useAuth } from '@src/hooks/useAuth';
-import { InnerContent } from '@src/pages/_app.page';
-import { dimensions } from '@src/styles/style';
 
 export type IndexPageProps = {
   className?: string;
-  readme?: string;
 };
 
-export async function getServerSideProps() {
-  try {
-    return { props: { readme: readmeRaw } };
-  } catch {
-    return {
-      notFound: true,
-    };
-  }
-}
-
-const Component: FC<IndexPageProps> = ({ className, readme }) => {
+const Component: FC<IndexPageProps> = ({ className }) => {
   const router = useRouter();
   const { isAuthorized, ready } = useAuth();
-
-  const handleBackClick = useCallback(() => {
-    router.back();
-  }, [router]);
 
   useEffect(() => {
     // When user is authorized, redirect to home
@@ -43,101 +27,82 @@ const Component: FC<IndexPageProps> = ({ className, readme }) => {
     }
   }, [isAuthorized, ready, router]);
 
+  // Show loading state while checking auth
+  if (!ready) {
+    return (
+      <div className={`${className}__loading`}>
+        <div className={`${className}__loading-spinner`} />
+      </div>
+    );
+  }
+
+  // Don't render landing page for authorized users (they'll be redirected)
+  if (isAuthorized) {
+    return null;
+  }
+
   return (
     <div className={className}>
-      {isAuthorized && <SidebarLayout />}
-      <InnerContent showSidebar={isAuthorized}>
-        <Header title={'Ludiscan'} onClick={handleBackClick} />
-        <div className={`${className}__inner`}>
-          {!isAuthorized && ready ? (
-            <div className={`${className}__content`}>
-              <div className={`${className}__welcome`}>
-                <h1 className={`${className}__title`}>Welcome to Ludiscan</h1>
-                <p className={`${className}__subtitle`}>Visualize gameplay data with 3D and 2D heatmaps</p>
-                <div className={`${className}__buttons`}>
-                  <Link href={'/login'}>Sign In</Link>
-                </div>
-              </div>
-              {readme && <MarkDownText className={`${className}__markdown`} markdown={readme} />}
-            </div>
-          ) : (
-            <div className={`${className}__loading`}>Loading...</div>
-          )}
-        </div>
-      </InnerContent>
+      {/* Three.js animated background */}
+      <Suspense fallback={null}>
+        <HeatmapBackgroundDemo />
+      </Suspense>
+
+      {/* Main content */}
+      <div className={`${className}__content`}>
+        <HeroSection />
+        <TrustSection />
+        <ProductVisualization />
+        <CTASection />
+        <Footer />
+      </div>
     </div>
   );
 };
 
 const IndexPage = styled(Component)`
-  height: 100vh;
+  position: relative;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: ${({ theme }) => theme.colors.background.default};
 
-  &__inner {
-    display: flex;
-    flex-direction: column;
-    height: calc(100vh - ${dimensions.headerHeight}px - 60px);
-    padding: 2rem;
-    text-align: center;
-  }
+  /* Smooth scrolling */
+  scroll-behavior: smooth;
 
   &__content {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    height: 100%;
-  }
-
-  &__welcome {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    align-items: center;
-    justify-content: center;
-    min-height: 300px;
-  }
-
-  &__title {
-    margin: 0;
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: ${({ theme }) => theme.colors.primary.main};
-  }
-
-  &__subtitle {
-    margin: 0;
-    font-size: 1.1rem;
-    color: ${({ theme }) => theme.colors.text.primary};
-    opacity: 0.8;
-  }
-
-  &__buttons {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1.5rem;
-
-    a {
-      text-decoration: none;
-    }
-  }
-
-  &__markdown {
-    flex: 1;
-    width: 100%;
-    max-width: ${dimensions.maxWidth}px;
-    margin: 0 auto;
-    overflow-y: auto;
-    font-size: 1rem;
-    line-height: 1.6;
-    text-align: start;
+    position: relative;
+    z-index: 1;
+    height: 100vh;
+    overflow: auto;
   }
 
   &__loading {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100%;
-    font-size: 1.2rem;
+    min-height: 100vh;
+    background: ${({ theme }) => theme.colors.background.default};
+  }
+
+  &__loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid ${({ theme }) => theme.colors.border.default};
+    border-top-color: ${({ theme }) => theme.colors.primary.main};
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Selection styling */
+  ::selection {
     color: ${({ theme }) => theme.colors.text.primary};
+    background: ${({ theme }) => theme.colors.primary.main}44;
   }
 `;
 

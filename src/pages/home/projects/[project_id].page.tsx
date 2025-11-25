@@ -143,6 +143,12 @@ const Component: FC<ProjectDetailsPageProps> = ({ className }) => {
                 fontWeight={theme.typography.fontWeight.extrabold}
               />
               <Text
+                text={`ID: ${project.id}`}
+                fontSize={theme.typography.fontSize.xs}
+                color={theme.colors.text.secondary}
+                fontWeight={theme.typography.fontWeight.regular}
+              />
+              <Text
                 text={project.description}
                 fontSize={theme.typography.fontSize.sm}
                 color={theme.colors.text.secondary}

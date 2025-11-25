@@ -23,7 +23,7 @@ import { useToast } from '@src/component/templates/ToastContext';
 import { useAuth } from '@src/hooks/useAuth';
 import { useLocale } from '@src/hooks/useLocale';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { createClient } from '@src/modeles/qeury';
+import { useApiClient } from '@src/modeles/ApiClientContext';
 import { InnerContent } from '@src/pages/_app.page';
 
 const fetchCount = 20;
@@ -47,6 +47,7 @@ const Component: FC<HomePageProps> = ({ className }) => {
   const { showToast } = useToast();
   const { t } = useLocale();
   const toastShownRef = useRef<boolean>(false);
+  const apiClient = useApiClient();
 
   const SORT_OPTIONS: { label: string; value: SortOption }[] = [
     { label: t('home.sortOptions.createdDesc'), value: 'created_desc' },
@@ -65,10 +66,10 @@ const Component: FC<HomePageProps> = ({ className }) => {
     error: projectsError,
     fetchNextPage: fetchNextPageProjects,
   } = useInfiniteQuery({
-    queryKey: ['projects', isAuthorized, searchQuery],
+    queryKey: ['projects', isAuthorized, searchQuery, apiClient],
     queryFn: async ({ pageParam }): Promise<Project[] | undefined> => {
       if (!isAuthorized) return undefined;
-      const { data, error } = await createClient().GET('/api/v0.1/projects', {
+      const { data, error } = await apiClient.GET('/api/v0.1/projects', {
         params: {
           query: {
             limit: fetchCount,

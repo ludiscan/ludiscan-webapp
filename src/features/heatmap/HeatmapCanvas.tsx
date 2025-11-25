@@ -1,7 +1,20 @@
-import { OrbitControls } from '@react-three/drei';
+import { GizmoHelper, GizmoViewport, OrbitControls } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AmbientLight, Box3, DirectionalLight, HemisphereLight, Raycaster, SpotLight, Vector2, Vector3 } from 'three';
+import {
+  AmbientLight,
+  Box3,
+  DirectionalLight,
+  GridHelper,
+  HemisphereLight,
+  Mesh,
+  MeshStandardMaterial,
+  PlaneGeometry,
+  Raycaster,
+  SpotLight,
+  Vector2,
+  Vector3,
+} from 'three';
 
 import { HeatmapObjectOverlay } from './HeatmapObjectOverlay';
 import { FocusController } from './selection/FocusController';
@@ -302,6 +315,40 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
     };
   }, [scene, theme, dimensionality]);
 
+  // グリッド and 床面をシーンに追加
+  useEffect(() => {
+    // グリッドを作成
+    const gridSize = 10000;
+    const gridDivisions = 100;
+    const gridHelper = new GridHelper(gridSize, gridDivisions, 0x888888, 0xcccccc);
+    gridHelper.position.y = -1000; // 床のわずか下に配置してZファイティングを避ける
+
+    // 床面を作成（半透明の平面）
+    const groundGeometry = new PlaneGeometry(gridSize, gridSize);
+    const groundMaterial = new MeshStandardMaterial({
+      color: 0xf5f5f5,
+      metalness: 0.1,
+      roughness: 0.8,
+      transparent: true,
+      opacity: 0.3, // 半透明
+      emissive: 0xf0f0f0,
+      emissiveIntensity: 0.2,
+    });
+    const groundMesh = new Mesh(groundGeometry, groundMaterial);
+    groundMesh.rotation.x = -Math.PI / 2; // XZ平面に合わせる
+    groundMesh.position.y = -1; // グリッドより下に配置
+
+    scene.add(gridHelper);
+    // scene.add(groundMesh);
+
+    return () => {
+      scene.remove(gridHelper);
+      // scene.remove(groundMesh);
+      groundGeometry.dispose();
+      groundMaterial.dispose();
+    };
+  }, [scene]);
+
   const getPercent = useCallback(() => {
     const controls = orbitControlsRef.current;
     const camera = controls?.object as PerspectiveCamera | OrthographicCamera | undefined;
@@ -505,12 +552,16 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
       </group>
       <FocusController orbit={orbitControlsRef} sceneRoot={groupRef} />
       <OrbitControls
+        makeDefault
         enableZoom
         enablePan
         enableRotate={dimensionality === '3d'} // 2Dモードでは回転を無効化
         ref={orbitControlsRef}
         position0={new Vector3(1, 1, 3000)}
       />
+      <GizmoHelper alignment='bottom-right' margin={[80, 80]}>
+        <GizmoViewport axisHeadScale={1.1} />
+      </GizmoHelper>
       <FocusPingLayer ttlMs={1800} baseRadius={60} />
       <RouteVisualization dimensionality={dimensionality} />
       {projectId && <RouteCoachVisualization projectId={projectId} playerId={playerId} />}

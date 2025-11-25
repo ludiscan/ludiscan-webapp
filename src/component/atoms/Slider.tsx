@@ -222,9 +222,10 @@ export const Slider = styled(SliderComponent)`
   }
 
   &__textField {
-    width: 35px;
+    width: 60px;
     margin-left: 8px;
     color: ${({ theme }) => theme.colors.text.primary};
+    background: ${({ theme }) => theme.colors.surface.base};
     border: 1px solid ${({ theme }) => theme.colors.border.default} !important;
     border-radius: 4px;
   }
