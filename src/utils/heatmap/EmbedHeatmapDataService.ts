@@ -253,6 +253,13 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
     return (res.data as unknown as FieldObjectLog[]) ?? [];
   }, [projectId, currentSessionId, apiClient]);
 
+  const loadTask = useCallback(
+    (newTaskId: number) => {
+      setTaskId(newTaskId);
+    },
+    [setTaskId],
+  );
+
   return {
     isInitialized: isReady && projectId !== undefined && !!apiClient,
     getMapList,
@@ -266,6 +273,7 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
     setSessionId: setCurrentSessionId,
     sessionHeatmapIds: undefined,
     setSessionHeatmapIds: () => {},
+    loadTask,
     getProject,
     getSession,
     getSessions,

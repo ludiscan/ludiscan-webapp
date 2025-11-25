@@ -54,6 +54,9 @@ export type HeatmapDataService = {
   sessionHeatmapIds: number[] | undefined;
   setSessionHeatmapIds: (sessionIds: number[] | undefined) => void;
 
+  // Load existing task by ID
+  loadTask: (taskId: number) => void;
+
   // New methods for centralized data access
   getProject(): Promise<Project | null>;
   getSession(): Promise<Session | null>;
@@ -75,6 +78,7 @@ export const mockHeatmapDataService: HeatmapDataService = {
   setSessionId: () => {},
   sessionHeatmapIds: undefined,
   setSessionHeatmapIds: () => {},
+  loadTask: () => {},
   getProject: async () => null,
   getSession: async () => null,
   getSessions: async () => [],
@@ -367,6 +371,13 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
     return (res.data as unknown as FieldObjectLog[]) ?? [];
   }, [projectId, sessionId, apiClient]);
 
+  const loadTask = useCallback(
+    (newTaskId: number) => {
+      setTaskId(newTaskId);
+    },
+    [setTaskId],
+  );
+
   return {
     isInitialized: isAuthorized && ready && projectId !== undefined,
     getMapList,
@@ -380,6 +391,7 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
     setSessionId,
     sessionHeatmapIds,
     setSessionHeatmapIds,
+    loadTask,
     getProject,
     getSession,
     getSessions,
