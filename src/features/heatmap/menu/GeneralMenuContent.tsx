@@ -3,11 +3,9 @@ import { useCallback, useState, useMemo, useRef } from 'react';
 import { IoChevronDown, IoChevronUp } from 'react-icons/io5';
 import { useDispatch } from 'react-redux';
 
-import type { ChangeEvent } from 'react';
-
 import type { HeatmapMenuProps } from '@src/features/heatmap/HeatmapMenuContent';
 import type { GeneralSettings } from '@src/modeles/heatmapView';
-import type { FC } from 'react';
+import type { ChangeEvent, FC } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
 import { FlexRow } from '@src/component/atoms/Flex';
@@ -59,11 +57,11 @@ const HiddenFileInput = styled.input`
 const BackgroundPreview = styled.div<{ backgroundUrl: string }>`
   width: 40px;
   height: 40px;
-  border-radius: 4px;
   background-image: url(${({ backgroundUrl }) => backgroundUrl});
-  background-size: cover;
   background-position: center;
+  background-size: cover;
   border: 1px solid ${({ theme }) => theme.colors.border.default};
+  border-radius: 4px;
 `;
 
 export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
@@ -74,21 +72,33 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
   const [isOptionsOpen, setIsOptionsOpen] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { upZ, scale, heatmapOpacity, heatmapType, colorScale, blockSize, showHeatmap, minThreshold, backgroundImage, backgroundScale, backgroundOffsetX, backgroundOffsetY } =
-    useGeneralPick(
-      'upZ',
-      'scale',
-      'showHeatmap',
-      'heatmapOpacity',
-      'heatmapType',
-      'blockSize',
-      'minThreshold',
-      'colorScale',
-      'backgroundImage',
-      'backgroundScale',
-      'backgroundOffsetX',
-      'backgroundOffsetY',
-    );
+  const {
+    upZ,
+    scale,
+    heatmapOpacity,
+    heatmapType,
+    colorScale,
+    blockSize,
+    showHeatmap,
+    minThreshold,
+    backgroundImage,
+    backgroundScale,
+    backgroundOffsetX,
+    backgroundOffsetY,
+  } = useGeneralPick(
+    'upZ',
+    'scale',
+    'showHeatmap',
+    'heatmapOpacity',
+    'heatmapType',
+    'blockSize',
+    'minThreshold',
+    'colorScale',
+    'backgroundImage',
+    'backgroundScale',
+    'backgroundOffsetX',
+    'backgroundOffsetY',
+  );
   const setData = useGeneralPatch();
 
   // Calculate the center position of all heatmap cells
@@ -126,6 +136,7 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
 
       // 画像ファイルのみ許可
       if (!file.type.startsWith('image/')) {
+        // eslint-disable-next-line no-console
         console.error('画像ファイルを選択してください');
         return;
       }
@@ -191,7 +202,7 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
             <Text text={backgroundImage ? '変更' : '選択'} fontSize={theme.typography.fontSize.sm} />
           </Button>
           {backgroundImage && (
-            <Button onClick={handleClearBackground} scheme={'danger'} fontSize={'sm'}>
+            <Button onClick={handleClearBackground} scheme={'tertiary'} fontSize={'sm'}>
               <Text text={'削除'} fontSize={theme.typography.fontSize.sm} />
             </Button>
           )}
