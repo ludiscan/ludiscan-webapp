@@ -3,7 +3,7 @@
  * Provides locale management and translation functions throughout the app
  */
 
-import React, { createContext, useCallback, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { SupportedLocale, LocaleContextValue } from '@src/types/locale';
 
@@ -15,10 +15,8 @@ const translations = {
   en,
 } as const;
 
-// Default locale from browser or fallback to Japanese
-const getDefaultLocale = (): SupportedLocale => {
-  if (typeof window === 'undefined') return 'ja';
-
+// Get locale from browser (client-side only)
+const getBrowserLocale = (): SupportedLocale => {
   const storedLocale = localStorage.getItem('ludiscan-locale') as SupportedLocale | null;
   if (storedLocale && (storedLocale === 'ja' || storedLocale === 'en')) {
     return storedLocale;
@@ -41,13 +39,19 @@ interface LocaleProviderProps {
 }
 
 export const LocaleProvider: React.FC<LocaleProviderProps> = ({ children }) => {
-  const [locale, setLocaleState] = useState<SupportedLocale>(getDefaultLocale);
+  // Always start with 'ja' for consistent server-side rendering
+  const [locale, setLocaleState] = useState<SupportedLocale>('ja');
 
   const setLocale = useCallback((newLocale: SupportedLocale) => {
     setLocaleState(newLocale);
     if (typeof window !== 'undefined') {
       localStorage.setItem('ludiscan-locale', newLocale);
     }
+  }, []);
+
+  // Initialize locale from browser after hydration to avoid hydration mismatch
+  useEffect(() => {
+    setLocaleState(getBrowserLocale());
   }, []);
 
   /**
