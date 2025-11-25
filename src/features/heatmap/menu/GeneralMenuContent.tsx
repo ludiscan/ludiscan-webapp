@@ -74,11 +74,7 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
       {/* Heatmap選択セクション */}
       <InputRow label={'Heatmap'}>
         <FlexRow gap={8} align='center' style={{ flex: 1 }}>
-          <Text
-            text={currentTaskId ? `Task #${currentTaskId}` : '未選択'}
-            fontSize={theme.typography.fontSize.sm}
-            color={theme.colors.text.secondary}
-          />
+          <Text text={currentTaskId ? `Task #${currentTaskId}` : '未選択'} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
           <Button onClick={() => setIsHeatmapSelectorModalOpen(true)} scheme={'primary'} fontSize={'sm'}>
             <Text text={'選択'} fontSize={theme.typography.fontSize.sm} />
           </Button>
