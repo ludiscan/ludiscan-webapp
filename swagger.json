@@ -3584,6 +3584,157 @@
         ]
       }
     },
+    "/api/v0.1/projects/{project_id}/sessions/aggregate": {
+      "post": {
+        "description": "\nAggregate play sessions with flexible filter criteria and return statistics.\n\n**Features:**\n- Count sessions matching filter criteria (total, finished, playing)\n- Aggregate numeric metadata fields (sum, avg, min, max)\n- Combine multiple aggregations in a single request\n\n**Filter Criteria:**\nSame as search endpoint - supports individual parameters, 'q' unified query, or both.\n\n**Aggregation Example:**\n```json\n{\n  \"platform\": \"Android\",\n  \"is_playing\": false,\n  \"aggregations\": [\n    { \"field\": \"score\", \"operations\": [\"sum\", \"avg\", \"min\", \"max\"] },\n    { \"field\": \"playTime\", \"operations\": [\"sum\", \"avg\"] }\n  ]\n}\n```\n\n**Response Example:**\n```json\n{\n  \"totalCount\": 250,\n  \"finishedCount\": 200,\n  \"playingCount\": 50,\n  \"aggregations\": [\n    { \"field\": \"score\", \"count\": 180, \"sum\": 12500, \"avg\": 69.44, \"min\": 10, \"max\": 200 },\n    { \"field\": \"playTime\", \"count\": 195, \"sum\": 58500, \"avg\": 300 }\n  ]\n}\n```\n        ",
+        "operationId": "PlaySessionV01Controller_aggregate",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AggregatePlaySessionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Aggregation results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AggregatePlaySessionResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Aggregate play sessions",
+        "tags": [
+          "v0.1"
+        ]
+      }
+    },
+    "/api/v0.1/projects/{project_id}/sessions/filter-options": {
+      "get": {
+        "description": "\nGet distinct values for filter dropdowns.\n\nReturns lists of unique values for:\n- Platforms (e.g., Android, iOS, Windows)\n- App versions (e.g., 1.0.0, 1.1.0, 2.0.0)\n- Device IDs\n\nUse these values to populate filter dropdowns in the UI.\n        ",
+        "operationId": "PlaySessionV01Controller_getFilterOptions",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Filter options",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilterOptionsResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get filter options",
+        "tags": [
+          "v0.1"
+        ]
+      }
+    },
+    "/api/v0.1/projects/{project_id}/sessions/metadata-keys": {
+      "get": {
+        "description": "\nGet all metadata keys used across sessions in a project.\n\nReturns for each key:\n- Key name\n- Count of sessions that have this key\n- Whether the values are numeric (can be aggregated)\n- Sample values (up to 5)\n\nUse this to:\n- Build dynamic metadata filter UI\n- Know which fields can be used for aggregation\n- Preview what data is available in metadata\n        ",
+        "operationId": "PlaySessionV01Controller_getMetadataKeys",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Metadata keys",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataKeysResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get metadata keys",
+        "tags": [
+          "v0.1"
+        ]
+      }
+    },
     "/api/v0/projects/{project_id}/play_session/{session_id}/player_position_log": {
       "get": {
         "operationId": "PlayerPositionLogController_get",
@@ -6113,7 +6264,7 @@
   "info": {
     "title": "Ludiscan API Documentation",
     "description": "Ludiscan API for game analytics and session tracking",
-    "version": "1.13.1",
+    "version": "1.14.0",
     "contact": {}
   },
   "tags": [],
@@ -6923,6 +7074,311 @@
         "required": [
           "sessions",
           "total"
+        ]
+      },
+      "AggregationFieldDto": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string",
+            "description": "Metadata field name to aggregate (e.g., \"score\", \"playTime\")",
+            "example": "score"
+          },
+          "operations": {
+            "type": "array",
+            "description": "Aggregation operations to perform",
+            "example": [
+              "sum",
+              "avg",
+              "min",
+              "max"
+            ],
+            "items": {
+              "type": "string",
+              "enum": [
+                "count",
+                "sum",
+                "avg",
+                "min",
+                "max"
+              ]
+            }
+          }
+        },
+        "required": [
+          "field",
+          "operations"
+        ]
+      },
+      "AggregatePlaySessionDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Session name (partial match)",
+            "example": "Session_2025"
+          },
+          "device_id": {
+            "type": "string",
+            "description": "Device ID (exact match)",
+            "example": "device-123"
+          },
+          "platform": {
+            "type": "string",
+            "description": "Platform (exact match)",
+            "example": "Android"
+          },
+          "app_version": {
+            "type": "string",
+            "description": "App version (exact match)",
+            "example": "1.0.0"
+          },
+          "start_time_from": {
+            "type": "string",
+            "description": "Start time from (ISO 8601)",
+            "example": "2025-01-01T00:00:00Z"
+          },
+          "start_time_to": {
+            "type": "string",
+            "description": "Start time to (ISO 8601)",
+            "example": "2025-01-31T23:59:59Z"
+          },
+          "end_time_from": {
+            "type": "string",
+            "description": "End time from (ISO 8601)",
+            "example": "2025-01-01T00:00:00Z"
+          },
+          "end_time_to": {
+            "type": "string",
+            "description": "End time to (ISO 8601)",
+            "example": "2025-01-31T23:59:59Z"
+          },
+          "is_playing": {
+            "type": "boolean",
+            "description": "Filter by playing status (true: currently playing, false: finished)",
+            "example": false
+          },
+          "metadata_key": {
+            "type": "string",
+            "description": "Metadata key to filter by (can be used alone to check key existence)",
+            "example": "mapName"
+          },
+          "metadata_value": {
+            "type": "string",
+            "description": "Metadata value to filter by (requires metadata_key to be specified)",
+            "example": "Level1"
+          },
+          "q": {
+            "type": "string",
+            "description": "Unified search query (same format as search endpoint)",
+            "example": "platform:Android is:finished"
+          },
+          "aggregations": {
+            "description": "Array of fields to aggregate with their operations. If not specified, only count is returned.",
+            "example": [
+              {
+                "field": "score",
+                "operations": [
+                  "sum",
+                  "avg",
+                  "min",
+                  "max"
+                ]
+              },
+              {
+                "field": "playTime",
+                "operations": [
+                  "sum",
+                  "avg"
+                ]
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AggregationFieldDto"
+            }
+          }
+        }
+      },
+      "FieldAggregationResultDto": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string",
+            "description": "Field name that was aggregated",
+            "example": "score"
+          },
+          "count": {
+            "type": "number",
+            "description": "Count of sessions that have this field with numeric value",
+            "example": 150
+          },
+          "sum": {
+            "type": "number",
+            "description": "Sum of all values (if requested)",
+            "example": 12500
+          },
+          "avg": {
+            "type": "number",
+            "description": "Average value (if requested)",
+            "example": 83.33
+          },
+          "min": {
+            "type": "number",
+            "description": "Minimum value (if requested)",
+            "example": 10
+          },
+          "max": {
+            "type": "number",
+            "description": "Maximum value (if requested)",
+            "example": 200
+          }
+        },
+        "required": [
+          "field",
+          "count"
+        ]
+      },
+      "AggregatePlaySessionResponseDto": {
+        "type": "object",
+        "properties": {
+          "totalCount": {
+            "type": "number",
+            "description": "Total count of sessions matching the filter criteria",
+            "example": 250
+          },
+          "finishedCount": {
+            "type": "number",
+            "description": "Count of finished sessions (end_time is not null)",
+            "example": 200
+          },
+          "playingCount": {
+            "type": "number",
+            "description": "Count of sessions currently playing (end_time is null)",
+            "example": 50
+          },
+          "aggregations": {
+            "description": "Aggregation results for each requested field",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FieldAggregationResultDto"
+            }
+          }
+        },
+        "required": [
+          "totalCount",
+          "finishedCount",
+          "playingCount"
+        ]
+      },
+      "FilterOptionsResponseDto": {
+        "type": "object",
+        "properties": {
+          "platforms": {
+            "description": "List of distinct platforms",
+            "example": [
+              "Android",
+              "iOS",
+              "Windows"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "appVersions": {
+            "description": "List of distinct app versions",
+            "example": [
+              "1.0.0",
+              "1.1.0",
+              "2.0.0"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "deviceIds": {
+            "description": "List of distinct device IDs",
+            "example": [
+              "device-001",
+              "device-002"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "totalSessions": {
+            "type": "number",
+            "description": "Total session count in the project",
+            "example": 500
+          }
+        },
+        "required": [
+          "platforms",
+          "appVersions",
+          "deviceIds",
+          "totalSessions"
+        ]
+      },
+      "MetadataKeyInfoDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Metadata key name",
+            "example": "score"
+          },
+          "count": {
+            "type": "number",
+            "description": "Number of sessions that have this key",
+            "example": 150
+          },
+          "isNumeric": {
+            "type": "boolean",
+            "description": "Whether the values are numeric (can be aggregated)",
+            "example": true
+          },
+          "sampleValues": {
+            "description": "Sample values (up to 5)",
+            "example": [
+              100,
+              200,
+              150
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "key",
+          "count",
+          "isNumeric",
+          "sampleValues"
+        ]
+      },
+      "MetadataKeysResponseDto": {
+        "type": "object",
+        "properties": {
+          "keys": {
+            "description": "List of metadata keys with their information",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MetadataKeyInfoDto"
+            }
+          },
+          "totalSessions": {
+            "type": "number",
+            "description": "Total session count in the project",
+            "example": 500
+          }
+        },
+        "required": [
+          "keys",
+          "totalSessions"
         ]
       },
       "PlayPositionLogDto": {
