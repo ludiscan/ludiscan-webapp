@@ -24,7 +24,7 @@ import { exportHeatmap } from '@src/features/heatmap/export-heatmap';
 import { HeatmapMenuSideBar } from '@src/features/heatmap/menu/HeatmapMenuSideBar';
 import { FocusLinkBridge } from '@src/features/heatmap/selection/FocusLinkBridge';
 import { InspectorModal } from '@src/features/heatmap/selection/InspectorModal';
-import { useGeneralPatch, useGeneralSelect } from '@src/hooks/useGeneral';
+import { useGeneralPatch, useGeneralPick } from '@src/hooks/useGeneral';
 import { DefaultStaleTime } from '@src/modeles/qeury';
 import { dimensions, zIndexes } from '@src/styles/style';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
@@ -48,8 +48,14 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
   const [openMenu, setOpenMenu] = useState<Menus | undefined>(undefined);
   const [menuExtra, setMenuExtra] = useState<object | undefined>(undefined);
 
-  const mapName = useGeneralSelect((s) => s.mapName);
-  const dimensionalityOverride = useGeneralSelect((s) => s.dimensionalityOverride);
+  const { mapName, dimensionalityOverride, backgroundImage, backgroundScale, backgroundOffsetX, backgroundOffsetY } = useGeneralPick(
+    'mapName',
+    'dimensionalityOverride',
+    'backgroundImage',
+    'backgroundScale',
+    'backgroundOffsetX',
+    'backgroundOffsetY',
+  );
   const splitMode = useSelector((s: RootState) => s.heatmapCanvas.splitMode);
   const setGeneral = useGeneralPatch();
 
@@ -217,11 +223,31 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
     };
   }, []);
 
+  // 背景画像のスタイルを計算
+  const backgroundStyle = useMemo(() => {
+    if (!backgroundImage) return null;
+    // offsetは-100〜100の範囲で、0が中央（50%）
+    const posX = 50 + backgroundOffsetX;
+    const posY = 50 + backgroundOffsetY;
+    return {
+      position: 'absolute' as const,
+      inset: 0,
+      zIndex: 0,
+      backgroundImage: `url(${backgroundImage})`,
+      backgroundSize: 'cover',
+      backgroundPosition: `${posX}% ${posY}%`,
+      backgroundRepeat: 'no-repeat',
+      transform: `scale(${backgroundScale})`,
+      transformOrigin: 'center center',
+      pointerEvents: 'none' as const,
+    };
+  }, [backgroundImage, backgroundScale, backgroundOffsetX, backgroundOffsetY]);
+
   const renderCanvas = useCallback(
     (paneId?: string) => (
       <Canvas
         key={paneId}
-        style={{ flex: 1 }}
+        style={{ flex: 1, position: 'relative', zIndex: 1 }}
         camera={
           dimensionality === '2d'
             ? { position: [0, 5000, 0], up: [0, 0, -1], near: 10, far: 20000 } // 2D: 真上から俯瞰
@@ -230,6 +256,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
         orthographic={dimensionality === '2d'} // 2Dは正投影カメラ
         ref={canvasRef}
         dpr={dpr}
+        gl={{ alpha: true }} // 背景を透明にして後ろの画像が見えるようにする
       >
         <PerformanceMonitor factor={1} onChange={handleOnPerformance} />
         <HeatMapCanvas
@@ -256,16 +283,19 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
         {splitMode.enabled ? (
           <FlexRow className={`${className}__splitContainer`} style={{ flex: 1, flexDirection: splitMode.direction === 'horizontal' ? 'row' : 'column' }}>
             <FlexColumn className={`${className}__canvasBox ${className}__canvasBox--split`}>
+              {backgroundStyle && <div style={backgroundStyle} />}
               {renderCanvas('left')}
               <QuickToolbar className={`${className}__footToolbar`} service={service} dimensionality={dimensionality} />
             </FlexColumn>
             <FlexColumn className={`${className}__canvasBox ${className}__canvasBox--split`}>
+              {backgroundStyle && <div style={backgroundStyle} />}
               {renderCanvas('right')}
               <QuickToolbar className={`${className}__footToolbar`} service={service} dimensionality={dimensionality} />
             </FlexColumn>
           </FlexRow>
         ) : (
           <FlexColumn className={`${className}__canvasBox`}>
+            {backgroundStyle && <div style={backgroundStyle} />}
             {renderCanvas()}
             {/*{performance && <PerformanceList api={performance} className={`${className}__performance`} />}*/}
             <QuickToolbar className={`${className}__footToolbar`} service={service} dimensionality={dimensionality} />
@@ -355,6 +385,7 @@ export const HeatMapViewer = memo(
       max-width: 1900px;
       height: 100%;
       margin: 0 auto;
+      overflow: hidden;
       border: ${({ theme }) => `1px solid ${theme.colors.border.default}`};
     }
 

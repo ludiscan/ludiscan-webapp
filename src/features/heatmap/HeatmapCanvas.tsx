@@ -552,6 +552,7 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
       </group>
       <FocusController orbit={orbitControlsRef} sceneRoot={groupRef} />
       <OrbitControls
+        makeDefault
         enableZoom
         enablePan
         enableRotate={dimensionality === '3d'} // 2Dモードでは回転を無効化

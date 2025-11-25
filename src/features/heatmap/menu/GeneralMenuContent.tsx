@@ -1,11 +1,11 @@
 import styled from '@emotion/styled';
-import { useCallback, useState, useMemo } from 'react';
+import { useCallback, useState, useMemo, useRef } from 'react';
 import { IoChevronDown, IoChevronUp } from 'react-icons/io5';
 import { useDispatch } from 'react-redux';
 
 import type { HeatmapMenuProps } from '@src/features/heatmap/HeatmapMenuContent';
 import type { GeneralSettings } from '@src/modeles/heatmapView';
-import type { FC } from 'react';
+import type { ChangeEvent, FC } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
 import { FlexRow } from '@src/component/atoms/Flex';
@@ -50,14 +50,42 @@ const CollapsibleContent = styled.div<{ isOpen: boolean }>`
   padding-top: 8px;
 `;
 
+const HiddenFileInput = styled.input`
+  display: none;
+`;
+
+const BackgroundPreview = styled.div<{ backgroundUrl: string }>`
+  width: 40px;
+  height: 40px;
+  background-image: url(${({ backgroundUrl }) => backgroundUrl});
+  background-position: center;
+  background-size: cover;
+  border: 1px solid ${({ theme }) => theme.colors.border.default};
+  border-radius: 4px;
+`;
+
 export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
   const dispatch = useDispatch();
   const { theme } = useSharedTheme();
   const [isSessionFilterModalOpen, setIsSessionFilterModalOpen] = useState(false);
   const [isHeatmapSelectorModalOpen, setIsHeatmapSelectorModalOpen] = useState(false);
   const [isOptionsOpen, setIsOptionsOpen] = useState(true);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { upZ, scale, heatmapOpacity, heatmapType, colorScale, blockSize, showHeatmap, minThreshold } = useGeneralPick(
+  const {
+    upZ,
+    scale,
+    heatmapOpacity,
+    heatmapType,
+    colorScale,
+    blockSize,
+    showHeatmap,
+    minThreshold,
+    backgroundImage,
+    backgroundScale,
+    backgroundOffsetX,
+    backgroundOffsetY,
+  } = useGeneralPick(
     'upZ',
     'scale',
     'showHeatmap',
@@ -66,6 +94,10 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
     'blockSize',
     'minThreshold',
     'colorScale',
+    'backgroundImage',
+    'backgroundScale',
+    'backgroundOffsetX',
+    'backgroundOffsetY',
   );
   const setData = useGeneralPatch();
 
@@ -95,6 +127,38 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
   }, [service.task]);
 
   const handleReload = useCallback(() => {}, []);
+
+  // 背景画像選択ハンドラー
+  const handleFileSelect = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      // 画像ファイルのみ許可
+      if (!file.type.startsWith('image/')) {
+        // eslint-disable-next-line no-console
+        console.error('画像ファイルを選択してください');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target?.result as string;
+        setData({ backgroundImage: dataUrl });
+      };
+      reader.readAsDataURL(file);
+
+      // 同じファイルを再選択できるようにリセット
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    },
+    [setData],
+  );
+
+  const handleClearBackground = useCallback(() => {
+    setData({ backgroundImage: null });
+  }, [setData]);
 
   const currentTaskId = service.task?.taskId;
 
@@ -129,6 +193,37 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
           <Text text={'セッションフィルター'} fontSize={theme.typography.fontSize.sm} />
         </Button>
       </InputRow>
+
+      {/* 背景画像選択 */}
+      <InputRow label={'背景画像'}>
+        <FlexRow gap={8} align='center' style={{ flex: 1 }}>
+          {backgroundImage && <BackgroundPreview backgroundUrl={backgroundImage} />}
+          <Button onClick={() => fileInputRef.current?.click()} scheme={'surface'} fontSize={'sm'}>
+            <Text text={backgroundImage ? '変更' : '選択'} fontSize={theme.typography.fontSize.sm} />
+          </Button>
+          {backgroundImage && (
+            <Button onClick={handleClearBackground} scheme={'tertiary'} fontSize={'sm'}>
+              <Text text={'削除'} fontSize={theme.typography.fontSize.sm} />
+            </Button>
+          )}
+        </FlexRow>
+        <HiddenFileInput ref={fileInputRef} type='file' accept='image/*' onChange={handleFileSelect} />
+      </InputRow>
+
+      {/* 背景画像の調整（画像が選択されている場合のみ表示） */}
+      {backgroundImage && (
+        <>
+          <InputRow label={'背景スケール'}>
+            <Slider value={backgroundScale} onChange={(v) => setData({ backgroundScale: v })} min={0.5} step={0.1} max={3.0} textField />
+          </InputRow>
+          <InputRow label={'背景X位置'}>
+            <Slider value={backgroundOffsetX} onChange={(v) => setData({ backgroundOffsetX: v })} min={-50} step={1} max={50} textField />
+          </InputRow>
+          <InputRow label={'背景Y位置'}>
+            <Slider value={backgroundOffsetY} onChange={(v) => setData({ backgroundOffsetY: v })} min={-50} step={1} max={50} textField />
+          </InputRow>
+        </>
+      )}
 
       {/* 折りたたみ可能なオプションセクション */}
       <CollapsibleSection>
