@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useCallback, useState, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
 import { IoChevronDown, IoChevronUp } from 'react-icons/io5';
+import { useDispatch } from 'react-redux';
 
 import type { HeatmapMenuProps } from '@src/features/heatmap/HeatmapMenuContent';
 import type { GeneralSettings } from '@src/modeles/heatmapView';
