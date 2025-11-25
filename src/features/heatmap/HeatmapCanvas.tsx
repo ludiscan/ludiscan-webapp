@@ -12,6 +12,7 @@ import {
   PlaneGeometry,
   Raycaster,
   SpotLight,
+  TextureLoader,
   Vector2,
   Vector3,
 } from 'three';
@@ -38,7 +39,7 @@ import { WaypointMarker } from '@src/features/heatmap/WaypointMarker';
 import { FocusPingLayer } from '@src/features/heatmap/selection/FocusPingLayer';
 import { useEventLogSelect } from '@src/hooks/useEventLog';
 import { useFieldObjectSelect } from '@src/hooks/useFieldObject';
-import { useGeneralPick } from '@src/hooks/useGeneral';
+import { useGeneralPick, useGeneralSelect } from '@src/hooks/useGeneral';
 import { usePlayerTimelinePick } from '@src/hooks/usePlayerTimeline';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
@@ -135,6 +136,7 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
   // const { invalidate } = useThree();
   const fitInfoRef = useRef<{ dist: number; center: Vector3 }>({ dist: 1000, center: new Vector3() });
   const { showHeatmap, heatmapOpacity, heatmapType } = useGeneralPick('showHeatmap', 'heatmapOpacity', 'heatmapType');
+  const backgroundImage = useGeneralSelect((s) => s.backgroundImage);
   const { theme } = useSharedTheme();
 
   const orbitControlsRef = useRef<OrbitControlsImpl>(null);
@@ -348,6 +350,30 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
       groundMaterial.dispose();
     };
   }, [scene]);
+
+  // 背景画像をシーンの背景として設定
+  useEffect(() => {
+    if (backgroundImage) {
+      const textureLoader = new TextureLoader();
+      textureLoader.load(
+        backgroundImage,
+        (texture) => {
+          scene.background = texture;
+        },
+        undefined,
+        (error) => {
+          console.error('背景画像の読み込みに失敗しました:', error);
+          scene.background = null;
+        },
+      );
+    } else {
+      scene.background = null;
+    }
+
+    return () => {
+      scene.background = null;
+    };
+  }, [scene, backgroundImage]);
 
   const getPercent = useCallback(() => {
     const controls = orbitControlsRef.current;

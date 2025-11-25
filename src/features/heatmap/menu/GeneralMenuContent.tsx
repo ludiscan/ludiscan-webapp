@@ -1,7 +1,9 @@
 import styled from '@emotion/styled';
-import { useCallback, useState, useMemo } from 'react';
+import { useCallback, useState, useMemo, useRef } from 'react';
 import { IoChevronDown, IoChevronUp } from 'react-icons/io5';
 import { useDispatch } from 'react-redux';
+
+import type { ChangeEvent } from 'react';
 
 import type { HeatmapMenuProps } from '@src/features/heatmap/HeatmapMenuContent';
 import type { GeneralSettings } from '@src/modeles/heatmapView';
@@ -50,14 +52,29 @@ const CollapsibleContent = styled.div<{ isOpen: boolean }>`
   padding-top: 8px;
 `;
 
+const HiddenFileInput = styled.input`
+  display: none;
+`;
+
+const BackgroundPreview = styled.div<{ backgroundUrl: string }>`
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  background-image: url(${({ backgroundUrl }) => backgroundUrl});
+  background-size: cover;
+  background-position: center;
+  border: 1px solid ${({ theme }) => theme.colors.border.default};
+`;
+
 export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
   const dispatch = useDispatch();
   const { theme } = useSharedTheme();
   const [isSessionFilterModalOpen, setIsSessionFilterModalOpen] = useState(false);
   const [isHeatmapSelectorModalOpen, setIsHeatmapSelectorModalOpen] = useState(false);
   const [isOptionsOpen, setIsOptionsOpen] = useState(true);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { upZ, scale, heatmapOpacity, heatmapType, colorScale, blockSize, showHeatmap, minThreshold } = useGeneralPick(
+  const { upZ, scale, heatmapOpacity, heatmapType, colorScale, blockSize, showHeatmap, minThreshold, backgroundImage } = useGeneralPick(
     'upZ',
     'scale',
     'showHeatmap',
@@ -66,6 +83,7 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
     'blockSize',
     'minThreshold',
     'colorScale',
+    'backgroundImage',
   );
   const setData = useGeneralPatch();
 
@@ -95,6 +113,37 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
   }, [service.task]);
 
   const handleReload = useCallback(() => {}, []);
+
+  // 背景画像選択ハンドラー
+  const handleFileSelect = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      // 画像ファイルのみ許可
+      if (!file.type.startsWith('image/')) {
+        console.error('画像ファイルを選択してください');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target?.result as string;
+        setData({ backgroundImage: dataUrl });
+      };
+      reader.readAsDataURL(file);
+
+      // 同じファイルを再選択できるようにリセット
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    },
+    [setData],
+  );
+
+  const handleClearBackground = useCallback(() => {
+    setData({ backgroundImage: null });
+  }, [setData]);
 
   const currentTaskId = service.task?.taskId;
 
@@ -128,6 +177,22 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
         <Button onClick={() => setIsSessionFilterModalOpen(true)} scheme={'surface'} fontSize={'sm'}>
           <Text text={'セッションフィルター'} fontSize={theme.typography.fontSize.sm} />
         </Button>
+      </InputRow>
+
+      {/* 背景画像選択 */}
+      <InputRow label={'背景画像'}>
+        <FlexRow gap={8} align='center' style={{ flex: 1 }}>
+          {backgroundImage && <BackgroundPreview backgroundUrl={backgroundImage} />}
+          <Button onClick={() => fileInputRef.current?.click()} scheme={'surface'} fontSize={'sm'}>
+            <Text text={backgroundImage ? '変更' : '選択'} fontSize={theme.typography.fontSize.sm} />
+          </Button>
+          {backgroundImage && (
+            <Button onClick={handleClearBackground} scheme={'danger'} fontSize={'sm'}>
+              <Text text={'削除'} fontSize={theme.typography.fontSize.sm} />
+            </Button>
+          )}
+        </FlexRow>
+        <HiddenFileInput ref={fileInputRef} type='file' accept='image/*' onChange={handleFileSelect} />
       </InputRow>
 
       {/* 折りたたみ可能なオプションセクション */}
