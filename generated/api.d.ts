@@ -816,6 +816,123 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v0.1/projects/{project_id}/sessions/aggregate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Aggregate play sessions
+     * @description
+     *     Aggregate play sessions with flexible filter criteria and return statistics.
+     *
+     *     **Features:**
+     *     - Count sessions matching filter criteria (total, finished, playing)
+     *     - Aggregate numeric metadata fields (sum, avg, min, max)
+     *     - Combine multiple aggregations in a single request
+     *
+     *     **Filter Criteria:**
+     *     Same as search endpoint - supports individual parameters, 'q' unified query, or both.
+     *
+     *     **Aggregation Example:**
+     *     ```json
+     *     {
+     *       "platform": "Android",
+     *       "is_playing": false,
+     *       "aggregations": [
+     *         { "field": "score", "operations": ["sum", "avg", "min", "max"] },
+     *         { "field": "playTime", "operations": ["sum", "avg"] }
+     *       ]
+     *     }
+     *     ```
+     *
+     *     **Response Example:**
+     *     ```json
+     *     {
+     *       "totalCount": 250,
+     *       "finishedCount": 200,
+     *       "playingCount": 50,
+     *       "aggregations": [
+     *         { "field": "score", "count": 180, "sum": 12500, "avg": 69.44, "min": 10, "max": 200 },
+     *         { "field": "playTime", "count": 195, "sum": 58500, "avg": 300 }
+     *       ]
+     *     }
+     *     ```
+     *
+     */
+    post: operations['PlaySessionV01Controller_aggregate'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0.1/projects/{project_id}/sessions/filter-options': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get filter options
+     * @description
+     *     Get distinct values for filter dropdowns.
+     *
+     *     Returns lists of unique values for:
+     *     - Platforms (e.g., Android, iOS, Windows)
+     *     - App versions (e.g., 1.0.0, 1.1.0, 2.0.0)
+     *     - Device IDs
+     *
+     *     Use these values to populate filter dropdowns in the UI.
+     *
+     */
+    get: operations['PlaySessionV01Controller_getFilterOptions'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0.1/projects/{project_id}/sessions/metadata-keys': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get metadata keys
+     * @description
+     *     Get all metadata keys used across sessions in a project.
+     *
+     *     Returns for each key:
+     *     - Key name
+     *     - Count of sessions that have this key
+     *     - Whether the values are numeric (can be aggregated)
+     *     - Sample values (up to 5)
+     *
+     *     Use this to:
+     *     - Build dynamic metadata filter UI
+     *     - Know which fields can be used for aggregation
+     *     - Preview what data is available in metadata
+     *
+     */
+    get: operations['PlaySessionV01Controller_getMetadataKeys'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v0/projects/{project_id}/play_session/{session_id}/player_position_log': {
     parameters: {
       query?: never;
@@ -1726,6 +1843,226 @@ export interface components {
        * @example 42
        */
       total: number;
+    };
+    AggregationFieldDto: {
+      /**
+       * @description Metadata field name to aggregate (e.g., "score", "playTime")
+       * @example score
+       */
+      field: string;
+      /**
+       * @description Aggregation operations to perform
+       * @example [
+       *       "sum",
+       *       "avg",
+       *       "min",
+       *       "max"
+       *     ]
+       */
+      operations: ('count' | 'sum' | 'avg' | 'min' | 'max')[];
+    };
+    AggregatePlaySessionDto: {
+      /**
+       * @description Session name (partial match)
+       * @example Session_2025
+       */
+      name?: string;
+      /**
+       * @description Device ID (exact match)
+       * @example device-123
+       */
+      device_id?: string;
+      /**
+       * @description Platform (exact match)
+       * @example Android
+       */
+      platform?: string;
+      /**
+       * @description App version (exact match)
+       * @example 1.0.0
+       */
+      app_version?: string;
+      /**
+       * @description Start time from (ISO 8601)
+       * @example 2025-01-01T00:00:00Z
+       */
+      start_time_from?: string;
+      /**
+       * @description Start time to (ISO 8601)
+       * @example 2025-01-31T23:59:59Z
+       */
+      start_time_to?: string;
+      /**
+       * @description End time from (ISO 8601)
+       * @example 2025-01-01T00:00:00Z
+       */
+      end_time_from?: string;
+      /**
+       * @description End time to (ISO 8601)
+       * @example 2025-01-31T23:59:59Z
+       */
+      end_time_to?: string;
+      /**
+       * @description Filter by playing status (true: currently playing, false: finished)
+       * @example false
+       */
+      is_playing?: boolean;
+      /**
+       * @description Metadata key to filter by (can be used alone to check key existence)
+       * @example mapName
+       */
+      metadata_key?: string;
+      /**
+       * @description Metadata value to filter by (requires metadata_key to be specified)
+       * @example Level1
+       */
+      metadata_value?: string;
+      /**
+       * @description Unified search query (same format as search endpoint)
+       * @example platform:Android is:finished
+       */
+      q?: string;
+      /**
+       * @description Array of fields to aggregate with their operations. If not specified, only count is returned.
+       * @example [
+       *       {
+       *         "field": "score",
+       *         "operations": [
+       *           "sum",
+       *           "avg",
+       *           "min",
+       *           "max"
+       *         ]
+       *       },
+       *       {
+       *         "field": "playTime",
+       *         "operations": [
+       *           "sum",
+       *           "avg"
+       *         ]
+       *       }
+       *     ]
+       */
+      aggregations?: components['schemas']['AggregationFieldDto'][];
+    };
+    FieldAggregationResultDto: {
+      /**
+       * @description Field name that was aggregated
+       * @example score
+       */
+      field: string;
+      /**
+       * @description Count of sessions that have this field with numeric value
+       * @example 150
+       */
+      count: number;
+      /**
+       * @description Sum of all values (if requested)
+       * @example 12500
+       */
+      sum?: number;
+      /**
+       * @description Average value (if requested)
+       * @example 83.33
+       */
+      avg?: number;
+      /**
+       * @description Minimum value (if requested)
+       * @example 10
+       */
+      min?: number;
+      /**
+       * @description Maximum value (if requested)
+       * @example 200
+       */
+      max?: number;
+    };
+    AggregatePlaySessionResponseDto: {
+      /**
+       * @description Total count of sessions matching the filter criteria
+       * @example 250
+       */
+      totalCount: number;
+      /**
+       * @description Count of finished sessions (end_time is not null)
+       * @example 200
+       */
+      finishedCount: number;
+      /**
+       * @description Count of sessions currently playing (end_time is null)
+       * @example 50
+       */
+      playingCount: number;
+      /** @description Aggregation results for each requested field */
+      aggregations?: components['schemas']['FieldAggregationResultDto'][];
+    };
+    FilterOptionsResponseDto: {
+      /**
+       * @description List of distinct platforms
+       * @example [
+       *       "Android",
+       *       "iOS",
+       *       "Windows"
+       *     ]
+       */
+      platforms: string[];
+      /**
+       * @description List of distinct app versions
+       * @example [
+       *       "1.0.0",
+       *       "1.1.0",
+       *       "2.0.0"
+       *     ]
+       */
+      appVersions: string[];
+      /**
+       * @description List of distinct device IDs
+       * @example [
+       *       "device-001",
+       *       "device-002"
+       *     ]
+       */
+      deviceIds: string[];
+      /**
+       * @description Total session count in the project
+       * @example 500
+       */
+      totalSessions: number;
+    };
+    MetadataKeyInfoDto: {
+      /**
+       * @description Metadata key name
+       * @example score
+       */
+      key: string;
+      /**
+       * @description Number of sessions that have this key
+       * @example 150
+       */
+      count: number;
+      /**
+       * @description Whether the values are numeric (can be aggregated)
+       * @example true
+       */
+      isNumeric: boolean;
+      /**
+       * @description Sample values (up to 5)
+       * @example [
+       *       100,
+       *       200,
+       *       150
+       *     ]
+       */
+      sampleValues: string[];
+    };
+    MetadataKeysResponseDto: {
+      /** @description List of metadata keys with their information */
+      keys: components['schemas']['MetadataKeyInfoDto'][];
+      /**
+       * @description Total session count in the project
+       * @example 500
+       */
+      totalSessions: number;
     };
     PlayPositionLogDto: {
       /**
@@ -4446,6 +4783,103 @@ export interface operations {
         };
         content: {
           'application/json': string[];
+        };
+      };
+    };
+  };
+  PlaySessionV01Controller_aggregate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        project_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AggregatePlaySessionDto'];
+      };
+    };
+    responses: {
+      /** @description Aggregation results */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AggregatePlaySessionResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  PlaySessionV01Controller_getFilterOptions: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        project_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Filter options */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['FilterOptionsResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  PlaySessionV01Controller_getMetadataKeys: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        project_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Metadata keys */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['MetadataKeysResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
         };
       };
     };

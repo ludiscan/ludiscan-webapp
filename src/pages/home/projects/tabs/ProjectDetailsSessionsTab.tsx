@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, useMemo } from 'react';
-import { BiRefresh, BiSearch } from 'react-icons/bi';
+import { BiRefresh, BiSearch, BiChevronDown, BiChevronUp } from 'react-icons/bi';
 
 import type { Project } from '@src/modeles/project';
 import type { FC } from 'react';
@@ -13,6 +13,9 @@ import { VerticalSpacer } from '@src/component/atoms/Spacer';
 import { Text } from '@src/component/atoms/Text';
 import { Pagination } from '@src/component/molecules/Pagination';
 import { useToast } from '@src/component/templates/ToastContext';
+import { SessionAggregationPanel } from '@src/features/session/SessionAggregationPanel';
+import { SessionFilterPanel } from '@src/features/session/SessionFilterPanel';
+import { useSessionFiltersAndAggregate } from '@src/hooks/useSessionFilters';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { useApiClient } from '@src/modeles/ApiClientContext';
 import { DefaultStaleTime } from '@src/modeles/qeury';
@@ -35,7 +38,29 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [currentPage, setCurrentPage] = useState(1);
+  const [showFilters, setShowFilters] = useState(false);
+  const [showAggregation, setShowAggregation] = useState(false);
   const apiClient = useApiClient();
+
+  // Use the new filters and aggregation hook
+  const {
+    filters,
+    updateFilter,
+    clearFilters,
+    hasActiveFilters,
+    filterOptions,
+    isLoadingFilterOptions,
+    metadataKeys,
+    numericMetadataKeys,
+    isLoadingMetadataKeys,
+    aggregationConfigs,
+    addAggregation,
+    removeAggregation,
+    clearAggregations,
+    runAggregate,
+    aggregateResult,
+    isAggregating,
+  } = useSessionFiltersAndAggregate(project.id);
 
   const {
     data: sessions = [],
@@ -67,9 +92,20 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
     try {
       setIsRefreshing(true);
       await queryClient.invalidateQueries({ queryKey: ['sessions', project.id] });
+      await queryClient.invalidateQueries({ queryKey: ['filterOptions', project.id] });
+      await queryClient.invalidateQueries({ queryKey: ['metadataKeys', project.id] });
       showToast('セッション一覧を更新しました', 2, 'success');
     } finally {
       setIsRefreshing(false);
+    }
+  };
+
+  const handleRunAggregate = async () => {
+    try {
+      await runAggregate();
+      showToast('集計が完了しました', 2, 'success');
+    } catch {
+      showToast('集計に失敗しました', 3, 'error');
     }
   };
 
@@ -99,6 +135,52 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
 
   return (
     <div className={className}>
+      {/* Filter & Aggregation Toggle Buttons */}
+      <FlexRow className={`${className}__toolBar`} gap={8}>
+        <Button onClick={() => setShowFilters(!showFilters)} scheme={showFilters ? 'primary' : 'surface'} fontSize='sm'>
+          {showFilters ? <BiChevronUp size={16} /> : <BiChevronDown size={16} />}
+          フィルター・集計
+          {hasActiveFilters && <span className={`${className}__filterBadge`}>{Object.values(filters).filter((v) => v !== undefined).length}</span>}
+        </Button>
+      </FlexRow>
+
+      {/* Filter Panel */}
+      {showFilters && (
+        <FlexColumn gap={12} className={`${className}__filterSection`}>
+          <SessionFilterPanel
+            filters={filters}
+            filterOptions={filterOptions}
+            metadataKeys={metadataKeys}
+            isLoadingOptions={isLoadingFilterOptions || isLoadingMetadataKeys}
+            hasActiveFilters={hasActiveFilters}
+            onUpdateFilter={updateFilter}
+            onClearFilters={clearFilters}
+          />
+
+          {/* Aggregation Toggle */}
+          <Button onClick={() => setShowAggregation(!showAggregation)} scheme='surface' fontSize='sm'>
+            {showAggregation ? <BiChevronUp size={16} /> : <BiChevronDown size={16} />}
+            集計パネル
+          </Button>
+
+          {showAggregation && (
+            <SessionAggregationPanel
+              numericMetadataKeys={numericMetadataKeys}
+              aggregationConfigs={aggregationConfigs}
+              aggregateResult={aggregateResult}
+              isAggregating={isAggregating}
+              onAddAggregation={addAggregation}
+              onRemoveAggregation={removeAggregation}
+              onClearAggregations={clearAggregations}
+              onRunAggregate={handleRunAggregate}
+              hasActiveFilters={hasActiveFilters}
+            />
+          )}
+        </FlexColumn>
+      )}
+
+      <VerticalSpacer size={12} />
+
       <Card blur color={theme.colors.surface.base} className={`${className}__card`}>
         {/* Header */}
         <FlexRow className={`${className}__header`} gap={16} align={'center'}>
@@ -197,12 +279,38 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
           </>
         )}
       </Card>
+      <VerticalSpacer size={42} />
     </div>
   );
 };
 
 export const ProjectDetailsSessionsTab = styled(Component)`
   width: 100%;
+
+  &__toolBar {
+    margin-bottom: 12px;
+  }
+
+  &__filterBadge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    margin-left: 6px;
+    font-size: 11px;
+    font-weight: bold;
+    color: ${({ theme }) => theme.colors.primary.contrast};
+    background: ${({ theme }) => theme.colors.primary.main};
+    border-radius: 9px;
+  }
+
+  &__filterSection {
+    padding: 12px;
+    background: ${({ theme }) => theme.colors.surface.sunken ?? 'rgba(0, 0, 0, 0.05)'};
+    border-radius: 8px;
+  }
 
   &__card {
     padding: 20px;

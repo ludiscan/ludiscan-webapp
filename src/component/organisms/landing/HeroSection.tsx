@@ -20,7 +20,7 @@ const Component: FC<HeroSectionProps> = ({ className }) => {
   return (
     <section className={`${className} ${isVisible ? 'visible' : ''}`}>
       <div className={`${className}__content`}>
-        <h1 className={`${className}__title`}>ゲームプレイデータの可視化</h1>
+        <h1 className={`${className}__title`}>ゲームの分析ツール</h1>
         <p className={`${className}__subtitle`}>3D/2Dヒートマップでプレイヤーの行動を分析</p>
         <div className={`${className}__cta`}>
           <Link href='/login' className={`${className}__primary-button`}>
@@ -57,7 +57,10 @@ export const HeroSection = styled(Component)`
   &__content {
     position: relative;
     z-index: 1;
-    max-width: 1000px;
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    max-width: 1200px;
   }
 
   &__title {
