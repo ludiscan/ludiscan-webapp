@@ -33,8 +33,13 @@ type ProductVisualizationProps = {
   className?: string;
 };
 
+// スライドショー用の背景画像配列
+// 環境に合わせて画像パスを変更してください
+const BACKGROUND_IMAGES = ['/preview/heatmap-preview1.png', '/preview/heatmap-preview2.png', '/preview/document-preview.png', '/preview/projects.png'];
+
 const Component: FC<ProductVisualizationProps> = ({ className }) => {
   const [isVisible, setIsVisible] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const sectionRef = useRef<HTMLElement>(null);
   const { data: stats } = usePublicStats();
 
@@ -62,6 +67,17 @@ const Component: FC<ProductVisualizationProps> = ({ className }) => {
     };
   }, []);
 
+  // 背景画像スライドショー
+  useEffect(() => {
+    if (BACKGROUND_IMAGES.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % BACKGROUND_IMAGES.length);
+    }, 5000); // 5秒ごとに画像を切り替え
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <section ref={sectionRef} className={`${className} ${isVisible ? 'visible' : ''}`}>
       <div className={`${className}__container`}>
@@ -83,9 +99,12 @@ const Component: FC<ProductVisualizationProps> = ({ className }) => {
               <div className={`${className}__mockup-title`}>Ludiscan Heatmap Viewer</div>
             </div>
             <div className={`${className}__mockup-content`}>
-              <div className={`${className}__mockup-canvas`}>
-                <div className={`${className}__mockup-gradient`} />
-              </div>
+              <div
+                className={`${className}__mockup-canvas`}
+                style={{
+                  backgroundImage: `url(${BACKGROUND_IMAGES[currentImageIndex]})`,
+                }}
+              />
               {stats && (
                 <div className={`${className}__mockup-overlay`}>
                   <div className={`${className}__mockup-stat`}>
@@ -190,7 +209,7 @@ export const ProductVisualization = styled(Component)`
   &__mockup-header {
     display: flex;
     align-items: center;
-    padding: 1rem 1.5rem;
+    padding: 0.6rem 1rem;
     background: ${({ theme }) => theme.colors.background.elevated};
     border-bottom: 1px solid ${({ theme }) => theme.colors.border.default};
   }
@@ -237,6 +256,10 @@ export const ProductVisualization = styled(Component)`
     position: relative;
     width: 100%;
     height: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    transition: background-image 0.8s ease-in-out;
   }
 
   &__mockup-gradient {
