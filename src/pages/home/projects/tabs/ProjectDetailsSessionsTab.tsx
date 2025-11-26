@@ -137,11 +137,7 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
     <div className={className}>
       {/* Filter & Aggregation Toggle Buttons */}
       <FlexRow className={`${className}__toolBar`} gap={8}>
-        <Button
-          onClick={() => setShowFilters(!showFilters)}
-          scheme={showFilters ? 'primary' : 'surface'}
-          fontSize="sm"
-        >
+        <Button onClick={() => setShowFilters(!showFilters)} scheme={showFilters ? 'primary' : 'surface'} fontSize='sm'>
           {showFilters ? <BiChevronUp size={16} /> : <BiChevronDown size={16} />}
           フィルター・集計
           {hasActiveFilters && <span className={`${className}__filterBadge`}>{Object.values(filters).filter((v) => v !== undefined).length}</span>}
@@ -162,11 +158,7 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
           />
 
           {/* Aggregation Toggle */}
-          <Button
-            onClick={() => setShowAggregation(!showAggregation)}
-            scheme="surface"
-            fontSize="sm"
-          >
+          <Button onClick={() => setShowAggregation(!showAggregation)} scheme='surface' fontSize='sm'>
             {showAggregation ? <BiChevronUp size={16} /> : <BiChevronDown size={16} />}
             集計パネル
           </Button>
@@ -287,6 +279,7 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
           </>
         )}
       </Card>
+      <VerticalSpacer size={42} />
     </div>
   );
 };

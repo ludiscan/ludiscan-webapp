@@ -83,13 +83,7 @@ export const useSessionAggregate = (projectId: number) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: async ({
-      filters,
-      aggregations,
-    }: {
-      filters: SessionFilterState;
-      aggregations?: AggregationConfig[];
-    }) => {
+    mutationFn: async ({ filters, aggregations }: { filters: SessionFilterState; aggregations?: AggregationConfig[] }) => {
       const { data, error } = await apiClient.POST('/api/v0.1/projects/{project_id}/sessions/aggregate', {
         params: {
           path: { project_id: projectId },

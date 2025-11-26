@@ -53,19 +53,17 @@ const Component: FC<SessionAggregationPanelProps> = ({
     return num.toLocaleString('ja-JP', { maximumFractionDigits: 2 });
   };
 
-  const availableFields = numericMetadataKeys.filter(
-    (k) => !aggregationConfigs.some((c) => c.field === k.key)
-  );
+  const availableFields = numericMetadataKeys.filter((k) => !aggregationConfigs.some((c) => c.field === k.key));
 
   return (
     <div className={className}>
-      <FlexRow className={`${className}__header`} justify="space-between" align="center">
-        <FlexRow gap={8} align="center">
+      <FlexRow className={`${className}__header`} align='center'>
+        <FlexRow gap={8} align='center'>
           <BiBarChartAlt2 size={18} />
-          <Text text="集計" fontSize={theme.typography.fontSize.base} fontWeight="bold" />
+          <Text text='集計' fontSize={theme.typography.fontSize.base} fontWeight='bold' />
         </FlexRow>
         <button
-          type="button"
+          type='button'
           className={`${className}__toggleButton`}
           onClick={() => setIsExpanded(!isExpanded)}
           aria-label={isExpanded ? '折りたたむ' : '展開する'}
@@ -79,31 +77,22 @@ const Component: FC<SessionAggregationPanelProps> = ({
           {/* Add Aggregation Field */}
           {numericMetadataKeys.length > 0 && (
             <FlexColumn gap={8}>
-              <Text
-                text="数値フィールドを選択して集計"
-                fontSize={theme.typography.fontSize.sm}
-                color={theme.colors.text.secondary}
-              />
-              <FlexRow gap={8} align="center">
+              <Text text='数値フィールドを選択して集計' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
+              <FlexRow gap={8} align='center'>
                 <select
                   className={`${className}__fieldSelect`}
                   value={selectedField}
                   onChange={(e) => setSelectedField(e.target.value)}
                   disabled={availableFields.length === 0}
                 >
-                  <option value="">フィールドを選択...</option>
+                  <option value=''>フィールドを選択...</option>
                   {availableFields.map((k) => (
                     <option key={k.key} value={k.key}>
                       {k.key} ({k.count}件)
                     </option>
                   ))}
                 </select>
-                <Button
-                  onClick={handleAddAggregation}
-                  scheme="primary"
-                  fontSize="sm"
-                  disabled={!selectedField}
-                >
+                <Button onClick={handleAddAggregation} scheme='primary' fontSize='sm' disabled={!selectedField}>
                   <BiPlus size={16} />
                   追加
                 </Button>
@@ -112,23 +101,15 @@ const Component: FC<SessionAggregationPanelProps> = ({
           )}
 
           {numericMetadataKeys.length === 0 && (
-            <Text
-              text="集計可能な数値フィールドがありません"
-              fontSize={theme.typography.fontSize.sm}
-              color={theme.colors.text.secondary}
-            />
+            <Text text='集計可能な数値フィールドがありません' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
           )}
 
           {/* Selected Aggregation Fields */}
           {aggregationConfigs.length > 0 && (
             <FlexColumn gap={8}>
-              <FlexRow justify="space-between" align="center">
-                <Text
-                  text="集計対象フィールド"
-                  fontSize={theme.typography.fontSize.sm}
-                  fontWeight="bold"
-                />
-                <Button onClick={onClearAggregations} scheme="surface" fontSize="sm">
+              <FlexRow align='center'>
+                <Text text='集計対象フィールド' fontSize={theme.typography.fontSize.sm} fontWeight='bold' />
+                <Button onClick={onClearAggregations} scheme='surface' fontSize='sm'>
                   <BiX size={14} />
                   すべてクリア
                 </Button>
@@ -137,11 +118,7 @@ const Component: FC<SessionAggregationPanelProps> = ({
                 {aggregationConfigs.map((config) => (
                   <span key={config.field} className={`${className}__tag`}>
                     {config.field}
-                    <button
-                      type="button"
-                      onClick={() => onRemoveAggregation(config.field)}
-                      aria-label={`${config.field}を削除`}
-                    >
+                    <button type='button' onClick={() => onRemoveAggregation(config.field)} aria-label={`${config.field}を削除`}>
                       <BiX size={14} />
                     </button>
                   </span>
@@ -151,28 +128,17 @@ const Component: FC<SessionAggregationPanelProps> = ({
           )}
 
           {/* Run Aggregate Button */}
-          <Button
-            onClick={onRunAggregate}
-            scheme="primary"
-            fontSize="base"
-            disabled={isAggregating}
-          >
+          <Button onClick={onRunAggregate} scheme='primary' fontSize='base' disabled={isAggregating}>
             <BiPlay size={18} />
             {isAggregating ? '集計中...' : '集計を実行'}
           </Button>
 
-          {hasActiveFilters && (
-            <Text
-              text="※ 現在のフィルター条件が適用されます"
-              fontSize={theme.typography.fontSize.sm}
-              color={theme.colors.text.secondary}
-            />
-          )}
+          {hasActiveFilters && <Text text='※ 現在のフィルター条件が適用されます' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />}
 
           {/* Aggregate Results */}
           {aggregateResult && (
             <FlexColumn gap={16} className={`${className}__results`}>
-              <Text text="集計結果" fontSize={theme.typography.fontSize.base} fontWeight="bold" />
+              <Text text='集計結果' fontSize={theme.typography.fontSize.base} fontWeight='bold' />
 
               {/* Session Counts */}
               <div className={`${className}__countGrid`}>
@@ -182,26 +148,18 @@ const Component: FC<SessionAggregationPanelProps> = ({
                 </div>
                 <div className={`${className}__countCard`}>
                   <span className={`${className}__countLabel`}>終了</span>
-                  <span className={`${className}__countValue ${className}__countValue--finished`}>
-                    {formatNumber(aggregateResult.finishedCount)}
-                  </span>
+                  <span className={`${className}__countValue ${className}__countValue--finished`}>{formatNumber(aggregateResult.finishedCount)}</span>
                 </div>
                 <div className={`${className}__countCard`}>
                   <span className={`${className}__countLabel`}>プレイ中</span>
-                  <span className={`${className}__countValue ${className}__countValue--playing`}>
-                    {formatNumber(aggregateResult.playingCount)}
-                  </span>
+                  <span className={`${className}__countValue ${className}__countValue--playing`}>{formatNumber(aggregateResult.playingCount)}</span>
                 </div>
               </div>
 
               {/* Field Aggregations */}
               {aggregateResult.aggregations && aggregateResult.aggregations.length > 0 && (
                 <FlexColumn gap={12}>
-                  <Text
-                    text="フィールド別集計"
-                    fontSize={theme.typography.fontSize.sm}
-                    fontWeight="bold"
-                  />
+                  <Text text='フィールド別集計' fontSize={theme.typography.fontSize.sm} fontWeight='bold' />
                   <div className={`${className}__aggregationTable`}>
                     <table>
                       <thead>
@@ -322,7 +280,7 @@ export const SessionAggregationPanel = styled(Component)`
       border-radius: 2px;
 
       &:hover {
-        color: ${({ theme }) => theme.colors.error.main};
+        color: ${({ theme }) => theme.colors.text.primary};
         background: ${({ theme }) => theme.colors.surface.hover};
       }
     }
@@ -362,11 +320,11 @@ export const SessionAggregationPanel = styled(Component)`
     color: ${({ theme }) => theme.colors.text.primary};
 
     &--finished {
-      color: ${({ theme }) => theme.colors.success?.main ?? '#4caf50'};
+      color: ${({ theme }) => theme.colors.semantic.success.main ?? '#4caf50'};
     }
 
     &--playing {
-      color: ${({ theme }) => theme.colors.warning?.main ?? '#ff9800'};
+      color: ${({ theme }) => theme.colors.semantic.warning.main ?? '#ff9800'};
     }
   }
 

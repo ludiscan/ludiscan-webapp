@@ -211,6 +211,7 @@ const Component: FC<ProjectDetailsPageProps> = ({ className }) => {
 
 const ProjectDetailsPage = styled(Component)`
   height: 100vh;
+  overflow-y: auto;
 
   &__header {
     padding: 0 24px 24px;
