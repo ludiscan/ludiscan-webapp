@@ -343,7 +343,6 @@ export const HeatMapViewer = memo(
       display: flex;
       flex-shrink: 0;
       height: 100%;
-      overflow-y: auto;
       background: ${({ theme }) => theme.colors.surface.raised};
     }
 
