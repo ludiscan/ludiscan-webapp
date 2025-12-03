@@ -24,7 +24,7 @@ import { exportHeatmap } from '@src/features/heatmap/export-heatmap';
 import { HeatmapMenuSideBar } from '@src/features/heatmap/menu/HeatmapMenuSideBar';
 import { FocusLinkBridge } from '@src/features/heatmap/selection/FocusLinkBridge';
 import { InspectorModal } from '@src/features/heatmap/selection/InspectorModal';
-import { useGeneralPatch, useGeneralPick } from '@src/hooks/useGeneral';
+import { useGeneralPick } from '@src/hooks/useGeneral';
 import { DefaultStaleTime } from '@src/modeles/qeury';
 import { dimensions, zIndexes } from '@src/styles/style';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
@@ -44,7 +44,8 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
   // const [performance, setPerformance] = useState<PerformanceMonitorApi>();
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const divRef = useRef(document.createElement('div'));
+  const divRef = useRef<HTMLDivElement>(null!);
+  const [statsReady, setStatsReady] = useState(false);
   const [openMenu, setOpenMenu] = useState<Menus | undefined>(undefined);
   const [menuExtra, setMenuExtra] = useState<object | undefined>(undefined);
 
@@ -57,7 +58,6 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
     'backgroundOffsetY',
   );
   const splitMode = useSelector((s: RootState) => s.heatmapCanvas.splitMode);
-  const setGeneral = useGeneralPatch();
 
   const [visibleTimelineRange, setVisibleTimelineRange] = useState<PlayerTimelinePointsTimeRange>({ start: 0, end: 0 });
 
@@ -112,17 +112,6 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
     setMap(mapContent);
     setModelType('server');
   }, [mapContent]);
-
-  // 2Dモードに切り替わった時にmapNameをクリア（3D専用機能のため）
-  useEffect(() => {
-    if (dimensionality === '2d') {
-      // 2Dモードになった時、mapNameがあればクリア
-      if (mapName) {
-        setGeneral({ mapName: '' });
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dimensionality, setGeneral]); // mapNameは依存配列に含めない
 
   const pointList = useMemo(() => {
     if (!task) return [];
@@ -209,17 +198,21 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
   }, []);
 
   useEffect(() => {
-    const div = divRef.current;
-    if (div) {
-      document.body.appendChild(div);
-      div.id = 'stats';
-      div.style.position = 'relative';
-      div.style.top = '0';
-      div.style.left = '0';
-    }
+    // Create div element on client side only
+    const div = document.createElement('div');
+    divRef.current = div;
+    document.body.appendChild(div);
+    div.id = 'stats';
+    div.style.position = 'relative';
+    div.style.top = '0';
+    div.style.left = '0';
+    setStatsReady(true);
 
     return () => {
-      document.body.removeChild(div);
+      setStatsReady(false);
+      if (div.parentNode) {
+        document.body.removeChild(div);
+      }
     };
   }, []);
 
@@ -270,10 +263,10 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
           fieldObjectLogs={fieldObjectLogs}
           projectId={service.projectId}
         />
-        <Stats parent={divRef} className={`${className}__stats`} />
+        {statsReady && <Stats parent={divRef} className={`${className}__stats`} />}
       </Canvas>
     ),
-    [dimensionality, dpr, handleOnPerformance, service, pointList, map, modelType, model, visibleTimelineRange, divRef, className, fieldObjectLogs],
+    [dimensionality, dpr, handleOnPerformance, service, pointList, map, modelType, model, visibleTimelineRange, statsReady, className, fieldObjectLogs],
   );
 
   return (

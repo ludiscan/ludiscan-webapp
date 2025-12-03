@@ -68,6 +68,7 @@ const HeaderWrapper = memo(
 
     return (
       <Header
+        showSidebar={false}
         title={'Heatmap'}
         onClick={onBackClick}
         iconTitleEnd={<Text className={`${className}__headerV`} text={`${version || 'debug'}`} fontSize={theme.typography.fontSize.sm} fontWeight={'bold'} />}
@@ -121,7 +122,8 @@ export const HeatmapIdPageLayoutComponent: FC<HeatmapIdPageLayoutProps> = ({ cla
 };
 
 export const HeatmapIdPageLayout = styled(HeatmapIdPageLayoutComponent)`
-  height: calc(100vh - ${dimensions.headerHeight}px);
+  height: 100vh;
+  padding-top: ${dimensions.headerHeight}px;
   background: ${({ theme }) => theme.colors.surface.raised};
 
   &__headerV {

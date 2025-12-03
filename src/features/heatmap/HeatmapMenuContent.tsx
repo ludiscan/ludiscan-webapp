@@ -29,26 +29,20 @@ export type HeatmapMenuProps = {
 };
 
 const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
-  const { className, name, mapOptions, toggleMenu } = props;
+  const { className, name, toggleMenu, mapOptions } = props;
   const mapName = useGeneralSelect((s) => s.mapName);
-  const setGeneral = useGeneralPatch();
   const { theme } = useSharedTheme();
+  const setGeneral = useGeneralPatch();
 
   useEffect(() => {
-    // mapOptionsが変わった時のみ実行（mapNameは依存配列に含めない）
+    // mapOptionsが変わった時のみ実行
     if (mapOptions.length > 0) {
-      // mapNameが空の場合のみ、最初のオプションを設定
-      if (!mapName || mapName === '') {
+      // mapNameが空、または現在のmapNameがmapOptionsに含まれていない場合のみ、最初のオプションを設定
+      if (!mapName || mapName === '' || !mapOptions.includes(mapName)) {
         setGeneral({ mapName: mapOptions[0] });
       }
-    } else if (mapOptions.length === 0) {
-      // mapOptionsが空になったら、mapNameをクリア
-      if (mapName) {
-        setGeneral({ mapName: '' });
-      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapOptions, setGeneral]); // mapNameは依存配列に含めない
+  }, [mapOptions, mapName, setGeneral]);
   const content = useMemo(() => MenuContents.find((content) => content.name === name), [name]);
 
   if (!content) {

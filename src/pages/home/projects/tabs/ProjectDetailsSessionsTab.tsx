@@ -1,13 +1,12 @@
+import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, useMemo } from 'react';
-import { BiRefresh, BiSearch, BiChevronDown, BiChevronUp } from 'react-icons/bi';
+import { BiRefresh, BiSearch, BiChevronDown, BiChevronUp, BiFilter } from 'react-icons/bi';
 
 import type { Project } from '@src/modeles/project';
 import type { FC } from 'react';
 
-import { Button } from '@src/component/atoms/Button';
-import { Card } from '@src/component/atoms/Card';
 import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { VerticalSpacer } from '@src/component/atoms/Spacer';
 import { Text } from '@src/component/atoms/Text';
@@ -135,18 +134,19 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
 
   return (
     <div className={className}>
-      {/* Filter & Aggregation Toggle Buttons */}
-      <FlexRow className={`${className}__toolBar`} gap={8}>
-        <Button onClick={() => setShowFilters(!showFilters)} scheme={showFilters ? 'primary' : 'surface'} fontSize='sm'>
-          {showFilters ? <BiChevronUp size={16} /> : <BiChevronDown size={16} />}
-          フィルター・集計
+      {/* Filter Toggle */}
+      <div className={`${className}__filterToggle`}>
+        <button onClick={() => setShowFilters(!showFilters)} className={`${className}__filterButton ${showFilters ? 'active' : ''}`}>
+          <BiFilter size={18} />
+          <span>Filters & Aggregation</span>
           {hasActiveFilters && <span className={`${className}__filterBadge`}>{Object.values(filters).filter((v) => v !== undefined).length}</span>}
-        </Button>
-      </FlexRow>
+          {showFilters ? <BiChevronUp size={16} /> : <BiChevronDown size={16} />}
+        </button>
+      </div>
 
       {/* Filter Panel */}
       {showFilters && (
-        <FlexColumn gap={12} className={`${className}__filterSection`}>
+        <div className={`${className}__filterPanel`}>
           <SessionFilterPanel
             filters={filters}
             filterOptions={filterOptions}
@@ -157,11 +157,10 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
             onClearFilters={clearFilters}
           />
 
-          {/* Aggregation Toggle */}
-          <Button onClick={() => setShowAggregation(!showAggregation)} scheme='surface' fontSize='sm'>
+          <button onClick={() => setShowAggregation(!showAggregation)} className={`${className}__aggregationToggle`}>
             {showAggregation ? <BiChevronUp size={16} /> : <BiChevronDown size={16} />}
-            集計パネル
-          </Button>
+            Aggregation Panel
+          </button>
 
           {showAggregation && (
             <SessionAggregationPanel
@@ -176,119 +175,158 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
               hasActiveFilters={hasActiveFilters}
             />
           )}
-        </FlexColumn>
+        </div>
       )}
 
-      <VerticalSpacer size={12} />
+      <VerticalSpacer size={16} />
 
-      <Card blur color={theme.colors.surface.base} className={`${className}__card`}>
+      {/* Main Card */}
+      <div className={`${className}__card`}>
+        <div className={`${className}__cardBorder`} />
+
         {/* Header */}
-        <FlexRow className={`${className}__header`} gap={16} align={'center'}>
-          <Button onClick={handleRefresh} scheme='surface' disabled={isLoadingSessions || isRefreshing} fontSize={'sm'}>
-            <BiRefresh size={20} />
-          </Button>
-          <Text
-            text={`Total: ${project.session_count ?? 0}`}
-            fontSize={theme.typography.fontSize.base}
-            color={theme.colors.text.primary}
-            fontWeight={theme.typography.fontWeight.bold}
-          />
-          {searchQuery && (
-            <Text text={`(${filteredAndSortedSessions.length}件一致)`} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
-          )}
-        </FlexRow>
+        <div className={`${className}__header`}>
+          <FlexRow gap={16} align={'center'}>
+            <button onClick={handleRefresh} disabled={isLoadingSessions || isRefreshing} className={`${className}__refreshButton`}>
+              <BiRefresh size={18} className={isRefreshing ? 'spinning' : ''} />
+            </button>
+            <div className={`${className}__headerStats`}>
+              <span className={`${className}__statValue`}>{project.session_count ?? 0}</span>
+              <span className={`${className}__statLabel`}>Total Sessions</span>
+            </div>
+            {searchQuery && <span className={`${className}__matchCount`}>{filteredAndSortedSessions.length} matches</span>}
+          </FlexRow>
+        </div>
 
         {/* Search and Sort Controls */}
-        <FlexRow className={`${className}__controls`} gap={12} align={'center'}>
-          <div className={`${className}__searchInput`}>
-            <BiSearch size={16} />
+        <div className={`${className}__controls`}>
+          <div className={`${className}__searchWrapper`}>
+            <BiSearch size={16} className={`${className}__searchIcon`} />
             <input
               type='text'
-              placeholder='セッション名、デバイスID、プラットフォームで検索...'
+              placeholder='Search sessions...'
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              className={`${className}__searchInput`}
             />
           </div>
 
-          <select className={`${className}__sortSelect`} value={sortBy} onChange={(e) => setSortBy(e.target.value as SortOption)}>
-            <option value='newest'>最新順</option>
-            <option value='oldest'>古い順</option>
-            <option value='name'>名前順</option>
-          </select>
-        </FlexRow>
+          <div className={`${className}__sortWrapper`}>
+            <select className={`${className}__sortSelect`} value={sortBy} onChange={(e) => setSortBy(e.target.value as SortOption)}>
+              <option value='newest'>Newest First</option>
+              <option value='oldest'>Oldest First</option>
+              <option value='name'>By Name</option>
+            </select>
+            <BiChevronDown size={16} className={`${className}__sortChevron`} />
+          </div>
+        </div>
 
-        <VerticalSpacer size={12} />
-
-        <FlexColumn className={`${className}__sessionList`} gap={0}>
-          {/* ローディング状態 */}
+        {/* Session List */}
+        <div className={`${className}__sessionList`}>
+          {/* Loading */}
           {isLoadingSessions && !isErrorSessions && (
             <div className={`${className}__loadingState`}>
-              <Text text='セッションを読み込み中...' fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} />
+              <div className={`${className}__loadingSpinner`} />
+              <Text text='Loading sessions...' fontSize={theme.typography.fontSize.base} color={theme.colors.text.secondary} />
             </div>
           )}
 
-          {/* エラー状態 */}
+          {/* Error */}
           {isErrorSessions && (
             <div className={`${className}__errorState`}>
-              <Text text='セッション一覧の取得に失敗しました' fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} />
+              <div className={`${className}__errorIcon`}>!</div>
+              <Text text='Failed to load sessions' fontSize={theme.typography.fontSize.base} color={theme.colors.semantic.error.main} />
             </div>
           )}
 
-          {/* セッション一覧 */}
+          {/* Sessions */}
           {!isErrorSessions && !isLoadingSessions && filteredAndSortedSessions.length > 0 && (
-            <>
+            <FlexColumn gap={0}>
               {filteredAndSortedSessions.map((session) => (
                 <div key={session.sessionId} className={`${className}__sessionItem`}>
                   <SessionItemRow session={session} />
                 </div>
               ))}
-            </>
+            </FlexColumn>
           )}
 
-          {/* 検索結果なし */}
+          {/* No Results */}
           {!isLoadingSessions && !isErrorSessions && searchQuery && filteredAndSortedSessions.length === 0 && (
             <div className={`${className}__emptyState`}>
+              <Text text={`No sessions matching "${searchQuery}"`} fontSize={theme.typography.fontSize.base} color={theme.colors.text.secondary} />
+            </div>
+          )}
+
+          {/* Empty */}
+          {!isLoadingSessions && !isErrorSessions && sessions.length === 0 && !searchQuery && (
+            <div className={`${className}__emptyState`}>
+              <Text text='No sessions yet' fontSize={theme.typography.fontSize.base} color={theme.colors.text.secondary} />
               <Text
-                text={`「${searchQuery}」に一致するセッションが見つかりません`}
-                fontSize={theme.typography.fontSize.base}
-                color={theme.colors.text.secondary}
+                text='Sessions will appear here when players start using your game'
+                fontSize={theme.typography.fontSize.sm}
+                color={theme.colors.text.tertiary}
               />
             </div>
           )}
+        </div>
 
-          {/* 空状態 */}
-          {!isLoadingSessions && !isErrorSessions && sessions.length === 0 && !searchQuery && (
-            <div className={`${className}__emptyState`}>
-              <Text text='セッションがありません' fontSize={theme.typography.fontSize.base} color={theme.colors.text.secondary} />
-            </div>
-          )}
-        </FlexColumn>
-
-        {/* ページネーション */}
-        {!isErrorSessions && (project.session_count ?? 0) > 0 && (
-          <>
-            <VerticalSpacer size={12} />
+        {/* Pagination */}
+        {!isErrorSessions && (project.session_count ?? 0) > ITEMS_PER_PAGE && (
+          <div className={`${className}__pagination`}>
             <Pagination
               currentPage={currentPage}
               totalItems={project.session_count ?? 0}
               itemsPerPage={ITEMS_PER_PAGE}
-              onPageChange={(page) => {
-                setCurrentPage(page);
-              }}
+              onPageChange={(page) => setCurrentPage(page)}
             />
-          </>
+          </div>
         )}
-      </Card>
+      </div>
       <VerticalSpacer size={42} />
     </div>
   );
 };
 
+const spin = keyframes`
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+`;
+
 export const ProjectDetailsSessionsTab = styled(Component)`
   width: 100%;
 
-  &__toolBar {
+  &__filterToggle {
     margin-bottom: 12px;
+  }
+
+  &__filterButton {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    padding: 10px 16px;
+    font-size: ${({ theme }) => theme.typography.fontSize.sm};
+    font-weight: ${({ theme }) => theme.typography.fontWeight.medium};
+    color: ${({ theme }) => theme.colors.text.secondary};
+    cursor: pointer;
+    background: ${({ theme }) => theme.colors.surface.base};
+    border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+    border-radius: ${({ theme }) => theme.borders.radius.md};
+    transition: all 0.2s ease;
+
+    &:hover {
+      color: ${({ theme }) => theme.colors.text.primary};
+      border-color: ${({ theme }) => theme.colors.border.default};
+    }
+
+    &.active {
+      color: ${({ theme }) => theme.colors.primary.main};
+      background: ${({ theme }) => theme.colors.primary.main}0d;
+      border-color: ${({ theme }) => theme.colors.primary.main}4d;
+    }
   }
 
   &__filterBadge {
@@ -298,118 +336,266 @@ export const ProjectDetailsSessionsTab = styled(Component)`
     min-width: 18px;
     height: 18px;
     padding: 0 5px;
-    margin-left: 6px;
-    font-size: 11px;
-    font-weight: bold;
-    color: ${({ theme }) => theme.colors.primary.contrast};
+    font-size: ${({ theme }) => theme.typography.fontSize.xs};
+    font-weight: ${({ theme }) => theme.typography.fontWeight.bold};
+    color: ${({ theme }) => theme.colors.background.default};
     background: ${({ theme }) => theme.colors.primary.main};
     border-radius: 9px;
   }
 
-  &__filterSection {
-    padding: 12px;
-    background: ${({ theme }) => theme.colors.surface.sunken ?? 'rgba(0, 0, 0, 0.05)'};
-    border-radius: 8px;
+  &__filterPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    background: ${({ theme }) => theme.colors.surface.base};
+    border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+    border-radius: ${({ theme }) => theme.borders.radius.lg};
+  }
+
+  &__aggregationToggle {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    padding: 8px 12px;
+    font-size: ${({ theme }) => theme.typography.fontSize.sm};
+    font-weight: ${({ theme }) => theme.typography.fontWeight.medium};
+    color: ${({ theme }) => theme.colors.text.secondary};
+    cursor: pointer;
+    background: ${({ theme }) => theme.colors.surface.sunken};
+    border: 1px solid ${({ theme }) => theme.colors.border.default};
+    border-radius: ${({ theme }) => theme.borders.radius.sm};
+    transition: all 0.2s ease;
+
+    &:hover {
+      color: ${({ theme }) => theme.colors.text.primary};
+    }
   }
 
   &__card {
-    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    background: ${({ theme }) => theme.colors.surface.base};
+    border-radius: ${({ theme }) => theme.borders.radius.lg};
+  }
+
+  &__cardBorder {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+    border-radius: ${({ theme }) => theme.borders.radius.lg};
   }
 
   &__header {
+    position: relative;
+    padding: 16px 20px;
+    border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  }
+
+  &__headerStats {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__statValue {
+    font-family: ${({ theme }) => theme.typography.fontFamily.monospace};
+    font-size: ${({ theme }) => theme.typography.fontSize.xl};
+    font-weight: ${({ theme }) => theme.typography.fontWeight.bold};
+    color: ${({ theme }) => theme.colors.primary.main};
+  }
+
+  &__statLabel {
+    font-size: ${({ theme }) => theme.typography.fontSize.xs};
+    color: ${({ theme }) => theme.colors.text.tertiary};
+    text-transform: uppercase;
+    letter-spacing: ${({ theme }) => theme.typography.letterSpacing.normal};
+  }
+
+  &__matchCount {
+    padding: 4px 10px;
+    font-size: ${({ theme }) => theme.typography.fontSize.xs};
+    color: ${({ theme }) => theme.colors.text.secondary};
+    background: ${({ theme }) => theme.colors.surface.sunken};
+    border-radius: ${({ theme }) => theme.borders.radius.sm};
+  }
+
+  &__refreshButton {
+    display: flex;
     align-items: center;
-    padding-bottom: 12px;
-    margin-bottom: 12px;
-    border-bottom: 1px solid ${({ theme }) => theme.colors.border.default};
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    color: ${({ theme }) => theme.colors.text.secondary};
+    cursor: pointer;
+    background: ${({ theme }) => theme.colors.surface.sunken};
+    border: 1px solid ${({ theme }) => theme.colors.border.default};
+    border-radius: ${({ theme }) => theme.borders.radius.md};
+    transition: all 0.2s ease;
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    &:hover:not(:disabled) {
+      color: ${({ theme }) => theme.colors.primary.main};
+      border-color: ${({ theme }) => theme.colors.primary.main}80;
+    }
+
+    .spinning {
+      animation: ${spin} 1s linear infinite;
+    }
   }
 
   &__controls {
+    display: flex;
     flex-wrap: wrap;
-    padding: 12px 0;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  }
+
+  &__searchWrapper {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+  }
+
+  &__searchIcon {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    color: ${({ theme }) => theme.colors.text.tertiary};
+    transform: translateY(-50%);
+    transition: color 0.2s ease;
   }
 
   &__searchInput {
-    display: flex;
-    flex: 1;
-    gap: 8px;
-    align-items: center;
-    min-width: 250px;
-    padding: 8px 12px;
-    font-size: 14px;
+    width: 100%;
+    padding: 10px 12px 10px 38px;
+    font-size: ${({ theme }) => theme.typography.fontSize.sm};
     color: ${({ theme }) => theme.colors.text.primary};
-    background-color: ${({ theme }) => theme.colors.surface.sunken ?? 'rgba(255, 255, 255, 0.02)'};
+    outline: none;
+    background: ${({ theme }) => theme.colors.surface.sunken};
     border: 1px solid ${({ theme }) => theme.colors.border.default};
-    border-radius: 6px;
+    border-radius: ${({ theme }) => theme.borders.radius.md};
+    transition: all 0.2s ease;
 
-    input {
-      flex: 1;
-      font-size: 14px;
-      color: ${({ theme }) => theme.colors.text.primary};
-      outline: none;
-      background: none;
-      border: none;
-
-      &::placeholder {
-        color: ${({ theme }) => theme.colors.text.secondary};
-        opacity: 0.6;
-      }
-    }
-
-    svg {
-      flex-shrink: 0;
-      color: ${({ theme }) => theme.colors.text.secondary};
-      opacity: 0.7;
-    }
-  }
-
-  &__sortSelect {
-    padding: 8px 12px;
-    font-size: 14px;
-    color: ${({ theme }) => theme.colors.text.primary};
-    white-space: nowrap;
-    cursor: pointer;
-    background-color: ${({ theme }) => theme.colors.surface.sunken ?? 'rgba(255, 255, 255, 0.02)'};
-    border: 1px solid ${({ theme }) => theme.colors.border.default};
-    border-radius: 6px;
-
-    &:hover {
-      border-color: ${({ theme }) => theme.colors.primary.main};
-      opacity: 0.8;
+    &::placeholder {
+      color: ${({ theme }) => theme.colors.text.tertiary};
     }
 
     &:focus {
-      outline: none;
-      border-color: ${({ theme }) => theme.colors.primary.main};
+      border-color: ${({ theme }) => theme.colors.primary.main}80;
+      box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary.main}1a;
+    }
+  }
+
+  &__searchWrapper:focus-within &__searchIcon {
+    color: ${({ theme }) => theme.colors.primary.main};
+  }
+
+  &__sortWrapper {
+    position: relative;
+  }
+
+  &__sortSelect {
+    padding: 10px 36px 10px 12px;
+    font-size: ${({ theme }) => theme.typography.fontSize.sm};
+    color: ${({ theme }) => theme.colors.text.primary};
+    appearance: none;
+    cursor: pointer;
+    outline: none;
+    background: ${({ theme }) => theme.colors.surface.sunken};
+    border: 1px solid ${({ theme }) => theme.colors.border.default};
+    border-radius: ${({ theme }) => theme.borders.radius.md};
+    transition: all 0.2s ease;
+
+    &:hover {
+      border-color: ${({ theme }) => theme.colors.border.strong};
+    }
+
+    &:focus {
+      border-color: ${({ theme }) => theme.colors.primary.main}80;
+      box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary.main}1a;
     }
 
     option {
       color: ${({ theme }) => theme.colors.text.primary};
-      background-color: ${({ theme }) => theme.colors.surface.base};
+      background: ${({ theme }) => theme.colors.surface.base};
     }
+  }
+
+  &__sortChevron {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    color: ${({ theme }) => theme.colors.text.tertiary};
+    pointer-events: none;
+    transform: translateY(-50%);
   }
 
   &__sessionList {
-    margin: 0 -4px;
+    min-height: 200px;
   }
 
   &__sessionItem {
-    padding: 0 4px;
-    border-bottom: 1px solid ${({ theme }) => theme.colors.border.default};
+    border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle};
 
     &:last-child {
       border-bottom: none;
-    }
-
-    &:hover {
-      background-color: ${({ theme }) => theme.colors.surface.sunken ?? 'rgba(255, 255, 255, 0.01)'};
     }
   }
 
   &__loadingState,
   &__errorState,
   &__emptyState {
-    padding: 40px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
     text-align: center;
-    opacity: 0.7;
+  }
+
+  &__loadingSpinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid ${({ theme }) => theme.colors.border.default};
+    border-top-color: ${({ theme }) => theme.colors.primary.main};
+    border-radius: 50%;
+    animation: ${spin} 1s linear infinite;
+  }
+
+  &__errorIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    font-size: ${({ theme }) => theme.typography.fontSize.xl};
+    font-weight: ${({ theme }) => theme.typography.fontWeight.bold};
+    color: ${({ theme }) => theme.colors.semantic.error.main};
+    background: ${({ theme }) => theme.colors.semantic.error.main}15;
+    border: 1px solid ${({ theme }) => theme.colors.semantic.error.main}40;
+    border-radius: 50%;
+  }
+
+  &__pagination {
+    padding: 16px 20px;
+    border-top: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  }
+
+  @media (width <= 768px) {
+    &__controls {
+      flex-direction: column;
+    }
+
+    &__searchWrapper {
+      max-width: none;
+    }
   }
 `;

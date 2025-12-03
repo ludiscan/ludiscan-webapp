@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CiUser, CiLight, CiDark, CiBellOn } from 'react-icons/ci';
 import { FiChevronLeft } from 'react-icons/fi';
 import { MdLogout } from 'react-icons/md';
@@ -23,7 +23,7 @@ import { UpdateHistoryModal } from '@src/component/organisms/UpdateHistoryModal'
 import { useAuth } from '@src/hooks/useAuth';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import themes from '@src/modeles/theme';
-import { dimensions } from '@src/styles/style';
+import { dimensions, zIndexes } from '@src/styles/style';
 
 const LAST_VIEWED_VERSION_KEY = 'ludiscan-last-viewed-version';
 
@@ -45,8 +45,42 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
 
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [hasUnreadUpdates, setHasUnreadUpdates] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollY = useRef(0);
+  const ticking = useRef(false);
 
   const isLoginPage = useMemo(() => pathname === '/login', [pathname]);
+
+  // Scroll-based header visibility
+  useEffect(() => {
+    const scrollContainer = document.getElementById('app-scroll-container');
+    if (!scrollContainer) return;
+
+    const handleScroll = () => {
+      if (!ticking.current) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = scrollContainer.scrollTop;
+          const scrollThreshold = 10; // Minimum scroll to trigger hide/show
+
+          // Show header when scrolling up or at top
+          if (currentScrollY < lastScrollY.current || currentScrollY < scrollThreshold) {
+            setIsVisible(true);
+          }
+          // Hide header when scrolling down past threshold
+          else if (currentScrollY > lastScrollY.current && currentScrollY > scrollThreshold) {
+            setIsVisible(false);
+          }
+
+          lastScrollY.current = currentScrollY;
+          ticking.current = false;
+        });
+        ticking.current = true;
+      }
+    };
+
+    scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
+    return () => scrollContainer.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const themeTypeOptions = useMemo(() => Object.keys(themes) as ThemeType[], []);
 
@@ -100,7 +134,7 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
     setIsUpdateModalOpen(false);
   }, []);
   return (
-    <header className={className}>
+    <header className={`${className} ${isVisible ? 'visible' : 'hidden'}`}>
       <FlexRow align={'center'} gap={12} className={`${className}__innerHeader`} wrap={'nowrap'}>
         {onClick && (
           <Button fontSize={'xl'} onClick={backIconHandle} scheme={'none'}>
@@ -242,12 +276,34 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
   );
 };
 
-export const Header = styled(Component)`
+export const Header = styled(Component)<{ showSidebar?: boolean }>`
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: ${zIndexes.header};
   display: flex;
+  width: calc(100% - ${(props) => (props.showSidebar !== false ? dimensions.sidebarWidth : 0)}px);
   height: ${dimensions.headerHeight}px;
   color: ${({ theme }) => theme.colors.text.primary};
   background-color: ${({ theme }) => theme.colors.surface.base};
-  transition: margin-left 0.3s ease-in-out;
+  box-shadow: 0 1px 3px ${({ theme }) => theme.colors.border.default}40;
+  transition:
+    transform 0.3s ease-in-out,
+    box-shadow 0.3s ease-in-out;
+
+  /* stylelint-disable-next-line */
+  @media (min-width: ${dimensions.mobileWidth}px) {
+    margin-inline-start: ${(props) => (props.showSidebar !== false ? dimensions.sidebarWidth : 0)}px;
+  }
+
+  &.visible {
+    transform: translateY(0);
+  }
+
+  &.hidden {
+    box-shadow: none;
+    transform: translateY(-100%);
+  }
 
   &__innerHeader {
     align-items: center;

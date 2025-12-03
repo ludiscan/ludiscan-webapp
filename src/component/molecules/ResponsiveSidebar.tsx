@@ -7,11 +7,13 @@
 
 import styled from '@emotion/styled';
 import { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { RiMenu2Fill, RiMenu3Fill } from 'react-icons/ri';
 
 import type { FC, ReactNode } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
+import { Card } from '@src/component/atoms/Card';
 import { FlexRow } from '@src/component/atoms/Flex';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { dimensions, zIndexes } from '@src/styles/style';
@@ -79,67 +81,32 @@ const ToggleButton = styled(ToggleButtonComponent)`
   }
 `;
 
-const Component: FC<ResponsiveSidebarProps> = ({ className, children, onChange }) => {
-  const [isOpen, setIsOpen] = useState<boolean | undefined>(undefined);
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= dimensions.mobileWidth) {
-        setIsOpen(true);
-      } else {
-        setIsOpen(false);
-      }
-    };
-    handleResize();
-
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (onChange && isOpen !== undefined) {
-      onChange(isOpen);
-    }
-  }, [isOpen, onChange]);
-
-  /**
-   * トグルボタンのクリックイベントハンドラ
-   * ・クリック時に isOpen の状態を反転させ、SidebarWrapper の transform を変更
-   */
-  const toggleSidebar = useCallback(() => {
-    setIsOpen(!isOpen);
-  }, [isOpen]);
-
-  return isOpen !== undefined ? (
-    <>
-      <ToggleButton onClick={toggleSidebar} isOpen={isOpen} />
-      <div className={`${className} ${isOpen ? 'visible' : ''}`}>{children}</div>
-    </>
-  ) : null;
-};
-
-export const ResponsiveSidebar = styled(Component)`
+/** position: fixedだけを担当する親ラッパー */
+const FixedWrapper = styled.div`
   position: fixed;
-
-  /* Use logical properties for positioning (Design Implementation Guide Rule 4) */
   inset-block-start: 0;
   inset-inline-start: 0;
   z-index: ${zIndexes.sidebar};
+  pointer-events: none;
+`;
+
+/** コンテンツ用のスタイル（backdrop-filter, transformなど） */
+const SidebarContent = styled(Card)`
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
 
   /* Use logical properties for sizing */
   inline-size: ${dimensions.sidebarWidth}px;
-  block-size: 100vh;
+  block-size: calc(100vh - var(--spacing-xs) * 2);
 
   /* Use logical properties for padding */
   padding-block: var(--spacing-md);
-  padding-inline: var(--spacing-md);
+  padding-inline: var(--spacing-sm);
+  margin: var(--spacing-xs);
   overflow-y: auto;
-  background-color: ${({ theme }) => theme.colors.surface.base};
+  pointer-events: auto;
+  border-radius: var(--border-radius-xl);
   box-shadow: 0 2px 4px rgb(0 0 0 / 30%);
 
   /* RTL/LTR aware transform */
@@ -171,3 +138,76 @@ export const ResponsiveSidebar = styled(Component)`
     }
   }
 `;
+
+type SidebarContentProps = {
+  className?: string;
+  children: ReactNode;
+  isOpen: boolean;
+  toggleSidebar: () => void;
+  surfaceColor: string;
+};
+
+const SidebarPortalContent: FC<SidebarContentProps> = ({ className, children, isOpen, toggleSidebar, surfaceColor }) => {
+  return (
+    <FixedWrapper>
+      <ToggleButton onClick={toggleSidebar} isOpen={isOpen} />
+      <SidebarContent className={`${className} ${isOpen ? 'visible' : ''}`} blur={'low'} color={surfaceColor}>
+        {children}
+      </SidebarContent>
+    </FixedWrapper>
+  );
+};
+
+export const ResponsiveSidebar: FC<ResponsiveSidebarProps> = ({ className, children, onChange }) => {
+  const [isOpen, setIsOpen] = useState<boolean | undefined>(undefined);
+  const [mounted, setMounted] = useState(false);
+  const { theme } = useSharedTheme();
+
+  // SSR対応: クライアントサイドでのみポータルを有効化
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= dimensions.mobileWidth) {
+        setIsOpen(true);
+      } else {
+        setIsOpen(false);
+      }
+    };
+    handleResize();
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (onChange && isOpen !== undefined) {
+      onChange(isOpen);
+    }
+  }, [isOpen, onChange]);
+
+  /**
+   * トグルボタンのクリックイベントハンドラ
+   * ・クリック時に isOpen の状態を反転させ、SidebarWrapper の transform を変更
+   */
+  const toggleSidebar = useCallback(() => {
+    setIsOpen(!isOpen);
+  }, [isOpen]);
+
+  // SSRまたは初期化前は何も表示しない
+  if (!mounted || isOpen === undefined) {
+    return null;
+  }
+
+  // ポータルを使ってbody直下にレンダリング（親要素のblur/transformの影響を回避）
+  return createPortal(
+    <SidebarPortalContent className={className} isOpen={isOpen} toggleSidebar={toggleSidebar} surfaceColor={theme.colors.surface.base}>
+      {children}
+    </SidebarPortalContent>,
+    document.body,
+  );
+};

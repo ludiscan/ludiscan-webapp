@@ -10,7 +10,13 @@ export type CardProps = {
   border?: string;
   padding?: string;
   stopPropagate?: boolean;
-  blur?: boolean;
+  blur?: boolean | 'low' | 'medium' | 'high';
+};
+
+const toBlurValue = (blur: boolean | 'low' | 'medium' | 'high'): string | undefined => {
+  if (blur === true) return 'medium';
+  if (blur === false || blur === undefined) return undefined;
+  return blur;
 };
 
 const Component = ({ className, children, stopPropagate = false, blur }: CardProps) => {
@@ -35,7 +41,7 @@ const Component = ({ className, children, stopPropagate = false, blur }: CardPro
       </div>
     );
   }
-  return <div className={`${className} ${blur && 'blur'}`}>{children}</div>;
+  return <div className={`${className} ${blur ? `blur-${toBlurValue(blur)}` : ''}`}>{children}</div>;
 };
 
 const shadowStyle = (props: CardProps) => {
@@ -68,15 +74,25 @@ const hexToRgba = (hex: string, alpha: number) => {
 export const Card = styled(Component)`
   padding: ${({ padding }) => padding || '16px'};
   background-color: ${({ color, theme }) => color || theme.colors.surface.base};
-  border: ${({ border }) => `1px solid ${border}`};
+  ${({ border }) => border && `border: 1px solid ${border};`}
   border-radius: 8px;
   box-shadow: ${(props) => shadowStyle(props)};
 
-  &.blur {
-    background-color: ${({ color, theme }) => hexToRgba(color || theme.colors.surface.base, 0.7)};
+  &.blur-low {
+    background-color: ${({ color, theme }) => hexToRgba(color || theme.colors.surface.base, 0.4)};
+    ${({ border }) => border && `border: 1px solid ${hexToRgba(border, 1)};`}
+    backdrop-filter: blur(4px);
+  }
 
-    ${({ border }) => border && `border: 1px solid ${hexToRgba(border, 0.7)}`};
-    /* 背景をぼかす */
-    backdrop-filter: blur(16px);
+  &.blur-medium {
+    background-color: ${({ color, theme }) => hexToRgba(color || theme.colors.surface.base, 0.4)};
+    ${({ border }) => border && `border: 1px solid ${hexToRgba(border, 1)};`}
+    backdrop-filter: blur(8px);
+  }
+
+  &.blur-high {
+    background-color: ${({ color, theme }) => hexToRgba(color || theme.colors.surface.base, 0.4)};
+    ${({ border }) => border && `border: 1px solid ${hexToRgba(border, 1)};`}
+    backdrop-filter: blur(12px);
   }
 `;
