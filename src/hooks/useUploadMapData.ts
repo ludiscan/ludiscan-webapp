@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { createClient } from '@src/modeles/qeury';
+import { env } from '@src/config/env';
 
 interface UploadMapDataParams {
   mapName: string;
@@ -9,29 +9,34 @@ interface UploadMapDataParams {
 
 /**
  * マップデータ（OBJファイルなど）をアップロードするHook
+ * Note: openapi-fetchはmultipart/form-dataを正しく処理しないため、直接fetchを使用
  */
 export function useUploadMapData() {
-  const client = createClient();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ mapName, file }: UploadMapDataParams) => {
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', file, file.name);
 
-      const response = await client.POST('/api/v0/heatmap/map_data/{map_name}', {
-        params: {
-          path: { map_name: mapName },
-        },
-        body: formData as unknown as { file?: string },
-        bodySerializer: () => formData,
+      const baseUrl = env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost';
+      const url = `${baseUrl}/api/v0/heatmap/map_data/${encodeURIComponent(mapName)}`;
+
+      // Content-Typeは設定しない（ブラウザが自動でmultipart/form-data; boundary=...を設定）
+      // credentials: 'include'でcookie認証を維持
+      const response = await fetch(url, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+        mode: 'cors',
       });
 
-      if (response.error) {
-        throw new Error(`Failed to upload map data: ${response.error.message || 'Unknown error'}`);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`Failed to upload map data: ${errorData.message || response.statusText}`);
       }
 
-      return response.data;
+      return response.json();
     },
     onSuccess: () => {
       // Invalidate map data queries to refresh available maps

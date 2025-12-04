@@ -19,14 +19,7 @@ const HiddenInput = styled.input`
   display: none;
 `;
 
-const Component: FC<FileInputProps> = ({
-  className,
-  accept,
-  onChange,
-  buttonText = 'Choose File',
-  disabled = false,
-  fontSize = 'base',
-}) => {
+const Component: FC<FileInputProps> = ({ className, accept, onChange, buttonText = 'Choose File', disabled = false, fontSize = 'base' }) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleButtonClick = useCallback(() => {
@@ -43,8 +36,8 @@ const Component: FC<FileInputProps> = ({
 
   return (
     <div className={className}>
-      <HiddenInput ref={inputRef} type="file" accept={accept} onChange={handleFileChange} disabled={disabled} />
-      <Button scheme="surface" fontSize={fontSize} onClick={handleButtonClick} disabled={disabled}>
+      <HiddenInput ref={inputRef} type='file' accept={accept} onChange={handleFileChange} disabled={disabled} />
+      <Button scheme='surface' fontSize={fontSize} onClick={handleButtonClick} disabled={disabled}>
         <Text text={buttonText} />
       </Button>
     </div>
@@ -53,6 +46,6 @@ const Component: FC<FileInputProps> = ({
 
 export const FileInput = styled(Component)`
   display: flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
 `;

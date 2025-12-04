@@ -42,10 +42,10 @@ const UploadRow = styled.div`
 `;
 
 const FileName = styled.span`
-  font-size: ${({ theme }) => theme.typography.fontSize.sm};
-  color: ${({ theme }) => theme.colors.text.secondary};
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: ${({ theme }) => theme.typography.fontSize.sm};
+  color: ${({ theme }) => theme.colors.text.secondary};
   white-space: nowrap;
 `;
 
@@ -78,10 +78,10 @@ const MapNameInput = styled.input`
   padding: 8px;
   font-size: ${({ theme }) => theme.typography.fontSize.sm};
   color: ${({ theme }) => theme.colors.text.primary};
+  outline: none;
   background-color: ${({ theme }) => theme.colors.surface.base};
   border: 1px solid ${({ theme }) => theme.colors.border.default};
   border-radius: 4px;
-  outline: none;
 
   &:focus {
     border-color: ${({ theme }) => theme.colors.primary.main};
@@ -92,30 +92,31 @@ const MapNameInput = styled.input`
   }
 `;
 
-export const MapMenuContent: FC<HeatmapMenuProps> = ({ mapOptions, model, dimensionality }) => {
+export const MapMenuContent: FC<HeatmapMenuProps> = ({ mapOptions, model, dimensionality, service }) => {
   const { theme } = useSharedTheme();
   const mapName = useGeneralSelect((s) => s.mapName);
   const setData = useGeneralPatch();
   const uploadMapData = useUploadMapData();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadMapName, setUploadMapName] = useState<string>('');
-  const [statusMessage, setStatusMessage] = useState<{ text: string; status: 'success' | 'error' | 'info' } | null>(
-    null,
-  );
+  const [statusMessage, setStatusMessage] = useState<{ text: string; status: 'success' | 'error' | 'info' } | null>(null);
 
   const handleAddWaypoint = useCallback(() => {
     heatMapEventBus.emit('add-waypoint');
   }, []);
 
-  const handleFileSelect = useCallback((file: File | null) => {
-    setSelectedFile(file);
-    setStatusMessage(null);
-    if (file && !uploadMapName) {
-      // ファイル名から拡張子を除いたものをマップ名として設定
-      const nameWithoutExt = file.name.replace(/\.[^/.]+$/, '');
-      setUploadMapName(nameWithoutExt);
-    }
-  }, [uploadMapName]);
+  const handleFileSelect = useCallback(
+    (file: File | null) => {
+      setSelectedFile(file);
+      setStatusMessage(null);
+      if (file && !uploadMapName) {
+        // ファイル名から拡張子を除いたものをマップ名として設定
+        const nameWithoutExt = file.name.replace(/\.[^/.]+$/, '');
+        setUploadMapName(nameWithoutExt);
+      }
+    },
+    [uploadMapName],
+  );
 
   const handleUpload = useCallback(async () => {
     if (!selectedFile || !uploadMapName.trim()) {
@@ -171,30 +172,22 @@ export const MapMenuContent: FC<HeatmapMenuProps> = ({ mapOptions, model, dimens
       </Button>
       {model && mapName && <ObjectToggleList mapName={mapName} model={model} />}
 
-      <UploadSection>
-        <Text text={'Upload Map Data (OBJ)'} fontSize={theme.typography.fontSize.base} />
-        <UploadRow>
-          <MapNameInput
-            type="text"
-            placeholder="Map name"
-            value={uploadMapName}
-            onChange={(e) => setUploadMapName(e.target.value)}
-          />
-        </UploadRow>
-        <UploadRow>
-          <FileInput accept=".obj" onChange={handleFileSelect} buttonText="Select OBJ File" fontSize="sm" />
-          {selectedFile && <FileName>{selectedFile.name}</FileName>}
-        </UploadRow>
-        <Button
-          scheme={'primary'}
-          fontSize={'base'}
-          onClick={handleUpload}
-          disabled={!selectedFile || !uploadMapName.trim() || uploadMapData.isPending}
-        >
-          <Text text={uploadMapData.isPending ? 'Uploading...' : 'Upload'} />
-        </Button>
-        {statusMessage && <StatusMessage status={statusMessage.status}>{statusMessage.text}</StatusMessage>}
-      </UploadSection>
+      {!service.isEmbed && (
+        <UploadSection>
+          <Text text={'Upload Map Data (OBJ)'} fontSize={theme.typography.fontSize.base} />
+          <UploadRow>
+            <MapNameInput type='text' placeholder='Map name' value={uploadMapName} onChange={(e) => setUploadMapName(e.target.value)} />
+          </UploadRow>
+          <UploadRow>
+            <FileInput accept='.obj' onChange={handleFileSelect} buttonText='Select OBJ File' fontSize='sm' />
+            {selectedFile && <FileName>{selectedFile.name}</FileName>}
+          </UploadRow>
+          <Button scheme={'primary'} fontSize={'base'} onClick={handleUpload} disabled={!selectedFile || !uploadMapName.trim() || uploadMapData.isPending}>
+            <Text text={uploadMapData.isPending ? 'Uploading...' : 'Upload'} />
+          </Button>
+          {statusMessage && <StatusMessage status={statusMessage.status}>{statusMessage.text}</StatusMessage>}
+        </UploadSection>
+      )}
     </>
   );
 };
