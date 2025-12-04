@@ -98,3 +98,17 @@ export const colors = {
   errorLight: '#ffa1a1',
   error: '#f94343',
 } as const;
+
+export const hexToRGBA = (hex: string, alpha: number) => {
+  let c = hex.replace('#', '');
+  if (c.length === 3)
+    c = c
+      .split('')
+      .map((ch) => ch + ch)
+      .join('');
+  const num = parseInt(c, 16);
+  const r = (num >> 16) & 0xff;
+  const g = (num >> 8) & 0xff;
+  const b = num & 0xff;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};

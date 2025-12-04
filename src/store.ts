@@ -4,6 +4,7 @@ import { authReducer } from '@src/slices/authSlice';
 import { canvasReducer } from '@src/slices/canvasSlice';
 import { routeCoachReducer } from '@src/slices/routeCoachSlice';
 import { selectionReducer } from '@src/slices/selectionSlice';
+import { uiReducer } from '@src/slices/uiSlice';
 
 export const store = () => {
   return configureStore({
@@ -12,6 +13,7 @@ export const store = () => {
       heatmapCanvas: canvasReducer,
       selection: selectionReducer,
       routeCoach: routeCoachReducer,
+      ui: uiReducer,
     },
   });
 };

@@ -624,6 +624,116 @@
         ]
       }
     },
+    "/admin/blocked-ips": {
+      "get": {
+        "operationId": "BlockedIpsController_getBlockedIps",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of blocked IPs"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Admin role required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get list of blocked IPs",
+        "tags": [
+          "Admin - Blocked IPs"
+        ]
+      },
+      "delete": {
+        "operationId": "BlockedIpsController_unblockAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "All IPs unblocked successfully"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Admin role required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Unblock all blocked IPs",
+        "tags": [
+          "Admin - Blocked IPs"
+        ]
+      }
+    },
+    "/admin/blocked-ips/{ip}": {
+      "delete": {
+        "operationId": "BlockedIpsController_unblockIp",
+        "parameters": [
+          {
+            "name": "ip",
+            "required": true,
+            "in": "path",
+            "description": "IP address to unblock",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "IP unblocked successfully"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Admin role required"
+          },
+          "404": {
+            "description": "IP not found in blocked list"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Unblock a specific IP address",
+        "tags": [
+          "Admin - Blocked IPs"
+        ]
+      }
+    },
     "/api/v0/users": {
       "get": {
         "operationId": "UsersController_findAll",
@@ -800,6 +910,107 @@
           }
         ],
         "summary": "特定のユーザーを取得",
+        "tags": [
+          "v0"
+        ]
+      },
+      "delete": {
+        "operationId": "UsersController_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ユーザーID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "ユーザーが見つかりません"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "ユーザーを削除",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/users/{id}/role": {
+      "patch": {
+        "operationId": "UsersController_updateRole",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ユーザーID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "ユーザーが見つかりません"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "ユーザーのロールを更新",
         "tags": [
           "v0"
         ]
@@ -6259,12 +6470,583 @@
           "Public Stats"
         ]
       }
+    },
+    "/api/v0/admin/stats": {
+      "get": {
+        "operationId": "AdminController_getStats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get admin dashboard stats",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/api/v0/admin/users": {
+      "get": {
+        "operationId": "AdminController_getUsers",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offset",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List all users",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/api/v0/admin/users/{id}": {
+      "get": {
+        "operationId": "AdminController_getUser",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get user by ID",
+        "tags": [
+          "Admin"
+        ]
+      },
+      "patch": {
+        "operationId": "AdminController_updateUser",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update user",
+        "tags": [
+          "Admin"
+        ]
+      },
+      "delete": {
+        "operationId": "AdminController_deleteUser",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete user",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/api/v0/admin/projects": {
+      "get": {
+        "operationId": "AdminController_getProjects",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offset",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List all projects",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/api/v0/admin/projects/{id}": {
+      "delete": {
+        "operationId": "AdminController_deleteProject",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete project",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/api/v0/admin/sessions": {
+      "get": {
+        "operationId": "AdminController_getSessions",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offset",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List all play sessions",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/api/v0/admin/sessions/{id}": {
+      "delete": {
+        "operationId": "AdminController_deleteSession",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete play session",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/api/v0/admin/api-keys": {
+      "get": {
+        "operationId": "AdminController_getApiKeys",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offset",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List all API keys",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/api/v0/admin/api-keys/{id}": {
+      "patch": {
+        "operationId": "AdminController_updateApiKey",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update API key (enable/disable)",
+        "tags": [
+          "Admin"
+        ]
+      },
+      "delete": {
+        "operationId": "AdminController_deleteApiKey",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete API key",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/api/v0/admin/heatmap-tasks": {
+      "get": {
+        "operationId": "AdminController_getHeatmapTasks",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offset",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List all heatmap tasks",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/api/v0/admin/heatmap-tasks/{id}": {
+      "delete": {
+        "operationId": "AdminController_deleteHeatmapTask",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete heatmap task",
+        "tags": [
+          "Admin"
+        ]
+      }
     }
   },
   "info": {
     "title": "Ludiscan API Documentation",
     "description": "Ludiscan API for game analytics and session tracking",
-    "version": "1.14.0",
+    "version": "1.15.0",
     "contact": {}
   },
   "tags": [],
@@ -6319,6 +7101,19 @@
         "required": [
           "password",
           "email"
+        ]
+      },
+      "UpdateRoleDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "description": "ユーザーの新しいロール (例: user, admin)",
+            "example": "admin"
+          }
+        },
+        "required": [
+          "role"
         ]
       },
       "GoogleStartQueryDto": {
@@ -7665,6 +8460,25 @@
               }
             ]
           },
+          "sessionIds": {
+            "description": "Session IDs used for filtering (if multiple sessions)",
+            "example": [
+              1,
+              2,
+              3
+            ],
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "searchQuery": {
+            "type": "object",
+            "description": "Search query text used to filter sessions (GitHub-style query)",
+            "example": "platform:Android is:finished",
+            "nullable": true
+          },
           "stepSize": {
             "type": "number",
             "description": "Step size",
@@ -7749,6 +8563,25 @@
                 "$ref": "#/components/schemas/PlaySessionResponseDto"
               }
             ]
+          },
+          "sessionIds": {
+            "description": "Session IDs used for filtering (if multiple sessions)",
+            "example": [
+              1,
+              2,
+              3
+            ],
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "searchQuery": {
+            "type": "object",
+            "description": "Search query text used to filter sessions (GitHub-style query)",
+            "example": "platform:Android is:finished",
+            "nullable": true
           },
           "stepSize": {
             "type": "number",

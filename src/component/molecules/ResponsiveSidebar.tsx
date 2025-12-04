@@ -7,11 +7,13 @@
 
 import styled from '@emotion/styled';
 import { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { RiMenu2Fill, RiMenu3Fill } from 'react-icons/ri';
 
 import type { FC, ReactNode } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
+import { PanelCard } from '@src/component/atoms/Card';
 import { FlexRow } from '@src/component/atoms/Flex';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { dimensions, zIndexes } from '@src/styles/style';
@@ -79,8 +81,91 @@ const ToggleButton = styled(ToggleButtonComponent)`
   }
 `;
 
-const Component: FC<ResponsiveSidebarProps> = ({ className, children, onChange }) => {
+/** position: fixedだけを担当する親ラッパー */
+const FixedWrapper = styled.div`
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  z-index: ${zIndexes.sidebar};
+  pointer-events: none;
+`;
+
+/** コンテンツ用のスタイル（backdrop-filter, transformなど） */
+const SidebarContent = styled(PanelCard)`
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+
+  /* Use logical properties for sizing */
+  inline-size: calc(${dimensions.sidebarWidth}px - 6px);
+  block-size: calc(100vh - var(--spacing-xs) * 2);
+
+  /* Use logical properties for padding */
+  padding-block: var(--spacing-md);
+  padding-inline: var(--spacing-sm);
+  margin: var(--spacing-xs);
+  overflow-y: auto;
+  pointer-events: auto;
+  box-shadow: 0 2px 4px rgb(0 0 0 / 20%);
+
+  /* RTL/LTR aware transform */
+  transform: translateX(-100%);
+  transition: transform 0.4s ease-in-out;
+
+  &.visible {
+    transform: translateX(0);
+  }
+
+  /* Smooth scrolling for accessibility */
+  scroll-behavior: smooth;
+
+  /* Custom scrollbar styling for webkit browsers */
+  &::-webkit-scrollbar {
+    inline-size: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: ${({ theme }) => theme.colors.surface.base};
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: ${({ theme }) => theme.colors.border.default};
+    border-radius: 3px;
+
+    &:hover {
+      background: ${({ theme }) => theme.colors.border.interactive};
+    }
+  }
+`;
+
+type SidebarContentProps = {
+  className?: string;
+  children: ReactNode;
+  isOpen: boolean;
+  toggleSidebar: () => void;
+  surfaceColor: string;
+};
+
+const SidebarPortalContent: FC<SidebarContentProps> = ({ className, children, isOpen, toggleSidebar, surfaceColor }) => {
+  return (
+    <FixedWrapper>
+      <ToggleButton onClick={toggleSidebar} isOpen={isOpen} />
+      <SidebarContent className={`${className} ${isOpen ? 'visible' : ''}`} color={surfaceColor}>
+        {children}
+      </SidebarContent>
+    </FixedWrapper>
+  );
+};
+
+export const ResponsiveSidebar: FC<ResponsiveSidebarProps> = ({ className, children, onChange }) => {
   const [isOpen, setIsOpen] = useState<boolean | undefined>(undefined);
+  const [mounted, setMounted] = useState(false);
+  const { theme } = useSharedTheme();
+
+  // SSR対応: クライアントサイドでのみポータルを有効化
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const handleResize = () => {
@@ -112,62 +197,16 @@ const Component: FC<ResponsiveSidebarProps> = ({ className, children, onChange }
     setIsOpen(!isOpen);
   }, [isOpen]);
 
-  return isOpen !== undefined ? (
-    <>
-      <ToggleButton onClick={toggleSidebar} isOpen={isOpen} />
-      <div className={`${className} ${isOpen ? 'visible' : ''}`}>{children}</div>
-    </>
-  ) : null;
+  // SSRまたは初期化前は何も表示しない
+  if (!mounted || isOpen === undefined) {
+    return null;
+  }
+
+  // ポータルを使ってbody直下にレンダリング（親要素のblur/transformの影響を回避）
+  return createPortal(
+    <SidebarPortalContent className={className} isOpen={isOpen} toggleSidebar={toggleSidebar} surfaceColor={theme.colors.surface.base}>
+      {children}
+    </SidebarPortalContent>,
+    document.body,
+  );
 };
-
-export const ResponsiveSidebar = styled(Component)`
-  position: fixed;
-
-  /* Use logical properties for positioning (Design Implementation Guide Rule 4) */
-  inset-block-start: 0;
-  inset-inline-start: 0;
-  z-index: ${zIndexes.sidebar};
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-
-  /* Use logical properties for sizing */
-  inline-size: ${dimensions.sidebarWidth}px;
-  block-size: 100vh;
-
-  /* Use logical properties for padding */
-  padding-block: var(--spacing-md);
-  padding-inline: var(--spacing-md);
-  overflow-y: auto;
-  background-color: ${({ theme }) => theme.colors.surface.base};
-  box-shadow: 0 2px 4px rgb(0 0 0 / 30%);
-
-  /* RTL/LTR aware transform */
-  transform: translateX(-100%);
-  transition: transform 0.4s ease-in-out;
-
-  &.visible {
-    transform: translateX(0);
-  }
-
-  /* Smooth scrolling for accessibility */
-  scroll-behavior: smooth;
-
-  /* Custom scrollbar styling for webkit browsers */
-  &::-webkit-scrollbar {
-    inline-size: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: ${({ theme }) => theme.colors.surface.base};
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: ${({ theme }) => theme.colors.border.default};
-    border-radius: 3px;
-
-    &:hover {
-      background: ${({ theme }) => theme.colors.border.interactive};
-    }
-  }
-`;

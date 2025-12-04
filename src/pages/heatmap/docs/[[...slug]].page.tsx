@@ -13,6 +13,7 @@ import type { FC } from 'react';
 import type { DocPage } from '@src/utils/docs/types';
 
 import { Text } from '@src/component/atoms/Text';
+import { DashboardBackgroundCanvas } from '@src/component/templates/DashboardBackgroundCanvas';
 import { Header } from '@src/component/templates/Header';
 import { SidebarLayout } from '@src/component/templates/SidebarLayout';
 import { DocsContent } from '@src/features/docs/components/DocsContent';
@@ -43,6 +44,7 @@ const Component: FC<DocsPageProps> = ({ currentDoc, error, className }) => {
   if (error) {
     return (
       <div className={className}>
+        <DashboardBackgroundCanvas />
         <SidebarLayout />
         <InnerContent>
           <div className={`${className}__errorContainer`}>
@@ -61,6 +63,7 @@ const Component: FC<DocsPageProps> = ({ currentDoc, error, className }) => {
 
   return (
     <div className={className}>
+      <DashboardBackgroundCanvas />
       <SidebarLayout />
       <InnerContent>
         <Header title='Documentation' onClick={handleBack} />
