@@ -1,0 +1,39 @@
+name: Git Statistics
+
+on:
+  # Manual trigger
+  workflow_dispatch:
+  # On push to main/develop (optional - comment out if too frequent)
+  push:
+    branches:
+      - main
+    paths:
+      - 'scripts/git-stats.sh'
+      - '.github/workflows/git-stats.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  generate-stats:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout with full history
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Generate statistics
+        run: |
+          chmod +x scripts/git-stats.sh
+          ./scripts/git-stats.sh STATS.md
+
+      - name: Display stats in summary
+        run: cat STATS.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload stats artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: git-stats-${{ github.run_number }}
+          path: STATS.md
+          retention-days: 90
