@@ -7046,7 +7046,7 @@
   "info": {
     "title": "Ludiscan API Documentation",
     "description": "Ludiscan API for game analytics and session tracking",
-    "version": "1.15.0",
+    "version": "1.15.1",
     "contact": {}
   },
   "tags": [],
