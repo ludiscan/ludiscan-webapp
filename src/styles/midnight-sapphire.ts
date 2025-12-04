@@ -25,18 +25,18 @@ export const midnightSapphireLight: Theme = {
       contrast: '#FFFFFF', // White
     },
     background: {
-      default: '#F5F7FC', // Soft Blue White
-      paper: '#FFFFFF', // Pure White
-      elevated: '#FAFBFE', // Slight Blue Tint
+      default: '#EBEEF5', // Soft Blue Gray
+      paper: '#F5F7FC', // Off Blue White
+      elevated: '#F0F2F8', // Slight Blue Tint
       overlay: 'rgba(46, 76, 139, 0.04)', // Sapphire Tint
     },
     surface: {
-      base: '#FFFFFF',
-      raised: '#F9FAFD',
-      sunken: '#EEF2FA',
-      interactive: '#E6EBF7',
-      hover: '#DBE3F3',
-      pressed: '#CFD9EF',
+      base: '#F5F7FC',
+      raised: '#F0F2F8',
+      sunken: '#E6EBF5',
+      interactive: '#DBE3F0',
+      hover: '#CFD9EB',
+      pressed: '#C3CEE5',
     },
     text: {
       primary: '#1A1F3A', // Midnight Blue

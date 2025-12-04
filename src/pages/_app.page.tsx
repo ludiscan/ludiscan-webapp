@@ -19,12 +19,17 @@ import { store } from '@src/store';
 import { dimensions } from '@src/styles/style';
 
 const Content = styled.div`
-  overflow: hidden;
+  overflow: hidden auto;
   color: ${({ theme }) => theme.colors.text.primary};
   background: ${({ theme }) => theme.colors.background.default};
 `;
 
 export const InnerContent = styled.div<{ showSidebar?: boolean }>`
+  position: relative;
+
+  /* Add padding for fixed header */
+  padding-top: ${dimensions.headerHeight}px;
+
   /* Use logical property for RTL/LTR support (Design Implementation Guide Rule 4) */
   /* stylelint-disable-next-line */
   @media (min-width: ${dimensions.mobileWidth}px) {
@@ -48,7 +53,12 @@ export default function App({ Component, pageProps }: AppProps) {
           <QueryClientProvider client={queryClient}>
             <SharedThemeProvider>
               <ToastProvider position={'top-right'}>
-                <Content className={isDesktop === undefined ? '' : isDesktop ? 'desktop' : 'mobile'} style={{ height: '100vh' }} data-testid={'app-content'}>
+                <Content
+                  id='app-scroll-container'
+                  className={isDesktop === undefined ? '' : isDesktop ? 'desktop' : 'mobile'}
+                  style={{ height: '100vh' }}
+                  data-testid={'app-content'}
+                >
                   <Component {...pageProps} />
                 </Content>
               </ToastProvider>

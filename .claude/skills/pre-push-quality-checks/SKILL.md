@@ -1,6 +1,7 @@
-# Pre-Push Quality Checks Skill
-
-このスキルは、PR作成やgit push前にコード品質チェックを強制実行します。
+---
+name: pre-push-quality-checks
+description: このスキルは、PR作成やgit push前にコード品質チェックを強制実行します。
+---
 
 ## When to Use This Skill
 

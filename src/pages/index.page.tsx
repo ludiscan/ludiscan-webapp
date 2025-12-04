@@ -1,3 +1,4 @@
+import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import { useRouter } from 'next/navigation';
 import { Suspense, useEffect } from 'react';
@@ -31,7 +32,12 @@ const Component: FC<IndexPageProps> = ({ className }) => {
   if (!ready) {
     return (
       <div className={`${className}__loading`}>
-        <div className={`${className}__loading-spinner`} />
+        <div className={`${className}__loading-content`}>
+          <div className={`${className}__loading-logo`}>L</div>
+          <div className={`${className}__loading-bar`}>
+            <div className={`${className}__loading-progress`} />
+          </div>
+        </div>
       </div>
     );
   }
@@ -60,6 +66,32 @@ const Component: FC<IndexPageProps> = ({ className }) => {
   );
 };
 
+const loadingPulse = keyframes`
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+`;
+
+const loadingProgress = keyframes`
+  0% {
+    width: 0%;
+    left: 0;
+  }
+  50% {
+    width: 100%;
+    left: 0;
+  }
+  100% {
+    width: 0%;
+    left: 100%;
+  }
+`;
+
 const IndexPage = styled(Component)`
   position: relative;
   min-height: 100vh;
@@ -73,7 +105,7 @@ const IndexPage = styled(Component)`
     position: relative;
     z-index: 1;
     height: 100vh;
-    overflow: auto;
+    overflow: hidden auto;
   }
 
   &__loading {
@@ -84,25 +116,49 @@ const IndexPage = styled(Component)`
     background: ${({ theme }) => theme.colors.background.default};
   }
 
-  &__loading-spinner {
-    width: 50px;
-    height: 50px;
-    border: 4px solid ${({ theme }) => theme.colors.border.default};
-    border-top-color: ${({ theme }) => theme.colors.primary.main};
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
+  &__loading-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: center;
   }
 
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
+  &__loading-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #030303;
+    background: linear-gradient(135deg, #00f5ff 0%, #00d4e0 100%);
+    border-radius: 16px;
+    animation: ${loadingPulse} 2s ease-in-out infinite;
+  }
+
+  &__loading-bar {
+    position: relative;
+    width: 120px;
+    height: 3px;
+    overflow: hidden;
+    background: ${({ theme }) => theme.colors.border.subtle};
+    border-radius: 2px;
+  }
+
+  &__loading-progress {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #00f5ff, #a890d3);
+    border-radius: 2px;
+    animation: ${loadingProgress} 1.5s ease-in-out infinite;
   }
 
   /* Selection styling */
   ::selection {
     color: ${({ theme }) => theme.colors.text.primary};
-    background: ${({ theme }) => theme.colors.primary.main}44;
+    background: #00f5ff40;
   }
 `;
 

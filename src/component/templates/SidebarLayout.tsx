@@ -13,6 +13,7 @@ import { Text } from '@src/component/atoms/Text';
 import { ResponsiveSidebar } from '@src/component/molecules/ResponsiveSidebar';
 import { useAuth } from '@src/hooks/useAuth';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
+import { DefaultStaleTime } from '@src/modeles/qeury';
 
 export type SidebarLayoutProps = {
   className?: string | undefined;
@@ -67,7 +68,7 @@ const Component: FC<SidebarLayoutProps> = ({ className }) => {
       }
       return response.json();
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: DefaultStaleTime,
   });
 
   // Auto-expand Docs dropdown when on a docs page

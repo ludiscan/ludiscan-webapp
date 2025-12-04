@@ -28,18 +28,18 @@ export const obsidianNightLight: Theme = {
       contrast: '#FFFFFF', // White
     },
     background: {
-      default: '#F8F8F8', // Soft Gray
-      paper: '#FFFFFF', // Pure White
-      elevated: '#FCFCFC', // Slight Gray Tint
+      default: '#EBEBEB', // Soft Gray
+      paper: '#F5F5F5', // Off White
+      elevated: '#F0F0F0', // Slight Gray Tint
       overlay: 'rgba(45, 45, 45, 0.04)', // Charcoal Tint
     },
     surface: {
-      base: '#FFFFFF',
-      raised: '#FAFAFA',
-      sunken: '#F0F0F0',
-      interactive: '#E8E8E8',
-      hover: '#DEDEDE',
-      pressed: '#D4D4D4',
+      base: '#F5F5F5',
+      raised: '#F0F0F0',
+      sunken: '#E5E5E5',
+      interactive: '#DBDBDB',
+      hover: '#D0D0D0',
+      pressed: '#C5C5C5',
     },
     text: {
       primary: '#1A1A1A', // Charcoal Black

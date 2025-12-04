@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
-import { memo, useEffect, useMemo, useState } from 'react';
+import dynamic from 'next/dynamic';
+import { memo, useEffect, useMemo } from 'react';
 
 import type { components } from '@generated/api';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
@@ -9,13 +10,23 @@ import type { FC } from 'react';
 import { Text } from '@src/component/atoms/Text';
 import { StatusContent } from '@src/component/molecules/StatusContent';
 import { env } from '@src/config/env';
-import { HeatMapViewer } from '@src/features/heatmap/HeatmapViewer';
+import { useGeneralPatch } from '@src/hooks/useGeneral';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { useEmbedHeatmapDataService } from '@src/utils/heatmap/EmbedHeatmapDataService';
+
+// SSR disabled to avoid hydration mismatch with Three.js and react-icons
+const HeatMapViewer = dynamic(() => import('@src/features/heatmap/HeatmapViewer').then((mod) => mod.HeatMapViewer), {
+  ssr: false,
+});
+
+type TokenVerifyResult = components['schemas']['VerifyEmbedTokenResponseDto'];
 
 export type EmbedHeatmapPageProps = {
   className?: string;
   token: string;
+  verifyResult: TokenVerifyResult;
+  initialMapName: string | null;
+  error?: string;
 };
 
 export const getServerSideProps: GetServerSideProps<EmbedHeatmapPageProps> = async (context) => {
@@ -25,11 +36,87 @@ export const getServerSideProps: GetServerSideProps<EmbedHeatmapPageProps> = asy
       notFound: true,
     };
   }
-  return {
-    props: {
-      token: params.token,
-    },
-  };
+
+  const token = params.token;
+
+  try {
+    // Verify token on server side
+    const verifyResponse = await fetch(`${env.NEXT_PUBLIC_API_BASE_URL}/api/v0/embed/verify`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ token }),
+    });
+
+    if (!verifyResponse.ok) {
+      const errorMessage = verifyResponse.status === 400 ? 'Invalid or expired token' : 'Failed to verify token';
+      return {
+        props: {
+          token,
+          verifyResult: { projectId: 0, sessionId: 0, expiresAt: '' },
+          initialMapName: null,
+          error: errorMessage,
+        },
+      };
+    }
+
+    const verifyResult = (await verifyResponse.json()) as TokenVerifyResult;
+
+    // Check expiration
+    if (verifyResult.expiresAt && Date.now() > Date.parse(verifyResult.expiresAt)) {
+      return {
+        props: {
+          token,
+          verifyResult,
+          initialMapName: null,
+          error: 'Token has expired',
+        },
+      };
+    }
+
+    // Fetch session to get mapName from metadata
+    let initialMapName: string | null = null;
+    try {
+      const sessionResponse = await fetch(`${env.NEXT_PUBLIC_API_BASE_URL}/api/v0/projects/${verifyResult.projectId}/play_session/${verifyResult.sessionId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-embed-token': token,
+        },
+      });
+
+      if (sessionResponse.ok) {
+        const session = (await sessionResponse.json()) as components['schemas']['PlaySessionResponseDto'];
+        // Extract mapName from metaData if available
+        if (session.metaData && typeof session.metaData === 'object') {
+          const metaData = session.metaData as Record<string, unknown>;
+          if (typeof metaData.mapName === 'string') {
+            initialMapName = metaData.mapName;
+          }
+        }
+      }
+    } catch {
+      // Session fetch failed, continue without mapName
+    }
+
+    return {
+      props: {
+        token,
+        verifyResult,
+        initialMapName,
+      },
+    };
+  } catch {
+    return {
+      props: {
+        token,
+        verifyResult: { projectId: 0, sessionId: 0, expiresAt: '' },
+        initialMapName: null,
+        error: 'Network error',
+      },
+    };
+  }
 };
 
 type EmbedLayoutProps = {
@@ -76,56 +163,17 @@ const EmbedLayout = styled(EmbedLayoutComponent)`
   }
 `;
 
-type TokenVerifyResult = components['schemas']['VerifyEmbedTokenResponseDto'];
+const EmbedHeatmapPage: FC<EmbedHeatmapPageProps> = ({ className, token, verifyResult, initialMapName, error }) => {
+  const setGeneral = useGeneralPatch();
 
-const EmbedHeatmapPage: FC<EmbedHeatmapPageProps> = ({ className, token }) => {
-  const [verifyResult, setVerifyResult] = useState<TokenVerifyResult | null>(null);
-  const [error, setError] = useState<string | undefined>(undefined);
-  const [isVerifying, setIsVerifying] = useState(true);
-
-  // Verify token on mount
+  // Set initial mapName from session metadata if available
   useEffect(() => {
-    const verifyToken = async () => {
-      try {
-        const response = await fetch(`${env.NEXT_PUBLIC_API_BASE_URL}/api/v0/embed/verify`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ token }),
-        });
+    if (initialMapName) {
+      setGeneral({ mapName: initialMapName });
+    }
+  }, [initialMapName, setGeneral]);
 
-        if (!response.ok) {
-          if (response.status === 400) {
-            setError('Invalid or expired token');
-          } else {
-            setError('Failed to verify token');
-          }
-          setIsVerifying(false);
-          return;
-        }
-
-        const data = (await response.json()) as TokenVerifyResult;
-
-        // Check expiration (expiresAt is ISO 8601 string)
-        if (data.expiresAt && Date.now() > Date.parse(data.expiresAt)) {
-          setError('Token has expired');
-          setIsVerifying(false);
-          return;
-        }
-
-        setVerifyResult(data);
-        setIsVerifying(false);
-      } catch {
-        setError('Network error');
-        setIsVerifying(false);
-      }
-    };
-
-    verifyToken();
-  }, [token]);
-
-  const service = useEmbedHeatmapDataService(verifyResult?.projectId, verifyResult?.sessionId, token);
+  const service = useEmbedHeatmapDataService(verifyResult.projectId || undefined, verifyResult.sessionId || undefined, token);
 
   const emptyService: HeatmapDataService = {
     isInitialized: false,
@@ -147,10 +195,6 @@ const EmbedHeatmapPage: FC<EmbedHeatmapPageProps> = ({ className, token }) => {
     getPlayers: async () => [],
     getFieldObjectLogs: async () => [],
   };
-
-  if (isVerifying) {
-    return <EmbedLayout className={className} service={emptyService} />;
-  }
 
   if (error) {
     return <EmbedLayout className={className} service={emptyService} error={error} />;
