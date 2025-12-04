@@ -3,6 +3,14 @@
     "stylelint-config-standard",
     "stylelint-config-recess-order"
   ],
+  "rules": {
+    "declaration-property-value-no-unknown": [true, {
+      "ignoreProperties": {
+        "mask-image": ["/radial-gradient/"],
+        "background": ["/radial-gradient/"]
+      }
+    }]
+  },
   "overrides": [
     {
       "files": ["src/**/*.tsx"],
