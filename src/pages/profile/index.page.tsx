@@ -1,16 +1,20 @@
 import styled from '@emotion/styled';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import type { ThemeType } from '@src/modeles/theme';
 import type { FC } from 'react';
 
-import { Card } from '@src/component/atoms/Card';
-import { FlexColumn } from '@src/component/atoms/Flex';
+import { PanelCard } from '@src/component/atoms/Card';
+import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
+import { Selector } from '@src/component/molecules/Selector';
+import { DashboardBackgroundCanvas } from '@src/component/templates/DashboardBackgroundCanvas';
 import { Header } from '@src/component/templates/Header';
 import { SidebarLayout } from '@src/component/templates/SidebarLayout';
 import { useAuth } from '@src/hooks/useAuth';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
+import themes from '@src/modeles/theme';
 import { InnerContent } from '@src/pages/_app.page';
 
 export type ProfilePageProps = {
@@ -26,10 +30,19 @@ interface UserProfile {
 const Component: FC<ProfilePageProps> = ({ className }) => {
   const { isAuthorized, isLoading, ready, user } = useAuth();
   const router = useRouter();
-  const { theme } = useSharedTheme();
+  const { theme, themeType, setThemeType } = useSharedTheme();
 
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+
+  const themeTypeOptions = useMemo(() => Object.keys(themes) as ThemeType[], []);
+
+  const handleThemeTypeChange = useCallback(
+    (value: string) => {
+      setThemeType(value as ThemeType);
+    },
+    [setThemeType],
+  );
 
   // ユーザー情報をセット
   useEffect(() => {
@@ -52,6 +65,7 @@ const Component: FC<ProfilePageProps> = ({ className }) => {
   if (!ready || isLoading) {
     return (
       <div className={className}>
+        <DashboardBackgroundCanvas className='visible' />
         <SidebarLayout />
         <InnerContent>
           <div className={`${className}__centerContent`}>
@@ -64,12 +78,13 @@ const Component: FC<ProfilePageProps> = ({ className }) => {
 
   return (
     <div className={className}>
+      <DashboardBackgroundCanvas className='visible' />
       <SidebarLayout />
       <InnerContent>
         <Header title='Profile' onClick={handleBack} />
 
         <div className={`${className}__container`}>
-          <Card blur color={theme.colors.surface.base} className={`${className}__card`}>
+          <PanelCard color={theme.colors.surface.base} className={`${className}__card`}>
             <FlexColumn gap={16}>
               <div>
                 <Text
@@ -118,7 +133,36 @@ const Component: FC<ProfilePageProps> = ({ className }) => {
                 <Text text='User information not available' fontSize={theme.typography.fontSize.base} color={theme.colors.semantic.error.main} />
               )}
             </FlexColumn>
-          </Card>
+          </PanelCard>
+
+          <PanelCard color={theme.colors.surface.base} className={`${className}__card`}>
+            <FlexColumn gap={16}>
+              <div>
+                <Text
+                  text='Appearance'
+                  fontSize={theme.typography.fontSize.lg}
+                  color={theme.colors.text.primary}
+                  fontWeight={theme.typography.fontWeight.bold}
+                />
+              </div>
+
+              <div className={`${className}__infoField`}>
+                <Text text='Theme' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} fontWeight={theme.typography.fontWeight.bold} />
+                <FlexRow align={'center'} gap={8}>
+                  <Selector
+                    options={themeTypeOptions}
+                    value={themeType}
+                    onChange={handleThemeTypeChange}
+                    fontSize={'base'}
+                    scheme={'none'}
+                    border={false}
+                    placement={'bottom'}
+                    align={'left'}
+                  />
+                </FlexRow>
+              </div>
+            </FlexColumn>
+          </PanelCard>
         </div>
       </InnerContent>
     </div>
@@ -126,10 +170,14 @@ const Component: FC<ProfilePageProps> = ({ className }) => {
 };
 
 const ProfilePage = styled(Component)`
+  position: relative;
   height: 100vh;
 
   &__container {
-    padding: 0 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 12px 6px;
     margin-bottom: 24px;
   }
 

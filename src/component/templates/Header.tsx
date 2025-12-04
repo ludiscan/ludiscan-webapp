@@ -2,27 +2,25 @@ import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { CiUser, CiLight, CiDark, CiBellOn } from 'react-icons/ci';
 import { FiChevronLeft } from 'react-icons/fi';
 import { MdLogout } from 'react-icons/md';
 
-import type { ThemeType } from '@src/modeles/theme';
 import type { ReleaseResponse } from '@src/pages/api/releases.api';
 import type { FC, ReactNode } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
+import { PanelCard } from '@src/component/atoms/Card';
 import { Divider } from '@src/component/atoms/Divider';
 import { FlexRow, InlineFlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { IconLabelRow } from '@src/component/molecules/IconLabelRow';
 import { EllipsisMenu, Menu } from '@src/component/molecules/Menu';
-import { Selector } from '@src/component/molecules/Selector';
 import { DesktopLayout, MobileLayout } from '@src/component/molecules/responsive';
 import { UpdateHistoryModal } from '@src/component/organisms/UpdateHistoryModal';
 import { useAuth } from '@src/hooks/useAuth';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import themes from '@src/modeles/theme';
 import { dimensions, zIndexes } from '@src/styles/style';
 
 const LAST_VIEWED_VERSION_KEY = 'ludiscan-last-viewed-version';
@@ -37,7 +35,7 @@ export type HeaderProps = {
 };
 
 const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, iconEnd, isOffline = false }) => {
-  const { theme, themeType, toggleTheme, setThemeType } = useSharedTheme();
+  const { theme, toggleTheme } = useSharedTheme();
 
   const { isAuthorized, logout } = useAuth();
   const router = useRouter();
@@ -49,7 +47,7 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
   const lastScrollY = useRef(0);
   const ticking = useRef(false);
 
-  const isLoginPage = useMemo(() => pathname === '/login', [pathname]);
+  const isLoginPage = pathname === '/login';
 
   // Scroll-based header visibility
   useEffect(() => {
@@ -82,8 +80,6 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
     return () => scrollContainer.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const themeTypeOptions = useMemo(() => Object.keys(themes) as ThemeType[], []);
-
   // Fetch releases to check for new updates
   const { data: releaseData } = useQuery<ReleaseResponse>({
     queryKey: ['releases'],
@@ -113,13 +109,6 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
     }
   }, [onClick]);
 
-  const handleThemeTypeChange = useCallback(
-    (value: string) => {
-      setThemeType(value as ThemeType);
-    },
-    [setThemeType],
-  );
-
   const handleLogout = useCallback(async () => {
     await logout();
     router.push('/login');
@@ -134,20 +123,22 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
     setIsUpdateModalOpen(false);
   }, []);
   return (
-    <header className={`${className} ${isVisible ? 'visible' : 'hidden'}`}>
+    <PanelCard className={`${className} ${isVisible ? 'visible' : 'hidden'}`} padding={'0px 16px'}>
       <FlexRow align={'center'} gap={12} className={`${className}__innerHeader`} wrap={'nowrap'}>
         {onClick && (
           <Button fontSize={'xl'} onClick={backIconHandle} scheme={'none'}>
             <FiChevronLeft />
           </Button>
         )}
-        <Image
-          className={`${className}__logo ${theme.mode === 'light' && 'light'}`}
-          src={'/favicon/favicon.svg'}
-          alt={'ludiscan'}
-          width={onClick ? 28 : 32}
-          height={onClick ? 28 : 32}
-        />
+        <a href={'/'} target={'_self'}>
+          <Image
+            className={`${className}__logo ${theme.mode === 'light' && 'light'}`}
+            src={'/favicon/favicon.svg'}
+            alt={'ludiscan'}
+            width={onClick ? 28 : 32}
+            height={onClick ? 28 : 32}
+          />
+        </a>
         <Text text={'Ludiscan'} href={'/'} target={'_self'} fontSize={theme.typography.fontSize.xl} fontWeight={theme.typography.fontWeight.bold} />
         <Text text={title} fontSize={theme.typography.fontSize.base} fontWeight={theme.typography.fontWeight.bold} color={theme.colors.text.secondary} />
         {iconTitleEnd && <>{iconTitleEnd}</>}
@@ -175,16 +166,6 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
             <Button fontSize={'xl'} onClick={toggleTheme} scheme={'none'}>
               {theme.mode === 'light' ? <CiDark size={24} color={theme.colors.text.primary} /> : <CiLight size={24} color={theme.colors.text.primary} />}
             </Button>
-            <Selector
-              options={themeTypeOptions}
-              value={themeType}
-              onChange={handleThemeTypeChange}
-              fontSize={'base'}
-              scheme={'none'}
-              border={false}
-              placement={'bottom'}
-              align={'right'}
-            />
             {!isOffline && !isLoginPage && (
               <>
                 <Divider orientation={'vertical'} />
@@ -228,20 +209,6 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
                 icon={theme.mode === 'light' ? <CiDark /> : <CiLight />}
                 onClick={toggleTheme}
               />
-              <Divider orientation={'horizontal'} margin={'0'} />
-              <FlexRow align={'center'} gap={8} style={{ padding: '0 8px' }}>
-                <Text text={'Theme:'} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
-                <Selector
-                  options={themeTypeOptions}
-                  value={themeType}
-                  onChange={handleThemeTypeChange}
-                  fontSize={'base'}
-                  scheme={'none'}
-                  border={false}
-                  placement={'bottom'}
-                  align={'right'}
-                />
-              </FlexRow>
               {!isOffline && !isLoginPage && (
                 <>
                   <Divider orientation={'horizontal'} margin={'0'} />
@@ -272,18 +239,19 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
         </MobileLayout>
       </FlexRow>
       <UpdateHistoryModal isOpen={isUpdateModalOpen} onClose={handleCloseUpdateModal} />
-    </header>
+    </PanelCard>
   );
 };
 
 export const Header = styled(Component)<{ showSidebar?: boolean }>`
   position: fixed;
   top: 0;
-  left: 0;
+  left: 6px;
   z-index: ${zIndexes.header};
   display: flex;
-  width: calc(100% - ${(props) => (props.showSidebar !== false ? dimensions.sidebarWidth : 0)}px);
-  height: ${dimensions.headerHeight}px;
+  width: calc(100% - 12px - ${(props) => (props.showSidebar !== false ? dimensions.sidebarWidth : 0)}px);
+  height: calc(${dimensions.headerHeight}px - 2px);
+  margin: 6px;
   color: ${({ theme }) => theme.colors.text.primary};
   background-color: ${({ theme }) => theme.colors.surface.base};
   box-shadow: 0 1px 3px ${({ theme }) => theme.colors.border.default}40;
@@ -309,7 +277,6 @@ export const Header = styled(Component)<{ showSidebar?: boolean }>`
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding: 16px;
     margin: 0 auto;
   }
 

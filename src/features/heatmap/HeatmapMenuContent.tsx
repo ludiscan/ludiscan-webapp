@@ -1,25 +1,28 @@
 import styled from '@emotion/styled';
-import { memo, useEffect, useMemo } from 'react';
-import { IoClose } from 'react-icons/io5';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 import type { Menus } from '@src/hooks/useHeatmapSideBarMenus';
+import type { RootState } from '@src/store';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC } from 'react';
 import type { Group } from 'three';
 
-import { Button } from '@src/component/atoms/Button';
-import { Card } from '@src/component/atoms/Card';
-import { FlexColumn, InlineFlexRow } from '@src/component/atoms/Flex';
+import { PanelCard } from '@src/component/atoms/Card';
+import { FlexColumn } from '@src/component/atoms/Flex';
+import { HeatmapMenuListRow } from '@src/component/organisms/HeatmapMenuListRow';
+import { QuickToolbar } from '@src/features/heatmap/QuickToolbar';
 import { useGeneralPatch, useGeneralSelect } from '@src/hooks/useGeneral';
 import { MenuContents } from '@src/hooks/useHeatmapSideBarMenus';
-import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { zIndexes } from '@src/styles/style';
+import { setMenuPanelWidth } from '@src/slices/uiSlice';
+import { heatMapEventBus } from '@src/utils/canvasEventBus';
+import { saveRecentMenu } from '@src/utils/localstrage';
 
 export type HeatmapMenuProps = {
   model: Group | null;
   className?: string | undefined;
-  name: Menus | undefined;
-  toggleMenu: (value: boolean) => void;
+  name?: Menus | undefined;
+  toggleMenu?: (value: boolean) => void;
   eventLogKeys?: string[] | undefined;
   handleExportView: () => Promise<void>;
   mapOptions: string[];
@@ -28,11 +31,93 @@ export type HeatmapMenuProps = {
   dimensionality: '2d' | '3d'; // 2D/3Dモード（一部のメニューは3D専用）
 };
 
+const MIN_WIDTH = 300;
+const MAX_WIDTH = 800;
+
 const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
-  const { className, name, toggleMenu, mapOptions } = props;
+  const { className, mapOptions, service, dimensionality } = props;
   const mapName = useGeneralSelect((s) => s.mapName);
-  const { theme } = useSharedTheme();
   const setGeneral = useGeneralPatch();
+  const dispatch = useDispatch();
+  const menuPanelWidth = useSelector((s: RootState) => s.ui.menuPanelWidth);
+
+  const [openMenu, setOpenMenu] = useState<Menus | undefined>(undefined);
+  const [menuExtra, setMenuExtra] = useState<object | undefined>(undefined);
+  const [isResizing, setIsResizing] = useState(false);
+  const resizeRef = useRef<{ startX: number; startWidth: number } | null>(null);
+
+  const handleMenuClose = useCallback(() => {
+    setOpenMenu(undefined);
+  }, []);
+
+  // Resize handlers
+  const handleResizeStart = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      setIsResizing(true);
+      resizeRef.current = { startX: e.clientX, startWidth: menuPanelWidth };
+    },
+    [menuPanelWidth],
+  );
+
+  useEffect(() => {
+    if (!isResizing) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!resizeRef.current) return;
+      const delta = e.clientX - resizeRef.current.startX;
+      const newWidth = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, resizeRef.current.startWidth + delta));
+      dispatch(setMenuPanelWidth(newWidth));
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+      resizeRef.current = null;
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizing, dispatch]);
+
+  // Listen to eventBus events
+  useEffect(() => {
+    const clickMenuIconHandler = (event: CustomEvent<{ name: Menus }>) => {
+      const menuName = event.detail.name;
+      setOpenMenu(menuName);
+      // Save to recent menus (except for 'more' and 'eventLogDetail')
+      if (menuName !== 'more' && menuName !== 'eventLogDetail') {
+        saveRecentMenu(menuName);
+      }
+    };
+    const clickEventLogHandler = (event: CustomEvent<{ logName: string; id: number }>) => {
+      setMenuExtra(event.detail);
+      setOpenMenu('eventLogDetail');
+    };
+    const closeMenuHandler = () => {
+      setOpenMenu(undefined);
+    };
+
+    heatMapEventBus.on('click-menu-icon', clickMenuIconHandler);
+    heatMapEventBus.on('click-event-log', clickEventLogHandler);
+    heatMapEventBus.on('close-menu', closeMenuHandler);
+    return () => {
+      heatMapEventBus.off('click-menu-icon', clickMenuIconHandler);
+      heatMapEventBus.off('click-event-log', clickEventLogHandler);
+      heatMapEventBus.off('close-menu', closeMenuHandler);
+    };
+  }, []);
+
+  // Auto-open general menu when session is selected
+  useEffect(() => {
+    if (service.sessionId) {
+      setOpenMenu('general');
+    }
+  }, [service.sessionId]);
 
   useEffect(() => {
     // mapOptionsが変わった時のみ実行
@@ -43,36 +128,96 @@ const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
       }
     }
   }, [mapOptions, mapName, setGeneral]);
-  const content = useMemo(() => MenuContents.find((content) => content.name === name), [name]);
 
-  if (!content) {
-    return null;
-  }
+  const content = useMemo(() => MenuContents.find((content) => content.name === openMenu), [openMenu]);
+
+  // Build props for menu content component
+  const menuProps: HeatmapMenuProps = {
+    ...props,
+    name: openMenu,
+    toggleMenu: handleMenuClose,
+    extra: menuExtra,
+  };
+
   return (
-    <Card className={className} padding={'0px'} color={theme.colors.surface.base} blur>
-      <InlineFlexRow align={'center'} gap={16} style={{ position: 'absolute', top: '20px', right: '20px', zIndex: zIndexes.header }}>
-        <Button onClick={() => toggleMenu(false)} scheme={'none'} fontSize={'sm'}>
-          <IoClose />
-        </Button>
-      </InlineFlexRow>
-      <FlexColumn gap={8} align={'flex-start'} className={`${className}__content`}>
-        {content && <content.Component {...props} />}
-      </FlexColumn>
-    </Card>
+    <div className={className} style={{ width: menuPanelWidth }}>
+      <PanelCard className={`${className}__card`} padding={'2px'}>
+        <FlexColumn className={`${className}__container`}>
+          {/* Menu icons row */}
+          <div className={`${className}__row`}>
+            <HeatmapMenuListRow currentMenu={openMenu} onClose={handleMenuClose} />
+          </div>
+
+          {/* Menu content - scrollable */}
+          <FlexColumn gap={8} align={'flex-start'} className={`${className}__content`}>
+            {content && <content.Component {...menuProps} />}
+          </FlexColumn>
+
+          {/* Quick toolbar at bottom */}
+          <QuickToolbar className={`${className}__toolbar`} service={service} dimensionality={dimensionality} />
+        </FlexColumn>
+      </PanelCard>
+      {/* Resize handle */}
+      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
+      <div className={`${className}__resizeHandle`} onMouseDown={handleResizeStart} />
+    </div>
   );
 };
 
 export const HeatmapMenuContent = memo(
   styled(HeatmapMenuContentComponent)`
     position: relative;
-    width: 500px;
-    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    height: calc(100% - 12px);
+    margin: 6px;
     color: ${({ theme }) => theme.colors.text.primary};
 
+    &__card {
+      height: 100%;
+    }
+
+    &__row {
+      align-self: center;
+      margin: 12px 24px;
+    }
+
+    &__container {
+      height: 100%;
+    }
+
     &__content {
-      height: calc(100% - 32px);
+      flex: 1;
+      height: 0;
+      min-height: 0;
       padding: 16px;
       overflow: hidden auto;
+    }
+
+    &__toolbar {
+      flex-shrink: 0;
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+      width: 100%;
+      padding: 8px;
+      overflow-x: auto;
+      border-top: ${({ theme }) => `1px solid ${theme.colors.border.default}`};
+    }
+
+    &__resizeHandle {
+      position: absolute;
+      top: 0;
+      right: -4px;
+      width: 8px;
+      height: 100%;
+      cursor: ew-resize;
+      background: transparent;
+      transition: background 0.2s;
+
+      &:hover {
+        background: ${({ theme }) => theme.colors.primary.light};
+      }
     }
 
     &__toggle {

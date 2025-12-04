@@ -29,18 +29,18 @@ export const slateEmberLight: Theme = {
       contrast: '#FFFFFF', // White
     },
     background: {
-      default: '#F5F6F8', // Soft Gray
-      paper: '#FFFFFF', // Pure White
-      elevated: '#FAFBFC', // Slight Gray Tint
+      default: '#EBEDF0', // Soft Gray
+      paper: '#F8F9FA', // Off White
+      elevated: '#F2F4F6', // Slight Gray Tint
       overlay: 'rgba(74, 96, 114, 0.04)', // Slate Tint
     },
     surface: {
-      base: '#FFFFFF',
-      raised: '#F9FAFC',
-      sunken: '#EEF0F3',
-      interactive: '#E5E8EC',
-      hover: '#DBE0E5',
-      pressed: '#D0D6DD',
+      base: '#F8F9FA',
+      raised: '#F2F4F6',
+      sunken: '#E5E8EC',
+      interactive: '#DBE0E5',
+      hover: '#D0D6DD',
+      pressed: '#C5CCD5',
     },
     text: {
       primary: '#2A2E35', // Deep Charcoal

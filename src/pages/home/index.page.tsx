@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { BiRefresh, BiMenuAltLeft, BiGridAlt, BiPlus, BiEdit, BiSearch, BiChevronDown } from 'react-icons/bi';
 
-import { DashboardBackgroundCanvas } from './DashboardBackgroundCanvas';
 import { ProjectItemRow } from './ProjectItemRow';
 
 import type { Project } from '@src/modeles/project';
@@ -18,6 +17,7 @@ import { Observer } from '@src/component/atoms/Observer';
 import { VerticalSpacer } from '@src/component/atoms/Spacer';
 import { Text } from '@src/component/atoms/Text';
 import { ProjectFormModal } from '@src/component/organisms/ProjectFormModal';
+import { DashboardBackgroundCanvas } from '@src/component/templates/DashboardBackgroundCanvas';
 import { Header } from '@src/component/templates/Header';
 import { SidebarLayout } from '@src/component/templates/SidebarLayout';
 import { useToast } from '@src/component/templates/ToastContext';
@@ -25,6 +25,7 @@ import { useAuth } from '@src/hooks/useAuth';
 import { useLocale } from '@src/hooks/useLocale';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { useApiClient } from '@src/modeles/ApiClientContext';
+import { DefaultStaleTime } from '@src/modeles/qeury';
 import { InnerContent } from '@src/pages/_app.page';
 
 const fetchCount = 20;
@@ -95,6 +96,7 @@ const Component: FC<HomePageProps> = ({ className }) => {
       if (!lastPage || lastPage.length < fetchCount) return undefined;
       return allPages.length * fetchCount;
     },
+    staleTime: DefaultStaleTime,
   });
 
   // エラー通知（一度だけ表示）
@@ -167,26 +169,21 @@ const Component: FC<HomePageProps> = ({ className }) => {
   return (
     <div className={`${className} ${isVisible ? 'visible' : ''}`}>
       {/* Three.js Canvas Background - Mountain landscape */}
-      <DashboardBackgroundCanvas className={isVisible ? 'visible' : ''} />
+      <DashboardBackgroundCanvas />
 
       <SidebarLayout />
       <InnerContent>
-        <Header title={'Dashboard'} onClick={handleBack} />
+        <Header title={t('home.title')} onClick={handleBack} />
 
         <div className={`${className}__mainContent`}>
           {/* Hero Section */}
           <section className={`${className}__hero`}>
             <div className={`${className}__heroContent`}>
               <div className={`${className}__greeting`}>
-                <span className={`${className}__greetingBadge`}>
-                  <span className={`${className}__statusDot`} />
-                  Analytics Active
-                </span>
                 <h1 className={`${className}__heroTitle`}>
                   <span className={`${className}__heroTitleLine`}>{user?.name ? `Welcome back,` : 'Welcome to'}</span>
                   <span className={`${className}__heroTitleAccent`}>{user?.name || 'Ludiscan'}</span>
                 </h1>
-                <p className={`${className}__heroSubtitle`}>{t('home.title')}</p>
               </div>
 
               {/* Stats Cards */}
@@ -416,17 +413,6 @@ const slideUp = keyframes`
   }
 `;
 
-const pulse = keyframes`
-  0%, 100% {
-    opacity: 0.3;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.6;
-    transform: scale(1.02);
-  }
-`;
-
 const spin = keyframes`
   from {
     transform: rotate(0deg);
@@ -472,32 +458,6 @@ const IndexPage = styled(Component)`
     display: flex;
     flex-direction: column;
     gap: 12px;
-  }
-
-  &__greetingBadge {
-    display: inline-flex;
-    gap: ${({ theme }) => theme.spacing.sm};
-    align-items: center;
-    width: fit-content;
-    padding: 6px 14px;
-    font-family: ${({ theme }) => theme.typography.fontFamily.monospace};
-    font-size: ${({ theme }) => theme.typography.fontSize.xs};
-    font-weight: ${({ theme }) => theme.typography.fontWeight.medium};
-    color: ${({ theme }) => theme.colors.primary.main};
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    background: ${({ theme }) => theme.colors.primary.main}14;
-    border: 1px solid ${({ theme }) => theme.colors.primary.main}33;
-    border-radius: ${({ theme }) => theme.borders.radius.full};
-  }
-
-  &__statusDot {
-    width: 6px;
-    height: 6px;
-    background: ${({ theme }) => theme.colors.semantic.success.main};
-    border-radius: 50%;
-    box-shadow: 0 0 8px ${({ theme }) => theme.colors.semantic.success.main};
-    animation: ${pulse} 2s ease-in-out infinite;
   }
 
   &__heroTitle {

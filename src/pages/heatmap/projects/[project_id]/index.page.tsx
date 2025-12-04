@@ -18,7 +18,6 @@ import { useGeneralSelect } from '@src/hooks/useGeneral';
 import { useHeatmapState } from '@src/hooks/useHeatmapState';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { patchSplitMode } from '@src/slices/canvasSlice';
-import { dimensions } from '@src/styles/style';
 import { useOnlineHeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 
 export type HeatMapTaskIdPageProps = {
@@ -123,11 +122,9 @@ export const HeatmapIdPageLayoutComponent: FC<HeatmapIdPageLayoutProps> = ({ cla
 
 export const HeatmapIdPageLayout = styled(HeatmapIdPageLayoutComponent)`
   height: 100vh;
-  padding-top: ${dimensions.headerHeight}px;
   background: ${({ theme }) => theme.colors.surface.raised};
 
   &__headerV {
-    align-self: end;
     padding: 4px 12px;
     color: ${({ theme }) => theme.colors.primary.main};
     border: 1px solid ${({ theme }) => theme.colors.primary.main};

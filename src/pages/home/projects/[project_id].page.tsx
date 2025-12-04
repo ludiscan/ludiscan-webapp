@@ -14,6 +14,7 @@ import type { FC } from 'react';
 
 import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
+import { DashboardBackgroundCanvas } from '@src/component/templates/DashboardBackgroundCanvas';
 import { Header } from '@src/component/templates/Header';
 import { SidebarLayout } from '@src/component/templates/SidebarLayout';
 import { useToast } from '@src/component/templates/ToastContext';
@@ -114,6 +115,7 @@ const Component: FC<ProjectDetailsPageProps> = ({ className }) => {
   if (!ready || isLoading) {
     return (
       <div className={className}>
+        <DashboardBackgroundCanvas />
         <SidebarLayout />
         <InnerContent>
           <div className={`${className}__loadingContainer`}>
@@ -128,6 +130,7 @@ const Component: FC<ProjectDetailsPageProps> = ({ className }) => {
   if (isErrorProject || !project) {
     return (
       <div className={className}>
+        <DashboardBackgroundCanvas />
         <SidebarLayout />
         <InnerContent>
           <Header title='Project Details' onClick={handleBack} />
@@ -143,10 +146,8 @@ const Component: FC<ProjectDetailsPageProps> = ({ className }) => {
 
   return (
     <div className={`${className} ${isVisible ? 'visible' : ''}`}>
-      {/* Background decorations */}
-      <div className={`${className}__orb ${className}__orb--1`} />
-      <div className={`${className}__orb ${className}__orb--2`} />
-      <div className={`${className}__grid-overlay`} />
+      {/* Background */}
+      <DashboardBackgroundCanvas />
 
       <SidebarLayout />
       <InnerContent>
@@ -230,17 +231,6 @@ const slideUp = keyframes`
   }
 `;
 
-const pulse = keyframes`
-  0%, 100% {
-    opacity: 0.3;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.6;
-    transform: scale(1.02);
-  }
-`;
-
 const spin = keyframes`
   from {
     transform: rotate(0deg);
@@ -254,50 +244,6 @@ const ProjectDetailsPage = styled(Component)`
   position: relative;
   min-height: 100vh;
   overflow: hidden;
-
-  /* Grid overlay */
-  &__grid-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    background-image:
-      linear-gradient(${({ theme }) => theme.colors.primary.main}06 1px, transparent 1px),
-      linear-gradient(90deg, ${({ theme }) => theme.colors.primary.main}06 1px, transparent 1px);
-    background-size: 80px 80px;
-  }
-
-  /* Glowing orbs */
-  &__orb {
-    position: fixed;
-    pointer-events: none;
-    border-radius: 50%;
-    opacity: 0;
-    filter: blur(100px);
-    transition: opacity 1s ease;
-
-    &--1 {
-      top: -10%;
-      right: -5%;
-      width: 500px;
-      height: 500px;
-      background: radial-gradient(circle, ${({ theme }) => theme.colors.primary.main}33 0%, transparent 70%);
-      animation: ${pulse} 10s ease-in-out infinite;
-    }
-
-    &--2 {
-      bottom: -10%;
-      left: -5%;
-      width: 600px;
-      height: 600px;
-      background: radial-gradient(circle, ${({ theme }) => theme.colors.tertiary.main}26 0%, transparent 70%);
-      animation: ${pulse} 12s ease-in-out infinite 3s;
-    }
-  }
-
-  &.visible &__orb {
-    opacity: 1;
-  }
 
   &__mainContent {
     position: relative;
@@ -609,10 +555,6 @@ const ProjectDetailsPage = styled(Component)`
       flex: none;
       min-width: 100px;
       padding: 12px 16px;
-    }
-
-    &__orb {
-      display: none;
     }
   }
 `;

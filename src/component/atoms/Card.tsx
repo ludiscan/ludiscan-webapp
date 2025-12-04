@@ -1,6 +1,9 @@
 import styled from '@emotion/styled';
 
-import type { ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
+
+import { useSharedTheme } from '@src/hooks/useSharedTheme';
+import { hexToRGBA } from '@src/styles/style';
 
 export type CardProps = {
   className?: string;
@@ -8,6 +11,7 @@ export type CardProps = {
   shadow?: 'none' | 'small' | 'medium' | 'large';
   color?: string;
   border?: string;
+  borderWidth?: string;
   padding?: string;
   stopPropagate?: boolean;
   blur?: boolean | 'low' | 'medium' | 'high';
@@ -57,42 +61,35 @@ const shadowStyle = (props: CardProps) => {
   return 'none';
 };
 
-const hexToRgba = (hex: string, alpha: number) => {
-  let c = hex.replace('#', '');
-  if (c.length === 3)
-    c = c
-      .split('')
-      .map((ch) => ch + ch)
-      .join('');
-  const num = parseInt(c, 16);
-  const r = (num >> 16) & 0xff;
-  const g = (num >> 8) & 0xff;
-  const b = num & 0xff;
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-};
-
 export const Card = styled(Component)`
   padding: ${({ padding }) => padding || '16px'};
   background-color: ${({ color, theme }) => color || theme.colors.surface.base};
-  ${({ border }) => border && `border: 1px solid ${border};`}
+  ${({ border, borderWidth }) => border && `border: ${borderWidth || '1px'} solid ${border};`}
   border-radius: 8px;
   box-shadow: ${(props) => shadowStyle(props)};
 
   &.blur-low {
-    background-color: ${({ color, theme }) => hexToRgba(color || theme.colors.surface.base, 0.4)};
-    ${({ border }) => border && `border: 1px solid ${hexToRgba(border, 1)};`}
+    background-color: ${({ color, theme }) => hexToRGBA(color || theme.colors.surface.base, 0.4)};
+    ${({ border, borderWidth }) => border && `border: ${borderWidth || '1px'} solid ${hexToRGBA(border, 1)};`}
     backdrop-filter: blur(4px);
   }
 
   &.blur-medium {
-    background-color: ${({ color, theme }) => hexToRgba(color || theme.colors.surface.base, 0.4)};
-    ${({ border }) => border && `border: 1px solid ${hexToRgba(border, 1)};`}
+    background-color: ${({ color, theme }) => hexToRGBA(color || theme.colors.surface.base, 0.6)};
+    ${({ border, borderWidth }) => border && `border: ${borderWidth || '1px'} solid ${hexToRGBA(border, 1)};`}
     backdrop-filter: blur(8px);
   }
 
   &.blur-high {
-    background-color: ${({ color, theme }) => hexToRgba(color || theme.colors.surface.base, 0.4)};
-    ${({ border }) => border && `border: 1px solid ${hexToRgba(border, 1)};`}
+    background-color: ${({ color, theme }) => hexToRGBA(color || theme.colors.surface.base, 0.8)};
+    ${({ border, borderWidth }) => border && `border: ${borderWidth || '1px'} solid ${hexToRGBA(border, 1)};`}
     backdrop-filter: blur(12px);
   }
 `;
+
+export type PanelCardProps = Omit<CardProps, 'blur' | 'border' | 'borderWidth'>;
+
+export const PanelCard: FC<PanelCardProps> = (props) => {
+  const { theme } = useSharedTheme();
+  return <Card {...props} blur={'medium'} border={theme.colors.border.strong} borderWidth={'1px'} />;
+};

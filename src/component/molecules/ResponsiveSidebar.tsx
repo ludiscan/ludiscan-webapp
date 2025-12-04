@@ -13,7 +13,7 @@ import { RiMenu2Fill, RiMenu3Fill } from 'react-icons/ri';
 import type { FC, ReactNode } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
-import { Card } from '@src/component/atoms/Card';
+import { PanelCard } from '@src/component/atoms/Card';
 import { FlexRow } from '@src/component/atoms/Flex';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { dimensions, zIndexes } from '@src/styles/style';
@@ -91,13 +91,13 @@ const FixedWrapper = styled.div`
 `;
 
 /** コンテンツ用のスタイル（backdrop-filter, transformなど） */
-const SidebarContent = styled(Card)`
+const SidebarContent = styled(PanelCard)`
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
 
   /* Use logical properties for sizing */
-  inline-size: ${dimensions.sidebarWidth}px;
+  inline-size: calc(${dimensions.sidebarWidth}px - 6px);
   block-size: calc(100vh - var(--spacing-xs) * 2);
 
   /* Use logical properties for padding */
@@ -106,8 +106,7 @@ const SidebarContent = styled(Card)`
   margin: var(--spacing-xs);
   overflow-y: auto;
   pointer-events: auto;
-  border-radius: var(--border-radius-xl);
-  box-shadow: 0 2px 4px rgb(0 0 0 / 30%);
+  box-shadow: 0 2px 4px rgb(0 0 0 / 20%);
 
   /* RTL/LTR aware transform */
   transform: translateX(-100%);
@@ -151,7 +150,7 @@ const SidebarPortalContent: FC<SidebarContentProps> = ({ className, children, is
   return (
     <FixedWrapper>
       <ToggleButton onClick={toggleSidebar} isOpen={isOpen} />
-      <SidebarContent className={`${className} ${isOpen ? 'visible' : ''}`} blur={'low'} color={surfaceColor}>
+      <SidebarContent className={`${className} ${isOpen ? 'visible' : ''}`} color={surfaceColor}>
         {children}
       </SidebarContent>
     </FixedWrapper>

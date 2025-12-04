@@ -25,18 +25,18 @@ export const oceanAbyssLight: Theme = {
       contrast: '#FFFFFF', // White
     },
     background: {
-      default: '#F0F7FA', // Soft Sky Blue
-      paper: '#FFFFFF', // Pure White
-      elevated: '#FAFCFD', // Slight Blue Tint
+      default: '#E5EEF2', // Soft Sky Gray
+      paper: '#F0F5F8', // Off Sky White
+      elevated: '#EBF2F5', // Slight Blue Tint
       overlay: 'rgba(44, 95, 122, 0.05)', // Ocean Tint
     },
     surface: {
-      base: '#FFFFFF',
-      raised: '#F8FBFC',
-      sunken: '#E8F4F8',
-      interactive: '#E0F2F7',
-      hover: '#D4EBF3',
-      pressed: '#C5E3EF',
+      base: '#F0F5F8',
+      raised: '#EBF2F5',
+      sunken: '#E0EBF0',
+      interactive: '#D5E5EB',
+      hover: '#C8DDE5',
+      pressed: '#B8D3DE',
     },
     text: {
       primary: '#0D1B2A', // Deep Ocean Black
