@@ -9,6 +9,7 @@ import { Card } from '@src/component/atoms/Card';
 import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { VerticalSpacer } from '@src/component/atoms/Spacer';
 import { Text } from '@src/component/atoms/Text';
+import { DashboardBackgroundCanvas } from '@src/component/templates/DashboardBackgroundCanvas';
 import { Header } from '@src/component/templates/Header';
 import { SidebarLayout } from '@src/component/templates/SidebarLayout';
 import { useHealthCheck } from '@src/hooks/useHealthCheck';
@@ -23,6 +24,7 @@ const Component: FC<HealthPageProps> = ({ className }) => {
   const router = useRouter();
   const { theme } = useSharedTheme();
   const [autoRefresh, setAutoRefresh] = useState(true);
+
   const {
     data,
     isLoading: healthLoading,
@@ -73,6 +75,7 @@ const Component: FC<HealthPageProps> = ({ className }) => {
 
   return (
     <div className={className}>
+      <DashboardBackgroundCanvas />
       <SidebarLayout />
       <InnerContent>
         <Header title='System Health Check' onClick={handleBack} />

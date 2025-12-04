@@ -29,18 +29,18 @@ export const nordicNightLight: Theme = {
       contrast: '#2E3440', // Dark Gray
     },
     background: {
-      default: '#ECEFF4', // Snow White
-      paper: '#FFFFFF', // Pure White
-      elevated: '#F5F7FA', // Slight Blue Tint
+      default: '#E2E6ED', // Snow Gray
+      paper: '#ECEFF4', // Off Snow White
+      elevated: '#E8ECF2', // Slight Blue Tint
       overlay: 'rgba(94, 129, 172, 0.04)', // Nordic Tint
     },
     surface: {
-      base: '#FFFFFF',
-      raised: '#F5F7FA',
-      sunken: '#E5E9F0',
-      interactive: '#DDE3EB',
-      hover: '#D4DCE6',
-      pressed: '#C8D1DE',
+      base: '#ECEFF4',
+      raised: '#E8ECF2',
+      sunken: '#DBE0E8',
+      interactive: '#D0D6E0',
+      hover: '#C5CDD8',
+      pressed: '#B8C2D0',
     },
     text: {
       primary: '#2E3440', // Dark Gray

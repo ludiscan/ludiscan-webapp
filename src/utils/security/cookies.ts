@@ -12,14 +12,20 @@ import type { NextApiResponse } from 'next';
  *
  * Development vs Production settings:
  * - Development: Works with HTTP, sameSite 'lax' for local testing
- * - Production: Enforces HTTPS, stricter security
+ * - Production: Enforces HTTPS, sameSite 'none' for cross-subdomain requests
  *
- * Note: sameSite 'none' requires secure: true, so we use 'lax' for development
+ * Cross-subdomain support:
+ * - Frontend: ludiapp.matuyuhi.com
+ * - API: matuyuhi.com
+ * - Explicit domain: '.matuyuhi.com' allows cookies to be sent across both subdomains
+ * - sameSite 'none' is required for fetch requests across subdomains in production
+ * - sameSite 'none' requires secure: true (enforced in production)
  */
 const DEFAULT_COOKIE_OPTIONS: SerializeOptions = {
   httpOnly: true, // Prevent JavaScript access (XSS protection)
   secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-  sameSite: 'lax', // CSRF protection, works with top-level navigation
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-subdomain requests in production, 'lax' for local testing
+  domain: process.env.NODE_ENV === 'production' ? '.matuyuhi.com' : undefined, // Cross-subdomain cookie sharing in production
   path: '/',
   maxAge: 60 * 60 * 24 * 7, // 7 days
 };

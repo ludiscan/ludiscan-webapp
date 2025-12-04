@@ -21,6 +21,7 @@ import { useAuth } from '@src/hooks/useAuth';
 import { useIsDesktop } from '@src/hooks/useIsDesktop';
 import { useLocale } from '@src/hooks/useLocale';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
+import { dimensions } from '@src/styles/style';
 
 export type LoginPageProps = {
   className?: string | undefined;
@@ -180,7 +181,8 @@ const Content: FC<LoginPageProps> = ({ className }) => {
       <SVGFilterDefs />
       <WavyLayer />
       <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', zIndex: 1, height: '100%' }}>
-        <Header title={''} />
+        <Header title={''} showSidebar={false} />
+        <VerticalSpacer size={dimensions.headerHeight} />
         <Card
           color={isDesktop ? theme.colors.surface.base : 'unset'}
           border={theme.colors.border.default}

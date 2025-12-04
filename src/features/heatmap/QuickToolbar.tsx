@@ -10,7 +10,6 @@ import { Text } from '@src/component/atoms/Text';
 import { Selector } from '@src/component/molecules/Selector';
 import { useRouteCoachApi } from '@src/features/heatmap/routecoach/api';
 import { useGeneralPatch } from '@src/hooks/useGeneral';
-import { useApiClient } from '@src/modeles/ApiClientContext';
 import { DefaultStaleTime } from '@src/modeles/qeury';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
@@ -27,7 +26,6 @@ function Toolbar({ className, service, dimensionality }: Props) {
   const [percent, setPercent] = useState(100);
   const [selectSessionId, setSelectSessionId] = useState<string | undefined>(undefined);
   const qc = useQueryClient();
-  const apiClient = useApiClient();
   const routeCoachApi = useRouteCoachApi();
 
   // 2D/3Dモード切り替え用
@@ -35,22 +33,7 @@ function Toolbar({ className, service, dimensionality }: Props) {
 
   const { data: sessions } = useQuery({
     queryKey: ['sessions', service.projectId],
-    queryFn: async () => {
-      if (!service.projectId) return;
-      const { data, error } = await apiClient.GET('/api/v0/projects/{project_id}/play_session', {
-        params: {
-          path: {
-            project_id: service.projectId,
-          },
-          query: {
-            limit: 200,
-            offset: 0,
-          },
-        },
-      });
-      if (error) return;
-      return data;
-    },
+    queryFn: () => service.getSessions(200, 0),
     staleTime: DefaultStaleTime,
     enabled: service.projectId !== undefined,
   });

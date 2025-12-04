@@ -10,6 +10,7 @@ import { GameApiKeyCreateModal } from '@src/component/organisms/GameApiKeyCreate
 import { GameApiKeyDeleteConfirmModal } from '@src/component/organisms/GameApiKeyDeleteConfirmModal';
 import { GameApiKeyDetailModal } from '@src/component/organisms/GameApiKeyDetailModal';
 import { GameApiKeyList } from '@src/component/organisms/GameApiKeyList';
+import { DashboardBackgroundCanvas } from '@src/component/templates/DashboardBackgroundCanvas';
 import { Header } from '@src/component/templates/Header';
 import { SidebarLayout } from '@src/component/templates/SidebarLayout';
 import { useToast } from '@src/component/templates/ToastContext';
@@ -119,6 +120,7 @@ const Component: FC<ApiKeysPageProps> = ({ className }) => {
   if (!ready || isLoading) {
     return (
       <div className={className}>
+        <DashboardBackgroundCanvas className='visible' />
         <SidebarLayout />
         <InnerContent>
           <div className={`${className}__centerContent`}>
@@ -131,6 +133,7 @@ const Component: FC<ApiKeysPageProps> = ({ className }) => {
 
   return (
     <div className={className}>
+      <DashboardBackgroundCanvas className='visible' />
       <SidebarLayout />
       <InnerContent>
         <Header title='API Keys' onClick={handleBack} />
@@ -184,6 +187,7 @@ const Component: FC<ApiKeysPageProps> = ({ className }) => {
 };
 
 const ApiKeysPage = styled(Component)`
+  position: relative;
   height: 100vh;
 
   &__container {

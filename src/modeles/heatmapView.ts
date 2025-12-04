@@ -35,6 +35,10 @@ export type GeneralSettings = {
   colorScale: number;
   sessionHeatmap: boolean;
   dimensionalityOverride: '2d' | '3d' | null; // ユーザーによる2D/3Dモード切り替え（nullの場合はproject.is2Dに従う）
+  backgroundImage: string | null; // ユーザーが選択した背景画像のData URL
+  backgroundScale: number; // 背景画像のスケール（1.0 = 100%）
+  backgroundOffsetX: number; // 背景画像のX方向オフセット（-100 ~ 100）
+  backgroundOffsetY: number; // 背景画像のY方向オフセット（-100 ~ 100）
 };
 export type HotspotModeSettings = {
   visible: boolean;
@@ -113,6 +117,10 @@ export const initializeValues: HeatmapDataState = {
     colorScale: 1.0,
     sessionHeatmap: false,
     dimensionalityOverride: null, // 初期状態ではproject.is2Dに従う
+    backgroundImage: null, // ユーザーが選択した背景画像（初期状態はなし）
+    backgroundScale: 1.0, // 背景画像のスケール（初期値は100%）
+    backgroundOffsetX: 0, // 背景画像のXオフセット（初期値は中央）
+    backgroundOffsetY: 0, // 背景画像のYオフセット（初期値は中央）
   },
   hotspotMode: {
     visible: false,

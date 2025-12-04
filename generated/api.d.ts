@@ -103,6 +103,41 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/admin/blocked-ips': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get list of blocked IPs */
+    get: operations['BlockedIpsController_getBlockedIps'];
+    put?: never;
+    post?: never;
+    /** Unblock all blocked IPs */
+    delete: operations['BlockedIpsController_unblockAll'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/blocked-ips/{ip}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Unblock a specific IP address */
+    delete: operations['BlockedIpsController_unblockIp'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v0/users': {
     parameters: {
       query?: never;
@@ -149,10 +184,28 @@ export interface paths {
     get: operations['UsersController_findOne'];
     put?: never;
     post?: never;
-    delete?: never;
+    /** ユーザーを削除 */
+    delete: operations['UsersController_delete'];
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  '/api/v0/users/{id}/role': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** ユーザーのロールを更新 */
+    patch: operations['UsersController_updateRole'];
     trace?: never;
   };
   '/api/v0/auth/google': {
@@ -718,6 +771,87 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v0.1/projects/{project_id}/sessions/search': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Search play sessions
+     * @description
+     *     Search play sessions with flexible query parameters.
+     *
+     *     **Search Methods:**
+     *     1. Individual parameters (name, platform, device_id, etc.)
+     *     2. Unified search using 'q' parameter (plain text keyword OR GitHub-style filters)
+     *     3. Both combined (parameters are merged with AND logic)
+     *
+     *     **'q' Parameter Examples:**
+     *
+     *     *Plain text keyword search (searches across name, device_id, platform, app_version, metadata keys and values):*
+     *     - `q=Session_2025` - Find sessions with "Session_2025" in any searchable field
+     *     - `q=Android` - Find sessions with "Android" in any searchable field
+     *     - `q=MapA` - Find sessions with "MapA" in metadata (key or value)
+     *     - `q=score` - Find sessions with "score" metadata key or value
+     *
+     *     *GitHub-style filters:*
+     *     - `q=platform:Android is:playing` - Android sessions currently playing
+     *     - `q=name:Session is:finished` - Finished sessions with "Session" in name
+     *     - `q=metadata.mapName:Level1 platform:iOS` - iOS sessions with mapName=Level1
+     *     - `q=start_time:>2025-01-01 is:finished` - Finished sessions after 2025-01-01
+     *
+     *     *Mixed (keyword + filters):*
+     *     - `q=Session_2025 platform:Android` - Sessions with "Session_2025" in name/device/platform/version AND on Android
+     *     - `q=Level1 is:finished` - Finished sessions with "Level1" in any searchable field
+     *
+     *     **Metadata Search (using individual parameters):**
+     *     - `metadata_key=mapName` - Sessions that have mapName key (any value)
+     *     - `metadata_key=mapName&metadata_value=Level1` - Sessions with mapName=Level1
+     *
+     */
+    get: operations['PlaySessionV01Controller_search'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0.1/projects/{project_id}/sessions/search/summary': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Search play sessions summary
+     * @description
+     *     Get lightweight summary of all matching sessions (no pagination).
+     *     This endpoint is useful for previewing which sessions will be included in a heatmap task before creating it.
+     *
+     *     Accepts the same search parameters as the regular search endpoint, but returns only session IDs and display text.
+     *
+     *     **Display Format:** "SessionName (Platform, Version) - YYYY-MM-DD HH:mm"
+     *
+     *     **Use Case:**
+     *     1. Call this endpoint to preview filtered sessions
+     *     2. User confirms the session list
+     *     3. Use the same search query in heatmap task creation API
+     *
+     */
+    get: operations['PlaySessionV01Controller_searchSummary'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v0.1/projects/{project_id}/sessions/{session_id}/maps': {
     parameters: {
       query?: never;
@@ -727,6 +861,123 @@ export interface paths {
     };
     /** セッションのマップ一覧 */
     get: operations['PlaySessionV01Controller_getSessionMaps'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0.1/projects/{project_id}/sessions/aggregate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Aggregate play sessions
+     * @description
+     *     Aggregate play sessions with flexible filter criteria and return statistics.
+     *
+     *     **Features:**
+     *     - Count sessions matching filter criteria (total, finished, playing)
+     *     - Aggregate numeric metadata fields (sum, avg, min, max)
+     *     - Combine multiple aggregations in a single request
+     *
+     *     **Filter Criteria:**
+     *     Same as search endpoint - supports individual parameters, 'q' unified query, or both.
+     *
+     *     **Aggregation Example:**
+     *     ```json
+     *     {
+     *       "platform": "Android",
+     *       "is_playing": false,
+     *       "aggregations": [
+     *         { "field": "score", "operations": ["sum", "avg", "min", "max"] },
+     *         { "field": "playTime", "operations": ["sum", "avg"] }
+     *       ]
+     *     }
+     *     ```
+     *
+     *     **Response Example:**
+     *     ```json
+     *     {
+     *       "totalCount": 250,
+     *       "finishedCount": 200,
+     *       "playingCount": 50,
+     *       "aggregations": [
+     *         { "field": "score", "count": 180, "sum": 12500, "avg": 69.44, "min": 10, "max": 200 },
+     *         { "field": "playTime", "count": 195, "sum": 58500, "avg": 300 }
+     *       ]
+     *     }
+     *     ```
+     *
+     */
+    post: operations['PlaySessionV01Controller_aggregate'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0.1/projects/{project_id}/sessions/filter-options': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get filter options
+     * @description
+     *     Get distinct values for filter dropdowns.
+     *
+     *     Returns lists of unique values for:
+     *     - Platforms (e.g., Android, iOS, Windows)
+     *     - App versions (e.g., 1.0.0, 1.1.0, 2.0.0)
+     *     - Device IDs
+     *
+     *     Use these values to populate filter dropdowns in the UI.
+     *
+     */
+    get: operations['PlaySessionV01Controller_getFilterOptions'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0.1/projects/{project_id}/sessions/metadata-keys': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get metadata keys
+     * @description
+     *     Get all metadata keys used across sessions in a project.
+     *
+     *     Returns for each key:
+     *     - Key name
+     *     - Count of sessions that have this key
+     *     - Whether the values are numeric (can be aggregated)
+     *     - Sample values (up to 5)
+     *
+     *     Use this to:
+     *     - Build dynamic metadata filter UI
+     *     - Know which fields can be used for aggregation
+     *     - Preview what data is available in metadata
+     *
+     */
+    get: operations['PlaySessionV01Controller_getMetadataKeys'];
     put?: never;
     post?: never;
     delete?: never;
@@ -839,6 +1090,30 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v0/heatmap/projects/{project_id}/tasks/list': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get heatmap tasks list for project
+     * @description
+     *     Get a list of completed heatmap tasks for a project with pagination.
+     *     Returns tasks ordered by most recent first (by updated_at).
+     *     Does not include heavy result data for better performance.
+     *
+     */
+    get: operations['HeatmapController_getProjectTasksList'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v0/heatmap/projects/{project_id}/tasks': {
     parameters: {
       query?: never;
@@ -848,7 +1123,29 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Create heatmap calculation task for project */
+    /**
+     * Create heatmap calculation task for project
+     * @description
+     *     Create a heatmap task for a project with optional session filtering.
+     *
+     *     **Filtering Options:**
+     *     1. No filter: Use all sessions in the project
+     *     2. sessionIds: Specify exact session IDs (array of numbers)
+     *     3. searchQuery: Use search parameters to filter sessions (same as session search API)
+     *
+     *     **Note:** sessionIds and searchQuery cannot be used together.
+     *
+     *     **Example with searchQuery:**
+     *     ```json
+     *     {
+     *       "stepSize": 300,
+     *       "searchQuery": {
+     *         "q": "platform:Android is:finished"
+     *       }
+     *     }
+     *     ```
+     *
+     */
     post: operations['HeatmapController_createProjectTask'];
     delete?: never;
     options?: never;
@@ -1165,6 +1462,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v0/game/projects/{project_id}/sessions/{session_id}/heatmap-embed-url': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * ヒートマップ埋め込みページのURLを取得
+     * @description セッション完了後にWebViewで直接ヒートマップを表示するためのURL（1時間有効なトークン付き）を生成します
+     */
+    get: operations['GameController_getHeatmapEmbedUrl'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v0/route-coach/projects/{project_id}/event-clusters': {
     parameters: {
       query?: never;
@@ -1261,6 +1578,236 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v0/embed/verify': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Embedトークンを検証
+     * @description heatmap埋め込み用トークンを検証し、projectIdとsessionIdを返します
+     */
+    post: operations['EmbedController_verifyToken'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/public-stats': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 公開統計情報を取得
+     * @description システム全体の統計情報を取得します。認証は不要です。
+     */
+    get: operations['PublicStatsController_getPublicStats'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/admin/stats': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get admin dashboard stats */
+    get: operations['AdminController_getStats'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/admin/users': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List all users */
+    get: operations['AdminController_getUsers'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/admin/users/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get user by ID */
+    get: operations['AdminController_getUser'];
+    put?: never;
+    post?: never;
+    /** Delete user */
+    delete: operations['AdminController_deleteUser'];
+    options?: never;
+    head?: never;
+    /** Update user */
+    patch: operations['AdminController_updateUser'];
+    trace?: never;
+  };
+  '/api/v0/admin/projects': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List all projects */
+    get: operations['AdminController_getProjects'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/admin/projects/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Delete project */
+    delete: operations['AdminController_deleteProject'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/admin/sessions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List all play sessions */
+    get: operations['AdminController_getSessions'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/admin/sessions/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Delete play session */
+    delete: operations['AdminController_deleteSession'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/admin/api-keys': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List all API keys */
+    get: operations['AdminController_getApiKeys'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/admin/api-keys/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Delete API key */
+    delete: operations['AdminController_deleteApiKey'];
+    options?: never;
+    head?: never;
+    /** Update API key (enable/disable) */
+    patch: operations['AdminController_updateApiKey'];
+    trace?: never;
+  };
+  '/api/v0/admin/heatmap-tasks': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List all heatmap tasks */
+    get: operations['AdminController_getHeatmapTasks'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/admin/heatmap-tasks/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Delete heatmap task */
+    delete: operations['AdminController_deleteHeatmapTask'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1277,6 +1824,13 @@ export interface components {
       /** @example password */
       password: string;
       email: string;
+    };
+    UpdateRoleDto: {
+      /**
+       * @description ユーザーの新しいロール (例: user, admin)
+       * @example admin
+       */
+      role: string;
     };
     GoogleStartQueryDto: {
       /** @description 署名付きのstate（CSRF防止やモード伝播用）。リンク時はAuthControllerが自動生成。 */
@@ -1469,12 +2023,296 @@ export interface components {
       avg: number;
     };
     CreateGeneralLogDto: {
+      /**
+       * @description テキストデータ
+       * @example Player collected item
+       */
       text_data: Record<string, never> | null;
-      position_data: Record<string, never> | null;
-      /** @description Extended metadata for RouteCoach extended events */
+      /** @description 位置データ */
+      position_data: components['schemas']['Position'] | null;
+      /**
+       * @description RouteCoach拡張イベント用のメタデータ
+       * @example {
+       *       "type": "achievement",
+       *       "category": "collectible",
+       *       "severity": "low",
+       *       "tags": [
+       *         "item",
+       *         "collect"
+       *       ]
+       *     }
+       */
       metadata: Record<string, never> | null;
+      /**
+       * @description オフセットタイムスタンプ（ミリ秒）
+       * @example 1500
+       */
       offset_timestamp: number;
+      /**
+       * @description プレイヤーID
+       * @example 1
+       */
       player: number;
+    };
+    SearchPlaySessionResponseDto: {
+      /** @description Array of play sessions matching the search criteria */
+      data: components['schemas']['PlaySessionResponseDto'][];
+      /**
+       * @description Total number of sessions matching the criteria
+       * @example 100
+       */
+      total: number;
+      /**
+       * @description Number of results returned
+       * @example 20
+       */
+      limit: number;
+      /**
+       * @description Number of results skipped
+       * @example 0
+       */
+      offset: number;
+    };
+    SearchSessionSummaryDto: {
+      /**
+       * @description Session ID
+       * @example 1
+       */
+      id: number;
+      /**
+       * @description Display text for the session (includes name, platform, version, and start time)
+       * @example Session_2025-01-15_Morning (Android, v1.2.3) - 2025-01-15 10:30
+       */
+      display: string;
+    };
+    SearchSessionSummaryResponseDto: {
+      /** @description Array of session summaries matching the search criteria (no pagination) */
+      sessions: components['schemas']['SearchSessionSummaryDto'][];
+      /**
+       * @description Total number of sessions found
+       * @example 42
+       */
+      total: number;
+    };
+    AggregationFieldDto: {
+      /**
+       * @description Metadata field name to aggregate (e.g., "score", "playTime")
+       * @example score
+       */
+      field: string;
+      /**
+       * @description Aggregation operations to perform
+       * @example [
+       *       "sum",
+       *       "avg",
+       *       "min",
+       *       "max"
+       *     ]
+       */
+      operations: ('count' | 'sum' | 'avg' | 'min' | 'max')[];
+    };
+    AggregatePlaySessionDto: {
+      /**
+       * @description Session name (partial match)
+       * @example Session_2025
+       */
+      name?: string;
+      /**
+       * @description Device ID (exact match)
+       * @example device-123
+       */
+      device_id?: string;
+      /**
+       * @description Platform (exact match)
+       * @example Android
+       */
+      platform?: string;
+      /**
+       * @description App version (exact match)
+       * @example 1.0.0
+       */
+      app_version?: string;
+      /**
+       * @description Start time from (ISO 8601)
+       * @example 2025-01-01T00:00:00Z
+       */
+      start_time_from?: string;
+      /**
+       * @description Start time to (ISO 8601)
+       * @example 2025-01-31T23:59:59Z
+       */
+      start_time_to?: string;
+      /**
+       * @description End time from (ISO 8601)
+       * @example 2025-01-01T00:00:00Z
+       */
+      end_time_from?: string;
+      /**
+       * @description End time to (ISO 8601)
+       * @example 2025-01-31T23:59:59Z
+       */
+      end_time_to?: string;
+      /**
+       * @description Filter by playing status (true: currently playing, false: finished)
+       * @example false
+       */
+      is_playing?: boolean;
+      /**
+       * @description Metadata key to filter by (can be used alone to check key existence)
+       * @example mapName
+       */
+      metadata_key?: string;
+      /**
+       * @description Metadata value to filter by (requires metadata_key to be specified)
+       * @example Level1
+       */
+      metadata_value?: string;
+      /**
+       * @description Unified search query (same format as search endpoint)
+       * @example platform:Android is:finished
+       */
+      q?: string;
+      /**
+       * @description Array of fields to aggregate with their operations. If not specified, only count is returned.
+       * @example [
+       *       {
+       *         "field": "score",
+       *         "operations": [
+       *           "sum",
+       *           "avg",
+       *           "min",
+       *           "max"
+       *         ]
+       *       },
+       *       {
+       *         "field": "playTime",
+       *         "operations": [
+       *           "sum",
+       *           "avg"
+       *         ]
+       *       }
+       *     ]
+       */
+      aggregations?: components['schemas']['AggregationFieldDto'][];
+    };
+    FieldAggregationResultDto: {
+      /**
+       * @description Field name that was aggregated
+       * @example score
+       */
+      field: string;
+      /**
+       * @description Count of sessions that have this field with numeric value
+       * @example 150
+       */
+      count: number;
+      /**
+       * @description Sum of all values (if requested)
+       * @example 12500
+       */
+      sum?: number;
+      /**
+       * @description Average value (if requested)
+       * @example 83.33
+       */
+      avg?: number;
+      /**
+       * @description Minimum value (if requested)
+       * @example 10
+       */
+      min?: number;
+      /**
+       * @description Maximum value (if requested)
+       * @example 200
+       */
+      max?: number;
+    };
+    AggregatePlaySessionResponseDto: {
+      /**
+       * @description Total count of sessions matching the filter criteria
+       * @example 250
+       */
+      totalCount: number;
+      /**
+       * @description Count of finished sessions (end_time is not null)
+       * @example 200
+       */
+      finishedCount: number;
+      /**
+       * @description Count of sessions currently playing (end_time is null)
+       * @example 50
+       */
+      playingCount: number;
+      /** @description Aggregation results for each requested field */
+      aggregations?: components['schemas']['FieldAggregationResultDto'][];
+    };
+    FilterOptionsResponseDto: {
+      /**
+       * @description List of distinct platforms
+       * @example [
+       *       "Android",
+       *       "iOS",
+       *       "Windows"
+       *     ]
+       */
+      platforms: string[];
+      /**
+       * @description List of distinct app versions
+       * @example [
+       *       "1.0.0",
+       *       "1.1.0",
+       *       "2.0.0"
+       *     ]
+       */
+      appVersions: string[];
+      /**
+       * @description List of distinct device IDs
+       * @example [
+       *       "device-001",
+       *       "device-002"
+       *     ]
+       */
+      deviceIds: string[];
+      /**
+       * @description Total session count in the project
+       * @example 500
+       */
+      totalSessions: number;
+    };
+    MetadataKeyInfoDto: {
+      /**
+       * @description Metadata key name
+       * @example score
+       */
+      key: string;
+      /**
+       * @description Number of sessions that have this key
+       * @example 150
+       */
+      count: number;
+      /**
+       * @description Whether the values are numeric (can be aggregated)
+       * @example true
+       */
+      isNumeric: boolean;
+      /**
+       * @description Sample values (up to 5)
+       * @example [
+       *       100,
+       *       200,
+       *       150
+       *     ]
+       */
+      sampleValues: string[];
+    };
+    MetadataKeysResponseDto: {
+      /** @description List of metadata keys with their information */
+      keys: components['schemas']['MetadataKeyInfoDto'][];
+      /**
+       * @description Total session count in the project
+       * @example 500
+       */
+      totalSessions: number;
     };
     PlayPositionLogDto: {
       /**
@@ -1482,11 +2320,24 @@ export interface components {
        * @example 1
        */
       player: number;
+      /** @description X coordinate */
       x: number;
+      /** @description Y coordinate */
       y: number;
+      /** @description Z coordinate */
       z?: number | null;
+      /** @description Milliseconds since session start */
       offset_timestamp: number;
+      /** @description Location name or identifier */
       location?: string | null;
+      /**
+       * @description Player status data (health, state, score, etc.)
+       * @example {
+       *       "health": 100,
+       *       "state": "running",
+       *       "score": 1000
+       *     }
+       */
       status?: Record<string, never> | null;
     };
     FieldObjectLogDto: {
@@ -1500,8 +2351,11 @@ export interface components {
        * @example health_potion
        */
       object_type: string;
+      /** @description X coordinate */
       x: number;
+      /** @description Y coordinate */
       y: number;
+      /** @description Z coordinate */
       z?: number | null;
       /** @description Milliseconds since session start */
       offset_timestamp: number;
@@ -1510,8 +2364,77 @@ export interface components {
        * @enum {string}
        */
       event_type: 'spawn' | 'move' | 'despawn' | 'update';
-      /** @description Additional custom data for this object */
+      /**
+       * @description Additional status data for this object (health, state, score, etc.)
+       * @example {
+       *       "health": 100,
+       *       "state": "active",
+       *       "score": 50
+       *     }
+       */
       status?: Record<string, never> | null;
+    };
+    HeatmapSearchQueryDto: {
+      /**
+       * @description Unified search query (plain text keyword OR GitHub-style filters)
+       * @example platform:Android is:finished
+       */
+      q?: string;
+      /**
+       * @description Session name (partial match)
+       * @example Session_2025
+       */
+      name?: string;
+      /**
+       * @description Device ID (exact match)
+       * @example device-123
+       */
+      device_id?: string;
+      /**
+       * @description Platform (exact match)
+       * @example Android
+       */
+      platform?: string;
+      /**
+       * @description App version (exact match)
+       * @example 1.0.0
+       */
+      app_version?: string;
+      /**
+       * @description Start time from (ISO 8601)
+       * @example 2025-01-01T00:00:00Z
+       */
+      start_time_from?: string;
+      /**
+       * @description Start time to (ISO 8601)
+       * @example 2025-01-31T23:59:59Z
+       */
+      start_time_to?: string;
+      /**
+       * @description End time from (ISO 8601)
+       * @example 2025-01-01T00:00:00Z
+       */
+      end_time_from?: string;
+      /**
+       * @description End time to (ISO 8601)
+       * @example 2025-01-31T23:59:59Z
+       */
+      end_time_to?: string;
+      /**
+       * @description Filter by playing status (true: currently playing, false: finished)
+       * @example false
+       */
+      is_playing?: boolean;
+      /**
+       * @description Metadata key to search for
+       * @example mapName
+       */
+      metadata_key?: string;
+      /**
+       * @description Metadata value to search for (requires metadata_key)
+       * @example Level1
+       */
+      metadata_value?: string;
     };
     CreateHeatmapDto: {
       /**
@@ -1524,6 +2447,17 @@ export interface components {
        * @example false
        */
       zVisible?: boolean;
+      /**
+       * @description Filter by specific session IDs (for project heatmap). Cannot be used together with searchQuery.
+       * @example [
+       *       1,
+       *       2,
+       *       3
+       *     ]
+       */
+      sessionIds?: number[];
+      /** @description Search query to filter sessions (for project heatmap). Cannot be used together with sessionIds. Use the same parameters as the search summary endpoint. */
+      searchQuery?: components['schemas']['HeatmapSearchQueryDto'];
     };
     HeatMapTaskResultListItem: {
       /**
@@ -1580,6 +2514,20 @@ export interface components {
        */
       session?: components['schemas']['PlaySessionResponseDto'];
       /**
+       * @description Session IDs used for filtering (if multiple sessions)
+       * @example [
+       *       1,
+       *       2,
+       *       3
+       *     ]
+       */
+      sessionIds?: number[] | null;
+      /**
+       * @description Search query text used to filter sessions (GitHub-style query)
+       * @example platform:Android is:finished
+       */
+      searchQuery?: Record<string, never> | null;
+      /**
        * @description Step size
        * @example 200
        */
@@ -1620,6 +2568,78 @@ export interface components {
        */
       updatedAt: string;
     };
+    HeatmapTaskListItemDto: {
+      /**
+       * @description Task ID
+       * @example 1
+       */
+      taskId: number;
+      /** @description Project */
+      project: components['schemas']['ProjectResponseDto'];
+      /** @description Session */
+      session?: components['schemas']['PlaySessionResponseDto'] | null;
+      /**
+       * @description Session IDs used for filtering (if multiple sessions)
+       * @example [
+       *       1,
+       *       2,
+       *       3
+       *     ]
+       */
+      sessionIds?: number[] | null;
+      /**
+       * @description Search query text used to filter sessions (GitHub-style query)
+       * @example platform:Android is:finished
+       */
+      searchQuery?: Record<string, never> | null;
+      /**
+       * @description Step size
+       * @example 200
+       */
+      stepSize: number;
+      /**
+       * @description Z visible
+       * @example true
+       */
+      zVisible: boolean;
+      /**
+       * @description Status
+       * @example completed
+       * @enum {string}
+       */
+      status: 'pending' | 'processing' | 'completed' | 'failed';
+      /**
+       * Format: date-time
+       * @description Created at
+       * @example 2021-01-01T00:00:00.000Z
+       */
+      createdAt: string;
+      /**
+       * Format: date-time
+       * @description Updated at
+       * @example 2021-01-01T00:00:00.000Z
+       */
+      updatedAt: string;
+    };
+    HeatmapTaskListDto: {
+      /** @description Tasks list */
+      tasks: components['schemas']['HeatmapTaskListItemDto'][];
+      /**
+       * @description Total count
+       * @example 100
+       */
+      total: number;
+      /**
+       * @description Limit
+       * @example 20
+       */
+      limit: number;
+      /**
+       * @description Offset
+       * @example 0
+       */
+      offset: number;
+    };
     SessionSummaryDto: {
       /**
        * @description Summary UUID
@@ -1628,17 +2648,41 @@ export interface components {
       id: string;
       /** @enum {string} */
       status: 'queued' | 'running' | 'done' | 'error';
-      /** @enum {string} */
+      /**
+       * @description Summary language
+       * @enum {string}
+       */
       lang: 'ja' | 'en';
-      /** @enum {string} */
+      /**
+       * @description AI provider used for generation
+       * @enum {string}
+       */
       provider: 'template' | 'ollama' | 'openai';
-      /** @example gpt-4o-mini */
+      /**
+       * @description AI model name
+       * @example gpt-4o-mini
+       */
       model: string;
+      /** @description Summary in Markdown format */
       summary_md: string | null;
+      /**
+       * @description Summary in JSON format with structured data
+       * @example {
+       *       "title": "Session Summary",
+       *       "description": "Player completed level 1",
+       *       "keyFindings": [
+       *         "Fast completion",
+       *         "No deaths"
+       *       ]
+       *     }
+       */
       summary_json: {
         [key: string]: unknown;
       } | null;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Summary creation timestamp
+       */
       created_at: string;
     };
     CreateGameApiKeyDto: {
@@ -1703,6 +2747,18 @@ export interface components {
        */
       projectIds: number[];
     };
+    HeatmapEmbedUrlResponseDto: {
+      /**
+       * @description ヒートマップ埋め込みページのURL（トークン付き）
+       * @example https://ludiscan.com/heatmap/embed/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+       */
+      url: string;
+      /**
+       * @description トークンの有効期限（ISO 8601形式）
+       * @example 2024-01-01T12:00:00.000Z
+       */
+      expiresAt: string;
+    };
     EventRawCoordinateDto: {
       /** @description X coordinate */
       x: number;
@@ -1763,13 +2819,32 @@ export interface components {
       avg_duration_ms?: number;
       /** @description Time saved compared to death routes (milliseconds) */
       time_saved_ms?: number;
-      /** @description Analysis for divergence strategy */
+      /**
+       * @description Analysis for divergence strategy
+       * @example {
+       *       "divergence_point": {
+       *         "x": 100,
+       *         "y": 200,
+       *         "z": 0
+       *       },
+       *       "distance_to_event_cluster": 15.5,
+       *       "common_prefix_length": 10
+       *     }
+       */
       divergence_analysis?: {
         [key: string]: unknown;
       };
       /** @description Safety score (0-1) for safety_passage strategy */
       safety_score?: number;
-      /** @description Evidence supporting the improvement */
+      /**
+       * @description Evidence supporting the improvement
+       * @example {
+       *       "description": "Based on successful player routes",
+       *       "reference_player_count": 5,
+       *       "data_source": "success_route",
+       *       "confidence": "high"
+       *     }
+       */
       evidence?: {
         [key: string]: unknown;
       };
@@ -1853,6 +2928,57 @@ export interface components {
       feedback_avg_rating: number;
       /** @description All feedback records for this improvement route */
       feedbacks: components['schemas']['ImprovementRouteFeedbackRecordDto'][];
+    };
+    VerifyEmbedTokenRequestDto: {
+      /**
+       * @description 検証するembedトークン
+       * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+       */
+      token: string;
+    };
+    VerifyEmbedTokenResponseDto: {
+      /**
+       * @description プロジェクトID
+       * @example 1
+       */
+      projectId: number;
+      /**
+       * @description セッションID
+       * @example 123
+       */
+      sessionId: number;
+      /**
+       * @description トークンの有効期限（ISO 8601形式）
+       * @example 2024-01-01T12:00:00.000Z
+       */
+      expiresAt: string;
+    };
+    PublicStatsResponseDto: {
+      /**
+       * @description 総プロジェクト数
+       * @example 150
+       */
+      total_projects: number;
+      /**
+       * @description 総セッション数
+       * @example 1234
+       */
+      total_sessions: number;
+      /**
+       * @description 総イベント数（処理済み）
+       * @example 567890
+       */
+      total_events: number;
+      /**
+       * @description 過去7日間のアクティブセッション数
+       * @example 42
+       */
+      active_sessions_7d: number;
+      /**
+       * @description 総ユーザー数
+       * @example 89
+       */
+      total_users: number;
     };
     DefaultErrorResponse: {
       /** @example 400 */
@@ -2305,6 +3431,118 @@ export interface operations {
       };
     };
   };
+  BlockedIpsController_getBlockedIps: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of blocked IPs */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+      /** @description Admin role required */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  BlockedIpsController_unblockAll: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description All IPs unblocked successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+      /** @description Admin role required */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  BlockedIpsController_unblockIp: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description IP address to unblock */
+        ip: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description IP unblocked successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+      /** @description Admin role required */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description IP not found in blocked list */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   UsersController_findAll: {
     parameters: {
       query?: never;
@@ -2312,6 +3550,7 @@ export interface operations {
       path?: never;
       cookie?: never;
     };
+    requestBody?: never;
     responses: {
       /** @description 成功 */
       200: {
@@ -2322,30 +3561,17 @@ export interface operations {
           'application/json': components['schemas']['UserResponseDto'][];
         };
       };
-    };
-  };
-  UsersController_search: {
-    parameters: {
-      query: {
-        'q': string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    responses: {
-      /** @description 成功 */
-      200: {
+      /** @description Bad Request */
+      400: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['UserResponseDto'][];
+          'application/json': components['schemas']['DefaultErrorResponse'];
         };
       };
     };
   };
-
   UsersController_create: {
     parameters: {
       query?: never;
@@ -2366,6 +3592,38 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['UserResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  UsersController_search: {
+    parameters: {
+      query: {
+        /** @description 検索クエリ（メールアドレスまたは名前） */
+        q: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description 成功 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['UserResponseDto'][];
         };
       };
       /** @description Bad Request */
@@ -2407,6 +3665,86 @@ export interface operations {
         content: {
           'application/json': components['schemas']['DefaultErrorResponse'];
         };
+      };
+    };
+  };
+  UsersController_delete: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description ユーザーID */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description 成功 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+      /** @description ユーザーが見つかりません */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  UsersController_updateRole: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description ユーザーID */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateRoleDto'];
+      };
+    };
+    responses: {
+      /** @description 成功 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['UserResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+      /** @description ユーザーが見つかりません */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
@@ -3752,6 +5090,142 @@ export interface operations {
       };
     };
   };
+  PlaySessionV01Controller_search: {
+    parameters: {
+      query?: {
+        /** @description Session name (partial match) */
+        name?: string;
+        /** @description Device ID (exact match) */
+        device_id?: string;
+        /** @description Platform (exact match) */
+        platform?: string;
+        /** @description App version (exact match) */
+        app_version?: string;
+        /** @description Start time from (ISO 8601) */
+        start_time_from?: string;
+        /** @description Start time to (ISO 8601) */
+        start_time_to?: string;
+        /** @description End time from (ISO 8601) */
+        end_time_from?: string;
+        /** @description End time to (ISO 8601) */
+        end_time_to?: string;
+        /** @description Updated at from (ISO 8601) */
+        updated_at_from?: string;
+        /** @description Updated at to (ISO 8601) */
+        updated_at_to?: string;
+        /** @description Filter by playing status (true: currently playing, false: finished) */
+        is_playing?: boolean;
+        /** @description Metadata key to search for (can be used alone to check key existence) */
+        metadata_key?: string;
+        /** @description Metadata value to search for (requires metadata_key to be specified) */
+        metadata_value?: string;
+        /** @description Unified search query. Supports: (1) Plain text keyword search across name, device_id, platform, app_version, and metadata keys/values (e.g., "Session_2025" or "MapA"), (2) GitHub-style filters (e.g., "platform:Android is:playing"), (3) Mixed (e.g., "Session_2025 platform:Android is:finished"). Keywords and filters are combined with AND logic. */
+        q?: string;
+        /** @description Maximum number of results to return */
+        limit?: number;
+        /** @description Number of results to skip */
+        offset?: number;
+        /** @description Field to sort by */
+        sort_by?: 'id' | 'name' | 'start_time' | 'end_time' | 'updated_at';
+        /** @description Sort order */
+        sort_order?: 'asc' | 'desc';
+      };
+      header?: never;
+      path: {
+        project_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SearchPlaySessionResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  PlaySessionV01Controller_searchSummary: {
+    parameters: {
+      query?: {
+        /** @description Session name (partial match) */
+        name?: string;
+        /** @description Device ID (exact match) */
+        device_id?: string;
+        /** @description Platform (exact match) */
+        platform?: string;
+        /** @description App version (exact match) */
+        app_version?: string;
+        /** @description Start time from (ISO 8601) */
+        start_time_from?: string;
+        /** @description Start time to (ISO 8601) */
+        start_time_to?: string;
+        /** @description End time from (ISO 8601) */
+        end_time_from?: string;
+        /** @description End time to (ISO 8601) */
+        end_time_to?: string;
+        /** @description Updated at from (ISO 8601) */
+        updated_at_from?: string;
+        /** @description Updated at to (ISO 8601) */
+        updated_at_to?: string;
+        /** @description Filter by playing status (true: currently playing, false: finished) */
+        is_playing?: boolean;
+        /** @description Metadata key to search for (can be used alone to check key existence) */
+        metadata_key?: string;
+        /** @description Metadata value to search for (requires metadata_key to be specified) */
+        metadata_value?: string;
+        /** @description Unified search query. Supports: (1) Plain text keyword search across name, device_id, platform, app_version, and metadata keys/values (e.g., "Session_2025" or "MapA"), (2) GitHub-style filters (e.g., "platform:Android is:playing"), (3) Mixed (e.g., "Session_2025 platform:Android is:finished"). Keywords and filters are combined with AND logic. */
+        q?: string;
+        /** @description Maximum number of results to return */
+        limit?: number;
+        /** @description Number of results to skip */
+        offset?: number;
+        /** @description Field to sort by */
+        sort_by?: 'id' | 'name' | 'start_time' | 'end_time' | 'updated_at';
+        /** @description Sort order */
+        sort_order?: 'asc' | 'desc';
+      };
+      header?: never;
+      path: {
+        project_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SearchSessionSummaryResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
   PlaySessionV01Controller_getSessionMaps: {
     parameters: {
       query?: never;
@@ -3779,6 +5253,103 @@ export interface operations {
         };
         content: {
           'application/json': string[];
+        };
+      };
+    };
+  };
+  PlaySessionV01Controller_aggregate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        project_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AggregatePlaySessionDto'];
+      };
+    };
+    responses: {
+      /** @description Aggregation results */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AggregatePlaySessionResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  PlaySessionV01Controller_getFilterOptions: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        project_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Filter options */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['FilterOptionsResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  PlaySessionV01Controller_getMetadataKeys: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        project_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Metadata keys */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['MetadataKeysResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
         };
       };
     };
@@ -4068,6 +5639,40 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['HeatmapTaskDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  HeatmapController_getProjectTasksList: {
+    parameters: {
+      query: {
+        limit: number;
+        offset: number;
+      };
+      header?: never;
+      path: {
+        project_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Tasks list */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HeatmapTaskListDto'];
         };
       };
       /** @description Bad Request */
@@ -4993,6 +6598,43 @@ export interface operations {
       };
     };
   };
+  GameController_getHeatmapEmbedUrl: {
+    parameters: {
+      query?: never;
+      header: {
+        /** @description ゲームクライアント用APIキー */
+        'X-API-Key': string;
+      };
+      path: {
+        /** @description Project ID */
+        project_id: number;
+        /** @description Session ID */
+        session_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HeatmapEmbedUrlResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
   RouteCoachController_getEventClusters: {
     parameters: {
       query?: {
@@ -5138,6 +6780,470 @@ export interface operations {
             updated_at?: string;
           };
         };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  EmbedController_verifyToken: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['VerifyEmbedTokenRequestDto'];
+      };
+    };
+    responses: {
+      /** @description トークンが有効な場合 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['VerifyEmbedTokenResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  PublicStatsController_getPublicStats: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description 統計情報の取得に成功 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PublicStatsResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+      /** @description サーバーエラー */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminController_getStats: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  AdminController_getUsers: {
+    parameters: {
+      query: {
+        limit: string;
+        offset: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  AdminController_getUser: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  AdminController_deleteUser: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  AdminController_updateUser: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  AdminController_getProjects: {
+    parameters: {
+      query: {
+        limit: string;
+        offset: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  AdminController_deleteProject: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  AdminController_getSessions: {
+    parameters: {
+      query: {
+        limit: string;
+        offset: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  AdminController_deleteSession: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  AdminController_getApiKeys: {
+    parameters: {
+      query: {
+        limit: string;
+        offset: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  AdminController_deleteApiKey: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  AdminController_updateApiKey: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  AdminController_getHeatmapTasks: {
+    parameters: {
+      query: {
+        limit: string;
+        offset: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  AdminController_deleteHeatmapTask: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description Bad Request */
       400: {

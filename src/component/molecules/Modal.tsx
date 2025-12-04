@@ -7,12 +7,12 @@ import { FlexColumn, FlexRow } from '../atoms/Flex';
 import { Text } from '../atoms/Text';
 
 import type { Theme } from '@emotion/react';
-import type { CSSProperties, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import type { Styles } from 'react-modal';
 
 import { Button } from '@src/component/atoms/Button';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { zIndexes } from '@src/styles/style';
+import { hexToRGBA, zIndexes } from '@src/styles/style';
 
 export type ModalProps = {
   className?: string | undefined;
@@ -21,7 +21,7 @@ export type ModalProps = {
   closeOutside?: boolean | undefined;
   onClose?: (() => void | Promise<void>) | undefined;
   children: ReactNode;
-  style?: CSSProperties;
+  style?: Styles['content'];
 };
 
 function defaultStyle(theme: Theme): Styles {
@@ -36,7 +36,7 @@ function defaultStyle(theme: Theme): Styles {
       bottom: 0,
       backgroundColor: 'rgb(21 21 21 / 40%)',
       alignContent: 'center',
-      transition: 'all 0.5s ease-in-out',
+      transition: 'all 0.2s ease-in-out',
     },
     content: {
       zIndex: zIndexes.modal,
@@ -51,10 +51,11 @@ function defaultStyle(theme: Theme): Styles {
       height: 'fit-content',
       position: 'relative',
       borderRadius: '8px',
-      backgroundColor: theme.colors.surface.base,
-      border: `1px solid ${theme.colors.border.default}`,
+      backgroundColor: hexToRGBA(theme.colors.surface.raised, 0.8),
+      border: `1px solid ${theme.colors.border.strong}`,
       paddingTop: '12px',
-      transition: 'all 0.5s ease-in-out',
+      transition: 'all 0.2s ease-in-out',
+      backdropFilter: 'blur(6px)',
     },
   };
 }
@@ -65,7 +66,7 @@ const Component = ({ className, isOpen, onClose, children, title, closeOutside, 
     <ReactModal
       className={className}
       isOpen={isOpen}
-      style={{ ...defaultStyle(theme), content: { ...defaultStyle(theme).content, ...style } }}
+      style={{ ...defaultStyle(theme), content: { ...defaultStyle(theme).content, ...style } } as Styles}
       onRequestClose={onClose}
       shouldCloseOnOverlayClick={closeOutside}
     >

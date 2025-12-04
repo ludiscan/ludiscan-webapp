@@ -86,5 +86,14 @@ export function useOfflineHeatmapDataService(offlineData: OfflineHeatmapData | n
     projectId: offlineData?.task?.project.id,
     sessionId: null,
     setSessionId: () => {},
+    sessionHeatmapIds: undefined,
+    setSessionHeatmapIds: () => {},
+    loadTask: () => {}, // Offline mode doesn't support loading different tasks
+    // Offline mode doesn't support these methods
+    getProject: async () => offlineData?.task?.project ?? null,
+    getSession: async () => null,
+    getSessions: async () => [],
+    getPlayers: async () => [],
+    getFieldObjectLogs: async () => [],
   };
 }

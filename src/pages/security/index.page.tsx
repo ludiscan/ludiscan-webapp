@@ -8,6 +8,7 @@ import { Card } from '@src/component/atoms/Card';
 import { FlexColumn } from '@src/component/atoms/Flex';
 import { VerticalSpacer } from '@src/component/atoms/Spacer';
 import { Text } from '@src/component/atoms/Text';
+import { DashboardBackgroundCanvas } from '@src/component/templates/DashboardBackgroundCanvas';
 import { Header } from '@src/component/templates/Header';
 import { SidebarLayout } from '@src/component/templates/SidebarLayout';
 import { useAuth } from '@src/hooks/useAuth';
@@ -36,6 +37,7 @@ const Component: FC<SecurityPageProps> = ({ className }) => {
   if (!ready || isLoading) {
     return (
       <div className={className}>
+        <DashboardBackgroundCanvas className='visible' />
         <SidebarLayout />
         <InnerContent>
           <div className={`${className}__centerContent`}>
@@ -48,6 +50,7 @@ const Component: FC<SecurityPageProps> = ({ className }) => {
 
   return (
     <div className={className}>
+      <DashboardBackgroundCanvas className='visible' />
       <SidebarLayout />
       <InnerContent>
         <Header title='Security Settings' onClick={handleBack} />
@@ -176,6 +179,7 @@ const Component: FC<SecurityPageProps> = ({ className }) => {
 };
 
 const SecurityPage = styled(Component)`
+  position: relative;
   height: 100vh;
 
   &__container {

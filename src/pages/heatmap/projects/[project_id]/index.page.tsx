@@ -18,7 +18,6 @@ import { useGeneralSelect } from '@src/hooks/useGeneral';
 import { useHeatmapState } from '@src/hooks/useHeatmapState';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { patchSplitMode } from '@src/slices/canvasSlice';
-import { dimensions } from '@src/styles/style';
 import { useOnlineHeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 
 export type HeatMapTaskIdPageProps = {
@@ -68,6 +67,7 @@ const HeaderWrapper = memo(
 
     return (
       <Header
+        showSidebar={false}
         title={'Heatmap'}
         onClick={onBackClick}
         iconTitleEnd={<Text className={`${className}__headerV`} text={`${version || 'debug'}`} fontSize={theme.typography.fontSize.sm} fontWeight={'bold'} />}
@@ -121,11 +121,10 @@ export const HeatmapIdPageLayoutComponent: FC<HeatmapIdPageLayoutProps> = ({ cla
 };
 
 export const HeatmapIdPageLayout = styled(HeatmapIdPageLayoutComponent)`
-  height: calc(100vh - ${dimensions.headerHeight}px);
+  height: 100vh;
   background: ${({ theme }) => theme.colors.surface.raised};
 
   &__headerV {
-    align-self: end;
     padding: 4px 12px;
     color: ${({ theme }) => theme.colors.primary.main};
     border: 1px solid ${({ theme }) => theme.colors.primary.main};

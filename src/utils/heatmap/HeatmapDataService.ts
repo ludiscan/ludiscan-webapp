@@ -3,10 +3,30 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import type { HeatmapStates } from '@src/modeles/heatmapView';
 import type { HeatmapTask, PositionEventLog } from '@src/modeles/heatmaptask';
+import type { Project } from '@src/modeles/project';
 import type { createClient } from '@src/modeles/qeury';
+import type { Session } from '@src/modeles/session';
 
 import { useAuth } from '@src/hooks/useAuth';
 import { useApiClient } from '@src/modeles/ApiClientContext';
+
+// Field object log type (matches API response)
+export type FieldObjectLog = {
+  object_id: string;
+  object_type: string;
+  x: number;
+  y: number;
+  z?: number | null;
+  offset_timestamp: number;
+  event_type: 'spawn' | 'move' | 'despawn' | 'update';
+  status?: Record<string, never> | null;
+};
+
+// Player type (matches API response)
+export type Player = {
+  playerId: string;
+  playerName: string;
+};
 
 // HeatmapViewer用のデータ取得インターフェース
 export type HeatmapDataService = {
@@ -30,9 +50,22 @@ export type HeatmapDataService = {
 
   sessionId: number | null;
   setSessionId: (sessionId: number | null) => void;
+
+  sessionHeatmapIds: number[] | undefined;
+  setSessionHeatmapIds: (sessionIds: number[] | undefined) => void;
+
+  // Load existing task by ID
+  loadTask: (taskId: number) => void;
+
+  // New methods for centralized data access
+  getProject(): Promise<Project | null>;
+  getSession(): Promise<Session | null>;
+  getSessions(limit?: number, offset?: number): Promise<Session[]>;
+  getPlayers(): Promise<Player[]>;
+  getFieldObjectLogs(): Promise<FieldObjectLog[]>;
 };
 
-export const mockHeatmapDataService = {
+export const mockHeatmapDataService: HeatmapDataService = {
   isInitialized: true,
   getMapList: async () => ['map1', 'map2', 'map3'],
   getMapContent: async () => null,
@@ -43,6 +76,14 @@ export const mockHeatmapDataService = {
   projectId: 1,
   sessionId: null,
   setSessionId: () => {},
+  sessionHeatmapIds: undefined,
+  setSessionHeatmapIds: () => {},
+  loadTask: () => {},
+  getProject: async () => null,
+  getSession: async () => null,
+  getSessions: async () => [],
+  getPlayers: async () => [],
+  getFieldObjectLogs: async () => [],
 };
 // データ型定義
 export type OfflineHeatmapData = {
@@ -69,7 +110,7 @@ async function sessionCreateTask(apiClient: ReturnType<typeof createClient>, pro
   });
 }
 
-async function projectCreateTask(apiClient: ReturnType<typeof createClient>, projectId: number, stepSize: number, zVisible: boolean) {
+async function projectCreateTask(apiClient: ReturnType<typeof createClient>, projectId: number, stepSize: number, zVisible: boolean, sessionIds?: number[]) {
   return await apiClient.POST('/api/v0/heatmap/projects/{project_id}/tasks', {
     params: {
       path: {
@@ -79,6 +120,7 @@ async function projectCreateTask(apiClient: ReturnType<typeof createClient>, pro
     body: {
       stepSize: stepSize,
       zVisible: zVisible,
+      ...(sessionIds && sessionIds.length > 0 ? { sessionIds } : {}),
     },
   });
 }
@@ -88,6 +130,7 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
   const timer = useRef<NodeJS.Timeout>(undefined);
   const [taskId, setTaskId] = useState<number | null>(initialTaskId);
   const [sessionId, setSessionId] = useState<number | null>(null);
+  const [sessionHeatmapIds, setSessionHeatmapIds] = useState<number[] | undefined>(undefined);
   const [stepSize] = useState<number>(50);
 
   const { isAuthorized, ready } = useAuth();
@@ -112,7 +155,7 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
   const zVisible = !(project?.is2D ?? false);
 
   const { data: createdTask } = useQuery({
-    queryKey: [projectId, sessionId, stepSize, zVisible, sessionHeatmap, apiClient],
+    queryKey: [projectId, sessionId, stepSize, zVisible, sessionHeatmap, sessionHeatmapIds, apiClient],
     queryFn: async (): Promise<HeatmapTask | null> => {
       if (!projectId) {
         return null;
@@ -121,7 +164,7 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
       const { data, error } =
         sessionHeatmap && sessionId && sessionId !== 0
           ? await sessionCreateTask(apiClient, projectId, sessionId, stepSize, zVisible)
-          : await projectCreateTask(apiClient, projectId, stepSize, zVisible);
+          : await projectCreateTask(apiClient, projectId, stepSize, zVisible, sessionHeatmapIds);
       if (error) throw error;
       return data;
     },
@@ -285,6 +328,56 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
     [projectId, sessionId, queryClient],
   );
 
+  const getProject = useCallback(async () => {
+    if (!projectId) return null;
+    const res = await apiClient.GET('/api/v0/projects/{id}', {
+      params: { path: { id: projectId } },
+    });
+    return res.data ?? null;
+  }, [projectId, apiClient]);
+
+  const getSession = useCallback(async () => {
+    if (!projectId || !sessionId) return null;
+    const res = await apiClient.GET('/api/v0/projects/{project_id}/play_session/{session_id}', {
+      params: { path: { project_id: projectId, session_id: sessionId } },
+    });
+    return res.data ?? null;
+  }, [projectId, sessionId, apiClient]);
+
+  const getSessions = useCallback(
+    async (limit = 100, offset = 0) => {
+      if (!projectId) return [];
+      const res = await apiClient.GET('/api/v0/projects/{project_id}/play_session', {
+        params: { path: { project_id: projectId }, query: { limit, offset } },
+      });
+      return (res.data as Session[]) ?? [];
+    },
+    [projectId, apiClient],
+  );
+
+  const getPlayers = useCallback(async () => {
+    if (!projectId || !sessionId) return [];
+    const res = await apiClient.GET('/api/v0/projects/{project_id}/play_session/{session_id}/player_position_log/{session_id}/players', {
+      params: { path: { project_id: projectId, session_id: sessionId } },
+    });
+    return (res.data as unknown as Player[]) ?? [];
+  }, [projectId, sessionId, apiClient]);
+
+  const getFieldObjectLogs = useCallback(async () => {
+    if (!projectId || !sessionId) return [];
+    const res = await apiClient.GET('/api/v0/projects/{project_id}/play_session/{session_id}/field_object_log', {
+      params: { path: { project_id: projectId, session_id: sessionId } },
+    });
+    return (res.data as unknown as FieldObjectLog[]) ?? [];
+  }, [projectId, sessionId, apiClient]);
+
+  const loadTask = useCallback(
+    (newTaskId: number) => {
+      setTaskId(newTaskId);
+    },
+    [setTaskId],
+  );
+
   return {
     isInitialized: isAuthorized && ready && projectId !== undefined,
     getMapList,
@@ -296,5 +389,13 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
     projectId,
     sessionId,
     setSessionId,
+    sessionHeatmapIds,
+    setSessionHeatmapIds,
+    loadTask,
+    getProject,
+    getSession,
+    getSessions,
+    getPlayers,
+    getFieldObjectLogs,
   };
 }

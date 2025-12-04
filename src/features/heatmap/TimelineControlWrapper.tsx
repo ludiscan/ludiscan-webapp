@@ -5,11 +5,11 @@ import type { Dispatch, SetStateAction, FC, ComponentProps } from 'react';
 
 import { type PlaySpeedType, TimelineControllerBlock } from '@src/component/templates/TimelineControllerBlock';
 import { usePlayerTimelinePatch, usePlayerTimelinePick, usePlayerTimelineSelect } from '@src/hooks/usePlayerTimeline';
+import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
 export type TimelineControlWrapperProps = {
   setVisibleTimelineRange: Dispatch<SetStateAction<PlayerTimelinePointsTimeRange>>;
   visibleTimelineRange: PlayerTimelinePointsTimeRange;
-  setOpenMenu: Dispatch<SetStateAction<string | undefined>>;
 };
 
 type ViewProps = Omit<ComponentProps<typeof TimelineControllerBlock>, 'currentTime'>;
@@ -36,7 +36,7 @@ const TimelineControllerView = memo(
 );
 TimelineControllerView.displayName = 'TimelineControllerView';
 
-export const TimelineControlWrapper: FC<TimelineControlWrapperProps> = ({ setVisibleTimelineRange, visibleTimelineRange, setOpenMenu }) => {
+export const TimelineControlWrapper: FC<TimelineControlWrapperProps> = ({ setVisibleTimelineRange, visibleTimelineRange }) => {
   const { isPlaying, visible, maxTime } = usePlayerTimelinePick('isPlaying', 'visible', 'maxTime');
   const setTimelineState = usePlayerTimelinePatch();
   const [timelinePlaySpeed, setTimelinePlaySpeed] = useState<PlaySpeedType>(1);
@@ -118,7 +118,7 @@ export const TimelineControlWrapper: FC<TimelineControlWrapperProps> = ({ setVis
         }));
       }}
       onClickMenu={() => {
-        setOpenMenu('playerTimeline');
+        heatMapEventBus.emit('click-menu-icon', { name: 'timeline' });
       }}
       onClickPlay={() => {
         setTimelineState((prev) => ({

@@ -18,9 +18,6 @@ export function saveToken(token: string): void {
   // SSR safety check - localStorage is only available in browser
   if (typeof window === 'undefined') return;
 
-  // eslint-disable-next-line no-console
-  console.warn('[Security] saveToken is deprecated. Tokens are now stored in httpOnly cookies.');
-
   const storage = localStorage.getItem(STORAGE_KEY);
   if (storage) {
     const data = JSON.parse(storage);

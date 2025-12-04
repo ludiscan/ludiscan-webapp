@@ -37,3 +37,32 @@ export const createClient = () => {
 
   return apiClient;
 };
+
+/**
+ * Embed用のAPIクライアントを作成
+ * x-embed-tokenヘッダーを使用して認証
+ */
+export const createEmbedClient = (embedToken: string) => {
+  const embedMiddleware: Middleware = {
+    async onRequest({ request }) {
+      request.headers.set('x-embed-token', embedToken);
+      return request;
+    },
+    async onError({ error }) {
+      throw error;
+    },
+  };
+
+  const apiClient = createClientFetch<paths>({
+    baseUrl: env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost',
+    credentials: 'include',
+    mode: 'cors',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  apiClient.use(embedMiddleware);
+
+  return apiClient;
+};

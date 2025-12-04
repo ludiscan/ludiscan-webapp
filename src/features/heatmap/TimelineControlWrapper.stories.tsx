@@ -16,12 +16,10 @@ const TimelineControlWrapperExample = () => {
     start: 0,
     end: 10000,
   });
-  const [openMenu, setOpenMenu] = useState<string | undefined>(undefined);
 
   return (
     <div>
-      <TimelineControlWrapper visibleTimelineRange={visibleTimelineRange} setVisibleTimelineRange={setVisibleTimelineRange} setOpenMenu={setOpenMenu} />
-      {openMenu && <div style={{ marginTop: 20 }}>Open Menu: {openMenu}</div>}
+      <TimelineControlWrapper visibleTimelineRange={visibleTimelineRange} setVisibleTimelineRange={setVisibleTimelineRange} />
     </div>
   );
 };

@@ -25,18 +25,18 @@ export const crimsonDuskLight: Theme = {
       contrast: '#FFFFFF', // White
     },
     background: {
-      default: '#FFF5F5', // Soft Rose White
-      paper: '#FFFFFF', // Pure White
-      elevated: '#FFF9F9', // Slight Warm White
+      default: '#F5EBEB', // Soft Rose Gray
+      paper: '#FAF5F5', // Off Rose White
+      elevated: '#F7F0F0', // Slight Warm Tint
       overlay: 'rgba(196, 30, 58, 0.05)', // Crimson Tint
     },
     surface: {
-      base: '#FFFFFF',
-      raised: '#FFF9F9',
-      sunken: '#FFEAEA',
-      interactive: '#FFE5E8',
-      hover: '#FFD6DB',
-      pressed: '#FFC7CD',
+      base: '#FAF5F5',
+      raised: '#F7F0F0',
+      sunken: '#F0E0E0',
+      interactive: '#E8D6D8',
+      hover: '#E0C8CC',
+      pressed: '#D8B8BD',
     },
     text: {
       primary: '#1A0F0F', // Deep Warm Black
