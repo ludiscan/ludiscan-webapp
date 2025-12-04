@@ -31,6 +31,8 @@ export type Player = {
 // HeatmapViewer用のデータ取得インターフェース
 export type HeatmapDataService = {
   isInitialized: boolean;
+  // embed経由でのアクセスかどうか（trueの場合、一部の機能が制限される）
+  isEmbed?: boolean;
   // マップリストの取得
   getMapList(): Promise<string[]>;
 
