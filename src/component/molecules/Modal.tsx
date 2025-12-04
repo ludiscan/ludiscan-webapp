@@ -7,7 +7,7 @@ import { FlexColumn, FlexRow } from '../atoms/Flex';
 import { Text } from '../atoms/Text';
 
 import type { Theme } from '@emotion/react';
-import type { CSSProperties, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import type { Styles } from 'react-modal';
 
 import { Button } from '@src/component/atoms/Button';
@@ -21,7 +21,7 @@ export type ModalProps = {
   closeOutside?: boolean | undefined;
   onClose?: (() => void | Promise<void>) | undefined;
   children: ReactNode;
-  style?: CSSProperties;
+  style?: Styles['content'];
 };
 
 function defaultStyle(theme: Theme): Styles {
@@ -66,7 +66,7 @@ const Component = ({ className, isOpen, onClose, children, title, closeOutside, 
     <ReactModal
       className={className}
       isOpen={isOpen}
-      style={{ ...defaultStyle(theme), content: { ...defaultStyle(theme).content, ...style } }}
+      style={{ ...defaultStyle(theme), content: { ...defaultStyle(theme).content, ...style } } as Styles}
       onRequestClose={onClose}
       shouldCloseOnOverlayClick={closeOutside}
     >
