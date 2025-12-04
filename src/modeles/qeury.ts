@@ -4,16 +4,16 @@ import type { paths } from '@generated/api';
 import type { Middleware } from 'openapi-fetch';
 
 import { env } from '@src/config/env';
-import { getToken } from '@src/utils/localstrage';
 
 export const DefaultStaleTime = 1000 * 60 * 5; // 5 minutes
 
 const myMiddleware: Middleware = {
   async onRequest({ request }) {
-    // SSRガード
-    if (typeof window !== 'undefined') {
-      const token = getToken();
-      if (token) request.headers.set('Authorization', `Bearer ${token}`);
+    // FormData送信時はContent-Typeを削除（ブラウザが自動でmultipart/form-data; boundary=...を設定）
+    // カスタムヘッダー X-Upload-FormData が設定されている場合にContent-Typeを削除
+    if (request.headers.get('X-Upload-FormData')) {
+      request.headers.delete('Content-Type');
+      request.headers.delete('X-Upload-FormData');
     }
     return request;
   },
@@ -48,9 +48,6 @@ export const createEmbedClient = (embedToken: string) => {
       request.headers.set('x-embed-token', embedToken);
       return request;
     },
-    async onError({ error }) {
-      throw error;
-    },
   };
 
   const apiClient = createClientFetch<paths>({
@@ -63,6 +60,7 @@ export const createEmbedClient = (embedToken: string) => {
   });
 
   apiClient.use(embedMiddleware);
+  apiClient.use(myMiddleware);
 
   return apiClient;
 };

@@ -262,6 +262,7 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
 
   return {
     isInitialized: isReady && projectId !== undefined && !!apiClient,
+    isEmbed: true,
     getMapList,
     getMapContent,
     getGeneralLogKeys,

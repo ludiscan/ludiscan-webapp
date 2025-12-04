@@ -780,8 +780,7 @@ export interface paths {
     };
     /**
      * Search play sessions
-     * @description
-     *     Search play sessions with flexible query parameters.
+     * @description Search play sessions with flexible query parameters.
      *
      *     **Search Methods:**
      *     1. Individual parameters (name, platform, device_id, etc.)
@@ -809,7 +808,6 @@ export interface paths {
      *     **Metadata Search (using individual parameters):**
      *     - `metadata_key=mapName` - Sessions that have mapName key (any value)
      *     - `metadata_key=mapName&metadata_value=Level1` - Sessions with mapName=Level1
-     *
      */
     get: operations['PlaySessionV01Controller_search'];
     put?: never;
@@ -829,8 +827,7 @@ export interface paths {
     };
     /**
      * Search play sessions summary
-     * @description
-     *     Get lightweight summary of all matching sessions (no pagination).
+     * @description Get lightweight summary of all matching sessions (no pagination).
      *     This endpoint is useful for previewing which sessions will be included in a heatmap task before creating it.
      *
      *     Accepts the same search parameters as the regular search endpoint, but returns only session IDs and display text.
@@ -841,7 +838,6 @@ export interface paths {
      *     1. Call this endpoint to preview filtered sessions
      *     2. User confirms the session list
      *     3. Use the same search query in heatmap task creation API
-     *
      */
     get: operations['PlaySessionV01Controller_searchSummary'];
     put?: never;
@@ -880,8 +876,7 @@ export interface paths {
     put?: never;
     /**
      * Aggregate play sessions
-     * @description
-     *     Aggregate play sessions with flexible filter criteria and return statistics.
+     * @description Aggregate play sessions with flexible filter criteria and return statistics.
      *
      *     **Features:**
      *     - Count sessions matching filter criteria (total, finished, playing)
@@ -915,7 +910,6 @@ export interface paths {
      *       ]
      *     }
      *     ```
-     *
      */
     post: operations['PlaySessionV01Controller_aggregate'];
     delete?: never;
@@ -933,8 +927,7 @@ export interface paths {
     };
     /**
      * Get filter options
-     * @description
-     *     Get distinct values for filter dropdowns.
+     * @description Get distinct values for filter dropdowns.
      *
      *     Returns lists of unique values for:
      *     - Platforms (e.g., Android, iOS, Windows)
@@ -942,7 +935,6 @@ export interface paths {
      *     - Device IDs
      *
      *     Use these values to populate filter dropdowns in the UI.
-     *
      */
     get: operations['PlaySessionV01Controller_getFilterOptions'];
     put?: never;
@@ -962,8 +954,7 @@ export interface paths {
     };
     /**
      * Get metadata keys
-     * @description
-     *     Get all metadata keys used across sessions in a project.
+     * @description Get all metadata keys used across sessions in a project.
      *
      *     Returns for each key:
      *     - Key name
@@ -975,7 +966,6 @@ export interface paths {
      *     - Build dynamic metadata filter UI
      *     - Know which fields can be used for aggregation
      *     - Preview what data is available in metadata
-     *
      */
     get: operations['PlaySessionV01Controller_getMetadataKeys'];
     put?: never;
@@ -1099,11 +1089,9 @@ export interface paths {
     };
     /**
      * Get heatmap tasks list for project
-     * @description
-     *     Get a list of completed heatmap tasks for a project with pagination.
+     * @description Get a list of completed heatmap tasks for a project with pagination.
      *     Returns tasks ordered by most recent first (by updated_at).
      *     Does not include heavy result data for better performance.
-     *
      */
     get: operations['HeatmapController_getProjectTasksList'];
     put?: never;
@@ -1125,8 +1113,7 @@ export interface paths {
     put?: never;
     /**
      * Create heatmap calculation task for project
-     * @description
-     *     Create a heatmap task for a project with optional session filtering.
+     * @description Create a heatmap task for a project with optional session filtering.
      *
      *     **Filtering Options:**
      *     1. No filter: Use all sessions in the project
@@ -1144,7 +1131,6 @@ export interface paths {
      *       }
      *     }
      *     ```
-     *
      */
     post: operations['HeatmapController_createProjectTask'];
     delete?: never;
@@ -1491,10 +1477,8 @@ export interface paths {
     };
     /**
      * プロジェクトのイベントクラスタと改善案を取得
-     * @description
-     *     指定したプレイヤーのイベント（死亡/成功）をクラスタリングし、
+     * @description 指定したプレイヤーのイベント（死亡/成功）をクラスタリングし、
      *     各クラスタに対するルートパターンと改善案を返します。
-     *
      */
     get: operations['RouteCoachController_getEventClusters'];
     put?: never;
@@ -1516,10 +1500,8 @@ export interface paths {
     put?: never;
     /**
      * 改善案のフィードバックを送信
-     * @description
-     *     改善案に対して3段階評価（Bad/Neutral/Good）とコメントを送信します。
+     * @description 改善案に対して3段階評価（Bad/Neutral/Good）とコメントを送信します。
      *     同じプレイヤーから同じ改善案への複数フィードバックは上書きされます。
-     *
      */
     post: operations['RouteCoachController_submitFeedback'];
     delete?: never;
@@ -1539,14 +1521,12 @@ export interface paths {
     put?: never;
     /**
      * プロジェクトの改善ルート生成ジョブを投入
-     * @description
-     *     プロジェクト全体の改善ルートを生成するための非同期ジョブをキューに投入します。
+     * @description プロジェクト全体の改善ルートを生成するための非同期ジョブをキューに投入します。
      *     このジョブは死亡イベントをクラスタリングし、各クラスタに対する
      *     改善提案（Strategy 1: 分岐点検出、Strategy 2: 安全通過、Strategy 3: 時間短縮）を生成します。
      *
      *     同じプロジェクト・マップの組み合わせで既に完了したタスクがある場合は、
      *     新規ジョブを投入せずに既存タスクを返します。
-     *
      */
     post: operations['RouteCoachController_generateImprovementRoutes'];
     delete?: never;
@@ -1564,10 +1544,8 @@ export interface paths {
     };
     /**
      * 改善ルート生成タスクの状態を取得
-     * @description
-     *     改善ルート生成タスクの処理状況を確認します。
+     * @description 改善ルート生成タスクの処理状況を確認します。
      *     完了したタスクは永続化されているため、いつでも結果を取得できます。
-     *
      */
     get: operations['RouteCoachController_getImprovementRoutesJobStatus'];
     put?: never;
@@ -3098,11 +3076,13 @@ export interface operations {
           'application/json': {
             /** @example ok */
             status?: string;
-            /** @example {
+            /**
+             * @example {
              *       "database": {
              *         "status": "up"
              *       }
-             *     } */
+             *     }
+             */
             info?: {
               [key: string]: {
                 status: string;
@@ -3118,11 +3098,13 @@ export interface operations {
                 [key: string]: unknown;
               };
             } | null;
-            /** @example {
+            /**
+             * @example {
              *       "database": {
              *         "status": "up"
              *       }
-             *     } */
+             *     }
+             */
             details?: {
               [key: string]: {
                 status: string;
@@ -3151,11 +3133,13 @@ export interface operations {
           'application/json': {
             /** @example error */
             status?: string;
-            /** @example {
+            /**
+             * @example {
              *       "database": {
              *         "status": "up"
              *       }
-             *     } */
+             *     }
+             */
             info?: {
               [key: string]: {
                 status: string;
@@ -3163,12 +3147,14 @@ export interface operations {
                 [key: string]: unknown;
               };
             } | null;
-            /** @example {
+            /**
+             * @example {
              *       "redis": {
              *         "status": "down",
              *         "message": "Could not connect"
              *       }
-             *     } */
+             *     }
+             */
             error?: {
               [key: string]: {
                 status: string;
@@ -3176,7 +3162,8 @@ export interface operations {
                 [key: string]: unknown;
               };
             } | null;
-            /** @example {
+            /**
+             * @example {
              *       "database": {
              *         "status": "up"
              *       },
@@ -3184,7 +3171,8 @@ export interface operations {
              *         "status": "down",
              *         "message": "Could not connect"
              *       }
-             *     } */
+             *     }
+             */
             details?: {
               [key: string]: {
                 status: string;
@@ -3215,11 +3203,13 @@ export interface operations {
           'application/json': {
             /** @example ok */
             status?: string;
-            /** @example {
+            /**
+             * @example {
              *       "database": {
              *         "status": "up"
              *       }
-             *     } */
+             *     }
+             */
             info?: {
               [key: string]: {
                 status: string;
@@ -3235,11 +3225,13 @@ export interface operations {
                 [key: string]: unknown;
               };
             } | null;
-            /** @example {
+            /**
+             * @example {
              *       "database": {
              *         "status": "up"
              *       }
-             *     } */
+             *     }
+             */
             details?: {
               [key: string]: {
                 status: string;
@@ -3268,11 +3260,13 @@ export interface operations {
           'application/json': {
             /** @example error */
             status?: string;
-            /** @example {
+            /**
+             * @example {
              *       "database": {
              *         "status": "up"
              *       }
-             *     } */
+             *     }
+             */
             info?: {
               [key: string]: {
                 status: string;
@@ -3280,12 +3274,14 @@ export interface operations {
                 [key: string]: unknown;
               };
             } | null;
-            /** @example {
+            /**
+             * @example {
              *       "redis": {
              *         "status": "down",
              *         "message": "Could not connect"
              *       }
-             *     } */
+             *     }
+             */
             error?: {
               [key: string]: {
                 status: string;
@@ -3293,7 +3289,8 @@ export interface operations {
                 [key: string]: unknown;
               };
             } | null;
-            /** @example {
+            /**
+             * @example {
              *       "database": {
              *         "status": "up"
              *       },
@@ -3301,7 +3298,8 @@ export interface operations {
              *         "status": "down",
              *         "message": "Could not connect"
              *       }
-             *     } */
+             *     }
+             */
             details?: {
               [key: string]: {
                 status: string;
@@ -3332,11 +3330,13 @@ export interface operations {
           'application/json': {
             /** @example ok */
             status?: string;
-            /** @example {
+            /**
+             * @example {
              *       "database": {
              *         "status": "up"
              *       }
-             *     } */
+             *     }
+             */
             info?: {
               [key: string]: {
                 status: string;
@@ -3352,11 +3352,13 @@ export interface operations {
                 [key: string]: unknown;
               };
             } | null;
-            /** @example {
+            /**
+             * @example {
              *       "database": {
              *         "status": "up"
              *       }
-             *     } */
+             *     }
+             */
             details?: {
               [key: string]: {
                 status: string;
@@ -3385,11 +3387,13 @@ export interface operations {
           'application/json': {
             /** @example error */
             status?: string;
-            /** @example {
+            /**
+             * @example {
              *       "database": {
              *         "status": "up"
              *       }
-             *     } */
+             *     }
+             */
             info?: {
               [key: string]: {
                 status: string;
@@ -3397,12 +3401,14 @@ export interface operations {
                 [key: string]: unknown;
               };
             } | null;
-            /** @example {
+            /**
+             * @example {
              *       "redis": {
              *         "status": "down",
              *         "message": "Could not connect"
              *       }
-             *     } */
+             *     }
+             */
             error?: {
               [key: string]: {
                 status: string;
@@ -3410,7 +3416,8 @@ export interface operations {
                 [key: string]: unknown;
               };
             } | null;
-            /** @example {
+            /**
+             * @example {
              *       "database": {
              *         "status": "up"
              *       },
@@ -3418,7 +3425,8 @@ export interface operations {
              *         "status": "down",
              *         "message": "Could not connect"
              *       }
-             *     } */
+             *     }
+             */
             details?: {
               [key: string]: {
                 status: string;
