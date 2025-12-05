@@ -167,7 +167,7 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
 
   // 改善ルート生成を開始
   const { mutate: startGeneration, isPending: isGenerating } = useMutation({
-    mutationFn: () => routeCoachApi.generateImprovementRoutes(projectId!, undefined, forceRegenerate),
+    mutationFn: () => routeCoachApi.generateImprovementRoutes(projectId!, sessionId!, undefined, forceRegenerate),
     onSuccess: (result) => {
       if (result) {
         setTaskId(result.taskId ?? null);
@@ -182,7 +182,9 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
   });
 
   const busy = isGenerating || isTaskFetching;
-  const disabled = !enabled || busy;
+  const disabled = useMemo(() => {
+    return !enabled || busy || !projectId || !sessionId;
+  }, [busy, enabled, projectId, sessionId]);
 
   // タスク実行中のメッセージ
   const taskStatusMessage = useMemo(() => {

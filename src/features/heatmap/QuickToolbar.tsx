@@ -46,8 +46,8 @@ function Toolbar({ className, service, dimensionality }: Props) {
   // RouteCoach改善ルート生成
   const { mutate: startRouteCoach, isPending: isRouteCoachPending } = useMutation({
     mutationFn: async () => {
-      if (!service.projectId) throw new Error('Project is required');
-      return routeCoachApi.generateImprovementRoutes(service.projectId);
+      if (!service.projectId || !service.sessionId) throw new Error('Project is required');
+      return routeCoachApi.generateImprovementRoutes(service.projectId, service.sessionId);
     },
     onSuccess: async () => {
       // 生成後、RouteCoachメニューのキャッシュを無効化

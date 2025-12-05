@@ -102,7 +102,7 @@ export function useRouteCoachApi() {
    * @param force 強制再生成フラグ（true の場合、既存の completed/failed タスクを削除して再生成）
    */
   const generateImprovementRoutes = useCallback(
-    async (projectId: number, mapName?: string, force?: boolean) => {
+    async (projectId: number, sessionId: number, mapName?: string, force?: boolean) => {
       try {
         const query: Record<string, string> = {};
         if (mapName) {
@@ -112,10 +112,14 @@ export function useRouteCoachApi() {
           query.force = 'true';
         }
 
-        const { data, error } = await apiClient.POST('/api/v0/route-coach/projects/{project_id}/generate-improvement-routes' as const, {
+        const { data, error } = await apiClient.POST('/api/v0/route-coach/projects/{project_id}/generate-improvement-routes', {
           params: {
             path: { project_id: projectId },
-            ...(Object.keys(query).length > 0 && { query }),
+            query: {
+              session_id: sessionId,
+              ...(force !== undefined ? { force: String(force) } : {}),
+              ...(mapName ? { map_name: mapName } : {}),
+            },
           },
         });
 

@@ -1,36 +1,11 @@
 import styled from '@emotion/styled';
 
+import type { ImprovementRoute } from '@src/component/molecules/ImprovementRouteCard';
 import type { FC } from 'react';
 
 import { ImprovementRouteCard } from '@src/component/molecules/ImprovementRouteCard';
 import { useImprovementRoutes } from '@src/hooks/useImprovementRoutes';
 import { useSelectedClusterId } from '@src/hooks/useRouteCoach';
-
-interface ImprovementRoute {
-  id: number;
-  strategy_type: 'divergence' | 'safety_passage' | 'faster';
-  trajectory_points: Array<{ x: number; y: number; z: number }>;
-  success_rate: number;
-  success_count: number;
-  avg_duration_ms: number;
-  time_saved_ms?: number;
-  divergence_analysis?: {
-    divergence_point: { x: number; y: number; z: number };
-    distance_to_event_cluster: number;
-    common_prefix_length: number;
-    improvement_segment: Array<{ x: number; y: number; z: number }>;
-  };
-  safety_score?: number;
-  evidence: {
-    description: string;
-    reference_player_count: number;
-    data_source: string;
-    sample_count: number;
-    confidence: 'high' | 'medium' | 'low';
-  };
-  feedback_total_count: number;
-  feedback_avg_rating: number;
-}
 
 interface EventClusterViewerProps {
   className?: string;
@@ -99,8 +74,8 @@ const Component: FC<EventClusterViewerProps> = ({ className, projectId, playerId
             </div>
 
             <div className={`${className}__routes`}>
-              {(c.improvements as unknown[]).length > 0 ? (
-                (c.improvements as ImprovementRoute[]).map((improvement: ImprovementRoute, _index: number) => {
+              {c.improvements.length > 0 ? (
+                c.improvements.map((improvement, _index: number) => {
                   return (
                     <ImprovementRouteCard
                       key={`improvement-${improvement.id}`}
