@@ -6665,7 +6665,9 @@ export interface operations {
   };
   RouteCoachController_getEventClusters: {
     parameters: {
-      query?: {
+      query: {
+        /** @description Session ID to filter events (required) */
+        session_id: number;
         /** @description Player ID to filter events (optional - if not specified, all players are included) */
         player_id?: string;
         /** @description Map name to filter by */
