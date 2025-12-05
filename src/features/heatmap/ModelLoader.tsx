@@ -1,5 +1,6 @@
 import { useLoader } from '@react-three/fiber';
-import { Suspense, useState, useEffect, memo } from 'react';
+import { Suspense, useState, useEffect, memo, useMemo } from 'react';
+import { MathUtils } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 
@@ -8,7 +9,7 @@ import type { Group } from 'three';
 
 import { setRaycastLayerRecursive } from '@src/features/heatmap/ObjectToggleList';
 import { useSelectable } from '@src/features/heatmap/selection/hooks';
-import { useGeneralSelect } from '@src/hooks/useGeneral';
+import { useGeneralPick } from '@src/hooks/useGeneral';
 
 type LocalModelLoaderProps = {
   modelPath: string;
@@ -17,9 +18,23 @@ type LocalModelLoaderProps = {
 };
 
 const LocalModelLoaderContent: FC<LocalModelLoaderProps> = ({ modelPath, modelType, ref }) => {
-  const scale = useGeneralSelect((s) => s.scale);
+  const { scale, modelPositionX, modelPositionY, modelPositionZ, modelRotationX, modelRotationY, modelRotationZ } = useGeneralPick(
+    'scale',
+    'modelPositionX',
+    'modelPositionY',
+    'modelPositionZ',
+    'modelRotationX',
+    'modelRotationY',
+    'modelRotationZ',
+  );
   const model = useLoader(modelType === 'obj' ? OBJLoader : GLTFLoader, modelPath);
   const handlers = useSelectable('map-mesh', { fit: 'object' });
+
+  const rotation: [number, number, number] = useMemo(
+    () => [MathUtils.degToRad(modelRotationX), MathUtils.degToRad(modelRotationY), MathUtils.degToRad(modelRotationZ)],
+    [modelRotationX, modelRotationY, modelRotationZ],
+  );
+
   return (
     <group
       ref={ref}
@@ -28,7 +43,8 @@ const LocalModelLoaderContent: FC<LocalModelLoaderProps> = ({ modelPath, modelTy
     >
       <primitive
         object={'scene' in model ? model.scene : model} // eslint-disable-line react/no-unknown-property
-        position={[0, 1, 0]} // eslint-disable-line react/no-unknown-property
+        position={[modelPositionX, modelPositionY, modelPositionZ]} // eslint-disable-line react/no-unknown-property
+        rotation={rotation} // eslint-disable-line react/no-unknown-property
         scale={[scale, scale, scale]}
         castShadow={true} // eslint-disable-line react/no-unknown-property
       />
@@ -77,7 +93,21 @@ export function useOBJFromArrayBuffer(arrayBuffer: ArrayBuffer | null): Group | 
 }
 
 const StreamModelLoaderComponent: FC<StreamModelLoaderProps> = ({ model, ref }) => {
-  const scale = useGeneralSelect((s) => s.scale);
+  const { scale, modelPositionX, modelPositionY, modelPositionZ, modelRotationX, modelRotationY, modelRotationZ } = useGeneralPick(
+    'scale',
+    'modelPositionX',
+    'modelPositionY',
+    'modelPositionZ',
+    'modelRotationX',
+    'modelRotationY',
+    'modelRotationZ',
+  );
+
+  const rotation: [number, number, number] = useMemo(
+    () => [MathUtils.degToRad(modelRotationX), MathUtils.degToRad(modelRotationY), MathUtils.degToRad(modelRotationZ)],
+    [modelRotationX, modelRotationY, modelRotationZ],
+  );
+
   return (
     <Suspense fallback={null}>
       <group
@@ -87,7 +117,8 @@ const StreamModelLoaderComponent: FC<StreamModelLoaderProps> = ({ model, ref }) 
         {model && (
           <primitive
             object={model} // eslint-disable-line react/no-unknown-property
-            position={[0, 1, 0]} // eslint-disable-line react/no-unknown-property
+            position={[modelPositionX, modelPositionY, modelPositionZ]} // eslint-disable-line react/no-unknown-property
+            rotation={rotation} // eslint-disable-line react/no-unknown-property
             scale={[scale, scale, scale]}
             castShadow={true} // eslint-disable-line react/no-unknown-property
           />

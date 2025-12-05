@@ -39,6 +39,14 @@ export type GeneralSettings = {
   backgroundScale: number; // 背景画像のスケール（1.0 = 100%）
   backgroundOffsetX: number; // 背景画像のX方向オフセット（-100 ~ 100）
   backgroundOffsetY: number; // 背景画像のY方向オフセット（-100 ~ 100）
+  // OBJモデルの位置調整
+  modelPositionX: number;
+  modelPositionY: number;
+  modelPositionZ: number;
+  // OBJモデルの回転調整（度数法）
+  modelRotationX: number;
+  modelRotationY: number;
+  modelRotationZ: number;
 };
 export type HotspotModeSettings = {
   visible: boolean;
@@ -121,6 +129,12 @@ export const initializeValues: HeatmapDataState = {
     backgroundScale: 1.0, // 背景画像のスケール（初期値は100%）
     backgroundOffsetX: 0, // 背景画像のXオフセット（初期値は中央）
     backgroundOffsetY: 0, // 背景画像のYオフセット（初期値は中央）
+    modelPositionX: 0, // OBJモデルのX位置
+    modelPositionY: 0, // OBJモデルのY位置
+    modelPositionZ: 0, // OBJモデルのZ位置
+    modelRotationX: 0, // OBJモデルのX回転（度）
+    modelRotationY: 0, // OBJモデルのY回転（度）
+    modelRotationZ: 0, // OBJモデルのZ回転（度）
   },
   hotspotMode: {
     visible: false,
