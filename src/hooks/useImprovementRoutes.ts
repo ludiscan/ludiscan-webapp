@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { createClient } from '@src/modeles/qeury';
+import { useApiClient } from '@src/modeles/ApiClientContext';
 
 /**
  * イベントクラスタと改善案ルートを取得するHook
@@ -19,7 +19,7 @@ export function useImprovementRoutes(
     enabled?: boolean;
   },
 ) {
-  const client = createClient();
+  const client = useApiClient();
   const queryKey = ['improvementRoutes', projectId, playerId, options?.mapName, options?.eventType, options?.freshnessDays];
 
   return useQuery({

@@ -1,36 +1,13 @@
 import styled from '@emotion/styled';
 import { useState } from 'react';
 
+import type { components } from '@generated/api';
 import type { FC } from 'react';
 
 import { FeedbackRating } from '@src/component/atoms/FeedbackRating';
 import { useSubmitFeedback } from '@src/hooks/useSubmitFeedback';
 
-interface ImprovementRoute {
-  id: number;
-  strategy_type: 'divergence' | 'safety_passage' | 'faster';
-  trajectory_points: Array<{ x: number; y: number; z: number }>;
-  success_rate: number;
-  success_count: number;
-  avg_duration_ms: number;
-  time_saved_ms?: number;
-  divergence_analysis?: {
-    divergence_point: { x: number; y: number; z: number };
-    distance_to_event_cluster: number;
-    common_prefix_length: number;
-    improvement_segment: Array<{ x: number; y: number; z: number }>;
-  };
-  safety_score?: number;
-  evidence: {
-    description: string;
-    reference_player_count: number;
-    data_source: string;
-    sample_count: number;
-    confidence: 'high' | 'medium' | 'low';
-  };
-  feedback_total_count: number;
-  feedback_avg_rating: number;
-}
+export type ImprovementRoute = components['schemas']['ImprovementRouteDto'];
 
 interface ImprovementRouteCardProps {
   className?: string;
@@ -74,7 +51,7 @@ const Component: FC<ImprovementRouteCardProps> = ({ className, route, playerId, 
     return labels[strategy as keyof typeof labels] || strategy;
   };
 
-  const successPercentage = Math.round(route.success_rate * 100);
+  const successPercentage = route.success_rate ? Math.round(route.success_rate * 100) : 0;
 
   return (
     <div className={className}>
@@ -95,7 +72,7 @@ const Component: FC<ImprovementRouteCardProps> = ({ className, route, playerId, 
         </div>
         <div className={`${className}__statItem`}>
           <div>平均実行時間</div>
-          <span>{(route.avg_duration_ms / 1000).toFixed(1)}秒</span>
+          <span>{((route?.avg_duration_ms ?? 0) / 1000).toFixed(1)}秒</span>
         </div>
         {route.time_saved_ms && (
           <div className={`${className}__statItem`}>
@@ -111,15 +88,14 @@ const Component: FC<ImprovementRouteCardProps> = ({ className, route, playerId, 
         )}
       </div>
 
-      <div className={`${className}__evidence`}>
-        <p>
-          <strong>根拠:</strong> {route.evidence.description}
-        </p>
-        <p>
-          参考プレイヤー数: {route.evidence.reference_player_count} | サンプル数: {route.evidence.sample_count} | 信頼度:
-          {route.evidence.confidence === 'high' ? '高' : route.evidence.confidence === 'medium' ? '中' : '低'}
-        </p>
-      </div>
+      {route.evidence ? (
+        <div className={`${className}__evidence`}>
+          <p>
+            | 信頼度:
+            {route.evidence.confidence === 'high' ? '高' : route.evidence.confidence === 'medium' ? '中' : '低'}
+          </p>
+        </div>
+      ) : null}
 
       <div className={`${className}__feedback`}>
         <div className={`${className}__feedbackStats`}>
