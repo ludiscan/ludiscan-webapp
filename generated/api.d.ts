@@ -1520,12 +1520,12 @@ export interface paths {
     get?: never;
     put?: never;
     /**
-     * プロジェクトの改善ルート生成ジョブを投入
-     * @description プロジェクト全体の改善ルートを生成するための非同期ジョブをキューに投入します。
-     *     このジョブは死亡イベントをクラスタリングし、各クラスタに対する
+     * セッションの改善ルート生成ジョブを投入
+     * @description 指定セッションの改善ルートを生成するための非同期ジョブをキューに投入します。
+     *     このジョブはセッション内の死亡/成功イベントをクラスタリングし、各クラスタに対する
      *     改善提案（Strategy 1: 分岐点検出、Strategy 2: 安全通過、Strategy 3: 時間短縮）を生成します。
      *
-     *     同じプロジェクト・マップの組み合わせで既に完了したタスクがある場合は、
+     *     同じプロジェクト・セッションの組み合わせで既に完了したタスクがある場合は、
      *     新規ジョブを投入せずに既存タスクを返します。
      */
     post: operations['RouteCoachController_generateImprovementRoutes'];
@@ -2751,17 +2751,33 @@ export interface components {
       /** @description Player ID */
       player_id: string;
     };
-    RoutePatternDto: {
-      /** @description Route pattern ID */
+    RawRouteDto: {
+      /** @description Route ID */
       id: number;
-      /** @description Trajectory points leading to the cluster */
+      /** @description Player ID */
+      player_id: string;
+      /** @description Session ID */
+      session_id: number;
+      /** @description Trajectory points leading to the cluster (raw player position logs) */
       trajectory_points: {
         x?: number;
         y?: number;
         z?: number;
         offset_timestamp?: number;
       }[];
-      /** @description Number of times this route was taken */
+      /** @description Duration in milliseconds */
+      duration_ms?: number;
+    };
+    ClusteredRouteDto: {
+      /** @description Clustered route ID */
+      id: number;
+      /** @description Averaged trajectory points (clustered) */
+      trajectory_points: {
+        x?: number;
+        y?: number;
+        z?: number;
+      }[];
+      /** @description Number of times this route pattern was taken */
       occurrence_count: number;
       /** @description Number of times this route led to success */
       success_count: number;
@@ -2851,12 +2867,16 @@ export interface components {
        * @enum {string}
        */
       event_type: 'death' | 'success';
+      /** @description Player ID this cluster belongs to */
+      player_id: string;
       /** @description Map name */
       map_name?: string;
       /** @description Raw event coordinates in this cluster */
       raw_coordinates: components['schemas']['EventRawCoordinateDto'][];
-      /** @description Route patterns leading to this cluster */
-      routes: components['schemas']['RoutePatternDto'][];
+      /** @description Raw routes - individual player movement logs leading to this cluster */
+      routes: components['schemas']['RawRouteDto'][];
+      /** @description Clustered routes - aggregated/averaged route patterns for statistics */
+      clustered_routes: components['schemas']['ClusteredRouteDto'][];
       /** @description Improvement route recommendations */
       improvements: components['schemas']['ImprovementRouteDto'][];
       /**
@@ -6720,8 +6740,10 @@ export interface operations {
   };
   RouteCoachController_generateImprovementRoutes: {
     parameters: {
-      query?: {
-        /** @description マップ名でフィルタ（指定時はそのマップのみ処理） */
+      query: {
+        /** @description 対象セッションID（必須） */
+        session_id: number;
+        /** @description マップ名（改善提案生成時のフィルタ用） */
         map_name?: string;
         /** @description force=true の場合、既存の completed/failed タスクを削除して強制再生成 */
         force?: string;
