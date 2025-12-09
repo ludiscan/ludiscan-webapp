@@ -12,18 +12,19 @@ import { zIndexes } from '@src/styles/style';
 
 interface RouteCoachVisualizationProps {
   projectId: number;
+  sessionId: number;
   playerId?: string;
 }
 
 /**
  * Route Coach のルート可視化コンポーネント（HeatmapCanvas内で使用）
  */
-const Component: FC<RouteCoachVisualizationProps> = ({ projectId, playerId }) => {
+const Component: FC<RouteCoachVisualizationProps> = ({ projectId, playerId, sessionId }) => {
   const selectedClusterId = useSelectedClusterId();
   const { upZ, scale } = useGeneralPick('upZ', 'scale');
 
   // 改善ルートデータを取得
-  const { data: clusterData } = useImprovementRoutes(projectId, playerId);
+  const { data: clusterData } = useImprovementRoutes(projectId, sessionId, playerId);
 
   // 選択中のクラスターデータを取得
   const selectedClusterData = useMemo(() => {
