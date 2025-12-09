@@ -53,7 +53,7 @@ const Component: FC<ProjectDetailsMembersTabProps> = ({ className, project }) =>
     isLoading: isLoadingMembers,
     isError: isErrorMembers,
   } = useQuery({
-    queryKey: ['members', project.id, apiClient],
+    queryKey: ['members', project.id],
     queryFn: async () => {
       const { data, error } = await apiClient.GET('/api/v0.1/projects/{project_id}/members', {
         params: {

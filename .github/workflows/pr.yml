@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'src/**'
+      - '.storybook/**'
       - '.github/workflows/pr.yml'
       - 'package.json'
       - 'bun.lock'
@@ -16,6 +17,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  contents: read
   pull-requests: write
   checks: write
   statuses: write
@@ -61,3 +63,48 @@ jobs:
 
       - name: Build
         run: bun run build:prod
+
+  storybook-test:
+    needs: check
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.0
+
+      - name: Cache bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install Playwright
+        run: bunx playwright install --with-deps
+
+      - name: Build Storybook
+        run: bun run build-storybook --quiet
+
+      - name: Serve Storybook and run tests
+        run: |
+          bunx concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
+            "bunx http-server storybook-static --port 6006 --silent" \
+            "bunx wait-on tcp:6006 && NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules bun run test-storybook"
+
+      - name: Upload screenshots to Argos
+        continue-on-error: true
+        run: bunx argos upload ./screenshots --token ${{ secrets.ARGOS_TOKEN }}

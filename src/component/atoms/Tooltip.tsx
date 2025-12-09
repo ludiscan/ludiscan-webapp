@@ -21,7 +21,7 @@ const TooltipText = styled(Text)<{ placement: 'top' | 'bottom' | 'left' | 'right
   position: absolute;
   z-index: ${zIndexes.tooltip};
   padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.sm};
-  color: ${({ theme }) => theme.colors.text.inverse};
+  color: ${({ theme }) => theme.colors.text.secondary};
   white-space: nowrap;
   pointer-events: none; /* ユーザーの操作に影響させない */
   background-color: ${({ theme }) => theme.colors.surface.sunken};
@@ -49,10 +49,10 @@ const TooltipComponent: FC<TooltipProps> = (props) => {
       let left = 0;
       // 配置（placement）に応じた位置計算
       if (placement === 'top') {
-        top = rect.top - rect.height;
+        top = rect.top - rect.height * 2;
         left = rect.left + rect.width / 2;
       } else if (placement === 'bottom') {
-        top = rect.bottom + rect.height;
+        top = rect.bottom + rect.height * 2;
         left = rect.left + rect.width / 2;
       } else if (placement === 'left') {
         top = rect.top + rect.height / 2;

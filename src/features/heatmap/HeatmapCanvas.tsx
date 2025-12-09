@@ -129,7 +129,6 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
   visibleTimelineRange,
   dimensionality,
   fieldObjectLogs = [],
-  projectId,
   playerId,
 }) => {
   // const { invalidate } = useThree();
@@ -453,20 +452,49 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
     notifyPercent();
   }, [notifyPercent]);
 
+  // 3Dモードにリセットするハンドラー
+  const reset3DCamera = useCallback(() => {
+    const controls = orbitControlsRef.current;
+    const camera = controls?.object as PerspectiveCamera | OrthographicCamera | undefined;
+    if (!controls || !camera || !groupRef.current) return;
+
+    // モデルの中心を取得
+    const box = new Box3().setFromObject(groupRef.current);
+    const center = new Vector3();
+    const size = new Vector3();
+    box.getCenter(center);
+    box.getSize(size);
+
+    // 3Dモード：斜めからの視点にリセット（upベクトルを標準に戻す）
+    camera.up.set(0, 1, 0); // Y軸が上（標準）
+    controls.target.copy(center);
+
+    // 斜め視点の計算
+    const radius = size.length() / 2 || 100;
+    const dist = radius * 2;
+    camera.position.set(center.x + dist, center.y + dist, center.z - dist);
+    camera.updateProjectionMatrix();
+    controls.update();
+    notifyPercent();
+  }, [notifyPercent]);
+
   useEffect(() => {
     const onSet = (e: CustomEvent<{ percent: number }>) => setPercent(e.detail.percent);
     const onFit = () => fitToObject();
     const onReset2D = () => reset2DCamera();
+    const onReset3D = () => reset3DCamera();
 
     heatMapEventBus.on('camera:set-zoom-percent', onSet);
     heatMapEventBus.on('camera:fit', onFit);
     heatMapEventBus.on('camera:reset-2d', onReset2D);
+    heatMapEventBus.on('camera:reset-3d', onReset3D);
     return () => {
       heatMapEventBus.off('camera:set-zoom-percent', onSet);
       heatMapEventBus.off('camera:fit', onFit);
       heatMapEventBus.off('camera:reset-2d', onReset2D);
+      heatMapEventBus.off('camera:reset-3d', onReset3D);
     };
-  }, [fitToObject, setPercent, reset2DCamera]);
+  }, [fitToObject, setPercent, reset2DCamera, reset3DCamera]);
 
   // モデルが揃った/サイズが決まったタイミングで実行
   useEffect(() => {
@@ -564,7 +592,7 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
       </GizmoHelper>
       <FocusPingLayer ttlMs={1800} baseRadius={60} />
       <RouteVisualization dimensionality={dimensionality} />
-      {projectId && <RouteCoachVisualization projectId={projectId} playerId={playerId} />}
+      {service.projectId && service.sessionId && <RouteCoachVisualization projectId={service.projectId} sessionId={service.sessionId} playerId={playerId} />}
     </>
   );
 };
@@ -580,6 +608,7 @@ export const HeatMapCanvas = memo(
     prev.service.task == next.service.task &&
     prev.dimensionality === next.dimensionality &&
     prev.fieldObjectLogs === next.fieldObjectLogs &&
-    prev.projectId === next.projectId &&
-    prev.playerId === next.playerId,
+    prev.playerId === next.playerId &&
+    prev.service.sessionId === next.service.sessionId &&
+    prev.service.projectId === next.service.projectId,
 );

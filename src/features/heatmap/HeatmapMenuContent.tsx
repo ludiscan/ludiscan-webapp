@@ -14,6 +14,7 @@ import { HeatmapMenuListRow } from '@src/component/organisms/HeatmapMenuListRow'
 import { QuickToolbar } from '@src/features/heatmap/QuickToolbar';
 import { useGeneralPatch, useGeneralSelect } from '@src/hooks/useGeneral';
 import { MenuContents } from '@src/hooks/useHeatmapSideBarMenus';
+import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { setMenuPanelWidth } from '@src/slices/uiSlice';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 import { saveRecentMenu } from '@src/utils/localstrage';
@@ -40,6 +41,7 @@ const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
   const setGeneral = useGeneralPatch();
   const dispatch = useDispatch();
   const menuPanelWidth = useSelector((s: RootState) => s.ui.menuPanelWidth);
+  const { theme } = useSharedTheme();
 
   const [openMenu, setOpenMenu] = useState<Menus | undefined>(undefined);
   const [menuExtra, setMenuExtra] = useState<object | undefined>(undefined);
@@ -112,13 +114,6 @@ const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
     };
   }, []);
 
-  // Auto-open general menu when session is selected
-  useEffect(() => {
-    if (service.sessionId) {
-      setOpenMenu('general');
-    }
-  }, [service.sessionId]);
-
   useEffect(() => {
     // mapOptionsが変わった時のみ実行
     if (mapOptions.length > 0) {
@@ -141,7 +136,7 @@ const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
 
   return (
     <div className={className} style={{ width: menuPanelWidth }}>
-      <PanelCard className={`${className}__card`} padding={'2px'}>
+      <PanelCard className={`${className}__card`} padding={'2px'} color={theme.colors.surface.raised}>
         <FlexColumn className={`${className}__container`}>
           {/* Menu icons row */}
           <div className={`${className}__row`}>
@@ -149,12 +144,14 @@ const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
           </div>
 
           {/* Menu content - scrollable */}
-          <FlexColumn gap={8} align={'flex-start'} className={`${className}__content`}>
+          <FlexColumn gap={8} align={'flex-start'} wrap='nowrap' className={`${className}__content`}>
             {content && <content.Component {...menuProps} />}
           </FlexColumn>
 
           {/* Quick toolbar at bottom */}
-          <QuickToolbar className={`${className}__toolbar`} service={service} dimensionality={dimensionality} />
+          <div className={`${className}__toolbar`} key='qt-container'>
+            <QuickToolbar service={service} dimensionality={dimensionality} />
+          </div>
         </FlexColumn>
       </PanelCard>
       {/* Resize handle */}
@@ -189,6 +186,7 @@ export const HeatmapMenuContent = memo(
 
     &__content {
       flex: 1;
+      width: 100%;
       height: 0;
       min-height: 0;
       padding: 16px;
@@ -198,10 +196,8 @@ export const HeatmapMenuContent = memo(
     &__toolbar {
       flex-shrink: 0;
       flex-wrap: nowrap;
-      justify-content: flex-start;
       width: 100%;
-      padding: 8px;
-      overflow-x: auto;
+      overflow: auto hidden;
       border-top: ${({ theme }) => `1px solid ${theme.colors.border.default}`};
     }
 
@@ -271,7 +267,12 @@ export const HeatmapMenuContent = memo(
       prev.toggleMenu == next.toggleMenu &&
       prev.service.task == next.service.task &&
       prev.service.projectId == next.service.projectId &&
-      prev.service.sessionId == next.service.sessionId
+      prev.service.sessionId == next.service.sessionId &&
+      prev.model === next.model &&
+      prev.eventLogKeys === next.eventLogKeys &&
+      prev.handleExportView === next.handleExportView &&
+      prev.extra === prev.extra &&
+      prev.dimensionality === next.dimensionality
     );
   },
 );

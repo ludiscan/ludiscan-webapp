@@ -18,6 +18,7 @@ import { HeatMapCanvas } from '@src/features/heatmap/HeatmapCanvas';
 import { HeatmapMenuContent } from '@src/features/heatmap/HeatmapMenuContent';
 import { useOBJFromArrayBuffer } from '@src/features/heatmap/ModelLoader';
 import { TimelineControlWrapper } from '@src/features/heatmap/TimelineControlWrapper';
+import { ZoomControls } from '@src/features/heatmap/ZoomControls';
 import { exportHeatmap } from '@src/features/heatmap/export-heatmap';
 import { FocusLinkBridge } from '@src/features/heatmap/selection/FocusLinkBridge';
 import { InspectorModal } from '@src/features/heatmap/selection/InspectorModal';
@@ -68,7 +69,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
   const dimensionality = useMemo(() => detectDimensionality(dimensionalityOverride, project?.is2D, task), [dimensionalityOverride, project?.is2D, task]);
 
   const { data: mapList } = useQuery({
-    queryKey: ['mapList', service, service.projectId],
+    queryKey: ['mapList', service.projectId],
     queryFn: async () => {
       return service.getMapList();
     },
@@ -77,20 +78,22 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
   });
 
   const { data: mapContent } = useQuery({
-    queryKey: ['mapData', mapName, service],
+    queryKey: ['mapData', mapName, service.projectId],
     queryFn: async () => {
       if (!mapName) return null;
       return service.getMapContent(mapName);
     },
     staleTime: 1000 * 60 * 20,
+    enabled: !!mapName && service.isInitialized,
   });
 
   const { data: generalLogKeys } = useQuery({
-    queryKey: ['general'],
+    queryKey: ['generalLogKeys', service.projectId, service.sessionId],
     queryFn: async () => {
       return service.getGeneralLogKeys();
     },
     staleTime: DefaultStaleTime,
+    enabled: service.isInitialized,
   });
 
   const { data: fieldObjectLogs } = useQuery({
@@ -222,7 +225,6 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
           visibleTimelineRange={visibleTimelineRange}
           dimensionality={dimensionality}
           fieldObjectLogs={fieldObjectLogs}
-          projectId={service.projectId}
         />
         {statsReady && <Stats parent={divRef} className={`${className}__stats`} />}
       </Canvas>
@@ -257,7 +259,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
       </FlexRow>
       <div className={`${className}__canvasMenuBox`}>
         <HeatmapMenuContent
-          mapOptions={mapList ?? []}
+          mapOptions={useMemo(() => mapList ?? [], [mapList])}
           model={model}
           handleExportView={handleExportView}
           eventLogKeys={generalLogKeys ?? undefined}
@@ -269,6 +271,12 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
       <div className={`${className}__selectionInspector`}>
         <InspectorModal />
       </div>
+
+      {/* ズームコントロール（キャンバス右下） */}
+      <div className={`${className}__zoomControls`}>
+        <ZoomControls />
+      </div>
+
       {/* AIリンク/外部postMessage→focus */}
       <FocusLinkBridge />
     </div>
@@ -325,7 +333,7 @@ export const HeatMapViewer = memo(
       height: 100%;
       margin: 0 auto;
       overflow: hidden;
-      background-color: ${({ theme }) => theme.colors.background.paper};
+      background-color: ${({ theme }) => theme.colors.background.overlay};
       border: ${({ theme }) => `1px solid ${theme.colors.border.default}`};
     }
 
@@ -345,6 +353,13 @@ export const HeatMapViewer = memo(
       bottom: 40px;
       left: 50%;
       transform: translateX(-50%);
+    }
+
+    &__zoomControls {
+      position: absolute;
+      right: 16px;
+      bottom: 16px;
+      z-index: ${zIndexes.content + 2};
     }
 
     &__stats {

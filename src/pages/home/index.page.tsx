@@ -74,7 +74,7 @@ const Component: FC<HomePageProps> = ({ className }) => {
     error: projectsError,
     fetchNextPage: fetchNextPageProjects,
   } = useInfiniteQuery({
-    queryKey: ['projects', isAuthorized, searchQuery, apiClient],
+    queryKey: ['projects', isAuthorized, searchQuery],
     queryFn: async ({ pageParam }): Promise<Project[] | undefined> => {
       if (!isAuthorized) return undefined;
       const { data, error } = await apiClient.GET('/api/v0.1/projects', {

@@ -75,6 +75,13 @@ const SliderComponent: FC<SliderProps> = (args) => {
   );
 
   useEffect(() => {
+    if (value !== undefined) {
+      setSliderValue(value);
+      setInputBackground(value);
+    }
+  }, [value, setInputBackground]);
+
+  useEffect(() => {
     setInputBackground(sliderValue);
   }, [theme, setInputBackground, sliderValue]);
 
@@ -157,6 +164,7 @@ const SliderComponent: FC<SliderProps> = (args) => {
 };
 
 export const Slider = styled(SliderComponent)`
+  width: 100%;
   overflow: hidden;
 
   &__sliderWrapper {
@@ -226,7 +234,7 @@ export const Slider = styled(SliderComponent)`
     margin-left: 8px;
     color: ${({ theme }) => theme.colors.text.primary};
     background: ${({ theme }) => theme.colors.surface.base};
-    border: 1px solid ${({ theme }) => theme.colors.border.default} !important;
+    border: 1px solid ${({ theme }) => theme.colors.border.subtle} !important;
     border-radius: 4px;
   }
 `;
