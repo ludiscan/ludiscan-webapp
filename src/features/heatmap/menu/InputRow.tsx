@@ -26,8 +26,14 @@ export const InputRow = styled(
     const { theme } = useSharedTheme();
     return (
       <InlineFlexRow className={className} align={align} wrap={'nowrap'} gap={4}>
-        <Text text={label} fontSize={theme.typography.fontSize.sm} style={{ width: '90px' }} color={theme.colors.tertiary.main} />
-        <div style={{ flex: 1, display: 'flex' }}>{children}</div>
+        <Text
+          text={label}
+          fontSize={theme.typography.fontSize.sm}
+          fontWeight={theme.typography.fontWeight.medium}
+          style={{ width: '90px' }}
+          color={theme.colors.tertiary.main}
+        />
+        <div style={{ flex: 1, display: 'flex', alignItems: align, gap: '4px' }}>{children}</div>
       </InlineFlexRow>
     );
   },
@@ -35,4 +41,5 @@ export const InputRow = styled(
   position: relative;
   width: 100%;
   padding: 4px 8px;
+  word-break: break-all;
 `;

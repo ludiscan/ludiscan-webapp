@@ -22,6 +22,7 @@ export interface HeatMapEventMap {
   'camera:set-zoom-percent': { percent: number };
   'camera:fit': object;
   'camera:reset-2d': object;
+  'camera:reset-3d': object;
   'focus:ping': { position: { x: number; y: number; z: number } };
   'route-selected': { route: RouteEdgeData | null };
 }

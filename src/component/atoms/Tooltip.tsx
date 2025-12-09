@@ -21,7 +21,7 @@ const TooltipText = styled(Text)<{ placement: 'top' | 'bottom' | 'left' | 'right
   position: absolute;
   z-index: ${zIndexes.tooltip};
   padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.sm};
-  color: ${({ theme }) => theme.colors.text.inverse};
+  color: ${({ theme }) => theme.colors.text.secondary};
   white-space: nowrap;
   pointer-events: none; /* ユーザーの操作に影響させない */
   background-color: ${({ theme }) => theme.colors.surface.sunken};

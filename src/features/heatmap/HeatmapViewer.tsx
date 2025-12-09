@@ -69,7 +69,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
   const dimensionality = useMemo(() => detectDimensionality(dimensionalityOverride, project?.is2D, task), [dimensionalityOverride, project?.is2D, task]);
 
   const { data: mapList } = useQuery({
-    queryKey: ['mapList', service, service.projectId],
+    queryKey: ['mapList', service.projectId],
     queryFn: async () => {
       return service.getMapList();
     },
@@ -78,20 +78,22 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
   });
 
   const { data: mapContent } = useQuery({
-    queryKey: ['mapData', mapName, service],
+    queryKey: ['mapData', mapName, service.projectId],
     queryFn: async () => {
       if (!mapName) return null;
       return service.getMapContent(mapName);
     },
     staleTime: 1000 * 60 * 20,
+    enabled: !!mapName && service.isInitialized,
   });
 
   const { data: generalLogKeys } = useQuery({
-    queryKey: ['general'],
+    queryKey: ['generalLogKeys', service.projectId, service.sessionId],
     queryFn: async () => {
       return service.getGeneralLogKeys();
     },
     staleTime: DefaultStaleTime,
+    enabled: service.isInitialized,
   });
 
   const { data: fieldObjectLogs } = useQuery({

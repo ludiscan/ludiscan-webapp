@@ -21,7 +21,7 @@ const Component: FC<FlexProps> = ({ className, children, style }) => {
 
 export const Flex = styled(Component)`
   display: flex;
-  flex-wrap: ${({ wrap }) => wrap || 'wrap'};
+  flex-wrap: ${({ wrap }) => wrap || 'nowrap'};
   gap: ${({ gap }) => gap || 0}px;
   align-content: ${({ align }) => align || 'flex-start'};
   align-items: ${({ align }) => align || 'flex-start'};

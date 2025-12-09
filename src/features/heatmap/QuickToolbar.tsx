@@ -63,9 +63,11 @@ function Toolbar({ className, service, dimensionality }: Props) {
       ...prev,
       dimensionalityOverride: newMode,
     }));
-    // 2Dモードに切り替えた時はカメラをリセット
+    // モード切り替え時はカメラをリセット
     if (newMode === '2d') {
       heatMapEventBus.emit('camera:reset-2d');
+    } else {
+      heatMapEventBus.emit('camera:reset-3d');
     }
   }, [dimensionality, patchGeneral]);
 
