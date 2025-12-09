@@ -151,7 +151,7 @@ const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
           </div>
 
           {/* Menu content - scrollable */}
-          <FlexColumn gap={8} align={'flex-start'} className={`${className}__content`}>
+          <FlexColumn gap={8} align={'flex-start'} wrap='nowrap' className={`${className}__content`}>
             {content && <content.Component {...menuProps} />}
           </FlexColumn>
 

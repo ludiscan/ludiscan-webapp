@@ -6,9 +6,10 @@ import type { HeatmapMenuProps } from '@src/features/heatmap/HeatmapMenuContent'
 import type { FC } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
+import { DraggableNumberInput } from '@src/component/atoms/DraggableNumberInput';
 import { FileInput } from '@src/component/atoms/FileInput';
-import { FlexColumn } from '@src/component/atoms/Flex';
-import { Slider } from '@src/component/atoms/Slider';
+import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
+import { VerticalSpacer } from '@src/component/atoms/Spacer';
 import { Text } from '@src/component/atoms/Text';
 import { Selector } from '@src/component/molecules/Selector';
 import { ObjectToggleList } from '@src/features/heatmap/ObjectToggleList';
@@ -75,25 +76,6 @@ const StatusMessage = styled.div<{ status: 'success' | 'error' | 'info' }>`
   }}
 `;
 
-const MapNameInput = styled.input`
-  flex: 1;
-  padding: 8px;
-  font-size: ${({ theme }) => theme.typography.fontSize.sm};
-  color: ${({ theme }) => theme.colors.text.primary};
-  outline: none;
-  background-color: ${({ theme }) => theme.colors.surface.base};
-  border: 1px solid ${({ theme }) => theme.colors.border.default};
-  border-radius: 4px;
-
-  &:focus {
-    border-color: ${({ theme }) => theme.colors.primary.main};
-  }
-
-  &::placeholder {
-    color: ${({ theme }) => theme.colors.text.disabled};
-  }
-`;
-
 const CollapsibleSection = styled.div`
   width: 100%;
 `;
@@ -137,30 +119,22 @@ export const MapMenuContent: FC<HeatmapMenuProps> = ({ mapOptions, model, dimens
   const setData = useGeneralPatch();
   const uploadMapData = useUploadMapData();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [uploadMapName, setUploadMapName] = useState<string>('');
   const [statusMessage, setStatusMessage] = useState<{ text: string; status: 'success' | 'error' | 'info' } | null>(null);
   const [isAlignmentOpen, setIsAlignmentOpen] = useState(false);
+  const [isObjectListOpen, setIsObjectListOpen] = useState(false);
 
   const handleAddWaypoint = useCallback(() => {
     heatMapEventBus.emit('add-waypoint');
   }, []);
 
-  const handleFileSelect = useCallback(
-    (file: File | null) => {
-      setSelectedFile(file);
-      setStatusMessage(null);
-      if (file && !uploadMapName) {
-        // ファイル名から拡張子を除いたものをマップ名として設定
-        const nameWithoutExt = file.name.replace(/\.[^/.]+$/, '');
-        setUploadMapName(nameWithoutExt);
-      }
-    },
-    [uploadMapName],
-  );
+  const handleFileSelect = useCallback((file: File | null) => {
+    setSelectedFile(file);
+    setStatusMessage(null);
+  }, []);
 
   const handleUpload = useCallback(async () => {
-    if (!selectedFile || !uploadMapName.trim()) {
-      setStatusMessage({ text: 'Please select a file and enter a map name', status: 'error' });
+    if (!selectedFile || !mapName) {
+      setStatusMessage({ text: 'Please select a file and a map name', status: 'error' });
       return;
     }
 
@@ -168,19 +142,18 @@ export const MapMenuContent: FC<HeatmapMenuProps> = ({ mapOptions, model, dimens
 
     try {
       await uploadMapData.mutateAsync({
-        mapName: uploadMapName.trim(),
+        mapName: mapName,
         file: selectedFile,
       });
       setStatusMessage({ text: 'Upload successful!', status: 'success' });
       setSelectedFile(null);
-      setUploadMapName('');
     } catch (error) {
       setStatusMessage({
         text: `Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
         status: 'error',
       });
     }
-  }, [selectedFile, uploadMapName, uploadMapData]);
+  }, [selectedFile, mapName, uploadMapData]);
 
   // 2Dモードではマップ機能を無効化
   if (dimensionality === '2d') {
@@ -210,7 +183,18 @@ export const MapMenuContent: FC<HeatmapMenuProps> = ({ mapOptions, model, dimens
       <Button scheme={'surface'} fontSize={'base'} onClick={handleAddWaypoint}>
         <Text text={'add waypoint'} />
       </Button>
-      {model && mapName && <ObjectToggleList mapName={mapName} model={model} />}
+      <VerticalSpacer size={12} />
+      {model && mapName && (
+        <CollapsibleSection>
+          <CollapsibleHeader onClick={() => setIsObjectListOpen(!isObjectListOpen)}>
+            <span>Model Objects</span>
+            {isObjectListOpen ? <IoChevronUp size={16} /> : <IoChevronDown size={16} />}
+          </CollapsibleHeader>
+          <CollapsibleContent isOpen={isObjectListOpen}>
+            <ObjectToggleList mapName={mapName} model={model} />
+          </CollapsibleContent>
+        </CollapsibleSection>
+      )}
 
       {/* OBJモデル位置・回転調整セクション */}
       {model && mapName && (
@@ -220,65 +204,43 @@ export const MapMenuContent: FC<HeatmapMenuProps> = ({ mapOptions, model, dimens
             {isAlignmentOpen ? <IoChevronUp size={16} /> : <IoChevronDown size={16} />}
           </CollapsibleHeader>
           <CollapsibleContent isOpen={isAlignmentOpen}>
-            <InputRow label={'Position X'}>
-              <Slider
-                value={modelPositionX}
-                onChange={(v) => setData({ modelPositionX: v })}
-                min={-1000}
-                step={1}
-                max={1000}
-                textField
-              />
+            <InputRow label={'Position'}>
+              <FlexRow gap={4} align='center'>
+                <DraggableNumberInput label='X' value={modelPositionX} onChange={(v) => setData({ modelPositionX: v })} step={1} precision={0} />
+                <DraggableNumberInput label='Y' value={modelPositionY} onChange={(v) => setData({ modelPositionY: v })} step={1} precision={0} />
+                <DraggableNumberInput label='Z' value={modelPositionZ} onChange={(v) => setData({ modelPositionZ: v })} step={1} precision={0} />
+              </FlexRow>
             </InputRow>
-            <InputRow label={'Position Y'}>
-              <Slider
-                value={modelPositionY}
-                onChange={(v) => setData({ modelPositionY: v })}
-                min={-1000}
-                step={1}
-                max={1000}
-                textField
-              />
-            </InputRow>
-            <InputRow label={'Position Z'}>
-              <Slider
-                value={modelPositionZ}
-                onChange={(v) => setData({ modelPositionZ: v })}
-                min={-1000}
-                step={1}
-                max={1000}
-                textField
-              />
-            </InputRow>
-            <InputRow label={'Rotation X'}>
-              <Slider
-                value={modelRotationX}
-                onChange={(v) => setData({ modelRotationX: v })}
-                min={-180}
-                step={1}
-                max={180}
-                textField
-              />
-            </InputRow>
-            <InputRow label={'Rotation Y'}>
-              <Slider
-                value={modelRotationY}
-                onChange={(v) => setData({ modelRotationY: v })}
-                min={-180}
-                step={1}
-                max={180}
-                textField
-              />
-            </InputRow>
-            <InputRow label={'Rotation Z'}>
-              <Slider
-                value={modelRotationZ}
-                onChange={(v) => setData({ modelRotationZ: v })}
-                min={-180}
-                step={1}
-                max={180}
-                textField
-              />
+            <InputRow label={'Rotation'}>
+              <FlexRow gap={4} align='center'>
+                <DraggableNumberInput
+                  label='X'
+                  value={modelRotationX}
+                  onChange={(v) => setData({ modelRotationX: v })}
+                  min={-180}
+                  max={180}
+                  step={1}
+                  precision={0}
+                />
+                <DraggableNumberInput
+                  label='Y'
+                  value={modelRotationY}
+                  onChange={(v) => setData({ modelRotationY: v })}
+                  min={-180}
+                  max={180}
+                  step={1}
+                  precision={0}
+                />
+                <DraggableNumberInput
+                  label='Z'
+                  value={modelRotationZ}
+                  onChange={(v) => setData({ modelRotationZ: v })}
+                  min={-180}
+                  max={180}
+                  step={1}
+                  precision={0}
+                />
+              </FlexRow>
             </InputRow>
             <InputRow label={''}>
               <Button
@@ -302,22 +264,20 @@ export const MapMenuContent: FC<HeatmapMenuProps> = ({ mapOptions, model, dimens
         </CollapsibleSection>
       )}
 
-      {!service.isEmbed && (
+      {!service.isEmbed && mapName && (
         <UploadSection>
-          <Text text={'Upload Map Data (OBJ)'} fontSize={theme.typography.fontSize.base} />
-          <UploadRow>
-            <MapNameInput type='text' placeholder='Map name' value={uploadMapName} onChange={(e) => setUploadMapName(e.target.value)} />
-          </UploadRow>
+          <Text text={`Upload OBJ for "${mapName}"`} fontSize={theme.typography.fontSize.base} />
           <UploadRow>
             <FileInput accept='.obj' onChange={handleFileSelect} buttonText='Select OBJ File' fontSize='sm' />
             {selectedFile && <FileName>{selectedFile.name}</FileName>}
           </UploadRow>
-          <Button scheme={'primary'} fontSize={'base'} onClick={handleUpload} disabled={!selectedFile || !uploadMapName.trim() || uploadMapData.isPending}>
+          <Button scheme={'primary'} fontSize={'base'} onClick={handleUpload} disabled={!selectedFile || uploadMapData.isPending}>
             <Text text={uploadMapData.isPending ? 'Uploading...' : 'Upload'} />
           </Button>
           {statusMessage && <StatusMessage status={statusMessage.status}>{statusMessage.text}</StatusMessage>}
         </UploadSection>
       )}
+      <VerticalSpacer size={12} />
     </>
   );
 };
