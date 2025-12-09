@@ -165,6 +165,7 @@ const SliderComponent: FC<SliderProps> = (args) => {
 
 export const Slider = styled(SliderComponent)`
   width: 100%;
+
   /* overflow: hidden; Removed to allow focus outline (ring) to be visible */
 
   &__sliderWrapper {
