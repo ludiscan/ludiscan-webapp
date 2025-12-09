@@ -1,5 +1,8 @@
 name: pr-storybook.yml
 on:
+  push:
+    branches:
+      - develop
   pull_request:
     branches-ignore:
       - main

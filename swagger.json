@@ -6107,6 +6107,15 @@
             }
           },
           {
+            "name": "session_id",
+            "required": true,
+            "in": "query",
+            "description": "Session ID to filter events (required)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
             "name": "player_id",
             "required": false,
             "in": "query",
@@ -6242,7 +6251,7 @@
     },
     "/api/v0/route-coach/projects/{project_id}/generate-improvement-routes": {
       "post": {
-        "description": "\nプロジェクト全体の改善ルートを生成するための非同期ジョブをキューに投入します。\nこのジョブは死亡イベントをクラスタリングし、各クラスタに対する\n改善提案（Strategy 1: 分岐点検出、Strategy 2: 安全通過、Strategy 3: 時間短縮）を生成します。\n\n同じプロジェクト・マップの組み合わせで既に完了したタスクがある場合は、\n新規ジョブを投入せずに既存タスクを返します。\n        ",
+        "description": "\n指定セッションの改善ルートを生成するための非同期ジョブをキューに投入します。\nこのジョブはセッション内の死亡/成功イベントをクラスタリングし、各クラスタに対する\n改善提案（Strategy 1: 分岐点検出、Strategy 2: 安全通過、Strategy 3: 時間短縮）を生成します。\n\n同じプロジェクト・セッションの組み合わせで既に完了したタスクがある場合は、\n新規ジョブを投入せずに既存タスクを返します。\n        ",
         "operationId": "RouteCoachController_generateImprovementRoutes",
         "parameters": [
           {
@@ -6254,10 +6263,19 @@
             }
           },
           {
+            "name": "session_id",
+            "required": true,
+            "in": "query",
+            "description": "対象セッションID（必須）",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
             "name": "map_name",
             "required": false,
             "in": "query",
-            "description": "マップ名でフィルタ（指定時はそのマップのみ処理）",
+            "description": "マップ名（改善提案生成時のフィルタ用）",
             "schema": {
               "type": "string"
             }
@@ -6309,7 +6327,7 @@
             "bearer": []
           }
         ],
-        "summary": "プロジェクトの改善ルート生成ジョブを投入",
+        "summary": "セッションの改善ルート生成ジョブを投入",
         "tags": [
           "v0"
         ]
@@ -7046,7 +7064,7 @@
   "info": {
     "title": "Ludiscan API Documentation",
     "description": "Ludiscan API for game analytics and session tracking",
-    "version": "1.16.0",
+    "version": "1.17.1",
     "contact": {}
   },
   "tags": [],
@@ -8915,12 +8933,20 @@
           "player_id"
         ]
       },
-      "RoutePatternDto": {
+      "RawRouteDto": {
         "type": "object",
         "properties": {
           "id": {
             "type": "number",
-            "description": "Route pattern ID"
+            "description": "Route ID"
+          },
+          "player_id": {
+            "type": "string",
+            "description": "Player ID"
+          },
+          "session_id": {
+            "type": "number",
+            "description": "Session ID"
           },
           "trajectory_points": {
             "type": "array",
@@ -8941,11 +8967,48 @@
                 }
               }
             },
-            "description": "Trajectory points leading to the cluster"
+            "description": "Trajectory points leading to the cluster (raw player position logs)"
+          },
+          "duration_ms": {
+            "type": "number",
+            "description": "Duration in milliseconds"
+          }
+        },
+        "required": [
+          "id",
+          "player_id",
+          "session_id",
+          "trajectory_points"
+        ]
+      },
+      "ClusteredRouteDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Clustered route ID"
+          },
+          "trajectory_points": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "x": {
+                  "type": "number"
+                },
+                "y": {
+                  "type": "number"
+                },
+                "z": {
+                  "type": "number"
+                }
+              }
+            },
+            "description": "Averaged trajectory points (clustered)"
           },
           "occurrence_count": {
             "type": "integer",
-            "description": "Number of times this route was taken"
+            "description": "Number of times this route pattern was taken"
           },
           "success_count": {
             "type": "integer",
@@ -9116,6 +9179,10 @@
             ],
             "description": "Type of event this cluster represents"
           },
+          "player_id": {
+            "type": "string",
+            "description": "Player ID this cluster belongs to"
+          },
           "map_name": {
             "type": "string",
             "description": "Map name"
@@ -9128,10 +9195,17 @@
             }
           },
           "routes": {
-            "description": "Route patterns leading to this cluster",
+            "description": "Raw routes - individual player movement logs leading to this cluster",
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/RoutePatternDto"
+              "$ref": "#/components/schemas/RawRouteDto"
+            }
+          },
+          "clustered_routes": {
+            "description": "Clustered routes - aggregated/averaged route patterns for statistics",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClusteredRouteDto"
             }
           },
           "improvements": {
@@ -9160,8 +9234,10 @@
           "cluster_radius",
           "raw_event_count",
           "event_type",
+          "player_id",
           "raw_coordinates",
           "routes",
+          "clustered_routes",
           "improvements",
           "created_at",
           "updated_at"

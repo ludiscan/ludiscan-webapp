@@ -19,6 +19,13 @@ import { useApiClient } from '@src/modeles/ApiClientContext';
 
 const POLL_MS = 2000;
 
+/** Query key constants for cache invalidation */
+const QUERY_KEYS = {
+  improvementRoutesTask: (projectId: number | undefined, sessionId: number | null) => ['improvementRoutesTask', projectId, sessionId] as const,
+  improvementRoutes: (projectId: number, sessionId: number | null, playerId?: string) => ['improvementRoutes', projectId, sessionId, playerId] as const,
+  sessionPlayers: (projectId: number | undefined, sessionId: number | null) => ['sessionPlayers', projectId, sessionId] as const,
+};
+
 /* ===== Styled Components (following BEM pattern) ===== */
 interface HintProps {
   children: React.ReactNode;
@@ -76,12 +83,14 @@ interface ScrollableClusterSectionProps {
 const ScrollableClusterSectionComponent: FC<ScrollableClusterSectionProps> = ({ children, className }) => <div className={className}>{children}</div>;
 
 const ScrollableClusterSection = styled(ScrollableClusterSectionComponent)`
-  max-height: calc(100vh - 450px);
-  padding-right: 8px;
+  flex: 1;
+  min-height: 0;
+  max-height: calc(100vh - 320px);
+  padding-right: 4px;
   overflow-y: auto;
 
   &::-webkit-scrollbar {
-    width: 6px;
+    width: 4px;
   }
 
   &::-webkit-scrollbar-track {
@@ -90,7 +99,7 @@ const ScrollableClusterSection = styled(ScrollableClusterSectionComponent)`
 
   &::-webkit-scrollbar-thumb {
     background: #ccc;
-    border-radius: 3px;
+    border-radius: 2px;
 
     &:hover {
       background: #999;
@@ -105,14 +114,11 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
   const sessionId = service.sessionId;
   const enabled = useMemo(() => Number.isFinite(projectId) && sessionId != null, [projectId, sessionId]);
 
-  // タスクID を管理する状態
-  const [taskId, setTaskId] = useState<number | null>(null);
-
   // プレイヤーID入力
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>('');
 
-  // 強制再生成フラグ
-  const [forceRegenerate, setForceRegenerate] = useState<boolean>(false);
+  // タスクIDを管理（mutation成功後に設定）
+  const [taskId, setTaskId] = useState<number | null>(null);
 
   // Redux から cluster 選択状態を更新
   const patchRouteCoach = useRouteCoachPatch();
@@ -122,7 +128,7 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
 
   // セッションのプレイヤー一覧を取得
   const { data: players, isLoading: isLoadingPlayers } = useQuery<number[]>({
-    queryKey: ['sessionPlayers', projectId, sessionId, apiClient],
+    queryKey: QUERY_KEYS.sessionPlayers(projectId, sessionId),
     enabled,
     queryFn: async () => {
       if (!projectId || !sessionId) return [];
@@ -140,49 +146,62 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
     refetchOnWindowFocus: false,
   });
 
-  // タスク状態を定期的に取得（taskIdが存在する場合）
-  const {
-    data: taskStatus,
-    isFetching: isTaskFetching,
-    refetch: refetchTaskStatus,
-  } = useQuery({
-    queryKey: ['improvementRoutesTask', taskId],
+  // タスク状態を取得（taskIdが存在する場合のみ、refetchIntervalで自動ポーリング）
+  const { data: taskStatus, isFetching: isTaskFetching } = useQuery({
+    // taskIdを含めてクエリの一意性を保証
+    queryKey: [...QUERY_KEYS.improvementRoutesTask(projectId, sessionId), taskId],
     enabled: !!taskId,
     queryFn: () => routeCoachApi.getImprovementRoutesTaskStatus(taskId!),
+    // AISummaryMenuContentと同様: statusに応じて自動ポーリング
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      if (!data) return false;
+      // pending/processing の場合のみポーリング継続
+      if (data.status === 'pending' || data.status === 'processing') {
+        return POLL_MS;
+      }
+      return false;
+    },
     refetchOnWindowFocus: false,
+    retry: 1,
   });
-
-  // ポーリング管理：status が 'completed' または 'failed' 以外の場合のみポーリング継続
-  useEffect(() => {
-    if (!taskStatus || taskStatus.status === 'completed' || taskStatus.status === 'failed') {
-      return;
-    }
-
-    const interval = setInterval(() => {
-      refetchTaskStatus();
-    }, POLL_MS);
-
-    return () => clearInterval(interval);
-  }, [taskStatus, refetchTaskStatus]);
 
   // 改善ルート生成を開始
   const { mutate: startGeneration, isPending: isGenerating } = useMutation({
-    mutationFn: () => routeCoachApi.generateImprovementRoutes(projectId!, undefined, forceRegenerate),
-    onSuccess: (result) => {
-      if (result) {
-        setTaskId(result.taskId ?? null);
-        setForceRegenerate(false);
+    mutationFn: (force: boolean = false) => routeCoachApi.generateImprovementRoutes(projectId!, sessionId!, undefined, force),
+    onSuccess: async (result) => {
+      if (result?.taskId) {
+        setTaskId(result.taskId);
+        // タスク状態のキャッシュを無効化して再取得
+        // exact: false でtaskIdの違うキャッシュも含めて無効化
+        await qc.invalidateQueries({
+          queryKey: QUERY_KEYS.improvementRoutesTask(projectId, sessionId),
+          exact: false,
+        });
       }
     },
     onError: (error) => {
-      // eslint-disable-next-line
+      // eslint-disable-next-line no-console
       console.error('Failed to start generation:', error);
-      setForceRegenerate(false);
     },
   });
 
-  const busy = isGenerating || isTaskFetching;
-  const disabled = !enabled || busy;
+  // タスク完了時に改善ルートデータのキャッシュを無効化
+  useEffect(() => {
+    if (taskStatus?.status === 'completed') {
+      // 改善ルートデータを再取得するためキャッシュを無効化
+      qc.invalidateQueries({
+        queryKey: ['improvementRoutes', projectId, sessionId],
+        exact: false, // playerIdが異なるものも含む
+      });
+    }
+  }, [taskStatus?.status, qc, projectId, sessionId]);
+
+  const isTaskRunning = taskStatus?.status === 'pending' || taskStatus?.status === 'processing';
+  const busy = isGenerating || isTaskFetching || isTaskRunning;
+  const disabled = useMemo(() => {
+    return !enabled || busy || !projectId || !sessionId;
+  }, [busy, enabled, projectId, sessionId]);
 
   // タスク実行中のメッセージ
   const taskStatusMessage = useMemo(() => {
@@ -204,30 +223,28 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
 
   const onStartGeneration = useCallback(() => {
     if (disabled) return;
-    startGeneration();
+    startGeneration(false);
   }, [disabled, startGeneration]);
 
   const onForceRegenerate = useCallback(() => {
     if (disabled) return;
-    setForceRegenerate(true);
-    startGeneration();
+    startGeneration(true);
   }, [disabled, startGeneration]);
 
-  // セッション切り替え時にtaskIdをリセット
+  // セッション切り替え時にリセット
   useEffect(() => {
     setTaskId(null);
     setSelectedPlayerId('');
-    setForceRegenerate(false);
     patchRouteCoach({ selectedClusterId: null });
   }, [projectId, sessionId, patchRouteCoach]);
 
-  // クリーンアップ
+  // アンマウント時にクエリをキャンセル
   useEffect(() => {
     return () => {
-      qc.cancelQueries({ queryKey: ['improvementRoutesTask'] });
-      qc.cancelQueries({ queryKey: ['sessionPlayers'] });
+      qc.cancelQueries({ queryKey: QUERY_KEYS.improvementRoutesTask(projectId, sessionId) });
+      qc.cancelQueries({ queryKey: QUERY_KEYS.sessionPlayers(projectId, sessionId) });
     };
-  }, [qc]);
+  }, [qc, projectId, sessionId]);
 
   // プレイヤーを選択する
   const handlePlayerSelect = useCallback((playerId: string) => {
@@ -235,7 +252,7 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
   }, []);
 
   // 改善ルートデータを取得（クラスター一覧用）
-  const { data: clusterData } = useImprovementRoutes(projectId || 0, selectedPlayerId, {
+  const { data: clusterData } = useImprovementRoutes(projectId || 0, sessionId, selectedPlayerId, {
     enabled: enabled && !!taskStatus,
   });
 
@@ -284,12 +301,16 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
       )}
 
       {/* クラスター選択リスト */}
-      {taskStatus && clusterData && clusterData.length > 0 ? (
+      {taskStatus && sessionId && clusterData && clusterData.length > 0 ? (
         <ScrollableClusterSection>
-          <FlexColumn gap={16}>
-            <Text text='クラスター選択' fontSize={theme.typography.fontSize.lg} />
+          <FlexColumn gap={8}>
+            <FlexRow gap={8} align={'space-between'}>
+              <Text text='クラスター' fontSize={theme.typography.fontSize.sm} />
+              <Text text={`${clusterData.length}件`} fontSize={theme.typography.fontSize.xs} color={theme.colors.text.secondary} />
+            </FlexRow>
             <EventClusterViewer
               projectId={projectId!}
+              sessionId={sessionId}
               playerId={selectedPlayerId}
               onSelectCluster={(clusterId) => patchRouteCoach({ selectedClusterId: clusterId })}
             />
