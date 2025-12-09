@@ -165,13 +165,14 @@ const SliderComponent: FC<SliderProps> = (args) => {
 
 export const Slider = styled(SliderComponent)`
   width: 100%;
-  overflow: hidden;
+
+  /* overflow: hidden; Removed to allow focus outline (ring) to be visible */
 
   &__sliderWrapper {
     position: relative; /* tooltip を絶対位置で配置するため */
     display: flex;
     align-items: center;
-    width: calc(100% - ${({ sideLabel }) => (sideLabel ? '40px' : '0px')} - ${({ textField }) => (textField ? '39px' : '0')});
+    width: calc(100% - ${({ sideLabel }) => (sideLabel ? '40px' : '0px')} - ${({ textField }) => (textField ? '70px' : '0')});
   }
 
   &__tooltip {
@@ -236,5 +237,9 @@ export const Slider = styled(SliderComponent)`
     background: ${({ theme }) => theme.colors.surface.base};
     border: 1px solid ${({ theme }) => theme.colors.border.subtle} !important;
     border-radius: 4px;
+
+    &:focus {
+      border-color: ${({ theme }) => theme.colors.primary.main} !important;
+    }
   }
 `;
