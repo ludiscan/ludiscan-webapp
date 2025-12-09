@@ -23,34 +23,33 @@ const HeatmapMenuListRowComponent: FC<HeatmapMenuListRowProps> = ({ className, c
   const { theme } = useSharedTheme();
 
   return (
-    <div className={className}>
-      <FlexRow className={`${className}__menuRow`} gap={12} wrap={'nowrap'} align={'center'}>
-        {menus.map(({ name: menuName, icon }) => (
-          <Button
-            className={`${className}__menuButton ${menuName === currentMenu ? 'active' : ''}`}
-            key={menuName}
-            scheme={'none'}
-            onClick={() => {
-              heatMapEventBus.emit('click-menu-icon', { name: menuName });
-            }}
-            fontSize={'lg'}
-            radius={'small'}
-          >
-            <Tooltip tooltip={menuName} placement={'bottom'} fontSize={theme.typography.fontSize.sm}>
-              {icon}
-            </Tooltip>
-          </Button>
-        ))}
-        <Button onClick={onClose} scheme={'none'} fontSize={'sm'} className={`${className}__closeButton`}>
-          <IoClose />
+    <FlexRow className={`${className}`} gap={12} wrap={'nowrap'} align={'center'}>
+      {menus.map(({ name: menuName, icon }) => (
+        <Button
+          className={`${className}__menuButton ${menuName === currentMenu ? 'active' : ''}`}
+          key={menuName}
+          scheme={'none'}
+          onClick={() => {
+            heatMapEventBus.emit('click-menu-icon', { name: menuName });
+          }}
+          fontSize={'lg'}
+          radius={'small'}
+        >
+          <Tooltip tooltip={menuName} placement={'bottom'} fontSize={theme.typography.fontSize.sm}>
+            {icon}
+          </Tooltip>
         </Button>
-      </FlexRow>
-    </div>
+      ))}
+      <Button onClick={onClose} scheme={'none'} fontSize={'sm'} className={`${className}__closeButton`}>
+        <IoClose />
+      </Button>
+    </FlexRow>
   );
 };
 
 export const HeatmapMenuListRow = styled(HeatmapMenuListRowComponent)`
   flex-shrink: 0;
+  min-height: 32px;
   padding: 0 var(--spacing-md);
   background: ${({ theme }) => hexToRGBA(theme.colors.surface.base, 0.9)};
   border-radius: var(--border-radius-full);
@@ -68,8 +67,8 @@ export const HeatmapMenuListRow = styled(HeatmapMenuListRowComponent)`
     }
 
     &.active {
-      color: ${({ theme }) => theme.colors.primary.contrast};
-      background: ${({ theme }) => theme.colors.primary.light};
+      color: ${({ theme }) => theme.colors.primary.contrast} !important;
+      background: ${({ theme }) => theme.colors.primary.light} !important;
     }
   }
 

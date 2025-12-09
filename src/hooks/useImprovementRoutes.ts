@@ -6,11 +6,13 @@ import { useApiClient } from '@src/modeles/ApiClientContext';
  * イベントクラスタと改善案ルートを取得するHook
  *
  * @param projectId プロジェクトID
+ * @param sessionId セッションID
  * @param playerId プレイヤーID（オプション - 指定されない場合は全プレイヤーのデータを取得）
  * @param options
  */
 export function useImprovementRoutes(
   projectId: number,
+  sessionId: number | null,
   playerId?: string,
   options?: {
     mapName?: string;
@@ -20,12 +22,16 @@ export function useImprovementRoutes(
   },
 ) {
   const client = useApiClient();
-  const queryKey = ['improvementRoutes', projectId, playerId, options?.mapName, options?.eventType, options?.freshnessDays];
+  const queryKey = ['improvementRoutes', sessionId, projectId, playerId, options?.mapName, options?.eventType, options?.freshnessDays];
 
   return useQuery({
     queryKey,
     queryFn: async () => {
+      if (!sessionId) {
+        return null;
+      }
       const queryParams = {
+        session_id: sessionId,
         ...(playerId && { player_id: playerId }),
         ...(options?.mapName && { map_name: options.mapName }),
         ...(options?.eventType && { event_type: options.eventType }),
@@ -51,11 +57,4 @@ export function useImprovementRoutes(
     staleTime: 5 * 60 * 1000, // 5分
     gcTime: 30 * 60 * 1000, // 30分
   });
-}
-
-/**
- * 改善案ルートの詳細情報を取得するHook
- */
-export function useEventClusters(projectId: number, playerId: string, mapName?: string) {
-  return useImprovementRoutes(projectId, playerId, { mapName });
 }

@@ -129,7 +129,6 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
   visibleTimelineRange,
   dimensionality,
   fieldObjectLogs = [],
-  projectId,
   playerId,
 }) => {
   // const { invalidate } = useThree();
@@ -564,7 +563,7 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
       </GizmoHelper>
       <FocusPingLayer ttlMs={1800} baseRadius={60} />
       <RouteVisualization dimensionality={dimensionality} />
-      {projectId && <RouteCoachVisualization projectId={projectId} playerId={playerId} />}
+      {service.projectId && service.sessionId && <RouteCoachVisualization projectId={service.projectId} sessionId={service.sessionId} playerId={playerId} />}
     </>
   );
 };
@@ -580,6 +579,7 @@ export const HeatMapCanvas = memo(
     prev.service.task == next.service.task &&
     prev.dimensionality === next.dimensionality &&
     prev.fieldObjectLogs === next.fieldObjectLogs &&
-    prev.projectId === next.projectId &&
-    prev.playerId === next.playerId,
+    prev.playerId === next.playerId &&
+    prev.service.sessionId === next.service.sessionId &&
+    prev.service.projectId === next.service.projectId,
 );
