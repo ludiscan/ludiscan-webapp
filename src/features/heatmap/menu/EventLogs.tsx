@@ -93,11 +93,11 @@ const Component: FC<HeatmapMenuProps> = ({ eventLogKeys }) => {
       <InlineFlexRow align={'center'} gap={4}>
         <Text text={'Event Log Keys'} fontSize={theme.typography.fontSize.sm} />
       </InlineFlexRow>
-      <InlineFlexRow align={'center'} gap={4}>
+      <InlineFlexColumn align={'center'} gap={4}>
         {eventLogKeys?.map((key) => {
           const index = logs.findIndex((e) => e.key === key);
           return (
-            <InputRow key={key} label={key}>
+            <InputRow key={key} label={key} align={'center'}>
               <Switch
                 label={key}
                 onChange={(checked) => {
@@ -117,6 +117,7 @@ const Component: FC<HeatmapMenuProps> = ({ eventLogKeys }) => {
                 <>
                   <input
                     type={'color'}
+                    style={{ paddingInline: '0px', paddingBlock: '0px' }}
                     color={logs[index].color}
                     onChange={(e) => {
                       const newEventLogs = logs.map((e) => ({ ...e }));
@@ -146,7 +147,7 @@ const Component: FC<HeatmapMenuProps> = ({ eventLogKeys }) => {
             </InputRow>
           );
         })}
-      </InlineFlexRow>
+      </InlineFlexColumn>
     </InlineFlexColumn>
   );
 };

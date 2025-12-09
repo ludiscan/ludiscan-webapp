@@ -66,7 +66,7 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
     isLoading: isLoadingSessions,
     isError: isErrorSessions,
   } = useQuery({
-    queryKey: ['sessions', project.id, currentPage, apiClient],
+    queryKey: ['sessions', project.id, currentPage],
     queryFn: async () => {
       if (!project.id || project.id === 0) return [];
       const offset = (currentPage - 1) * ITEMS_PER_PAGE;

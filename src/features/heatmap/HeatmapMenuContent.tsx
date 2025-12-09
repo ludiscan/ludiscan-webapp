@@ -114,13 +114,6 @@ const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
     };
   }, []);
 
-  // Auto-open general menu when session is selected
-  useEffect(() => {
-    if (service.sessionId) {
-      setOpenMenu('general');
-    }
-  }, [service.sessionId]);
-
   useEffect(() => {
     // mapOptionsが変わった時のみ実行
     if (mapOptions.length > 0) {
@@ -276,6 +269,9 @@ export const HeatmapMenuContent = memo(
       prev.service.projectId == next.service.projectId &&
       prev.service.sessionId == next.service.sessionId &&
       prev.model === next.model &&
+      prev.eventLogKeys === next.eventLogKeys &&
+      prev.handleExportView === next.handleExportView &&
+      prev.extra === prev.extra &&
       prev.dimensionality === next.dimensionality
     );
   },
