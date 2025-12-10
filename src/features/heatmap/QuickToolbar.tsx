@@ -135,6 +135,7 @@ export const QuickToolbar = memo(
     flex-direction: row;
     gap: 8px;
     align-items: center;
+    justify-content: end;
     width: max-content;
     min-width: 100%;
     padding: 6px 32px;
