@@ -8,8 +8,9 @@ import type { FC } from 'react';
 import { Button } from '@src/component/atoms/Button';
 import { DraggableNumberInput } from '@src/component/atoms/DraggableNumberInput';
 import { FileInput } from '@src/component/atoms/FileInput';
-import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
+import { FlexRow } from '@src/component/atoms/Flex';
 import { VerticalSpacer } from '@src/component/atoms/Spacer';
+import { Switch } from '@src/component/atoms/Switch';
 import { Text } from '@src/component/atoms/Text';
 import { Selector } from '@src/component/molecules/Selector';
 import { ObjectToggleList } from '@src/features/heatmap/ObjectToggleList';
@@ -18,15 +19,6 @@ import { useGeneralPatch, useGeneralPick, useGeneralSelect } from '@src/hooks/us
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { useUploadMapData } from '@src/hooks/useUploadMapData';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
-
-const DisabledMessage = styled.div`
-  padding: 16px;
-  font-size: ${({ theme }) => theme.typography.fontSize.sm};
-  color: #666;
-  text-align: center;
-  background: #f5f5f5;
-  border-radius: 8px;
-`;
 
 const UploadSection = styled.div`
   display: flex;
@@ -108,13 +100,14 @@ const CollapsibleContent = styled.div<{ isOpen: boolean }>`
 export const MapMenuContent: FC<HeatmapMenuProps> = ({ mapOptions, model, dimensionality, service }) => {
   const { theme } = useSharedTheme();
   const mapName = useGeneralSelect((s) => s.mapName);
-  const { modelPositionX, modelPositionY, modelPositionZ, modelRotationX, modelRotationY, modelRotationZ } = useGeneralPick(
+  const { modelPositionX, modelPositionY, modelPositionZ, modelRotationX, modelRotationY, modelRotationZ, showMapIn2D } = useGeneralPick(
     'modelPositionX',
     'modelPositionY',
     'modelPositionZ',
     'modelRotationX',
     'modelRotationY',
     'modelRotationZ',
+    'showMapIn2D',
   );
   const setData = useGeneralPatch();
   const uploadMapData = useUploadMapData();
@@ -155,20 +148,23 @@ export const MapMenuContent: FC<HeatmapMenuProps> = ({ mapOptions, model, dimens
     }
   }, [selectedFile, mapName, uploadMapData]);
 
-  // 2Dモードではマップ機能を無効化
-  if (dimensionality === '2d') {
-    return (
-      <FlexColumn gap={12}>
-        <DisabledMessage>
-          <Text text={'Map visualization is only available in 3D mode.'} fontSize={theme.typography.fontSize.base} />
-          <Text text={'Switch to 3D mode using the toggle button in the toolbar.'} fontSize={theme.typography.fontSize.sm} />
-        </DisabledMessage>
-      </FlexColumn>
-    );
-  }
+  const is2DMode = dimensionality === '2d';
+
+  // 2Dモードでマップ表示がOFFかつマップが選択されていない場合のメッセージ
+  const showMapEnabled = !is2DMode || showMapIn2D;
 
   return (
     <>
+      {/* 2Dモードの場合、マップ表示のON/OFFトグルを表示 */}
+      {is2DMode && (
+        <>
+          <InputRow label={'Show map in 2D'}>
+            <Switch label='Show map in 2D mode' checked={showMapIn2D} onChange={(checked) => setData({ showMapIn2D: checked })} size='small' />
+          </InputRow>
+          <VerticalSpacer size={8} />
+        </>
+      )}
+
       <InputRow label={'visualize map'}>
         <Selector
           onChange={(mapName) => {
@@ -177,105 +173,111 @@ export const MapMenuContent: FC<HeatmapMenuProps> = ({ mapOptions, model, dimens
           options={mapOptions}
           value={mapName}
           fontSize={'sm'}
-          disabled={mapOptions.length === 0}
+          disabled={mapOptions.length === 0 || (is2DMode && !showMapIn2D)}
         />
       </InputRow>
-      <Button scheme={'surface'} fontSize={'base'} onClick={handleAddWaypoint}>
-        <Text text={'add waypoint'} />
-      </Button>
-      <VerticalSpacer size={12} />
-      {model && mapName && (
-        <CollapsibleSection>
-          <CollapsibleHeader onClick={() => setIsObjectListOpen(!isObjectListOpen)}>
-            <span>Model Objects</span>
-            {isObjectListOpen ? <IoChevronUp size={16} /> : <IoChevronDown size={16} />}
-          </CollapsibleHeader>
-          <CollapsibleContent isOpen={isObjectListOpen}>
-            <ObjectToggleList mapName={mapName} model={model} />
-          </CollapsibleContent>
-        </CollapsibleSection>
-      )}
 
-      {/* OBJモデル位置・回転調整セクション */}
-      {model && mapName && (
-        <CollapsibleSection>
-          <CollapsibleHeader onClick={() => setIsAlignmentOpen(!isAlignmentOpen)}>
-            <span>Model Alignment</span>
-            {isAlignmentOpen ? <IoChevronUp size={16} /> : <IoChevronDown size={16} />}
-          </CollapsibleHeader>
-          <CollapsibleContent isOpen={isAlignmentOpen}>
-            <InputRow label={'Position'}>
-              <FlexRow gap={4} align='center'>
-                <DraggableNumberInput label='X' value={modelPositionX} onChange={(v) => setData({ modelPositionX: v })} step={1} precision={0} />
-                <DraggableNumberInput label='Y' value={modelPositionY} onChange={(v) => setData({ modelPositionY: v })} step={1} precision={0} />
-                <DraggableNumberInput label='Z' value={modelPositionZ} onChange={(v) => setData({ modelPositionZ: v })} step={1} precision={0} />
-              </FlexRow>
-            </InputRow>
-            <InputRow label={'Rotation'}>
-              <FlexRow gap={4} align='center'>
-                <DraggableNumberInput
-                  label='X'
-                  value={modelRotationX}
-                  onChange={(v) => setData({ modelRotationX: v })}
-                  min={-180}
-                  max={180}
-                  step={1}
-                  precision={0}
-                />
-                <DraggableNumberInput
-                  label='Y'
-                  value={modelRotationY}
-                  onChange={(v) => setData({ modelRotationY: v })}
-                  min={-180}
-                  max={180}
-                  step={1}
-                  precision={0}
-                />
-                <DraggableNumberInput
-                  label='Z'
-                  value={modelRotationZ}
-                  onChange={(v) => setData({ modelRotationZ: v })}
-                  min={-180}
-                  max={180}
-                  step={1}
-                  precision={0}
-                />
-              </FlexRow>
-            </InputRow>
-            <InputRow label={''}>
-              <Button
-                scheme={'tertiary'}
-                fontSize={'sm'}
-                onClick={() =>
-                  setData({
-                    modelPositionX: 0,
-                    modelPositionY: 0,
-                    modelPositionZ: 0,
-                    modelRotationX: 0,
-                    modelRotationY: 0,
-                    modelRotationZ: 0,
-                  })
-                }
-              >
-                <Text text={'Reset'} fontSize={theme.typography.fontSize.sm} />
-              </Button>
-            </InputRow>
-          </CollapsibleContent>
-        </CollapsibleSection>
-      )}
-
-      {!service.isEmbed && mapName && (
-        <UploadSection>
-          <Text text={`Upload OBJ for "${mapName}"`} fontSize={theme.typography.fontSize.base} />
-          <UploadRow>
-            <FileInput accept='.obj' onChange={handleFileSelect} buttonText='Select OBJ File' fontSize='sm' />
-            {selectedFile && <FileName>{selectedFile.name}</FileName>}
-          </UploadRow>
-          <Button scheme={'primary'} fontSize={'base'} onClick={handleUpload} disabled={!selectedFile || uploadMapData.isPending}>
-            <Text text={uploadMapData.isPending ? 'Uploading...' : 'Upload'} />
+      {/* マップ表示がONの場合のみ、以下の機能を表示 */}
+      {showMapEnabled && (
+        <>
+          <Button scheme={'surface'} fontSize={'base'} onClick={handleAddWaypoint}>
+            <Text text={'add waypoint'} />
           </Button>
-          {statusMessage && <StatusMessage status={statusMessage.status}>{statusMessage.text}</StatusMessage>}
-        </UploadSection>
+          <VerticalSpacer size={12} />
+          {model && mapName && (
+            <CollapsibleSection>
+              <CollapsibleHeader onClick={() => setIsObjectListOpen(!isObjectListOpen)}>
+                <span>Model Objects</span>
+                {isObjectListOpen ? <IoChevronUp size={16} /> : <IoChevronDown size={16} />}
+              </CollapsibleHeader>
+              <CollapsibleContent isOpen={isObjectListOpen}>
+                <ObjectToggleList mapName={mapName} model={model} />
+              </CollapsibleContent>
+            </CollapsibleSection>
+          )}
+
+          {/* OBJモデル位置・回転調整セクション */}
+          {model && mapName && (
+            <CollapsibleSection>
+              <CollapsibleHeader onClick={() => setIsAlignmentOpen(!isAlignmentOpen)}>
+                <span>Model Alignment</span>
+                {isAlignmentOpen ? <IoChevronUp size={16} /> : <IoChevronDown size={16} />}
+              </CollapsibleHeader>
+              <CollapsibleContent isOpen={isAlignmentOpen}>
+                <InputRow label={'Position'}>
+                  <FlexRow gap={4} align='center'>
+                    <DraggableNumberInput label='X' value={modelPositionX} onChange={(v) => setData({ modelPositionX: v })} step={1} precision={0} />
+                    <DraggableNumberInput label='Y' value={modelPositionY} onChange={(v) => setData({ modelPositionY: v })} step={1} precision={0} />
+                    <DraggableNumberInput label='Z' value={modelPositionZ} onChange={(v) => setData({ modelPositionZ: v })} step={1} precision={0} />
+                  </FlexRow>
+                </InputRow>
+                <InputRow label={'Rotation'}>
+                  <FlexRow gap={4} align='center'>
+                    <DraggableNumberInput
+                      label='X'
+                      value={modelRotationX}
+                      onChange={(v) => setData({ modelRotationX: v })}
+                      min={-180}
+                      max={180}
+                      step={1}
+                      precision={0}
+                    />
+                    <DraggableNumberInput
+                      label='Y'
+                      value={modelRotationY}
+                      onChange={(v) => setData({ modelRotationY: v })}
+                      min={-180}
+                      max={180}
+                      step={1}
+                      precision={0}
+                    />
+                    <DraggableNumberInput
+                      label='Z'
+                      value={modelRotationZ}
+                      onChange={(v) => setData({ modelRotationZ: v })}
+                      min={-180}
+                      max={180}
+                      step={1}
+                      precision={0}
+                    />
+                  </FlexRow>
+                </InputRow>
+                <InputRow label={''}>
+                  <Button
+                    scheme={'tertiary'}
+                    fontSize={'sm'}
+                    onClick={() =>
+                      setData({
+                        modelPositionX: 0,
+                        modelPositionY: 0,
+                        modelPositionZ: 0,
+                        modelRotationX: 0,
+                        modelRotationY: 0,
+                        modelRotationZ: 0,
+                      })
+                    }
+                  >
+                    <Text text={'Reset'} fontSize={theme.typography.fontSize.sm} />
+                  </Button>
+                </InputRow>
+              </CollapsibleContent>
+            </CollapsibleSection>
+          )}
+
+          {!service.isEmbed && mapName && (
+            <UploadSection>
+              <Text text={`Upload OBJ for "${mapName}"`} fontSize={theme.typography.fontSize.base} />
+              <UploadRow>
+                <FileInput accept='.obj' onChange={handleFileSelect} buttonText='Select OBJ File' fontSize='sm' />
+                {selectedFile && <FileName>{selectedFile.name}</FileName>}
+              </UploadRow>
+              <Button scheme={'primary'} fontSize={'base'} onClick={handleUpload} disabled={!selectedFile || uploadMapData.isPending}>
+                <Text text={uploadMapData.isPending ? 'Uploading...' : 'Upload'} />
+              </Button>
+              {statusMessage && <StatusMessage status={statusMessage.status}>{statusMessage.text}</StatusMessage>}
+            </UploadSection>
+          )}
+        </>
       )}
       <VerticalSpacer size={12} />
     </>
