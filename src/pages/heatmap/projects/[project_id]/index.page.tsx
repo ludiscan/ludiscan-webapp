@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useRouter } from 'next/navigation';
 import { memo, useCallback, useEffect, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 import type { RootState } from '@src/store';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
@@ -17,7 +17,6 @@ import { useAuth } from '@src/hooks/useAuth';
 import { useGeneralSelect } from '@src/hooks/useGeneral';
 import { useHeatmapState } from '@src/hooks/useHeatmapState';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { patchSplitMode } from '@src/slices/canvasSlice';
 import { useOnlineHeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 
 export type HeatMapTaskIdPageProps = {
@@ -50,20 +49,20 @@ const HeaderWrapper = memo(
     const { theme } = useSharedTheme();
     const { apply, hasDiff, discard } = useHeatmapState();
     const version = useSelector((s: RootState) => s.heatmapCanvas.version);
-    const splitMode = useSelector((s: RootState) => s.heatmapCanvas.splitMode);
-    const dispatch = useDispatch();
+    // const splitMode = useSelector((s: RootState) => s.heatmapCanvas.splitMode);
+    // const dispatch = useDispatch();
 
-    const handleSplitHorizontal = useCallback(() => {
-      dispatch(patchSplitMode({ enabled: true, direction: 'horizontal' }));
-    }, [dispatch]);
-
-    const handleSplitVertical = useCallback(() => {
-      dispatch(patchSplitMode({ enabled: true, direction: 'vertical' }));
-    }, [dispatch]);
-
-    const handleSingleView = useCallback(() => {
-      dispatch(patchSplitMode({ enabled: false }));
-    }, [dispatch]);
+    // const handleSplitHorizontal = useCallback(() => {
+    //   dispatch(patchSplitMode({ enabled: true, direction: 'horizontal' }));
+    // }, [dispatch]);
+    //
+    // const handleSplitVertical = useCallback(() => {
+    //   dispatch(patchSplitMode({ enabled: true, direction: 'vertical' }));
+    // }, [dispatch]);
+    //
+    // const handleSingleView = useCallback(() => {
+    //   dispatch(patchSplitMode({ enabled: false }));
+    // }, [dispatch]);
 
     return (
       <Header
@@ -73,17 +72,17 @@ const HeaderWrapper = memo(
         iconTitleEnd={<Text className={`${className}__headerV`} text={`${version || 'debug'}`} fontSize={theme.typography.fontSize.sm} fontWeight={'bold'} />}
         iconEnd={
           <>
-            <Button fontSize={'sm'} onClick={handleSplitHorizontal} scheme={splitMode.enabled && splitMode.direction === 'horizontal' ? 'primary' : 'surface'}>
-              <Text text={'Split ↔'} fontWeight={'bold'} />
-            </Button>
-            <Button fontSize={'sm'} onClick={handleSplitVertical} scheme={splitMode.enabled && splitMode.direction === 'vertical' ? 'primary' : 'surface'}>
-              <Text text={'Split ↕'} fontWeight={'bold'} />
-            </Button>
-            {splitMode.enabled && (
-              <Button fontSize={'sm'} onClick={handleSingleView} scheme={'surface'}>
-                <Text text={'Single'} fontWeight={'bold'} />
-              </Button>
-            )}
+            {/*<Button fontSize={'sm'} onClick={handleSplitHorizontal} scheme={splitMode.enabled && splitMode.direction === 'horizontal' ? 'primary' : 'surface'}>*/}
+            {/*  <Text text={'Split ↔'} fontWeight={'bold'} />*/}
+            {/*</Button>*/}
+            {/*<Button fontSize={'sm'} onClick={handleSplitVertical} scheme={splitMode.enabled && splitMode.direction === 'vertical' ? 'primary' : 'surface'}>*/}
+            {/*  <Text text={'Split ↕'} fontWeight={'bold'} />*/}
+            {/*</Button>*/}
+            {/*{splitMode.enabled && (*/}
+            {/*  <Button fontSize={'sm'} onClick={handleSingleView} scheme={'surface'}>*/}
+            {/*    <Text text={'Single'} fontWeight={'bold'} />*/}
+            {/*  </Button>*/}
+            {/*)}*/}
             <Button fontSize={'sm'} onClick={discard} scheme={'surface'} disabled={!hasDiff}>
               <Text text={'Discard'} fontWeight={'bold'} />
             </Button>

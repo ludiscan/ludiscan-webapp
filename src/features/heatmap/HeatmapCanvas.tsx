@@ -133,7 +133,7 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
 }) => {
   // const { invalidate } = useThree();
   const fitInfoRef = useRef<{ dist: number; center: Vector3 }>({ dist: 1000, center: new Vector3() });
-  const { showHeatmap, heatmapOpacity, heatmapType } = useGeneralPick('showHeatmap', 'heatmapOpacity', 'heatmapType');
+  const { showHeatmap, heatmapOpacity, heatmapType, showMapIn2D } = useGeneralPick('showHeatmap', 'heatmapOpacity', 'heatmapType', 'showMapIn2D');
   const { theme } = useSharedTheme();
 
   const orbitControlsRef = useRef<OrbitControlsImpl>(null);
@@ -536,14 +536,14 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
   return (
     <>
       <group ref={groupRef}>
-        {/* 3Dモデルは3Dモードでのみ表示（2Dモードではヒートマップと2D要素のみ） */}
-        {dimensionality === '3d' && modelType && map && modelType !== 'server' && typeof map === 'string' && (
+        {/* 3Dモデルは3Dモードまたは2Dモードでマップ表示がONの場合に表示 */}
+        {(dimensionality === '3d' || showMapIn2D) && modelType && map && modelType !== 'server' && typeof map === 'string' && (
           <LocalModelLoader ref={modelRef} modelPath={map} modelType={modelType} />
         )}
-        {dimensionality === '3d' && modelType && model && modelType === 'server' && typeof map !== 'string' && (
+        {(dimensionality === '3d' || showMapIn2D) && modelType && model && modelType === 'server' && typeof map !== 'string' && (
           <>
             <StreamModelLoader ref={modelRef} model={model} />
-            {/* fillモードは3Dモデル表面に配置するため、3Dモードでのみ表示 */}
+            {/* fillモードは3Dモデル表面に配置するため、モデルがある場合のみ表示 */}
             {pointList && modelRef.current && heatmapType === 'fill' && showHeatmap && (
               <HeatmapFillOverlay group={modelRef.current} points={pointList} cellSize={(service.task?.stepSize || 50) / 2} opacity={heatmapOpacity} />
             )}

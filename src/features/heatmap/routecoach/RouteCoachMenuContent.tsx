@@ -231,12 +231,18 @@ const Component: FC<HeatmapMenuProps> = ({ className, service }) => {
     startGeneration(true);
   }, [disabled, startGeneration]);
 
-  // セッション切り替え時にリセット
+  // セッション切り替え時にリセットし、自動的に改善ルートを生成
   useEffect(() => {
     setTaskId(null);
     setSelectedPlayerId('');
     patchRouteCoach({ selectedClusterId: null });
-  }, [projectId, sessionId, patchRouteCoach]);
+
+    // セッションが有効な場合、自動的に改善ルート生成を開始
+    if (projectId && sessionId != null) {
+      startGeneration(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId, sessionId]);
 
   // アンマウント時にクエリをキャンセル
   useEffect(() => {

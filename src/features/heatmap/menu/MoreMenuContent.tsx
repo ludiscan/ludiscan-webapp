@@ -54,16 +54,13 @@ const GridContainer = styled.div`
   padding: 8px 0;
 `;
 
-export const MoreMenuContent: FC<HeatmapMenuProps> = ({ dimensionality }) => {
+export const MoreMenuContent: FC<HeatmapMenuProps> = () => {
   const { theme } = useSharedTheme();
 
   // Filter out menus that shouldn't appear in the grid (more itself, eventLogDetail)
-  // In 2D mode, also filter out 'map' menu as it's only for 3D
   const availableMenus = MenuContents.filter((menu) => {
     if (!menu.icon) return false;
     if (menu.name === 'more' || menu.name === 'eventLogDetail') return false;
-    // 2Dモードではmapメニューを非表示
-    if (dimensionality === '2d' && menu.name === 'map') return false;
     return true;
   });
 
