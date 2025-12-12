@@ -53,7 +53,7 @@
     "file-saver": "^2.0.5",
     "framer-motion": "^12.23.25",
     "jszip": "^3.10.1",
-    "next": "15.5.7",
+    "next": "15.5.9",
     "npm-run-all2": "^7.0.2",
     "openapi-fetch": "^0.13.8",
     "react": "^19.2.1",
