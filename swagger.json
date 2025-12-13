@@ -1091,6 +1091,42 @@
         ]
       }
     },
+    "/api/v0/auth/google/auth": {
+      "get": {
+        "description": "認証完了後に指定したURLへリダイレクトします。主にadminページなど特定のページからの認証に使用。",
+        "operationId": "AuthController_googleAuthWithReturn",
+        "parameters": [
+          {
+            "name": "returnTo",
+            "required": false,
+            "in": "query",
+            "description": "認証完了後に戻る先（フロントのURL）",
+            "schema": {
+              "$ref": "#/components/schemas/GoogleAuthWithReturnQueryDto"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect to /api/v0/auth/google with signed state"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Google OAuth開始（カスタムreturnTo付き）",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
     "/api/v0/auth/google/callback": {
       "get": {
         "description": "Passportが `req.user` にGoogleプロフィールをセット。`state` がリンクモードならリンク、そうでなければログイン/サインアップ。最後にフロントへ302（?token=... か ?code=...）。",
@@ -7064,7 +7100,7 @@
   "info": {
     "title": "Ludiscan API Documentation",
     "description": "Ludiscan API for game analytics and session tracking",
-    "version": "1.17.2",
+    "version": "1.18.0",
     "contact": {}
   },
   "tags": [],
@@ -7149,6 +7185,15 @@
           "returnTo": {
             "type": "string",
             "description": "リンク完了後に戻る先（フロントのURL）"
+          }
+        }
+      },
+      "GoogleAuthWithReturnQueryDto": {
+        "type": "object",
+        "properties": {
+          "returnTo": {
+            "type": "string",
+            "description": "認証完了後に戻る先（フロントのURL）"
           }
         }
       },
