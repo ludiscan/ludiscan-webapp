@@ -122,6 +122,7 @@ export function useSelectable(
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function useSelectable(kind: 'map-mesh' | 'point' | 'heatmap-cell' | 'player-arrow', options?: any): Handlers {
   const { setSelected, focusBox3, focusPoint, focusSphere } = useFocusActions();
+  const clickToFocusEnabled = useAppSelector((s) => s.selection.clickToFocusEnabled);
 
   return useMemo(() => {
     const stop = options ? options.stopPropagation : true;
@@ -141,6 +142,8 @@ export function useSelectable(kind: 'map-mesh' | 'point' | 'heatmap-cell' | 'pla
 
       // heatmap-cell は getSelection で完成形を渡すのを推奨
       if (kind === 'heatmap-cell' && options?.getSelection) {
+        // フラグがfalseの場合はセレクトとフォーカスの両方をスキップ
+        if (!clickToFocusEnabled) return;
         const sel = options.getSelection(e);
         setSelected(sel);
         if (options.fit === 'point') focusPoint(sel.worldPosition);
@@ -194,5 +197,5 @@ export function useSelectable(kind: 'map-mesh' | 'point' | 'heatmap-cell' | 'pla
     };
 
     return { onPointerOver, onPointerOut, onPointerDown };
-  }, [kind, options, setSelected, focusBox3, focusPoint, focusSphere]);
+  }, [kind, options, setSelected, focusBox3, focusPoint, focusSphere, clickToFocusEnabled]);
 }
