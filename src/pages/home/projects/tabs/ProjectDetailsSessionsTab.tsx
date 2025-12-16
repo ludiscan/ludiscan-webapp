@@ -27,7 +27,17 @@ export type ProjectDetailsSessionsTabProps = {
   project: Project;
 };
 
-type SortOption = 'newest' | 'oldest' | 'name';
+type SortOption = 'newest' | 'oldest' | 'name' | 'updated';
+
+type ApiSortBy = 'id' | 'name' | 'start_time' | 'end_time' | 'updated_at';
+type ApiSortOrder = 'asc' | 'desc';
+
+const sortOptionToApiParams: Record<SortOption, { sortBy: ApiSortBy; sortOrder: ApiSortOrder }> = {
+  newest: { sortBy: 'start_time', sortOrder: 'desc' },
+  oldest: { sortBy: 'start_time', sortOrder: 'asc' },
+  name: { sortBy: 'name', sortOrder: 'asc' },
+  updated: { sortBy: 'updated_at', sortOrder: 'desc' },
+};
 
 const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) => {
   const { theme } = useSharedTheme();
@@ -61,12 +71,14 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
     isAggregating,
   } = useSessionFiltersAndAggregate(project.id);
 
+  const apiSortParams = sortOptionToApiParams[sortBy];
+
   const {
     data: sessions = [],
     isLoading: isLoadingSessions,
     isError: isErrorSessions,
   } = useQuery({
-    queryKey: ['sessions', project.id, currentPage],
+    queryKey: ['sessions', project.id, currentPage, sortBy],
     queryFn: async () => {
       if (!project.id || project.id === 0) return [];
       const offset = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -75,6 +87,8 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
           query: {
             limit: ITEMS_PER_PAGE,
             offset,
+            sortBy: apiSortParams.sortBy,
+            sortOrder: apiSortParams.sortOrder,
           },
           path: {
             project_id: project.id,
@@ -108,29 +122,18 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
     }
   };
 
-  // Filter/sort sessions
-  const filteredAndSortedSessions = useMemo(() => {
-    // Filter by search query
-    const filtered = sessions.filter((session) => {
-      const query = searchQuery.toLowerCase();
+  // Filter sessions by search query (sorting is done server-side)
+  const filteredSessions = useMemo(() => {
+    if (!searchQuery) return sessions;
+    const query = searchQuery.toLowerCase();
+    return sessions.filter((session) => {
       return (
         session.name.toLowerCase().includes(query) ||
         (session.deviceId?.toLowerCase().includes(query) ?? false) ||
         (session.platform?.toLowerCase().includes(query) ?? false)
       );
     });
-
-    // Sort
-    switch (sortBy) {
-      case 'oldest':
-        return filtered.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
-      case 'name':
-        return filtered.sort((a, b) => a.name.localeCompare(b.name, 'ja'));
-      case 'newest':
-      default:
-        return filtered.sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
-    }
-  }, [sessions, searchQuery, sortBy]);
+  }, [sessions, searchQuery]);
 
   return (
     <div className={className}>
@@ -194,7 +197,7 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
               <span className={`${className}__statValue`}>{project.session_count ?? 0}</span>
               <span className={`${className}__statLabel`}>Total Sessions</span>
             </div>
-            {searchQuery && <span className={`${className}__matchCount`}>{filteredAndSortedSessions.length} matches</span>}
+            {searchQuery && <span className={`${className}__matchCount`}>{filteredSessions.length} matches</span>}
           </FlexRow>
         </div>
 
@@ -212,10 +215,18 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
           </div>
 
           <div className={`${className}__sortWrapper`}>
-            <select className={`${className}__sortSelect`} value={sortBy} onChange={(e) => setSortBy(e.target.value as SortOption)}>
+            <select
+              className={`${className}__sortSelect`}
+              value={sortBy}
+              onChange={(e) => {
+                setSortBy(e.target.value as SortOption);
+                setCurrentPage(1);
+              }}
+            >
               <option value='newest'>Newest First</option>
               <option value='oldest'>Oldest First</option>
               <option value='name'>By Name</option>
+              <option value='updated'>Recently Updated</option>
             </select>
             <BiChevronDown size={16} className={`${className}__sortChevron`} />
           </div>
@@ -240,9 +251,9 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
           )}
 
           {/* Sessions */}
-          {!isErrorSessions && !isLoadingSessions && filteredAndSortedSessions.length > 0 && (
+          {!isErrorSessions && !isLoadingSessions && filteredSessions.length > 0 && (
             <FlexColumn gap={0}>
-              {filteredAndSortedSessions.map((session) => (
+              {filteredSessions.map((session) => (
                 <div key={session.sessionId} className={`${className}__sessionItem`}>
                   <SessionItemRow session={session} />
                 </div>
@@ -251,7 +262,7 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
           )}
 
           {/* No Results */}
-          {!isLoadingSessions && !isErrorSessions && searchQuery && filteredAndSortedSessions.length === 0 && (
+          {!isLoadingSessions && !isErrorSessions && searchQuery && filteredSessions.length === 0 && (
             <div className={`${className}__emptyState`}>
               <Text text={`No sessions matching "${searchQuery}"`} fontSize={theme.typography.fontSize.base} color={theme.colors.text.secondary} />
             </div>
