@@ -3,7 +3,7 @@ import JSZip from 'jszip';
 
 import type { HeatmapStates } from '@src/modeles/heatmapView';
 import type { HeatmapTask, PositionEventLog } from '@src/modeles/heatmaptask';
-import type { OfflineHeatmapData } from '@src/utils/heatmap/HeatmapDataService';
+import type { MapContentResult, OfflineHeatmapData } from '@src/utils/heatmap/HeatmapDataService';
 
 import { API_ENDPOINTS } from '@src/config/api';
 import { getOfflineHeatmapTemplate } from '@src/utils/heatmap/getOfflineHeatmapTemplate';
@@ -12,7 +12,7 @@ export const exportHeatmap = async (
   task: HeatmapTask | undefined,
   eventLogs: Record<string, PositionEventLog[]>,
   generalLogKeys: string[] | null | undefined,
-  mapContent: ArrayBuffer | null | undefined,
+  mapContent: MapContentResult | null | undefined,
   mapList: string[] | undefined,
   state: HeatmapStates,
 ) => {
@@ -30,9 +30,9 @@ export const exportHeatmap = async (
 
   // 2. モデルデータのBase64エンコード処理
   let mapContentBase64 = null;
-  if (mapContent) {
+  if (mapContent?.data) {
     // ArrayBufferをBase64に変換
-    const uint8Array = new Uint8Array(mapContent);
+    const uint8Array = new Uint8Array(mapContent.data);
     const binaryString = uint8Array.reduce((acc, byte) => acc + String.fromCharCode(byte), '');
     mapContentBase64 = btoa(binaryString);
   }

@@ -6,6 +6,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector, useStore } from 'react-redux';
 
 import type { PerformanceMonitorApi } from '@react-three/drei';
+import type { ModelFileType } from '@src/features/heatmap/ModelLoader';
 import type { PlayerTimelinePointsTimeRange } from '@src/features/heatmap/PlayerTimelinePoints';
 import type { PositionEventLog } from '@src/modeles/heatmaptask';
 import type { RootState } from '@src/store';
@@ -16,7 +17,7 @@ import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { useToast } from '@src/component/templates/ToastContext';
 import { HeatMapCanvas } from '@src/features/heatmap/HeatmapCanvas';
 import { HeatmapMenuContent } from '@src/features/heatmap/HeatmapMenuContent';
-import { useOBJFromArrayBuffer } from '@src/features/heatmap/ModelLoader';
+import { useModelFromArrayBuffer } from '@src/features/heatmap/ModelLoader';
 import { TimelineControlWrapper } from '@src/features/heatmap/TimelineControlWrapper';
 import { ZoomControls } from '@src/features/heatmap/ZoomControls';
 import { exportHeatmap } from '@src/features/heatmap/export-heatmap';
@@ -36,6 +37,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
   const toast = useToast();
   const [map, setMap] = useState<string | ArrayBuffer | null>(null);
   const [modelType, setModelType] = useState<'gltf' | 'glb' | 'obj' | 'server' | null>(null);
+  const [serverModelFileType, setServerModelFileType] = useState<ModelFileType | null>(null);
   const [dpr, setDpr] = useState(2);
   // const [performance, setPerformance] = useState<PerformanceMonitorApi>();
 
@@ -105,8 +107,9 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
 
   useEffect(() => {
     if (!mapContent) return;
-    setMap(mapContent);
+    setMap(mapContent.data);
     setModelType('server');
+    setServerModelFileType(mapContent.fileType);
   }, [mapContent]);
 
   const pointList = useMemo(() => {
@@ -133,7 +136,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
     }
     return map;
   }, [map]);
-  const model = useOBJFromArrayBuffer(buffer);
+  const model = useModelFromArrayBuffer(buffer, serverModelFileType);
 
   const store = useStore<RootState>();
   const handleExportView = useCallback(async () => {
