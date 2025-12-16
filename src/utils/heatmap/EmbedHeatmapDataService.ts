@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import type { FieldObjectLog, HeatmapDataService, Player } from './HeatmapDataService';
+import type { FieldObjectLog, HeatmapDataService, MapContentResult, Player } from './HeatmapDataService';
 import type { HeatmapTask, PositionEventLog } from '@src/modeles/heatmaptask';
 import type { Project } from '@src/modeles/project';
 import type { Session } from '@src/modeles/session';
@@ -128,7 +128,7 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
   }, [projectId, apiClient]);
 
   const getMapContent = useCallback(
-    async (mapName: string) => {
+    async (mapName: string): Promise<MapContentResult | null> => {
       try {
         if (!mapName || mapName === '' || !apiClient) return null;
         const { data, error } = await apiClient.GET('/api/v0/heatmap/map_data/{map_name}', {
@@ -140,7 +140,8 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
           parseAs: 'arrayBuffer',
         });
         if (error) return null;
-        return data;
+        // Embedモードではファイル形式をヘッダーから取得できないため、デフォルトでobjとして扱う
+        return { data, fileType: 'obj' };
       } catch {
         return null;
       }

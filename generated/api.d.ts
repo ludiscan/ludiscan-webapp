@@ -245,6 +245,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v0/auth/google/auth': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Google OAuth開始（カスタムreturnTo付き）
+     * @description 認証完了後に指定したURLへリダイレクトします。主にadminページなど特定のページからの認証に使用。
+     */
+    get: operations['AuthController_googleAuthWithReturn'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v0/auth/google/callback': {
     parameters: {
       query?: never;
@@ -1816,6 +1836,10 @@ export interface components {
     };
     GoogleLinkQueryDto: {
       /** @description リンク完了後に戻る先（フロントのURL） */
+      returnTo?: string;
+    };
+    GoogleAuthWithReturnQueryDto: {
+      /** @description 認証完了後に戻る先（フロントのURL） */
       returnTo?: string;
     };
     GoogleCallbackQueryDto: {
@@ -3835,6 +3859,36 @@ export interface operations {
       };
     };
   };
+  AuthController_googleAuthWithReturn: {
+    parameters: {
+      query?: {
+        /** @description 認証完了後に戻る先（フロントのURL） */
+        returnTo?: components['schemas']['GoogleAuthWithReturnQueryDto'];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Redirect to /api/v0/auth/google with signed state */
+      302: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
   AuthController_googleCallback: {
     parameters: {
       query?: {
@@ -4648,6 +4702,10 @@ export interface operations {
         limit?: number;
         offset?: number;
         isFinished?: boolean;
+        /** @description Field to sort by */
+        sortBy?: 'id' | 'name' | 'start_time' | 'end_time' | 'updated_at';
+        /** @description Sort order (asc or desc) */
+        sortOrder?: 'asc' | 'desc';
       };
       header?: never;
       path: {
@@ -5825,6 +5883,8 @@ export interface operations {
       /** @description Map data */
       200: {
         headers: {
+          /** @description The file type of the 3D model (obj, fbx, gltf, glb) */
+          'X-Model-File-Type'?: 'obj' | 'fbx' | 'gltf' | 'glb';
           [name: string]: unknown;
         };
         content: {

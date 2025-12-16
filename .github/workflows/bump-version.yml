@@ -1,4 +1,4 @@
-name: Release
+name: Bump Version
 
 on:
   workflow_dispatch:
@@ -17,7 +17,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  release:
+  bump-version:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -50,9 +50,9 @@ jobs:
         run: |
           NEW_VERSION=$(npm version ${{ github.event.inputs.release_type }} --no-git-tag-version)
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
-          echo "branch_name=release/$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "branch_name=bump/$NEW_VERSION" >> $GITHUB_OUTPUT
 
-      - name: Create release branch and commit
+      - name: Create branch and commit
         run: |
           BRANCH_NAME="${{ steps.version.outputs.branch_name }}"
           git checkout -b "$BRANCH_NAME"
@@ -61,28 +61,18 @@ jobs:
           git push -u origin "$BRANCH_NAME"
 
       - name: Create Pull Request
-        id: pr
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           PR_URL=$(gh pr create \
-            --title "Release ${{ steps.version.outputs.new_version }}" \
-            --body "## Release ${{ steps.version.outputs.new_version }}
+            --title "Bump version to ${{ steps.version.outputs.new_version }}" \
+            --body "## Bump version to ${{ steps.version.outputs.new_version }}
 
-          This PR bumps the version to ${{ steps.version.outputs.new_version }}.
+          This PR bumps the version to ${{ steps.version.outputs.new_version }} for the next release.
 
           **Release type**: ${{ github.event.inputs.release_type }}
 
-          The git tag has been automatically created and pushed." \
+          After merging this PR, the next deployment will create the tag automatically." \
             --base ${{ github.ref_name }} \
             --head ${{ steps.version.outputs.branch_name }})
-          PR_NUMBER=$(echo "$PR_URL" | grep -oE '[0-9]+$')
-          echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
-          echo "PR URL: $PR_URL"
-          echo "PR Number: $PR_NUMBER"
-
-      - name: Create and push tag
-        run: |
-          git tag ${{ steps.version.outputs.new_version }}
-          git push origin ${{ steps.version.outputs.new_version }}
-          echo "✅ Tag ${{ steps.version.outputs.new_version }} created and pushed!"
+          echo "PR created: $PR_URL"

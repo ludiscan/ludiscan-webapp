@@ -2,7 +2,7 @@ import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, useMemo } from 'react';
-import { BiRefresh, BiSearch, BiChevronDown, BiChevronUp, BiFilter } from 'react-icons/bi';
+import { BiRefresh, BiSearch, BiChevronDown, BiChevronUp, BiFilter, BiExpand, BiCollapse } from 'react-icons/bi';
 
 import type { Project } from '@src/modeles/project';
 import type { FC } from 'react';
@@ -27,7 +27,17 @@ export type ProjectDetailsSessionsTabProps = {
   project: Project;
 };
 
-type SortOption = 'newest' | 'oldest' | 'name';
+type SortOption = 'newest' | 'oldest' | 'name' | 'updated';
+
+type ApiSortBy = 'id' | 'name' | 'start_time' | 'end_time' | 'updated_at';
+type ApiSortOrder = 'asc' | 'desc';
+
+const sortOptionToApiParams: Record<SortOption, { sortBy: ApiSortBy; sortOrder: ApiSortOrder }> = {
+  newest: { sortBy: 'start_time', sortOrder: 'desc' },
+  oldest: { sortBy: 'start_time', sortOrder: 'asc' },
+  name: { sortBy: 'name', sortOrder: 'asc' },
+  updated: { sortBy: 'updated_at', sortOrder: 'desc' },
+};
 
 const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) => {
   const { theme } = useSharedTheme();
@@ -39,6 +49,7 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
   const [showAggregation, setShowAggregation] = useState(false);
+  const [compactMode, setCompactMode] = useState(false);
   const apiClient = useApiClient();
 
   // Use the new filters and aggregation hook
@@ -61,12 +72,14 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
     isAggregating,
   } = useSessionFiltersAndAggregate(project.id);
 
+  const apiSortParams = sortOptionToApiParams[sortBy];
+
   const {
     data: sessions = [],
     isLoading: isLoadingSessions,
     isError: isErrorSessions,
   } = useQuery({
-    queryKey: ['sessions', project.id, currentPage],
+    queryKey: ['sessions', project.id, currentPage, apiSortParams.sortBy, apiSortParams.sortOrder],
     queryFn: async () => {
       if (!project.id || project.id === 0) return [];
       const offset = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -75,6 +88,8 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
           query: {
             limit: ITEMS_PER_PAGE,
             offset,
+            sortBy: apiSortParams.sortBy,
+            sortOrder: apiSortParams.sortOrder,
           },
           path: {
             project_id: project.id,
@@ -108,29 +123,18 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
     }
   };
 
-  // Filter/sort sessions
-  const filteredAndSortedSessions = useMemo(() => {
-    // Filter by search query
-    const filtered = sessions.filter((session) => {
-      const query = searchQuery.toLowerCase();
+  // Filter sessions by search query (sorting is done server-side)
+  const filteredSessions = useMemo(() => {
+    if (!searchQuery) return sessions;
+    const query = searchQuery.toLowerCase();
+    return sessions.filter((session) => {
       return (
         session.name.toLowerCase().includes(query) ||
         (session.deviceId?.toLowerCase().includes(query) ?? false) ||
         (session.platform?.toLowerCase().includes(query) ?? false)
       );
     });
-
-    // Sort
-    switch (sortBy) {
-      case 'oldest':
-        return filtered.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
-      case 'name':
-        return filtered.sort((a, b) => a.name.localeCompare(b.name, 'ja'));
-      case 'newest':
-      default:
-        return filtered.sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
-    }
-  }, [sessions, searchQuery, sortBy]);
+  }, [sessions, searchQuery]);
 
   return (
     <div className={className}>
@@ -186,7 +190,7 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
 
         {/* Header */}
         <div className={`${className}__header`}>
-          <FlexRow gap={16} align={'center'}>
+          <FlexRow gap={16} align={'center'} style={{ flex: 1 }}>
             <button onClick={handleRefresh} disabled={isLoadingSessions || isRefreshing} className={`${className}__refreshButton`}>
               <BiRefresh size={18} className={isRefreshing ? 'spinning' : ''} />
             </button>
@@ -194,8 +198,16 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
               <span className={`${className}__statValue`}>{project.session_count ?? 0}</span>
               <span className={`${className}__statLabel`}>Total Sessions</span>
             </div>
-            {searchQuery && <span className={`${className}__matchCount`}>{filteredAndSortedSessions.length} matches</span>}
+            {searchQuery && <span className={`${className}__matchCount`}>{filteredSessions.length} matches</span>}
           </FlexRow>
+          <button
+            onClick={() => setCompactMode(!compactMode)}
+            className={`${className}__compactToggle ${compactMode ? 'active' : ''}`}
+            title={compactMode ? 'Show details' : 'Compact view'}
+          >
+            {compactMode ? <BiExpand size={16} /> : <BiCollapse size={16} />}
+            <span>{compactMode ? 'Details' : 'Compact'}</span>
+          </button>
         </div>
 
         {/* Search and Sort Controls */}
@@ -212,10 +224,18 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
           </div>
 
           <div className={`${className}__sortWrapper`}>
-            <select className={`${className}__sortSelect`} value={sortBy} onChange={(e) => setSortBy(e.target.value as SortOption)}>
+            <select
+              className={`${className}__sortSelect`}
+              value={sortBy}
+              onChange={(e) => {
+                setSortBy(e.target.value as SortOption);
+                setCurrentPage(1);
+              }}
+            >
               <option value='newest'>Newest First</option>
               <option value='oldest'>Oldest First</option>
               <option value='name'>By Name</option>
+              <option value='updated'>Recently Updated</option>
             </select>
             <BiChevronDown size={16} className={`${className}__sortChevron`} />
           </div>
@@ -240,18 +260,18 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
           )}
 
           {/* Sessions */}
-          {!isErrorSessions && !isLoadingSessions && filteredAndSortedSessions.length > 0 && (
+          {!isErrorSessions && !isLoadingSessions && filteredSessions.length > 0 && (
             <FlexColumn gap={0}>
-              {filteredAndSortedSessions.map((session) => (
+              {filteredSessions.map((session) => (
                 <div key={session.sessionId} className={`${className}__sessionItem`}>
-                  <SessionItemRow session={session} />
+                  <SessionItemRow session={session} compact={compactMode} />
                 </div>
               ))}
             </FlexColumn>
           )}
 
           {/* No Results */}
-          {!isLoadingSessions && !isErrorSessions && searchQuery && filteredAndSortedSessions.length === 0 && (
+          {!isLoadingSessions && !isErrorSessions && searchQuery && filteredSessions.length === 0 && (
             <div className={`${className}__emptyState`}>
               <Text text={`No sessions matching "${searchQuery}"`} fontSize={theme.typography.fontSize.base} color={theme.colors.text.secondary} />
             </div>
@@ -389,8 +409,39 @@ export const ProjectDetailsSessionsTab = styled(Component)`
 
   &__header {
     position: relative;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    justify-content: space-between;
     padding: 16px 20px;
     border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  }
+
+  &__compactToggle {
+    display: inline-flex;
+    flex-shrink: 0;
+    gap: 6px;
+    align-items: center;
+    padding: 8px 12px;
+    font-size: ${({ theme }) => theme.typography.fontSize.xs};
+    font-weight: ${({ theme }) => theme.typography.fontWeight.medium};
+    color: ${({ theme }) => theme.colors.text.secondary};
+    cursor: pointer;
+    background: ${({ theme }) => theme.colors.surface.sunken};
+    border: 1px solid ${({ theme }) => theme.colors.border.default};
+    border-radius: ${({ theme }) => theme.borders.radius.md};
+    transition: all 0.2s ease;
+
+    &:hover {
+      color: ${({ theme }) => theme.colors.text.primary};
+      border-color: ${({ theme }) => theme.colors.border.strong};
+    }
+
+    &.active {
+      color: ${({ theme }) => theme.colors.primary.main};
+      background: ${({ theme }) => theme.colors.primary.main}0d;
+      border-color: ${({ theme }) => theme.colors.primary.main}4d;
+    }
   }
 
   &__headerStats {
@@ -542,6 +593,7 @@ export const ProjectDetailsSessionsTab = styled(Component)`
   }
 
   &__sessionItem {
+    width: 100%;
     border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle};
 
     &:last-child {

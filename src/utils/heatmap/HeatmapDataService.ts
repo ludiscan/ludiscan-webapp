@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import type { ModelFileType } from '@src/features/heatmap/ModelLoader';
 import type { HeatmapStates } from '@src/modeles/heatmapView';
 import type { HeatmapTask, PositionEventLog } from '@src/modeles/heatmaptask';
 import type { Project } from '@src/modeles/project';
@@ -28,6 +29,12 @@ export type Player = {
   playerName: string;
 };
 
+// マップコンテンツの取得結果
+export type MapContentResult = {
+  data: ArrayBuffer;
+  fileType: ModelFileType | null;
+};
+
 // HeatmapViewer用のデータ取得インターフェース
 export type HeatmapDataService = {
   isInitialized: boolean;
@@ -37,7 +44,7 @@ export type HeatmapDataService = {
   getMapList(): Promise<string[]>;
 
   // マップデータの取得
-  getMapContent(mapName: string): Promise<ArrayBuffer | null>;
+  getMapContent(mapName: string): Promise<MapContentResult | null>;
 
   // イベントログキーの取得
   getGeneralLogKeys(): Promise<string[] | null>;
@@ -87,6 +94,18 @@ export const mockHeatmapDataService: HeatmapDataService = {
   getPlayers: async () => [],
   getFieldObjectLogs: async () => [],
 };
+
+/**
+ * ファイル形式文字列をModelFileTypeに変換
+ */
+function parseModelFileType(fileTypeStr: string | null): ModelFileType | null {
+  if (!fileTypeStr) return null;
+  const lower = fileTypeStr.toLowerCase();
+  if (lower === 'obj' || lower === 'fbx' || lower === 'gltf' || lower === 'glb') {
+    return lower as ModelFileType;
+  }
+  return null;
+}
 // データ型定義
 export type OfflineHeatmapData = {
   task: HeatmapTask;
@@ -230,10 +249,10 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
   }, [projectId, apiClient]);
 
   const getMapContent = useCallback(
-    async (mapName: string) => {
+    async (mapName: string): Promise<MapContentResult | null> => {
       try {
         if (!mapName || mapName === '') return null;
-        const { data, error } = await apiClient.GET('/api/v0/heatmap/map_data/{map_name}', {
+        const { data, error, response } = await apiClient.GET('/api/v0/heatmap/map_data/{map_name}', {
           params: {
             path: {
               map_name: mapName,
@@ -242,7 +261,11 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
           parseAs: 'arrayBuffer',
         });
         if (error) return null;
-        return data;
+
+        const fileTypeHeader = response.headers.get('X-Model-File-Type');
+        const fileType = parseModelFileType(fileTypeHeader);
+
+        return { data, fileType };
       } catch {
         return null;
       }

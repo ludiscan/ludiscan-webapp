@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 
 import type { PositionEventLog } from '@src/modeles/heatmaptask';
-import type { HeatmapDataService, OfflineHeatmapData } from '@src/utils/heatmap/HeatmapDataService';
+import type { HeatmapDataService, MapContentResult, OfflineHeatmapData } from '@src/utils/heatmap/HeatmapDataService';
 
 /**
  * React向けのオフラインデータサービスフック
@@ -14,7 +14,7 @@ export function useOfflineHeatmapDataService(offlineData: OfflineHeatmapData | n
   }, [offlineData]);
 
   const getMapContent = useCallback(
-    async (_mapName: string): Promise<ArrayBuffer | null> => {
+    async (_mapName: string): Promise<MapContentResult | null> => {
       const data = offlineData;
       if (!data || !data.mapContentBase64) return null;
 
@@ -32,7 +32,8 @@ export function useOfflineHeatmapDataService(offlineData: OfflineHeatmapData | n
           bytes[i] = binaryString.charCodeAt(i);
         }
 
-        return bytes.buffer;
+        // オフラインモードではファイル形式をデータから取得できないため、デフォルトでobjとして扱う
+        return { data: bytes.buffer, fileType: 'obj' };
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('モデルデータのデコードに失敗しました:', error);
