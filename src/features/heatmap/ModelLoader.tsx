@@ -1,11 +1,14 @@
 import { useLoader } from '@react-three/fiber';
 import { Suspense, useState, useEffect, memo, useMemo } from 'react';
 import { MathUtils } from 'three';
+import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 
 import type { FC, RefObject } from 'react';
 import type { Group } from 'three';
+
+export type ModelFileType = 'obj' | 'fbx' | 'gltf' | 'glb';
 
 import { setRaycastLayerRecursive } from '@src/features/heatmap/ObjectToggleList';
 import { useSelectable } from '@src/features/heatmap/selection/hooks';
@@ -63,33 +66,81 @@ type StreamModelLoaderProps = {
   ref: RefObject<Group | null>;
 };
 /**
- * ArrayBuffer から OBJ ファイルをパースして Three.js の Group を返すカスタムフック
- * @param arrayBuffer OBJ ファイルの ArrayBuffer。存在しない場合は null
+ * ファイル名から拡張子を取得してModelFileTypeを返す
+ * @param fileName ファイル名
+ * @returns ModelFileType または null（サポートされていない形式の場合）
+ */
+export function getModelFileType(fileName: string): ModelFileType | null {
+  const ext = fileName.toLowerCase().split('.').pop();
+  switch (ext) {
+    case 'obj':
+      return 'obj';
+    case 'fbx':
+      return 'fbx';
+    case 'gltf':
+      return 'gltf';
+    case 'glb':
+      return 'glb';
+    default:
+      return null;
+  }
+}
+
+/**
+ * ArrayBuffer から 3Dモデルファイル（OBJ/FBX）をパースして Three.js の Group を返すカスタムフック
+ * @param arrayBuffer モデルファイルの ArrayBuffer。存在しない場合は null
+ * @param fileType ファイル形式（'obj' | 'fbx'）。存在しない場合は 'obj'
  * @returns Three.js の Group オブジェクト（パース成功時）または null
  */
-export function useOBJFromArrayBuffer(arrayBuffer: ArrayBuffer | null): Group | null {
+export function useModelFromArrayBuffer(arrayBuffer: ArrayBuffer | null, fileType: ModelFileType | null = 'obj'): Group | null {
   const [object3d, setObject3d] = useState<Group | null>(null);
 
   useEffect(() => {
-    if (!arrayBuffer) return;
+    if (!arrayBuffer) {
+      setObject3d(null);
+      return;
+    }
 
-    // ArrayBuffer をテキストに変換
-    const text = new TextDecoder('utf-8').decode(arrayBuffer);
-    const loader = new OBJLoader();
+    const type = fileType ?? 'obj';
 
     try {
-      const obj = loader.parse(text);
-      setRaycastLayerRecursive(obj, true);
-      setObject3d(obj);
+      if (type === 'obj') {
+        // OBJ: テキスト形式なのでTextDecoderで変換してパース
+        const text = new TextDecoder('utf-8').decode(arrayBuffer);
+        const loader = new OBJLoader();
+        const obj = loader.parse(text);
+        setRaycastLayerRecursive(obj, true);
+        setObject3d(obj);
+      } else if (type === 'fbx') {
+        // FBX: バイナリ形式なのでArrayBufferから直接パース
+        const loader = new FBXLoader();
+        const fbx = loader.parse(arrayBuffer, '');
+        setRaycastLayerRecursive(fbx, true);
+        setObject3d(fbx);
+      } else {
+        // GLTF/GLB は useLoader を使用する必要があるため、ここではサポートしない
+        // eslint-disable-next-line no-console
+        console.warn(`Model type "${type}" is not supported for ArrayBuffer parsing. Use LocalModelLoader instead.`);
+        setObject3d(null);
+      }
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error('Failed to parse OBJ model from ArrayBuffer:', error);
-      // Set null to indicate failed loading
+      console.error(`Failed to parse ${type.toUpperCase()} model from ArrayBuffer:`, error);
       setObject3d(null);
     }
-  }, [arrayBuffer]);
+  }, [arrayBuffer, fileType]);
 
   return object3d;
+}
+
+/**
+ * ArrayBuffer から OBJ ファイルをパースして Three.js の Group を返すカスタムフック
+ * @param arrayBuffer OBJ ファイルの ArrayBuffer。存在しない場合は null
+ * @returns Three.js の Group オブジェクト（パース成功時）または null
+ * @deprecated useModelFromArrayBuffer を使用してください
+ */
+export function useOBJFromArrayBuffer(arrayBuffer: ArrayBuffer | null): Group | null {
+  return useModelFromArrayBuffer(arrayBuffer, 'obj');
 }
 
 const StreamModelLoaderComponent: FC<StreamModelLoaderProps> = ({ model, ref }) => {

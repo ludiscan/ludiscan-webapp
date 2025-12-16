@@ -266,9 +266,9 @@ export const MapMenuContent: FC<HeatmapMenuProps> = ({ mapOptions, model, dimens
 
           {!service.isEmbed && mapName && (
             <UploadSection>
-              <Text text={`Upload OBJ for "${mapName}"`} fontSize={theme.typography.fontSize.base} />
+              <Text text={`Upload 3D Model for "${mapName}"`} fontSize={theme.typography.fontSize.base} />
               <UploadRow>
-                <FileInput accept='.obj' onChange={handleFileSelect} buttonText='Select OBJ File' fontSize='sm' />
+                <FileInput accept='.obj,.fbx' onChange={handleFileSelect} buttonText='Select OBJ/FBX File' fontSize='sm' />
                 {selectedFile && <FileName>{selectedFile.name}</FileName>}
               </UploadRow>
               <Button scheme={'primary'} fontSize={'base'} onClick={handleUpload} disabled={!selectedFile || uploadMapData.isPending}>
