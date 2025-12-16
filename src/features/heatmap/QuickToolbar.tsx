@@ -7,8 +7,10 @@ import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import { QuickToolbarMenu, MenuIcons } from '@src/features/heatmap/QuickToolbarMenu';
 import { SessionPicker } from '@src/features/heatmap/SessionPicker';
 import { useRouteCoachApi } from '@src/features/heatmap/routecoach/api';
+import { useAppDispatch, useAppSelector } from '@src/hooks/useDispatch';
 import { useGeneralPatch } from '@src/hooks/useGeneral';
 import { DefaultStaleTime } from '@src/modeles/qeury';
+import { setClickToFocusEnabled } from '@src/slices/selectionSlice';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
 const PAGE_SIZE = 50;
@@ -22,9 +24,13 @@ type Props = {
 function Toolbar({ className, service, dimensionality }: Props) {
   const qc = useQueryClient();
   const routeCoachApi = useRouteCoachApi();
+  const dispatch = useAppDispatch();
 
   // 2D/3Dモード切り替え用
   const patchGeneral = useGeneralPatch();
+
+  // クリックフォーカス機能の状態
+  const clickToFocusEnabled = useAppSelector((s) => s.selection.clickToFocusEnabled);
 
   const {
     data: sessionsData,
@@ -94,6 +100,11 @@ function Toolbar({ className, service, dimensionality }: Props) {
     }
   }, [dimensionality, patchGeneral]);
 
+  // クリックフォーカス機能トグルハンドラー
+  const toggleClickFocus = useCallback(() => {
+    dispatch(setClickToFocusEnabled(!clickToFocusEnabled));
+  }, [dispatch, clickToFocusEnabled]);
+
   const fit = useCallback(() => heatMapEventBus.emit('camera:fit'), []);
   const oneToOne = useCallback(() => heatMapEventBus.emit('camera:set-zoom-percent', { percent: 100 }), []);
 
@@ -130,6 +141,13 @@ function Toolbar({ className, service, dimensionality }: Props) {
           onClick: toggleDimensionality,
         },
         {
+          id: 'toggle-click-focus',
+          label: clickToFocusEnabled ? 'Disable Click Focus' : 'Enable Click Focus',
+          icon: <MenuIcons.ClickFocus />,
+          onClick: toggleClickFocus,
+          active: clickToFocusEnabled,
+        },
+        {
           id: 'route-coach',
           label: isRouteCoachPending ? 'Generating...' : 'Route Coach',
           icon: <MenuIcons.RouteCoach />,
@@ -141,7 +159,7 @@ function Toolbar({ className, service, dimensionality }: Props) {
     };
 
     return [viewActions];
-  }, [fit, oneToOne, dimensionality, toggleDimensionality, isRouteCoachPending, service.projectId, startRouteCoach]);
+  }, [fit, oneToOne, dimensionality, toggleDimensionality, clickToFocusEnabled, toggleClickFocus, isRouteCoachPending, service.projectId, startRouteCoach]);
 
   return (
     <div className={className} role='toolbar' aria-label='Viewer quick tools'>
