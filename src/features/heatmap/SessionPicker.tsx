@@ -53,6 +53,9 @@ export type SessionPickerProps = {
   currentSessionId: number | null;
   onSelectSession: (sessionId: number) => void;
   isLoading?: boolean;
+  onLoadMore?: () => void;
+  isFetchingMore?: boolean;
+  hasMore?: boolean;
 };
 
 // =============================================================================
@@ -266,21 +269,70 @@ const EmptyState = styled.div`
   text-align: center;
 `;
 
+const LoadMoreIndicator = styled.div`
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 10px;
+  font-size: 11px;
+  color: ${({ theme }) => theme.colors.text.tertiary};
+`;
+
+const LoadingDot = styled.span`
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: currentcolor;
+  border-radius: 50%;
+  animation: ${pulse} 1s ease-in-out infinite;
+
+  &:nth-of-type(2) {
+    animation-delay: 0.2s;
+  }
+
+  &:nth-of-type(3) {
+    animation-delay: 0.4s;
+  }
+`;
+
 // =============================================================================
 // Component
 // =============================================================================
 
-const Component: FC<SessionPickerProps> = ({ className, sessionIds, currentSessionId, onSelectSession, isLoading = false }) => {
+const Component: FC<SessionPickerProps> = ({
+  className,
+  sessionIds,
+  currentSessionId,
+  onSelectSession,
+  isLoading = false,
+  onLoadMore,
+  isFetchingMore = false,
+  hasMore = false,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const triggerRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  // Scroll detection for infinite loading
+  const handleScroll = useCallback(() => {
+    if (!listRef.current || !onLoadMore || isFetchingMore || !hasMore) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = listRef.current;
+    const threshold = 50; // pixels from bottom to trigger load
+
+    if (scrollHeight - scrollTop - clientHeight < threshold) {
+      onLoadMore();
+    }
+  }, [onLoadMore, isFetchingMore, hasMore]);
 
   const updatePosition = useCallback(() => {
     if (!triggerRef.current || !dropdownRef.current) return;
@@ -419,27 +471,39 @@ const Component: FC<SessionPickerProps> = ({ className, sessionIds, currentSessi
               }}
               onClick={(e: MouseEvent) => e.stopPropagation()}
             >
-              <DropdownHeader>Sessions ({sessionIds.length})</DropdownHeader>
-              <DropdownList role='listbox'>
+              <DropdownHeader>
+                Sessions ({sessionIds.length}
+                {hasMore ? '+' : ''})
+              </DropdownHeader>
+              <DropdownList ref={listRef} role='listbox' onScroll={handleScroll}>
                 {sessionIds.length === 0 ? (
                   <EmptyState>No sessions available</EmptyState>
                 ) : (
-                  sessionIds.map((id, index) => {
-                    const isActive = String(currentSessionId) === id;
-                    return (
-                      <SessionItem key={id} index={index} isActive={isActive} onClick={() => handleSelectSession(id)} role='option' aria-selected={isActive}>
-                        <SessionItemIcon isActive={isActive}>
-                          <IoGameController />
-                        </SessionItemIcon>
-                        <SessionItemLabel>Session #{id}</SessionItemLabel>
-                        {isActive && (
-                          <ActiveCheck>
-                            <IoCheckmark />
-                          </ActiveCheck>
-                        )}
-                      </SessionItem>
-                    );
-                  })
+                  <>
+                    {sessionIds.map((id, index) => {
+                      const isActive = String(currentSessionId) === id;
+                      return (
+                        <SessionItem key={id} index={index} isActive={isActive} onClick={() => handleSelectSession(id)} role='option' aria-selected={isActive}>
+                          <SessionItemIcon isActive={isActive}>
+                            <IoGameController />
+                          </SessionItemIcon>
+                          <SessionItemLabel>Session #{id}</SessionItemLabel>
+                          {isActive && (
+                            <ActiveCheck>
+                              <IoCheckmark />
+                            </ActiveCheck>
+                          )}
+                        </SessionItem>
+                      );
+                    })}
+                    {isFetchingMore && (
+                      <LoadMoreIndicator>
+                        <LoadingDot />
+                        <LoadingDot />
+                        <LoadingDot />
+                      </LoadMoreIndicator>
+                    )}
+                  </>
                 )}
               </DropdownList>
             </DropdownContainer>

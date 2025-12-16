@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { memo } from 'react';
-import { BiTime, BiDevices } from 'react-icons/bi';
+import { BiTime, BiDevices, BiHash } from 'react-icons/bi';
 
 import type { Session } from '@src/modeles/session';
 import type { FC } from 'react';
@@ -13,6 +13,7 @@ import { useSharedTheme } from '@src/hooks/useSharedTheme';
 export type SessionItemRowProps = {
   className?: string | undefined;
   session: Session;
+  compact?: boolean;
 };
 
 const formatDate = (dateString: string) => {
@@ -38,24 +39,31 @@ const calculateDuration = (startTime: string, endTime: string | null) => {
   return `${hours}h ${minutes}m`;
 };
 
-const Component: FC<SessionItemRowProps> = memo(({ className, session }) => {
+const Component: FC<SessionItemRowProps> = memo(({ className, session, compact = false }) => {
   const { theme } = useSharedTheme();
   const isPlaying = session.isPlaying;
 
   return (
-    <div className={`${className} ${isPlaying ? 'playing' : ''}`}>
+    <div className={`${className} ${isPlaying ? 'playing' : ''} ${compact ? 'compact' : ''}`}>
       <div className={`${className}__accent`} />
-      <FlexRow gap={16} align={'center'} className={`${className}__row`}>
+      <FlexRow gap={compact ? 12 : 16} align={'center'} className={`${className}__row`}>
         {/* Status indicator */}
         <div className={`${className}__statusIndicator`}>{isPlaying && <span className={`${className}__pulsingDot`} />}</div>
 
         {/* Main Info */}
-        <FlexColumn gap={6} className={`${className}__mainInfo`}>
+        <FlexColumn gap={compact ? 2 : 6} className={`${className}__mainInfo`}>
           <FlexRow gap={8} align={'center'}>
+            {/* Session ID */}
+            <Tooltip tooltip={`Session ID: ${session.sessionId}`}>
+              <span className={`${className}__sessionId`}>
+                <BiHash size={12} />
+                {session.sessionId}
+              </span>
+            </Tooltip>
             <Tooltip tooltip={session.name}>
               <ClampText
                 text={session.name}
-                fontSize={theme.typography.fontSize.base}
+                fontSize={compact ? theme.typography.fontSize.sm : theme.typography.fontSize.base}
                 fontWeight={theme.typography.fontWeight.semibold}
                 lines={1}
                 color={theme.colors.text.primary}
@@ -64,34 +72,37 @@ const Component: FC<SessionItemRowProps> = memo(({ className, session }) => {
             {isPlaying && <span className={`${className}__liveBadge`}>LIVE</span>}
           </FlexRow>
 
-          <FlexRow gap={12} align={'center'} className={`${className}__metaRow`}>
-            {session.deviceId && (
-              <Tooltip tooltip={`Device: ${session.deviceId}`}>
-                <span className={`${className}__metaItem`}>
-                  <BiDevices size={14} />
-                  <span className={`${className}__metaValue`}>{session.deviceId}</span>
-                </span>
-              </Tooltip>
-            )}
+          {/* Detail row - hidden in compact mode */}
+          {!compact && (
+            <FlexRow gap={12} align={'center'} className={`${className}__metaRow`}>
+              {session.deviceId && (
+                <Tooltip tooltip={`Device: ${session.deviceId}`}>
+                  <span className={`${className}__metaItem`}>
+                    <BiDevices size={14} />
+                    <span className={`${className}__metaValue`}>{session.deviceId}</span>
+                  </span>
+                </Tooltip>
+              )}
 
-            {session.platform && (
-              <Tooltip tooltip={`Platform: ${session.platform}`}>
-                <span className={`${className}__platformBadge`}>{session.platform}</span>
-              </Tooltip>
-            )}
+              {session.platform && (
+                <Tooltip tooltip={`Platform: ${session.platform}`}>
+                  <span className={`${className}__platformBadge`}>{session.platform}</span>
+                </Tooltip>
+              )}
 
-            {session.appVersion && (
-              <Tooltip tooltip={`App Version: ${session.appVersion}`}>
-                <span className={`${className}__versionBadge`}>v{session.appVersion}</span>
-              </Tooltip>
-            )}
-          </FlexRow>
+              {session.appVersion && (
+                <Tooltip tooltip={`App Version: ${session.appVersion}`}>
+                  <span className={`${className}__versionBadge`}>v{session.appVersion}</span>
+                </Tooltip>
+              )}
+            </FlexRow>
+          )}
         </FlexColumn>
 
         {/* Time Info */}
-        <FlexColumn gap={4} align={'flex-end'} className={`${className}__timeInfo`}>
+        <FlexColumn gap={compact ? 2 : 4} align={'flex-end'} className={`${className}__timeInfo`}>
           <span className={`${className}__timestamp`}>
-            <BiTime size={14} />
+            <BiTime size={compact ? 12 : 14} />
             {formatDate(session.startTime)}
           </span>
           <span className={`${className}__duration ${isPlaying ? 'active' : ''}`}>{calculateDuration(session.startTime, session.endTime)}</span>
@@ -109,6 +120,10 @@ export const SessionItemRow = styled(Component)`
   padding: 14px 16px;
   overflow: hidden;
   transition: all 0.2s ease;
+
+  &.compact {
+    padding: 8px 12px;
+  }
 
   &__accent {
     position: absolute;
@@ -171,6 +186,24 @@ export const SessionItemRow = styled(Component)`
   &__mainInfo {
     flex: 1;
     min-width: 0;
+  }
+
+  &__sessionId {
+    display: inline-flex;
+    flex-shrink: 0;
+    gap: 2px;
+    align-items: center;
+    padding: 2px 6px;
+    font-family: ${({ theme }) => theme.typography.fontFamily.monospace};
+    font-size: ${({ theme }) => theme.typography.fontSize.xs};
+    font-weight: ${({ theme }) => theme.typography.fontWeight.medium};
+    color: ${({ theme }) => theme.colors.text.tertiary};
+    background: ${({ theme }) => theme.colors.surface.sunken};
+    border-radius: ${({ theme }) => theme.borders.radius.sm};
+
+    svg {
+      flex-shrink: 0;
+    }
   }
 
   &__liveBadge {

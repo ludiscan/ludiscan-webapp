@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { memo, useCallback, useMemo } from 'react';
 
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
@@ -10,6 +10,8 @@ import { useRouteCoachApi } from '@src/features/heatmap/routecoach/api';
 import { useGeneralPatch } from '@src/hooks/useGeneral';
 import { DefaultStaleTime } from '@src/modeles/qeury';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
+
+const PAGE_SIZE = 50;
 
 type Props = {
   className?: string;
@@ -24,18 +26,39 @@ function Toolbar({ className, service, dimensionality }: Props) {
   // 2D/3Dモード切り替え用
   const patchGeneral = useGeneralPatch();
 
-  const { data: sessions } = useQuery({
+  const {
+    data: sessionsData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: isSessionsLoading,
+  } = useInfiniteQuery({
     queryKey: ['sessions', service.projectId],
-    queryFn: () => service.getSessions(200, 0),
+    queryFn: async ({ pageParam = 0 }) => {
+      const sessions = await service.getSessions(PAGE_SIZE, pageParam);
+      return {
+        sessions,
+        nextOffset: sessions.length === PAGE_SIZE ? pageParam + PAGE_SIZE : undefined,
+      };
+    },
+    getNextPageParam: (lastPage) => lastPage.nextOffset,
+    initialPageParam: 0,
     staleTime: DefaultStaleTime,
     enabled: service.projectId !== undefined,
     refetchOnWindowFocus: false,
   });
 
+  // Flatten pages into single session list, sorted by newest first (already sorted from API)
   const sessionIds = useMemo(() => {
-    if (!sessions || !Array.isArray(sessions)) return [];
-    return sessions?.map((session) => String(session.sessionId)) || [];
-  }, [sessions]);
+    if (!sessionsData?.pages) return [];
+    return sessionsData.pages.flatMap((page) => page.sessions.map((session) => String(session.sessionId)));
+  }, [sessionsData]);
+
+  const handleLoadMore = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   // RouteCoach改善ルート生成
   const { mutate: startRouteCoach, isPending: isRouteCoachPending } = useMutation({
@@ -122,7 +145,15 @@ function Toolbar({ className, service, dimensionality }: Props) {
 
   return (
     <div className={className} role='toolbar' aria-label='Viewer quick tools'>
-      <SessionPicker sessionIds={sessionIds} currentSessionId={service.sessionId} onSelectSession={handleSelectSession} isLoading={!sessions} />
+      <SessionPicker
+        sessionIds={sessionIds}
+        currentSessionId={service.sessionId}
+        onSelectSession={handleSelectSession}
+        isLoading={isSessionsLoading}
+        onLoadMore={handleLoadMore}
+        isFetchingMore={isFetchingNextPage}
+        hasMore={hasNextPage ?? false}
+      />
       <QuickToolbarMenu sections={menuSections} />
     </div>
   );
