@@ -4702,6 +4702,10 @@ export interface operations {
         limit?: number;
         offset?: number;
         isFinished?: boolean;
+        /** @description Field to sort by */
+        sortBy?: 'id' | 'name' | 'start_time' | 'end_time' | 'updated_at';
+        /** @description Sort order (asc or desc) */
+        sortOrder?: 'asc' | 'desc';
       };
       header?: never;
       path: {
@@ -5879,6 +5883,8 @@ export interface operations {
       /** @description Map data */
       200: {
         headers: {
+          /** @description The file type of the 3D model (obj, fbx, gltf, glb) */
+          'X-Model-File-Type'?: 'obj' | 'fbx' | 'gltf' | 'glb';
           [name: string]: unknown;
         };
         content: {
