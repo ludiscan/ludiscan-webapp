@@ -138,7 +138,11 @@ const DropZoneIcon = styled.div<{ isDragging: boolean }>`
   background: ${({ theme }) => theme.colors.surface.base};
   border-radius: ${({ theme }) => theme.borders.radius.md};
   transition: all 0.3s ease;
-  animation: ${({ isDragging }) => (isDragging ? `${floatAnimation} 1s ease-in-out infinite` : 'none')};
+  ${({ isDragging }) =>
+    isDragging &&
+    css`
+      animation: ${floatAnimation} 1s ease-in-out infinite;
+    `}
 `;
 
 const DropZoneText = styled.div`
