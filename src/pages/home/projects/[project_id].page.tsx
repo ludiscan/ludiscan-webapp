@@ -248,7 +248,9 @@ const ProjectDetailsPage = styled(Component)`
   &__mainContent {
     position: relative;
     z-index: 1;
+    max-width: 1200px;
     padding: 0 24px 48px;
+    margin: 0 auto;
   }
 
   /* Loading State */

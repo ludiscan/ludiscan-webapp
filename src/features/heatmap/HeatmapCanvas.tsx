@@ -54,6 +54,7 @@ type HeatmapCanvasProps = {
   fieldObjectLogs?: components['schemas']['FieldObjectLogDto'][];
   projectId?: number;
   playerId?: string;
+  hasLocalModel?: boolean; // ローカルモデルがある場合はtrue
 };
 
 type Waypoint = {
@@ -130,6 +131,7 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
   dimensionality,
   fieldObjectLogs = [],
   playerId,
+  hasLocalModel = false,
 }) => {
   // const { invalidate } = useThree();
   const fitInfoRef = useRef<{ dist: number; center: Vector3 }>({ dist: 1000, center: new Vector3() });
@@ -536,11 +538,11 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
   return (
     <>
       <group ref={groupRef}>
-        {/* 3Dモデルは3Dモードまたは2Dモードでマップ表示がONの場合に表示 */}
-        {(dimensionality === '3d' || showMapIn2D) && modelType && map && modelType !== 'server' && typeof map === 'string' && (
+        {/* 3Dモデルは3Dモードまたは2Dモードでマップ表示がONの場合、またはローカルモデルがある場合に表示 */}
+        {(dimensionality === '3d' || showMapIn2D || hasLocalModel) && modelType && map && modelType !== 'server' && typeof map === 'string' && (
           <LocalModelLoader ref={modelRef} modelPath={map} modelType={modelType} />
         )}
-        {(dimensionality === '3d' || showMapIn2D) && modelType && model && modelType === 'server' && typeof map !== 'string' && (
+        {(dimensionality === '3d' || showMapIn2D || hasLocalModel) && modelType && model && modelType === 'server' && (
           <>
             <StreamModelLoader ref={modelRef} model={model} />
             {/* fillモードは3Dモデル表面に配置するため、モデルがある場合のみ表示 */}
@@ -610,5 +612,6 @@ export const HeatMapCanvas = memo(
     prev.fieldObjectLogs === next.fieldObjectLogs &&
     prev.playerId === next.playerId &&
     prev.service.sessionId === next.service.sessionId &&
-    prev.service.projectId === next.service.projectId,
+    prev.service.projectId === next.service.projectId &&
+    prev.hasLocalModel === next.hasLocalModel,
 );
