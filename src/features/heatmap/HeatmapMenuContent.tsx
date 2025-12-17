@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
+import type { ModelFileType } from '@src/features/heatmap/ModelLoader';
 import type { Menus } from '@src/hooks/useHeatmapSideBarMenus';
 import type { RootState } from '@src/store';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
@@ -19,6 +20,12 @@ import { setMenuPanelWidth } from '@src/slices/uiSlice';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 import { saveRecentMenu } from '@src/utils/localstrage';
 
+export type LocalModelData = {
+  buffer: ArrayBuffer;
+  fileType: ModelFileType;
+  fileName: string;
+};
+
 export type HeatmapMenuProps = {
   model: Group | null;
   className?: string | undefined;
@@ -30,6 +37,9 @@ export type HeatmapMenuProps = {
   service: HeatmapDataService;
   extra?: object;
   dimensionality: '2d' | '3d'; // 2D/3Dモード（一部のメニューは3D専用）
+  // ローカルファイルの一時表示用
+  localModel?: LocalModelData | null;
+  onLocalModelChange?: (data: LocalModelData | null) => void;
 };
 
 const MIN_WIDTH = 300;
@@ -272,7 +282,9 @@ export const HeatmapMenuContent = memo(
       prev.eventLogKeys === next.eventLogKeys &&
       prev.handleExportView === next.handleExportView &&
       prev.extra === prev.extra &&
-      prev.dimensionality === next.dimensionality
+      prev.dimensionality === next.dimensionality &&
+      prev.localModel === next.localModel &&
+      prev.onLocalModelChange === next.onLocalModelChange
     );
   },
 );

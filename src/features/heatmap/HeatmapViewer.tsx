@@ -6,6 +6,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector, useStore } from 'react-redux';
 
 import type { PerformanceMonitorApi } from '@react-three/drei';
+import type { LocalModelData } from '@src/features/heatmap/HeatmapMenuContent';
 import type { ModelFileType } from '@src/features/heatmap/ModelLoader';
 import type { PlayerTimelinePointsTimeRange } from '@src/features/heatmap/PlayerTimelinePoints';
 import type { PositionEventLog } from '@src/modeles/heatmaptask';
@@ -40,6 +41,9 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
   const [serverModelFileType, setServerModelFileType] = useState<ModelFileType | null>(null);
   const [dpr, setDpr] = useState(2);
   // const [performance, setPerformance] = useState<PerformanceMonitorApi>();
+
+  // ローカルファイルの一時表示用状態
+  const [localModel, setLocalModel] = useState<LocalModelData | null>(null);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const divRef = useRef<HTMLDivElement>(null!);
@@ -112,6 +116,13 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
     setServerModelFileType(mapContent.fileType);
   }, [mapContent]);
 
+  // ローカルモデルがある場合はmodelTypeを'server'に設定
+  useEffect(() => {
+    if (localModel) {
+      setModelType('server');
+    }
+  }, [localModel]);
+
   const pointList = useMemo(() => {
     if (!task) return [];
 
@@ -130,13 +141,30 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
     // setPerformance(api);
   }, []);
 
-  const buffer = useMemo(() => {
+  // ローカルモデルが設定されている場合はそれを使用、なければサーバーモデルを使用
+  const activeBuffer = useMemo(() => {
+    if (localModel) {
+      return localModel.buffer;
+    }
     if (typeof map === 'string') {
       return null;
     }
     return map;
-  }, [map]);
-  const model = useModelFromArrayBuffer(buffer, serverModelFileType);
+  }, [map, localModel]);
+
+  const activeFileType = useMemo(() => {
+    if (localModel) {
+      return localModel.fileType;
+    }
+    return serverModelFileType;
+  }, [localModel, serverModelFileType]);
+
+  const model = useModelFromArrayBuffer(activeBuffer, activeFileType);
+
+  // ローカルモデル変更ハンドラ
+  const handleLocalModelChange = useCallback((data: LocalModelData | null) => {
+    setLocalModel(data);
+  }, []);
 
   const store = useStore<RootState>();
   const handleExportView = useCallback(async () => {
@@ -228,11 +256,26 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
           visibleTimelineRange={visibleTimelineRange}
           dimensionality={dimensionality}
           fieldObjectLogs={fieldObjectLogs}
+          hasLocalModel={!!localModel}
         />
         {statsReady && <Stats parent={divRef} className={`${className}__stats`} />}
       </Canvas>
     ),
-    [dimensionality, dpr, handleOnPerformance, service, pointList, map, modelType, model, visibleTimelineRange, statsReady, className, fieldObjectLogs],
+    [
+      dimensionality,
+      dpr,
+      handleOnPerformance,
+      service,
+      pointList,
+      map,
+      modelType,
+      model,
+      visibleTimelineRange,
+      statsReady,
+      className,
+      fieldObjectLogs,
+      localModel,
+    ],
   );
 
   return (
@@ -268,6 +311,8 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
           eventLogKeys={generalLogKeys ?? undefined}
           service={service}
           dimensionality={dimensionality}
+          localModel={localModel}
+          onLocalModelChange={handleLocalModelChange}
         />
       </div>
 

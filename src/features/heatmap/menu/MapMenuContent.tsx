@@ -1,24 +1,25 @@
+import { css, keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
-import { useCallback, useState } from 'react';
-import { IoChevronDown, IoChevronUp } from 'react-icons/io5';
+import { useCallback, useRef, useState } from 'react';
+import { IoChevronDown, IoChevronUp, IoClose, IoCubeOutline, IoCloudUploadOutline } from 'react-icons/io5';
 
-import type { HeatmapMenuProps } from '@src/features/heatmap/HeatmapMenuContent';
-import type { FC } from 'react';
+import type { HeatmapMenuProps, LocalModelData } from '@src/features/heatmap/HeatmapMenuContent';
+import type { FC, DragEvent } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
 import { DraggableNumberInput } from '@src/component/atoms/DraggableNumberInput';
 import { FileInput } from '@src/component/atoms/FileInput';
-import { FlexRow } from '@src/component/atoms/Flex';
+import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { VerticalSpacer } from '@src/component/atoms/Spacer';
 import { Switch } from '@src/component/atoms/Switch';
 import { Text } from '@src/component/atoms/Text';
 import { Selector } from '@src/component/molecules/Selector';
+import { getModelFileType } from '@src/features/heatmap/ModelLoader';
 import { ObjectToggleList } from '@src/features/heatmap/ObjectToggleList';
 import { InputRow } from '@src/features/heatmap/menu/InputRow';
 import { useGeneralPatch, useGeneralPick, useGeneralSelect } from '@src/hooks/useGeneral';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { useUploadMapData } from '@src/hooks/useUploadMapData';
-import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
 const UploadSection = styled.div`
   display: flex;
@@ -68,6 +69,231 @@ const StatusMessage = styled.div<{ status: 'success' | 'error' | 'info' }>`
   }}
 `;
 
+// アニメーション定義
+const pulseGlow = keyframes`
+  0%, 100% { box-shadow: 0 0 0 0 rgba(196, 30, 58, 0); }
+  50% { box-shadow: 0 0 12px 2px rgba(196, 30, 58, 0.3); }
+`;
+
+const floatAnimation = keyframes`
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+`;
+
+const shimmer = keyframes`
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+`;
+
+// ドラッグ＆ドロップゾーン
+const DropZone = styled.div<{ isDragging: boolean; isLoading: boolean }>`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  min-height: 100px;
+  padding: 16px;
+  overflow: hidden;
+  cursor: ${({ isLoading }) => (isLoading ? 'wait' : 'pointer')};
+  background: ${({ theme, isDragging }) =>
+    isDragging ? `linear-gradient(135deg, ${theme.colors.primary.dark}15, ${theme.colors.primary.main}10)` : theme.colors.surface.sunken};
+  border: 2px dashed ${({ theme, isDragging }) => (isDragging ? theme.colors.primary.main : theme.colors.border.default)};
+  border-radius: ${({ theme }) => theme.borders.radius.lg};
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    background: ${({ theme }) => `linear-gradient(135deg, ${theme.colors.primary.dark}08, ${theme.colors.primary.main}05)`};
+    border-color: ${({ theme }) => theme.colors.primary.light};
+  }
+
+  ${({ isDragging }) =>
+    isDragging &&
+    css`
+      animation: ${pulseGlow} 1.5s ease-in-out infinite;
+    `}
+
+  ${({ isLoading, theme }) =>
+    isLoading &&
+    css`
+      &::after {
+        position: absolute;
+        inset: 0;
+        content: '';
+        background: linear-gradient(90deg, transparent, ${theme.colors.primary.main}20, transparent);
+        background-size: 200% 100%;
+        animation: ${shimmer} 1.5s infinite;
+      }
+    `}
+`;
+
+const DropZoneIcon = styled.div<{ isDragging: boolean }>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  color: ${({ theme, isDragging }) => (isDragging ? theme.colors.primary.main : theme.colors.text.tertiary)};
+  background: ${({ theme }) => theme.colors.surface.base};
+  border-radius: ${({ theme }) => theme.borders.radius.md};
+  transition: all 0.3s ease;
+  animation: ${({ isDragging }) => (isDragging ? `${floatAnimation} 1s ease-in-out infinite` : 'none')};
+`;
+
+const DropZoneText = styled.div`
+  text-align: center;
+`;
+
+const DropZoneTitle = styled.p`
+  margin: 0 0 4px;
+  font-size: ${({ theme }) => theme.typography.fontSize.sm};
+  font-weight: ${({ theme }) => theme.typography.fontWeight.medium};
+  color: ${({ theme }) => theme.colors.text.primary};
+`;
+
+const DropZoneSubtitle = styled.p`
+  margin: 0;
+  font-size: ${({ theme }) => theme.typography.fontSize.xs};
+  color: ${({ theme }) => theme.colors.text.tertiary};
+`;
+
+const FileTypeBadges = styled.div`
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+`;
+
+const FileTypeBadge = styled.span`
+  padding: 2px 8px;
+  font-family: ${({ theme }) => theme.typography.fontFamily.monospace};
+  font-size: 10px;
+  font-weight: ${({ theme }) => theme.typography.fontWeight.semibold};
+  color: ${({ theme }) => theme.colors.text.secondary};
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: ${({ theme }) => theme.colors.surface.base};
+  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: ${({ theme }) => theme.borders.radius.sm};
+`;
+
+// プレビュー表示セクション
+const PreviewCard = styled.div`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: ${({ theme }) => `linear-gradient(135deg, ${theme.colors.surface.base}, ${theme.colors.surface.raised})`};
+  border: 1px solid ${({ theme }) => theme.colors.border.default};
+  border-radius: ${({ theme }) => theme.borders.radius.lg};
+  box-shadow: ${({ theme }) => theme.shadows.sm};
+`;
+
+const PreviewHeader = styled.div`
+  display: flex;
+  gap: 12px;
+  align-items: center;
+`;
+
+const PreviewIconWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  color: ${({ theme }) => theme.colors.primary.main};
+  background: ${({ theme }) => `linear-gradient(135deg, ${theme.colors.primary.main}15, ${theme.colors.primary.light}10)`};
+  border-radius: ${({ theme }) => theme.borders.radius.md};
+  animation: ${floatAnimation} 3s ease-in-out infinite;
+`;
+
+const PreviewInfo = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+`;
+
+const PreviewFileName = styled.span`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: ${({ theme }) => theme.typography.fontSize.sm};
+  font-weight: ${({ theme }) => theme.typography.fontWeight.medium};
+  color: ${({ theme }) => theme.colors.text.primary};
+  white-space: nowrap;
+`;
+
+const PreviewMeta = styled.div`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+`;
+
+const PreviewBadge = styled.span`
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: ${({ theme }) => theme.typography.fontWeight.semibold};
+  color: ${({ theme }) => theme.colors.semantic.info.contrast};
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  background: ${({ theme }) => theme.colors.semantic.info.main};
+  border-radius: ${({ theme }) => theme.borders.radius.full};
+`;
+
+const PreviewFileType = styled.span`
+  font-family: ${({ theme }) => theme.typography.fontFamily.monospace};
+  font-size: 10px;
+  font-weight: ${({ theme }) => theme.typography.fontWeight.medium};
+  color: ${({ theme }) => theme.colors.text.tertiary};
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+`;
+
+const CloseButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  color: ${({ theme }) => theme.colors.text.tertiary};
+  cursor: pointer;
+  background: ${({ theme }) => theme.colors.surface.hover};
+  border: none;
+  border-radius: ${({ theme }) => theme.borders.radius.md};
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.semantic.error.main};
+    background: ${({ theme }) => theme.colors.semantic.error.light};
+  }
+`;
+
+const PreviewNote = styled.div`
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 8px 12px;
+  font-size: ${({ theme }) => theme.typography.fontSize.xs};
+  color: ${({ theme }) => theme.colors.text.secondary};
+  background: ${({ theme }) => theme.colors.surface.sunken};
+  border-radius: ${({ theme }) => theme.borders.radius.md};
+
+  &::before {
+    flex-shrink: 0;
+    width: 4px;
+    height: 4px;
+    content: '';
+    background: ${({ theme }) => theme.colors.semantic.info.main};
+    border-radius: 50%;
+  }
+`;
+
 const CollapsibleSection = styled.div`
   width: 100%;
 `;
@@ -97,7 +323,7 @@ const CollapsibleContent = styled.div<{ isOpen: boolean }>`
   padding-top: 8px;
 `;
 
-export const MapMenuContent: FC<HeatmapMenuProps> = ({ mapOptions, model, dimensionality, service }) => {
+export const MapMenuContent: FC<HeatmapMenuProps> = ({ mapOptions, model, dimensionality, service, localModel, onLocalModelChange }) => {
   const { theme } = useSharedTheme();
   const mapName = useGeneralSelect((s) => s.mapName);
   const { modelPositionX, modelPositionY, modelPositionZ, modelRotationX, modelRotationY, modelRotationZ, showMapIn2D } = useGeneralPick(
@@ -116,14 +342,103 @@ export const MapMenuContent: FC<HeatmapMenuProps> = ({ mapOptions, model, dimens
   const [isAlignmentOpen, setIsAlignmentOpen] = useState(false);
   const [isObjectListOpen, setIsObjectListOpen] = useState(false);
 
-  const handleAddWaypoint = useCallback(() => {
-    heatMapEventBus.emit('add-waypoint');
-  }, []);
+  // ドラッグ＆ドロップ用の状態
+  const [isDragging, setIsDragging] = useState(false);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // const handleAddWaypoint = useCallback(() => {
+  //   heatMapEventBus.emit('add-waypoint');
+  // }, []);
 
   const handleFileSelect = useCallback((file: File | null) => {
     setSelectedFile(file);
     setStatusMessage(null);
   }, []);
+
+  // ローカルファイルプレビュー用のファイル選択ハンドラ
+  const handleLocalPreviewFileSelect = useCallback(
+    async (file: File | null) => {
+      if (!file || !onLocalModelChange) {
+        return;
+      }
+
+      const fileType = getModelFileType(file.name);
+      if (!fileType) {
+        setStatusMessage({ text: 'Unsupported file format. Please use .obj or .fbx', status: 'error' });
+        return;
+      }
+
+      setIsLoadingPreview(true);
+      try {
+        const buffer = await file.arrayBuffer();
+        const data: LocalModelData = {
+          buffer,
+          fileType,
+          fileName: file.name,
+        };
+        onLocalModelChange(data);
+      } catch (error) {
+        setStatusMessage({
+          text: `Failed to read file: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          status: 'error',
+        });
+      } finally {
+        setIsLoadingPreview(false);
+      }
+    },
+    [onLocalModelChange],
+  );
+
+  // ローカルプレビューをクリアするハンドラ
+  const handleClearLocalPreview = useCallback(() => {
+    if (onLocalModelChange) {
+      onLocalModelChange(null);
+    }
+  }, [onLocalModelChange]);
+
+  // ドラッグ＆ドロップハンドラ
+  const handleDragOver = useCallback((e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  }, []);
+
+  const handleDrop = useCallback(
+    (e: DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragging(false);
+
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        handleLocalPreviewFileSelect(files[0]);
+      }
+    },
+    [handleLocalPreviewFileSelect],
+  );
+
+  const handleDropZoneClick = useCallback(() => {
+    fileInputRef.current?.click();
+  }, []);
+
+  const handleFileInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = e.target.files;
+      if (files && files.length > 0) {
+        handleLocalPreviewFileSelect(files[0]);
+      }
+      // リセットして同じファイルを再選択できるようにする
+      e.target.value = '';
+    },
+    [handleLocalPreviewFileSelect],
+  );
 
   const handleUpload = useCallback(async () => {
     if (!selectedFile || !mapName) {
@@ -151,7 +466,8 @@ export const MapMenuContent: FC<HeatmapMenuProps> = ({ mapOptions, model, dimens
   const is2DMode = dimensionality === '2d';
 
   // 2Dモードでマップ表示がOFFかつマップが選択されていない場合のメッセージ
-  const showMapEnabled = !is2DMode || showMapIn2D;
+  // ローカルモデルがある場合は常に表示を有効にする
+  const showMapEnabled = !is2DMode || showMapIn2D || !!localModel;
 
   return (
     <>
@@ -173,16 +489,70 @@ export const MapMenuContent: FC<HeatmapMenuProps> = ({ mapOptions, model, dimens
           options={mapOptions}
           value={mapName}
           fontSize={'sm'}
-          disabled={mapOptions.length === 0 || (is2DMode && !showMapIn2D)}
+          disabled={mapOptions.length === 0 || (is2DMode && !showMapIn2D) || !!localModel}
         />
       </InputRow>
+
+      {/* ローカルファイル一時表示セクション */}
+      {onLocalModelChange && (
+        <>
+          <VerticalSpacer size={12} />
+          <FlexColumn gap={4}>
+            <Text text='Local Preview' fontSize={theme.typography.fontSize.xs} color={theme.colors.text.secondary} />
+            {localModel ? (
+              <PreviewCard>
+                <PreviewHeader>
+                  <PreviewIconWrapper>
+                    <IoCubeOutline size={22} />
+                  </PreviewIconWrapper>
+                  <PreviewInfo>
+                    <PreviewFileName>{localModel.fileName}</PreviewFileName>
+                    <PreviewMeta>
+                      <PreviewBadge>Preview</PreviewBadge>
+                      <PreviewFileType>.{localModel.fileType}</PreviewFileType>
+                    </PreviewMeta>
+                  </PreviewInfo>
+                  <CloseButton onClick={handleClearLocalPreview} title='Clear preview'>
+                    <IoClose size={16} />
+                  </CloseButton>
+                </PreviewHeader>
+                <PreviewNote>Temporary preview only — not uploaded to server</PreviewNote>
+              </PreviewCard>
+            ) : (
+              <>
+                {/* 隠れたファイルinput */}
+                <input type='file' ref={fileInputRef} accept='.obj,.fbx' onChange={handleFileInputChange} style={{ display: 'none' }} />
+                {/* ドラッグ＆ドロップゾーン */}
+                <DropZone
+                  isDragging={isDragging}
+                  isLoading={isLoadingPreview}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  onClick={handleDropZoneClick}
+                >
+                  <DropZoneIcon isDragging={isDragging}>{isDragging ? <IoCubeOutline size={24} /> : <IoCloudUploadOutline size={24} />}</DropZoneIcon>
+                  <DropZoneText>
+                    <DropZoneTitle>{isDragging ? 'Drop to preview' : isLoadingPreview ? 'Loading...' : 'Drop 3D model here'}</DropZoneTitle>
+                    <DropZoneSubtitle>{isLoadingPreview ? 'Processing file...' : 'or click to browse'}</DropZoneSubtitle>
+                  </DropZoneText>
+                  <FileTypeBadges>
+                    <FileTypeBadge>.obj</FileTypeBadge>
+                    <FileTypeBadge>.fbx</FileTypeBadge>
+                  </FileTypeBadges>
+                </DropZone>
+              </>
+            )}
+          </FlexColumn>
+        </>
+      )}
 
       {/* マップ表示がONの場合のみ、以下の機能を表示 */}
       {showMapEnabled && (
         <>
-          <Button scheme={'surface'} fontSize={'base'} onClick={handleAddWaypoint}>
-            <Text text={'add waypoint'} />
-          </Button>
+          {/*<Button scheme={'surface'} fontSize={'base'} onClick={handleAddWaypoint}>*/}
+          {/*  <Text text={'add waypoint'} />*/}
+          {/*</Button>*/}
           <VerticalSpacer size={12} />
           {model && mapName && (
             <CollapsibleSection>
@@ -197,7 +567,7 @@ export const MapMenuContent: FC<HeatmapMenuProps> = ({ mapOptions, model, dimens
           )}
 
           {/* OBJモデル位置・回転調整セクション */}
-          {model && mapName && (
+          {model && (mapName || localModel) && (
             <CollapsibleSection>
               <CollapsibleHeader onClick={() => setIsAlignmentOpen(!isAlignmentOpen)}>
                 <span>Model Alignment</span>
