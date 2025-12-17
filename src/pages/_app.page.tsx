@@ -28,7 +28,7 @@ export const InnerContent = styled.div<{ showSidebar?: boolean }>`
   position: relative;
 
   /* Add padding for fixed header */
-  padding-top: ${dimensions.headerHeight}px;
+  padding-top: ${dimensions.headerHeight + 16}px;
 
   /* Use logical property for RTL/LTR support (Design Implementation Guide Rule 4) */
   /* stylelint-disable-next-line */

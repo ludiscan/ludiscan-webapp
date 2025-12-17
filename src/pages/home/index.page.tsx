@@ -439,6 +439,7 @@ const IndexPage = styled(Component)`
     z-index: 1;
     max-width: 1200px;
     padding: 0 24px 48px;
+    margin: 0 auto;
   }
 
   /* Hero Section */
@@ -780,6 +781,7 @@ const IndexPage = styled(Component)`
   }
 
   &__listItem {
+    width: 100%;
     border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle};
     transition: background-color 0.2s ease;
 
