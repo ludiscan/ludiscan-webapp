@@ -11,7 +11,6 @@ import {
   MeshStandardMaterial,
   PlaneGeometry,
   Raycaster,
-  SpotLight,
   Vector2,
   Vector3,
 } from 'three';
@@ -292,7 +291,7 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
   useEffect(() => {
     // 2Dモード: 真上からのシンプルな照明
     // 3Dモード: 既存の複数光源
-    const lights: (AmbientLight | DirectionalLight | HemisphereLight | SpotLight)[] = [];
+    const lights: (AmbientLight | DirectionalLight | HemisphereLight)[] = [];
 
     if (dimensionality === '2d') {
       // 2D: 環境光+真上からの平行光源のみ
@@ -301,12 +300,14 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
       directionalLight.position.set(0, 1, 0); // 真上から
       lights.push(ambientLight, directionalLight);
     } else {
-      // 3D: 既存の複雑な照明システム
-      const ambientLight = new AmbientLight(0xffffff, 0.2);
+      // 3D: 全方位から十分な光を当てる照明システム
+      const ambientLight = new AmbientLight(0xffffff, 1); // 環境光を強化
       const directionalLight = new DirectionalLight(0xffffff, 0.4);
-      const hemisphereLight = new HemisphereLight(theme.colors.background.default, theme.colors.surface.raised, 1);
-      const spotLight = new SpotLight(0xffffff, 4, 30, Math.PI / 4, 10, 0.5);
-      lights.push(ambientLight, directionalLight, hemisphereLight, spotLight);
+      directionalLight.position.set(1, 1, 1).normalize(); // 斜め上から
+      const directionalLight2 = new DirectionalLight(0xffffff, 0.2);
+      directionalLight2.position.set(-1, 0.5, -1).normalize(); // 反対側から補助光
+      const hemisphereLight = new HemisphereLight(0xffffff, 0x444444, 0.4); // 空と地面の色
+      lights.push(ambientLight, directionalLight, directionalLight2, hemisphereLight);
     }
 
     lights.forEach((light) => scene.add(light));

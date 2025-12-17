@@ -1,18 +1,66 @@
 import { useLoader } from '@react-three/fiber';
 import { Suspense, useState, useEffect, memo, useMemo } from 'react';
-import { MathUtils } from 'three';
+import { Color, MathUtils, MeshLambertMaterial, MeshPhongMaterial, MeshStandardMaterial } from 'three';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 
 import type { FC, RefObject } from 'react';
-import type { Group } from 'three';
+import type { Group, Mesh, Material } from 'three';
 
 export type ModelFileType = 'obj' | 'fbx' | 'gltf' | 'glb';
 
 import { setRaycastLayerRecursive } from '@src/features/heatmap/ObjectToggleList';
 import { useSelectable } from '@src/features/heatmap/selection/hooks';
 import { useGeneralPick } from '@src/hooks/useGeneral';
+
+/**
+ * FBXモデルのマテリアルを修正する
+ * FBXLoaderで読み込んだマテリアルが真っ黒になる問題を防ぐ
+ */
+function fixFBXMaterials(object: Group): void {
+  object.traverse((child) => {
+    if ((child as Mesh).isMesh) {
+      const mesh = child as Mesh;
+      const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+
+      materials.forEach((material: Material, index: number) => {
+        // MeshLambertMaterialの場合（FBXで使われることがある）
+        if (material instanceof MeshLambertMaterial) {
+          // 新しいマテリアルを作成（テクスチャは保持、色と発光を調整）
+          const newMaterial = new MeshLambertMaterial({
+            map: material.map,
+            color: 0xffffff,
+            emissive: 0x444444,
+            emissiveIntensity: 1.0,
+          });
+
+          if (Array.isArray(mesh.material)) {
+            mesh.material[index] = newMaterial;
+          } else {
+            mesh.material = newMaterial;
+          }
+          return;
+        }
+        // MeshPhongMaterialの場合
+        else if (material instanceof MeshPhongMaterial) {
+          material.color = new Color(0xffffff);
+          material.emissive = new Color(0x222222);
+          material.shininess = 30;
+          material.needsUpdate = true;
+        }
+        // MeshStandardMaterialの場合
+        else if (material instanceof MeshStandardMaterial) {
+          material.color = new Color(0xffffff);
+          material.emissive = new Color(0x111111);
+          material.metalness = 0.1;
+          material.roughness = 0.6;
+          material.needsUpdate = true;
+        }
+      });
+    }
+  });
+}
 
 type LocalModelLoaderProps = {
   modelPath: string;
@@ -33,7 +81,8 @@ const LocalModelLoaderContent: FC<LocalModelLoaderProps> = ({ modelPath, modelTy
   const model = useLoader(modelType === 'obj' ? OBJLoader : GLTFLoader, modelPath);
   const handlers = useSelectable('map-mesh', { fit: 'object' });
 
-  const rotation: [number, number, number] = useMemo(
+  // ユーザー設定値は親グループに適用（モデルの元の変換を保持するため）
+  const userRotation: [number, number, number] = useMemo(
     () => [MathUtils.degToRad(modelRotationX), MathUtils.degToRad(modelRotationY), MathUtils.degToRad(modelRotationZ)],
     [modelRotationX, modelRotationY, modelRotationZ],
   );
@@ -42,13 +91,14 @@ const LocalModelLoaderContent: FC<LocalModelLoaderProps> = ({ modelPath, modelTy
     <group
       ref={ref}
       dispose={null} // eslint-disable-line react/no-unknown-property
+      position={[modelPositionX, modelPositionY, modelPositionZ]} // eslint-disable-line react/no-unknown-property
+      rotation={userRotation} // eslint-disable-line react/no-unknown-property
+      scale={[scale, scale, scale]}
       {...handlers}
     >
+      {/* primitiveにはposition/rotation/scaleを設定せず、モデルの元の変換を保持 */}
       <primitive
         object={'scene' in model ? model.scene : model} // eslint-disable-line react/no-unknown-property
-        position={[modelPositionX, modelPositionY, modelPositionZ]} // eslint-disable-line react/no-unknown-property
-        rotation={rotation} // eslint-disable-line react/no-unknown-property
-        scale={[scale, scale, scale]}
         castShadow={true} // eslint-disable-line react/no-unknown-property
       />
       <shadowMaterial opacity={1} />
@@ -115,6 +165,8 @@ export function useModelFromArrayBuffer(arrayBuffer: ArrayBuffer | null, fileTyp
         // FBX: バイナリ形式なのでArrayBufferから直接パース
         const loader = new FBXLoader();
         const fbx = loader.parse(arrayBuffer, '');
+        // FBXマテリアルの真っ黒問題を修正（色とemissiveが暗い場合のみ補正）
+        fixFBXMaterials(fbx);
         setRaycastLayerRecursive(fbx, true);
         setObject3d(fbx);
       } else {
@@ -154,7 +206,8 @@ const StreamModelLoaderComponent: FC<StreamModelLoaderProps> = ({ model, ref }) 
     'modelRotationZ',
   );
 
-  const rotation: [number, number, number] = useMemo(
+  // ユーザー設定値は親グループに適用（FBXの元の変換を保持するため）
+  const userRotation: [number, number, number] = useMemo(
     () => [MathUtils.degToRad(modelRotationX), MathUtils.degToRad(modelRotationY), MathUtils.degToRad(modelRotationZ)],
     [modelRotationX, modelRotationY, modelRotationZ],
   );
@@ -164,13 +217,14 @@ const StreamModelLoaderComponent: FC<StreamModelLoaderProps> = ({ model, ref }) 
       <group
         ref={ref}
         dispose={null} // eslint-disable-line react/no-unknown-property
+        position={[modelPositionX, modelPositionY, modelPositionZ]} // eslint-disable-line react/no-unknown-property
+        rotation={userRotation} // eslint-disable-line react/no-unknown-property
+        scale={[scale, scale, scale]}
       >
+        {/* primitiveにはposition/rotation/scaleを設定せず、FBXの元の変換を保持 */}
         {model && (
           <primitive
             object={model} // eslint-disable-line react/no-unknown-property
-            position={[modelPositionX, modelPositionY, modelPositionZ]} // eslint-disable-line react/no-unknown-property
-            rotation={rotation} // eslint-disable-line react/no-unknown-property
-            scale={[scale, scale, scale]}
             castShadow={true} // eslint-disable-line react/no-unknown-property
           />
         )}
