@@ -46,14 +46,14 @@ const MIN_WIDTH = 300;
 const MAX_WIDTH = 800;
 
 const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
-  const { className, mapOptions, service, dimensionality } = props;
+  const { className, mapOptions, service, dimensionality, name } = props;
   const mapName = useGeneralSelect((s) => s.mapName);
   const setGeneral = useGeneralPatch();
   const dispatch = useDispatch();
   const menuPanelWidth = useSelector((s: RootState) => s.ui.menuPanelWidth);
   const { theme } = useSharedTheme();
 
-  const [openMenu, setOpenMenu] = useState<Menus | undefined>(undefined);
+  const [openMenu, setOpenMenu] = useState<Menus | undefined>(name);
   const [menuExtra, setMenuExtra] = useState<object | undefined>(undefined);
   const [isResizing, setIsResizing] = useState(false);
   const resizeRef = useRef<{ startX: number; startWidth: number } | null>(null);

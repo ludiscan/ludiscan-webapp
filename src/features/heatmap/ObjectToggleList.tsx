@@ -1,12 +1,12 @@
 import styled from '@emotion/styled';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { IoMdEye, IoMdEyeOff } from 'react-icons/io';
+import { MdOpacity } from 'react-icons/md';
 
 import type { FC } from 'react';
 import type { Group, Material, Object3D } from 'three';
 
-import { Button } from '@src/component/atoms/Button';
-import { FlexRow, InlineFlexRow } from '@src/component/atoms/Flex';
+import { FlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { layers } from '@src/styles/style';
@@ -192,65 +192,68 @@ const Component: FC<ObjectToggleListProps> = ({ className, model, mapName }) => 
 
   return (
     <div className={className}>
-      {/* 親ラベル */}
-      <FlexRow className={`${className}__parent-label`} align={'center'} gap={8}>
-        <Text text={(model as Group).name || 'Mesh'} fontSize={theme.typography.fontSize.base} />
-        {/* 全体 visible トグル */}
-        <Button
-          scheme={'none'}
-          fontSize={'lg'}
-          className={`${className}__visibleButton`}
-          onClick={() => setAllVisible(!allVisible)}
-          aria-label={allVisible ? 'Hide all' : 'Show all'}
-        >
-          {allVisible ? <IoMdEye /> : anyVisible ? <IoMdEye /> : <IoMdEyeOff />}
-        </Button>
-        {/* 全体 opacity トグル（visible時のデフォルトを合わせるイメージ） */}
-        <Button
-          scheme={'none'}
-          fontSize={'xs'}
-          className={`${className}__opacityButton`}
-          onClick={() => setAllOpacity(majorityOpacity === 1.0 ? 0.5 : 1.0)}
-          disabled={!anyVisible}
-          aria-label={'Toggle opacity for all visible'}
-        >
-          <Text text={majorityOpacity.toFixed(1)} fontSize={theme.typography.fontSize.sm} fontWeight={'bold'} />
-        </Button>
-      </FlexRow>
+      {/* ヘッダー: モデル名 + 一括操作 */}
+      <div className={`${className}__header`}>
+        <Text text={(model as Group).name || 'Objects'} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
+        <FlexRow gap={2}>
+          <button
+            type='button'
+            className={`${className}__bulk-btn`}
+            onClick={() => setAllVisible(!allVisible)}
+            aria-label={allVisible ? 'Hide all' : 'Show all'}
+            title={allVisible ? 'Hide all' : 'Show all'}
+          >
+            {allVisible ? <IoMdEye size={14} /> : anyVisible ? <IoMdEye size={14} /> : <IoMdEyeOff size={14} />}
+          </button>
+          <button
+            type='button'
+            className={`${className}__bulk-btn ${!anyVisible ? `${className}__bulk-btn--disabled` : ''}`}
+            onClick={() => setAllOpacity(majorityOpacity === 1.0 ? 0.5 : 1.0)}
+            disabled={!anyVisible}
+            aria-label={'Toggle opacity for all'}
+            title={`Set all to ${majorityOpacity === 1.0 ? '50%' : '100%'}`}
+          >
+            <MdOpacity size={14} />
+          </button>
+        </FlexRow>
+      </div>
 
-      {/* 子要素リスト */}
-      <ul className={`${className}__child-list`}>
+      {/* レイヤーリスト */}
+      <ul className={`${className}__list`}>
         {model.children.map((child) => {
           const s = displayState[child.uuid];
           const visible = s?.visible ?? true;
           const opacity = s?.opacity ?? 1.0;
+          const isHalfOpacity = opacity === 0.5;
+
           return (
-            <li key={child.uuid}>
-              <InlineFlexRow align={'center'} gap={6}>
-                <Text text={child.name || child.type} fontSize={theme.typography.fontSize.sm} />
-                {/* 個別 visible */}
-                <Button
-                  onClick={() => toggleChildVisible(child.uuid)}
-                  scheme={'none'}
-                  fontSize={'lg'}
-                  className={`${className}__visibleButton`}
-                  aria-label={visible ? 'Hide' : 'Show'}
-                >
-                  {visible ? <IoMdEye /> : <IoMdEyeOff />}
-                </Button>
-                {/* 個別 opacity：visible の時だけ表示 */}
-                {visible && (
-                  <Button
-                    fontSize={'xs'}
-                    onClick={() => toggleChildOpacity(child.uuid)}
-                    scheme={'none'}
-                    className={`${className}__opacityButton`}
-                    aria-label={'Toggle opacity'}
-                  >
-                    <Text text={opacity.toFixed(1)} fontSize={theme.typography.fontSize.sm} fontWeight={'bold'} />
-                  </Button>
-                )}
-              </InlineFlexRow>
+            <li
+              key={child.uuid}
+              className={`${className}__item ${visible ? `${className}__item--visible` : ''} ${isHalfOpacity ? `${className}__item--half` : ''}`}
+            >
+              <button
+                type='button'
+                className={`${className}__visibility`}
+                onClick={() => toggleChildVisible(child.uuid)}
+                aria-label={visible ? 'Hide' : 'Show'}
+                title={visible ? 'Hide' : 'Show'}
+              >
+                {visible ? <IoMdEye size={14} /> : <IoMdEyeOff size={14} />}
+              </button>
+              <span className={`${className}__name`} title={child.name || child.type}>
+                {child.name || child.type}
+              </span>
+              <button
+                type='button'
+                className={`${className}__opacity`}
+                onClick={() => toggleChildOpacity(child.uuid)}
+                disabled={!visible}
+                aria-label={`Opacity: ${opacity * 100}%`}
+                title={`Opacity: ${opacity * 100}%`}
+              >
+                <MdOpacity size={12} />
+                <span className={`${className}__opacity-value`}>{Math.round(opacity * 100)}</span>
+              </button>
             </li>
           );
         })}
@@ -260,71 +263,164 @@ const Component: FC<ObjectToggleListProps> = ({ className, model, mapName }) => 
 };
 
 export const ObjectToggleList = styled(Component)`
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid ${({ theme }) => theme.colors.border.default};
+  border-radius: ${({ theme }) => theme.borders.radius.md};
 
-  &__parent-label {
-    position: relative;
-    left: 6px;
-    height: 20px;
-    padding: 4px 0;
-    font-weight: bold;
+  /* ヘッダー */
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 8px;
+    background: ${({ theme }) => theme.colors.surface.raised};
+    border-bottom: 1px solid ${({ theme }) => theme.colors.border.default};
   }
 
-  &__parent-label::after {
-    position: absolute;
-    top: 50%;
-    left: -20px;
-    width: 20px;
-    height: 2px;
-    content: '';
-    background: #ccc;
+  /* 一括操作ボタン */
+  &__bulk-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    color: ${({ theme }) => theme.colors.text.tertiary};
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    border-radius: ${({ theme }) => theme.borders.radius.sm};
+    transition:
+      background-color 0.12s ease,
+      color 0.12s ease;
+
+    &:hover:not(:disabled) {
+      color: ${({ theme }) => theme.colors.text.primary};
+      background: ${({ theme }) => theme.colors.surface.hover};
+    }
+
+    &:active:not(:disabled) {
+      background: ${({ theme }) => theme.colors.surface.pressed};
+    }
+
+    &--disabled {
+      cursor: not-allowed;
+      opacity: 0.3;
+    }
   }
 
-  &__child-list {
-    position: relative;
+  /* レイヤーリスト */
+  &__list {
+    display: flex;
+    flex-direction: column;
     padding: 0;
     margin: 0;
     list-style: none;
+    background: ${({ theme }) => theme.colors.surface.base};
   }
 
-  &__child-list li {
-    position: relative;
-    padding: 2px 0;
-    padding-left: 20px;
-  }
-
-  &__child-list li::before {
-    position: absolute;
-    top: 50%;
-    left: 0;
-    width: 18px;
-    height: 2px;
-    content: '';
-    background: #ccc;
-  }
-
-  &__child-list li::after {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: -2px;
-    width: 2px;
-    content: '';
-    background: #ccc;
-  }
-
-  &__child-list li:last-child::after {
-    bottom: calc(50% - 2px);
-  }
-
-  &__child-list li:first-of-type::after {
-    top: -8px;
-  }
-
-  &__visibleButton,
-  &__opacityButton {
+  /* レイヤーアイテム */
+  &__item {
     display: flex;
-    align-content: center;
-    min-width: 28px;
+    gap: 4px;
+    align-items: center;
+    height: 28px;
+    padding: 0 6px;
+    border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle};
+    transition: background-color 0.1s ease;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:hover {
+      background: ${({ theme }) => theme.colors.surface.hover};
+    }
+  }
+
+  /* 表示トグルボタン */
+  &__visibility {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    color: var(--visibility-color, ${({ theme }) => theme.colors.text.tertiary});
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    border-radius: ${({ theme }) => theme.borders.radius.sm};
+    transition:
+      background-color 0.1s ease,
+      color 0.1s ease;
+
+    &:hover {
+      color: ${({ theme }) => theme.colors.text.primary};
+      background: ${({ theme }) => theme.colors.surface.interactive};
+    }
+  }
+
+  /* オブジェクト名 */
+  &__name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: ${({ theme }) => theme.typography.fontSize.xs};
+    color: var(--name-color, ${({ theme }) => theme.colors.text.secondary});
+    white-space: nowrap;
+    opacity: var(--name-opacity, 1);
+  }
+
+  /* 透明度ボタン */
+  &__opacity {
+    display: flex;
+    flex-shrink: 0;
+    gap: 2px;
+    align-items: center;
+    justify-content: center;
+    height: 18px;
+    padding: 0 4px;
+    font-size: 10px;
+    color: var(--opacity-color, ${({ theme }) => theme.colors.text.tertiary});
+    cursor: pointer;
+    background: var(--opacity-bg, transparent);
+    border: none;
+    border-radius: ${({ theme }) => theme.borders.radius.sm};
+    transition:
+      background-color 0.1s ease,
+      color 0.1s ease;
+
+    &:disabled {
+      cursor: default;
+      opacity: 0.3;
+    }
+
+    &:hover:not(:disabled) {
+      color: ${({ theme }) => theme.colors.text.primary};
+      background: ${({ theme }) => theme.colors.surface.interactive};
+    }
+  }
+
+  &__opacity-value {
+    min-width: 18px;
+    font-weight: 500;
+    text-align: right;
+  }
+
+  /* アイテム状態: visible */
+  &__item--visible {
+    --visibility-color: ${({ theme }) => theme.colors.primary.main};
+    --name-color: ${({ theme }) => theme.colors.text.primary};
+  }
+
+  /* アイテム状態: half opacity */
+  &__item--half {
+    --opacity-color: ${({ theme }) => theme.colors.text.inverse};
+    --opacity-bg: ${({ theme }) => theme.colors.primary.main};
+    --name-opacity: 0.6;
   }
 `;
