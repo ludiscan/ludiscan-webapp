@@ -12,6 +12,7 @@ import { StatusContent } from '@src/component/molecules/StatusContent';
 import { env } from '@src/config/env';
 import { useGeneralPatch } from '@src/hooks/useGeneral';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
+import { heatMapEventBus } from '@src/utils/canvasEventBus';
 import { useEmbedHeatmapDataService } from '@src/utils/heatmap/EmbedHeatmapDataService';
 
 // SSR disabled to avoid hydration mismatch with Three.js and react-icons
@@ -172,6 +173,17 @@ const EmbedHeatmapPage: FC<EmbedHeatmapPageProps> = ({ className, token, verifyR
       setGeneral({ mapName: initialMapName });
     }
   }, [initialMapName, setGeneral]);
+
+  // Embed mode: open timeline menu by default
+  // Note: visibility is automatically enabled in PlayerTimeline component when isEmbed=true
+  useEffect(() => {
+    // Open timeline menu after a short delay to ensure HeatMapViewer is mounted
+    const timer = setTimeout(() => {
+      heatMapEventBus.emit('click-menu-icon', { name: 'timeline' });
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const service = useEmbedHeatmapDataService(verifyResult.projectId || undefined, verifyResult.sessionId || undefined, token);
 

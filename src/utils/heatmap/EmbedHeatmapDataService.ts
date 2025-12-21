@@ -2,11 +2,24 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { FieldObjectLog, HeatmapDataService, MapContentResult, Player } from './HeatmapDataService';
+import type { ModelFileType } from '@src/features/heatmap/ModelLoader';
 import type { HeatmapTask, PositionEventLog } from '@src/modeles/heatmaptask';
 import type { Project } from '@src/modeles/project';
 import type { Session } from '@src/modeles/session';
 
 import { createEmbedClient } from '@src/modeles/qeury';
+
+/**
+ * ファイル形式文字列をModelFileTypeに変換
+ */
+function parseModelFileType(fileTypeStr: string | null): ModelFileType | null {
+  if (!fileTypeStr) return null;
+  const lower = fileTypeStr.toLowerCase();
+  if (lower === 'obj' || lower === 'fbx' || lower === 'gltf' || lower === 'glb') {
+    return lower as ModelFileType;
+  }
+  return null;
+}
 
 /**
  * Embed用のHeatmapDataService
@@ -131,7 +144,7 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
     async (mapName: string): Promise<MapContentResult | null> => {
       try {
         if (!mapName || mapName === '' || !apiClient) return null;
-        const { data, error } = await apiClient.GET('/api/v0/heatmap/map_data/{map_name}', {
+        const { data, error, response } = await apiClient.GET('/api/v0/heatmap/map_data/{map_name}', {
           params: {
             path: {
               map_name: mapName,
@@ -140,8 +153,12 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
           parseAs: 'arrayBuffer',
         });
         if (error) return null;
-        // Embedモードではファイル形式をヘッダーから取得できないため、デフォルトでobjとして扱う
-        return { data, fileType: 'obj' };
+
+        // レスポンスヘッダーからファイル形式を取得
+        const fileTypeHeader = response.headers.get('X-Model-File-Type');
+        const fileType = parseModelFileType(fileTypeHeader);
+
+        return { data, fileType };
       } catch {
         return null;
       }
