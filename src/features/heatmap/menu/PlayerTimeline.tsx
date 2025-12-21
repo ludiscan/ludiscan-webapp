@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
-import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BsInfoCircle } from 'react-icons/bs';
 import { IoClose } from 'react-icons/io5';
 import Markdown from 'react-markdown';
@@ -235,35 +235,49 @@ const PlayerTimelineComponent: FC<HeatmapMenuProps> = ({ className, service }) =
     enabled: selectSessionId !== null && service.projectId !== undefined,
   });
 
+  // Add players to details and enable visibility
+  const enableWithPlayers = useCallback(() => {
+    if (!players) return;
+    const session_id = service.sessionId;
+    const project_id = service.projectId;
+    if (!session_id || !project_id) return;
+
+    setData((prev) => {
+      const newDetails: PlayerTimelineDetail[] = players
+        .map((player) => {
+          if (prev.details?.some((d) => d.player === player && d.session_id === session_id)) {
+            return null;
+          }
+          return { player, project_id, session_id, visible: true };
+        })
+        .filter((s) => s !== null);
+      return {
+        ...prev,
+        visible: true,
+        details: [...(prev.details || []), ...newDetails],
+      };
+    });
+  }, [players, service.projectId, service.sessionId, setData]);
+
   const onVisibilityChange = useCallback(
     (checked: boolean) => {
-      if (!players) return;
-      const session_id = service.sessionId;
-      const project_id = service.projectId;
-      if (!session_id || !project_id) return;
-      setData((prev) => {
-        const newDetails: PlayerTimelineDetail[] = players
-          .map((player) => {
-            if (prev.details?.some((d) => d.player === player && d.session_id === session_id)) {
-              return null;
-            }
-            return {
-              player: player,
-              project_id,
-              session_id,
-              visible: true,
-            };
-          })
-          .filter((s) => s !== null);
-        return {
-          ...prev,
-          visible: checked,
-          details: [...(prev.details || []), ...newDetails],
-        };
-      });
+      if (checked) {
+        enableWithPlayers();
+      } else {
+        setData({ visible: false });
+      }
     },
-    [players, service.projectId, service.sessionId, setData],
+    [enableWithPlayers, setData],
   );
+
+  // Auto-enable visibility when players are loaded (only once per session)
+  const initializedSessionRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (players && players.length > 0 && service.sessionId && initializedSessionRef.current !== service.sessionId) {
+      initializedSessionRef.current = service.sessionId;
+      enableWithPlayers();
+    }
+  }, [service.sessionId, players, enableWithPlayers]);
 
   const queryDisable = useMemo(() => {
     try {
