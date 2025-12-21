@@ -400,6 +400,7 @@ export const HeatMapViewer = memo(
       position: absolute;
       bottom: 40px;
       left: 50%;
+      z-index: ${zIndexes.content + 2};
       transform: translateX(-50%);
     }
 

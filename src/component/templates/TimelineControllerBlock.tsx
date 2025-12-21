@@ -140,7 +140,7 @@ const Component: FC<TimelineControllerBlockProps> = ({
   return (
     <Card
       color={theme.colors.surface.base}
-      className={`${className} ${isDetailOpen && 'open'}`}
+      className={`${className} ${isDetailOpen ? 'open' : ''}`}
       shadow='medium'
       border={theme.colors.border.default}
       stopPropagate
@@ -198,8 +198,13 @@ const Component: FC<TimelineControllerBlockProps> = ({
             <div className={`${className}__sliderWrapper`} ref={trackRef}>
               {!isDetailOpen && (
                 <>
-                  <Text className={`${className}__speedLabel`} text={`${playSpeed}x`} fontSize={'xs'} color={theme.colors.text.secondary} />
-                  <Text className={`${className}__label`} text={`${currentTimeLabel}/${maxTimeLabel}`} fontSize={'xs'} />
+                  <Text
+                    className={`${className}__speedLabel`}
+                    text={`${playSpeed}x`}
+                    fontSize={theme.typography.fontSize.xs}
+                    color={theme.colors.text.secondary}
+                  />
+                  <Text className={`${className}__label`} text={`${currentTimeLabel}/${maxTimeLabel}`} fontSize={theme.typography.fontSize.xs} />
                 </>
               )}
               <div className={`${className}__sliderBackground`} />
@@ -273,18 +278,13 @@ const createBackgroundGradient = (theme: Theme, currentMinTime: number, currentM
 export const TimelineControllerBlock = memo(
   styled(Component)`
     max-width: 90vw;
-    height: ${({ theme }) => theme.spacing.lg};
-    padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.lg};
+    padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.md};
     color: ${({ theme }) => theme.colors.text.primary};
     border-radius: ${({ theme }) => theme.borders.radius.xl};
     transition: all 0.2s ease-in-out;
 
     @media (width >= 500px) {
       max-width: 450px;
-    }
-
-    &.open {
-      height: calc(${({ theme }) => theme.spacing.lg} * 2);
     }
 
     &__sliderWrapper {
@@ -342,6 +342,7 @@ export const TimelineControllerBlock = memo(
       height: 100%;
       appearance: none;
       background: transparent;
+      border: none;
 
       &::-webkit-slider-thumb {
         /* English comment: taller thumb for current */
