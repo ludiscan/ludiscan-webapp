@@ -4097,7 +4097,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['DefaultSuccessResponse'];
+          'application/json': components['schemas']['ProjectResponseDto'];
         };
       };
       /** @description Bad Request */
