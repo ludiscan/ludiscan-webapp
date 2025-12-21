@@ -43,6 +43,5 @@ export const Labeled: Story = {
   args: {
     ...Template.args,
     type: 'text',
-    label: 'Label',
   },
 };

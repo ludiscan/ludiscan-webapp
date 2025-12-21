@@ -16,17 +16,17 @@ const SelectorContainer = styled.div`
 `;
 
 const LanguageButton = styled.button<{ isActive: boolean }>`
+  min-height: 40px;
   padding: 6px 12px;
   font-size: 14px;
   color: ${({ theme }) => theme.colors.text.primary};
   cursor: pointer;
-  background: ${({ theme, isActive }) => (isActive ? theme.colors.primary : 'transparent')};
-  border: 1px solid ${({ theme, isActive }) => (isActive ? theme.colors.primary : theme.colors.border)};
+  background: ${({ theme, isActive }) => (isActive ? theme.colors.surface.sunken : theme.colors.surface.base)};
   border-radius: 4px;
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${({ theme, isActive }) => (isActive ? theme.colors.primary : theme.colors.surface.raised)};
+    opacity: 0.8;
   }
 
   &:focus {

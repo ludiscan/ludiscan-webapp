@@ -83,8 +83,8 @@ export type SharedThemeProviderProps = {
 };
 
 export const SharedThemeProvider: FC<SharedThemeProviderProps> = ({ children, initialTheme }) => {
-  const [theme, setTheme] = useState(initialTheme || themes.crimsonDusk.dark);
-  const [themeType, setThemeTypeState] = useState<ThemeType>('crimsonDusk');
+  const [theme, setTheme] = useState(initialTheme || themes.slateEmber.dark);
+  const [themeType, setThemeTypeState] = useState<ThemeType>('slateEmber');
 
   const onToggleTheme = useCallback(() => {
     setTheme((currentTheme) => toggleTheme(currentTheme));
@@ -102,7 +102,7 @@ export const SharedThemeProvider: FC<SharedThemeProviderProps> = ({ children, in
   );
 
   useEffect(() => {
-    const savedType = getThemeType() || 'crimsonDusk';
+    const savedType = getThemeType() || 'slateEmber';
     setThemeTypeState(savedType);
     const updateTheme = initialTheme ?? themes[savedType][getThemeName() || 'dark'];
     if (updateTheme !== undefined) {

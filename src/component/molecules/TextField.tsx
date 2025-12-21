@@ -1,8 +1,6 @@
 import styled from '@emotion/styled';
 
-import { FlexColumn } from '@src/component/atoms/Flex';
-import { Text } from '@src/component/atoms/Text';
-import { useSharedTheme } from '@src/hooks/useSharedTheme';
+import type { CSSProperties } from 'react';
 
 export type TextFieldProps = {
   className?: string | undefined;
@@ -14,24 +12,22 @@ export type TextFieldProps = {
   fontSize?: string;
   shadow?: boolean;
   fontWeight?: number | 'bolder' | 'lighter' | 'normal' | 'bold';
-  label?: string;
+  id?: string;
+  style?: CSSProperties;
 };
 
-const Component = ({ className, value, onChange, placeholder, type = 'text', label }: TextFieldProps) => {
-  const { theme } = useSharedTheme();
-
-  const Input = (
-    <input id={label ?? className} className={className} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} type={type} />
+const Component = ({ className, value, onChange, placeholder, type = 'text', id, style }: TextFieldProps) => {
+  return (
+    <input
+      style={style}
+      id={id ?? className}
+      className={className}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      type={type}
+    />
   );
-  if (label) {
-    return (
-      <FlexColumn gap={2}>
-        <Text text={label} fontSize={theme.typography.fontSize.sm} fontWeight={theme.typography.fontWeight.bold} />
-        {Input}
-      </FlexColumn>
-    );
-  }
-  return Input;
 };
 
 export const TextField = styled(Component)`
