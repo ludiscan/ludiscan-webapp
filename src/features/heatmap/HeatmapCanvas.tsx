@@ -66,7 +66,17 @@ const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(mi
 const EventLogs = memo(
   ({ service }: { service: HeatmapDataService }) => {
     const logs = useEventLogSelect((s) => s.logs);
-    const visibleEventLogs = useMemo(() => logs.filter((event) => event.visible), [logs]);
+    const { visible: isTimelineActive } = usePlayerTimelinePick('visible');
+
+    // When timeline is active, show all event logs (filtered by time in EventLogMarkers)
+    // Otherwise, only show manually enabled event logs
+    const visibleEventLogs = useMemo(() => {
+      if (isTimelineActive) {
+        return logs;
+      }
+      return logs.filter((event) => event.visible);
+    }, [logs, isTimelineActive]);
+
     return (
       <>
         {visibleEventLogs.length > 0 && visibleEventLogs.map((event) => <EventLogMarkers key={event.key} logName={event.key} service={service} pref={event} />)}

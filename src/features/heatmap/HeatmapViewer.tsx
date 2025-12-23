@@ -9,7 +9,7 @@ import type { PerformanceMonitorApi } from '@react-three/drei';
 import type { LocalModelData } from '@src/features/heatmap/HeatmapMenuContent';
 import type { ModelFileType } from '@src/features/heatmap/ModelLoader';
 import type { PlayerTimelinePointsTimeRange } from '@src/features/heatmap/PlayerTimelinePoints';
-import type { FieldObjectData, PlayerTimelineDetail } from '@src/modeles/heatmapView';
+import type { EventLogData, FieldObjectData, PlayerTimelineDetail } from '@src/modeles/heatmapView';
 import type { PositionEventLog } from '@src/modeles/heatmaptask';
 import type { RootState } from '@src/store';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
@@ -17,6 +17,7 @@ import type { FC } from 'react';
 
 import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { useToast } from '@src/component/templates/ToastContext';
+import { EventLogPanel } from '@src/features/heatmap/EventLogPanel';
 import { HeatMapCanvas } from '@src/features/heatmap/HeatmapCanvas';
 import { HeatmapMenuContent } from '@src/features/heatmap/HeatmapMenuContent';
 import { useModelFromArrayBuffer } from '@src/features/heatmap/ModelLoader';
@@ -25,6 +26,7 @@ import { ZoomControls } from '@src/features/heatmap/ZoomControls';
 import { exportHeatmap } from '@src/features/heatmap/export-heatmap';
 import { FocusLinkBridge } from '@src/features/heatmap/selection/FocusLinkBridge';
 import { InspectorModal } from '@src/features/heatmap/selection/InspectorModal';
+import { useEventLogPatch, useEventLogSelect } from '@src/hooks/useEventLog';
 import { useFieldObjectPatch, useFieldObjectSelect } from '@src/hooks/useFieldObject';
 import { useGeneralPick } from '@src/hooks/useGeneral';
 import { useGetApi } from '@src/hooks/useGetApi';
@@ -67,13 +69,14 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
   const divRef = useRef<HTMLDivElement>(null!);
   const [statsReady, setStatsReady] = useState(false);
 
-  const { mapName, dimensionalityOverride, backgroundImage, backgroundScale, backgroundOffsetX, backgroundOffsetY } = useGeneralPick(
+  const { mapName, dimensionalityOverride, backgroundImage, backgroundScale, backgroundOffsetX, backgroundOffsetY, showStats } = useGeneralPick(
     'mapName',
     'dimensionalityOverride',
     'backgroundImage',
     'backgroundScale',
     'backgroundOffsetX',
     'backgroundOffsetY',
+    'showStats',
   );
   const splitMode = useSelector((s: RootState) => s.heatmapCanvas.splitMode);
 
@@ -160,6 +163,33 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
       setFieldObjects(updates);
     }
   }, [objectTypes, fieldObjects, fieldObjectQueryText, setFieldObjects]);
+
+  // Event Log の初期化（メニューを開かなくても実行される）
+  const eventLogs = useEventLogSelect((s) => s.logs);
+  const setEventLogs = useEventLogPatch();
+
+  useEffect(() => {
+    if (generalLogKeys && Array.isArray(generalLogKeys)) {
+      const currentKeys = eventLogs.map((e) => e.key);
+      const setA = new Set(generalLogKeys);
+      const setB = new Set(currentKeys);
+      const isSameSet = setA.size === setB.size && [...setA].every((k) => setB.has(k));
+      if (isSameSet) return;
+
+      const eventLogDatas: EventLogData[] = generalLogKeys.map((key) => {
+        const index = eventLogs.findIndex((e) => e.key === key);
+        return {
+          key,
+          visible: index !== -1 ? eventLogs[index].visible : false,
+          color: eventLogs[index]?.color || getRandomPrimitiveColor(),
+          iconName: eventLogs[index]?.iconName || 'CiStreamOn',
+          hvqlScript: eventLogs[index]?.hvqlScript,
+        };
+      });
+
+      setEventLogs({ logs: eventLogDatas });
+    }
+  }, [generalLogKeys, eventLogs, setEventLogs]);
 
   // PlayerTimeline の自動有効化ロジック（メニューを開かなくても実行される）
   const setPlayerTimelineData = usePlayerTimelinePatch();
@@ -373,7 +403,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
           fieldObjectLogs={fieldObjectLogs}
           hasLocalModel={!!localModel}
         />
-        {statsReady && <Stats parent={divRef} className={`${className}__stats`} />}
+        {statsReady && showStats && <Stats parent={divRef} className={`${className}__stats`} />}
       </Canvas>
     ),
     [
@@ -387,6 +417,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
       model,
       visibleTimelineRange,
       statsReady,
+      showStats,
       className,
       fieldObjectLogs,
       localModel,
@@ -431,6 +462,13 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
         />
       </div>
 
+      {/* EventLogパネル（セッション選択時に表示） */}
+      {service.sessionId && (
+        <div className={`${className}__eventLogPanel`}>
+          <EventLogPanel service={service} eventLogKeys={generalLogKeys ?? null} />
+        </div>
+      )}
+
       <div className={`${className}__selectionInspector`}>
         <InspectorModal />
       </div>
@@ -467,9 +505,16 @@ export const HeatMapViewer = memo(
       padding-top: ${dimensions.headerHeight}px;
     }
 
+    &__eventLogPanel {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: ${zIndexes.content + 2};
+    }
+
     &__selectionInspector {
       position: absolute;
-      top: 60px;
+      top: 340px;
       right: 16px;
       z-index: ${zIndexes.content + 2};
       max-width: 360px;
