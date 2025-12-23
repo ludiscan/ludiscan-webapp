@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import type { FieldObjectLog, HeatmapDataService, MapContentResult, Player } from './HeatmapDataService';
+import type { FieldObjectLog, HeatmapDataService, MapContentResult, Player, SessionSearchParams } from './HeatmapDataService';
 import type { ModelFileType } from '@src/features/heatmap/ModelLoader';
 import type { HeatmapTask, PositionEventLog } from '@src/modeles/heatmaptask';
 import type { Project } from '@src/modeles/project';
@@ -255,6 +255,27 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
     [projectId, apiClient],
   );
 
+  const searchSessions = useCallback(
+    async (params: SessionSearchParams): Promise<Session[]> => {
+      if (!projectId || !apiClient) return [];
+      const res = await apiClient.GET('/api/v0.1/projects/{project_id}/sessions/search', {
+        params: {
+          path: { project_id: projectId },
+          query: {
+            q: params.q,
+            device_id: params.deviceId,
+            platform: params.platform,
+            is_playing: params.isPlaying,
+            limit: params.limit ?? 100,
+            offset: params.offset ?? 0,
+          },
+        },
+      });
+      return res.data?.data ?? [];
+    },
+    [projectId, apiClient],
+  );
+
   const getPlayers = useCallback(async (): Promise<Player[]> => {
     if (!projectId || !currentSessionId || !apiClient) return [];
     const res = await apiClient.GET('/api/v0/projects/{project_id}/play_session/{session_id}/player_position_log/{session_id}/players', {
@@ -296,6 +317,7 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
     getProject,
     getSession,
     getSessions,
+    searchSessions,
     getPlayers,
     getFieldObjectLogs,
   };

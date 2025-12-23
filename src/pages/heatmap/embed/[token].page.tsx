@@ -204,6 +204,7 @@ const EmbedHeatmapPage: FC<EmbedHeatmapPageProps> = ({ className, token, verifyR
     getProject: async () => null,
     getSession: async () => null,
     getSessions: async () => [],
+    searchSessions: async () => [],
     getPlayers: async () => [],
     getFieldObjectLogs: async () => [],
   };

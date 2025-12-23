@@ -8,6 +8,16 @@ import type { Project } from '@src/modeles/project';
 import type { createClient } from '@src/modeles/qeury';
 import type { Session } from '@src/modeles/session';
 
+// セッション検索パラメータ
+export type SessionSearchParams = {
+  q?: string; // 統合検索クエリ
+  deviceId?: string;
+  platform?: string;
+  isPlaying?: boolean;
+  limit?: number;
+  offset?: number;
+};
+
 import { useAuth } from '@src/hooks/useAuth';
 import { useApiClient } from '@src/modeles/ApiClientContext';
 
@@ -70,6 +80,7 @@ export type HeatmapDataService = {
   getProject(): Promise<Project | null>;
   getSession(): Promise<Session | null>;
   getSessions(limit?: number, offset?: number): Promise<Session[]>;
+  searchSessions(params: SessionSearchParams): Promise<Session[]>;
   getPlayers(): Promise<Player[]>;
   getFieldObjectLogs(): Promise<FieldObjectLog[]>;
 };
@@ -91,6 +102,7 @@ export const mockHeatmapDataService: HeatmapDataService = {
   getProject: async () => null,
   getSession: async () => null,
   getSessions: async () => [],
+  searchSessions: async () => [],
   getPlayers: async () => [],
   getFieldObjectLogs: async () => [],
 };
@@ -380,6 +392,27 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
     [projectId, apiClient],
   );
 
+  const searchSessions = useCallback(
+    async (params: SessionSearchParams) => {
+      if (!projectId) return [];
+      const res = await apiClient.GET('/api/v0.1/projects/{project_id}/sessions/search', {
+        params: {
+          path: { project_id: projectId },
+          query: {
+            q: params.q,
+            device_id: params.deviceId,
+            platform: params.platform,
+            is_playing: params.isPlaying,
+            limit: params.limit ?? 100,
+            offset: params.offset ?? 0,
+          },
+        },
+      });
+      return res.data?.data ?? [];
+    },
+    [projectId, apiClient],
+  );
+
   const getPlayers = useCallback(async () => {
     if (!projectId || !sessionId) return [];
     const res = await apiClient.GET('/api/v0/projects/{project_id}/play_session/{session_id}/player_position_log/{session_id}/players', {
@@ -420,6 +453,7 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
     getProject,
     getSession,
     getSessions,
+    searchSessions,
     getPlayers,
     getFieldObjectLogs,
   };
