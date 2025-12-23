@@ -3,6 +3,7 @@ export type ViewContext = {
   status: Record<string, never | string | boolean | number>;
   pos: { x: number; y: number; z: number };
   t: number;
+  objectType?: string;
 };
 
 export type ViewStyle = {
@@ -30,9 +31,31 @@ const propMap: Record<string, keyof ViewStyle> = {
   'point-size': 'pointSize',
 };
 
+// snake_case -> camelCase 変換
+const toCamelCase = (s: string) => s.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+// camelCase -> snake_case 変換
+const toSnakeCase = (s: string) => s.replace(/[A-Z]/g, (c) => `_${c.toLowerCase()}`);
+
 // eslint-disable-next-line
 // @ts-ignore
-const getPath = (obj: never, path: string) => path.split('.').reduce((o, k) => (o == null ? undefined : o[k]), obj);
+const getPath = (obj: never, path: string) =>
+  path.split('.').reduce((o, k) => {
+    if (o == null) return undefined;
+    // 元のキーで見つかればそれを返す
+    // eslint-disable-next-line
+    // @ts-ignore
+    if (o[k] !== undefined) return o[k];
+    // snake_case と camelCase の両方を試す
+    const camel = toCamelCase(k);
+    const snake = toSnakeCase(k);
+    // eslint-disable-next-line
+    // @ts-ignore
+    if (o[camel] !== undefined) return o[camel];
+    // eslint-disable-next-line
+    // @ts-ignore
+    if (o[snake] !== undefined) return o[snake];
+    return undefined;
+  }, obj);
 
 const expandTemplate = (s: string, env: Document) =>
   s.replace(/\$\{([a-zA-Z0-9_-]+)\}/g, (_, key) => {
@@ -211,7 +234,7 @@ export function compileHVQL(input: string, baseEnv: Document = {}) {
   return function apply(ctx: ViewContext): ViewStyle {
     const out: ViewStyle = {};
     for (const b of program.maps) {
-      const val = getPath({ status: ctx.status, player: ctx.player, pos: ctx.pos, t: ctx.t } as never, b.path);
+      const val = getPath({ status: ctx.status, player: ctx.player, pos: ctx.pos, t: ctx.t, objectType: ctx.objectType } as never, b.path);
       const c = b.cases.find(
         (ca) =>
           (typeof ca.match === 'number' && String(ca.match) === String(val)) ||

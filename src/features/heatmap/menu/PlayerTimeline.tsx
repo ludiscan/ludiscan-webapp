@@ -22,6 +22,7 @@ import { Text } from '@src/component/atoms/Text';
 import { Toggle } from '@src/component/atoms/Toggle';
 import { Modal } from '@src/component/molecules/Modal';
 import { TextArea } from '@src/component/molecules/TextArea';
+import { useFieldObjectPatch } from '@src/hooks/useFieldObject';
 import { useGetApi } from '@src/hooks/useGetApi';
 import { usePlayerTimelinePatch, usePlayerTimelinePick } from '@src/hooks/usePlayerTimeline';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
@@ -161,6 +162,7 @@ const queryPlaceholder =
 const PlayerTimelineComponent: FC<HeatmapMenuProps> = ({ className, service }) => {
   const { theme } = useSharedTheme();
   const setData = usePlayerTimelinePatch();
+  const setFieldObjectData = useFieldObjectPatch();
   const { details, queryText: queryTextState, visible } = usePlayerTimelinePick('details', 'queryText', 'visible');
   const [queryText, setQueryText] = useState<string>('');
   const [isOpenQueryInfo, setIsOpenQueryInfo] = useState<boolean>(false);
@@ -257,7 +259,9 @@ const PlayerTimelineComponent: FC<HeatmapMenuProps> = ({ className, service }) =
         details: [...(prev.details || []), ...newDetails],
       };
     });
-  }, [players, service.projectId, service.sessionId, setData]);
+    // playerTimelineがONの時、fieldObjectもデフォルトで表示
+    setFieldObjectData({ visible: true });
+  }, [players, service.projectId, service.sessionId, setData, setFieldObjectData]);
 
   const onVisibilityChange = useCallback(
     (checked: boolean) => {

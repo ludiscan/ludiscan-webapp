@@ -1,11 +1,13 @@
 import styled from '@emotion/styled';
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { memo, useCallback, useMemo } from 'react';
+import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { memo, useCallback, useMemo, useState, useEffect } from 'react';
 
+import type { SessionFilters } from '@src/features/heatmap/SessionPickerModal';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 
 import { QuickToolbarMenu, MenuIcons } from '@src/features/heatmap/QuickToolbarMenu';
 import { SessionPicker } from '@src/features/heatmap/SessionPicker';
+import { SessionPickerModal } from '@src/features/heatmap/SessionPickerModal';
 import { useRouteCoachApi } from '@src/features/heatmap/routecoach/api';
 import { useAppDispatch, useAppSelector } from '@src/hooks/useDispatch';
 import { useGeneralPatch } from '@src/hooks/useGeneral';
@@ -26,18 +28,92 @@ function Toolbar({ className, service, dimensionality }: Props) {
   const routeCoachApi = useRouteCoachApi();
   const dispatch = useAppDispatch();
 
+  // セッション選択モーダルの状態
+  const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
+
+  // フィルタ状態
+  const [filters, setFilters] = useState<SessionFilters>({
+    searchQuery: '',
+    deviceId: null,
+    deviceIdEnabled: true, // embedモードでは初期でオン
+  });
+
+  // embed用の初期deviceId（現在のセッションのdeviceId）
+  const [initialDeviceId, setInitialDeviceId] = useState<string | null>(null);
+
   // 2D/3Dモード切り替え用
   const patchGeneral = useGeneralPatch();
 
   // クリックフォーカス機能の状態
   const clickToFocusEnabled = useAppSelector((s) => s.selection.clickToFocusEnabled);
 
+  // embedモードの場合、現在のセッションのdeviceIdを取得してフィルタに設定
+  const { data: currentSessionData } = useQuery({
+    queryKey: ['currentSession', service.projectId, service.sessionId],
+    queryFn: () => service.getSession(),
+    enabled: service.isEmbed && service.sessionId !== null,
+    staleTime: DefaultStaleTime,
+  });
+
+  // embedモードで初回マウント時にdeviceIdを設定
+  useEffect(() => {
+    if (service.isEmbed && currentSessionData?.deviceId && initialDeviceId === null) {
+      setInitialDeviceId(currentSessionData.deviceId);
+      setFilters((prev) => ({
+        ...prev,
+        deviceId: currentSessionData.deviceId,
+      }));
+    }
+  }, [service.isEmbed, currentSessionData?.deviceId, initialDeviceId]);
+
+  // 検索クエリのデバウンス処理
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(filters.searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [filters.searchQuery]);
+
+  // deviceIdフィルタは deviceIdEnabled がtrueの場合のみ適用
+  const activeDeviceId = filters.deviceIdEnabled ? filters.deviceId : null;
+  const hasActiveFilters = debouncedQuery.trim() !== '' || activeDeviceId !== null;
+
+  // セッション検索API（フィルタが有効な場合）- ページネーション対応
   const {
-    data: sessionsData,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading: isSessionsLoading,
+    data: searchedSessionsData,
+    fetchNextPage: fetchNextSearchPage,
+    hasNextPage: hasNextSearchPage,
+    isFetchingNextPage: isFetchingNextSearchPage,
+    isLoading: isSearchLoading,
+  } = useInfiniteQuery({
+    queryKey: ['sessionsSearch', service.projectId, debouncedQuery, activeDeviceId],
+    queryFn: async ({ pageParam = 0 }) => {
+      const sessions = await service.searchSessions({
+        q: debouncedQuery.trim() || undefined,
+        deviceId: activeDeviceId ?? undefined,
+        limit: PAGE_SIZE,
+        offset: pageParam,
+      });
+      return {
+        sessions,
+        nextOffset: sessions.length === PAGE_SIZE ? pageParam + PAGE_SIZE : undefined,
+      };
+    },
+    getNextPageParam: (lastPage) => lastPage.nextOffset,
+    initialPageParam: 0,
+    staleTime: DefaultStaleTime,
+    enabled: service.projectId !== undefined && hasActiveFilters,
+    refetchOnWindowFocus: false,
+  });
+
+  // 通常のセッション一覧取得（フィルタが無効な場合）- ページネーション対応
+  const {
+    data: allSessionsData,
+    fetchNextPage: fetchNextAllPage,
+    hasNextPage: hasNextAllPage,
+    isFetchingNextPage: isFetchingNextAllPage,
+    isLoading: isAllSessionsLoading,
   } = useInfiniteQuery({
     queryKey: ['sessions', service.projectId],
     queryFn: async ({ pageParam = 0 }) => {
@@ -50,21 +126,38 @@ function Toolbar({ className, service, dimensionality }: Props) {
     getNextPageParam: (lastPage) => lastPage.nextOffset,
     initialPageParam: 0,
     staleTime: DefaultStaleTime,
-    enabled: service.projectId !== undefined,
+    enabled: service.projectId !== undefined && !hasActiveFilters,
     refetchOnWindowFocus: false,
   });
 
-  // Flatten pages into single session list, sorted by newest first (already sorted from API)
-  const sessionIds = useMemo(() => {
-    if (!sessionsData?.pages) return [];
-    return sessionsData.pages.flatMap((page) => page.sessions.map((session) => String(session.sessionId)));
-  }, [sessionsData]);
+  // 表示するセッション（フィルタ有無で切り替え）
+  const sessions = useMemo(() => {
+    if (hasActiveFilters) {
+      return searchedSessionsData?.pages.flatMap((page) => page.sessions) ?? [];
+    }
+    return allSessionsData?.pages.flatMap((page) => page.sessions) ?? [];
+  }, [hasActiveFilters, searchedSessionsData, allSessionsData]);
+
+  const isSessionsLoading = hasActiveFilters ? isSearchLoading : isAllSessionsLoading;
+  const hasNextPage = hasActiveFilters ? hasNextSearchPage : hasNextAllPage;
+  const isFetchingNextPage = hasActiveFilters ? isFetchingNextSearchPage : isFetchingNextAllPage;
+
+  // 現在選択中のセッションオブジェクト
+  const currentSession = useMemo(() => {
+    return sessions.find((s) => s.sessionId === service.sessionId) ?? null;
+  }, [sessions, service.sessionId]);
 
   const handleLoadMore = useCallback(() => {
-    if (hasNextPage && !isFetchingNextPage) {
-      void fetchNextPage();
+    if (hasActiveFilters) {
+      if (hasNextSearchPage && !isFetchingNextSearchPage) {
+        void fetchNextSearchPage();
+      }
+    } else {
+      if (hasNextAllPage && !isFetchingNextAllPage) {
+        void fetchNextAllPage();
+      }
     }
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [hasActiveFilters, hasNextSearchPage, isFetchingNextSearchPage, fetchNextSearchPage, hasNextAllPage, isFetchingNextAllPage, fetchNextAllPage]);
 
   // RouteCoach改善ルート生成
   const { mutate: startRouteCoach, isPending: isRouteCoachPending } = useMutation({
@@ -116,6 +209,20 @@ function Toolbar({ className, service, dimensionality }: Props) {
     [service],
   );
 
+  // モーダル開閉ハンドラー
+  const handleOpenModal = useCallback(() => {
+    setIsSessionModalOpen(true);
+  }, []);
+
+  const handleCloseModal = useCallback(() => {
+    setIsSessionModalOpen(false);
+  }, []);
+
+  // フィルタ変更ハンドラー
+  const handleFiltersChange = useCallback((newFilters: SessionFilters) => {
+    setFilters(newFilters);
+  }, []);
+
   // Build menu sections (セッション選択はSessionPickerに移動)
   const menuSections = useMemo(() => {
     const viewActions = {
@@ -163,14 +270,20 @@ function Toolbar({ className, service, dimensionality }: Props) {
 
   return (
     <div className={className} role='toolbar' aria-label='Viewer quick tools'>
-      <SessionPicker
-        sessionIds={sessionIds}
+      <SessionPicker currentSession={currentSession} onOpenModal={handleOpenModal} isLoading={isSessionsLoading} />
+      <SessionPickerModal
+        isOpen={isSessionModalOpen}
+        onClose={handleCloseModal}
+        sessions={sessions}
         currentSessionId={service.sessionId}
         onSelectSession={handleSelectSession}
-        isLoading={isSessionsLoading}
         onLoadMore={handleLoadMore}
         isFetchingMore={isFetchingNextPage}
         hasMore={hasNextPage ?? false}
+        isLoading={isSessionsLoading}
+        filters={filters}
+        onFiltersChange={handleFiltersChange}
+        initialDeviceId={initialDeviceId}
       />
       <QuickToolbarMenu sections={menuSections} />
     </div>

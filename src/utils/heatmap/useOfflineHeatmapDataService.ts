@@ -94,6 +94,7 @@ export function useOfflineHeatmapDataService(offlineData: OfflineHeatmapData | n
     getProject: async () => offlineData?.task?.project ?? null,
     getSession: async () => null,
     getSessions: async () => [],
+    searchSessions: async () => [],
     getPlayers: async () => [],
     getFieldObjectLogs: async () => [],
   };

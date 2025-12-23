@@ -15,6 +15,7 @@ export const heatmapIconMap: Record<string, string> = {
   flag: '/heatmap/flag.svg',
   checkpoint: '/heatmap/checkpoint.svg',
   spawn: '/heatmap/spawn.svg',
+  question: '/heatmap/question.svg',
 
   // デフォルト
   default: '/heatmap/default.svg',

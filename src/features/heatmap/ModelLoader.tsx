@@ -62,6 +62,18 @@ function fixFBXMaterials(object: Group): void {
   });
 }
 
+/**
+ * モデルの全メッシュにシャドウ設定を適用する
+ */
+function applyShadowSettings(object: Group, receiveShadow: boolean): void {
+  object.traverse((child) => {
+    if ((child as Mesh).isMesh) {
+      const mesh = child as Mesh;
+      mesh.receiveShadow = receiveShadow;
+    }
+  });
+}
+
 type LocalModelLoaderProps = {
   modelPath: string;
   modelType: 'gltf' | 'glb' | 'obj';
@@ -69,7 +81,7 @@ type LocalModelLoaderProps = {
 };
 
 const LocalModelLoaderContent: FC<LocalModelLoaderProps> = ({ modelPath, modelType, ref }) => {
-  const { scale, modelPositionX, modelPositionY, modelPositionZ, modelRotationX, modelRotationY, modelRotationZ } = useGeneralPick(
+  const { scale, modelPositionX, modelPositionY, modelPositionZ, modelRotationX, modelRotationY, modelRotationZ, showShadow } = useGeneralPick(
     'scale',
     'modelPositionX',
     'modelPositionY',
@@ -77,9 +89,18 @@ const LocalModelLoaderContent: FC<LocalModelLoaderProps> = ({ modelPath, modelTy
     'modelRotationX',
     'modelRotationY',
     'modelRotationZ',
+    'showShadow',
   );
   const model = useLoader(modelType === 'obj' ? OBJLoader : GLTFLoader, modelPath);
   const handlers = useSelectable('map-mesh', { fit: 'object' });
+
+  // モデルにシャドウ設定を適用
+  const modelObject = 'scene' in model ? model.scene : model;
+  useEffect(() => {
+    if (modelObject) {
+      applyShadowSettings(modelObject as Group, showShadow);
+    }
+  }, [modelObject, showShadow]);
 
   // ユーザー設定値は親グループに適用（モデルの元の変換を保持するため）
   const userRotation: [number, number, number] = useMemo(
@@ -98,10 +119,8 @@ const LocalModelLoaderContent: FC<LocalModelLoaderProps> = ({ modelPath, modelTy
     >
       {/* primitiveにはposition/rotation/scaleを設定せず、モデルの元の変換を保持 */}
       <primitive
-        object={'scene' in model ? model.scene : model} // eslint-disable-line react/no-unknown-property
-        castShadow={true} // eslint-disable-line react/no-unknown-property
+        object={modelObject} // eslint-disable-line react/no-unknown-property
       />
-      <shadowMaterial opacity={1} />
     </group>
   );
 };
@@ -196,7 +215,7 @@ export function useOBJFromArrayBuffer(arrayBuffer: ArrayBuffer | null): Group | 
 }
 
 const StreamModelLoaderComponent: FC<StreamModelLoaderProps> = ({ model, ref }) => {
-  const { scale, modelPositionX, modelPositionY, modelPositionZ, modelRotationX, modelRotationY, modelRotationZ } = useGeneralPick(
+  const { scale, modelPositionX, modelPositionY, modelPositionZ, modelRotationX, modelRotationY, modelRotationZ, showShadow } = useGeneralPick(
     'scale',
     'modelPositionX',
     'modelPositionY',
@@ -204,7 +223,15 @@ const StreamModelLoaderComponent: FC<StreamModelLoaderProps> = ({ model, ref }) 
     'modelRotationX',
     'modelRotationY',
     'modelRotationZ',
+    'showShadow',
   );
+
+  // モデルにシャドウ設定を適用
+  useEffect(() => {
+    if (model) {
+      applyShadowSettings(model, showShadow);
+    }
+  }, [model, showShadow]);
 
   // ユーザー設定値は親グループに適用（FBXの元の変換を保持するため）
   const userRotation: [number, number, number] = useMemo(
@@ -225,10 +252,8 @@ const StreamModelLoaderComponent: FC<StreamModelLoaderProps> = ({ model, ref }) 
         {model && (
           <primitive
             object={model} // eslint-disable-line react/no-unknown-property
-            castShadow={true} // eslint-disable-line react/no-unknown-property
           />
         )}
-        <shadowMaterial opacity={1} />
       </group>
     </Suspense>
   );

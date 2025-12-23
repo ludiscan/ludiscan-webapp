@@ -9,6 +9,7 @@ import type { PerformanceMonitorApi } from '@react-three/drei';
 import type { LocalModelData } from '@src/features/heatmap/HeatmapMenuContent';
 import type { ModelFileType } from '@src/features/heatmap/ModelLoader';
 import type { PlayerTimelinePointsTimeRange } from '@src/features/heatmap/PlayerTimelinePoints';
+import type { FieldObjectData, PlayerTimelineDetail } from '@src/modeles/heatmapView';
 import type { PositionEventLog } from '@src/modeles/heatmaptask';
 import type { RootState } from '@src/store';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
@@ -24,10 +25,27 @@ import { ZoomControls } from '@src/features/heatmap/ZoomControls';
 import { exportHeatmap } from '@src/features/heatmap/export-heatmap';
 import { FocusLinkBridge } from '@src/features/heatmap/selection/FocusLinkBridge';
 import { InspectorModal } from '@src/features/heatmap/selection/InspectorModal';
+import { useFieldObjectPatch, useFieldObjectSelect } from '@src/hooks/useFieldObject';
 import { useGeneralPick } from '@src/hooks/useGeneral';
+import { useGetApi } from '@src/hooks/useGetApi';
+import { usePlayerTimelinePatch } from '@src/hooks/usePlayerTimeline';
+import { useFieldObjectTypes } from '@src/modeles/heatmapView';
 import { DefaultStaleTime } from '@src/modeles/qeury';
 import { dimensions, zIndexes } from '@src/styles/style';
+import { getRandomPrimitiveColor } from '@src/utils/color';
 import { detectDimensionality } from '@src/utils/heatmap/detectDimensionality';
+
+// デフォルトのHVQLクエリ（HandChangeItem用）
+const DEFAULT_FIELD_OBJECT_HVQL = `map status.hand {
+  rock     -> icon: hand-rock;
+  paper    -> icon: hand-paper;
+  scissor  -> icon: hand-scissor;
+  *        -> icon: hand-paper;
+}
+map object_type {
+  RandomHandChangeItem -> icon: question;
+}
+`;
 
 export type HeatmapViewerProps = {
   className?: string | undefined;
@@ -108,6 +126,102 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
     staleTime: DefaultStaleTime,
     enabled: !!service.projectId && !!service.sessionId,
   });
+
+  // Field Object Types のフェッチと初期化（メニューを開かなくても実行される）
+  const fieldObjects = useFieldObjectSelect((s) => s.objects);
+  const fieldObjectQueryText = useFieldObjectSelect((s) => s.queryText);
+  const setFieldObjects = useFieldObjectPatch();
+  const { data: objectTypes } = useFieldObjectTypes(service.projectId ?? undefined, service.sessionId ?? undefined);
+
+  useEffect(() => {
+    if (objectTypes && Array.isArray(objectTypes.data)) {
+      const currentTypes = fieldObjects.map((e) => e.objectType);
+      const setA = new Set(objectTypes.data);
+      const setB = new Set(currentTypes);
+      const isSameSet = setA.size === setB.size && [...setA].every((k) => setB.has(k));
+      if (isSameSet) return;
+
+      const fieldObjectDatas: FieldObjectData[] = (objectTypes.data as string[]).map((type) => {
+        const index = fieldObjects.findIndex((e) => e.objectType === type);
+        return {
+          objectType: type,
+          visible: index !== -1 ? fieldObjects[index].visible : true,
+          color: fieldObjects[index]?.color || getRandomPrimitiveColor(),
+          iconName: fieldObjects[index]?.iconName || 'spawn',
+          hvqlScript: fieldObjects[index]?.hvqlScript,
+        };
+      });
+
+      // デフォルトのHVQLクエリを設定（未設定の場合のみ）
+      const updates: { objects: FieldObjectData[]; queryText?: string } = { objects: fieldObjectDatas };
+      if (!fieldObjectQueryText) {
+        updates.queryText = DEFAULT_FIELD_OBJECT_HVQL;
+      }
+      setFieldObjects(updates);
+    }
+  }, [objectTypes, fieldObjects, fieldObjectQueryText, setFieldObjects]);
+
+  // PlayerTimeline の自動有効化ロジック（メニューを開かなくても実行される）
+  const setPlayerTimelineData = usePlayerTimelinePatch();
+
+  const getPlayers = useGetApi('/api/v0/projects/{project_id}/play_session/{session_id}/player_position_log/{session_id}/players', {
+    staleTime: DefaultStaleTime,
+  });
+
+  const { data: players } = useQuery({
+    queryKey: ['players', service.sessionId, service.projectId],
+    queryFn: async () => {
+      if (!service.sessionId || !service.projectId) return null;
+      const { data } = await getPlayers.fetch([
+        {
+          params: {
+            path: {
+              project_id: service.projectId,
+              session_id: service.sessionId,
+            },
+          },
+        },
+      ]);
+      return data;
+    },
+    staleTime: DefaultStaleTime,
+    enabled: !!service.sessionId && !!service.projectId,
+  });
+
+  // プレイヤーを追加して表示を有効化するコールバック
+  const enableWithPlayers = useCallback(() => {
+    if (!players) return;
+    const session_id = service.sessionId;
+    const project_id = service.projectId;
+    if (!session_id || !project_id) return;
+
+    setPlayerTimelineData((prev) => {
+      const newDetails: PlayerTimelineDetail[] = players
+        .map((player) => {
+          if (prev.details?.some((d) => d.player === player && d.session_id === session_id)) {
+            return null;
+          }
+          return { player, project_id, session_id, visible: true };
+        })
+        .filter((s): s is PlayerTimelineDetail => s !== null);
+      return {
+        ...prev,
+        visible: true,
+        details: [...(prev.details || []), ...newDetails],
+      };
+    });
+    // playerTimelineがONの時、fieldObjectもデフォルトで表示
+    setFieldObjects({ visible: true });
+  }, [players, service.projectId, service.sessionId, setPlayerTimelineData, setFieldObjects]);
+
+  // プレイヤーがロードされたら自動的に表示を有効化（セッションごとに1回のみ）
+  const initializedSessionRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (players && players.length > 0 && service.sessionId && initializedSessionRef.current !== service.sessionId) {
+      initializedSessionRef.current = service.sessionId;
+      enableWithPlayers();
+    }
+  }, [service.sessionId, players, enableWithPlayers]);
 
   useEffect(() => {
     if (!mapContent) return;
@@ -244,6 +358,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
         orthographic={dimensionality === '2d'} // 2Dは正投影カメラ
         ref={canvasRef}
         dpr={dpr}
+        shadows // シャドウマップを有効化
         gl={{ alpha: true }} // 背景を透明にして後ろの画像が見えるようにする
       >
         <PerformanceMonitor factor={1} onChange={handleOnPerformance} />
