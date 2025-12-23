@@ -12,6 +12,8 @@ import { StatusContent } from '@src/component/molecules/StatusContent';
 import { env } from '@src/config/env';
 import { useGeneralPatch } from '@src/hooks/useGeneral';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
+import { ApiClientProvider } from '@src/modeles/ApiClientContext';
+import { createEmbedClient } from '@src/modeles/qeury';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 import { useEmbedHeatmapDataService } from '@src/utils/heatmap/EmbedHeatmapDataService';
 
@@ -164,7 +166,7 @@ const EmbedLayout = styled(EmbedLayoutComponent)`
   }
 `;
 
-const EmbedHeatmapPage: FC<EmbedHeatmapPageProps> = ({ className, token, verifyResult, initialMapName, error }) => {
+const EmbedHeatmapPageContent: FC<EmbedHeatmapPageProps> = ({ className, token, verifyResult, initialMapName, error }) => {
   const setGeneral = useGeneralPatch();
 
   // Set initial mapName from session metadata if available
@@ -214,6 +216,22 @@ const EmbedHeatmapPage: FC<EmbedHeatmapPageProps> = ({ className, token, verifyR
   }
 
   return <EmbedLayout className={className} service={service} />;
+};
+
+const EmbedHeatmapPage: FC<EmbedHeatmapPageProps> = (props) => {
+  const { token } = props;
+
+  // Embed用のAPIクライアントファクトリを作成（tokenが変わったら再作成）
+  const embedClientFactory = useMemo(() => {
+    if (!token) return undefined;
+    return () => createEmbedClient(token);
+  }, [token]);
+
+  return (
+    <ApiClientProvider createClient={embedClientFactory}>
+      <EmbedHeatmapPageContent {...props} />
+    </ApiClientProvider>
+  );
 };
 
 export default memo(EmbedHeatmapPage);
