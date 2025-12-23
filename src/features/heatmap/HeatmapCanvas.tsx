@@ -81,22 +81,22 @@ const EventLogs = memo(
 EventLogs.displayName = 'EventLogs';
 
 const FieldObjects = memo(
-  ({ service, logs }: { service: HeatmapDataService; logs: components['schemas']['FieldObjectLogDto'][] }) => {
+  ({ logs }: { logs: components['schemas']['FieldObjectLogDto'][] }) => {
     const objects = useFieldObjectSelect((s) => s.objects);
     const queryText = useFieldObjectSelect((s) => s.queryText);
     const visibleObjects = useMemo(() => objects.filter((obj) => obj.visible), [objects]);
+
+    if (visibleObjects.length === 0) return null;
+
     return (
       <>
-        {visibleObjects.length > 0 &&
-          visibleObjects.map((obj, i) => (
-            <FieldObjectMarkers key={i} objectType={obj.objectType} _service={service} pref={obj} logs={logs} queryText={queryText} />
-          ))}
+        {visibleObjects.map((obj, i) => (
+          <FieldObjectMarkers key={i} objectType={obj.objectType} pref={obj} logs={logs} queryText={queryText} />
+        ))}
       </>
     );
   },
-  (prev, next) => {
-    return prev.service === next.service && prev.logs === next.logs;
-  },
+  (prev, next) => prev.logs === next.logs,
 );
 
 FieldObjects.displayName = 'FieldObjects';
@@ -579,7 +579,7 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
         {pointList && heatmapType === 'object' && showHeatmap && <HeatmapObjectOverlay points={pointList} />}
         {pointList && showHeatmap && <HotspotCircles points={pointList} />}
         <EventLogs service={service} />
-        {fieldObjectLogs && fieldObjectLogs.length > 0 && <FieldObjects service={service} logs={fieldObjectLogs} />}
+        {fieldObjectLogs && fieldObjectLogs.length > 0 && <FieldObjects logs={fieldObjectLogs} />}
         <TimelinePoints service={service} visibleTimelineRange={visibleTimelineRange} />
         {/* --- 追加：ウェイポイントを map して表示 --- */}
         {waypoints.map((wp) => (

@@ -192,9 +192,13 @@ select[aria-invalid='true'] {
   border-color: var(--theme-colors-semantic-error-main);
 }
 
+input[type='color'] {
+  padding: 2px;
+}
+
 /**
- * Lists with logical spacing
- */
+   * Lists with logical spacing
+   */
 ul,
 ol {
   padding-inline-start: var(--spacing-lg);

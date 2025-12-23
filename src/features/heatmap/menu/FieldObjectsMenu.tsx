@@ -96,7 +96,7 @@ const Component: FC<HeatmapMenuProps> = ({ service }) => {
       <InlineFlexRow align={'center'} gap={4}>
         <Text text={'Object Types'} fontSize={theme.typography.fontSize.sm} />
       </InlineFlexRow>
-      <InlineFlexRow align={'center'} gap={4}>
+      <InlineFlexColumn align={'center'} gap={4}>
         {objectTypes?.data &&
           Array.isArray(objectTypes.data) &&
           (objectTypes.data as string[]).map((type) => {
@@ -152,7 +152,7 @@ const Component: FC<HeatmapMenuProps> = ({ service }) => {
               </InputRow>
             );
           })}
-      </InlineFlexRow>
+      </InlineFlexColumn>
     </InlineFlexColumn>
   );
 };
