@@ -37,7 +37,7 @@ import { dimensions, zIndexes } from '@src/styles/style';
 import { getRandomPrimitiveColor } from '@src/utils/color';
 import { detectDimensionality } from '@src/utils/heatmap/detectDimensionality';
 
-// デフォルトのHVQLクエリ（HandChangeItem用）
+// デフォルトのHVQLクエリ（FieldObject用）
 const DEFAULT_FIELD_OBJECT_HVQL = `map status.hand {
   rock     -> icon: hand-rock;
   paper    -> icon: hand-paper;
@@ -46,6 +46,15 @@ const DEFAULT_FIELD_OBJECT_HVQL = `map status.hand {
 }
 map object_type {
   RandomHandChangeItem -> icon: question;
+}
+`;
+
+// デフォルトのHVQLクエリ（PlayerTimeline用）
+const DEFAULT_PLAYER_TIMELINE_HVQL = `map status.hand {
+  rock     -> player-icon: hand-rock;
+  paper    -> player-icon: hand-paper;
+  scissor  -> player-icon: hand-scissor;
+  *        -> player-icon: target;
 }
 `;
 
@@ -238,6 +247,8 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
         ...prev,
         visible: true,
         details: [...(prev.details || []), ...newDetails],
+        // デフォルトのHVQLクエリを設定（未設定の場合のみ）
+        queryText: prev.queryText || DEFAULT_PLAYER_TIMELINE_HVQL,
       };
     });
     // playerTimelineがONの時、fieldObjectもデフォルトで表示

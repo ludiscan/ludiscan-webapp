@@ -312,9 +312,8 @@ const PlayerTimelineComponent: FC<HeatmapMenuProps> = ({ className, service }) =
         palette: { yellow: '#FFD400', blue: '#0057FF' },
         vars: {}, // 必要なら
       });
-    } catch (error: unknown) {
-      // eslint-disable-next-line no-console
-      console.error('HVQL parse error:', error);
+    } catch {
+      /* */
     }
   }, [queryText]);
 

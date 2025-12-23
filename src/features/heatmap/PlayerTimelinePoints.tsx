@@ -8,7 +8,7 @@ import type { PlayerPositionLog, PlayerTimelineDetail } from '@src/modeles/heatm
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { ViewContext } from '@src/utils/vql';
 import type { FC } from 'react';
-import type { Texture, Group } from 'three';
+import type { Group, Texture } from 'three';
 
 import { useSelectable } from '@src/features/heatmap/selection/hooks';
 import { registerLiveObject } from '@src/features/heatmap/selection/liveObjectRegistry';
@@ -104,14 +104,13 @@ const Component: FC<PlayerTimelinePointsProps> = ({ state, visibleTimeRange }) =
     [getCachedTexture],
   );
 
-  // スプライトの初期化
+  // スプライトの初期化（FieldObjectMarkersと同じ設定）
   useEffect(() => {
     if (!spriteRef.current) {
       const material = new SpriteMaterial({
         transparent: true,
         opacity: 0.8,
-        sizeAttenuation: false,
-        depthTest: false,
+        // sizeAttenuation: true (デフォルト) - FieldObjectMarkersと同じ
       });
       materialRef.current = material;
 
@@ -250,10 +249,11 @@ const Component: FC<PlayerTimelinePointsProps> = ({ state, visibleTimeRange }) =
           // テクスチャの更新（必要時のみ）
           updateIconTexture(currentIconPath);
 
-          // スプライトの位置とスケールを更新
+          // スプライトの位置とスケールを更新（FieldObjectMarkersと同じスケール計算）
+          const markerScale = Math.max(scale * 70, 70);
           spriteRef.current.position.copy(lastPoint.vec);
           spriteRef.current.position.y += 50 * scale; // arrowの上に表示
-          spriteRef.current.scale.set(0.07 * scale, 0.07 * scale, 1);
+          spriteRef.current.scale.set(markerScale, markerScale, 1);
 
           return <primitive renderOrder={zIndexes.renderOrder.timelineArrows} object={spriteRef.current} />;
         })()}
