@@ -244,6 +244,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
         orthographic={dimensionality === '2d'} // 2Dは正投影カメラ
         ref={canvasRef}
         dpr={dpr}
+        shadows // シャドウマップを有効化
         gl={{ alpha: true }} // 背景を透明にして後ろの画像が見えるようにする
       >
         <PerformanceMonitor factor={1} onChange={handleOnPerformance} />
