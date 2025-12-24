@@ -33,6 +33,7 @@ export type GeneralSettings = {
   minThreshold: number;
   maxThreshold: number;
   colorScale: number;
+  displayIntensity: number; // 0-100: 表示量の簡易調整（minThresholdとcolorScaleを自動計算）
   sessionHeatmap: boolean;
   dimensionalityOverride: '2d' | '3d' | null; // ユーザーによる2D/3Dモード切り替え（nullの場合はproject.is2Dに従う）
   showMapIn2D: boolean; // 2Dモードでもマップ（3Dモデル）を表示するかどうか
@@ -126,6 +127,7 @@ export const initializeValues: HeatmapDataState = {
     minThreshold: 0.0,
     maxThreshold: 1,
     colorScale: 1.0,
+    displayIntensity: 50, // 表示量（0-100）、50がデフォルト
     sessionHeatmap: false,
     dimensionalityOverride: null, // 初期状態ではproject.is2Dに従う
     showMapIn2D: false, // 2Dモードでもマップを表示するか（初期値はOFF）
