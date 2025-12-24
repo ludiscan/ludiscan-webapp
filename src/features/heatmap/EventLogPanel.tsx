@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { memo, useCallback, useMemo, useState } from 'react';
-import { IoChevronDown, IoChevronForward, IoClose, IoPlay } from 'react-icons/io5';
+import { IoChevronDown, IoChevronForward, IoChevronUp, IoPlay } from 'react-icons/io5';
 
 import type { PositionEventLog } from '@src/modeles/heatmaptask';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
@@ -24,7 +24,6 @@ const formatTimestamp = (ms: number): string => {
 type EventLogPanelProps = {
   service: HeatmapDataService;
   eventLogKeys: string[] | null;
-  onClose?: () => void;
 };
 
 type EventLogTypeSectionProps = {
@@ -35,11 +34,11 @@ type EventLogTypeSectionProps = {
 };
 
 // Styled Components
-const PanelContainer = styled('div')<{ $theme: ReturnType<typeof useSharedTheme>['theme'] }>`
+const PanelContainer = styled('div')<{ $theme: ReturnType<typeof useSharedTheme>['theme']; $collapsed: boolean }>`
   display: flex;
   flex-direction: column;
-  width: 280px;
-  max-height: 300px;
+  width: ${({ $collapsed }) => ($collapsed ? 'auto' : '280px')};
+  max-height: ${({ $collapsed }) => ($collapsed ? 'auto' : '300px')};
   overflow: hidden;
   background: ${({ $theme }) => $theme.colors.background.paper};
   border-radius: 8px;
@@ -60,7 +59,7 @@ const PanelTitle = styled('span')`
   font-weight: 600;
 `;
 
-const CloseButton = styled('button')<{ $theme: ReturnType<typeof useSharedTheme>['theme'] }>`
+const ToggleButton = styled('button')<{ $theme: ReturnType<typeof useSharedTheme>['theme'] }>`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -72,6 +71,7 @@ const CloseButton = styled('button')<{ $theme: ReturnType<typeof useSharedTheme>
   border-radius: 4px;
 
   &:hover {
+    color: ${({ $theme }) => $theme.colors.text.primary};
     background: ${({ $theme }) => $theme.colors.surface.hover};
   }
 `;
@@ -199,10 +199,11 @@ const EventLogTypeSection: FC<EventLogTypeSectionProps> = memo(({ logName, servi
 
 EventLogTypeSection.displayName = 'EventLogTypeSection';
 
-const EventLogPanelComponent: FC<EventLogPanelProps> = ({ service, eventLogKeys, onClose }) => {
+const EventLogPanelComponent: FC<EventLogPanelProps> = ({ service, eventLogKeys }) => {
   const { theme } = useSharedTheme();
   const logs = useEventLogSelect((s) => s.logs);
   const setTimelineState = usePlayerTimelinePatch();
+  const [collapsed, setCollapsed] = useState(false);
 
   const handleEventClick = useCallback(
     (event: PositionEventLog) => {
@@ -222,25 +223,29 @@ const EventLogPanelComponent: FC<EventLogPanelProps> = ({ service, eventLogKeys,
     [logs],
   );
 
+  const handleToggle = useCallback(() => {
+    setCollapsed((prev) => !prev);
+  }, []);
+
   if (!eventLogKeys || eventLogKeys.length === 0) {
     return null;
   }
 
   return (
-    <PanelContainer $theme={theme}>
+    <PanelContainer $theme={theme} $collapsed={collapsed}>
       <PanelHeader $theme={theme}>
         <PanelTitle>Event Logs</PanelTitle>
-        {onClose && (
-          <CloseButton onClick={onClose} $theme={theme}>
-            <IoClose size={16} />
-          </CloseButton>
-        )}
+        <ToggleButton onClick={handleToggle} $theme={theme}>
+          {collapsed ? <IoChevronDown size={16} /> : <IoChevronUp size={16} />}
+        </ToggleButton>
       </PanelHeader>
-      <PanelContent>
-        {eventLogKeys.map((logName) => (
-          <EventLogTypeSection key={logName} logName={logName} service={service} color={getColorForLog(logName)} onEventClick={handleEventClick} />
-        ))}
-      </PanelContent>
+      {!collapsed && (
+        <PanelContent>
+          {eventLogKeys.map((logName) => (
+            <EventLogTypeSection key={logName} logName={logName} service={service} color={getColorForLog(logName)} onEventClick={handleEventClick} />
+          ))}
+        </PanelContent>
+      )}
     </PanelContainer>
   );
 };

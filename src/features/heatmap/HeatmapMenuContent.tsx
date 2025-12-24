@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { IoChevronDown, IoChevronUp } from 'react-icons/io5';
 import { useDispatch, useSelector } from 'react-redux';
 
 import type { ModelFileType } from '@src/features/heatmap/ModelLoader';
@@ -9,14 +10,16 @@ import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC } from 'react';
 import type { Group } from 'three';
 
+import { Button } from '@src/component/atoms/Button';
 import { PanelCard } from '@src/component/atoms/Card';
-import { FlexColumn } from '@src/component/atoms/Flex';
+import { Flex, FlexColumn } from '@src/component/atoms/Flex';
+import { Tooltip } from '@src/component/atoms/Tooltip';
 import { HeatmapMenuListRow } from '@src/component/organisms/HeatmapMenuListRow';
 import { QuickToolbar } from '@src/features/heatmap/QuickToolbar';
 import { useGeneralPatch, useGeneralSelect } from '@src/hooks/useGeneral';
-import { MenuContents } from '@src/hooks/useHeatmapSideBarMenus';
+import { MenuContents, useHeatmapSideBarMenus } from '@src/hooks/useHeatmapSideBarMenus';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { setMenuPanelWidth } from '@src/slices/uiSlice';
+import { setMenuPanelCollapsed, setMenuPanelWidth, toggleMenuPanelCollapsed } from '@src/slices/uiSlice';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 import { saveRecentMenu } from '@src/utils/localstrage';
 
@@ -44,6 +47,7 @@ export type HeatmapMenuProps = {
 
 const MIN_WIDTH = 300;
 const MAX_WIDTH = 800;
+const SMALL_SCREEN_BREAKPOINT = 768;
 
 const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
   const { className, mapOptions, service, dimensionality, name } = props;
@@ -51,12 +55,25 @@ const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
   const setGeneral = useGeneralPatch();
   const dispatch = useDispatch();
   const menuPanelWidth = useSelector((s: RootState) => s.ui.menuPanelWidth);
+  const menuPanelCollapsed = useSelector((s: RootState) => s.ui.menuPanelCollapsed);
   const { theme } = useSharedTheme();
+  const menus = useHeatmapSideBarMenus();
 
   const [openMenu, setOpenMenu] = useState<Menus | undefined>(name);
   const [menuExtra, setMenuExtra] = useState<object | undefined>(undefined);
   const [isResizing, setIsResizing] = useState(false);
   const resizeRef = useRef<{ startX: number; startWidth: number } | null>(null);
+  const initialCollapseRef = useRef(false);
+
+  // Auto-collapse on small screens (initial load only)
+  useLayoutEffect(() => {
+    if (initialCollapseRef.current) return;
+    initialCollapseRef.current = true;
+
+    if (typeof window !== 'undefined' && window.innerWidth < SMALL_SCREEN_BREAKPOINT) {
+      dispatch(setMenuPanelCollapsed(true));
+    }
+  }, [dispatch]);
 
   const handleMenuClose = useCallback(() => {
     setOpenMenu(undefined);
@@ -144,13 +161,64 @@ const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
     extra: menuExtra,
   };
 
+  const handleToggleCollapse = useCallback(() => {
+    dispatch(toggleMenuPanelCollapsed());
+  }, [dispatch]);
+
+  // Handle menu click when collapsed - expand and open menu
+  const handleCollapsedMenuClick = useCallback(
+    (menuName: Menus) => {
+      dispatch(toggleMenuPanelCollapsed());
+      heatMapEventBus.emit('click-menu-icon', { name: menuName });
+    },
+    [dispatch],
+  );
+
+  // Collapsed view - adapts to orientation via CSS
+  if (menuPanelCollapsed) {
+    return (
+      <div className={`${className} ${className}--collapsed`}>
+        <PanelCard className={`${className}__card ${className}__card--collapsed`} padding={'2px'} color={theme.colors.surface.raised}>
+          <Flex className={`${className}__collapsedContainer`} gap={8} align={'center'} wrap={'nowrap'}>
+            {/* Menu icons - direction controlled by CSS */}
+            <Flex className={`${className}__collapsedMenus`} gap={4} align={'center'} wrap={'nowrap'}>
+              {menus.map(({ name: menuName, icon }) => (
+                <Button
+                  className={`${className}__collapsedMenuButton ${menuName === openMenu ? 'active' : ''}`}
+                  key={menuName}
+                  scheme={'none'}
+                  onClick={() => handleCollapsedMenuClick(menuName)}
+                  fontSize={'lg'}
+                  radius={'small'}
+                >
+                  <Tooltip tooltip={menuName} placement={'bottom'} fontSize={theme.typography.fontSize.sm}>
+                    {icon}
+                  </Tooltip>
+                </Button>
+              ))}
+            </Flex>
+
+            {/* Expand button */}
+            <Button className={`${className}__toggleButton ${className}__toggleButton--collapsed`} scheme={'none'} onClick={handleToggleCollapse} fontSize={'base'}>
+              <IoChevronDown />
+            </Button>
+          </Flex>
+        </PanelCard>
+      </div>
+    );
+  }
+
+  // Expanded view - full menu panel
   return (
     <div className={className} style={{ width: menuPanelWidth }}>
       <PanelCard className={`${className}__card`} padding={'2px'} color={theme.colors.surface.raised}>
         <FlexColumn className={`${className}__container`}>
-          {/* Menu icons row */}
+          {/* Menu icons row with collapse button */}
           <div className={`${className}__row`}>
-            <HeatmapMenuListRow currentMenu={openMenu} onClose={handleMenuClose} />
+            <Button className={`${className}__toggleButton`} scheme={'none'} onClick={handleToggleCollapse} fontSize={'base'}>
+              <IoChevronUp />
+            </Button>
+            <HeatmapMenuListRow currentMenu={openMenu} />
           </div>
 
           {/* Menu content - scrollable */}
@@ -186,8 +254,91 @@ export const HeatmapMenuContent = memo(
     }
 
     &__row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
       align-self: center;
       margin: 12px 24px;
+    }
+
+    /* Portrait (縦向き): 上部に横並びバー */
+    &--collapsed {
+      width: auto;
+      height: auto;
+    }
+
+    &__card--collapsed {
+      height: auto;
+    }
+
+    &__collapsedContainer {
+      flex-direction: row;
+      padding: 8px 12px;
+    }
+
+    &__collapsedMenus {
+      flex-direction: row;
+      overflow: auto hidden; /* Portrait: 横スクロールのみ */
+    }
+
+    /* Landscape (横向き): 左側に縦並びサイドバー */
+    @media (orientation: landscape) {
+      &--collapsed {
+        width: 60px;
+        height: 100%;
+      }
+
+      &__card--collapsed {
+        height: 100%;
+      }
+
+      &__collapsedContainer {
+        flex-direction: column;
+        padding: 12px 8px;
+      }
+
+      &__collapsedMenus {
+        flex-direction: column;
+        overflow: hidden auto; /* Landscape: 縦スクロールのみ */
+      }
+
+      &__toggleButton--collapsed {
+        transform: rotate(-90deg);
+      }
+    }
+
+    &__collapsedMenuButton {
+      display: flex;
+      flex-shrink: 0;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      transition: background 0.2s;
+
+      &:hover {
+        background: ${({ theme }) => theme.colors.surface.hover};
+      }
+
+      &.active {
+        color: ${({ theme }) => theme.colors.primary.contrast};
+        background: ${({ theme }) => theme.colors.primary.light};
+      }
+    }
+
+    &__toggleButton {
+      display: flex;
+      flex-shrink: 0;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      color: ${({ theme }) => theme.colors.text.secondary};
+      transition: color 0.2s;
+
+      &:hover {
+        color: ${({ theme }) => theme.colors.text.primary};
+      }
     }
 
     &__container {

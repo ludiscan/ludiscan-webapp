@@ -509,7 +509,7 @@ export const HeatMapViewer = memo(
       position: absolute;
       top: 0;
       left: 0;
-      z-index: ${zIndexes.content + 2};
+      z-index: ${zIndexes.content + 3};
       display: flex;
       width: max-content;
       height: 100%;
@@ -518,7 +518,7 @@ export const HeatMapViewer = memo(
 
     &__eventLogPanel {
       position: absolute;
-      top: 16px;
+      top: calc(${dimensions.headerHeight}px + 16px);
       right: 16px;
       z-index: ${zIndexes.content + 2};
     }
