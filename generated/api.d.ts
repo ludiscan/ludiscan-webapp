@@ -4540,7 +4540,10 @@ export interface operations {
   };
   ProjectsV01Controller_getProjectMaps: {
     parameters: {
-      query?: never;
+      query?: {
+        /** @description trueの場合、マップデータがアップロード済みのマップのみを返す */
+        activeOnly?: boolean;
+      };
       header?: never;
       path: {
         project_id: number;
