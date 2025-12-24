@@ -20,6 +20,7 @@ import { EllipsisMenu, Menu } from '@src/component/molecules/Menu';
 import { DesktopLayout, MobileLayout } from '@src/component/molecules/responsive';
 import { UpdateHistoryModal } from '@src/component/organisms/UpdateHistoryModal';
 import { useAuth } from '@src/hooks/useAuth';
+import { useIsDesktop } from '@src/hooks/useIsDesktop';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { dimensions, zIndexes } from '@src/styles/style';
 
@@ -46,6 +47,7 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
   const [isVisible, setIsVisible] = useState(true);
   const lastScrollY = useRef(0);
   const ticking = useRef(false);
+  const isDesktop = useIsDesktop();
 
   const isLoginPage = pathname === '/login';
 
@@ -139,8 +141,12 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
             height={onClick ? 28 : 32}
           />
         </a>
-        <Text text={'Ludiscan'} href={'/'} target={'_self'} fontSize={theme.typography.fontSize.xl} fontWeight={theme.typography.fontWeight.bold} />
-        <Text text={title} fontSize={theme.typography.fontSize.base} fontWeight={theme.typography.fontWeight.bold} color={theme.colors.text.secondary} />
+        {isDesktop && (
+          <>
+            <Text text={'Ludiscan'} href={'/'} target={'_self'} fontSize={theme.typography.fontSize.xl} fontWeight={theme.typography.fontWeight.bold} />
+            <Text text={title} fontSize={theme.typography.fontSize.base} fontWeight={theme.typography.fontWeight.bold} color={theme.colors.text.secondary} />
+          </>
+        )}
         {iconTitleEnd && <>{iconTitleEnd}</>}
         <div style={{ flex: 1 }} />
 

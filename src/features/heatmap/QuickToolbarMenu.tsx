@@ -2,7 +2,18 @@ import { css, keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { IoContract, IoExpand, IoCube, IoSquareOutline, IoRocket, IoEllipsisHorizontal, IoGameController, IoCheckmark, IoLocate } from 'react-icons/io5';
+import {
+  IoContract,
+  IoExpand,
+  IoCube,
+  IoSquareOutline,
+  IoRocket,
+  IoEllipsisHorizontal,
+  IoGameController,
+  IoCheckmark,
+  IoLocate,
+  IoSpeedometer,
+} from 'react-icons/io5';
 
 import type { FC, ReactNode, MouseEvent } from 'react';
 
@@ -504,6 +515,7 @@ export const MenuIcons = {
   Session: IoGameController,
   Check: IoCheckmark,
   ClickFocus: IoLocate,
+  Stats: IoSpeedometer,
 };
 
 QuickToolbarMenu.displayName = 'QuickToolbarMenu';

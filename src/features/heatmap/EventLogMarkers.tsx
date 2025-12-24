@@ -13,6 +13,7 @@ import type { Shape, Box3, Group, Texture } from 'three';
 
 import { useEventLogPick } from '@src/hooks/useEventLog';
 import { useGeneralPick } from '@src/hooks/useGeneral';
+import { usePlayerTimelinePick } from '@src/hooks/usePlayerTimeline';
 import { DefaultStaleTime } from '@src/modeles/qeury';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 import { getIconPath } from '@src/utils/heatmapIconMap';
@@ -96,12 +97,18 @@ const MarkerBillboard: FC<{
   );
 };
 
+// Time window for event visibility (±2 seconds)
+const EVENT_TIME_WINDOW_MS = 2000;
+
 const EventLogMarkers: FC<EventLogMarkersProps> = ({ logName, service, pref }) => {
   const { color, iconName } = pref;
   const { upZ = false, scale } = useGeneralPick('upZ', 'scale');
 
   const { filters } = useEventLogPick('filters');
   const { camera, size } = useThree();
+
+  // Timeline state for time-based filtering
+  const { visible: isTimelineActive, currentTimelineSeek } = usePlayerTimelinePick('visible', 'currentTimelineSeek');
 
   // Compile HVQL script if provided
   // const hvqlCompiler = useMemo(() => {
@@ -155,22 +162,31 @@ const EventLogMarkers: FC<EventLogMarkersProps> = ({ logName, service, pref }) =
 
   // Precompute world positions with metadata
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const worldPositions = useMemo<{ pos: Vector3; id: number; metadata?: Record<string, any> }[]>(
-    () =>
-      (data ?? [])
-        .map((d) => {
-          const playerFilter = filters['player'] || -1;
-          if (playerFilter !== -1 && d.player !== playerFilter) return null; // Filter by player if specified
-          const { x, y, z } = d.event_data;
-          return {
-            pos: upZ ? new Vector3(x * scale, z * scale, y * scale) : new Vector3(x * scale, y * scale, z * scale),
-            id: d.id,
-            // metadata: d.metadata || {},
-          };
-        })
-        .filter((d) => d != null),
-    [data, upZ, scale, filters],
-  );
+  const worldPositions = useMemo<{ pos: Vector3; id: number; offset_timestamp: number; metadata?: Record<string, any> }[]>(() => {
+    let filtered = (data ?? [])
+      .map((d) => {
+        const playerFilter = filters['player'] || -1;
+        if (playerFilter !== -1 && d.player !== playerFilter) return null; // Filter by player if specified
+        const { x, y, z } = d.event_data;
+        return {
+          pos: upZ ? new Vector3(x * scale, z * scale, y * scale) : new Vector3(x * scale, y * scale, z * scale),
+          id: d.id,
+          offset_timestamp: d.offset_timestamp,
+          // metadata: d.metadata || {},
+        };
+      })
+      .filter((d) => d != null);
+
+    // Apply timeline-based filtering when timeline is active
+    if (isTimelineActive && currentTimelineSeek !== undefined) {
+      filtered = filtered.filter((d) => {
+        const timeDiff = Math.abs(d.offset_timestamp - currentTimelineSeek);
+        return timeDiff <= EVENT_TIME_WINDOW_MS;
+      });
+    }
+
+    return filtered;
+  }, [data, upZ, scale, filters, isTimelineActive, currentTimelineSeek]);
 
   // Overlap filtering with useMemo
   const visibleWorldPositions = useMemo(() => {

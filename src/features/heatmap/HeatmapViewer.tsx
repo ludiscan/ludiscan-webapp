@@ -9,7 +9,7 @@ import type { PerformanceMonitorApi } from '@react-three/drei';
 import type { LocalModelData } from '@src/features/heatmap/HeatmapMenuContent';
 import type { ModelFileType } from '@src/features/heatmap/ModelLoader';
 import type { PlayerTimelinePointsTimeRange } from '@src/features/heatmap/PlayerTimelinePoints';
-import type { FieldObjectData, PlayerTimelineDetail } from '@src/modeles/heatmapView';
+import type { EventLogData, FieldObjectData, PlayerTimelineDetail } from '@src/modeles/heatmapView';
 import type { PositionEventLog } from '@src/modeles/heatmaptask';
 import type { RootState } from '@src/store';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
@@ -17,6 +17,7 @@ import type { FC } from 'react';
 
 import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { useToast } from '@src/component/templates/ToastContext';
+import { EventLogPanel } from '@src/features/heatmap/EventLogPanel';
 import { HeatMapCanvas } from '@src/features/heatmap/HeatmapCanvas';
 import { HeatmapMenuContent } from '@src/features/heatmap/HeatmapMenuContent';
 import { useModelFromArrayBuffer } from '@src/features/heatmap/ModelLoader';
@@ -25,6 +26,7 @@ import { ZoomControls } from '@src/features/heatmap/ZoomControls';
 import { exportHeatmap } from '@src/features/heatmap/export-heatmap';
 import { FocusLinkBridge } from '@src/features/heatmap/selection/FocusLinkBridge';
 import { InspectorModal } from '@src/features/heatmap/selection/InspectorModal';
+import { useEventLogPatch, useEventLogSelect } from '@src/hooks/useEventLog';
 import { useFieldObjectPatch, useFieldObjectSelect } from '@src/hooks/useFieldObject';
 import { useGeneralPick } from '@src/hooks/useGeneral';
 import { useGetApi } from '@src/hooks/useGetApi';
@@ -35,7 +37,7 @@ import { dimensions, zIndexes } from '@src/styles/style';
 import { getRandomPrimitiveColor } from '@src/utils/color';
 import { detectDimensionality } from '@src/utils/heatmap/detectDimensionality';
 
-// デフォルトのHVQLクエリ（HandChangeItem用）
+// デフォルトのHVQLクエリ（FieldObject用）
 const DEFAULT_FIELD_OBJECT_HVQL = `map status.hand {
   rock     -> icon: hand-rock;
   paper    -> icon: hand-paper;
@@ -47,12 +49,22 @@ map object_type {
 }
 `;
 
+// デフォルトのHVQLクエリ（PlayerTimeline用）
+const DEFAULT_PLAYER_TIMELINE_HVQL = `map status.hand {
+  rock     -> player-icon: hand-rock;
+  paper    -> player-icon: hand-paper;
+  scissor  -> player-icon: hand-scissor;
+  *        -> player-icon: target;
+}
+`;
+
 export type HeatmapViewerProps = {
   className?: string | undefined;
   service: HeatmapDataService;
+  isEmbed?: boolean;
 };
 
-const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
+const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false }) => {
   const toast = useToast();
   const [map, setMap] = useState<string | ArrayBuffer | null>(null);
   const [modelType, setModelType] = useState<'gltf' | 'glb' | 'obj' | 'server' | null>(null);
@@ -67,13 +79,14 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
   const divRef = useRef<HTMLDivElement>(null!);
   const [statsReady, setStatsReady] = useState(false);
 
-  const { mapName, dimensionalityOverride, backgroundImage, backgroundScale, backgroundOffsetX, backgroundOffsetY } = useGeneralPick(
+  const { mapName, dimensionalityOverride, backgroundImage, backgroundScale, backgroundOffsetX, backgroundOffsetY, showStats } = useGeneralPick(
     'mapName',
     'dimensionalityOverride',
     'backgroundImage',
     'backgroundScale',
     'backgroundOffsetX',
     'backgroundOffsetY',
+    'showStats',
   );
   const splitMode = useSelector((s: RootState) => s.heatmapCanvas.splitMode);
 
@@ -161,6 +174,33 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
     }
   }, [objectTypes, fieldObjects, fieldObjectQueryText, setFieldObjects]);
 
+  // Event Log の初期化（メニューを開かなくても実行される）
+  const eventLogs = useEventLogSelect((s) => s.logs);
+  const setEventLogs = useEventLogPatch();
+
+  useEffect(() => {
+    if (generalLogKeys && Array.isArray(generalLogKeys)) {
+      const currentKeys = eventLogs.map((e) => e.key);
+      const setA = new Set(generalLogKeys);
+      const setB = new Set(currentKeys);
+      const isSameSet = setA.size === setB.size && [...setA].every((k) => setB.has(k));
+      if (isSameSet) return;
+
+      const eventLogDatas: EventLogData[] = generalLogKeys.map((key) => {
+        const index = eventLogs.findIndex((e) => e.key === key);
+        return {
+          key,
+          visible: index !== -1 ? eventLogs[index].visible : false,
+          color: eventLogs[index]?.color || getRandomPrimitiveColor(),
+          iconName: eventLogs[index]?.iconName || 'CiStreamOn',
+          hvqlScript: eventLogs[index]?.hvqlScript,
+        };
+      });
+
+      setEventLogs({ logs: eventLogDatas });
+    }
+  }, [generalLogKeys, eventLogs, setEventLogs]);
+
   // PlayerTimeline の自動有効化ロジック（メニューを開かなくても実行される）
   const setPlayerTimelineData = usePlayerTimelinePatch();
 
@@ -208,6 +248,8 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
         ...prev,
         visible: true,
         details: [...(prev.details || []), ...newDetails],
+        // デフォルトのHVQLクエリを設定（未設定の場合のみ）
+        queryText: prev.queryText || DEFAULT_PLAYER_TIMELINE_HVQL,
       };
     });
     // playerTimelineがONの時、fieldObjectもデフォルトで表示
@@ -373,7 +415,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
           fieldObjectLogs={fieldObjectLogs}
           hasLocalModel={!!localModel}
         />
-        {statsReady && <Stats parent={divRef} className={`${className}__stats`} />}
+        {statsReady && showStats && <Stats parent={divRef} className={`${className}__stats`} />}
       </Canvas>
     ),
     [
@@ -387,6 +429,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
       model,
       visibleTimelineRange,
       statsReady,
+      showStats,
       className,
       fieldObjectLogs,
       localModel,
@@ -394,7 +437,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
   );
 
   return (
-    <div className={`${className}__view`}>
+    <div className={`${className}__view ${isEmbed ? `${className}--embed` : ''}`}>
       <FlexRow style={{ width: '100%', height: '100%' }} align={'center'} wrap={'nowrap'}>
         {splitMode.enabled ? (
           <FlexRow className={`${className}__splitContainer`} style={{ flex: 1, flexDirection: splitMode.direction === 'horizontal' ? 'row' : 'column' }}>
@@ -431,6 +474,13 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
         />
       </div>
 
+      {/* EventLogパネル（セッション選択時に表示） */}
+      {service.sessionId && (
+        <div className={`${className}__eventLogPanel`}>
+          <EventLogPanel service={service} eventLogKeys={generalLogKeys ?? null} />
+        </div>
+      )}
+
       <div className={`${className}__selectionInspector`}>
         <InspectorModal />
       </div>
@@ -449,6 +499,8 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
 export const HeatMapViewer = memo(
   styled(Component)`
     &__view {
+      --header-offset: ${dimensions.headerHeight}px;
+
       position: relative;
       width: calc(100% - 2px);
       height: 100%;
@@ -456,20 +508,32 @@ export const HeatMapViewer = memo(
       border-top: ${({ theme }) => `1px solid ${theme.colors.border.default}`};
     }
 
+    /* Embed mode: no header offset */
+    &--embed {
+      --header-offset: 0px;
+    }
+
     &__canvasMenuBox {
       position: absolute;
       top: 0;
       left: 0;
-      z-index: ${zIndexes.content + 2};
+      z-index: ${zIndexes.content + 3};
       display: flex;
       width: max-content;
       height: 100%;
-      padding-top: ${dimensions.headerHeight}px;
+      padding-top: var(--header-offset);
+    }
+
+    &__eventLogPanel {
+      position: absolute;
+      top: calc(var(--header-offset) + 16px);
+      right: 16px;
+      z-index: ${zIndexes.content + 2};
     }
 
     &__selectionInspector {
       position: absolute;
-      top: 60px;
+      top: 340px;
       right: 16px;
       z-index: ${zIndexes.content + 2};
       max-width: 360px;

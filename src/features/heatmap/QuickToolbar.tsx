@@ -47,6 +47,9 @@ function Toolbar({ className, service, dimensionality }: Props) {
   // クリックフォーカス機能の状態
   const clickToFocusEnabled = useAppSelector((s) => s.selection.clickToFocusEnabled);
 
+  // FPS統計表示の状態
+  const showStats = useAppSelector((s) => s.heatmapCanvas.general.showStats);
+
   // embedモードの場合、現在のセッションのdeviceIdを取得してフィルタに設定
   const { data: currentSessionData } = useQuery({
     queryKey: ['currentSession', service.projectId, service.sessionId],
@@ -198,6 +201,14 @@ function Toolbar({ className, service, dimensionality }: Props) {
     dispatch(setClickToFocusEnabled(!clickToFocusEnabled));
   }, [dispatch, clickToFocusEnabled]);
 
+  // FPS統計表示トグルハンドラー
+  const toggleStats = useCallback(() => {
+    patchGeneral((prev) => ({
+      ...prev,
+      showStats: !prev.showStats,
+    }));
+  }, [patchGeneral]);
+
   const fit = useCallback(() => heatMapEventBus.emit('camera:fit'), []);
   const oneToOne = useCallback(() => heatMapEventBus.emit('camera:set-zoom-percent', { percent: 100 }), []);
 
@@ -262,11 +273,30 @@ function Toolbar({ className, service, dimensionality }: Props) {
           disabled: !service.projectId,
           loading: isRouteCoachPending,
         },
+        {
+          id: 'toggle-stats',
+          label: showStats ? 'Hide FPS Stats' : 'Show FPS Stats',
+          icon: <MenuIcons.Stats />,
+          onClick: toggleStats,
+          active: showStats,
+        },
       ],
     };
 
     return [viewActions];
-  }, [fit, oneToOne, dimensionality, toggleDimensionality, clickToFocusEnabled, toggleClickFocus, isRouteCoachPending, service.projectId, startRouteCoach]);
+  }, [
+    fit,
+    oneToOne,
+    dimensionality,
+    toggleDimensionality,
+    clickToFocusEnabled,
+    toggleClickFocus,
+    isRouteCoachPending,
+    service.projectId,
+    startRouteCoach,
+    showStats,
+    toggleStats,
+  ]);
 
   return (
     <div className={className} role='toolbar' aria-label='Viewer quick tools'>
