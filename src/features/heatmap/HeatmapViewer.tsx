@@ -61,9 +61,10 @@ const DEFAULT_PLAYER_TIMELINE_HVQL = `map status.hand {
 export type HeatmapViewerProps = {
   className?: string | undefined;
   service: HeatmapDataService;
+  isEmbed?: boolean;
 };
 
-const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
+const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false }) => {
   const toast = useToast();
   const [map, setMap] = useState<string | ArrayBuffer | null>(null);
   const [modelType, setModelType] = useState<'gltf' | 'glb' | 'obj' | 'server' | null>(null);
@@ -436,7 +437,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
   );
 
   return (
-    <div className={`${className}__view`}>
+    <div className={`${className}__view ${isEmbed ? `${className}--embed` : ''}`}>
       <FlexRow style={{ width: '100%', height: '100%' }} align={'center'} wrap={'nowrap'}>
         {splitMode.enabled ? (
           <FlexRow className={`${className}__splitContainer`} style={{ flex: 1, flexDirection: splitMode.direction === 'horizontal' ? 'row' : 'column' }}>
@@ -498,11 +499,18 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
 export const HeatMapViewer = memo(
   styled(Component)`
     &__view {
+      --header-offset: ${dimensions.headerHeight}px;
+
       position: relative;
       width: calc(100% - 2px);
       height: 100%;
       overflow: hidden;
       border-top: ${({ theme }) => `1px solid ${theme.colors.border.default}`};
+    }
+
+    /* Embed mode: no header offset */
+    &--embed {
+      --header-offset: 0px;
     }
 
     &__canvasMenuBox {
@@ -513,12 +521,12 @@ export const HeatMapViewer = memo(
       display: flex;
       width: max-content;
       height: 100%;
-      padding-top: ${dimensions.headerHeight}px;
+      padding-top: var(--header-offset);
     }
 
     &__eventLogPanel {
       position: absolute;
-      top: calc(${dimensions.headerHeight}px + 16px);
+      top: calc(var(--header-offset) + 16px);
       right: 16px;
       z-index: ${zIndexes.content + 2};
     }

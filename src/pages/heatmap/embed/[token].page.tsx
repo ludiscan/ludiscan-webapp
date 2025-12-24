@@ -148,7 +148,7 @@ const EmbedLayoutComponent: FC<EmbedLayoutProps> = ({ className, service, error 
 
   return (
     <div className={className}>
-      <StatusContent status={statusContentStatus}>{service && service.isInitialized && <HeatMapViewer service={service} />}</StatusContent>
+      <StatusContent status={statusContentStatus}>{service && service.isInitialized && <HeatMapViewer service={service} isEmbed />}</StatusContent>
     </div>
   );
 };
