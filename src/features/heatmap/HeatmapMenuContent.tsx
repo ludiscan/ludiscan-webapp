@@ -199,7 +199,12 @@ const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
             </Flex>
 
             {/* Expand button */}
-            <Button className={`${className}__toggleButton ${className}__toggleButton--collapsed`} scheme={'none'} onClick={handleToggleCollapse} fontSize={'base'}>
+            <Button
+              className={`${className}__toggleButton ${className}__toggleButton--collapsed`}
+              scheme={'none'}
+              onClick={handleToggleCollapse}
+              fontSize={'base'}
+            >
               <IoChevronDown />
             </Button>
           </Flex>
