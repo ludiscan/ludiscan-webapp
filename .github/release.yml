@@ -1,0 +1,52 @@
+changelog:
+  exclude:
+    labels:
+      - ignore-for-release
+    authors:
+      - dependabot
+      - dependabot[bot]
+  categories:
+    - title: Features
+      labels:
+        - feature
+        - enhancement
+        - area:features
+    - title: Bug Fixes
+      labels:
+        - bug
+        - bugfix
+        - fix
+    - title: UI Components
+      labels:
+        - area:components
+    - title: Pages
+      labels:
+        - area:pages
+    - title: API Changes
+      labels:
+        - area:api
+    - title: State Management
+      labels:
+        - area:state
+        - area:hooks
+    - title: Documentation
+      labels:
+        - documentation
+        - docs
+        - area:docs
+    - title: Tests & Storybook
+      labels:
+        - area:tests
+        - area:storybook
+    - title: CI/CD
+      labels:
+        - area:ci
+    - title: Styling
+      labels:
+        - area:styles
+    - title: Utilities
+      labels:
+        - area:utils
+    - title: Other Changes
+      labels:
+        - "*"
