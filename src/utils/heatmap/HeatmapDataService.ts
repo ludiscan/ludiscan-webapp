@@ -50,8 +50,8 @@ export type HeatmapDataService = {
   isInitialized: boolean;
   // embed経由でのアクセスかどうか（trueの場合、一部の機能が制限される）
   isEmbed?: boolean;
-  // マップリストの取得
-  getMapList(): Promise<string[]>;
+  // マップリストの取得（activeOnly: trueの場合、マップデータがアップロード済みのマップのみを返す）
+  getMapList(activeOnly?: boolean): Promise<string[]>;
 
   // マップデータの取得
   getMapContent(mapName: string): Promise<MapContentResult | null>;
@@ -87,7 +87,7 @@ export type HeatmapDataService = {
 
 export const mockHeatmapDataService: HeatmapDataService = {
   isInitialized: true,
-  getMapList: async () => ['map1', 'map2', 'map3'],
+  getMapList: async (_activeOnly?: boolean) => ['map1', 'map2', 'map3'],
   getMapContent: async () => null,
   getGeneralLogKeys: async () => ['key1', 'key2', 'key3'],
   task: undefined,
@@ -241,24 +241,30 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
     };
   }, [queryClient, task]);
 
-  const getMapList = useCallback(async () => {
-    try {
-      if (!projectId) {
+  const getMapList = useCallback(
+    async (activeOnly?: boolean) => {
+      try {
+        if (!projectId) {
+          return [];
+        }
+        const { data, error } = await apiClient.GET('/api/v0.1/projects/{project_id}/maps', {
+          params: {
+            path: {
+              project_id: Number(projectId),
+            },
+            query: {
+              activeOnly,
+            },
+          },
+        });
+        if (error) return [];
+        return data.maps || [];
+      } catch {
         return [];
       }
-      const { data, error } = await apiClient.GET('/api/v0.1/projects/{project_id}/maps', {
-        params: {
-          path: {
-            project_id: Number(projectId),
-          },
-        },
-      });
-      if (error) return [];
-      return data.maps || [];
-    } catch {
-      return [];
-    }
-  }, [projectId, apiClient]);
+    },
+    [projectId, apiClient],
+  );
 
   const getMapContent = useCallback(
     async (mapName: string): Promise<MapContentResult | null> => {

@@ -121,24 +121,30 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
     };
   }, [queryClient, task]);
 
-  const getMapList = useCallback(async () => {
-    try {
-      if (!projectId || !apiClient) {
+  const getMapList = useCallback(
+    async (activeOnly?: boolean) => {
+      try {
+        if (!projectId || !apiClient) {
+          return [];
+        }
+        const { data, error } = await apiClient.GET('/api/v0.1/projects/{project_id}/maps', {
+          params: {
+            path: {
+              project_id: Number(projectId),
+            },
+            query: {
+              activeOnly,
+            },
+          },
+        });
+        if (error) return [];
+        return data.maps || [];
+      } catch {
         return [];
       }
-      const { data, error } = await apiClient.GET('/api/v0.1/projects/{project_id}/maps', {
-        params: {
-          path: {
-            project_id: Number(projectId),
-          },
-        },
-      });
-      if (error) return [];
-      return data.maps || [];
-    } catch {
-      return [];
-    }
-  }, [projectId, apiClient]);
+    },
+    [projectId, apiClient],
+  );
 
   const getMapContent = useCallback(
     async (mapName: string): Promise<MapContentResult | null> => {

@@ -327,7 +327,16 @@ const CollapsibleContent = styled.div<{ isOpen: boolean }>`
   padding-top: 8px;
 `;
 
-export const MapMenuContent: FC<HeatmapMenuProps> = ({ mapOptions, model, dimensionality, service, localModel, onLocalModelChange }) => {
+export const MapMenuContent: FC<HeatmapMenuProps> = ({
+  mapOptions,
+  model,
+  dimensionality,
+  service,
+  localModel,
+  onLocalModelChange,
+  mapActiveOnly,
+  onMapActiveOnlyChange,
+}) => {
   const { theme } = useSharedTheme();
   const mapName = useGeneralSelect((s) => s.mapName);
   const { modelPositionX, modelPositionY, modelPositionZ, modelRotationX, modelRotationY, modelRotationZ, showMapIn2D } = useGeneralPick(
@@ -496,6 +505,11 @@ export const MapMenuContent: FC<HeatmapMenuProps> = ({ mapOptions, model, dimens
           disabled={mapOptions.length === 0 || (is2DMode && !showMapIn2D) || !!localModel}
         />
       </InputRow>
+      {onMapActiveOnlyChange && (
+        <InputRow label={'active maps only'}>
+          <Switch label='Show only maps with uploaded data' checked={mapActiveOnly ?? true} onChange={onMapActiveOnlyChange} size='small' />
+        </InputRow>
+      )}
 
       {/* ローカルファイル一時表示セクション */}
       {onLocalModelChange && (
