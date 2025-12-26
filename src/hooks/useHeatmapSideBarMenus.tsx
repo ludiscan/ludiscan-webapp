@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import { BiBarChartAlt2 } from 'react-icons/bi';
 import { BsGrid, BsPerson } from 'react-icons/bs';
 import { CiMap, CiMapPin, CiStreamOn } from 'react-icons/ci';
 import { FaCube } from 'react-icons/fa';
@@ -11,6 +12,7 @@ import type { HeatmapMenuProps } from '@src/features/heatmap/HeatmapMenuContent'
 import type { HeatmapDataState } from '@src/modeles/heatmapView';
 import type { FC, JSX } from 'react';
 
+import { AggregationMenuContent } from '@src/features/heatmap/menu/AggregationMenuContent';
 import { EventLogDetail } from '@src/features/heatmap/menu/EventLogDetail';
 import { EventLogContent } from '@src/features/heatmap/menu/EventLogs';
 import { FieldObjectsMenuContent } from '@src/features/heatmap/menu/FieldObjectsMenu';
@@ -76,6 +78,11 @@ export const MenuContents: MenuType[] = [
     name: 'routecoach',
     icon: <GiPathDistance />,
     Component: RouteCoachMenuContent,
+  },
+  {
+    name: 'aggregation',
+    icon: <BiBarChartAlt2 />,
+    Component: AggregationMenuContent,
   },
   {
     name: 'more',
