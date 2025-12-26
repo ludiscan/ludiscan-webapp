@@ -43,6 +43,9 @@ export type HeatmapMenuProps = {
   // ローカルファイルの一時表示用
   localModel?: LocalModelData | null;
   onLocalModelChange?: (data: LocalModelData | null) => void;
+  // マップリストのactiveOnlyフィルター
+  mapActiveOnly?: boolean;
+  onMapActiveOnlyChange?: (value: boolean) => void;
 };
 
 const MIN_WIDTH = 300;
@@ -440,7 +443,9 @@ export const HeatmapMenuContent = memo(
       prev.extra === prev.extra &&
       prev.dimensionality === next.dimensionality &&
       prev.localModel === next.localModel &&
-      prev.onLocalModelChange === next.onLocalModelChange
+      prev.onLocalModelChange === next.onLocalModelChange &&
+      prev.mapActiveOnly === next.mapActiveOnly &&
+      prev.onMapActiveOnlyChange === next.onMapActiveOnlyChange
     );
   },
 );

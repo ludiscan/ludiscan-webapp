@@ -105,10 +105,13 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
   // 2D/3D判定（オーバーライド > プロジェクトのis2D > taskのzVisible）
   const dimensionality = useMemo(() => detectDimensionality(dimensionalityOverride, project?.is2D, task), [dimensionalityOverride, project?.is2D, task]);
 
+  // マップリストのactiveOnlyフィルター（デフォルトtrue: アップロード済みのマップのみ表示）
+  const [mapActiveOnly, setMapActiveOnly] = useState(true);
+
   const { data: mapList } = useQuery({
-    queryKey: ['mapList', service.projectId],
+    queryKey: ['mapList', service.projectId, mapActiveOnly],
     queryFn: async () => {
-      return service.getMapList();
+      return service.getMapList(mapActiveOnly);
     },
     staleTime: DefaultStaleTime, // 5 minutes
     enabled: service.isInitialized,
@@ -471,6 +474,8 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
           dimensionality={dimensionality}
           localModel={localModel}
           onLocalModelChange={handleLocalModelChange}
+          mapActiveOnly={mapActiveOnly}
+          onMapActiveOnlyChange={setMapActiveOnly}
         />
       </div>
 

@@ -23,8 +23,9 @@ export function createMockApiClient(mockDataDir: string = '/mocks/heatmap'): Api
   });
 
   // Project Maps
-  router.registerGet('/api/v0.1/projects/{project_id}/maps', async (params) => {
+  router.registerGet('/api/v0.1/projects/{project_id}/maps', async (params, _query) => {
     const projectId = params.project_id;
+    // Note: activeOnly query parameter is ignored in mock - always returns all maps
     return await loadMockJson(`${mockDataDir}/project_${projectId}_maps.json`);
   });
 
