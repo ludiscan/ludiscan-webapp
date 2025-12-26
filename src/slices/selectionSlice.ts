@@ -27,11 +27,13 @@ export type FocusTarget =
 type SelectionState = {
   selected: Selection | null;
   focusTarget: FocusTarget | null;
+  clickToFocusEnabled: boolean;
 };
 
 const initialState: SelectionState = {
   selected: null,
   focusTarget: null,
+  clickToFocusEnabled: false,
 };
 
 const slice = createSlice({
@@ -62,8 +64,11 @@ const slice = createSlice({
       state.selected = null;
       state.focusTarget = null;
     },
+    setClickToFocusEnabled(state, action: PayloadAction<boolean>) {
+      state.clickToFocusEnabled = action.payload;
+    },
   },
 });
 
-export const { setSelected, setFocusTarget, focusByCoord, clear, followLive, stopFollow } = slice.actions;
+export const { setSelected, setFocusTarget, focusByCoord, clear, followLive, stopFollow, setClickToFocusEnabled } = slice.actions;
 export const selectionReducer = slice.reducer;

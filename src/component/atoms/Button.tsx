@@ -237,7 +237,7 @@ export const Button = styled(Component)`
   &:disabled {
     color: ${({ theme }) => theme.colors.text.disabled};
     cursor: not-allowed;
-    background-color: ${({ theme }) => theme.colors.surface.pressed};
+    background-color: ${({ theme }) => theme.colors.secondary.main};
   }
 
   &:hover:not(:disabled) {

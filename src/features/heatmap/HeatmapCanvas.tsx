@@ -1,4 +1,4 @@
-import { GizmoHelper, GizmoViewport, OrbitControls } from '@react-three/drei';
+import { ContactShadows, GizmoHelper, GizmoViewport, OrbitControls } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -11,7 +11,6 @@ import {
   MeshStandardMaterial,
   PlaneGeometry,
   Raycaster,
-  SpotLight,
   Vector2,
   Vector3,
 } from 'three';
@@ -54,6 +53,7 @@ type HeatmapCanvasProps = {
   fieldObjectLogs?: components['schemas']['FieldObjectLogDto'][];
   projectId?: number;
   playerId?: string;
+  hasLocalModel?: boolean; // ローカルモデルがある場合はtrue
 };
 
 type Waypoint = {
@@ -66,7 +66,17 @@ const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(mi
 const EventLogs = memo(
   ({ service }: { service: HeatmapDataService }) => {
     const logs = useEventLogSelect((s) => s.logs);
-    const visibleEventLogs = useMemo(() => logs.filter((event) => event.visible), [logs]);
+    const { visible: isTimelineActive } = usePlayerTimelinePick('visible');
+
+    // When timeline is active, show all event logs (filtered by time in EventLogMarkers)
+    // Otherwise, only show manually enabled event logs
+    const visibleEventLogs = useMemo(() => {
+      if (isTimelineActive) {
+        return logs;
+      }
+      return logs.filter((event) => event.visible);
+    }, [logs, isTimelineActive]);
+
     return (
       <>
         {visibleEventLogs.length > 0 && visibleEventLogs.map((event) => <EventLogMarkers key={event.key} logName={event.key} service={service} pref={event} />)}
@@ -81,22 +91,22 @@ const EventLogs = memo(
 EventLogs.displayName = 'EventLogs';
 
 const FieldObjects = memo(
-  ({ service, logs }: { service: HeatmapDataService; logs: components['schemas']['FieldObjectLogDto'][] }) => {
+  ({ logs }: { logs: components['schemas']['FieldObjectLogDto'][] }) => {
     const objects = useFieldObjectSelect((s) => s.objects);
     const queryText = useFieldObjectSelect((s) => s.queryText);
     const visibleObjects = useMemo(() => objects.filter((obj) => obj.visible), [objects]);
+
+    if (visibleObjects.length === 0) return null;
+
     return (
       <>
-        {visibleObjects.length > 0 &&
-          visibleObjects.map((obj, i) => (
-            <FieldObjectMarkers key={i} objectType={obj.objectType} _service={service} pref={obj} logs={logs} queryText={queryText} />
-          ))}
+        {visibleObjects.map((obj, i) => (
+          <FieldObjectMarkers key={i} objectType={obj.objectType} pref={obj} logs={logs} queryText={queryText} />
+        ))}
       </>
     );
   },
-  (prev, next) => {
-    return prev.service === next.service && prev.logs === next.logs;
-  },
+  (prev, next) => prev.logs === next.logs,
 );
 
 FieldObjects.displayName = 'FieldObjects';
@@ -130,10 +140,17 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
   dimensionality,
   fieldObjectLogs = [],
   playerId,
+  hasLocalModel = false,
 }) => {
   // const { invalidate } = useThree();
   const fitInfoRef = useRef<{ dist: number; center: Vector3 }>({ dist: 1000, center: new Vector3() });
-  const { showHeatmap, heatmapOpacity, heatmapType, showMapIn2D } = useGeneralPick('showHeatmap', 'heatmapOpacity', 'heatmapType', 'showMapIn2D');
+  const { showHeatmap, heatmapOpacity, heatmapType, showMapIn2D, showShadow } = useGeneralPick(
+    'showHeatmap',
+    'heatmapOpacity',
+    'heatmapType',
+    'showMapIn2D',
+    'showShadow',
+  );
   const { theme } = useSharedTheme();
 
   const orbitControlsRef = useRef<OrbitControlsImpl>(null);
@@ -290,7 +307,7 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
   useEffect(() => {
     // 2Dモード: 真上からのシンプルな照明
     // 3Dモード: 既存の複数光源
-    const lights: (AmbientLight | DirectionalLight | HemisphereLight | SpotLight)[] = [];
+    const lights: (AmbientLight | DirectionalLight | HemisphereLight)[] = [];
 
     if (dimensionality === '2d') {
       // 2D: 環境光+真上からの平行光源のみ
@@ -299,12 +316,31 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
       directionalLight.position.set(0, 1, 0); // 真上から
       lights.push(ambientLight, directionalLight);
     } else {
-      // 3D: 既存の複雑な照明システム
-      const ambientLight = new AmbientLight(0xffffff, 0.2);
-      const directionalLight = new DirectionalLight(0xffffff, 0.4);
-      const hemisphereLight = new HemisphereLight(theme.colors.background.default, theme.colors.surface.raised, 1);
-      const spotLight = new SpotLight(0xffffff, 4, 30, Math.PI / 4, 10, 0.5);
-      lights.push(ambientLight, directionalLight, hemisphereLight, spotLight);
+      // 3D: 全方位から十分な光を当てる照明システム
+      const ambientLight = new AmbientLight(0xffffff, 1); // 環境光を強化
+      const directionalLight = new DirectionalLight(0xffffff, 0.6);
+      directionalLight.position.set(2000, 3000, 2000); // 斜め上から（シャドウ用に位置を設定）
+
+      // シャドウ設定
+      if (showShadow) {
+        directionalLight.castShadow = true;
+        directionalLight.shadow.mapSize.width = 2048;
+        directionalLight.shadow.mapSize.height = 2048;
+        directionalLight.shadow.camera.near = 100;
+        directionalLight.shadow.camera.far = 10000;
+        // シャドウカメラの範囲（シーンをカバーするように設定）
+        const shadowCameraSize = 5000;
+        directionalLight.shadow.camera.left = -shadowCameraSize;
+        directionalLight.shadow.camera.right = shadowCameraSize;
+        directionalLight.shadow.camera.top = shadowCameraSize;
+        directionalLight.shadow.camera.bottom = -shadowCameraSize;
+        directionalLight.shadow.bias = -0.0005; // シャドウアクネ防止
+      }
+
+      const directionalLight2 = new DirectionalLight(0xffffff, 0.2);
+      directionalLight2.position.set(-1, 0.5, -1).normalize(); // 反対側から補助光
+      const hemisphereLight = new HemisphereLight(0xffffff, 0x444444, 0.4); // 空と地面の色
+      lights.push(ambientLight, directionalLight, directionalLight2, hemisphereLight);
     }
 
     lights.forEach((light) => scene.add(light));
@@ -312,7 +348,7 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
     return () => {
       lights.forEach((light) => scene.remove(light));
     };
-  }, [scene, theme, dimensionality]);
+  }, [scene, theme, dimensionality, showShadow]);
 
   // グリッド and 床面をシーンに追加
   useEffect(() => {
@@ -536,11 +572,11 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
   return (
     <>
       <group ref={groupRef}>
-        {/* 3Dモデルは3Dモードまたは2Dモードでマップ表示がONの場合に表示 */}
-        {(dimensionality === '3d' || showMapIn2D) && modelType && map && modelType !== 'server' && typeof map === 'string' && (
+        {/* 3Dモデルは3Dモードまたは2Dモードでマップ表示がONの場合、またはローカルモデルがある場合に表示 */}
+        {(dimensionality === '3d' || showMapIn2D || hasLocalModel) && modelType && map && modelType !== 'server' && typeof map === 'string' && (
           <LocalModelLoader ref={modelRef} modelPath={map} modelType={modelType} />
         )}
-        {(dimensionality === '3d' || showMapIn2D) && modelType && model && modelType === 'server' && typeof map !== 'string' && (
+        {(dimensionality === '3d' || showMapIn2D || hasLocalModel) && modelType && model && modelType === 'server' && (
           <>
             <StreamModelLoader ref={modelRef} model={model} />
             {/* fillモードは3Dモデル表面に配置するため、モデルがある場合のみ表示 */}
@@ -553,7 +589,7 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
         {pointList && heatmapType === 'object' && showHeatmap && <HeatmapObjectOverlay points={pointList} />}
         {pointList && showHeatmap && <HotspotCircles points={pointList} />}
         <EventLogs service={service} />
-        {fieldObjectLogs && fieldObjectLogs.length > 0 && <FieldObjects service={service} logs={fieldObjectLogs} />}
+        {fieldObjectLogs && fieldObjectLogs.length > 0 && <FieldObjects logs={fieldObjectLogs} />}
         <TimelinePoints service={service} visibleTimelineRange={visibleTimelineRange} />
         {/* --- 追加：ウェイポイントを map して表示 --- */}
         {waypoints.map((wp) => (
@@ -578,6 +614,8 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
           />
         ))}
       </group>
+      {/* AO風の接地影 - モデルの下に柔らかい影を投射 */}
+      {showShadow && <ContactShadows position={[0, 600, 0]} opacity={0.4} scale={10000} blur={2} far={5000} resolution={512} color='#000000' />}
       <FocusController orbit={orbitControlsRef} sceneRoot={groupRef} />
       <OrbitControls
         makeDefault
@@ -610,5 +648,6 @@ export const HeatMapCanvas = memo(
     prev.fieldObjectLogs === next.fieldObjectLogs &&
     prev.playerId === next.playerId &&
     prev.service.sessionId === next.service.sessionId &&
-    prev.service.projectId === next.service.projectId,
+    prev.service.projectId === next.service.projectId &&
+    prev.hasLocalModel === next.hasLocalModel,
 );

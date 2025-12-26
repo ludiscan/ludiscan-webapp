@@ -132,9 +132,6 @@ const HeatmapFillOverlayComponent: FC<Props> = ({ group, points, cellSize, offse
     raycaster.layers.set(targetLayer ?? layers.raycast);
     if (raycaster.firstHitOnly !== undefined) raycaster.firstHitOnly = true;
 
-    const up = new THREE.Vector3(0, 0, 1);
-    const nTmp = new THREE.Vector3();
-
     const out: { pos: THREE.Vector3; quat: THREE.Quaternion; color: THREE.Color }[] = [];
     const { tLo, mode } = normConfig;
 
@@ -157,9 +154,9 @@ const HeatmapFillOverlayComponent: FC<Props> = ({ group, points, cellSize, offse
       const hit = raycaster.intersectObject(group, true)[0];
       if (!hit || !hit.face) continue;
 
-      const n = nTmp.copy(hit.face.normal).normalize();
-      const quat = new THREE.Quaternion().setFromUnitVectors(up, n);
-      const pos = hit.point.clone().add(n.multiplyScalar(offset));
+      // セルは常に水平（XZ平面に平行）に配置、メッシュの向きには合わせない
+      const quat = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI / 2);
+      const pos = hit.point.clone().addScaledVector(new THREE.Vector3(0, 1, 0), offset);
       out.push({ pos, quat, color: lerpColor(t) });
     }
     return out;

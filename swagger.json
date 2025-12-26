@@ -1422,7 +1422,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DefaultSuccessResponse"
+                  "$ref": "#/components/schemas/ProjectResponseDto"
                 }
               }
             }
@@ -2185,6 +2185,17 @@
             "in": "path",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "name": "activeOnly",
+            "required": false,
+            "in": "query",
+            "description": "trueの場合、マップデータがアップロード済みのマップのみを返す",
+            "schema": {
+              "default": false,
+              "example": false,
+              "type": "boolean"
             }
           }
         ],
@@ -7143,7 +7154,7 @@
   "info": {
     "title": "Ludiscan API Documentation",
     "description": "Ludiscan API for game analytics and session tracking",
-    "version": "1.19.1",
+    "version": "1.21.0",
     "contact": {}
   },
   "tags": [],

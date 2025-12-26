@@ -68,6 +68,7 @@ export const OutlinedTextField = styled(BaseTextFieldOutlined)`
     padding: 0;
     font-size: ${({ fontSize, theme }) => fontSize || theme.typography.fontSize.base};
     font-weight: ${({ fontWeight }) => fontWeight || 'normal'};
+    line-height: 1.5;
     color: ${({ color, theme }) => color || theme.colors.text.primary};
     text-shadow: ${({ shadow }) => (shadow ? '0 0 4px rgba(0, 0, 0, 0.2)' : 'none')};
     outline: none;

@@ -8,10 +8,13 @@ import type { HeatmapDataService, MapContentResult, OfflineHeatmapData } from '@
  */
 export function useOfflineHeatmapDataService(offlineData: OfflineHeatmapData | null): HeatmapDataService {
   // APIの実装
-  const getMapList = useCallback(async (): Promise<string[]> => {
-    if (!offlineData) return [];
-    return offlineData.mapList;
-  }, [offlineData]);
+  const getMapList = useCallback(
+    async (_activeOnly?: boolean): Promise<string[]> => {
+      if (!offlineData) return [];
+      return offlineData.mapList;
+    },
+    [offlineData],
+  );
 
   const getMapContent = useCallback(
     async (_mapName: string): Promise<MapContentResult | null> => {
@@ -94,6 +97,7 @@ export function useOfflineHeatmapDataService(offlineData: OfflineHeatmapData | n
     getProject: async () => offlineData?.task?.project ?? null,
     getSession: async () => null,
     getSessions: async () => [],
+    searchSessions: async () => [],
     getPlayers: async () => [],
     getFieldObjectLogs: async () => [],
   };

@@ -74,12 +74,13 @@ const SearchInput = styled.input`
 `;
 
 export type SessionFilterModalProps = {
+  className?: string;
   isOpen: boolean;
   onClose: () => void;
   service: HeatmapDataService;
 };
 
-export const SessionFilterModal: FC<SessionFilterModalProps> = ({ isOpen, onClose, service }) => {
+export const Component: FC<SessionFilterModalProps> = ({ className, isOpen, onClose, service }) => {
   const { theme } = useSharedTheme();
   const toast = useToast();
   const apiClient = useApiClient();
@@ -161,7 +162,7 @@ export const SessionFilterModal: FC<SessionFilterModalProps> = ({ isOpen, onClos
   }, [selectedSessionIds, service, toast, onClose]);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title='セッションフィルター' closeOutside>
+    <Modal isOpen={isOpen} onClose={onClose} title='セッションフィルター' closeOutside className={className}>
       <FlexColumn gap={16} style={{ width: '600px', maxWidth: '90vw' }}>
         {/* 検索クエリ入力 */}
         <FlexColumn gap={8}>
@@ -234,3 +235,7 @@ export const SessionFilterModal: FC<SessionFilterModalProps> = ({ isOpen, onClos
     </Modal>
   );
 };
+
+export const SessionFilterModal = styled(Component)`
+  color: ${({ theme }) => theme.colors.text.primary};
+`;

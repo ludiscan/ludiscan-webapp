@@ -6,8 +6,10 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector, useStore } from 'react-redux';
 
 import type { PerformanceMonitorApi } from '@react-three/drei';
+import type { LocalModelData } from '@src/features/heatmap/HeatmapMenuContent';
 import type { ModelFileType } from '@src/features/heatmap/ModelLoader';
 import type { PlayerTimelinePointsTimeRange } from '@src/features/heatmap/PlayerTimelinePoints';
+import type { EventLogData, FieldObjectData, PlayerTimelineDetail } from '@src/modeles/heatmapView';
 import type { PositionEventLog } from '@src/modeles/heatmaptask';
 import type { RootState } from '@src/store';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
@@ -15,6 +17,7 @@ import type { FC } from 'react';
 
 import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { useToast } from '@src/component/templates/ToastContext';
+import { EventLogPanel } from '@src/features/heatmap/EventLogPanel';
 import { HeatMapCanvas } from '@src/features/heatmap/HeatmapCanvas';
 import { HeatmapMenuContent } from '@src/features/heatmap/HeatmapMenuContent';
 import { useModelFromArrayBuffer } from '@src/features/heatmap/ModelLoader';
@@ -23,17 +26,45 @@ import { ZoomControls } from '@src/features/heatmap/ZoomControls';
 import { exportHeatmap } from '@src/features/heatmap/export-heatmap';
 import { FocusLinkBridge } from '@src/features/heatmap/selection/FocusLinkBridge';
 import { InspectorModal } from '@src/features/heatmap/selection/InspectorModal';
+import { useEventLogPatch, useEventLogSelect } from '@src/hooks/useEventLog';
+import { useFieldObjectPatch, useFieldObjectSelect } from '@src/hooks/useFieldObject';
 import { useGeneralPick } from '@src/hooks/useGeneral';
+import { useGetApi } from '@src/hooks/useGetApi';
+import { usePlayerTimelinePatch } from '@src/hooks/usePlayerTimeline';
+import { useFieldObjectTypes } from '@src/modeles/heatmapView';
 import { DefaultStaleTime } from '@src/modeles/qeury';
 import { dimensions, zIndexes } from '@src/styles/style';
+import { getRandomPrimitiveColor } from '@src/utils/color';
 import { detectDimensionality } from '@src/utils/heatmap/detectDimensionality';
+
+// デフォルトのHVQLクエリ（FieldObject用）
+const DEFAULT_FIELD_OBJECT_HVQL = `map status.hand {
+  rock     -> icon: hand-rock;
+  paper    -> icon: hand-paper;
+  scissor  -> icon: hand-scissor;
+  *        -> icon: hand-paper;
+}
+map object_type {
+  RandomHandChangeItem -> icon: question;
+}
+`;
+
+// デフォルトのHVQLクエリ（PlayerTimeline用）
+const DEFAULT_PLAYER_TIMELINE_HVQL = `map status.hand {
+  rock     -> player-icon: hand-rock;
+  paper    -> player-icon: hand-paper;
+  scissor  -> player-icon: hand-scissor;
+  *        -> player-icon: target;
+}
+`;
 
 export type HeatmapViewerProps = {
   className?: string | undefined;
   service: HeatmapDataService;
+  isEmbed?: boolean;
 };
 
-const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
+const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false }) => {
   const toast = useToast();
   const [map, setMap] = useState<string | ArrayBuffer | null>(null);
   const [modelType, setModelType] = useState<'gltf' | 'glb' | 'obj' | 'server' | null>(null);
@@ -41,17 +72,21 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
   const [dpr, setDpr] = useState(2);
   // const [performance, setPerformance] = useState<PerformanceMonitorApi>();
 
+  // ローカルファイルの一時表示用状態
+  const [localModel, setLocalModel] = useState<LocalModelData | null>(null);
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const divRef = useRef<HTMLDivElement>(null!);
   const [statsReady, setStatsReady] = useState(false);
 
-  const { mapName, dimensionalityOverride, backgroundImage, backgroundScale, backgroundOffsetX, backgroundOffsetY } = useGeneralPick(
+  const { mapName, dimensionalityOverride, backgroundImage, backgroundScale, backgroundOffsetX, backgroundOffsetY, showStats } = useGeneralPick(
     'mapName',
     'dimensionalityOverride',
     'backgroundImage',
     'backgroundScale',
     'backgroundOffsetX',
     'backgroundOffsetY',
+    'showStats',
   );
   const splitMode = useSelector((s: RootState) => s.heatmapCanvas.splitMode);
 
@@ -70,10 +105,13 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
   // 2D/3D判定（オーバーライド > プロジェクトのis2D > taskのzVisible）
   const dimensionality = useMemo(() => detectDimensionality(dimensionalityOverride, project?.is2D, task), [dimensionalityOverride, project?.is2D, task]);
 
+  // マップリストのactiveOnlyフィルター（デフォルトtrue: アップロード済みのマップのみ表示）
+  const [mapActiveOnly, setMapActiveOnly] = useState(true);
+
   const { data: mapList } = useQuery({
-    queryKey: ['mapList', service.projectId],
+    queryKey: ['mapList', service.projectId, mapActiveOnly],
     queryFn: async () => {
-      return service.getMapList();
+      return service.getMapList(mapActiveOnly);
     },
     staleTime: DefaultStaleTime, // 5 minutes
     enabled: service.isInitialized,
@@ -105,12 +143,144 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
     enabled: !!service.projectId && !!service.sessionId,
   });
 
+  // Field Object Types のフェッチと初期化（メニューを開かなくても実行される）
+  const fieldObjects = useFieldObjectSelect((s) => s.objects);
+  const fieldObjectQueryText = useFieldObjectSelect((s) => s.queryText);
+  const setFieldObjects = useFieldObjectPatch();
+  const { data: objectTypes } = useFieldObjectTypes(service.projectId ?? undefined, service.sessionId ?? undefined);
+
+  useEffect(() => {
+    if (objectTypes && Array.isArray(objectTypes.data)) {
+      const currentTypes = fieldObjects.map((e) => e.objectType);
+      const setA = new Set(objectTypes.data);
+      const setB = new Set(currentTypes);
+      const isSameSet = setA.size === setB.size && [...setA].every((k) => setB.has(k));
+      if (isSameSet) return;
+
+      const fieldObjectDatas: FieldObjectData[] = (objectTypes.data as string[]).map((type) => {
+        const index = fieldObjects.findIndex((e) => e.objectType === type);
+        return {
+          objectType: type,
+          visible: index !== -1 ? fieldObjects[index].visible : true,
+          color: fieldObjects[index]?.color || getRandomPrimitiveColor(),
+          iconName: fieldObjects[index]?.iconName || 'spawn',
+          hvqlScript: fieldObjects[index]?.hvqlScript,
+        };
+      });
+
+      // デフォルトのHVQLクエリを設定（未設定の場合のみ）
+      const updates: { objects: FieldObjectData[]; queryText?: string } = { objects: fieldObjectDatas };
+      if (!fieldObjectQueryText) {
+        updates.queryText = DEFAULT_FIELD_OBJECT_HVQL;
+      }
+      setFieldObjects(updates);
+    }
+  }, [objectTypes, fieldObjects, fieldObjectQueryText, setFieldObjects]);
+
+  // Event Log の初期化（メニューを開かなくても実行される）
+  const eventLogs = useEventLogSelect((s) => s.logs);
+  const setEventLogs = useEventLogPatch();
+
+  useEffect(() => {
+    if (generalLogKeys && Array.isArray(generalLogKeys)) {
+      const currentKeys = eventLogs.map((e) => e.key);
+      const setA = new Set(generalLogKeys);
+      const setB = new Set(currentKeys);
+      const isSameSet = setA.size === setB.size && [...setA].every((k) => setB.has(k));
+      if (isSameSet) return;
+
+      const eventLogDatas: EventLogData[] = generalLogKeys.map((key) => {
+        const index = eventLogs.findIndex((e) => e.key === key);
+        return {
+          key,
+          visible: index !== -1 ? eventLogs[index].visible : false,
+          color: eventLogs[index]?.color || getRandomPrimitiveColor(),
+          iconName: eventLogs[index]?.iconName || 'CiStreamOn',
+          hvqlScript: eventLogs[index]?.hvqlScript,
+        };
+      });
+
+      setEventLogs({ logs: eventLogDatas });
+    }
+  }, [generalLogKeys, eventLogs, setEventLogs]);
+
+  // PlayerTimeline の自動有効化ロジック（メニューを開かなくても実行される）
+  const setPlayerTimelineData = usePlayerTimelinePatch();
+
+  const getPlayers = useGetApi('/api/v0/projects/{project_id}/play_session/{session_id}/player_position_log/{session_id}/players', {
+    staleTime: DefaultStaleTime,
+  });
+
+  const { data: players } = useQuery({
+    queryKey: ['players', service.sessionId, service.projectId],
+    queryFn: async () => {
+      if (!service.sessionId || !service.projectId) return null;
+      const { data } = await getPlayers.fetch([
+        {
+          params: {
+            path: {
+              project_id: service.projectId,
+              session_id: service.sessionId,
+            },
+          },
+        },
+      ]);
+      return data;
+    },
+    staleTime: DefaultStaleTime,
+    enabled: !!service.sessionId && !!service.projectId,
+  });
+
+  // プレイヤーを追加して表示を有効化するコールバック
+  const enableWithPlayers = useCallback(() => {
+    if (!players) return;
+    const session_id = service.sessionId;
+    const project_id = service.projectId;
+    if (!session_id || !project_id) return;
+
+    setPlayerTimelineData((prev) => {
+      const newDetails: PlayerTimelineDetail[] = players
+        .map((player) => {
+          if (prev.details?.some((d) => d.player === player && d.session_id === session_id)) {
+            return null;
+          }
+          return { player, project_id, session_id, visible: true };
+        })
+        .filter((s): s is PlayerTimelineDetail => s !== null);
+      return {
+        ...prev,
+        visible: true,
+        details: [...(prev.details || []), ...newDetails],
+        // デフォルトのHVQLクエリを設定（未設定の場合のみ）
+        queryText: prev.queryText || DEFAULT_PLAYER_TIMELINE_HVQL,
+      };
+    });
+    // playerTimelineがONの時、fieldObjectもデフォルトで表示
+    setFieldObjects({ visible: true });
+  }, [players, service.projectId, service.sessionId, setPlayerTimelineData, setFieldObjects]);
+
+  // プレイヤーがロードされたら自動的に表示を有効化（セッションごとに1回のみ）
+  const initializedSessionRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (players && players.length > 0 && service.sessionId && initializedSessionRef.current !== service.sessionId) {
+      initializedSessionRef.current = service.sessionId;
+      enableWithPlayers();
+    }
+  }, [service.sessionId, players, enableWithPlayers]);
+
   useEffect(() => {
     if (!mapContent) return;
     setMap(mapContent.data);
     setModelType('server');
     setServerModelFileType(mapContent.fileType);
   }, [mapContent]);
+
+  // ローカルモデルがある場合はmodelTypeを'server'に設定
+  useEffect(() => {
+    if (localModel) {
+      setModelType('server');
+    }
+  }, [localModel]);
 
   const pointList = useMemo(() => {
     if (!task) return [];
@@ -130,13 +300,30 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
     // setPerformance(api);
   }, []);
 
-  const buffer = useMemo(() => {
+  // ローカルモデルが設定されている場合はそれを使用、なければサーバーモデルを使用
+  const activeBuffer = useMemo(() => {
+    if (localModel) {
+      return localModel.buffer;
+    }
     if (typeof map === 'string') {
       return null;
     }
     return map;
-  }, [map]);
-  const model = useModelFromArrayBuffer(buffer, serverModelFileType);
+  }, [map, localModel]);
+
+  const activeFileType = useMemo(() => {
+    if (localModel) {
+      return localModel.fileType;
+    }
+    return serverModelFileType;
+  }, [localModel, serverModelFileType]);
+
+  const model = useModelFromArrayBuffer(activeBuffer, activeFileType);
+
+  // ローカルモデル変更ハンドラ
+  const handleLocalModelChange = useCallback((data: LocalModelData | null) => {
+    setLocalModel(data);
+  }, []);
 
   const store = useStore<RootState>();
   const handleExportView = useCallback(async () => {
@@ -216,6 +403,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
         orthographic={dimensionality === '2d'} // 2Dは正投影カメラ
         ref={canvasRef}
         dpr={dpr}
+        shadows // シャドウマップを有効化
         gl={{ alpha: true }} // 背景を透明にして後ろの画像が見えるようにする
       >
         <PerformanceMonitor factor={1} onChange={handleOnPerformance} />
@@ -228,15 +416,31 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
           visibleTimelineRange={visibleTimelineRange}
           dimensionality={dimensionality}
           fieldObjectLogs={fieldObjectLogs}
+          hasLocalModel={!!localModel}
         />
-        {statsReady && <Stats parent={divRef} className={`${className}__stats`} />}
+        {statsReady && showStats && <Stats parent={divRef} className={`${className}__stats`} />}
       </Canvas>
     ),
-    [dimensionality, dpr, handleOnPerformance, service, pointList, map, modelType, model, visibleTimelineRange, statsReady, className, fieldObjectLogs],
+    [
+      dimensionality,
+      dpr,
+      handleOnPerformance,
+      service,
+      pointList,
+      map,
+      modelType,
+      model,
+      visibleTimelineRange,
+      statsReady,
+      showStats,
+      className,
+      fieldObjectLogs,
+      localModel,
+    ],
   );
 
   return (
-    <div className={`${className}__view`}>
+    <div className={`${className}__view ${isEmbed ? `${className}--embed` : ''}`}>
       <FlexRow style={{ width: '100%', height: '100%' }} align={'center'} wrap={'nowrap'}>
         {splitMode.enabled ? (
           <FlexRow className={`${className}__splitContainer`} style={{ flex: 1, flexDirection: splitMode.direction === 'horizontal' ? 'row' : 'column' }}>
@@ -268,8 +472,19 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
           eventLogKeys={generalLogKeys ?? undefined}
           service={service}
           dimensionality={dimensionality}
+          localModel={localModel}
+          onLocalModelChange={handleLocalModelChange}
+          mapActiveOnly={mapActiveOnly}
+          onMapActiveOnlyChange={setMapActiveOnly}
         />
       </div>
+
+      {/* EventLogパネル（セッション選択時に表示） */}
+      {service.sessionId && (
+        <div className={`${className}__eventLogPanel`}>
+          <EventLogPanel service={service} eventLogKeys={generalLogKeys ?? null} />
+        </div>
+      )}
 
       <div className={`${className}__selectionInspector`}>
         <InspectorModal />
@@ -289,6 +504,8 @@ const Component: FC<HeatmapViewerProps> = ({ className, service }) => {
 export const HeatMapViewer = memo(
   styled(Component)`
     &__view {
+      --header-offset: ${dimensions.headerHeight}px;
+
       position: relative;
       width: calc(100% - 2px);
       height: 100%;
@@ -296,20 +513,32 @@ export const HeatMapViewer = memo(
       border-top: ${({ theme }) => `1px solid ${theme.colors.border.default}`};
     }
 
+    /* Embed mode: no header offset */
+    &--embed {
+      --header-offset: 0px;
+    }
+
     &__canvasMenuBox {
       position: absolute;
       top: 0;
       left: 0;
-      z-index: ${zIndexes.content + 2};
+      z-index: ${zIndexes.content + 3};
       display: flex;
       width: max-content;
       height: 100%;
-      padding-top: ${dimensions.headerHeight}px;
+      padding-top: var(--header-offset);
+    }
+
+    &__eventLogPanel {
+      position: absolute;
+      top: calc(var(--header-offset) + 16px);
+      right: 16px;
+      z-index: ${zIndexes.content + 2};
     }
 
     &__selectionInspector {
       position: absolute;
-      top: 60px;
+      top: 340px;
       right: 16px;
       z-index: ${zIndexes.content + 2};
       max-width: 360px;
@@ -355,6 +584,7 @@ export const HeatMapViewer = memo(
       position: absolute;
       bottom: 40px;
       left: 50%;
+      z-index: ${zIndexes.content + 2};
       transform: translateX(-50%);
     }
 

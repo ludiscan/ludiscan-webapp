@@ -1,12 +1,25 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import type { FieldObjectLog, HeatmapDataService, MapContentResult, Player } from './HeatmapDataService';
+import type { FieldObjectLog, HeatmapDataService, MapContentResult, Player, SessionSearchParams } from './HeatmapDataService';
+import type { ModelFileType } from '@src/features/heatmap/ModelLoader';
 import type { HeatmapTask, PositionEventLog } from '@src/modeles/heatmaptask';
 import type { Project } from '@src/modeles/project';
 import type { Session } from '@src/modeles/session';
 
 import { createEmbedClient } from '@src/modeles/qeury';
+
+/**
+ * ファイル形式文字列をModelFileTypeに変換
+ */
+function parseModelFileType(fileTypeStr: string | null): ModelFileType | null {
+  if (!fileTypeStr) return null;
+  const lower = fileTypeStr.toLowerCase();
+  if (lower === 'obj' || lower === 'fbx' || lower === 'gltf' || lower === 'glb') {
+    return lower as ModelFileType;
+  }
+  return null;
+}
 
 /**
  * Embed用のHeatmapDataService
@@ -108,30 +121,36 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
     };
   }, [queryClient, task]);
 
-  const getMapList = useCallback(async () => {
-    try {
-      if (!projectId || !apiClient) {
+  const getMapList = useCallback(
+    async (activeOnly?: boolean) => {
+      try {
+        if (!projectId || !apiClient) {
+          return [];
+        }
+        const { data, error } = await apiClient.GET('/api/v0.1/projects/{project_id}/maps', {
+          params: {
+            path: {
+              project_id: Number(projectId),
+            },
+            query: {
+              activeOnly,
+            },
+          },
+        });
+        if (error) return [];
+        return data.maps || [];
+      } catch {
         return [];
       }
-      const { data, error } = await apiClient.GET('/api/v0.1/projects/{project_id}/maps', {
-        params: {
-          path: {
-            project_id: Number(projectId),
-          },
-        },
-      });
-      if (error) return [];
-      return data.maps || [];
-    } catch {
-      return [];
-    }
-  }, [projectId, apiClient]);
+    },
+    [projectId, apiClient],
+  );
 
   const getMapContent = useCallback(
     async (mapName: string): Promise<MapContentResult | null> => {
       try {
         if (!mapName || mapName === '' || !apiClient) return null;
-        const { data, error } = await apiClient.GET('/api/v0/heatmap/map_data/{map_name}', {
+        const { data, error, response } = await apiClient.GET('/api/v0/heatmap/map_data/{map_name}', {
           params: {
             path: {
               map_name: mapName,
@@ -140,8 +159,12 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
           parseAs: 'arrayBuffer',
         });
         if (error) return null;
-        // Embedモードではファイル形式をヘッダーから取得できないため、デフォルトでobjとして扱う
-        return { data, fileType: 'obj' };
+
+        // レスポンスヘッダーからファイル形式を取得
+        const fileTypeHeader = response.headers.get('X-Model-File-Type');
+        const fileType = parseModelFileType(fileTypeHeader);
+
+        return { data, fileType };
       } catch {
         return null;
       }
@@ -238,6 +261,27 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
     [projectId, apiClient],
   );
 
+  const searchSessions = useCallback(
+    async (params: SessionSearchParams): Promise<Session[]> => {
+      if (!projectId || !apiClient) return [];
+      const res = await apiClient.GET('/api/v0.1/projects/{project_id}/sessions/search', {
+        params: {
+          path: { project_id: projectId },
+          query: {
+            q: params.q,
+            device_id: params.deviceId,
+            platform: params.platform,
+            is_playing: params.isPlaying,
+            limit: params.limit ?? 100,
+            offset: params.offset ?? 0,
+          },
+        },
+      });
+      return res.data?.data ?? [];
+    },
+    [projectId, apiClient],
+  );
+
   const getPlayers = useCallback(async (): Promise<Player[]> => {
     if (!projectId || !currentSessionId || !apiClient) return [];
     const res = await apiClient.GET('/api/v0/projects/{project_id}/play_session/{session_id}/player_position_log/{session_id}/players', {
@@ -279,6 +323,7 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
     getProject,
     getSession,
     getSessions,
+    searchSessions,
     getPlayers,
     getFieldObjectLogs,
   };

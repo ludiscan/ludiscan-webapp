@@ -1,5 +1,4 @@
 import styled from '@emotion/styled';
-import { IoClose } from 'react-icons/io5';
 
 import type { Menus } from '@src/hooks/useHeatmapSideBarMenus';
 import type { FC } from 'react';
@@ -15,10 +14,9 @@ import { heatMapEventBus } from '@src/utils/canvasEventBus';
 export type HeatmapMenuListRowProps = {
   className?: string;
   currentMenu?: Menus;
-  onClose?: () => void;
 };
 
-const HeatmapMenuListRowComponent: FC<HeatmapMenuListRowProps> = ({ className, currentMenu, onClose }) => {
+const HeatmapMenuListRowComponent: FC<HeatmapMenuListRowProps> = ({ className, currentMenu }) => {
   const menus = useHeatmapSideBarMenus();
   const { theme } = useSharedTheme();
 
@@ -40,9 +38,6 @@ const HeatmapMenuListRowComponent: FC<HeatmapMenuListRowProps> = ({ className, c
           </Tooltip>
         </Button>
       ))}
-      <Button onClick={onClose} scheme={'none'} fontSize={'sm'} className={`${className}__closeButton`}>
-        <IoClose />
-      </Button>
     </FlexRow>
   );
 };
@@ -70,9 +65,5 @@ export const HeatmapMenuListRow = styled(HeatmapMenuListRowComponent)`
       color: ${({ theme }) => theme.colors.primary.contrast} !important;
       background: ${({ theme }) => theme.colors.primary.light} !important;
     }
-  }
-
-  &__closeButton {
-    margin-left: auto;
   }
 `;

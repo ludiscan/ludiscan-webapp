@@ -8,6 +8,16 @@ import type { Project } from '@src/modeles/project';
 import type { createClient } from '@src/modeles/qeury';
 import type { Session } from '@src/modeles/session';
 
+// セッション検索パラメータ
+export type SessionSearchParams = {
+  q?: string; // 統合検索クエリ
+  deviceId?: string;
+  platform?: string;
+  isPlaying?: boolean;
+  limit?: number;
+  offset?: number;
+};
+
 import { useAuth } from '@src/hooks/useAuth';
 import { useApiClient } from '@src/modeles/ApiClientContext';
 
@@ -40,8 +50,8 @@ export type HeatmapDataService = {
   isInitialized: boolean;
   // embed経由でのアクセスかどうか（trueの場合、一部の機能が制限される）
   isEmbed?: boolean;
-  // マップリストの取得
-  getMapList(): Promise<string[]>;
+  // マップリストの取得（activeOnly: trueの場合、マップデータがアップロード済みのマップのみを返す）
+  getMapList(activeOnly?: boolean): Promise<string[]>;
 
   // マップデータの取得
   getMapContent(mapName: string): Promise<MapContentResult | null>;
@@ -70,13 +80,14 @@ export type HeatmapDataService = {
   getProject(): Promise<Project | null>;
   getSession(): Promise<Session | null>;
   getSessions(limit?: number, offset?: number): Promise<Session[]>;
+  searchSessions(params: SessionSearchParams): Promise<Session[]>;
   getPlayers(): Promise<Player[]>;
   getFieldObjectLogs(): Promise<FieldObjectLog[]>;
 };
 
 export const mockHeatmapDataService: HeatmapDataService = {
   isInitialized: true,
-  getMapList: async () => ['map1', 'map2', 'map3'],
+  getMapList: async (_activeOnly?: boolean) => ['map1', 'map2', 'map3'],
   getMapContent: async () => null,
   getGeneralLogKeys: async () => ['key1', 'key2', 'key3'],
   task: undefined,
@@ -91,6 +102,7 @@ export const mockHeatmapDataService: HeatmapDataService = {
   getProject: async () => null,
   getSession: async () => null,
   getSessions: async () => [],
+  searchSessions: async () => [],
   getPlayers: async () => [],
   getFieldObjectLogs: async () => [],
 };
@@ -229,24 +241,30 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
     };
   }, [queryClient, task]);
 
-  const getMapList = useCallback(async () => {
-    try {
-      if (!projectId) {
+  const getMapList = useCallback(
+    async (activeOnly?: boolean) => {
+      try {
+        if (!projectId) {
+          return [];
+        }
+        const { data, error } = await apiClient.GET('/api/v0.1/projects/{project_id}/maps', {
+          params: {
+            path: {
+              project_id: Number(projectId),
+            },
+            query: {
+              activeOnly,
+            },
+          },
+        });
+        if (error) return [];
+        return data.maps || [];
+      } catch {
         return [];
       }
-      const { data, error } = await apiClient.GET('/api/v0.1/projects/{project_id}/maps', {
-        params: {
-          path: {
-            project_id: Number(projectId),
-          },
-        },
-      });
-      if (error) return [];
-      return data.maps || [];
-    } catch {
-      return [];
-    }
-  }, [projectId, apiClient]);
+    },
+    [projectId, apiClient],
+  );
 
   const getMapContent = useCallback(
     async (mapName: string): Promise<MapContentResult | null> => {
@@ -380,6 +398,27 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
     [projectId, apiClient],
   );
 
+  const searchSessions = useCallback(
+    async (params: SessionSearchParams) => {
+      if (!projectId) return [];
+      const res = await apiClient.GET('/api/v0.1/projects/{project_id}/sessions/search', {
+        params: {
+          path: { project_id: projectId },
+          query: {
+            q: params.q,
+            device_id: params.deviceId,
+            platform: params.platform,
+            is_playing: params.isPlaying,
+            limit: params.limit ?? 100,
+            offset: params.offset ?? 0,
+          },
+        },
+      });
+      return res.data?.data ?? [];
+    },
+    [projectId, apiClient],
+  );
+
   const getPlayers = useCallback(async () => {
     if (!projectId || !sessionId) return [];
     const res = await apiClient.GET('/api/v0/projects/{project_id}/play_session/{session_id}/player_position_log/{session_id}/players', {
@@ -420,6 +459,7 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
     getProject,
     getSession,
     getSessions,
+    searchSessions,
     getPlayers,
     getFieldObjectLogs,
   };

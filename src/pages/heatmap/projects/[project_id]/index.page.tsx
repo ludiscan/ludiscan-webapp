@@ -16,6 +16,7 @@ import { HeatMapViewer } from '@src/features/heatmap/HeatmapViewer';
 import { useAuth } from '@src/hooks/useAuth';
 import { useGeneralSelect } from '@src/hooks/useGeneral';
 import { useHeatmapState } from '@src/hooks/useHeatmapState';
+import { useIsDesktop } from '@src/hooks/useIsDesktop';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { useOnlineHeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 
@@ -49,6 +50,7 @@ const HeaderWrapper = memo(
     const { theme } = useSharedTheme();
     const { apply, hasDiff, discard } = useHeatmapState();
     const version = useSelector((s: RootState) => s.heatmapCanvas.version);
+    const isDesktop = useIsDesktop();
     // const splitMode = useSelector((s: RootState) => s.heatmapCanvas.splitMode);
     // const dispatch = useDispatch();
 
@@ -69,7 +71,11 @@ const HeaderWrapper = memo(
         showSidebar={false}
         title={'Heatmap'}
         onClick={onBackClick}
-        iconTitleEnd={<Text className={`${className}__headerV`} text={`${version || 'debug'}`} fontSize={theme.typography.fontSize.sm} fontWeight={'bold'} />}
+        iconTitleEnd={
+          isDesktop ? (
+            <Text className={`${className}__headerV`} text={`${version || 'debug'}`} fontSize={theme.typography.fontSize.sm} fontWeight={'bold'} />
+          ) : undefined
+        }
         iconEnd={
           <>
             {/*<Button fontSize={'sm'} onClick={handleSplitHorizontal} scheme={splitMode.enabled && splitMode.direction === 'horizontal' ? 'primary' : 'surface'}>*/}

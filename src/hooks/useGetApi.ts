@@ -5,7 +5,7 @@ import type { paths } from '@generated/api';
 import type { MaybeOptionalInit, FetchResponse } from 'openapi-fetch';
 import type { PathsWithMethod, RequiredKeysOf } from 'openapi-typescript-helpers';
 
-import { createClient } from '@src/modeles/qeury';
+import { useApiClient } from '@src/modeles/ApiClientContext';
 
 type InitParam<Init> = RequiredKeysOf<Init> extends never ? [(Init & { [key: string]: unknown })?] : [Init & { [key: string]: unknown }];
 
@@ -23,6 +23,7 @@ export function useGetApi<TPath extends PathsWithMethod<paths, 'get'>>(
   },
 ) {
   const queryClient = useQueryClient();
+  const apiClient = useApiClient();
 
   /**
    * fetch
@@ -36,11 +37,11 @@ export function useGetApi<TPath extends PathsWithMethod<paths, 'get'>>(
     ): Promise<FetchResponse<paths[TPath]['get'], InitParam<MaybeOptionalInit<paths[TPath], 'get'>>, 'application/json'>> => {
       return queryClient.fetchQuery({
         queryKey: [path, init],
-        queryFn: async () => await createClient().GET(path, ...init),
+        queryFn: async () => await apiClient.GET(path, ...init),
         staleTime: options?.staleTime ?? 1000 * 60 * 5, // デフォルトは5分
       });
     },
-    [queryClient, path, options?.staleTime],
+    [queryClient, path, options?.staleTime, apiClient],
   );
 
   return { fetch };

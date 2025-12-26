@@ -1,4 +1,3 @@
-import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -8,12 +7,13 @@ import type { FC } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
 import { Card } from '@src/component/atoms/Card';
-import { InlineFlexColumn } from '@src/component/atoms/Flex';
+import { FlexColumn, InlineFlexColumn } from '@src/component/atoms/Flex';
 import { VerticalSpacer } from '@src/component/atoms/Spacer';
 import { Text } from '@src/component/atoms/Text';
 import { LanguageSelector } from '@src/component/molecules/LanguageSelector';
 import { LinedText } from '@src/component/molecules/LinedText';
-import { OutlinedTextField } from '@src/component/molecules/OutlinedTextField';
+import { TextField } from '@src/component/molecules/TextField';
+import { DashboardBackgroundCanvas } from '@src/component/templates/DashboardBackgroundCanvas';
 import { Header } from '@src/component/templates/Header';
 import { useToast } from '@src/component/templates/ToastContext';
 import { env } from '@src/config/env';
@@ -21,125 +21,11 @@ import { useAuth } from '@src/hooks/useAuth';
 import { useIsDesktop } from '@src/hooks/useIsDesktop';
 import { useLocale } from '@src/hooks/useLocale';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { dimensions } from '@src/styles/style';
+import { InnerContent } from '@src/pages/_app.page';
 
 export type LoginPageProps = {
   className?: string | undefined;
 };
-
-const slideX = keyframes`
-  0% {
-    /* 6レイヤー分の position を横方向に大きく変化させる */
-    background-position:
-      20% 60%, /* linear帯 */
-      8%  64%,
-      92% 58%,
-      46% 66%,
-      24% 58%,
-      76% 58%;
-  }
-  50% {
-    background-position:
-      62% 62%,
-      14% 60%,
-      86% 62%,
-      54% 64%,
-      30% 56%,
-      70% 60%;
-  }
-  100% {
-    background-position:
-      55% 60%,
-      10% 58%,
-      90% 60%,
-      50% 66%,
-      28% 60%,
-      72% 58%;
-  }
-`;
-
-const ripple = keyframes`
-  0% {
-    background-size:
-      260% 160%, 200% 110%, 200% 110%, 220% 130%, 200% 110%, 200% 110%;
-  }
-  50% {
-    background-size:
-      260% 170%, 210% 130%, 210% 120%, 230% 150%, 210% 130%, 210% 120%;
-  }
-  100% {
-    background-size:
-      260% 160%, 200% 110%, 200% 110%, 220% 130%, 200% 110%, 200% 110%;
-  }
-`;
-
-const slowSpin = keyframes`to { transform: rotate(13deg) scale(1.04); }`;
-
-const SVGFilterDefs: FC = () => (
-  <svg width='0' height='0' style={{ position: 'absolute' }} aria-hidden>
-    <filter id='warp'>
-      <feTurbulence type='fractalNoise' baseFrequency='0.003 0.002' numOctaves='2' seed='7'>
-        <animate attributeName='baseFrequency' dur='16s' values='0.003 0.002;0.002 0.003;0.003 0.002' repeatCount='indefinite' />
-      </feTurbulence>
-      {/* scale を 16–36 で調整：大きいほど“うねる” */}
-      <feDisplacementMap in='SourceGraphic' scale='24' />
-    </filter>
-  </svg>
-);
-const background = `
-  linear-gradient(200deg, #3dffe2 10%, #3dffef 40%, #a4e6ff 70%, #36ff9b 100%),
-  radial-gradient(140% 60% at 20% 58%, rgba(237, 61, 108, 0.85) 0 32%, transparent 20%),
-  radial-gradient(140% 58% at 80% 62%, rgba(92, 255, 130, 0.85) 0 34%, transparent 64%),
-  radial-gradient(180% 70% at 50% 66%, rgba(61, 197, 255, 0.9) 0 22%, transparent 20%),
-  radial-gradient(140% 60% at 35% 50%, rgba(255, 138, 61, 0.8) 0 26%, transparent 30%),
-  radial-gradient(140% 60% at 65% 52%, rgba(54, 163, 255, 0.85) 0 26%, transparent 60%)
-`;
-
-/** 横に伸びる JetBrains 風レイヤ */
-const WavyLayer = styled.div`
-  position: fixed;
-  inset: 25% -20% 30%;
-  z-index: 0;
-  pointer-events: none;
-
-  /* 1) 長い帯（linear） + 2) 横長の楕円を重ねる */
-  background: ${background};
-  background-repeat: no-repeat;
-
-  /* 初期位置（中腹に集中させる） */
-  background-position:
-    50% 62%,
-    12% 64%,
-    88% 60%,
-    50% 66%,
-    32% 58%,
-    68% 58%;
-
-  /* 横方向に“帯”が伸びるように各レイヤのサイズを大きくする */
-  background-size:
-    260% 160%,
-    /* linear 帯は特にワイド */ 200% 120%,
-    200% 120%,
-    220% 140%,
-    200% 120%,
-    200% 120%;
-  background-blend-mode: screen, normal, normal, normal, normal, normal;
-
-  /* ← ここが “うねり”の肝。SVG 変形 + ブラー */
-  filter: url('#warp') blur(30px) saturate(1.15);
-  transform-origin: 50% 62%;
-
-  /* 回転は今の slowSpin を維持し、ripple を追加 */
-  animation:
-    ${slideX} 12s ease-in-out infinite alternate,
-    ${ripple} 4s ease-in-out infinite alternate,
-    ${slowSpin} 6s linear infinite alternate;
-  will-change: transform, background-position, background-size, filter;
-
-  @media (prefers-reduced-motion: reduce) {
-    animation: none;
-  }
-`;
 
 const Content: FC<LoginPageProps> = ({ className }) => {
   const router = useRouter();
@@ -178,11 +64,9 @@ const Content: FC<LoginPageProps> = ({ className }) => {
   const loginDisabled = useMemo(() => email === '' || password === '' || isLoading, [email, password, isLoading]);
   return (
     <div className={className}>
-      <SVGFilterDefs />
-      <WavyLayer />
-      <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', zIndex: 1, height: '100%' }}>
+      <DashboardBackgroundCanvas />
+      <InnerContent showSidebar={false}>
         <Header title={''} showSidebar={false} />
-        <VerticalSpacer size={dimensions.headerHeight} />
         <Card
           color={isDesktop ? theme.colors.surface.base : 'unset'}
           border={theme.colors.border.default}
@@ -220,33 +104,38 @@ const Content: FC<LoginPageProps> = ({ className }) => {
               lineThickness={'1px'}
               fullWidth={true}
             />
-            <OutlinedTextField
-              className={`${className}__email`}
-              onChange={handleInputEmail}
-              value={email}
-              label={t('common.email')}
-              placeholder={t('login.emailPlaceholder')}
-              type={'email'}
-              fontSize={theme.typography.fontSize.base}
-              maxLength={50}
-            />
-            <OutlinedTextField
-              className={`${className}__password`}
-              onChange={handleInputPassword}
-              value={password}
-              label={t('common.password')}
-              type={'password'}
-              placeholder={t('login.passwordPlaceholder')}
-              fontSize={theme.typography.fontSize.base}
-              maxLength={20}
-            />
+            <FlexColumn gap={2} className={`${className}__email`}>
+              <Text text={t('common.email')} fontSize={theme.typography.fontSize.sm} />
+              <TextField
+                onChange={handleInputEmail}
+                value={email}
+                id={t('common.email')}
+                placeholder={t('login.emailPlaceholder')}
+                type={'email'}
+                fontSize={theme.typography.fontSize.base}
+                style={{ width: '100%' }}
+              />
+            </FlexColumn>
+            <FlexColumn gap={2} className={`${className}__password`}>
+              <Text text={t('common.password')} fontSize={theme.typography.fontSize.sm} />
+              <TextField
+                onChange={handleInputPassword}
+                value={password}
+                id={t('common.password')}
+                type={'password'}
+                placeholder={t('login.passwordPlaceholder')}
+                fontSize={theme.typography.fontSize.base}
+                style={{ width: '100%' }}
+              />
+            </FlexColumn>
+
             <VerticalSpacer size={2} />
             <Button onClick={handleLogin} scheme={'primary'} radius={'default'} fontSize={'lg'} width={'full'} disabled={loginDisabled}>
               <Text text={t('login.signIn')} />
             </Button>
           </InlineFlexColumn>
         </Card>
-      </div>
+      </InnerContent>
     </div>
   );
 };
@@ -289,16 +178,16 @@ const IndexPage = styled(Component)`
     z-index: 1;
     width: 100%;
     max-width: 500px;
-    max-height: 600px;
     margin: 20px;
   }
 
   .mobile &__form {
-    max-width: calc(100% - 58px);
+    max-width: 100%;
     height: 100%;
     max-height: unset;
     margin: 0;
     background: ${({ theme }) => hexToRgba(theme.colors.surface.base, 0.5)};
+    border: none;
   }
 
   &__content {
