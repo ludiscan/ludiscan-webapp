@@ -29,16 +29,8 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
 
   const projectId = service.projectId ?? 0;
 
-  const {
-    numericMetadataKeys,
-    aggregationConfigs,
-    addAggregation,
-    removeAggregation,
-    clearAggregations,
-    runAggregate,
-    aggregateResult,
-    isAggregating,
-  } = useSessionFiltersAndAggregate(projectId);
+  const { numericMetadataKeys, aggregationConfigs, addAggregation, removeAggregation, clearAggregations, runAggregate, aggregateResult, isAggregating } =
+    useSessionFiltersAndAggregate(projectId);
 
   const handleAddAggregation = () => {
     if (selectedField) {
@@ -55,18 +47,16 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
     }
   };
 
-  const availableFields = numericMetadataKeys.filter(
-    (k: MetadataKeyInfo) => !aggregationConfigs.some((c) => c.field === k.key),
-  );
+  const availableFields = numericMetadataKeys.filter((k: MetadataKeyInfo) => !aggregationConfigs.some((c) => c.field === k.key));
 
   if (!projectId) {
     return (
       <div className={className}>
-        <FlexRow gap={8} align="center">
+        <FlexRow gap={8} align='center'>
           <BiBarChartAlt2 size={20} />
-          <Text text="集計" fontSize={theme.typography.fontSize.lg} fontWeight="bold" />
+          <Text text='集計' fontSize={theme.typography.fontSize.lg} fontWeight='bold' />
         </FlexRow>
-        <Text text="プロジェクトが選択されていません" fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
+        <Text text='プロジェクトが選択されていません' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
       </div>
     );
   }
@@ -74,54 +64,46 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
   return (
     <div className={className}>
       {/* Header */}
-      <FlexRow gap={8} align="center" className={`${className}__header`}>
+      <FlexRow gap={8} align='center' className={`${className}__header`}>
         <BiBarChartAlt2 size={20} />
-        <Text text="集計" fontSize={theme.typography.fontSize.lg} fontWeight="bold" />
+        <Text text='集計' fontSize={theme.typography.fontSize.lg} fontWeight='bold' />
       </FlexRow>
 
       <FlexColumn gap={16} className={`${className}__content`}>
         {/* Field Selection */}
         {numericMetadataKeys.length > 0 ? (
           <FlexColumn gap={8}>
-            <Text
-              text="数値フィールドを選択して集計"
-              fontSize={theme.typography.fontSize.sm}
-              color={theme.colors.text.secondary}
-            />
-            <FlexRow gap={8} align="center">
+            <Text text='数値フィールドを選択して集計' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
+            <FlexRow gap={8} align='center'>
               <select
                 className={`${className}__fieldSelect`}
                 value={selectedField}
                 onChange={(e) => setSelectedField(e.target.value)}
                 disabled={availableFields.length === 0}
               >
-                <option value="">フィールドを選択...</option>
+                <option value=''>フィールドを選択...</option>
                 {availableFields.map((k: MetadataKeyInfo) => (
                   <option key={k.key} value={k.key}>
                     {k.key} ({k.count}件)
                   </option>
                 ))}
               </select>
-              <Button onClick={handleAddAggregation} scheme="primary" fontSize="sm" disabled={!selectedField}>
+              <Button onClick={handleAddAggregation} scheme='primary' fontSize='sm' disabled={!selectedField}>
                 <BiPlus size={16} />
                 追加
               </Button>
             </FlexRow>
           </FlexColumn>
         ) : (
-          <Text
-            text="集計可能な数値フィールドがありません"
-            fontSize={theme.typography.fontSize.sm}
-            color={theme.colors.text.secondary}
-          />
+          <Text text='集計可能な数値フィールドがありません' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
         )}
 
         {/* Selected Fields */}
         {aggregationConfigs.length > 0 && (
           <FlexColumn gap={8}>
-            <FlexRow align="center">
-              <Text text="集計対象フィールド" fontSize={theme.typography.fontSize.sm} fontWeight="bold" />
-              <Button onClick={clearAggregations} scheme="surface" fontSize="sm">
+            <FlexRow align='center'>
+              <Text text='集計対象フィールド' fontSize={theme.typography.fontSize.sm} fontWeight='bold' />
+              <Button onClick={clearAggregations} scheme='surface' fontSize='sm'>
                 <BiX size={14} />
                 クリア
               </Button>
@@ -130,7 +112,7 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
               {aggregationConfigs.map((config) => (
                 <span key={config.field} className={`${className}__tag`}>
                   {config.field}
-                  <button type="button" onClick={() => removeAggregation(config.field)} aria-label={`${config.field}を削除`}>
+                  <button type='button' onClick={() => removeAggregation(config.field)} aria-label={`${config.field}を削除`}>
                     <BiX size={14} />
                   </button>
                 </span>
@@ -140,7 +122,7 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
         )}
 
         {/* Run Button */}
-        <Button onClick={handleRunAggregate} scheme="primary" fontSize="base" disabled={isAggregating}>
+        <Button onClick={handleRunAggregate} scheme='primary' fontSize='base' disabled={isAggregating}>
           <BiPlay size={18} />
           {isAggregating ? '集計中...' : '集計を実行'}
         </Button>
@@ -148,7 +130,7 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
         {/* Results */}
         {aggregateResult && (
           <FlexColumn gap={16} className={`${className}__results`}>
-            <Text text="集計結果" fontSize={theme.typography.fontSize.base} fontWeight="bold" />
+            <Text text='集計結果' fontSize={theme.typography.fontSize.base} fontWeight='bold' />
 
             {/* Session Counts */}
             <div className={`${className}__countGrid`}>
@@ -158,22 +140,18 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
               </div>
               <div className={`${className}__countCard`}>
                 <span className={`${className}__countLabel`}>終了</span>
-                <span className={`${className}__countValue ${className}__countValue--finished`}>
-                  {formatNumber(aggregateResult.finishedCount)}
-                </span>
+                <span className={`${className}__countValue ${className}__countValue--finished`}>{formatNumber(aggregateResult.finishedCount)}</span>
               </div>
               <div className={`${className}__countCard`}>
                 <span className={`${className}__countLabel`}>プレイ中</span>
-                <span className={`${className}__countValue ${className}__countValue--playing`}>
-                  {formatNumber(aggregateResult.playingCount)}
-                </span>
+                <span className={`${className}__countValue ${className}__countValue--playing`}>{formatNumber(aggregateResult.playingCount)}</span>
               </div>
             </div>
 
             {/* Field Aggregations */}
             {aggregateResult.aggregations && aggregateResult.aggregations.length > 0 && (
               <FlexColumn gap={12}>
-                <Text text="フィールド別集計" fontSize={theme.typography.fontSize.sm} fontWeight="bold" />
+                <Text text='フィールド別集計' fontSize={theme.typography.fontSize.sm} fontWeight='bold' />
                 <div className={`${className}__aggregationTable`}>
                   <table>
                     <thead>
@@ -234,8 +212,8 @@ export const AggregationMenuContent = styled(AggregationMenuContentComponent)`
     border-radius: ${({ theme }) => theme.borders.radius.md};
 
     &:focus {
-      border-color: ${({ theme }) => theme.colors.primary.main};
       outline: none;
+      border-color: ${({ theme }) => theme.colors.primary.main};
     }
 
     &:disabled {
