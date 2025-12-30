@@ -80,7 +80,7 @@ export const MenuContents: MenuType[] = [
     Component: RouteCoachMenuContent,
   },
   {
-    name: 'aggregation',
+    name: '集計',
     icon: <BiBarChartAlt2 />,
     Component: AggregationMenuContent,
   },
