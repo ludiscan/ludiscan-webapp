@@ -60,7 +60,7 @@ export const MoreMenuContent: FC<HeatmapMenuProps> = () => {
   // Filter out menus that shouldn't appear in the grid (more itself, eventLogDetail)
   const availableMenus = MenuContents.filter((menu) => {
     if (!menu.icon) return false;
-    if (menu.name === 'more' || menu.name === 'eventLogDetail') return false;
+    if (menu.name === 'その他' || menu.name === 'イベント詳細') return false;
     return true;
   });
 

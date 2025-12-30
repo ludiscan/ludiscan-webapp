@@ -40,42 +40,42 @@ export type MenuType = Omit<SideBarMenuType, 'icon'> & {
 
 export const MenuContents: MenuType[] = [
   {
-    name: 'info',
+    name: '情報',
     icon: <IoIosInformationCircleOutline />,
     Component: InfoMenuContent,
   },
   {
-    name: 'general',
+    name: '一般',
     icon: <BsPerson />,
     Component: GeneralMenuContent,
   },
   {
-    name: 'map',
+    name: 'マップ',
     icon: <CiMap />,
     Component: MapMenuContent,
   },
   {
-    name: 'hotspot',
+    name: 'ホットスポット',
     icon: <CiMapPin />,
     Component: HotspotMenuContent,
   },
   {
-    name: 'eventlog',
+    name: 'イベントログ',
     icon: <CiStreamOn />,
     Component: EventLogContent,
   },
   {
-    name: 'fieldObject',
+    name: 'オブジェクト',
     icon: <FaCube />,
     Component: FieldObjectsMenuContent,
   },
   {
-    name: 'timeline',
+    name: 'タイムライン',
     icon: <SiSvgtrace />,
     Component: PlayerTimeline,
   },
   {
-    name: 'routecoach',
+    name: 'ルートコーチ',
     icon: <GiPathDistance />,
     Component: RouteCoachMenuContent,
   },
@@ -85,17 +85,17 @@ export const MenuContents: MenuType[] = [
     Component: AggregationMenuContent,
   },
   {
-    name: 'more',
+    name: 'その他',
     icon: <BsGrid />,
     Component: MoreMenuContent,
   },
   {
-    name: 'eventLogDetail',
+    name: 'イベント詳細',
     Component: EventLogDetail,
   },
   {
-    name: 'summary',
-    icon: <Image src={'/heatmap/summarize-ai.svg'} alt={'summary'} width={22} height={22} />,
+    name: 'AI要約',
+    icon: <Image src={'/heatmap/summarize-ai.svg'} alt={'AI要約'} width={22} height={22} />,
     Component: AISummaryMenuContent,
   },
 ] as const;
@@ -117,7 +117,7 @@ export function useHeatmapSideBarMenus(): SideBarMenuType[] {
   }, []);
 
   // Always show general and more
-  const alwaysShowMenus = ['general', 'more'];
+  const alwaysShowMenus = ['一般', 'その他'];
 
   // Get recent menus (max 5, excluding general and more)
   const recentMenuItems = recentMenus
@@ -130,7 +130,7 @@ export function useHeatmapSideBarMenus(): SideBarMenuType[] {
   const sidebarMenus: SideBarMenuType[] = [];
 
   // Add general menu
-  const generalMenu = MenuContents.find((content) => content.name === 'general');
+  const generalMenu = MenuContents.find((content) => content.name === '一般');
   if (generalMenu && generalMenu.icon) {
     sidebarMenus.push({
       name: generalMenu.name,
@@ -151,7 +151,7 @@ export function useHeatmapSideBarMenus(): SideBarMenuType[] {
   });
 
   // Add more menu
-  const moreMenu = MenuContents.find((content) => content.name === 'more');
+  const moreMenu = MenuContents.find((content) => content.name === 'その他');
   if (moreMenu && moreMenu.icon) {
     sidebarMenus.push({
       name: moreMenu.name,
