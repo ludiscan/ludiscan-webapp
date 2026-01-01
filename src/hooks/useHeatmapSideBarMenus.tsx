@@ -1,7 +1,6 @@
-import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { BiBarChartAlt2 } from 'react-icons/bi';
-import { BsGrid, BsPerson } from 'react-icons/bs';
+import { BsGrid, BsPerson, BsStars } from 'react-icons/bs';
 import { CiMap, CiMapPin, CiStreamOn } from 'react-icons/ci';
 import { FaCube } from 'react-icons/fa';
 import { GiPathDistance } from 'react-icons/gi';
@@ -95,7 +94,7 @@ export const MenuContents: MenuType[] = [
   },
   {
     name: 'AI要約',
-    icon: <Image src={'/heatmap/summarize-ai.svg'} alt={'AI要約'} width={22} height={22} />,
+    icon: <BsStars />,
     Component: AISummaryMenuContent,
   },
 ] as const;

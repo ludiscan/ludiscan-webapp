@@ -44,7 +44,7 @@ const HeatmapMenuListRowComponent: FC<HeatmapMenuListRowProps> = ({ className, c
 
 export const HeatmapMenuListRow = styled(HeatmapMenuListRowComponent)`
   flex-shrink: 0;
-  min-height: 32px;
+  min-height: 36px;
   padding: 0 var(--spacing-md);
   background: ${({ theme }) => hexToRGBA(theme.colors.surface.base, 0.9)};
   border-radius: var(--border-radius-full);
