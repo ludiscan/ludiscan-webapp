@@ -23,7 +23,7 @@ const MenuItemComponent: FC<MenuItemProps & { className?: string }> = ({ classNa
     <Button className={className} onClick={onClick} scheme={'none'} fontSize={'base'}>
       <FlexColumn align={'center'} gap={4}>
         <div className={`${className}__icon`}>{icon}</div>
-        <Text text={name} fontSize={theme.typography.fontSize.sm} fontWeight={theme.typography.fontWeight.light} />
+        <Text text={name} fontSize={theme.typography.fontSize.xs} fontWeight={theme.typography.fontWeight.medium} />
       </FlexColumn>
     </Button>
   );
@@ -41,8 +41,22 @@ const MenuItem = styled(MenuItemComponent)`
   }
 
   &__icon {
-    font-size: 24px;
+    width: 24px;
+    height: 24px;
     color: ${({ theme }) => theme.colors.text.primary};
+
+    svg {
+      width: 100%;
+      height: 100%;
+      fill: currentcolor;
+    }
+
+    img {
+      width: 100%;
+      height: 100%;
+      color: ${({ theme }) => theme.colors.text.primary} !important;
+      object-fit: contain;
+    }
   }
 `;
 
@@ -60,7 +74,7 @@ export const MoreMenuContent: FC<HeatmapMenuProps> = () => {
   // Filter out menus that shouldn't appear in the grid (more itself, eventLogDetail)
   const availableMenus = MenuContents.filter((menu) => {
     if (!menu.icon) return false;
-    if (menu.name === 'more' || menu.name === 'eventLogDetail') return false;
+    if (menu.name === 'その他' || menu.name === 'イベント詳細') return false;
     return true;
   });
 

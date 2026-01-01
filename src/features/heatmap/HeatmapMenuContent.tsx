@@ -121,14 +121,14 @@ const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
     const clickMenuIconHandler = (event: CustomEvent<{ name: Menus }>) => {
       const menuName = event.detail.name;
       setOpenMenu(menuName);
-      // Save to recent menus (except for 'more' and 'eventLogDetail')
-      if (menuName !== 'more' && menuName !== 'eventLogDetail') {
+      // Save to recent menus (except for 'その他' and 'イベント詳細')
+      if (menuName !== 'その他' && menuName !== 'イベント詳細') {
         saveRecentMenu(menuName);
       }
     };
     const clickEventLogHandler = (event: CustomEvent<{ logName: string; id: number }>) => {
       setMenuExtra(event.detail);
-      setOpenMenu('eventLogDetail');
+      setOpenMenu('イベント詳細');
     };
     const closeMenuHandler = () => {
       setOpenMenu(undefined);

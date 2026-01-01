@@ -1,6 +1,6 @@
-import Image from 'next/image';
 import { useEffect, useState } from 'react';
-import { BsGrid, BsPerson } from 'react-icons/bs';
+import { BiBarChartAlt2 } from 'react-icons/bi';
+import { BsGrid, BsPerson, BsStars } from 'react-icons/bs';
 import { CiMap, CiMapPin, CiStreamOn } from 'react-icons/ci';
 import { FaCube } from 'react-icons/fa';
 import { GiPathDistance } from 'react-icons/gi';
@@ -11,6 +11,7 @@ import type { HeatmapMenuProps } from '@src/features/heatmap/HeatmapMenuContent'
 import type { HeatmapDataState } from '@src/modeles/heatmapView';
 import type { FC, JSX } from 'react';
 
+import { AggregationMenuContent } from '@src/features/heatmap/menu/AggregationMenuContent';
 import { EventLogDetail } from '@src/features/heatmap/menu/EventLogDetail';
 import { EventLogContent } from '@src/features/heatmap/menu/EventLogs';
 import { FieldObjectsMenuContent } from '@src/features/heatmap/menu/FieldObjectsMenu';
@@ -38,57 +39,62 @@ export type MenuType = Omit<SideBarMenuType, 'icon'> & {
 
 export const MenuContents: MenuType[] = [
   {
-    name: 'info',
+    name: '情報',
     icon: <IoIosInformationCircleOutline />,
     Component: InfoMenuContent,
   },
   {
-    name: 'general',
+    name: '一般',
     icon: <BsPerson />,
     Component: GeneralMenuContent,
   },
   {
-    name: 'map',
+    name: 'マップ',
     icon: <CiMap />,
     Component: MapMenuContent,
   },
   {
-    name: 'hotspot',
+    name: 'ホットスポット',
     icon: <CiMapPin />,
     Component: HotspotMenuContent,
   },
   {
-    name: 'eventlog',
+    name: 'イベントログ',
     icon: <CiStreamOn />,
     Component: EventLogContent,
   },
   {
-    name: 'fieldObject',
+    name: 'オブジェクト',
     icon: <FaCube />,
     Component: FieldObjectsMenuContent,
   },
   {
-    name: 'timeline',
+    name: 'タイムライン',
     icon: <SiSvgtrace />,
     Component: PlayerTimeline,
   },
   {
-    name: 'routecoach',
+    name: 'ルートコーチ',
     icon: <GiPathDistance />,
     Component: RouteCoachMenuContent,
   },
   {
-    name: 'more',
+    name: '集計',
+    icon: <BiBarChartAlt2 />,
+    Component: AggregationMenuContent,
+  },
+  {
+    name: 'その他',
     icon: <BsGrid />,
     Component: MoreMenuContent,
   },
   {
-    name: 'eventLogDetail',
+    name: 'イベント詳細',
     Component: EventLogDetail,
   },
   {
-    name: 'summary',
-    icon: <Image src={'/heatmap/summarize-ai.svg'} alt={'summary'} width={22} height={22} />,
+    name: 'AI要約',
+    icon: <BsStars />,
     Component: AISummaryMenuContent,
   },
 ] as const;
@@ -110,7 +116,7 @@ export function useHeatmapSideBarMenus(): SideBarMenuType[] {
   }, []);
 
   // Always show general and more
-  const alwaysShowMenus = ['general', 'more'];
+  const alwaysShowMenus = ['一般', 'その他'];
 
   // Get recent menus (max 5, excluding general and more)
   const recentMenuItems = recentMenus
@@ -123,7 +129,7 @@ export function useHeatmapSideBarMenus(): SideBarMenuType[] {
   const sidebarMenus: SideBarMenuType[] = [];
 
   // Add general menu
-  const generalMenu = MenuContents.find((content) => content.name === 'general');
+  const generalMenu = MenuContents.find((content) => content.name === '一般');
   if (generalMenu && generalMenu.icon) {
     sidebarMenus.push({
       name: generalMenu.name,
@@ -144,7 +150,7 @@ export function useHeatmapSideBarMenus(): SideBarMenuType[] {
   });
 
   // Add more menu
-  const moreMenu = MenuContents.find((content) => content.name === 'more');
+  const moreMenu = MenuContents.find((content) => content.name === 'その他');
   if (moreMenu && moreMenu.icon) {
     sidebarMenus.push({
       name: moreMenu.name,
