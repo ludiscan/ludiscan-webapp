@@ -75,11 +75,11 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
   if (!projectId) {
     return (
       <div className={className}>
-        <FlexRow gap={8} align="center">
+        <FlexRow gap={8} align='center'>
           <BiBarChartAlt2 size={20} />
-          <Text text="集計" fontSize={theme.typography.fontSize.lg} fontWeight="bold" />
+          <Text text='集計' fontSize={theme.typography.fontSize.lg} fontWeight='bold' />
         </FlexRow>
-        <Text text="プロジェクトが選択されていません" fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
+        <Text text='プロジェクトが選択されていません' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
       </div>
     );
   }
@@ -87,18 +87,18 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
   return (
     <div className={className}>
       {/* Header */}
-      <FlexRow gap={8} align="center" className={`${className}__header`}>
+      <FlexRow gap={8} align='center' className={`${className}__header`}>
         <BiBarChartAlt2 size={20} />
-        <Text text="集計" fontSize={theme.typography.fontSize.lg} fontWeight="bold" />
+        <Text text='集計' fontSize={theme.typography.fontSize.lg} fontWeight='bold' />
       </FlexRow>
 
       <FlexColumn gap={16} className={`${className}__content`}>
         {/* Filter Section */}
         <div className={`${className}__filterSection`}>
-          <button type="button" className={`${className}__filterToggle`} onClick={() => setShowFilters(!showFilters)}>
-            <FlexRow gap={8} align="center">
+          <button type='button' className={`${className}__filterToggle`} onClick={() => setShowFilters(!showFilters)}>
+            <FlexRow gap={8} align='center'>
               <BiFilter size={18} />
-              <Text text="フィルター" fontSize={theme.typography.fontSize.sm} fontWeight="bold" />
+              <Text text='フィルター' fontSize={theme.typography.fontSize.sm} fontWeight='bold' />
               {activeFilterCount > 0 && <span className={`${className}__badge`}>{activeFilterCount}</span>}
             </FlexRow>
             {showFilters ? <BiChevronUp size={18} /> : <BiChevronDown size={18} />}
@@ -108,7 +108,7 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
             <FlexColumn gap={12} className={`${className}__filterContent`}>
               {hasActiveFilters && (
                 <FlexRow>
-                  <Button onClick={clearFilters} scheme="surface" fontSize="sm">
+                  <Button onClick={clearFilters} scheme='surface' fontSize='sm'>
                     <BiX size={14} />
                     フィルターをクリア
                   </Button>
@@ -119,14 +119,14 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
               <div className={`${className}__filterGrid`}>
                 {/* Platform */}
                 <div className={`${className}__filterItem`}>
-                  <label htmlFor="agg-filter-platform">プラットフォーム</label>
+                  <label htmlFor='agg-filter-platform'>プラットフォーム</label>
                   <select
-                    id="agg-filter-platform"
+                    id='agg-filter-platform'
                     value={filters.platform ?? ''}
                     onChange={(e) => handleUpdateFilter('platform', e.target.value || undefined)}
                     disabled={isLoadingFilterOptions}
                   >
-                    <option value="">すべて</option>
+                    <option value=''>すべて</option>
                     {filterOptions?.platforms.map((p) => (
                       <option key={p} value={p}>
                         {p}
@@ -137,14 +137,14 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
 
                 {/* App Version */}
                 <div className={`${className}__filterItem`}>
-                  <label htmlFor="agg-filter-app-version">アプリバージョン</label>
+                  <label htmlFor='agg-filter-app-version'>アプリバージョン</label>
                   <select
-                    id="agg-filter-app-version"
+                    id='agg-filter-app-version'
                     value={filters.appVersion ?? ''}
                     onChange={(e) => handleUpdateFilter('appVersion', e.target.value || undefined)}
                     disabled={isLoadingFilterOptions}
                   >
-                    <option value="">すべて</option>
+                    <option value=''>すべて</option>
                     {filterOptions?.appVersions.map((v) => (
                       <option key={v} value={v}>
                         {v}
@@ -155,28 +155,24 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
 
                 {/* Playing Status */}
                 <div className={`${className}__filterItem`}>
-                  <label htmlFor="agg-filter-status">ステータス</label>
+                  <label htmlFor='agg-filter-status'>ステータス</label>
                   <select
-                    id="agg-filter-status"
+                    id='agg-filter-status'
                     value={filters.isPlaying === undefined ? '' : filters.isPlaying ? 'playing' : 'finished'}
                     onChange={(e) => {
                       const value = e.target.value;
                       handleUpdateFilter('isPlaying', value === '' ? undefined : value === 'playing');
                     }}
                   >
-                    <option value="">すべて</option>
-                    <option value="playing">プレイ中</option>
-                    <option value="finished">終了</option>
+                    <option value=''>すべて</option>
+                    <option value='playing'>プレイ中</option>
+                    <option value='finished'>終了</option>
                   </select>
                 </div>
               </div>
 
               {/* Advanced Filters Toggle */}
-              <button
-                type="button"
-                className={`${className}__advancedToggle`}
-                onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-              >
+              <button type='button' className={`${className}__advancedToggle`} onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}>
                 <Text
                   text={showAdvancedFilters ? '詳細フィルターを隠す' : '詳細フィルターを表示'}
                   fontSize={theme.typography.fontSize.sm}
@@ -190,19 +186,19 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
                   {/* Date Range */}
                   <div className={`${className}__filterGrid`}>
                     <div className={`${className}__filterItem`}>
-                      <label htmlFor="agg-filter-start-from">開始日（From）</label>
+                      <label htmlFor='agg-filter-start-from'>開始日（From）</label>
                       <input
-                        id="agg-filter-start-from"
-                        type="datetime-local"
+                        id='agg-filter-start-from'
+                        type='datetime-local'
                         value={filters.startTimeFrom ?? ''}
                         onChange={(e) => handleUpdateFilter('startTimeFrom', e.target.value || undefined)}
                       />
                     </div>
                     <div className={`${className}__filterItem`}>
-                      <label htmlFor="agg-filter-start-to">開始日（To）</label>
+                      <label htmlFor='agg-filter-start-to'>開始日（To）</label>
                       <input
-                        id="agg-filter-start-to"
-                        type="datetime-local"
+                        id='agg-filter-start-to'
+                        type='datetime-local'
                         value={filters.startTimeTo ?? ''}
                         onChange={(e) => handleUpdateFilter('startTimeTo', e.target.value || undefined)}
                       />
@@ -212,9 +208,9 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
                   {/* Metadata Filters */}
                   <div className={`${className}__filterGrid`}>
                     <div className={`${className}__filterItem`}>
-                      <label htmlFor="agg-filter-metadata-key">メタデータキー</label>
+                      <label htmlFor='agg-filter-metadata-key'>メタデータキー</label>
                       <select
-                        id="agg-filter-metadata-key"
+                        id='agg-filter-metadata-key'
                         value={filters.metadataKey ?? ''}
                         onChange={(e) => {
                           handleUpdateFilter('metadataKey', e.target.value || undefined);
@@ -223,7 +219,7 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
                           }
                         }}
                       >
-                        <option value="">選択してください</option>
+                        <option value=''>選択してください</option>
                         {metadataKeys.map((k) => (
                           <option key={k.key} value={k.key}>
                             {k.key} ({k.count}件)
@@ -232,13 +228,13 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
                       </select>
                     </div>
                     <div className={`${className}__filterItem`}>
-                      <label htmlFor="agg-filter-metadata-value">メタデータ値</label>
+                      <label htmlFor='agg-filter-metadata-value'>メタデータ値</label>
                       <input
-                        id="agg-filter-metadata-value"
-                        type="text"
+                        id='agg-filter-metadata-value'
+                        type='text'
                         value={filters.metadataValue ?? ''}
                         onChange={(e) => handleUpdateFilter('metadataValue', e.target.value || undefined)}
-                        placeholder="値を入力..."
+                        placeholder='値を入力...'
                         disabled={!filters.metadataKey}
                       />
                     </div>
@@ -246,13 +242,13 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
 
                   {/* Query Filter */}
                   <div className={`${className}__filterItem`}>
-                    <label htmlFor="agg-filter-query">クエリフィルター</label>
+                    <label htmlFor='agg-filter-query'>クエリフィルター</label>
                     <input
-                      id="agg-filter-query"
-                      type="text"
+                      id='agg-filter-query'
+                      type='text'
                       value={filters.q ?? ''}
                       onChange={(e) => handleUpdateFilter('q', e.target.value || undefined)}
-                      placeholder="例: platform:Android is:finished"
+                      placeholder='例: platform:Android is:finished'
                     />
                   </div>
                 </FlexColumn>
@@ -264,37 +260,37 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
         {/* Field Selection */}
         {numericMetadataKeys.length > 0 ? (
           <FlexColumn gap={8}>
-            <Text text="数値フィールドを選択して集計" fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
-            <FlexRow gap={8} align="center">
+            <Text text='数値フィールドを選択して集計' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
+            <FlexRow gap={8} align='center'>
               <select
                 className={`${className}__fieldSelect`}
                 value={selectedField}
                 onChange={(e) => setSelectedField(e.target.value)}
                 disabled={availableFields.length === 0}
               >
-                <option value="">フィールドを選択...</option>
+                <option value=''>フィールドを選択...</option>
                 {availableFields.map((k: MetadataKeyInfo) => (
                   <option key={k.key} value={k.key}>
                     {k.key} ({k.count}件)
                   </option>
                 ))}
               </select>
-              <Button onClick={handleAddAggregation} scheme="primary" fontSize="sm" disabled={!selectedField}>
+              <Button onClick={handleAddAggregation} scheme='primary' fontSize='sm' disabled={!selectedField}>
                 <BiPlus size={16} />
                 追加
               </Button>
             </FlexRow>
           </FlexColumn>
         ) : (
-          <Text text="集計可能な数値フィールドがありません" fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
+          <Text text='集計可能な数値フィールドがありません' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
         )}
 
         {/* Selected Fields */}
         {aggregationConfigs.length > 0 && (
           <FlexColumn gap={8}>
-            <FlexRow align="center">
-              <Text text="集計対象フィールド" fontSize={theme.typography.fontSize.sm} fontWeight="bold" />
-              <Button onClick={clearAggregations} scheme="surface" fontSize="sm">
+            <FlexRow align='center'>
+              <Text text='集計対象フィールド' fontSize={theme.typography.fontSize.sm} fontWeight='bold' />
+              <Button onClick={clearAggregations} scheme='surface' fontSize='sm'>
                 <BiX size={14} />
                 クリア
               </Button>
@@ -303,7 +299,7 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
               {aggregationConfigs.map((config) => (
                 <span key={config.field} className={`${className}__tag`}>
                   {config.field}
-                  <button type="button" onClick={() => removeAggregation(config.field)} aria-label={`${config.field}を削除`}>
+                  <button type='button' onClick={() => removeAggregation(config.field)} aria-label={`${config.field}を削除`}>
                     <BiX size={14} />
                   </button>
                 </span>
@@ -313,19 +309,17 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
         )}
 
         {/* Run Button */}
-        <Button onClick={handleRunAggregate} scheme="primary" fontSize="base" disabled={isAggregating}>
+        <Button onClick={handleRunAggregate} scheme='primary' fontSize='base' disabled={isAggregating}>
           <BiPlay size={18} />
           {isAggregating ? '集計中...' : '集計を実行'}
         </Button>
 
-        {hasActiveFilters && (
-          <Text text="※ フィルター条件が適用されます" fontSize={theme.typography.fontSize.xs} color={theme.colors.text.secondary} />
-        )}
+        {hasActiveFilters && <Text text='※ フィルター条件が適用されます' fontSize={theme.typography.fontSize.xs} color={theme.colors.text.secondary} />}
 
         {/* Results */}
         {aggregateResult && (
           <FlexColumn gap={16} className={`${className}__results`}>
-            <Text text="集計結果" fontSize={theme.typography.fontSize.base} fontWeight="bold" />
+            <Text text='集計結果' fontSize={theme.typography.fontSize.base} fontWeight='bold' />
 
             {/* Session Counts */}
             <div className={`${className}__countGrid`}>
@@ -335,22 +329,18 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
               </div>
               <div className={`${className}__countCard`}>
                 <span className={`${className}__countLabel`}>終了</span>
-                <span className={`${className}__countValue ${className}__countValue--finished`}>
-                  {formatNumber(aggregateResult.finishedCount)}
-                </span>
+                <span className={`${className}__countValue ${className}__countValue--finished`}>{formatNumber(aggregateResult.finishedCount)}</span>
               </div>
               <div className={`${className}__countCard`}>
                 <span className={`${className}__countLabel`}>プレイ中</span>
-                <span className={`${className}__countValue ${className}__countValue--playing`}>
-                  {formatNumber(aggregateResult.playingCount)}
-                </span>
+                <span className={`${className}__countValue ${className}__countValue--playing`}>{formatNumber(aggregateResult.playingCount)}</span>
               </div>
             </div>
 
             {/* Field Aggregations */}
             {aggregateResult.aggregations && aggregateResult.aggregations.length > 0 && (
               <FlexColumn gap={12}>
-                <Text text="フィールド別集計" fontSize={theme.typography.fontSize.sm} fontWeight="bold" />
+                <Text text='フィールド別集計' fontSize={theme.typography.fontSize.sm} fontWeight='bold' />
                 <div className={`${className}__aggregationTable`}>
                   <table>
                     <thead>
@@ -459,6 +449,11 @@ export const AggregationMenuContent = styled(AggregationMenuContentComponent)`
       color: ${({ theme }) => theme.colors.text.secondary};
     }
 
+    option {
+      color: ${({ theme }) => theme.colors.text.primary};
+      background: ${({ theme }) => theme.colors.surface.base};
+    }
+
     select,
     input {
       padding: ${({ theme }) => theme.spacing.sm};
@@ -469,18 +464,13 @@ export const AggregationMenuContent = styled(AggregationMenuContentComponent)`
       border-radius: ${({ theme }) => theme.borders.radius.sm};
 
       &:focus {
-        border-color: ${({ theme }) => theme.colors.primary.main};
         outline: none;
+        border-color: ${({ theme }) => theme.colors.primary.main};
       }
 
       &:disabled {
         cursor: not-allowed;
         opacity: 0.5;
-      }
-
-      option {
-        color: ${({ theme }) => theme.colors.text.primary};
-        background: ${({ theme }) => theme.colors.surface.base};
       }
     }
   }
@@ -510,8 +500,8 @@ export const AggregationMenuContent = styled(AggregationMenuContentComponent)`
     border-radius: ${({ theme }) => theme.borders.radius.md};
 
     &:focus {
-      border-color: ${({ theme }) => theme.colors.primary.main};
       outline: none;
+      border-color: ${({ theme }) => theme.colors.primary.main};
     }
 
     &:disabled {
