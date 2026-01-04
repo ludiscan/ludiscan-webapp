@@ -1211,6 +1211,109 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v0.1/heatmap/projects/{project_id}/play_session/{session_id}/tasks': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Create heatmap task for session (v0.1 - normalized density)
+     * @description Creates a heatmap calculation task for a specific session.
+     *     Returns normalized density values (0-1 range) instead of raw counts.
+     *
+     *     **v0.1 Improvements:**
+     *     - Density values are pre-normalized to 0-1 range on the server
+     *     - Includes normalization statistics for debugging
+     *     - Frontend only needs minThreshold slider for filtering
+     */
+    post: operations['HeatmapV01Controller_createSessionTask'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0.1/heatmap/projects/{project_id}/tasks': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Create heatmap task for project (v0.1 - normalized density)
+     * @description Creates a heatmap calculation task for a project with optional session filtering.
+     *     Returns normalized density values (0-1 range) instead of raw counts.
+     *
+     *     **Filtering Options:**
+     *     1. No filter: Use all sessions in the project
+     *     2. sessionIds: Specify exact session IDs (array of numbers)
+     *     3. searchQuery: Use search parameters to filter sessions
+     *
+     *     **v0.1 Improvements:**
+     *     - Density values are pre-normalized to 0-1 range on the server
+     *     - Includes normalization statistics for debugging
+     *     - Frontend only needs minThreshold slider for filtering
+     */
+    post: operations['HeatmapV01Controller_createProjectTask'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0.1/heatmap/tasks/{task_id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get heatmap task with normalized density (v0.1)
+     * @description Get heatmap task details with normalized density values (0-1 range).
+     *
+     *     **Response includes:**
+     *     - result: Array of points with normalizedDensity (0-1 range)
+     *     - stats: Normalization statistics (min, max, percentiles, scale mode)
+     */
+    get: operations['HeatmapV01Controller_getTask'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0.1/heatmap/projects/{project_id}/tasks/list': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get heatmap tasks list for project (v0.1)
+     * @description Get a list of completed heatmap tasks for a project with pagination.
+     *     Returns tasks ordered by most recent first (by updated_at).
+     *     Does not include result data for better performance.
+     */
+    get: operations['HeatmapV01Controller_getProjectTasksList'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v0/database/backup': {
     parameters: {
       query?: never;
@@ -1477,9 +1580,29 @@ export interface paths {
     };
     /**
      * ヒートマップ埋め込みページのURLを取得
-     * @description セッション完了後にWebViewで直接ヒートマップを表示するためのURL（1時間有効なトークン付き）を生成します
+     * @description セッション完了後にWebViewで直接ヒートマップを表示するための短縮URL（24時間有効）を生成します
      */
     get: operations['GameController_getHeatmapEmbedUrl'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/h/{code}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 共有リンクからheatmapページにリダイレクト
+     * @description 短縮コードを検証し、有効であればwebappのheatmapページにリダイレクトします
+     */
+    get: operations['ShareLinksController_redirect'];
     put?: never;
     post?: never;
     delete?: never;
@@ -2638,6 +2761,191 @@ export interface components {
       limit: number;
       /**
        * @description Offset
+       * @example 0
+       */
+      offset: number;
+    };
+    NormalizedHeatmapPointDto: {
+      /**
+       * @description X coordinate
+       * @example 100.5
+       */
+      x: number;
+      /**
+       * @description Y coordinate
+       * @example 200.5
+       */
+      y: number;
+      /**
+       * @description Z coordinate
+       * @example 50
+       */
+      z: number;
+      /**
+       * @description Normalized density value (0-1 range)
+       * @example 0.75
+       */
+      normalizedDensity: number;
+    };
+    NormalizedHeatmapStatsDto: {
+      /**
+       * @description Minimum raw density value
+       * @example 1
+       */
+      min: number;
+      /**
+       * @description Maximum raw density value
+       * @example 1000
+       */
+      max: number;
+      /**
+       * @description 1st percentile density value (lower bound for normalization)
+       * @example 5
+       */
+      percentile1: number;
+      /**
+       * @description 99th percentile density value (upper bound for normalization)
+       * @example 800
+       */
+      percentile99: number;
+      /**
+       * @description Scale mode used for normalization
+       * @example log1p
+       * @enum {string}
+       */
+      scaleMode: 'sqrt' | 'log1p';
+      /**
+       * @description Total number of data points
+       * @example 500
+       */
+      totalPoints: number;
+    };
+    HeatmapTaskV01Dto: {
+      /**
+       * @description Task ID
+       * @example 1
+       */
+      taskId: number;
+      /** @description Project */
+      project: components['schemas']['ProjectResponseDto'];
+      /** @description Session (if task is for a specific session) */
+      session?: components['schemas']['PlaySessionResponseDto'] | null;
+      /**
+       * @description Session IDs used for filtering (if multiple sessions)
+       * @example [
+       *       1,
+       *       2,
+       *       3
+       *     ]
+       */
+      sessionIds?: number[] | null;
+      /**
+       * @description Search query text used to filter sessions (GitHub-style query)
+       * @example platform:Android is:finished
+       */
+      searchQuery?: Record<string, never> | null;
+      /**
+       * @description Step size for grid cells
+       * @example 200
+       */
+      stepSize: number;
+      /**
+       * @description Whether Z axis is visible (3D mode)
+       * @example true
+       */
+      zVisible: boolean;
+      /**
+       * @description Task status
+       * @example completed
+       * @enum {string}
+       */
+      status: 'pending' | 'processing' | 'completed' | 'failed';
+      /** @description Normalized heatmap result with density values in 0-1 range */
+      result: components['schemas']['NormalizedHeatmapPointDto'][];
+      /** @description Normalization statistics */
+      stats: components['schemas']['NormalizedHeatmapStatsDto'];
+      /**
+       * Format: date-time
+       * @description Created at timestamp
+       * @example 2021-01-01T00:00:00.000Z
+       */
+      createdAt: string;
+      /**
+       * Format: date-time
+       * @description Updated at timestamp
+       * @example 2021-01-01T00:00:00.000Z
+       */
+      updatedAt: string;
+    };
+    HeatmapTaskV01ListItemDto: {
+      /**
+       * @description Task ID
+       * @example 1
+       */
+      taskId: number;
+      /**
+       * @description Session ID (if task is for a specific session)
+       * @example 123
+       */
+      sessionId?: Record<string, never> | null;
+      /**
+       * @description Session IDs used for filtering (if multiple sessions)
+       * @example [
+       *       1,
+       *       2,
+       *       3
+       *     ]
+       */
+      sessionIds?: number[] | null;
+      /**
+       * @description Search query text used to filter sessions
+       * @example platform:Android is:finished
+       */
+      searchQuery?: Record<string, never> | null;
+      /**
+       * @description Step size for grid cells
+       * @example 200
+       */
+      stepSize: number;
+      /**
+       * @description Whether Z axis is visible (3D mode)
+       * @example true
+       */
+      zVisible: boolean;
+      /**
+       * @description Task status
+       * @example completed
+       * @enum {string}
+       */
+      status: 'pending' | 'processing' | 'completed' | 'failed';
+      /**
+       * Format: date-time
+       * @description Created at timestamp
+       * @example 2021-01-01T00:00:00.000Z
+       */
+      createdAt: string;
+      /**
+       * Format: date-time
+       * @description Updated at timestamp
+       * @example 2021-01-01T00:00:00.000Z
+       */
+      updatedAt: string;
+    };
+    HeatmapTaskV01ListResponseDto: {
+      /** @description List of heatmap tasks */
+      tasks: components['schemas']['HeatmapTaskV01ListItemDto'][];
+      /**
+       * @description Total number of tasks
+       * @example 100
+       */
+      total: number;
+      /**
+       * @description Number of tasks returned
+       * @example 20
+       */
+      limit: number;
+      /**
+       * @description Offset for pagination
        * @example 0
        */
       offset: number;
@@ -5943,6 +6251,144 @@ export interface operations {
       };
     };
   };
+  HeatmapV01Controller_createSessionTask: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        project_id: number;
+        session_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateHeatmapDto'];
+      };
+    };
+    responses: {
+      /** @description Task created with normalized density */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HeatmapTaskV01Dto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  HeatmapV01Controller_createProjectTask: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        project_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateHeatmapDto'];
+      };
+    };
+    responses: {
+      /** @description Task created with normalized density */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HeatmapTaskV01Dto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  HeatmapV01Controller_getTask: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        task_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Task details with normalized density */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HeatmapTaskV01Dto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  HeatmapV01Controller_getProjectTasksList: {
+    parameters: {
+      query?: {
+        /** @description Number of tasks to return (1-100, default: 20) */
+        limit?: number;
+        /** @description Offset for pagination (default: 0) */
+        offset?: number;
+      };
+      header?: never;
+      path: {
+        project_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Tasks list */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HeatmapTaskV01ListResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
   BackupController_backup: {
     parameters: {
       query?: never;
@@ -6723,6 +7169,41 @@ export interface operations {
         content: {
           'application/json': components['schemas']['DefaultErrorResponse'];
         };
+      };
+    };
+  };
+  ShareLinksController_redirect: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description 共有リンクコード（4文字-4文字） */
+        code: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description heatmapページにリダイレクト */
+      302: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description リンクが無効化されている、期限切れ、または使用回数超過 */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description リンクが見つからない */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };

@@ -4915,6 +4915,240 @@
         ]
       }
     },
+    "/api/v0.1/heatmap/projects/{project_id}/play_session/{session_id}/tasks": {
+      "post": {
+        "description": "\nCreates a heatmap calculation task for a specific session.\nReturns normalized density values (0-1 range) instead of raw counts.\n\n**v0.1 Improvements:**\n- Density values are pre-normalized to 0-1 range on the server\n- Includes normalization statistics for debugging\n- Frontend only needs minThreshold slider for filtering\n        ",
+        "operationId": "HeatmapV01Controller_createSessionTask",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "session_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateHeatmapDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Task created with normalized density",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HeatmapTaskV01Dto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create heatmap task for session (v0.1 - normalized density)",
+        "tags": [
+          "v0.1"
+        ]
+      }
+    },
+    "/api/v0.1/heatmap/projects/{project_id}/tasks": {
+      "post": {
+        "description": "\nCreates a heatmap calculation task for a project with optional session filtering.\nReturns normalized density values (0-1 range) instead of raw counts.\n\n**Filtering Options:**\n1. No filter: Use all sessions in the project\n2. sessionIds: Specify exact session IDs (array of numbers)\n3. searchQuery: Use search parameters to filter sessions\n\n**v0.1 Improvements:**\n- Density values are pre-normalized to 0-1 range on the server\n- Includes normalization statistics for debugging\n- Frontend only needs minThreshold slider for filtering\n        ",
+        "operationId": "HeatmapV01Controller_createProjectTask",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateHeatmapDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Task created with normalized density",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HeatmapTaskV01Dto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create heatmap task for project (v0.1 - normalized density)",
+        "tags": [
+          "v0.1"
+        ]
+      }
+    },
+    "/api/v0.1/heatmap/tasks/{task_id}": {
+      "get": {
+        "description": "\nGet heatmap task details with normalized density values (0-1 range).\n\n**Response includes:**\n- result: Array of points with normalizedDensity (0-1 range)\n- stats: Normalization statistics (min, max, percentiles, scale mode)\n        ",
+        "operationId": "HeatmapV01Controller_getTask",
+        "parameters": [
+          {
+            "name": "task_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task details with normalized density",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HeatmapTaskV01Dto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get heatmap task with normalized density (v0.1)",
+        "tags": [
+          "v0.1"
+        ]
+      }
+    },
+    "/api/v0.1/heatmap/projects/{project_id}/tasks/list": {
+      "get": {
+        "description": "\nGet a list of completed heatmap tasks for a project with pagination.\nReturns tasks ordered by most recent first (by updated_at).\nDoes not include result data for better performance.\n        ",
+        "operationId": "HeatmapV01Controller_getProjectTasksList",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Number of tasks to return (1-100, default: 20)",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Offset for pagination (default: 0)",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tasks list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HeatmapTaskV01ListResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get heatmap tasks list for project (v0.1)",
+        "tags": [
+          "v0.1"
+        ]
+      }
+    },
     "/api/v0/database/backup": {
       "post": {
         "operationId": "BackupController_backup",
@@ -6119,7 +6353,7 @@
     },
     "/api/v0/game/projects/{project_id}/sessions/{session_id}/heatmap-embed-url": {
       "get": {
-        "description": "セッション完了後にWebViewで直接ヒートマップを表示するためのURL（1時間有効なトークン付き）を生成します",
+        "description": "セッション完了後にWebViewで直接ヒートマップを表示するための短縮URL（24時間有効）を生成します",
         "operationId": "GameController_getHeatmapEmbedUrl",
         "parameters": [
           {
@@ -6180,6 +6414,39 @@
         "summary": "ヒートマップ埋め込みページのURLを取得",
         "tags": [
           "Game Client API"
+        ]
+      }
+    },
+    "/api/v0/h/{code}": {
+      "get": {
+        "description": "短縮コードを検証し、有効であればwebappのheatmapページにリダイレクトします",
+        "operationId": "ShareLinksController_redirect",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "description": "共有リンクコード（4文字-4文字）",
+            "schema": {
+              "example": "ABCD-EFGH",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "heatmapページにリダイレクト"
+          },
+          "400": {
+            "description": "リンクが無効化されている、期限切れ、または使用回数超過"
+          },
+          "404": {
+            "description": "リンクが見つからない"
+          }
+        },
+        "summary": "共有リンクからheatmapページにリダイレクト",
+        "tags": [
+          "Share Links"
         ]
       }
     },
@@ -7154,7 +7421,7 @@
   "info": {
     "title": "Ludiscan API Documentation",
     "description": "Ludiscan API for game analytics and session tracking",
-    "version": "1.21.0",
+    "version": "1.22.0",
     "contact": {}
   },
   "tags": [],
@@ -8767,6 +9034,300 @@
           "offset": {
             "type": "number",
             "description": "Offset",
+            "example": 0
+          }
+        },
+        "required": [
+          "tasks",
+          "total",
+          "limit",
+          "offset"
+        ]
+      },
+      "NormalizedHeatmapPointDto": {
+        "type": "object",
+        "properties": {
+          "x": {
+            "type": "number",
+            "description": "X coordinate",
+            "example": 100.5
+          },
+          "y": {
+            "type": "number",
+            "description": "Y coordinate",
+            "example": 200.5
+          },
+          "z": {
+            "type": "number",
+            "description": "Z coordinate",
+            "example": 50
+          },
+          "normalizedDensity": {
+            "type": "number",
+            "description": "Normalized density value (0-1 range)",
+            "example": 0.75,
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "required": [
+          "x",
+          "y",
+          "z",
+          "normalizedDensity"
+        ]
+      },
+      "NormalizedHeatmapStatsDto": {
+        "type": "object",
+        "properties": {
+          "min": {
+            "type": "number",
+            "description": "Minimum raw density value",
+            "example": 1
+          },
+          "max": {
+            "type": "number",
+            "description": "Maximum raw density value",
+            "example": 1000
+          },
+          "percentile1": {
+            "type": "number",
+            "description": "1st percentile density value (lower bound for normalization)",
+            "example": 5
+          },
+          "percentile99": {
+            "type": "number",
+            "description": "99th percentile density value (upper bound for normalization)",
+            "example": 800
+          },
+          "scaleMode": {
+            "type": "string",
+            "description": "Scale mode used for normalization",
+            "example": "log1p",
+            "enum": [
+              "sqrt",
+              "log1p"
+            ]
+          },
+          "totalPoints": {
+            "type": "number",
+            "description": "Total number of data points",
+            "example": 500
+          }
+        },
+        "required": [
+          "min",
+          "max",
+          "percentile1",
+          "percentile99",
+          "scaleMode",
+          "totalPoints"
+        ]
+      },
+      "HeatmapTaskV01Dto": {
+        "type": "object",
+        "properties": {
+          "taskId": {
+            "type": "number",
+            "description": "Task ID",
+            "example": 1
+          },
+          "project": {
+            "description": "Project",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProjectResponseDto"
+              }
+            ]
+          },
+          "session": {
+            "description": "Session (if task is for a specific session)",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PlaySessionResponseDto"
+              }
+            ]
+          },
+          "sessionIds": {
+            "description": "Session IDs used for filtering (if multiple sessions)",
+            "example": [
+              1,
+              2,
+              3
+            ],
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "searchQuery": {
+            "type": "object",
+            "description": "Search query text used to filter sessions (GitHub-style query)",
+            "example": "platform:Android is:finished",
+            "nullable": true
+          },
+          "stepSize": {
+            "type": "number",
+            "description": "Step size for grid cells",
+            "example": 200
+          },
+          "zVisible": {
+            "type": "boolean",
+            "description": "Whether Z axis is visible (3D mode)",
+            "example": true
+          },
+          "status": {
+            "type": "string",
+            "description": "Task status",
+            "example": "completed",
+            "enum": [
+              "pending",
+              "processing",
+              "completed",
+              "failed"
+            ]
+          },
+          "result": {
+            "description": "Normalized heatmap result with density values in 0-1 range",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NormalizedHeatmapPointDto"
+            }
+          },
+          "stats": {
+            "description": "Normalization statistics",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NormalizedHeatmapStatsDto"
+              }
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Created at timestamp",
+            "example": "2021-01-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Updated at timestamp",
+            "example": "2021-01-01T00:00:00.000Z"
+          }
+        },
+        "required": [
+          "taskId",
+          "project",
+          "stepSize",
+          "zVisible",
+          "status",
+          "result",
+          "stats",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "HeatmapTaskV01ListItemDto": {
+        "type": "object",
+        "properties": {
+          "taskId": {
+            "type": "number",
+            "description": "Task ID",
+            "example": 1
+          },
+          "sessionId": {
+            "type": "object",
+            "description": "Session ID (if task is for a specific session)",
+            "example": 123,
+            "nullable": true
+          },
+          "sessionIds": {
+            "description": "Session IDs used for filtering (if multiple sessions)",
+            "example": [
+              1,
+              2,
+              3
+            ],
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "searchQuery": {
+            "type": "object",
+            "description": "Search query text used to filter sessions",
+            "example": "platform:Android is:finished",
+            "nullable": true
+          },
+          "stepSize": {
+            "type": "number",
+            "description": "Step size for grid cells",
+            "example": 200
+          },
+          "zVisible": {
+            "type": "boolean",
+            "description": "Whether Z axis is visible (3D mode)",
+            "example": true
+          },
+          "status": {
+            "type": "string",
+            "description": "Task status",
+            "example": "completed",
+            "enum": [
+              "pending",
+              "processing",
+              "completed",
+              "failed"
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Created at timestamp",
+            "example": "2021-01-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Updated at timestamp",
+            "example": "2021-01-01T00:00:00.000Z"
+          }
+        },
+        "required": [
+          "taskId",
+          "stepSize",
+          "zVisible",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "HeatmapTaskV01ListResponseDto": {
+        "type": "object",
+        "properties": {
+          "tasks": {
+            "description": "List of heatmap tasks",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HeatmapTaskV01ListItemDto"
+            }
+          },
+          "total": {
+            "type": "number",
+            "description": "Total number of tasks",
+            "example": 100
+          },
+          "limit": {
+            "type": "number",
+            "description": "Number of tasks returned",
+            "example": 20
+          },
+          "offset": {
+            "type": "number",
+            "description": "Offset for pagination",
             "example": 0
           }
         },
