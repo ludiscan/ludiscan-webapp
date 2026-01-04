@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import { useCallback, useState, useMemo, useRef } from 'react';
+import { FiFilter } from 'react-icons/fi';
 import { IoChevronDown, IoChevronUp } from 'react-icons/io5';
 import { useDispatch } from 'react-redux';
 
@@ -8,7 +9,7 @@ import type { GeneralSettings } from '@src/modeles/heatmapView';
 import type { ChangeEvent, FC } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
-import { FlexRow } from '@src/component/atoms/Flex';
+import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { Slider } from '@src/component/atoms/Slider';
 import { Switch } from '@src/component/atoms/Switch';
 import { Text } from '@src/component/atoms/Text';
@@ -164,6 +165,23 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
 
   const currentTaskId = service.task?.taskId;
 
+  // セッションフィルター用（embed時はembedSessionId、通常時はsessionIdを使用）
+  const targetSessionId = service.embedSessionId ?? service.sessionId;
+  const isFilteredBySession = useMemo(() => {
+    if (!targetSessionId) return false;
+    return service.sessionHeatmapIds?.includes(targetSessionId) && service.sessionHeatmapIds.length === 1;
+  }, [targetSessionId, service.sessionHeatmapIds]);
+
+  const handleFilterBySession = useCallback(() => {
+    if (targetSessionId) {
+      service.setSessionHeatmapIds([targetSessionId]);
+    }
+  }, [service, targetSessionId]);
+
+  const handleClearSessionFilter = useCallback(() => {
+    service.setSessionHeatmapIds(undefined);
+  }, [service]);
+
   const handleResetView = useCallback(() => {
     if (centerPosition) {
       dispatch(focusByCoord({ point: centerPosition }));
@@ -214,9 +232,30 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
 
       {/* Session Filter ボタン */}
       <InputRow label={'Session Filter'}>
-        <Button onClick={() => setIsSessionFilterModalOpen(true)} scheme={'surface'} fontSize={'sm'}>
-          <Text text={'セッションフィルター'} fontSize={theme.typography.fontSize.sm} />
-        </Button>
+        <FlexColumn gap={8} style={{ flex: 1 }}>
+          <Button onClick={() => setIsSessionFilterModalOpen(true)} scheme={'surface'} fontSize={'sm'}>
+            <Text text={'セッションフィルター'} fontSize={theme.typography.fontSize.sm} />
+          </Button>
+          {/* セッション選択時のクイックフィルターボタン */}
+          {targetSessionId && (
+            <>
+              {isFilteredBySession ? (
+                <Button onClick={handleClearSessionFilter} scheme={'tertiary'} fontSize={'sm'}>
+                  <FiFilter size={14} />
+                  <Text text={'フィルター解除'} fontSize={theme.typography.fontSize.sm} />
+                </Button>
+              ) : (
+                <Button onClick={handleFilterBySession} scheme={'primary'} fontSize={'sm'}>
+                  <FiFilter size={14} />
+                  <Text text={`Session #${targetSessionId} でフィルター`} fontSize={theme.typography.fontSize.sm} />
+                </Button>
+              )}
+            </>
+          )}
+          {isFilteredBySession && (
+            <Text text={`Session ${targetSessionId} でフィルター中`} fontSize={theme.typography.fontSize.xs} color={theme.colors.text.secondary} />
+          )}
+        </FlexColumn>
       </InputRow>
 
       {/* 背景画像選択 */}

@@ -50,6 +50,8 @@ export type HeatmapDataService = {
   isInitialized: boolean;
   // embed経由でのアクセスかどうか（trueの場合、一部の機能が制限される）
   isEmbed?: boolean;
+  // embedトークンに紐づいた元のsessionId（フィルター用、embed時のみ）
+  embedSessionId?: number;
   // マップリストの取得（activeOnly: trueの場合、マップデータがアップロード済みのマップのみを返す）
   getMapList(activeOnly?: boolean): Promise<string[]>;
 
@@ -438,6 +440,8 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
   const loadTask = useCallback(
     (newTaskId: number) => {
       setTaskId(newTaskId);
+      // タスクを直接選択した場合はフィルターを解除
+      setSessionHeatmapIds(undefined);
     },
     [setTaskId],
   );
