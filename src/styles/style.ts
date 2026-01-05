@@ -38,6 +38,7 @@ export const zIndexes = {
   tooltip: 400,
   loader: 500,
   toast: 600,
+  pageLoading: 900,
   renderOrder: {
     heatmap: 100,
     timelinePoints: 101,
