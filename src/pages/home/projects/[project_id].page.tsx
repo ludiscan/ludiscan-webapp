@@ -35,7 +35,7 @@ export const getServerSideProps: GetServerSideProps<ProjectDetailsPageProps> = a
   const { params, req } = context;
   const projectId = params?.project_id;
 
-  if (!projectId || isNaN(Number(projectId))) {
+  if (!projectId || Array.isArray(projectId) || isNaN(Number(projectId))) {
     return { notFound: true };
   }
 
