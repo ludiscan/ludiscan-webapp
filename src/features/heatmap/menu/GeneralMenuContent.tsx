@@ -75,29 +75,19 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
   const [isOptionsOpen, setIsOptionsOpen] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const {
-    upZ,
-    scale,
-    heatmapOpacity,
-    heatmapType,
-    showHeatmap,
-    minThreshold,
-    backgroundImage,
-    backgroundScale,
-    backgroundOffsetX,
-    backgroundOffsetY,
-  } = useGeneralPick(
-    'upZ',
-    'scale',
-    'showHeatmap',
-    'heatmapOpacity',
-    'heatmapType',
-    'minThreshold',
-    'backgroundImage',
-    'backgroundScale',
-    'backgroundOffsetX',
-    'backgroundOffsetY',
-  );
+  const { upZ, scale, heatmapOpacity, heatmapType, showHeatmap, minThreshold, backgroundImage, backgroundScale, backgroundOffsetX, backgroundOffsetY } =
+    useGeneralPick(
+      'upZ',
+      'scale',
+      'showHeatmap',
+      'heatmapOpacity',
+      'heatmapType',
+      'minThreshold',
+      'backgroundImage',
+      'backgroundScale',
+      'backgroundOffsetX',
+      'backgroundOffsetY',
+    );
   const setData = useGeneralPatch();
 
   // Calculate the center position of all heatmap cells
@@ -224,10 +214,7 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
               ) : (
                 <Button onClick={handleFilterBySession} scheme={'primary'} fontSize={'sm'}>
                   <FiFilter size={14} />
-                  <Text
-                    text={t('heatmap.general.filterBySession').replace('{id}', String(targetSessionId))}
-                    fontSize={theme.typography.fontSize.sm}
-                  />
+                  <Text text={t('heatmap.general.filterBySession').replace('{id}', String(targetSessionId))} fontSize={theme.typography.fontSize.sm} />
                 </Button>
               )}
             </>

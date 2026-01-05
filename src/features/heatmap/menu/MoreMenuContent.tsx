@@ -89,12 +89,7 @@ export const MoreMenuContent: FC<HeatmapMenuProps> = () => {
       <Text text={'All Features'} fontSize={theme.typography.fontSize.lg} fontWeight={theme.typography.fontWeight.bold} />
       <GridContainer>
         {availableMenus.map((menu) => (
-          <MenuItem
-            key={menu.id}
-            name={getMenuDisplayName(menu.id, t)}
-            icon={menu.icon!}
-            onClick={() => handleMenuClick(menu.id)}
-          />
+          <MenuItem key={menu.id} name={getMenuDisplayName(menu.id, t)} icon={menu.icon!} onClick={() => handleMenuClick(menu.id)} />
         ))}
       </GridContainer>
     </FlexColumn>
