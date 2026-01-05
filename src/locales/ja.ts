@@ -195,10 +195,20 @@ export const ja = {
     },
 
     info: {
-      projectId: 'project_id:',
-      name: 'name:',
-      mode: 'mode:',
+      projectId: 'プロジェクトID',
+      name: '名前',
+      mode: 'モード',
+      description: '説明',
       export: 'エクスポート',
+      projectSection: 'プロジェクト情報',
+      productSection: 'アプリケーション情報',
+      version: 'バージョン',
+      author: '開発者',
+      documentation: 'ドキュメント',
+      sourceCode: 'ソースコード',
+      viewOrg: 'GitHub Org',
+      viewSource: 'GitHubで見る',
+      noDescription: '説明なし',
     },
 
     map: {
