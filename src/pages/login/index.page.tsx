@@ -8,6 +8,7 @@ import type { FC } from 'react';
 import { Button } from '@src/component/atoms/Button';
 import { Card } from '@src/component/atoms/Card';
 import { FlexColumn, InlineFlexColumn } from '@src/component/atoms/Flex';
+import { Seo } from '@src/component/atoms/Seo';
 import { VerticalSpacer } from '@src/component/atoms/Spacer';
 import { Text } from '@src/component/atoms/Text';
 import { LanguageSelector } from '@src/component/molecules/LanguageSelector';
@@ -143,6 +144,7 @@ const Content: FC<LoginPageProps> = ({ className }) => {
 const Component: FC<LoginPageProps> = (props) => {
   return (
     <div className={props.className}>
+      <Seo title='Login' path='/login' keywords={['login', 'sign in', 'authentication']} />
       <Content {...props} />
     </div>
   );

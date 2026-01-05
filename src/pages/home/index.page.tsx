@@ -14,6 +14,7 @@ import { Button } from '@src/component/atoms/Button';
 import { Card } from '@src/component/atoms/Card';
 import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { Observer } from '@src/component/atoms/Observer';
+import { Seo } from '@src/component/atoms/Seo';
 import { VerticalSpacer } from '@src/component/atoms/Spacer';
 import { Text } from '@src/component/atoms/Text';
 import { ProjectFormModal } from '@src/component/organisms/ProjectFormModal';
@@ -168,6 +169,7 @@ const Component: FC<HomePageProps> = ({ className }) => {
 
   return (
     <div className={`${className} ${isVisible ? 'visible' : ''}`}>
+      <Seo title={t('home.title')} path='/home' noIndex={true} />
       {/* Three.js Canvas Background - Mountain landscape */}
       <DashboardBackgroundCanvas />
 
