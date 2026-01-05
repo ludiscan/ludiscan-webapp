@@ -91,4 +91,3 @@ ludiscan-webapp/
 
 - [開発環境のセットアップ](/heatmap/docs/project/setup)を参照して開発を始める
 - [アーキテクチャドキュメント](/heatmap/docs/project/architecture)で詳細な設計を理解する
-- [開発ガイドライン](/heatmap/docs/project/guidelines)でコーディング規約を確認する
