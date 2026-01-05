@@ -51,6 +51,8 @@ const HintText = styled.div`
   font-size: 12px;
   line-height: 1.5;
   color: ${({ theme }) => theme.colors.text.secondary};
+  word-break: break-all;
+  white-space: pre-wrap;
 `;
 
 const SearchInput = styled.input`
@@ -163,7 +165,7 @@ export const Component: FC<SessionFilterModalProps> = ({ className, isOpen, onCl
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title='セッションフィルター' closeOutside className={className}>
-      <FlexColumn gap={16} style={{ width: '600px', maxWidth: '90vw' }}>
+      <FlexColumn gap={16} style={{ maxWidth: '90vw' }}>
         {/* 検索クエリ入力 */}
         <FlexColumn gap={8}>
           <Text text={'検索クエリ'} fontSize={theme.typography.fontSize.base} fontWeight={'bold'} />

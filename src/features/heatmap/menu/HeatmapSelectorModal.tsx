@@ -1,65 +1,219 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
-import { useCallback } from 'react';
+import { memo, useCallback, useState, useEffect, useMemo } from 'react';
+import { IoCheckmark, IoGrid } from 'react-icons/io5';
 
+import type { HeatmapTaskListItem } from '@src/features/heatmap/menu/HeatmapTaskDetail';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
-import { FlexColumn } from '@src/component/atoms/Flex';
+import { Divider } from '@src/component/atoms/Divider';
 import { Text } from '@src/component/atoms/Text';
 import { Modal } from '@src/component/molecules/Modal';
 import { useToast } from '@src/component/templates/ToastContext';
+import { HeatmapTaskDetail } from '@src/features/heatmap/menu/HeatmapTaskDetail';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { useApiClient } from '@src/modeles/ApiClientContext';
+
+const ModalContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 800px;
+  max-width: calc(100vw - 32px);
+  height: 500px;
+  max-height: calc(100vh - 120px);
+  overflow: hidden;
+
+  @media (width <= 768px) {
+    width: calc(100vw - 32px);
+    height: calc(100vh - 100px);
+    max-height: calc(100vh - 100px);
+  }
+
+  @media (width <= 480px) {
+    width: calc(100vw - 16px);
+    height: calc(100vh - 80px);
+    max-height: calc(100vh - 80px);
+  }
+`;
+
+const HintText = styled.div`
+  flex-shrink: 0;
+  padding: 12px 16px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: ${({ theme }) => theme.colors.text.secondary};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border.default};
+`;
+
+const PanelContainer = styled.div`
+  display: flex;
+  flex: 1;
+  gap: 0;
+  min-height: 0;
+  overflow: hidden;
+
+  @media (width <= 600px) {
+    flex-direction: column;
+  }
+`;
+
+const LeftPanel = styled.div`
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  width: 280px;
+  min-width: 200px;
+  min-height: 0;
+  border-right: 1px solid ${({ theme }) => theme.colors.border.default};
+
+  @media (width <= 600px) {
+    flex: 1;
+    width: 100%;
+    min-height: 120px;
+    border-right: none;
+    border-bottom: 1px solid ${({ theme }) => theme.colors.border.default};
+  }
+`;
+
+const RightPanel = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+
+  @media (width <= 600px) {
+    flex: 1;
+    min-height: 120px;
+  }
+`;
+
+const PanelHeader = styled.div`
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.text.secondary};
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border.default};
+`;
+
+const TaskCount = styled.span`
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.text.tertiary};
+  background: ${({ theme }) => theme.colors.surface.base};
+  border-radius: 10px;
+`;
+
+const ListWrapper = styled.div`
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: ${({ theme }) => theme.colors.border.default};
+    border-radius: 3px;
+
+    &:hover {
+      background: ${({ theme }) => theme.colors.border.strong};
+    }
+  }
+`;
+
+const DetailWrapper = styled.div`
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+`;
 
 const TaskList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  max-height: 400px;
+  gap: 4px;
   padding: 8px;
-  overflow-y: auto;
-  background: ${({ theme }) => theme.colors.surface.raised};
-  border-radius: 8px;
 `;
 
-const TaskItem = styled.div<{ isSelected?: boolean }>`
+const TaskItem = styled.button<{ isSelected?: boolean; isCurrent?: boolean }>`
   display: flex;
   gap: 12px;
   align-items: center;
-  justify-content: space-between;
+  width: 100%;
   padding: 12px;
   font-size: 14px;
+  text-align: left;
   cursor: pointer;
-  background: ${({ theme, isSelected }) => (isSelected ? theme.colors.primary.main + '20' : theme.colors.surface.base)};
-  border: 1px solid ${({ theme, isSelected }) => (isSelected ? theme.colors.primary.main : theme.colors.border.subtle)};
-  border-radius: 6px;
+  background: ${({ theme, isSelected }) => (isSelected ? theme.colors.primary.main + '15' : 'transparent')};
+  border: 1px solid
+    ${({ theme, isSelected, isCurrent }) => (isCurrent ? theme.colors.primary.main : isSelected ? theme.colors.primary.main + '40' : 'transparent')};
+  border-radius: 8px;
+  transition: all 0.15s ease;
 
   &:hover {
-    background: ${({ theme }) => theme.colors.surface.hover};
+    background: ${({ theme, isSelected }) => (isSelected ? theme.colors.primary.main + '20' : theme.colors.surface.hover)};
   }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+`;
+
+const TaskIcon = styled.span<{ isSelected?: boolean }>`
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  font-size: 16px;
+  color: ${({ theme, isSelected }) => (isSelected ? theme.colors.primary.main : theme.colors.text.secondary)};
+  background: ${({ theme }) => theme.colors.surface.base};
+  border-radius: 6px;
 `;
 
 const TaskInfo = styled.div`
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
+  min-width: 0;
+`;
+
+const TaskName = styled.span`
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.text.primary};
 `;
 
 const TaskMeta = styled.div`
   display: flex;
-  gap: 8px;
+  gap: 6px;
   align-items: center;
-  font-size: 12px;
-  color: ${({ theme }) => theme.colors.text.secondary};
+  font-size: 11px;
+  color: ${({ theme }) => theme.colors.text.tertiary};
 `;
 
-const StatusBadge = styled.span<{ status: string }>`
-  padding: 2px 8px;
-  font-size: 11px;
-  color: ${({ theme }) => theme.colors.text.primary};
+const StatusDot = styled.span<{ status: string }>`
+  width: 6px;
+  height: 6px;
   background: ${({ status }) => {
     switch (status) {
       case 'completed':
@@ -74,20 +228,51 @@ const StatusBadge = styled.span<{ status: string }>`
         return '#6b7280';
     }
   }};
-  border-radius: 4px;
+  border-radius: 50%;
 `;
 
-const HintText = styled.div`
-  font-size: 12px;
-  line-height: 1.5;
+const DimensionTag = styled.span`
+  padding: 1px 4px;
+  font-size: 10px;
+  font-weight: 600;
   color: ${({ theme }) => theme.colors.text.secondary};
+  background: ${({ theme }) => theme.colors.surface.raised};
+  border-radius: 3px;
+`;
+
+const CheckMark = styled.span`
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  color: ${({ theme }) => theme.colors.primary.contrast};
+  background: ${({ theme }) => theme.colors.primary.main};
+  border-radius: 50%;
 `;
 
 const EmptyState = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
   padding: 24px;
   font-size: 14px;
   color: ${({ theme }) => theme.colors.text.secondary};
   text-align: center;
+`;
+
+const Footer = styled.div`
+  display: flex;
+  flex-shrink: 0;
+  gap: 12px;
+  justify-content: flex-end;
+  padding: 12px 16px;
+  border-top: 1px solid ${({ theme }) => theme.colors.border.default};
 `;
 
 export type HeatmapSelectorModalProps = {
@@ -96,19 +281,22 @@ export type HeatmapSelectorModalProps = {
   service: HeatmapDataService;
 };
 
-export const HeatmapSelectorModal: FC<HeatmapSelectorModalProps> = ({ isOpen, onClose, service }) => {
+const Component: FC<HeatmapSelectorModalProps> = ({ isOpen, onClose, service }) => {
   const { theme } = useSharedTheme();
   const toast = useToast();
   const apiClient = useApiClient();
   const projectId = service.projectId;
   const currentTaskId = service.task?.taskId;
 
+  // プレビュー用タスク（確定前）
+  const [previewTask, setPreviewTask] = useState<HeatmapTaskListItem | null>(null);
+
   const { data: taskListData, isLoading } = useQuery({
     queryKey: ['heatmapTasksList', projectId],
     queryFn: async () => {
       if (!projectId) return null;
 
-      const res = await apiClient.GET('/api/v0/heatmap/projects/{project_id}/tasks/list', {
+      const res = await apiClient.GET('/api/v0.1/heatmap/projects/{project_id}/tasks/list', {
         params: {
           path: { project_id: projectId },
           query: { limit: 20, offset: 0 },
@@ -125,84 +313,131 @@ export const HeatmapSelectorModal: FC<HeatmapSelectorModalProps> = ({ isOpen, on
     staleTime: 1000 * 30, // 30 seconds
   });
 
-  const tasks = taskListData?.tasks ?? [];
+  const tasks = useMemo(() => taskListData?.tasks ?? [], [taskListData?.tasks]);
 
-  const handleSelectTask = useCallback(
-    (taskId: number) => {
-      service.loadTask(taskId);
+  // モーダルが開いた時、現在のタスクをプレビューに設定
+  useEffect(() => {
+    if (isOpen && tasks.length > 0) {
+      const current = tasks.find((t) => t.taskId === currentTaskId) ?? null;
+      setPreviewTask(current);
+    }
+  }, [isOpen, tasks, currentTaskId]);
+
+  const handleSelectTask = useCallback((task: HeatmapTaskListItem) => {
+    setPreviewTask(task);
+  }, []);
+
+  const handleConfirm = useCallback(() => {
+    if (previewTask && previewTask.status === 'completed') {
+      service.loadTask(previewTask.taskId);
       toast.showToast('Heatmapを読み込み中...', 2, 'info');
       onClose();
-    },
-    [service, toast, onClose],
-  );
+    }
+  }, [previewTask, service, toast, onClose]);
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleString('ja-JP', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
+  const handleCancel = useCallback(() => {
+    onClose();
+  }, [onClose]);
+
+  const taskCount = tasks.length;
+  const countDisplay = taskListData && taskListData.total > tasks.length ? `${taskCount}+` : String(taskCount);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title='Heatmap選択' closeOutside>
-      <FlexColumn gap={16} style={{ width: '500px', maxWidth: '90vw' }}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title='Heatmap選択'
+      closeOutside
+      style={{
+        width: 'fit-content',
+        minWidth: 'unset',
+        maxWidth: 'calc(100vw - 16px)',
+        maxHeight: 'calc(100vh - 32px)',
+        padding: 0,
+        overflow: 'hidden',
+      }}
+    >
+      <ModalContent>
         <HintText>最近作成されたHeatmapから選択して読み込むことができます。</HintText>
 
-        {isLoading && (
-          <EmptyState>
-            <Text text='読み込み中...' fontSize={theme.typography.fontSize.base} />
-          </EmptyState>
-        )}
+        <PanelContainer>
+          <LeftPanel>
+            <PanelHeader>
+              Heatmaps
+              <TaskCount>{countDisplay}</TaskCount>
+            </PanelHeader>
+            <ListWrapper>
+              {isLoading && (
+                <EmptyState>
+                  <Text text='読み込み中...' fontSize={theme.typography.fontSize.base} />
+                </EmptyState>
+              )}
 
-        {!isLoading && tasks.length === 0 && (
-          <EmptyState>
-            <Text text='Heatmapがありません' fontSize={theme.typography.fontSize.base} />
-          </EmptyState>
-        )}
+              {!isLoading && tasks.length === 0 && (
+                <EmptyState>
+                  <IoGrid size={32} style={{ opacity: 0.3 }} />
+                  <Text text='Heatmapがありません' fontSize={theme.typography.fontSize.base} />
+                </EmptyState>
+              )}
 
-        {!isLoading && tasks.length > 0 && (
-          <TaskList>
-            {tasks.map((task) => (
-              <TaskItem key={task.taskId} isSelected={task.taskId === currentTaskId} onClick={() => handleSelectTask(task.taskId)}>
-                <TaskInfo>
-                  <Text text={`Task #${task.taskId}`} fontSize={theme.typography.fontSize.base} fontWeight='bold' />
-                  <TaskMeta>
-                    <span>Step: {task.stepSize}</span>
-                    <span>|</span>
-                    <span>{task.zVisible ? '3D' : '2D'}</span>
-                    <span>|</span>
-                    <StatusBadge status={task.status}>{task.status}</StatusBadge>
-                  </TaskMeta>
-                  <TaskMeta>
-                    <span>{formatDate(task.updatedAt)}</span>
-                  </TaskMeta>
-                </TaskInfo>
-                <Button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSelectTask(task.taskId);
-                  }}
-                  scheme={task.taskId === currentTaskId ? 'primary' : 'surface'}
-                  fontSize='sm'
-                  disabled={task.status !== 'completed'}
-                >
-                  <Text text={task.taskId === currentTaskId ? '選択中' : '選択'} fontSize={theme.typography.fontSize.sm} />
-                </Button>
-              </TaskItem>
-            ))}
-          </TaskList>
-        )}
-
-        {taskListData && taskListData.total > tasks.length && (
-          <HintText>
-            {taskListData.total}件中{tasks.length}件を表示しています
-          </HintText>
-        )}
-      </FlexColumn>
+              {!isLoading && tasks.length > 0 && (
+                <TaskList>
+                  {tasks.map((task) => {
+                    const isSelected = previewTask?.taskId === task.taskId;
+                    const isCurrent = currentTaskId === task.taskId;
+                    return (
+                      <TaskItem
+                        key={task.taskId}
+                        isSelected={isSelected}
+                        isCurrent={isCurrent}
+                        onClick={() => handleSelectTask(task)}
+                        disabled={task.status !== 'completed'}
+                      >
+                        <TaskIcon isSelected={isSelected}>
+                          <IoGrid />
+                        </TaskIcon>
+                        <TaskInfo>
+                          <TaskName>Task #{task.taskId}</TaskName>
+                          <TaskMeta>
+                            <StatusDot status={task.status} />
+                            <span>{task.status}</span>
+                            <span>•</span>
+                            <DimensionTag>{task.zVisible ? '3D' : '2D'}</DimensionTag>
+                          </TaskMeta>
+                        </TaskInfo>
+                        {isCurrent && (
+                          <CheckMark>
+                            <IoCheckmark />
+                          </CheckMark>
+                        )}
+                      </TaskItem>
+                    );
+                  })}
+                </TaskList>
+              )}
+            </ListWrapper>
+          </LeftPanel>
+          <RightPanel>
+            <PanelHeader>Task Details</PanelHeader>
+            <DetailWrapper>
+              <HeatmapTaskDetail task={previewTask} />
+            </DetailWrapper>
+          </RightPanel>
+        </PanelContainer>
+        <Divider orientation='horizontal' />
+        <Footer>
+          <Button scheme='secondary' fontSize='sm' onClick={handleCancel}>
+            Cancel
+          </Button>
+          <Button scheme='primary' fontSize='sm' onClick={handleConfirm} disabled={!previewTask || previewTask.status !== 'completed'}>
+            Select
+          </Button>
+        </Footer>
+      </ModalContent>
     </Modal>
   );
 };
+
+export const HeatmapSelectorModal = memo(Component);
+
+HeatmapSelectorModal.displayName = 'HeatmapSelectorModal';

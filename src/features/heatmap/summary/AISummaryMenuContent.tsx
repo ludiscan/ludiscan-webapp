@@ -27,7 +27,7 @@ const Hint = styled.div`
 const EmptyBox = styled.div`
   padding: 10px 12px;
   font-size: 12px;
-  color: #666;
+  color: ${({ theme }) => theme.colors.text.secondary};
   cursor: pointer;
   border: 1px dashed #bbb;
   border-radius: 8px;
@@ -50,7 +50,7 @@ const MetaGrid = styled.div`
   grid-template-columns: repeat(2, auto);
   gap: 12px;
   font-size: 12px;
-  color: #555;
+  color: ${({ theme }) => theme.colors.text.secondary};
 `;
 
 const StatusBadge = styled.span`
@@ -79,8 +79,9 @@ const ChatCard = styled.div`
   margin-top: 8px;
   font-size: 14px;
   line-height: 1.6;
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  color: ${({ theme }) => theme.colors.text.primary};
+  background: ${({ theme }) => theme.colors.background.default};
+  border: 1px solid ${({ theme }) => theme.colors.border.default};
   border-radius: 8px;
   box-shadow: 0 1px 2px rgb(0 0 0 / 5%);
 `;
