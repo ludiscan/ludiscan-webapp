@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { BiBarChartAlt2 } from 'react-icons/bi';
 import { BsGrid, BsPerson, BsStars } from 'react-icons/bs';
 import { CiMap, CiMapPin, CiStreamOn } from 'react-icons/ci';
@@ -23,85 +23,119 @@ import { MoreMenuContent } from '@src/features/heatmap/menu/MoreMenuContent';
 import { PlayerTimeline } from '@src/features/heatmap/menu/PlayerTimeline';
 import { RouteCoachMenuContent } from '@src/features/heatmap/routecoach/RouteCoachMenuContent';
 import { AISummaryMenuContent } from '@src/features/heatmap/summary/AISummaryMenuContent';
+import { useLocale } from '@src/hooks/useLocale';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 import { getRecentMenus } from '@src/utils/localstrage';
 
+/**
+ * Menu key type - used as identifier for menus
+ * Must match keys in locales menus object
+ */
+export type MenuKey =
+  | 'info'
+  | 'general'
+  | 'map'
+  | 'hotspot'
+  | 'eventlog'
+  | 'fieldObject'
+  | 'timeline'
+  | 'routecoach'
+  | 'aggregation'
+  | 'more'
+  | 'eventDetail'
+  | 'aiSummary';
+
 export type SideBarMenuType = {
-  name: string;
+  id: MenuKey;
+  displayName: string;
   icon: JSX.Element;
   Component: FC<HeatmapMenuProps>;
 };
 
-export type MenuType = Omit<SideBarMenuType, 'icon'> & {
+export type MenuType = {
+  id: MenuKey;
   icon?: JSX.Element;
+  Component: FC<HeatmapMenuProps>;
   visible?: (state: HeatmapDataState) => boolean;
 };
 
 export const MenuContents: MenuType[] = [
   {
-    name: '情報',
+    id: 'info',
     icon: <IoIosInformationCircleOutline />,
     Component: InfoMenuContent,
   },
   {
-    name: '一般',
+    id: 'general',
     icon: <BsPerson />,
     Component: GeneralMenuContent,
   },
   {
-    name: 'マップ',
+    id: 'map',
     icon: <CiMap />,
     Component: MapMenuContent,
   },
   {
-    name: 'ホットスポット',
+    id: 'hotspot',
     icon: <CiMapPin />,
     Component: HotspotMenuContent,
   },
   {
-    name: 'イベントログ',
+    id: 'eventlog',
     icon: <CiStreamOn />,
     Component: EventLogContent,
   },
   {
-    name: 'オブジェクト',
+    id: 'fieldObject',
     icon: <FaCube />,
     Component: FieldObjectsMenuContent,
   },
   {
-    name: 'タイムライン',
+    id: 'timeline',
     icon: <SiSvgtrace />,
     Component: PlayerTimeline,
   },
   {
-    name: 'ルートコーチ',
+    id: 'routecoach',
     icon: <GiPathDistance />,
     Component: RouteCoachMenuContent,
   },
   {
-    name: '集計',
+    id: 'aggregation',
     icon: <BiBarChartAlt2 />,
     Component: AggregationMenuContent,
   },
   {
-    name: 'その他',
+    id: 'more',
     icon: <BsGrid />,
     Component: MoreMenuContent,
   },
   {
-    name: 'イベント詳細',
+    id: 'eventDetail',
     Component: EventLogDetail,
   },
   {
-    name: 'AI要約',
+    id: 'aiSummary',
     icon: <BsStars />,
     Component: AISummaryMenuContent,
   },
 ] as const;
 
-export type Menus = (typeof MenuContents)[number]['name'];
+/**
+ * Helper to get display name for a menu key
+ */
+export function getMenuDisplayName(id: MenuKey, t: ReturnType<typeof useLocale>['t']): string {
+  return t(`menus.${id}`);
+}
+
+/** @deprecated Use MenuKey instead */
+export type Menus = MenuKey;
+
+// Always show general and more - defined outside hook to avoid dependency issues
+const ALWAYS_SHOW_MENUS: MenuKey[] = ['general', 'more'];
 
 export function useHeatmapSideBarMenus(): SideBarMenuType[] {
+  const { t } = useLocale();
   const [recentMenus, setRecentMenus] = useState<string[]>(getRecentMenus());
 
   // Listen to menu clicks to update recent menus
@@ -115,49 +149,55 @@ export function useHeatmapSideBarMenus(): SideBarMenuType[] {
     };
   }, []);
 
-  // Always show general and more
-  const alwaysShowMenus = ['一般', 'その他'];
-
   // Get recent menus (max 5, excluding general and more)
-  const recentMenuItems = recentMenus
-    .filter((menuName) => !alwaysShowMenus.includes(menuName))
-    .slice(0, 5)
-    .map((menuName) => MenuContents.find((content) => content.name === menuName))
-    .filter((content) => content != null && content.icon != null);
+  const recentMenuItems = useMemo(
+    () =>
+      recentMenus
+        .filter((menuId) => !ALWAYS_SHOW_MENUS.includes(menuId as MenuKey))
+        .slice(0, 5)
+        .map((menuId) => MenuContents.find((content) => content.id === menuId))
+        .filter((content) => content != null && content.icon != null),
+    [recentMenus],
+  );
 
   // Build the sidebar menu list: general, recent items, more
-  const sidebarMenus: SideBarMenuType[] = [];
+  return useMemo(() => {
+    const sidebarMenus: SideBarMenuType[] = [];
 
-  // Add general menu
-  const generalMenu = MenuContents.find((content) => content.name === '一般');
-  if (generalMenu && generalMenu.icon) {
-    sidebarMenus.push({
-      name: generalMenu.name,
-      icon: generalMenu.icon,
-      Component: generalMenu.Component,
-    });
-  }
-
-  // Add recent menus
-  recentMenuItems.forEach((content) => {
-    if (content && content.icon) {
+    // Add general menu
+    const generalMenu = MenuContents.find((content) => content.id === 'general');
+    if (generalMenu && generalMenu.icon) {
       sidebarMenus.push({
-        name: content.name,
-        icon: content.icon,
-        Component: content.Component,
+        id: generalMenu.id,
+        displayName: getMenuDisplayName(generalMenu.id, t),
+        icon: generalMenu.icon,
+        Component: generalMenu.Component,
       });
     }
-  });
 
-  // Add more menu
-  const moreMenu = MenuContents.find((content) => content.name === 'その他');
-  if (moreMenu && moreMenu.icon) {
-    sidebarMenus.push({
-      name: moreMenu.name,
-      icon: moreMenu.icon,
-      Component: moreMenu.Component,
+    // Add recent menus
+    recentMenuItems.forEach((content) => {
+      if (content && content.icon) {
+        sidebarMenus.push({
+          id: content.id,
+          displayName: getMenuDisplayName(content.id, t),
+          icon: content.icon,
+          Component: content.Component,
+        });
+      }
     });
-  }
 
-  return sidebarMenus;
+    // Add more menu
+    const moreMenu = MenuContents.find((content) => content.id === 'more');
+    if (moreMenu && moreMenu.icon) {
+      sidebarMenus.push({
+        id: moreMenu.id,
+        displayName: getMenuDisplayName(moreMenu.id, t),
+        icon: moreMenu.icon,
+        Component: moreMenu.Component,
+      });
+    }
+
+    return sidebarMenus;
+  }, [t, recentMenuItems]);
 }

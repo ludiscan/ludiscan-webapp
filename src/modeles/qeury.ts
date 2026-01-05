@@ -5,7 +5,7 @@ import type { Middleware } from 'openapi-fetch';
 
 import { env } from '@src/config/env';
 
-export const DefaultStaleTime = 1000 * 60 * 5; // 5 minutes
+export const DefaultStaleTime = 1000 * 60 * 10; // 10 minutes
 
 const myMiddleware: Middleware = {
   async onRequest({ request }) {

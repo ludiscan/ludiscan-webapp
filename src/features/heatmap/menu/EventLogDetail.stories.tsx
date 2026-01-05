@@ -20,7 +20,7 @@ export const Loading: Story = {
   ...Template,
   name: 'Loading State',
   args: createMockMenuProps({
-    name: 'eventLogDetail',
+    name: 'eventDetail',
     extra: {
       logName: 'PlayerDeath',
       id: 123,
@@ -32,7 +32,7 @@ export const NoData: Story = {
   ...Template,
   name: 'No Data',
   args: createMockMenuProps({
-    name: 'eventLogDetail',
+    name: 'eventDetail',
     extra: {},
   }),
 };

@@ -181,7 +181,7 @@ const EmbedHeatmapPageContent: FC<EmbedHeatmapPageProps> = ({ className, token, 
   useEffect(() => {
     // Open timeline menu after a short delay to ensure HeatMapViewer is mounted
     const timer = setTimeout(() => {
-      heatMapEventBus.emit('click-menu-icon', { name: 'タイムライン' });
+      heatMapEventBus.emit('click-menu-icon', { name: 'timeline' });
     }, 1000);
 
     return () => clearTimeout(timer);

@@ -28,7 +28,6 @@ export type GeneralSettings = {
   sessionId: number | null;
   heatmapOpacity: number;
   heatmapType: 'object' | 'fill';
-  blockSize: number;
   mapName: string;
   minThreshold: number;
   maxThreshold: number;
@@ -122,7 +121,6 @@ export const initializeValues: HeatmapDataState = {
     sessionId: null,
     heatmapOpacity: 1.0,
     heatmapType: 'object',
-    blockSize: 1,
     mapName: '',
     minThreshold: 0.0,
     maxThreshold: 1,
