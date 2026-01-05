@@ -1,0 +1,75 @@
+name: Cache Cleanup
+
+on:
+  schedule:
+    # Run every Sunday at 00:00 UTC
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+
+permissions:
+  actions: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Cleanup old caches
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const caches = await github.rest.actions.getActionsCacheList({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100,
+            });
+
+            const now = new Date();
+            const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+            // Group caches by key prefix (e.g., "Linux-playwright", "Linux-bun")
+            const cacheGroups = {};
+            for (const cache of caches.data.actions_caches) {
+              // Extract prefix (everything before the last hash)
+              const parts = cache.key.split('-');
+              const prefix = parts.slice(0, 2).join('-');
+
+              if (!cacheGroups[prefix]) {
+                cacheGroups[prefix] = [];
+              }
+              cacheGroups[prefix].push(cache);
+            }
+
+            let deletedCount = 0;
+            let deletedSize = 0;
+
+            for (const [prefix, groupCaches] of Object.entries(cacheGroups)) {
+              // Sort by last accessed time (newest first)
+              groupCaches.sort((a, b) =>
+                new Date(b.last_accessed_at) - new Date(a.last_accessed_at)
+              );
+
+              // Keep the newest cache, delete the rest
+              for (let i = 1; i < groupCaches.length; i++) {
+                const cache = groupCaches[i];
+                const lastAccessed = new Date(cache.last_accessed_at);
+
+                // Delete if older than 7 days or if it's a duplicate
+                if (lastAccessed < sevenDaysAgo || i > 0) {
+                  console.log(`Deleting cache: ${cache.key} (last accessed: ${cache.last_accessed_at})`);
+                  try {
+                    await github.rest.actions.deleteActionsCacheById({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      cache_id: cache.id,
+                    });
+                    deletedCount++;
+                    deletedSize += cache.size_in_bytes;
+                  } catch (error) {
+                    console.log(`Failed to delete cache ${cache.key}: ${error.message}`);
+                  }
+                }
+              }
+            }
+
+            const deletedSizeMB = (deletedSize / 1024 / 1024).toFixed(2);
+            console.log(`\nCleanup complete: deleted ${deletedCount} caches (${deletedSizeMB} MB)`);
