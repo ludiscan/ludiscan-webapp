@@ -195,10 +195,20 @@ export const en = {
     },
 
     info: {
-      projectId: 'project_id:',
-      name: 'name:',
-      mode: 'mode:',
+      projectId: 'Project ID',
+      name: 'Name',
+      mode: 'Mode',
+      description: 'Description',
       export: 'Export',
+      projectSection: 'Project Info',
+      productSection: 'Application Info',
+      version: 'Version',
+      author: 'Author',
+      documentation: 'Documentation',
+      sourceCode: 'Source Code',
+      viewOrg: 'GitHub Org',
+      viewSource: 'View on GitHub',
+      noDescription: 'No description',
     },
 
     map: {
