@@ -213,6 +213,15 @@ export const en = {
       zoomIn: 'Zoom in',
       zoomOut: 'Zoom out',
     },
+
+    settings: {
+      title: 'Settings',
+      language: 'Language',
+      theme: 'Theme',
+      themeMode: 'Mode',
+      light: 'Light',
+      dark: 'Dark',
+    },
   },
 
   // Pagination

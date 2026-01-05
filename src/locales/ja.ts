@@ -213,6 +213,15 @@ export const ja = {
       zoomIn: 'ズームイン',
       zoomOut: 'ズームアウト',
     },
+
+    settings: {
+      title: '設定',
+      language: '言語',
+      theme: 'テーマ',
+      themeMode: 'モード',
+      light: 'ライト',
+      dark: 'ダーク',
+    },
   },
 
   // Pagination
