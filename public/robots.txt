@@ -1,0 +1,23 @@
+# Robots.txt for Ludiscan Web App
+# https://ludiapp.matuyuhi.com
+
+User-agent: *
+
+# Allow public pages
+Allow: /
+Allow: /login
+Allow: /heatmap/embed/
+
+# Disallow authenticated/private pages
+Disallow: /home
+Disallow: /home/*
+Disallow: /profile
+Disallow: /security
+Disallow: /api-keys
+Disallow: /heatmap/projects/
+
+# Disallow API routes
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://ludiapp.matuyuhi.com/sitemap.xml

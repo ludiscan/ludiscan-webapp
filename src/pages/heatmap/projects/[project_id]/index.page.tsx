@@ -1,18 +1,19 @@
 import styled from '@emotion/styled';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { memo, useCallback, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
 import type { RootState } from '@src/store';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
-import type { GetServerSideProps } from 'next';
+import type { GetStaticPaths, GetStaticProps } from 'next';
 import type { FC } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
+import { Seo } from '@src/component/atoms/Seo';
 import { Text } from '@src/component/atoms/Text';
 import { StatusContent } from '@src/component/molecules/StatusContent';
 import { Header } from '@src/component/templates/Header';
-import { HeatMapViewer } from '@src/features/heatmap/HeatmapViewer';
 import { useAuth } from '@src/hooks/useAuth';
 import { useGeneralSelect } from '@src/hooks/useGeneral';
 import { useHeatmapState } from '@src/hooks/useHeatmapState';
@@ -20,22 +21,42 @@ import { useIsDesktop } from '@src/hooks/useIsDesktop';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { useOnlineHeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 
+// Three.jsを使うHeatMapViewerはSSRを無効にして動的インポート
+const HeatMapViewer = dynamic(() => import('@src/features/heatmap/HeatmapViewer').then((mod) => mod.HeatMapViewer), {
+  ssr: false,
+  loading: () => null, // StatusContentがローディングを表示するため
+});
+
 export type HeatMapTaskIdPageProps = {
   className?: string;
   project_id?: number;
 };
 
-export const getServerSideProps: GetServerSideProps<HeatMapTaskIdPageProps> = async (context) => {
-  const { params } = context;
+// SSG: ビルド時にパスを生成せず、初回アクセス時に生成（fallback: 'blocking'）
+export const getStaticPaths: GetStaticPaths = async () => ({
+  paths: [],
+  fallback: 'blocking',
+});
+
+export const getStaticProps: GetStaticProps<HeatMapTaskIdPageProps> = async ({ params }) => {
   if (!params || !params.project_id) {
     return {
       notFound: true,
     };
   }
+
+  const projectId = Number(params.project_id as string);
+  if (isNaN(projectId)) {
+    return {
+      notFound: true,
+    };
+  }
+
   return {
     props: {
-      project_id: Number(params.project_id as string),
+      project_id: projectId,
     },
+    revalidate: 3600,
   };
 };
 
@@ -175,7 +196,12 @@ const HeatMapTaskIdPage: FC<HeatMapTaskIdPageProps> = ({ className, project_id }
     return <div>Invalid Task ID</div>;
   }
 
-  return <HeatmapIdPageLayout className={className} service={service} onBackClick={handleBackClick} />;
+  return (
+    <>
+      <Seo title={`Heatmap - Project ${project_id}`} path={`/heatmap/projects/${project_id}`} noIndex={true} />
+      <HeatmapIdPageLayout className={className} service={service} onBackClick={handleBackClick} />
+    </>
+  );
 };
 
 export default HeatMapTaskIdPage;

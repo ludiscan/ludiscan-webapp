@@ -30,11 +30,13 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
   const timer = useRef<NodeJS.Timeout>(undefined);
   const [taskId, setTaskId] = useState<number | null>(null);
   const [currentSessionId, setCurrentSessionId] = useState<number | null>(sessionId ?? null);
+  const [sessionHeatmapIds, setSessionHeatmapIds] = useState<number[] | undefined>(undefined);
   const [stepSize] = useState<number>(50);
 
   const queryClient = useQueryClient();
 
-  const isReady = !!token && projectId !== undefined && sessionId !== undefined;
+  // sessionIdはオプション（タイムライン等で使用）、heatmapはproject全体をデフォルト
+  const isReady = !!token && projectId !== undefined;
 
   // Embed用のAPIクライアントを作成（tokenが変わったら再作成）
   const apiClient = useMemo(() => {
@@ -61,22 +63,24 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
 
   const { data: createdTask } = useQuery({
     // eslint-disable-next-line @tanstack/query/exhaustive-deps
-    queryKey: ['embed-create-task', projectId, sessionId, stepSize, zVisible, token],
+    queryKey: ['embed-create-task', projectId, stepSize, zVisible, sessionHeatmapIds, token],
     queryFn: async (): Promise<HeatmapTask | null> => {
-      if (!projectId || !sessionId || !apiClient) {
+      if (!projectId || !apiClient) {
         return null;
       }
 
-      const { data, error } = await apiClient.POST('/api/v0/heatmap/projects/{project_id}/play_session/{session_id}/tasks', {
+      // v0.1 API - normalized density (0-1 range)
+      // project全体のheatmapタスクを作成（sessionHeatmapIdsでフィルター可能）
+      const { data, error } = await apiClient.POST('/api/v0.1/heatmap/projects/{project_id}/tasks', {
         params: {
           path: {
             project_id: projectId,
-            session_id: sessionId,
           },
         },
         body: {
           stepSize: stepSize,
           zVisible: zVisible,
+          ...(sessionHeatmapIds && sessionHeatmapIds.length > 0 ? { sessionIds: sessionHeatmapIds } : {}),
         },
       });
       if (error) throw error;
@@ -91,12 +95,13 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
     setTaskId(createdTask.taskId);
   }, [createdTask]);
 
+  // v0.1 API - normalized density (0-1 range)
   const { data: task } = useQuery({
     // eslint-disable-next-line @tanstack/query/exhaustive-deps
     queryKey: ['embed-heatmap', taskId, token],
     queryFn: async (): Promise<HeatmapTask | null> => {
       if (!taskId || isNaN(Number(taskId)) || !apiClient) return null;
-      const { data, error } = await apiClient.GET('/api/v0/heatmap/tasks/{task_id}', {
+      const { data, error } = await apiClient.GET('/api/v0.1/heatmap/tasks/{task_id}', {
         params: { path: { task_id: Number(taskId) } },
       });
       if (error) throw error;
@@ -301,6 +306,8 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
   const loadTask = useCallback(
     (newTaskId: number) => {
       setTaskId(newTaskId);
+      // タスクを直接選択した場合はフィルターを解除
+      setSessionHeatmapIds(undefined);
     },
     [setTaskId],
   );
@@ -317,8 +324,8 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
     projectId,
     sessionId: currentSessionId,
     setSessionId: setCurrentSessionId,
-    sessionHeatmapIds: undefined,
-    setSessionHeatmapIds: () => {},
+    sessionHeatmapIds,
+    setSessionHeatmapIds,
     loadTask,
     getProject,
     getSession,
@@ -326,5 +333,7 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
     searchSessions,
     getPlayers,
     getFieldObjectLogs,
+    // embedトークンに紐づいた元のsessionId（フィルター用）
+    embedSessionId: sessionId,
   };
 }

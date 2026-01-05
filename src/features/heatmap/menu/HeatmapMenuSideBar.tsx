@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { memo } from 'react';
 
-import type { Menus } from '@src/hooks/useHeatmapSideBarMenus';
+import type { MenuKey } from '@src/hooks/useHeatmapSideBarMenus';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC } from 'react';
 
@@ -14,7 +14,7 @@ import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
 export type MenuSideBarProps = {
   className?: string;
-  currentMenu?: Menus;
+  currentMenu?: MenuKey;
   service: HeatmapDataService;
 };
 
@@ -23,18 +23,18 @@ const Component: FC<MenuSideBarProps> = ({ className, currentMenu }) => {
   const menus = useHeatmapSideBarMenus();
   return (
     <FlexColumn className={className} gap={12} wrap={'nowrap'}>
-      {menus.map(({ name, icon }) => (
+      {menus.map(({ id, displayName, icon }) => (
         <Button
-          className={`${className}__button ${name === currentMenu ? 'active' : ''}`}
-          key={name}
+          className={`${className}__button ${id === currentMenu ? 'active' : ''}`}
+          key={id}
           scheme={'none'}
           onClick={() => {
-            heatMapEventBus.emit('click-menu-icon', { name });
+            heatMapEventBus.emit('click-menu-icon', { name: id });
           }}
           fontSize={'xl'}
           radius={'small'}
         >
-          <Tooltip tooltip={name} placement={'bottom'} fontSize={theme.typography.fontSize.sm}>
+          <Tooltip tooltip={displayName} placement={'bottom'} fontSize={theme.typography.fontSize.sm}>
             {icon}
           </Tooltip>
         </Button>

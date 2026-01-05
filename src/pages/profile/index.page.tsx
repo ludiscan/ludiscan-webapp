@@ -7,6 +7,7 @@ import type { FC } from 'react';
 
 import { PanelCard } from '@src/component/atoms/Card';
 import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
+import { Seo } from '@src/component/atoms/Seo';
 import { Text } from '@src/component/atoms/Text';
 import { Selector } from '@src/component/molecules/Selector';
 import { DashboardBackgroundCanvas } from '@src/component/templates/DashboardBackgroundCanvas';
@@ -78,6 +79,7 @@ const Component: FC<ProfilePageProps> = ({ className }) => {
 
   return (
     <div className={className}>
+      <Seo title='Profile' path='/profile' noIndex={true} />
       <DashboardBackgroundCanvas className='visible' />
       <SidebarLayout />
       <InnerContent>

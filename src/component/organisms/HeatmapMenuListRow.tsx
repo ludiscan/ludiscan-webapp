@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 
-import type { Menus } from '@src/hooks/useHeatmapSideBarMenus';
+import type { MenuKey } from '@src/hooks/useHeatmapSideBarMenus';
 import type { FC } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
@@ -13,7 +13,7 @@ import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
 export type HeatmapMenuListRowProps = {
   className?: string;
-  currentMenu?: Menus;
+  currentMenu?: MenuKey;
 };
 
 const HeatmapMenuListRowComponent: FC<HeatmapMenuListRowProps> = ({ className, currentMenu }) => {
@@ -22,18 +22,18 @@ const HeatmapMenuListRowComponent: FC<HeatmapMenuListRowProps> = ({ className, c
 
   return (
     <FlexRow className={`${className}`} gap={12} wrap={'nowrap'} align={'center'}>
-      {menus.map(({ name: menuName, icon }) => (
+      {menus.map(({ id, displayName, icon }) => (
         <Button
-          className={`${className}__menuButton ${menuName === currentMenu ? 'active' : ''}`}
-          key={menuName}
+          className={`${className}__menuButton ${id === currentMenu ? 'active' : ''}`}
+          key={id}
           scheme={'none'}
           onClick={() => {
-            heatMapEventBus.emit('click-menu-icon', { name: menuName });
+            heatMapEventBus.emit('click-menu-icon', { name: id });
           }}
           fontSize={'lg'}
           radius={'small'}
         >
-          <Tooltip tooltip={menuName} placement={'bottom'} fontSize={theme.typography.fontSize.sm}>
+          <Tooltip tooltip={displayName} placement={'bottom'} fontSize={theme.typography.fontSize.sm}>
             {icon}
           </Tooltip>
         </Button>

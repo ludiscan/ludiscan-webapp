@@ -50,6 +50,8 @@ export type HeatmapDataService = {
   isInitialized: boolean;
   // embed経由でのアクセスかどうか（trueの場合、一部の機能が制限される）
   isEmbed?: boolean;
+  // embedトークンに紐づいた元のsessionId（フィルター用、embed時のみ）
+  embedSessionId?: number;
   // マップリストの取得（activeOnly: trueの場合、マップデータがアップロード済みのマップのみを返す）
   getMapList(activeOnly?: boolean): Promise<string[]>;
 
@@ -128,8 +130,9 @@ export type OfflineHeatmapData = {
   eventLogs: Record<string, PositionEventLog[]>;
 };
 
+// v0.1 API - normalized density (0-1 range)
 async function sessionCreateTask(apiClient: ReturnType<typeof createClient>, projectId: number, sessionId: number, stepSize: number, zVisible: boolean) {
-  return await apiClient.POST('/api/v0/heatmap/projects/{project_id}/play_session/{session_id}/tasks', {
+  return await apiClient.POST('/api/v0.1/heatmap/projects/{project_id}/play_session/{session_id}/tasks', {
     params: {
       path: {
         project_id: projectId,
@@ -143,8 +146,9 @@ async function sessionCreateTask(apiClient: ReturnType<typeof createClient>, pro
   });
 }
 
+// v0.1 API - normalized density (0-1 range)
 async function projectCreateTask(apiClient: ReturnType<typeof createClient>, projectId: number, stepSize: number, zVisible: boolean, sessionIds?: number[]) {
-  return await apiClient.POST('/api/v0/heatmap/projects/{project_id}/tasks', {
+  return await apiClient.POST('/api/v0.1/heatmap/projects/{project_id}/tasks', {
     params: {
       path: {
         project_id: projectId,
@@ -210,12 +214,13 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
     setTaskId(createdTask.taskId);
   }, [createdTask]);
 
+  // v0.1 API - normalized density (0-1 range)
   const { data: task } = useQuery({
     queryKey: ['heatmap', isAuthorized, taskId],
     queryFn: async (): Promise<HeatmapTask | null> => {
       if (!taskId || isNaN(Number(taskId))) return null;
       if (!isAuthorized) return null;
-      const { data, error } = await apiClient.GET('/api/v0/heatmap/tasks/{task_id}', {
+      const { data, error } = await apiClient.GET('/api/v0.1/heatmap/tasks/{task_id}', {
         params: { path: { task_id: Number(taskId) } },
       });
       if (error) throw error;
@@ -438,6 +443,8 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
   const loadTask = useCallback(
     (newTaskId: number) => {
       setTaskId(newTaskId);
+      // タスクを直接選択した場合はフィルターを解除
+      setSessionHeatmapIds(undefined);
     },
     [setTaskId],
   );

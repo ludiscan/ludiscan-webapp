@@ -10,6 +10,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { RiMenu2Fill, RiMenu3Fill } from 'react-icons/ri';
 
+import type { ButtonProps } from '@src/component/atoms/Button';
 import type { FC, ReactNode } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
@@ -26,13 +27,19 @@ export type ResponsiveSidebarProps = {
 
   onChange?: (isOpen: boolean) => void;
 };
+
+export type ToggleButtonProps = {
+  className?: string;
+  onClick: ButtonProps['onClick'];
+  isOpen: boolean;
+};
 /**
  * トグルボタンのスタイルコンポーネント
  *
  * ・position: fixed により画面上部左側に配置
  * ・モバイル環境でのみ表示するため、@media クエリでデスクトップでは非表示にしています
  */
-const ToggleButtonComponent = ({ className, onClick, isOpen }: { className?: string; onClick: () => void; isOpen: boolean }) => {
+const ToggleButtonComponent: FC<ToggleButtonProps> = ({ className, onClick, isOpen }) => {
   const { theme } = useSharedTheme();
   return (
     <FlexRow className={`${className} ${isOpen ? '' : 'closed'}`} align={'center'}>
@@ -54,10 +61,11 @@ const ToggleButton = styled(ToggleButtonComponent)`
   /* Ensure minimum touch target size (Design Guide Rule 10) */
   inline-size: 56px; /* Increased from 46px to accommodate touch target */
   block-size: 44px; /* Increased from 32px for WCAG 2.2 SC 2.5.8 */
+  pointer-events: auto; /* Enable click events (parent FixedWrapper has pointer-events: none) */
   background: ${({ theme }) => theme.colors.surface.base};
   border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
   box-shadow: 2px 0 4px rgb(0 0 0 / 20%);
-  transition: all 0.25s ease-in-out;
+  transition: all 0.3s ease-in-out;
 
   &.closed {
     /* When closed, button is at left edge */
@@ -110,7 +118,7 @@ const SidebarContent = styled(PanelCard)`
 
   /* RTL/LTR aware transform */
   transform: translateX(-100%);
-  transition: transform 0.4s ease-in-out;
+  transition: transform 0.3s ease-in-out;
 
   &.visible {
     transform: translateX(0);

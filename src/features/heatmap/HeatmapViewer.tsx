@@ -21,6 +21,7 @@ import { EventLogPanel } from '@src/features/heatmap/EventLogPanel';
 import { HeatMapCanvas } from '@src/features/heatmap/HeatmapCanvas';
 import { HeatmapMenuContent } from '@src/features/heatmap/HeatmapMenuContent';
 import { useModelFromArrayBuffer } from '@src/features/heatmap/ModelLoader';
+import { SettingsButton } from '@src/features/heatmap/SettingsButton';
 import { TimelineControlWrapper } from '@src/features/heatmap/TimelineControlWrapper';
 import { ZoomControls } from '@src/features/heatmap/ZoomControls';
 import { exportHeatmap } from '@src/features/heatmap/export-heatmap';
@@ -282,6 +283,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
     }
   }, [localModel]);
 
+  // v0.1 API: normalizedDensity is already 0-1 range
   const pointList = useMemo(() => {
     if (!task) return [];
 
@@ -290,7 +292,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
         x: point.x - task.stepSize / 2,
         y: point.y - task.stepSize / 2,
         z: (point.z ?? 0) - task.stepSize / 2,
-        density: point.density,
+        normalizedDensity: point.normalizedDensity,
       })) ?? []
     );
   }, [task]);
@@ -495,6 +497,11 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
         <ZoomControls />
       </div>
 
+      {/* 設定ボタン（キャンバス左下） */}
+      <div className={`${className}__settingsButton`}>
+        <SettingsButton />
+      </div>
+
       {/* AIリンク/外部postMessage→focus */}
       <FocusLinkBridge />
     </div>
@@ -514,9 +521,12 @@ export const HeatMapViewer = memo(
     }
 
     /* Embed mode: no header offset */
+
     &--embed {
       --header-offset: 0px;
     }
+
+    /* noinspection CssUnresolvedCustomProperty */
 
     &__canvasMenuBox {
       position: absolute;
@@ -593,6 +603,13 @@ export const HeatMapViewer = memo(
       right: 16px;
       bottom: 16px;
       z-index: ${zIndexes.content + 2};
+    }
+
+    &__settingsButton {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      z-index: ${zIndexes.content + 4};
     }
 
     &__stats {

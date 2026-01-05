@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { CreateGameApiKeyResponse, GameApiKey } from '@src/types/api-keys';
 import type { FC } from 'react';
 
+import { Seo } from '@src/component/atoms/Seo';
 import { Text } from '@src/component/atoms/Text';
 import { GameApiKeyCreateModal } from '@src/component/organisms/GameApiKeyCreateModal';
 import { GameApiKeyDeleteConfirmModal } from '@src/component/organisms/GameApiKeyDeleteConfirmModal';
@@ -133,6 +134,7 @@ const Component: FC<ApiKeysPageProps> = ({ className }) => {
 
   return (
     <div className={className}>
+      <Seo title='API Keys' path='/api-keys' noIndex={true} />
       <DashboardBackgroundCanvas className='visible' />
       <SidebarLayout />
       <InnerContent>

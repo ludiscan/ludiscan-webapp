@@ -255,7 +255,7 @@ export const Header = styled(Component)<{ showSidebar?: boolean }>`
   left: 6px;
   z-index: ${zIndexes.header};
   display: flex;
-  width: calc(100% - 12px - ${(props) => (props.showSidebar !== false ? dimensions.sidebarWidth : 0)}px);
+  width: calc(100% - 12px);
   height: calc(${dimensions.headerHeight}px - 2px);
   margin: 6px;
   color: ${({ theme }) => theme.colors.text.primary};
@@ -267,6 +267,7 @@ export const Header = styled(Component)<{ showSidebar?: boolean }>`
 
   /* stylelint-disable-next-line */
   @media (min-width: ${dimensions.mobileWidth}px) {
+    width: calc(100% - 12px - ${(props) => (props.showSidebar !== false ? dimensions.sidebarWidth : 0)}px);
     margin-inline-start: ${(props) => (props.showSidebar !== false ? dimensions.sidebarWidth : 0)}px;
   }
 

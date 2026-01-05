@@ -343,5 +343,5 @@ describe('ComponentName', () => {
 
 ## 次のステップ
 
-- [開発ガイドライン](/heatmap/docs/project/guidelines)でコーディング規約を確認
-- [API連携ガイド](/heatmap/docs/project/api-integration)でAPI通信の詳細を学ぶ
+- [開発環境のセットアップ](/heatmap/docs/project/setup)で環境構築を確認
+- [プロジェクト概要](/heatmap/docs/project/overview)で全体像を把握

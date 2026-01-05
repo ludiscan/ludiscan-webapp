@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unknown-property */
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { BufferGeometry, CatmullRomCurve3, Color, Line, LineBasicMaterial, Sprite, SpriteMaterial, TextureLoader, Vector3 } from 'three';
+import { Color, Sprite, SpriteMaterial, TextureLoader, Vector3 } from 'three';
 import { Line2, LineGeometry, LineMaterial } from 'three-stdlib';
 
 import type { PlayerArrowExtra } from '@src/features/heatmap/selection/hooks';
@@ -59,13 +59,6 @@ const Component: FC<PlayerTimelinePointsProps> = ({ state, visibleTimeRange }) =
     });
     return points.values().toArray();
   }, [fetchLogs, scale, upZ]);
-  const fullPathPoints = useMemo(() => {
-    if (!logs) return [];
-    return Array.from(logs)
-      .filter((pt) => pt.offset_timestamp >= visibleTimeRange.start && pt.offset_timestamp <= visibleTimeRange.end)
-      .sort((a, b) => a.offset_timestamp - b.offset_timestamp)
-      .map((pt) => new Vector3(pt.x, pt.y, pt.z));
-  }, [logs, visibleTimeRange]);
 
   const partialPathPoints = useMemo(() => {
     if (!logs) return [];
@@ -227,16 +220,16 @@ const Component: FC<PlayerTimelinePointsProps> = ({ state, visibleTimeRange }) =
             <meshStandardMaterial color={new Color(161 / 255, 198 / 255, 255 / 255)} transparent />
           </mesh>
         ))}
-      {fullPathPoints.length > 1 && (
-        <primitive
-          object={
-            new Line(
-              new BufferGeometry().setFromPoints(new CatmullRomCurve3(fullPathPoints).getPoints(200)),
-              new LineBasicMaterial({ color: '#888888' }), // 全体：薄いグレー
-            )
-          }
-        />
-      )}
+      {/*{fullPathPoints.length > 1 && (*/}
+      {/*  <primitive*/}
+      {/*    object={*/}
+      {/*      new Line(*/}
+      {/*        new BufferGeometry().setFromPoints(new CatmullRomCurve3(fullPathPoints).getPoints(200)),*/}
+      {/*        new LineBasicMaterial({ color: '#888888' }), // 全体：薄いグレー*/}
+      {/*      )*/}
+      {/*    }*/}
+      {/*  />*/}
+      {/*)}*/}
 
       {/* アイコン表示 */}
       {queryIcon &&

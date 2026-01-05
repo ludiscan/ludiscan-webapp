@@ -165,17 +165,19 @@ APIキーは、外部アプリケーションやスクリプトからludiscan-we
 ```bash
 # 例: curlコマンドでプロジェクト一覧を取得
 curl -H "Authorization: Bearer YOUR_API_KEY" \
-     https://api.ludiscan.com/v1/projects
+     ${API_BASE_URL}/v0/project
 ```
 
 ```python
 # 例: Pythonでデータを取得
 import requests
+import os
 
 api_key = "YOUR_API_KEY"
+api_base_url = os.environ.get("API_BASE_URL")
 headers = {"Authorization": f"Bearer {api_key}"}
 response = requests.get(
-    "https://api.ludiscan.com/v1/projects",
+    f"{api_base_url}/v0/project",
     headers=headers
 )
 data = response.json()
@@ -183,10 +185,7 @@ data = response.json()
 
 #### APIドキュメント
 
-詳細なAPI仕様については、APIドキュメントを参照してください：
-
-- APIキー管理ページの「APIドキュメント」リンク
-- または、[API Reference](https://docs.ludiscan.com/api)
+詳細なAPI仕様については、管理者にお問い合わせください。
 
 ### APIキーのセキュリティ
 
@@ -317,6 +316,5 @@ A: いいえ。有効期限の延長はできません。有効期限が切れ�
 
 - **[クイックスタート](/heatmap/docs/general/quick-start)** - 基本的な使い方を習得
 - **[よくある質問](/heatmap/docs/heatmap/faq)** - トラブルシューティング
-- **[セキュリティポリシー](https://ludiscan.com/security)** - セキュリティに関する詳細情報
 
 アカウント設定について不明な点がある場合は、サポートチームに問い合わせてください。

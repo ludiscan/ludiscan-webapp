@@ -5,6 +5,8 @@ import { Suspense, useEffect } from 'react';
 
 import type { FC } from 'react';
 
+import { JsonLd, LudiscanOrganization, LudiscanWebSite } from '@src/component/atoms/JsonLd';
+import { Seo } from '@src/component/atoms/Seo';
 import { CTASection } from '@src/component/organisms/landing/CTASection';
 import { Footer } from '@src/component/organisms/landing/Footer';
 import { HeatmapBackgroundDemo } from '@src/component/organisms/landing/HeatmapBackgroundDemo';
@@ -49,6 +51,10 @@ const Component: FC<IndexPageProps> = ({ className }) => {
 
   return (
     <div className={className}>
+      <Seo path='/' />
+      <JsonLd schema={LudiscanOrganization} />
+      <JsonLd schema={LudiscanWebSite} />
+
       {/* Three.js animated background */}
       <Suspense fallback={null}>
         <HeatmapBackgroundDemo />

@@ -23,7 +23,7 @@ export const Default: Story = {
   ...Template,
   name: 'Default (No Session)',
   args: createMockMenuProps({
-    name: 'playerTimeline',
+    name: 'timeline',
   }),
 };
 
@@ -31,7 +31,7 @@ export const WithSession: Story = {
   ...Template,
   name: 'With Session',
   args: createMockMenuProps({
-    name: 'playerTimeline',
+    name: 'timeline',
     service: createMockService({
       projectId: 12345,
       sessionId: 1,

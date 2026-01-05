@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import { useCallback, useState, useMemo, useRef } from 'react';
+import { FiFilter } from 'react-icons/fi';
 import { IoChevronDown, IoChevronUp } from 'react-icons/io5';
 import { useDispatch } from 'react-redux';
 
@@ -8,7 +9,7 @@ import type { GeneralSettings } from '@src/modeles/heatmapView';
 import type { ChangeEvent, FC } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
-import { FlexRow } from '@src/component/atoms/Flex';
+import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { Slider } from '@src/component/atoms/Slider';
 import { Switch } from '@src/component/atoms/Switch';
 import { Text } from '@src/component/atoms/Text';
@@ -18,6 +19,7 @@ import { HeatmapSelectorModal } from '@src/features/heatmap/menu/HeatmapSelector
 import { InputRow } from '@src/features/heatmap/menu/InputRow';
 import { SessionFilterModal } from '@src/features/heatmap/menu/SessionFilterModal';
 import { useGeneralPatch, useGeneralPick } from '@src/hooks/useGeneral';
+import { useLocale } from '@src/hooks/useLocale';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { focusByCoord } from '@src/slices/selectionSlice';
 
@@ -67,40 +69,25 @@ const BackgroundPreview = styled.div<{ backgroundUrl: string }>`
 export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
   const dispatch = useDispatch();
   const { theme } = useSharedTheme();
+  const { t } = useLocale();
   const [isSessionFilterModalOpen, setIsSessionFilterModalOpen] = useState(false);
   const [isHeatmapSelectorModalOpen, setIsHeatmapSelectorModalOpen] = useState(false);
   const [isOptionsOpen, setIsOptionsOpen] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const {
-    upZ,
-    scale,
-    heatmapOpacity,
-    heatmapType,
-    colorScale,
-    blockSize,
-    showHeatmap,
-    minThreshold,
-    displayIntensity,
-    backgroundImage,
-    backgroundScale,
-    backgroundOffsetX,
-    backgroundOffsetY,
-  } = useGeneralPick(
-    'upZ',
-    'scale',
-    'showHeatmap',
-    'heatmapOpacity',
-    'heatmapType',
-    'blockSize',
-    'minThreshold',
-    'colorScale',
-    'displayIntensity',
-    'backgroundImage',
-    'backgroundScale',
-    'backgroundOffsetX',
-    'backgroundOffsetY',
-  );
+  const { upZ, scale, heatmapOpacity, heatmapType, showHeatmap, minThreshold, backgroundImage, backgroundScale, backgroundOffsetX, backgroundOffsetY } =
+    useGeneralPick(
+      'upZ',
+      'scale',
+      'showHeatmap',
+      'heatmapOpacity',
+      'heatmapType',
+      'minThreshold',
+      'backgroundImage',
+      'backgroundScale',
+      'backgroundOffsetX',
+      'backgroundOffsetY',
+    );
   const setData = useGeneralPatch();
 
   // Calculate the center position of all heatmap cells
@@ -164,71 +151,94 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
 
   const currentTaskId = service.task?.taskId;
 
+  // セッションフィルター用（embed時はembedSessionId、通常時はsessionIdを使用）
+  const targetSessionId = service.embedSessionId ?? service.sessionId;
+  const isFilteredBySession = useMemo(() => {
+    if (!targetSessionId) return false;
+    return service.sessionHeatmapIds?.includes(targetSessionId) && service.sessionHeatmapIds.length === 1;
+  }, [targetSessionId, service.sessionHeatmapIds]);
+
+  const handleFilterBySession = useCallback(() => {
+    if (targetSessionId) {
+      service.setSessionHeatmapIds([targetSessionId]);
+    }
+  }, [service, targetSessionId]);
+
+  const handleClearSessionFilter = useCallback(() => {
+    service.setSessionHeatmapIds(undefined);
+  }, [service]);
+
   const handleResetView = useCallback(() => {
     if (centerPosition) {
       dispatch(focusByCoord({ point: centerPosition }));
     }
   }, [centerPosition, dispatch]);
 
-  // 表示量スライダーのハンドラー（minThresholdとcolorScaleを自動計算）
-  const handleDisplayIntensityChange = useCallback(
-    (intensity: number) => {
-      // intensity: 0-100
-      // 0 = 全て表示（minThreshold低、colorScale低）
-      // 100 = ホットスポットのみ（minThreshold高、colorScale高）
-      const normalizedIntensity = intensity / 100;
-
-      // minThreshold: 0 → 0.0, 100 → 0.3
-      const newMinThreshold = normalizedIntensity * 0.3;
-
-      // colorScale: 0 → 0.5, 100 → 3.0
-      const newColorScale = 0.5 + normalizedIntensity * 2.5;
-
-      setData({
-        displayIntensity: intensity,
-        minThreshold: newMinThreshold,
-        colorScale: newColorScale,
-      });
-    },
-    [setData],
-  );
-
   return (
     <>
       {/* Heatmap選択セクション */}
-      <InputRow label={'Heatmap'}>
+      <InputRow label={t('heatmap.general.heatmap')}>
         <FlexRow gap={8} align='center' style={{ flex: 1 }}>
-          <Text text={currentTaskId ? `Task #${currentTaskId}` : '未選択'} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
+          <Text
+            text={currentTaskId ? `Task #${currentTaskId}` : t('heatmap.general.notSelected')}
+            fontSize={theme.typography.fontSize.sm}
+            color={theme.colors.text.secondary}
+          />
           <Button onClick={() => setIsHeatmapSelectorModalOpen(true)} scheme={'primary'} fontSize={'sm'}>
-            <Text text={'選択'} fontSize={theme.typography.fontSize.sm} />
+            <Text text={t('heatmap.general.select')} fontSize={theme.typography.fontSize.sm} />
           </Button>
         </FlexRow>
       </InputRow>
 
       {/* Reset View ボタン */}
-      <InputRow label={'ビュー'}>
+      <InputRow label={t('heatmap.general.view')}>
         <Button onClick={handleResetView} scheme={'secondary'} fontSize={'sm'} disabled={!centerPosition}>
-          <Text text={'初期位置にリセット'} fontSize={theme.typography.fontSize.sm} />
+          <Text text={t('heatmap.general.resetToInitial')} fontSize={theme.typography.fontSize.sm} />
         </Button>
       </InputRow>
 
       {/* Session Filter ボタン */}
-      <InputRow label={'Session Filter'}>
-        <Button onClick={() => setIsSessionFilterModalOpen(true)} scheme={'surface'} fontSize={'sm'}>
-          <Text text={'セッションフィルター'} fontSize={theme.typography.fontSize.sm} />
-        </Button>
+      <InputRow label={t('heatmap.general.sessionFilter')}>
+        <FlexColumn gap={8} style={{ flex: 1 }}>
+          <Button onClick={() => setIsSessionFilterModalOpen(true)} scheme={'surface'} fontSize={'sm'}>
+            <Text text={t('heatmap.general.sessionFilter')} fontSize={theme.typography.fontSize.sm} />
+          </Button>
+          {/* セッション選択時のクイックフィルターボタン */}
+          {targetSessionId && (
+            <>
+              {isFilteredBySession ? (
+                <Button onClick={handleClearSessionFilter} scheme={'tertiary'} fontSize={'sm'}>
+                  <FiFilter size={14} />
+                  <Text text={t('heatmap.general.clearFilter')} fontSize={theme.typography.fontSize.sm} />
+                </Button>
+              ) : (
+                <Button onClick={handleFilterBySession} scheme={'primary'} fontSize={'sm'}>
+                  <FiFilter size={14} />
+                  <Text text={t('heatmap.general.filterBySession').replace('{id}', String(targetSessionId))} fontSize={theme.typography.fontSize.sm} />
+                </Button>
+              )}
+            </>
+          )}
+          {isFilteredBySession && (
+            <Text
+              text={t('heatmap.general.filteringBySession').replace('{id}', String(targetSessionId))}
+              fontSize={theme.typography.fontSize.xs}
+              color={theme.colors.text.secondary}
+            />
+          )}
+        </FlexColumn>
       </InputRow>
 
       {/* 背景画像選択 */}
-      <InputRow label={'背景画像'}>
+      <InputRow label={t('heatmap.general.backgroundImage')}>
         <FlexRow gap={8} align='center' style={{ flex: 1 }}>
           {backgroundImage && <BackgroundPreview backgroundUrl={backgroundImage} />}
           <Button onClick={() => fileInputRef.current?.click()} scheme={'surface'} fontSize={'sm'}>
-            <Text text={backgroundImage ? '変更' : '選択'} fontSize={theme.typography.fontSize.sm} />
+            <Text text={backgroundImage ? t('heatmap.general.change') : t('heatmap.general.select')} fontSize={theme.typography.fontSize.sm} />
           </Button>
           {backgroundImage && (
             <Button onClick={handleClearBackground} scheme={'tertiary'} fontSize={'sm'}>
-              <Text text={'削除'} fontSize={theme.typography.fontSize.sm} />
+              <Text text={t('heatmap.general.remove')} fontSize={theme.typography.fontSize.sm} />
             </Button>
           )}
         </FlexRow>
@@ -238,13 +248,13 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
       {/* 背景画像の調整（画像が選択されている場合のみ表示） */}
       {backgroundImage && (
         <>
-          <InputRow label={'背景スケール'}>
+          <InputRow label={t('heatmap.general.backgroundScale')}>
             <Slider value={backgroundScale} onChange={(v) => setData({ backgroundScale: v })} min={0.5} step={0.1} max={3.0} textField />
           </InputRow>
-          <InputRow label={'背景X位置'}>
+          <InputRow label={t('heatmap.general.backgroundXPosition')}>
             <Slider value={backgroundOffsetX} onChange={(v) => setData({ backgroundOffsetX: v })} min={-50} step={1} max={50} textField />
           </InputRow>
-          <InputRow label={'背景Y位置'}>
+          <InputRow label={t('heatmap.general.backgroundYPosition')}>
             <Slider value={backgroundOffsetY} onChange={(v) => setData({ backgroundOffsetY: v })} min={-50} step={1} max={50} textField />
           </InputRow>
         </>
@@ -253,11 +263,11 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
       {/* 折りたたみ可能なオプションセクション */}
       <CollapsibleSection>
         <CollapsibleHeader onClick={() => setIsOptionsOpen(!isOptionsOpen)}>
-          <span>表示オプション</span>
+          <span>{t('heatmap.general.displayOptions')}</span>
           {isOptionsOpen ? <IoChevronUp size={16} /> : <IoChevronDown size={16} />}
         </CollapsibleHeader>
         <CollapsibleContent isOpen={isOptionsOpen}>
-          <InputRow label={'上向ベクトル'}>
+          <InputRow label={t('heatmap.general.upVector')}>
             <SegmentedSwitch
               fontSize={'xs'}
               value={upZ ? 'Z' : 'Y'}
@@ -267,15 +277,15 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
               }}
             />
           </InputRow>
-          <InputRow label={'scale'}>
+          <InputRow label={t('heatmap.general.scale')}>
             <Slider value={scale} onChange={(scale) => setData({ scale })} min={0.1} step={0.05} max={1.0} textField />
           </InputRow>
-          <InputRow label={'showHeatmap'}>
+          <InputRow label={t('heatmap.general.showHeatmap')}>
             <div>
-              <Switch label={'showHeatmap'} onChange={(showHeatmap) => setData({ showHeatmap })} checked={showHeatmap} size={'small'} />
+              <Switch label={t('heatmap.general.showHeatmap')} onChange={(showHeatmap) => setData({ showHeatmap })} checked={showHeatmap} size={'small'} />
             </div>
           </InputRow>
-          <InputRow label={'opacity'}>
+          <InputRow label={t('heatmap.general.opacity')}>
             <Slider
               value={heatmapOpacity}
               min={0.0}
@@ -286,7 +296,7 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
               textField
             />
           </InputRow>
-          <InputRow label={'type'}>
+          <InputRow label={t('heatmap.general.type')}>
             <Selector
               options={['object', 'fill']}
               value={heatmapType}
@@ -296,22 +306,13 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
               fontSize={'base'}
             />
           </InputRow>
-          <InputRow label={'blockSize'}>
-            <Slider value={blockSize} onChange={(blockSize) => setData({ blockSize })} min={50} step={50} max={500} textField />
-          </InputRow>
-          <InputRow label={'表示フィルター'}>
-            <Slider value={displayIntensity} onChange={handleDisplayIntensityChange} min={0} step={1} max={100} textField />
-          </InputRow>
-          <InputRow label={'minThreshold'}>
-            <Slider value={minThreshold} onChange={(minThreshold) => setData({ minThreshold })} min={0} step={0.001} max={0.5} textField />
-          </InputRow>
-          <InputRow label={'color scale'}>
-            <Slider value={colorScale} onChange={(colorScale) => setData({ colorScale })} min={0.1} step={0.1} max={5} textField />
+          <InputRow label={t('heatmap.general.minThreshold')}>
+            <Slider value={minThreshold} onChange={(minThreshold) => setData({ minThreshold })} min={0} step={0.01} max={1.0} textField />
           </InputRow>
           <InputRow label={''}>
             <div style={{ flex: 1 }} />
             <Button onClick={handleReload} scheme={'surface'} fontSize={'sm'}>
-              <Text text={'Reload'} fontSize={theme.typography.fontSize.sm} />
+              <Text text={t('heatmap.general.reload')} fontSize={theme.typography.fontSize.sm} />
             </Button>
           </InputRow>
         </CollapsibleContent>

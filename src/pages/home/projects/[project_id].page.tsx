@@ -2,7 +2,7 @@ import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { BiBarChart, BiUser, BiKey, BiLineChart, BiChevronRight } from 'react-icons/bi';
 
 import { ProjectDetailsApiKeysTab } from './tabs/ProjectDetailsApiKeysTab';
@@ -10,6 +10,7 @@ import { ProjectDetailsMembersTab } from './tabs/ProjectDetailsMembersTab';
 import { ProjectDetailsSessionsTab } from './tabs/ProjectDetailsSessionsTab';
 
 import type { Project } from '@src/modeles/project';
+import type { GetServerSideProps } from 'next';
 import type { FC } from 'react';
 
 import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
@@ -17,16 +18,67 @@ import { Text } from '@src/component/atoms/Text';
 import { DashboardBackgroundCanvas } from '@src/component/templates/DashboardBackgroundCanvas';
 import { Header } from '@src/component/templates/Header';
 import { SidebarLayout } from '@src/component/templates/SidebarLayout';
-import { useToast } from '@src/component/templates/ToastContext';
+import { env } from '@src/config/env';
 import { useAuth } from '@src/hooks/useAuth';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { createClient } from '@src/modeles/qeury';
 import { InnerContent } from '@src/pages/_app.page';
+import { getCookie, COOKIE_NAMES } from '@src/utils/security/cookies';
 
 type TabType = 'sessions' | 'members' | 'api-keys';
 
 export type ProjectDetailsPageProps = {
   className?: string;
+  project: Project;
+};
+
+export const getServerSideProps: GetServerSideProps<ProjectDetailsPageProps> = async (context) => {
+  const { params, req } = context;
+  const projectId = params?.project_id;
+
+  if (!projectId || Array.isArray(projectId) || isNaN(Number(projectId))) {
+    return { notFound: true };
+  }
+
+  const authToken = getCookie(req.headers.cookie, COOKIE_NAMES.AUTH_TOKEN);
+
+  if (!authToken) {
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false,
+      },
+    };
+  }
+
+  try {
+    const response = await fetch(`${env.NEXT_PUBLIC_API_BASE_URL}/api/v0/projects/${projectId}`, {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        return {
+          redirect: {
+            destination: '/login',
+            permanent: false,
+          },
+        };
+      }
+      return { notFound: true };
+    }
+
+    const project: Project = await response.json();
+
+    return {
+      props: {
+        project,
+      },
+    };
+  } catch {
+    return { notFound: true };
+  }
 };
 
 const TABS: { id: TabType; label: string; icon: React.ReactNode }[] = [
@@ -35,16 +87,12 @@ const TABS: { id: TabType; label: string; icon: React.ReactNode }[] = [
   { id: 'api-keys', label: 'API Keys', icon: <BiKey size={18} /> },
 ];
 
-const Component: FC<ProjectDetailsPageProps> = ({ className }) => {
+const Component: FC<ProjectDetailsPageProps> = ({ className, project }) => {
   const { isAuthorized, isLoading, ready } = useAuth();
   const router = useRouter();
-  const { showToast } = useToast();
   const { theme } = useSharedTheme();
 
   const [activeTab, setActiveTab] = useState<TabType>('sessions');
-  const [project, setProject] = useState<Project | null>(null);
-  const [isErrorProject, setIsErrorProject] = useState(false);
-  const [projectId, setProjectId] = useState<string | undefined>();
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -52,65 +100,15 @@ const Component: FC<ProjectDetailsPageProps> = ({ className }) => {
     return () => clearTimeout(timer);
   }, []);
 
-  // URLパスからprojectIdを取得
-  useEffect(() => {
-    const pathname = window.location.pathname;
-    const match = pathname.match(/\/home\/projects\/(\d+)/);
-    if (match) {
-      setProjectId(match[1]);
-    }
-  }, []);
-
-  // プロジェクト情報を取得
-  useEffect(() => {
-    if (!projectId || !isAuthorized) return;
-
-    const fetchProject = async () => {
-      try {
-        const { data, error } = await createClient().GET('/api/v0.1/projects', {
-          params: {
-            query: {
-              limit: 100,
-              offset: 0,
-            },
-          },
-        });
-
-        if (error || !data) {
-          throw new Error('プロジェクト情報の取得に失敗しました');
-        }
-
-        const found = data.find((p) => p.id === Number(projectId));
-        if (!found) {
-          throw new Error('プロジェクトが見つかりません');
-        }
-
-        setProject(found);
-        setIsErrorProject(false);
-      } catch (err) {
-        setIsErrorProject(true);
-        showToast((err as Error).message || 'プロジェクト情報の取得に失敗しました', 3, 'error');
-      }
-    };
-
-    fetchProject();
-  }, [projectId, isAuthorized, showToast]);
-
   useEffect(() => {
     if (!isAuthorized && !isLoading && ready) {
       router.replace('/');
     }
   }, [isAuthorized, isLoading, ready, router]);
 
-  useEffect(() => {
-    if (isErrorProject && projectId) {
-      setTimeout(() => router.replace('/home'), 2000);
-    }
-  }, [isErrorProject, projectId, router]);
-
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     router.back();
-  };
+  }, [router]);
 
   if (!ready || isLoading) {
     return (
@@ -121,23 +119,6 @@ const Component: FC<ProjectDetailsPageProps> = ({ className }) => {
           <div className={`${className}__loadingContainer`}>
             <div className={`${className}__loadingSpinner`} />
             <Text text='Loading...' fontSize={theme.typography.fontSize.base} color={theme.colors.text.secondary} />
-          </div>
-        </InnerContent>
-      </div>
-    );
-  }
-
-  if (isErrorProject || !project) {
-    return (
-      <div className={className}>
-        <DashboardBackgroundCanvas />
-        <SidebarLayout />
-        <InnerContent>
-          <Header title='Project Details' onClick={handleBack} />
-          <div className={`${className}__errorContainer`}>
-            <div className={`${className}__errorIcon`}>!</div>
-            <Text text='プロジェクトが見つかりません' fontSize={theme.typography.fontSize.lg} color={theme.colors.semantic.error.main} />
-            <Text text='Redirecting to home...' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.tertiary} />
           </div>
         </InnerContent>
       </div>
@@ -173,7 +154,7 @@ const Component: FC<ProjectDetailsPageProps> = ({ className }) => {
                   />
                   <Text text={project.description || 'No description'} fontSize={theme.typography.fontSize.base} color={theme.colors.text.secondary} />
                 </FlexColumn>
-                <Link href={`/heatmap/projects/${project.id}`} className={`${className}__heatmapLink`}>
+                <Link href={`/heatmap/projects/${project.id}`} prefetch={true} className={`${className}__heatmapLink`}>
                   <BiLineChart size={20} />
                   <span>View Heatmap</span>
                   <BiChevronRight size={18} className={`${className}__linkChevron`} />

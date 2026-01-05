@@ -215,5 +215,3 @@ bun run type
 開発環境が整ったら、以下のドキュメントを参照して開発を進めましょう：
 
 - [アーキテクチャドキュメント](/heatmap/docs/project/architecture)
-- [開発ガイドライン](/heatmap/docs/project/guidelines)
-- [API連携ガイド](/heatmap/docs/project/api-integration)

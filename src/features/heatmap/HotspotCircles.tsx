@@ -6,8 +6,9 @@ import type { FC } from 'react';
 import { useGeneralPick } from '@src/hooks/useGeneral';
 import { useHotspotModePick } from '@src/hooks/useHotspotMode';
 
+// v0.1 API: normalizedDensity is already 0-1 range
 export type PointCirclesProps = {
-  points: { x: number; y: number; z?: number | undefined; density: number }[];
+  points: { x: number; y: number; z?: number | undefined; normalizedDensity: number }[];
 };
 
 const Component: FC<PointCirclesProps> = ({ points }) => {
@@ -35,7 +36,7 @@ const Component: FC<PointCirclesProps> = ({ points }) => {
       points.forEach((other) => {
         const otherPos = new Vector3(other.x * scale, upZ ? (other.z ?? 0) * scale : other.y * scale, upZ ? other.y * scale : (other.z ?? 0) * scale);
         if (pos.distanceTo(otherPos) <= cellRadius) {
-          areaMap.get(key)!.totalDensity += other.density;
+          areaMap.get(key)!.totalDensity += other.normalizedDensity;
         }
       });
     });
