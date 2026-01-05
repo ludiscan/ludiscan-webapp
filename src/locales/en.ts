@@ -173,7 +173,6 @@ export const en = {
       showHeatmap: 'Show Heatmap',
       opacity: 'Opacity',
       type: 'Type',
-      blockSize: 'Block Size',
       minThreshold: 'Min Threshold',
       colorScale: 'Color Scale',
       reload: 'Reload',

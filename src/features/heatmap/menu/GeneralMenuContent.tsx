@@ -78,7 +78,6 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
     scale,
     heatmapOpacity,
     heatmapType,
-    blockSize,
     showHeatmap,
     minThreshold,
     backgroundImage,
@@ -91,7 +90,6 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
     'showHeatmap',
     'heatmapOpacity',
     'heatmapType',
-    'blockSize',
     'minThreshold',
     'backgroundImage',
     'backgroundScale',
@@ -307,9 +305,6 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
               }}
               fontSize={'base'}
             />
-          </InputRow>
-          <InputRow label={'blockSize'}>
-            <Slider value={blockSize} onChange={(blockSize) => setData({ blockSize })} min={50} step={50} max={500} textField />
           </InputRow>
           <InputRow label={'最低密度'}>
             <Slider value={minThreshold} onChange={(minThreshold) => setData({ minThreshold })} min={0} step={0.01} max={1.0} textField />

@@ -173,7 +173,6 @@ export const ja = {
       showHeatmap: 'ヒートマップを表示',
       opacity: '不透明度',
       type: 'タイプ',
-      blockSize: 'ブロックサイズ',
       minThreshold: '最小閾値',
       colorScale: 'カラースケール',
       reload: '再読み込み',
