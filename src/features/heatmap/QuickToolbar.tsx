@@ -177,7 +177,7 @@ function Toolbar({ className, service, dimensionality }: Props) {
         exact: false,
       });
       // メニューを自動開く
-      heatMapEventBus.emit('click-menu-icon', { name: 'ルートコーチ' });
+      heatMapEventBus.emit('click-menu-icon', { name: 'routecoach' });
     },
   });
 
