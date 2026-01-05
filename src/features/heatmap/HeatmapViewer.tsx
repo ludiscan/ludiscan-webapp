@@ -526,7 +526,7 @@ export const HeatMapViewer = memo(
       --header-offset: 0px;
     }
 
-    /*noinspection CssUnresolvedCustomProperty*/
+    /* noinspection CssUnresolvedCustomProperty */
 
     &__canvasMenuBox {
       position: absolute;

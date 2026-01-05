@@ -81,7 +81,7 @@ const Component: FC<SettingsButtonProps> = ({ className }) => {
         aria-expanded={open}
         aria-haspopup='menu'
         scheme='surface'
-        fontSize='sm'
+        fontSize='base'
         aria-label={t('heatmap.settings.title')}
       >
         <IoSettingsOutline size={18} />
@@ -120,11 +120,7 @@ const Component: FC<SettingsButtonProps> = ({ className }) => {
           {/* Theme Section */}
           <div className='settings-section'>
             <div className='settings-label'>{t('heatmap.settings.theme')}</div>
-            <select
-              className='settings-select'
-              value={themeType}
-              onChange={(e) => handleThemeTypeChange(e.target.value as ThemeType)}
-            >
+            <select className='settings-select' value={themeType} onChange={(e) => handleThemeTypeChange(e.target.value as ThemeType)}>
               {THEME_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
@@ -170,8 +166,8 @@ export const SettingsButton = memo(styled(Component)`
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
+    width: 42px;
+    height: 42px;
     padding: 0;
     background: ${({ theme }) => theme.colors.surface.base};
     border: 1px solid ${({ theme }) => theme.colors.border.default};

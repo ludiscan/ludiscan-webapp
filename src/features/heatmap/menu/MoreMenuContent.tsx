@@ -1,13 +1,14 @@
 import styled from '@emotion/styled';
 
 import type { HeatmapMenuProps } from '@src/features/heatmap/HeatmapMenuContent';
-import type { Menus } from '@src/hooks/useHeatmapSideBarMenus';
+import type { MenuKey } from '@src/hooks/useHeatmapSideBarMenus';
 import type { FC, ReactElement } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
 import { FlexColumn } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
-import { MenuContents } from '@src/hooks/useHeatmapSideBarMenus';
+import { getMenuDisplayName, MenuContents } from '@src/hooks/useHeatmapSideBarMenus';
+import { useLocale } from '@src/hooks/useLocale';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
@@ -70,16 +71,17 @@ const GridContainer = styled.div`
 
 export const MoreMenuContent: FC<HeatmapMenuProps> = () => {
   const { theme } = useSharedTheme();
+  const { t } = useLocale();
 
   // Filter out menus that shouldn't appear in the grid (more itself, eventLogDetail)
   const availableMenus = MenuContents.filter((menu) => {
     if (!menu.icon) return false;
-    if (menu.name === 'その他' || menu.name === 'イベント詳細') return false;
+    if (menu.id === 'more' || menu.id === 'eventDetail') return false;
     return true;
   });
 
-  const handleMenuClick = (menuName: Menus) => {
-    heatMapEventBus.emit('click-menu-icon', { name: menuName });
+  const handleMenuClick = (menuId: MenuKey) => {
+    heatMapEventBus.emit('click-menu-icon', { name: menuId });
   };
 
   return (
@@ -87,7 +89,12 @@ export const MoreMenuContent: FC<HeatmapMenuProps> = () => {
       <Text text={'All Features'} fontSize={theme.typography.fontSize.lg} fontWeight={theme.typography.fontWeight.bold} />
       <GridContainer>
         {availableMenus.map((menu) => (
-          <MenuItem key={menu.name} name={menu.name} icon={menu.icon!} onClick={() => handleMenuClick(menu.name)} />
+          <MenuItem
+            key={menu.id}
+            name={getMenuDisplayName(menu.id, t)}
+            icon={menu.icon!}
+            onClick={() => handleMenuClick(menu.id)}
+          />
         ))}
       </GridContainer>
     </FlexColumn>

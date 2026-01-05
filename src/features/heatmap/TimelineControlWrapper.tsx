@@ -118,7 +118,7 @@ export const TimelineControlWrapper: FC<TimelineControlWrapperProps> = ({ setVis
         }));
       }}
       onClickMenu={() => {
-        heatMapEventBus.emit('click-menu-icon', { name: 'タイムライン' });
+        heatMapEventBus.emit('click-menu-icon', { name: 'timeline' });
       }}
       onClickPlay={() => {
         setTimelineState((prev) => ({

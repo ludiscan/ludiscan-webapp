@@ -23,7 +23,7 @@ export const Default: Story = {
   ...Template,
   name: 'Default (No Session)',
   args: createMockMenuProps({
-    name: 'aisummary',
+    name: 'aiSummary',
   }),
 };
 
@@ -31,7 +31,7 @@ export const WithSession: Story = {
   ...Template,
   name: 'With Session ID',
   args: createMockMenuProps({
-    name: 'aisummary',
+    name: 'aiSummary',
     service: createMockService({
       projectId: 12345,
       sessionId: 1,

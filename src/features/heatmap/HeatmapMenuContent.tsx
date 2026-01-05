@@ -4,7 +4,7 @@ import { IoChevronDown, IoChevronUp } from 'react-icons/io5';
 import { useDispatch, useSelector } from 'react-redux';
 
 import type { ModelFileType } from '@src/features/heatmap/ModelLoader';
-import type { Menus } from '@src/hooks/useHeatmapSideBarMenus';
+import type { MenuKey } from '@src/hooks/useHeatmapSideBarMenus';
 import type { RootState } from '@src/store';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC } from 'react';
@@ -32,7 +32,7 @@ export type LocalModelData = {
 export type HeatmapMenuProps = {
   model: Group | null;
   className?: string | undefined;
-  name?: Menus | undefined;
+  name?: MenuKey | undefined;
   toggleMenu?: (value: boolean) => void;
   eventLogKeys?: string[] | undefined;
   handleExportView: () => Promise<void>;
@@ -62,7 +62,7 @@ const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
   const { theme } = useSharedTheme();
   const menus = useHeatmapSideBarMenus();
 
-  const [openMenu, setOpenMenu] = useState<Menus | undefined>(name);
+  const [openMenu, setOpenMenu] = useState<MenuKey | undefined>(name);
   const [menuExtra, setMenuExtra] = useState<object | undefined>(undefined);
   const [isResizing, setIsResizing] = useState(false);
   const resizeRef = useRef<{ startX: number; startWidth: number } | null>(null);
@@ -118,17 +118,17 @@ const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
 
   // Listen to eventBus events
   useEffect(() => {
-    const clickMenuIconHandler = (event: CustomEvent<{ name: Menus }>) => {
-      const menuName = event.detail.name;
-      setOpenMenu(menuName);
-      // Save to recent menus (except for 'その他' and 'イベント詳細')
-      if (menuName !== 'その他' && menuName !== 'イベント詳細') {
-        saveRecentMenu(menuName);
+    const clickMenuIconHandler = (event: CustomEvent<{ name: MenuKey }>) => {
+      const menuId = event.detail.name;
+      setOpenMenu(menuId);
+      // Save to recent menus (except for 'more' and 'eventDetail')
+      if (menuId !== 'more' && menuId !== 'eventDetail') {
+        saveRecentMenu(menuId);
       }
     };
     const clickEventLogHandler = (event: CustomEvent<{ logName: string; id: number }>) => {
       setMenuExtra(event.detail);
-      setOpenMenu('イベント詳細');
+      setOpenMenu('eventDetail');
     };
     const closeMenuHandler = () => {
       setOpenMenu(undefined);
@@ -154,7 +154,7 @@ const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
     }
   }, [mapOptions, mapName, setGeneral]);
 
-  const content = useMemo(() => MenuContents.find((content) => content.name === openMenu), [openMenu]);
+  const content = useMemo(() => MenuContents.find((content) => content.id === openMenu), [openMenu]);
 
   // Build props for menu content component
   const menuProps: HeatmapMenuProps = {
@@ -170,9 +170,9 @@ const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
 
   // Handle menu click when collapsed - expand and open menu
   const handleCollapsedMenuClick = useCallback(
-    (menuName: Menus) => {
+    (menuId: MenuKey) => {
       dispatch(toggleMenuPanelCollapsed());
-      heatMapEventBus.emit('click-menu-icon', { name: menuName });
+      heatMapEventBus.emit('click-menu-icon', { name: menuId });
     },
     [dispatch],
   );
@@ -185,16 +185,16 @@ const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
           <Flex className={`${className}__collapsedContainer`} gap={8} align={'center'} wrap={'nowrap'}>
             {/* Menu icons - direction controlled by CSS */}
             <Flex className={`${className}__collapsedMenus`} gap={4} align={'center'} wrap={'nowrap'}>
-              {menus.map(({ name: menuName, icon }) => (
+              {menus.map(({ id, displayName, icon }) => (
                 <Button
-                  className={`${className}__collapsedMenuButton ${menuName === openMenu ? 'active' : ''}`}
-                  key={menuName}
+                  className={`${className}__collapsedMenuButton ${id === openMenu ? 'active' : ''}`}
+                  key={id}
                   scheme={'none'}
-                  onClick={() => handleCollapsedMenuClick(menuName)}
+                  onClick={() => handleCollapsedMenuClick(id)}
                   fontSize={'lg'}
                   radius={'small'}
                 >
-                  <Tooltip tooltip={menuName} placement={'bottom'} fontSize={theme.typography.fontSize.sm}>
+                  <Tooltip tooltip={displayName} placement={'bottom'} fontSize={theme.typography.fontSize.sm}>
                     {icon}
                   </Tooltip>
                 </Button>
