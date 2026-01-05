@@ -78,11 +78,9 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
     scale,
     heatmapOpacity,
     heatmapType,
-    colorScale,
     blockSize,
     showHeatmap,
     minThreshold,
-    displayIntensity,
     backgroundImage,
     backgroundScale,
     backgroundOffsetX,
@@ -95,8 +93,6 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
     'heatmapType',
     'blockSize',
     'minThreshold',
-    'colorScale',
-    'displayIntensity',
     'backgroundImage',
     'backgroundScale',
     'backgroundOffsetX',
@@ -187,29 +183,6 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
       dispatch(focusByCoord({ point: centerPosition }));
     }
   }, [centerPosition, dispatch]);
-
-  // 表示量スライダーのハンドラー（minThresholdとcolorScaleを自動計算）
-  const handleDisplayIntensityChange = useCallback(
-    (intensity: number) => {
-      // intensity: 0-100
-      // 0 = 全て表示（minThreshold低、colorScale低）
-      // 100 = ホットスポットのみ（minThreshold高、colorScale高）
-      const normalizedIntensity = intensity / 100;
-
-      // minThreshold: 0 → 0.0, 100 → 0.3
-      const newMinThreshold = normalizedIntensity * 0.3;
-
-      // colorScale: 0 → 0.5, 100 → 3.0
-      const newColorScale = 0.5 + normalizedIntensity * 2.5;
-
-      setData({
-        displayIntensity: intensity,
-        minThreshold: newMinThreshold,
-        colorScale: newColorScale,
-      });
-    },
-    [setData],
-  );
 
   return (
     <>
@@ -338,14 +311,8 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
           <InputRow label={'blockSize'}>
             <Slider value={blockSize} onChange={(blockSize) => setData({ blockSize })} min={50} step={50} max={500} textField />
           </InputRow>
-          <InputRow label={'表示フィルター'}>
-            <Slider value={displayIntensity} onChange={handleDisplayIntensityChange} min={0} step={1} max={100} textField />
-          </InputRow>
-          <InputRow label={'minThreshold'}>
-            <Slider value={minThreshold} onChange={(minThreshold) => setData({ minThreshold })} min={0} step={0.001} max={0.5} textField />
-          </InputRow>
-          <InputRow label={'color scale'}>
-            <Slider value={colorScale} onChange={(colorScale) => setData({ colorScale })} min={0.1} step={0.1} max={5} textField />
+          <InputRow label={'最低密度'}>
+            <Slider value={minThreshold} onChange={(minThreshold) => setData({ minThreshold })} min={0} step={0.01} max={1.0} textField />
           </InputRow>
           <InputRow label={''}>
             <div style={{ flex: 1 }} />

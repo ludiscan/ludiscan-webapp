@@ -69,8 +69,9 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
         return null;
       }
 
+      // v0.1 API - normalized density (0-1 range)
       // project全体のheatmapタスクを作成（sessionHeatmapIdsでフィルター可能）
-      const { data, error } = await apiClient.POST('/api/v0/heatmap/projects/{project_id}/tasks', {
+      const { data, error } = await apiClient.POST('/api/v0.1/heatmap/projects/{project_id}/tasks', {
         params: {
           path: {
             project_id: projectId,
@@ -94,12 +95,13 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
     setTaskId(createdTask.taskId);
   }, [createdTask]);
 
+  // v0.1 API - normalized density (0-1 range)
   const { data: task } = useQuery({
     // eslint-disable-next-line @tanstack/query/exhaustive-deps
     queryKey: ['embed-heatmap', taskId, token],
     queryFn: async (): Promise<HeatmapTask | null> => {
       if (!taskId || isNaN(Number(taskId)) || !apiClient) return null;
-      const { data, error } = await apiClient.GET('/api/v0/heatmap/tasks/{task_id}', {
+      const { data, error } = await apiClient.GET('/api/v0.1/heatmap/tasks/{task_id}', {
         params: { path: { task_id: Number(taskId) } },
       });
       if (error) throw error;

@@ -282,6 +282,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
     }
   }, [localModel]);
 
+  // v0.1 API: normalizedDensity is already 0-1 range
   const pointList = useMemo(() => {
     if (!task) return [];
 
@@ -290,7 +291,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
         x: point.x - task.stepSize / 2,
         y: point.y - task.stepSize / 2,
         z: (point.z ?? 0) - task.stepSize / 2,
-        density: point.density,
+        normalizedDensity: point.normalizedDensity,
       })) ?? []
     );
   }, [task]);

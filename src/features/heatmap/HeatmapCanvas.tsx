@@ -47,7 +47,8 @@ type HeatmapCanvasProps = {
   service: HeatmapDataService;
   map?: string | ArrayBuffer | null;
   modelType?: 'gltf' | 'glb' | 'obj' | 'server' | null;
-  pointList: { x: number; y: number; z?: number; density: number }[];
+  // v0.1 API: normalizedDensity is already 0-1 range
+  pointList: { x: number; y: number; z?: number; normalizedDensity: number }[];
   visibleTimelineRange: PlayerTimelinePointsTimeRange;
   dimensionality: '2d' | '3d';
   fieldObjectLogs?: components['schemas']['FieldObjectLogDto'][];
