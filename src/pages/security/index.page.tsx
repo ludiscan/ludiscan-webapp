@@ -6,6 +6,7 @@ import type { FC } from 'react';
 
 import { Card } from '@src/component/atoms/Card';
 import { FlexColumn } from '@src/component/atoms/Flex';
+import { Seo } from '@src/component/atoms/Seo';
 import { VerticalSpacer } from '@src/component/atoms/Spacer';
 import { Text } from '@src/component/atoms/Text';
 import { DashboardBackgroundCanvas } from '@src/component/templates/DashboardBackgroundCanvas';
@@ -50,6 +51,7 @@ const Component: FC<SecurityPageProps> = ({ className }) => {
 
   return (
     <div className={className}>
+      <Seo title='Security' path='/security' noIndex={true} />
       <DashboardBackgroundCanvas className='visible' />
       <SidebarLayout />
       <InnerContent>

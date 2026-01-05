@@ -10,6 +10,7 @@ import type { GetStaticPaths, GetStaticProps } from 'next';
 import type { FC } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
+import { Seo } from '@src/component/atoms/Seo';
 import { Text } from '@src/component/atoms/Text';
 import { StatusContent } from '@src/component/molecules/StatusContent';
 import { Header } from '@src/component/templates/Header';
@@ -55,6 +56,7 @@ export const getStaticProps: GetStaticProps<HeatMapTaskIdPageProps> = async ({ p
     props: {
       project_id: projectId,
     },
+    revalidate: 3600,
   };
 };
 
@@ -194,7 +196,12 @@ const HeatMapTaskIdPage: FC<HeatMapTaskIdPageProps> = ({ className, project_id }
     return <div>Invalid Task ID</div>;
   }
 
-  return <HeatmapIdPageLayout className={className} service={service} onBackClick={handleBackClick} />;
+  return (
+    <>
+      <Seo title={`Heatmap - Project ${project_id}`} path={`/heatmap/projects/${project_id}`} noIndex={true} />
+      <HeatmapIdPageLayout className={className} service={service} onBackClick={handleBackClick} />
+    </>
+  );
 };
 
 export default HeatMapTaskIdPage;
