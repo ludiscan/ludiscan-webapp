@@ -1,6 +1,12 @@
 import type { components } from '@generated/api';
 
-export type HeatmapTask = components['schemas']['HeatmapTaskDto'];
+// v0 API types (legacy - raw density)
+export type HeatmapTaskLegacy = components['schemas']['HeatmapTaskDto'];
+
+// v0.1 API types (normalized density 0-1)
+export type HeatmapTask = components['schemas']['HeatmapTaskV01Dto'];
+export type NormalizedHeatmapPoint = components['schemas']['NormalizedHeatmapPointDto'];
+export type NormalizedHeatmapStats = components['schemas']['NormalizedHeatmapStatsDto'];
 
 export function createMockHeatmapTask(): HeatmapTask {
   return {
@@ -15,7 +21,15 @@ export function createMockHeatmapTask(): HeatmapTask {
     stepSize: 50,
     zVisible: true,
     status: 'completed',
-    result: null,
+    result: [],
+    stats: {
+      min: 0,
+      max: 100,
+      percentile1: 1,
+      percentile99: 90,
+      scaleMode: 'sqrt',
+      totalPoints: 0,
+    },
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
