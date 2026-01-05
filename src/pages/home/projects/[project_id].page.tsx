@@ -154,7 +154,7 @@ const Component: FC<ProjectDetailsPageProps> = ({ className, project }) => {
                   />
                   <Text text={project.description || 'No description'} fontSize={theme.typography.fontSize.base} color={theme.colors.text.secondary} />
                 </FlexColumn>
-                <Link href={`/heatmap/projects/${project.id}`} className={`${className}__heatmapLink`}>
+                <Link href={`/heatmap/projects/${project.id}`} prefetch={true} className={`${className}__heatmapLink`}>
                   <BiLineChart size={20} />
                   <span>View Heatmap</span>
                   <BiChevronRight size={18} className={`${className}__linkChevron`} />
