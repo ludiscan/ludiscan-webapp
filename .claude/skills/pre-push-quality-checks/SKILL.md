@@ -1,6 +1,6 @@
 ---
 name: pre-push-quality-checks
-description: このスキルは、PR作成やgit push前にコード品質チェックを強制実行します。
+description: PR作成・git push前に必ず使用。bun install → fix → format → type → lint を順番に実行。
 ---
 
 ## When to Use This Skill
