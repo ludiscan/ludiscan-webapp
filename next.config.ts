@@ -1,6 +1,11 @@
 import type { NextConfig } from 'next';
 
+import packageJson from './package.json';
+
 const nextConfig: NextConfig = {
+  env: {
+    NEXT_PUBLIC_APP_VERSION: packageJson.version,
+  },
   pageExtensions: ['page.tsx', 'page.ts', 'api.ts'],
   output: 'standalone',
 
@@ -26,7 +31,7 @@ const nextConfig: NextConfig = {
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",
-              "upgrade-insecure-requests",
+              'upgrade-insecure-requests',
             ]
               .join('; ')
               .replace(/\s+/g, ' '),
