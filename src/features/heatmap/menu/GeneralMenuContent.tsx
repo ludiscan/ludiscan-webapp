@@ -13,7 +13,6 @@ import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { Slider } from '@src/component/atoms/Slider';
 import { Switch } from '@src/component/atoms/Switch';
 import { Text } from '@src/component/atoms/Text';
-import { SegmentedSwitch } from '@src/component/molecules/SegmentedSwitch';
 import { Selector } from '@src/component/molecules/Selector';
 import { HeatmapSelectorModal } from '@src/features/heatmap/menu/HeatmapSelectorModal';
 import { InputRow } from '@src/features/heatmap/menu/InputRow';
@@ -22,6 +21,30 @@ import { useGeneralPatch, useGeneralPick } from '@src/hooks/useGeneral';
 import { useLocale } from '@src/hooks/useLocale';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { focusByCoord } from '@src/slices/selectionSlice';
+
+// Section wrapper with visual separation
+const Section = styled.section`
+  width: 100%;
+  padding-block-end: ${({ theme }) => theme.spacing.sm};
+  margin-block-end: ${({ theme }) => theme.spacing.sm};
+  border-block-end: 1px solid ${({ theme }) => theme.colors.border.subtle};
+
+  &:last-of-type {
+    border-block-end: none;
+    margin-block-end: 0;
+    padding-block-end: 0;
+  }
+`;
+
+const SectionTitle = styled.h3`
+  margin: 0;
+  margin-block-end: ${({ theme }) => theme.spacing.xs};
+  font-size: ${({ theme }) => theme.typography.fontSize.xs};
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.text.secondary};
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+`;
 
 const CollapsibleSection = styled.div`
   width: 100%;
@@ -33,23 +56,29 @@ const CollapsibleHeader = styled.button`
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 8px;
-  font-size: 14px;
-  font-weight: bold;
+  min-block-size: 44px;
+  padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.sm};
+  font-size: ${({ theme }) => theme.typography.fontSize.sm};
+  font-weight: 500;
   color: ${({ theme }) => theme.colors.text.primary};
   cursor: pointer;
   background: ${({ theme }) => theme.colors.surface.hover};
   border: none;
-  border-radius: 4px;
+  border-radius: ${({ theme }) => theme.borders.radius.sm};
 
   &:hover {
     background: ${({ theme }) => theme.colors.surface.raised};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.primary.main};
+    outline-offset: 2px;
   }
 `;
 
 const CollapsibleContent = styled.div<{ isOpen: boolean }>`
   display: ${({ isOpen }) => (isOpen ? 'block' : 'none')};
-  padding-top: 8px;
+  padding-block-start: ${({ theme }) => theme.spacing.xs};
 `;
 
 const HiddenFileInput = styled.input`
@@ -63,7 +92,7 @@ const BackgroundPreview = styled.div<{ backgroundUrl: string }>`
   background-position: center;
   background-size: cover;
   border: 1px solid ${({ theme }) => theme.colors.border.default};
-  border-radius: 4px;
+  border-radius: ${({ theme }) => theme.borders.radius.sm};
 `;
 
 export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
@@ -72,22 +101,34 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
   const { t } = useLocale();
   const [isSessionFilterModalOpen, setIsSessionFilterModalOpen] = useState(false);
   const [isHeatmapSelectorModalOpen, setIsHeatmapSelectorModalOpen] = useState(false);
-  const [isOptionsOpen, setIsOptionsOpen] = useState(true);
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
+  const [isSessionFilterOpen, setIsSessionFilterOpen] = useState(false);
+  const [isBackgroundOpen, setIsBackgroundOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { upZ, scale, heatmapOpacity, heatmapType, showHeatmap, minThreshold, backgroundImage, backgroundScale, backgroundOffsetX, backgroundOffsetY } =
-    useGeneralPick(
-      'upZ',
-      'scale',
-      'showHeatmap',
-      'heatmapOpacity',
-      'heatmapType',
-      'minThreshold',
-      'backgroundImage',
-      'backgroundScale',
-      'backgroundOffsetX',
-      'backgroundOffsetY',
-    );
+  const {
+    upZ,
+    scale,
+    heatmapOpacity,
+    heatmapType,
+    showHeatmap,
+    minThreshold,
+    backgroundImage,
+    backgroundScale,
+    backgroundOffsetX,
+    backgroundOffsetY,
+  } = useGeneralPick(
+    'upZ',
+    'scale',
+    'showHeatmap',
+    'heatmapOpacity',
+    'heatmapType',
+    'minThreshold',
+    'backgroundImage',
+    'backgroundScale',
+    'backgroundOffsetX',
+    'backgroundOffsetY',
+  );
   const setData = useGeneralPatch();
 
   // Calculate the center position of all heatmap cells
@@ -115,8 +156,6 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
     };
   }, [service.task]);
 
-  const handleReload = useCallback(() => {}, []);
-
   // 背景画像選択ハンドラー
   const handleFileSelect = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
@@ -125,8 +164,6 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
 
       // 画像ファイルのみ許可
       if (!file.type.startsWith('image/')) {
-        // eslint-disable-next-line no-console
-        console.error('画像ファイルを選択してください');
         return;
       }
 
@@ -176,147 +213,237 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
 
   return (
     <>
-      {/* Heatmap選択セクション */}
-      <InputRow label={t('heatmap.general.heatmap')}>
-        <FlexRow gap={8} align='center' style={{ flex: 1 }}>
-          <Text
-            text={currentTaskId ? `Task #${currentTaskId}` : t('heatmap.general.notSelected')}
-            fontSize={theme.typography.fontSize.sm}
-            color={theme.colors.text.secondary}
-          />
-          <Button onClick={() => setIsHeatmapSelectorModalOpen(true)} scheme={'primary'} fontSize={'sm'}>
-            <Text text={t('heatmap.general.select')} fontSize={theme.typography.fontSize.sm} />
-          </Button>
-        </FlexRow>
-      </InputRow>
+      {/* ===== Heatmap Settings - Primary Controls (常時表示) ===== */}
+      <Section role="group" aria-label={t('heatmap.general.heatmap')}>
+        <SectionTitle>{t('heatmap.general.heatmap')}</SectionTitle>
 
-      {/* Reset View ボタン */}
-      <InputRow label={t('heatmap.general.view')}>
-        <Button onClick={handleResetView} scheme={'secondary'} fontSize={'sm'} disabled={!centerPosition}>
-          <Text text={t('heatmap.general.resetToInitial')} fontSize={theme.typography.fontSize.sm} />
-        </Button>
-      </InputRow>
-
-      {/* Session Filter ボタン */}
-      <InputRow label={t('heatmap.general.sessionFilter')}>
-        <FlexColumn gap={8} style={{ flex: 1 }}>
-          <Button onClick={() => setIsSessionFilterModalOpen(true)} scheme={'surface'} fontSize={'sm'}>
-            <Text text={t('heatmap.general.sessionFilter')} fontSize={theme.typography.fontSize.sm} />
-          </Button>
-          {/* セッション選択時のクイックフィルターボタン */}
-          {targetSessionId && (
-            <>
-              {isFilteredBySession ? (
-                <Button onClick={handleClearSessionFilter} scheme={'tertiary'} fontSize={'sm'}>
-                  <FiFilter size={14} />
-                  <Text text={t('heatmap.general.clearFilter')} fontSize={theme.typography.fontSize.sm} />
-                </Button>
-              ) : (
-                <Button onClick={handleFilterBySession} scheme={'primary'} fontSize={'sm'}>
-                  <FlexRow align={'center'} gap={4}>
-                    <FiFilter size={18} />
-                    <Text text={t('heatmap.general.filterBySession').replace('{id}', String(targetSessionId))} fontSize={theme.typography.fontSize.sm} />
-                  </FlexRow>
-                </Button>
-              )}
-            </>
-          )}
-          {isFilteredBySession && (
+        {/* Heatmap選択 */}
+        <InputRow label={t('heatmap.general.select')}>
+          <FlexRow gap={8} align="center" style={{ flex: 1 }}>
             <Text
-              text={t('heatmap.general.filteringBySession').replace('{id}', String(targetSessionId))}
-              fontSize={theme.typography.fontSize.xs}
+              text={currentTaskId ? `Task #${currentTaskId}` : t('heatmap.general.notSelected')}
+              fontSize={theme.typography.fontSize.sm}
               color={theme.colors.text.secondary}
             />
-          )}
-        </FlexColumn>
-      </InputRow>
+            <Button onClick={() => setIsHeatmapSelectorModalOpen(true)} scheme={'primary'} fontSize={'sm'}>
+              <Text text={t('heatmap.general.select')} fontSize={theme.typography.fontSize.sm} />
+            </Button>
+          </FlexRow>
+        </InputRow>
 
-      {/* 背景画像選択 */}
-      <InputRow label={t('heatmap.general.backgroundImage')}>
-        <FlexRow gap={8} align='center' style={{ flex: 1 }}>
-          {backgroundImage && <BackgroundPreview backgroundUrl={backgroundImage} />}
-          <Button onClick={() => fileInputRef.current?.click()} scheme={'surface'} fontSize={'sm'}>
-            <Text text={backgroundImage ? t('heatmap.general.change') : t('heatmap.general.select')} fontSize={theme.typography.fontSize.sm} />
+        {/* Show Heatmap */}
+        <InputRow label={t('heatmap.general.showHeatmap')}>
+          <Switch
+            label={t('heatmap.general.showHeatmap')}
+            onChange={(showHeatmap) => setData({ showHeatmap })}
+            checked={showHeatmap}
+            size={'small'}
+            aria-label={t('heatmap.general.showHeatmap')}
+          />
+        </InputRow>
+
+        {/* Type - よく使う */}
+        <InputRow label={t('heatmap.general.type')}>
+          <Selector
+            options={['object', 'fill']}
+            value={heatmapType}
+            onChange={(v) => {
+              setData({ heatmapType: v as GeneralSettings['heatmapType'] });
+            }}
+            fontSize={'base'}
+            aria-label={t('heatmap.general.type')}
+          />
+        </InputRow>
+
+        {/* Min Density - よく使う */}
+        <InputRow label={t('heatmap.general.minThreshold')}>
+          <Slider
+            value={minThreshold}
+            onChange={(minThreshold) => setData({ minThreshold })}
+            min={0}
+            step={0.01}
+            max={1.0}
+            textField
+            aria-label={t('heatmap.general.minThreshold')}
+          />
+        </InputRow>
+
+        {/* Opacity */}
+        <InputRow label={t('heatmap.general.opacity')}>
+          <Slider
+            value={heatmapOpacity}
+            min={0.0}
+            max={1.0}
+            step={0.1}
+            onChange={(value) => setData({ heatmapOpacity: value })}
+            disabled={!showHeatmap}
+            textField
+            aria-label={t('heatmap.general.opacity')}
+          />
+        </InputRow>
+      </Section>
+
+      {/* ===== View Controls ===== */}
+      <Section role="group" aria-label={t('heatmap.general.view')}>
+        <SectionTitle>{t('heatmap.general.view')}</SectionTitle>
+
+        <InputRow label={t('heatmap.general.resetToInitial')}>
+          <Button onClick={handleResetView} scheme={'secondary'} fontSize={'sm'} disabled={!centerPosition}>
+            <Text text={t('heatmap.general.resetToInitial')} fontSize={theme.typography.fontSize.sm} />
           </Button>
-          {backgroundImage && (
-            <Button onClick={handleClearBackground} scheme={'tertiary'} fontSize={'sm'}>
-              <Text text={t('heatmap.general.remove')} fontSize={theme.typography.fontSize.sm} />
-            </Button>
-          )}
-        </FlexRow>
-        <HiddenFileInput ref={fileInputRef} type='file' accept='image/*' onChange={handleFileSelect} />
-      </InputRow>
+        </InputRow>
+      </Section>
 
-      {/* 背景画像の調整（画像が選択されている場合のみ表示） */}
-      {backgroundImage && (
-        <>
-          <InputRow label={t('heatmap.general.backgroundScale')}>
-            <Slider value={backgroundScale} onChange={(v) => setData({ backgroundScale: v })} min={0.5} step={0.1} max={3.0} textField />
-          </InputRow>
-          <InputRow label={t('heatmap.general.backgroundXPosition')}>
-            <Slider value={backgroundOffsetX} onChange={(v) => setData({ backgroundOffsetX: v })} min={-50} step={1} max={50} textField />
-          </InputRow>
-          <InputRow label={t('heatmap.general.backgroundYPosition')}>
-            <Slider value={backgroundOffsetY} onChange={(v) => setData({ backgroundOffsetY: v })} min={-50} step={1} max={50} textField />
-          </InputRow>
-        </>
-      )}
-
-      {/* 折りたたみ可能なオプションセクション */}
+      {/* ===== Advanced Display Settings (折りたたみ) ===== */}
       <CollapsibleSection>
-        <CollapsibleHeader onClick={() => setIsOptionsOpen(!isOptionsOpen)}>
+        <CollapsibleHeader
+          onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
+          aria-expanded={isAdvancedOpen}
+          aria-controls="advanced-display-content"
+        >
           <span>{t('heatmap.general.displayOptions')}</span>
-          {isOptionsOpen ? <IoChevronUp size={16} /> : <IoChevronDown size={16} />}
+          {isAdvancedOpen ? <IoChevronUp size={16} /> : <IoChevronDown size={16} />}
         </CollapsibleHeader>
-        <CollapsibleContent isOpen={isOptionsOpen}>
-          <InputRow label={t('heatmap.general.upVector')}>
-            <SegmentedSwitch
-              fontSize={'xs'}
-              value={upZ ? 'Z' : 'Y'}
-              options={['Y', 'Z']}
-              onChange={(v) => {
-                setData({ upZ: v === 'Z' });
-              }}
-            />
-          </InputRow>
+        <CollapsibleContent isOpen={isAdvancedOpen} id="advanced-display-content">
           <InputRow label={t('heatmap.general.scale')}>
-            <Slider value={scale} onChange={(scale) => setData({ scale })} min={0.1} step={0.05} max={1.0} textField />
-          </InputRow>
-          <InputRow label={t('heatmap.general.showHeatmap')}>
-            <div>
-              <Switch label={t('heatmap.general.showHeatmap')} onChange={(showHeatmap) => setData({ showHeatmap })} checked={showHeatmap} size={'small'} />
-            </div>
-          </InputRow>
-          <InputRow label={t('heatmap.general.opacity')}>
             <Slider
-              value={heatmapOpacity}
-              min={0.0}
+              value={scale}
+              onChange={(scale) => setData({ scale })}
+              min={0.1}
+              step={0.05}
               max={1.0}
-              step={0.1}
-              onChange={(value) => setData({ heatmapOpacity: value })}
-              disabled={!showHeatmap}
               textField
+              aria-label={t('heatmap.general.scale')}
             />
           </InputRow>
-          <InputRow label={t('heatmap.general.type')}>
+          <InputRow label={t('heatmap.general.upVector')}>
             <Selector
-              options={['object', 'fill']}
-              value={heatmapType}
-              onChange={(v) => {
-                setData({ heatmapType: v as GeneralSettings['heatmapType'] });
-              }}
+              options={['Y', 'Z']}
+              value={upZ ? 'Z' : 'Y'}
+              onChange={(v) => setData({ upZ: v === 'Z' })}
               fontSize={'base'}
+              aria-label={t('heatmap.general.upVector')}
             />
           </InputRow>
-          <InputRow label={t('heatmap.general.minThreshold')}>
-            <Slider value={minThreshold} onChange={(minThreshold) => setData({ minThreshold })} min={0} step={0.01} max={1.0} textField />
+        </CollapsibleContent>
+      </CollapsibleSection>
+
+      {/* ===== Session Filter (折りたたみ) ===== */}
+      <CollapsibleSection>
+        <CollapsibleHeader
+          onClick={() => setIsSessionFilterOpen(!isSessionFilterOpen)}
+          aria-expanded={isSessionFilterOpen}
+          aria-controls="session-filter-content"
+        >
+          <span>{t('heatmap.general.sessionFilter')}</span>
+          {isSessionFilterOpen ? <IoChevronUp size={16} /> : <IoChevronDown size={16} />}
+        </CollapsibleHeader>
+        <CollapsibleContent isOpen={isSessionFilterOpen} id="session-filter-content">
+          <InputRow label={t('heatmap.general.sessionFilter')}>
+            <FlexColumn gap={8} style={{ flex: 1 }}>
+              <Button onClick={() => setIsSessionFilterModalOpen(true)} scheme={'surface'} fontSize={'sm'}>
+                <Text text={t('heatmap.general.sessionFilter')} fontSize={theme.typography.fontSize.sm} />
+              </Button>
+              {/* セッション選択時のクイックフィルターボタン */}
+              {targetSessionId && (
+                <>
+                  {isFilteredBySession ? (
+                    <Button onClick={handleClearSessionFilter} scheme={'tertiary'} fontSize={'sm'}>
+                      <FiFilter size={14} />
+                      <Text text={t('heatmap.general.clearFilter')} fontSize={theme.typography.fontSize.sm} />
+                    </Button>
+                  ) : (
+                    <Button onClick={handleFilterBySession} scheme={'primary'} fontSize={'sm'}>
+                      <FlexRow align={'center'} gap={4}>
+                        <FiFilter size={18} />
+                        <Text
+                          text={t('heatmap.general.filterBySession').replace('{id}', String(targetSessionId))}
+                          fontSize={theme.typography.fontSize.sm}
+                        />
+                      </FlexRow>
+                    </Button>
+                  )}
+                </>
+              )}
+              {isFilteredBySession && (
+                <Text
+                  text={t('heatmap.general.filteringBySession').replace('{id}', String(targetSessionId))}
+                  fontSize={theme.typography.fontSize.xs}
+                  color={theme.colors.text.secondary}
+                />
+              )}
+            </FlexColumn>
           </InputRow>
-          <InputRow label={''}>
-            <div style={{ flex: 1 }} />
-            <Button onClick={handleReload} scheme={'surface'} fontSize={'sm'}>
-              <Text text={t('heatmap.general.reload')} fontSize={theme.typography.fontSize.sm} />
-            </Button>
+        </CollapsibleContent>
+      </CollapsibleSection>
+
+      {/* ===== Background Image (折りたたみ) ===== */}
+      <CollapsibleSection>
+        <CollapsibleHeader
+          onClick={() => setIsBackgroundOpen(!isBackgroundOpen)}
+          aria-expanded={isBackgroundOpen}
+          aria-controls="background-content"
+        >
+          <span>{t('heatmap.general.backgroundImage')}</span>
+          {isBackgroundOpen ? <IoChevronUp size={16} /> : <IoChevronDown size={16} />}
+        </CollapsibleHeader>
+        <CollapsibleContent isOpen={isBackgroundOpen} id="background-content">
+          <InputRow label={t('heatmap.general.select')}>
+            <FlexRow gap={8} align="center" style={{ flex: 1 }}>
+              {backgroundImage && <BackgroundPreview backgroundUrl={backgroundImage} />}
+              <Button onClick={() => fileInputRef.current?.click()} scheme={'surface'} fontSize={'sm'}>
+                <Text
+                  text={backgroundImage ? t('heatmap.general.change') : t('heatmap.general.select')}
+                  fontSize={theme.typography.fontSize.sm}
+                />
+              </Button>
+              {backgroundImage && (
+                <Button onClick={handleClearBackground} scheme={'tertiary'} fontSize={'sm'}>
+                  <Text text={t('heatmap.general.remove')} fontSize={theme.typography.fontSize.sm} />
+                </Button>
+              )}
+            </FlexRow>
+            <HiddenFileInput ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} />
           </InputRow>
+
+          {/* 背景画像の調整（画像が選択されている場合のみ表示） */}
+          {backgroundImage && (
+            <>
+              <InputRow label={t('heatmap.general.backgroundScale')}>
+                <Slider
+                  value={backgroundScale}
+                  onChange={(v) => setData({ backgroundScale: v })}
+                  min={0.5}
+                  step={0.1}
+                  max={3.0}
+                  textField
+                  aria-label={t('heatmap.general.backgroundScale')}
+                />
+              </InputRow>
+              <InputRow label={t('heatmap.general.backgroundXPosition')}>
+                <Slider
+                  value={backgroundOffsetX}
+                  onChange={(v) => setData({ backgroundOffsetX: v })}
+                  min={-50}
+                  step={1}
+                  max={50}
+                  textField
+                  aria-label={t('heatmap.general.backgroundXPosition')}
+                />
+              </InputRow>
+              <InputRow label={t('heatmap.general.backgroundYPosition')}>
+                <Slider
+                  value={backgroundOffsetY}
+                  onChange={(v) => setData({ backgroundOffsetY: v })}
+                  min={-50}
+                  step={1}
+                  max={50}
+                  textField
+                  aria-label={t('heatmap.general.backgroundYPosition')}
+                />
+              </InputRow>
+            </>
+          )}
         </CollapsibleContent>
       </CollapsibleSection>
 
