@@ -156,7 +156,7 @@ const queryPlaceholder =
   'map status.hand {\n' +
   '  rock    -> player-current-point-icon: hand-rock;\n' +
   '  paper   -> player-current-point-icon: hand-paper;\n' +
-  '  scissor -> player-current-point-icon: hand-scissor;\n' +
+  '  scissors -> player-current-point-icon: hand-scissor;\n' +
   '}';
 
 const PlayerTimelineComponent: FC<HeatmapMenuProps> = ({ className, service }) => {

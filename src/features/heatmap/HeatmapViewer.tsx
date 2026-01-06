@@ -42,7 +42,7 @@ import { detectDimensionality } from '@src/utils/heatmap/detectDimensionality';
 const DEFAULT_FIELD_OBJECT_HVQL = `map status.hand {
   rock     -> icon: hand-rock;
   paper    -> icon: hand-paper;
-  scissor  -> icon: hand-scissor;
+  scissors  -> icon: hand-scissor;
   *        -> icon: hand-paper;
 }
 map object_type {
@@ -54,7 +54,7 @@ map object_type {
 const DEFAULT_PLAYER_TIMELINE_HVQL = `map status.hand {
   rock     -> player-icon: hand-rock;
   paper    -> player-icon: hand-paper;
-  scissor  -> player-icon: hand-scissor;
+  scissors  -> player-icon: hand-scissor;
   *        -> player-icon: target;
 }
 `;

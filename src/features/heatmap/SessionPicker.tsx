@@ -83,13 +83,6 @@ const SessionLabel = styled.span`
   letter-spacing: 0.02em;
 `;
 
-const SessionName = styled.span`
-  max-width: 120px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-`;
-
 const SessionId = styled.span`
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -143,7 +136,6 @@ const Component: FC<SessionPickerProps> = ({ className, currentSession, onOpenMo
             <LoadingIndicator />
           ) : hasSession ? (
             <>
-              <SessionName>{currentSession.name || 'Session'}</SessionName>
               <SessionId>#{currentSession.sessionId}</SessionId>
               {currentSession.platform && <PlatformBadge hasSession={hasSession}>{currentSession.platform}</PlatformBadge>}
             </>

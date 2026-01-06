@@ -221,6 +221,10 @@ export const AISummaryMenuContent = styled(Component)`
     font-size: 12px;
     line-height: 1.3;
     text-align: start;
+
+    h3 {
+      font-size: ${(props) => props.theme.typography.fontSize.lg};
+    }
   }
 
   &__markdown::before {

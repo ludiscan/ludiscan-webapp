@@ -20,7 +20,7 @@ const HAND_CHANGE_ITEM_HVQL = `
 map status.hand {
   rock     -> player-current-point-icon: hand-rock;
   paper    -> player-current-point-icon: hand-paper;
-  scissor  -> player-current-point-icon: hand-scissor;
+  scissors  -> player-current-point-icon: hand-scissor;
   *        -> player-current-point-icon: target;
 }
 `;

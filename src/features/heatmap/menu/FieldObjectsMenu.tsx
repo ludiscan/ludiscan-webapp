@@ -21,7 +21,7 @@ const HAND_CHANGE_ITEM_HVQL = `
 map status.hand {
   rock     -> icon: hand-rock;
   paper    -> icon: hand-paper;
-  scissor  -> icon: hand-scissor;
+  scissors  -> icon: hand-scissor;
   *        -> icon: hand-paper;
 }
 `;
