@@ -11,6 +11,7 @@ import { Text } from '@src/component/atoms/Text';
 import { Selector } from '@src/component/molecules/Selector';
 import { InputRow } from '@src/features/heatmap/menu/InputRow';
 import { useFieldObjectPatch, useFieldObjectSelect } from '@src/hooks/useFieldObject';
+import { useLocale } from '@src/hooks/useLocale';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { useFieldObjectTypes } from '@src/modeles/heatmapView';
 import { getRandomPrimitiveColor } from '@src/utils/color';
@@ -28,6 +29,7 @@ map status.hand {
 
 const Component: FC<HeatmapMenuProps> = ({ service }) => {
   const { theme } = useSharedTheme();
+  const { t } = useLocale();
   const objects = useFieldObjectSelect((s) => s.objects);
   const queryText = useFieldObjectSelect((s) => s.queryText);
   const setFieldObjects = useFieldObjectPatch();
@@ -69,11 +71,11 @@ const Component: FC<HeatmapMenuProps> = ({ service }) => {
   return (
     <InlineFlexColumn gap={8}>
       <InlineFlexRow align={'center'} gap={4}>
-        <Text text={'Field Objects'} fontSize={theme.typography.fontSize.lg} fontWeight={theme.typography.fontWeight.bold} />
+        <Text text={t('heatmap.fieldObject.title')} fontSize={theme.typography.fontSize.lg} fontWeight={theme.typography.fontWeight.bold} />
       </InlineFlexRow>
       <Divider orientation={'horizontal'} />
       <InlineFlexRow align={'center'} gap={4}>
-        <Text text={'HVQL Query'} fontSize={theme.typography.fontSize.sm} />
+        <Text text={t('heatmap.fieldObject.hvqlQuery')} fontSize={theme.typography.fontSize.sm} />
       </InlineFlexRow>
       <textarea
         value={queryText}
@@ -94,7 +96,7 @@ const Component: FC<HeatmapMenuProps> = ({ service }) => {
       />
       <Divider orientation={'horizontal'} />
       <InlineFlexRow align={'center'} gap={4}>
-        <Text text={'Object Types'} fontSize={theme.typography.fontSize.sm} />
+        <Text text={t('heatmap.fieldObject.types')} fontSize={theme.typography.fontSize.sm} />
       </InlineFlexRow>
       <InlineFlexColumn align={'center'} gap={4}>
         {objectTypes?.data &&

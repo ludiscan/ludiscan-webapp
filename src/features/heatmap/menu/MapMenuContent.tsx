@@ -18,6 +18,7 @@ import { getModelFileType } from '@src/features/heatmap/ModelLoader';
 import { ObjectToggleList } from '@src/features/heatmap/ObjectToggleList';
 import { InputRow } from '@src/features/heatmap/menu/InputRow';
 import { useGeneralPatch, useGeneralPick, useGeneralSelect } from '@src/hooks/useGeneral';
+import { useLocale } from '@src/hooks/useLocale';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { useUploadMapData } from '@src/hooks/useUploadMapData';
 
@@ -338,6 +339,7 @@ export const MapMenuContent: FC<HeatmapMenuProps> = ({
   onMapActiveOnlyChange,
 }) => {
   const { theme } = useSharedTheme();
+  const { t } = useLocale();
   const mapName = useGeneralSelect((s) => s.mapName);
   const { modelPositionX, modelPositionY, modelPositionZ, modelRotationX, modelRotationY, modelRotationZ, showMapIn2D } = useGeneralPick(
     'modelPositionX',
@@ -494,7 +496,7 @@ export const MapMenuContent: FC<HeatmapMenuProps> = ({
         </>
       )}
 
-      <InputRow label={'visualize map'}>
+      <InputRow label={t('heatmap.map.visualizeMap')}>
         <Selector
           onChange={(mapName) => {
             setData({ mapName });

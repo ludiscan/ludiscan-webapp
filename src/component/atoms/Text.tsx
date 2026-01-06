@@ -19,10 +19,7 @@ export type TextLinkProps = TextProps & {
   target?: '_blank' | '_self';
 };
 
-const Component = forwardRef<HTMLSpanElement | HTMLAnchorElement, TextProps | TextLinkProps>(function TextComponent(
-  props,
-  ref,
-) {
+const Component = forwardRef<HTMLSpanElement | HTMLAnchorElement, TextProps | TextLinkProps>(function TextComponent(props, ref) {
   const { className, text, style } = props;
   if ('href' in props) {
     const { href, target = '_blank' } = props as TextLinkProps;
