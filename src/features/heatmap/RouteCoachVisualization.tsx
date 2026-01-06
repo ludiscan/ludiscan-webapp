@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unknown-property */
 import { useFrame } from '@react-three/fiber';
 import { memo, useMemo, useRef } from 'react';
-import { CatmullRomCurve3, Color, DoubleSide, Vector3 } from 'three';
+import { Color, DoubleSide, Euler, Quaternion, Vector3 } from 'three';
 import { Line2, LineGeometry, LineMaterial } from 'three-stdlib';
 
 import type { FC } from 'react';
@@ -18,12 +18,9 @@ interface RouteCoachVisualizationProps {
   playerId?: string;
 }
 
-// ルートの色（白系で視認性を確保）
-const RAW_ROUTE_COLOR = 0xffffff;
-
 // イベントタイプに基づく色
 const EVENT_TYPE_COLORS = {
-  death: 0xff4444,
+  death: 0xff7a6c,
   success: 0x44ff44,
 } as const;
 
@@ -128,6 +125,43 @@ const Component: FC<RouteCoachVisualizationProps> = ({ projectId, playerId, sess
     }
   };
 
+  // 線に沿って一定間隔で矢印の位置と方向を計算
+  const getArrowPositions = (points: Vector3[], interval: number): { position: Vector3; rotation: Euler }[] => {
+    if (points.length < 2) return [];
+
+    const arrows: { position: Vector3; rotation: Euler }[] = [];
+    let accumulatedDistance = interval / 2; // 最初の矢印は中間から
+
+    for (let i = 0; i < points.length - 1; i++) {
+      const start = points[i];
+      const end = points[i + 1];
+      const segmentDirection = new Vector3().subVectors(end, start);
+      const segmentLength = segmentDirection.length();
+
+      if (segmentLength === 0) continue;
+
+      const segmentNormalized = segmentDirection.clone().normalize();
+
+      // このセグメント内で矢印を配置
+      while (accumulatedDistance <= segmentLength) {
+        const arrowPos = start.clone().add(segmentNormalized.clone().multiplyScalar(accumulatedDistance));
+
+        // 方向から回転を計算（コーンは上向きがデフォルトなので調整）
+        const quaternion = new Quaternion();
+        const up = new Vector3(0, 1, 0);
+        quaternion.setFromUnitVectors(up, segmentNormalized);
+        const euler = new Euler().setFromQuaternion(quaternion);
+
+        arrows.push({ position: arrowPos, rotation: euler });
+        accumulatedDistance += interval;
+      }
+
+      accumulatedDistance -= segmentLength;
+    }
+
+    return arrows;
+  };
+
   // パルスアニメーション
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
@@ -143,21 +177,20 @@ const Component: FC<RouteCoachVisualizationProps> = ({ projectId, playerId, sess
     }
   });
 
-  // シンプルな線を作成するヘルパー関数
+  // シンプルな直線を作成するヘルパー関数
   const createLine = (points: Vector3[], color: number, lineWidth: number): Line2 | null => {
     if (points.length < 2) return null;
 
-    const curve = new CatmullRomCurve3(points);
-    const smoothPoints = curve.getPoints(Math.max(100, points.length * 10));
-    const positions = smoothPoints.flatMap((pt) => [pt.x, pt.y, pt.z]);
+    // ポイント間を直線で結ぶ（スムージングなし）
+    const positions = points.flatMap((pt) => [pt.x, pt.y, pt.z]);
 
     const geometry = new LineGeometry();
     geometry.setPositions(positions);
 
     const material = new LineMaterial({
       color,
-      linewidth: lineWidth,
-      worldUnits: false,
+      linewidth: lineWidth * scale,
+      worldUnits: true, // ワールド座標での太さ（カメラ距離で変化しない）
       transparent: true,
       opacity: 0.9,
       depthTest: true,
@@ -204,12 +237,24 @@ const Component: FC<RouteCoachVisualizationProps> = ({ projectId, playerId, sess
         </group>
       )}
 
-      {/* Raw Routes（シンプルな太線） */}
+      {/* Raw Routes（イベントタイプの色で表示） */}
       {routeLines.map((route) => {
-        const line = createLine(route.points, RAW_ROUTE_COLOR, 6);
+        const line = createLine(route.points, eventTypeColor, 6);
         if (!line) return null;
 
-        return <primitive key={`route-${route.id}`} object={line} renderOrder={zIndexes.renderOrder.timelinePoints} />;
+        const arrows = getArrowPositions(route.points, 300 * scale);
+
+        return (
+          <group key={`route-${route.id}`}>
+            <primitive object={line} renderOrder={zIndexes.renderOrder.timelinePoints} />
+            {arrows.map((arrow, idx) => (
+              <mesh key={`arrow-${route.id}-${idx}`} position={arrow.position} rotation={arrow.rotation} renderOrder={zIndexes.renderOrder.timelinePoints + 1}>
+                <coneGeometry args={[20 * scale, 50 * scale, 8]} />
+                <meshBasicMaterial color={eventTypeColor} transparent opacity={0.9} />
+              </mesh>
+            ))}
+          </group>
+        );
       })}
 
       {/* Improvement Routes（より太い線） */}
@@ -218,7 +263,24 @@ const Component: FC<RouteCoachVisualizationProps> = ({ projectId, playerId, sess
         const line = createLine(improvement.points, color, 10);
         if (!line) return null;
 
-        return <primitive key={`improvement-${improvement.id}`} object={line} renderOrder={zIndexes.renderOrder.timelineArrows} />;
+        const arrows = getArrowPositions(improvement.points, 300 * scale);
+
+        return (
+          <group key={`improvement-${improvement.id}`}>
+            <primitive object={line} renderOrder={zIndexes.renderOrder.timelineArrows} />
+            {arrows.map((arrow, idx) => (
+              <mesh
+                key={`arrow-${improvement.id}-${idx}`}
+                position={arrow.position}
+                rotation={arrow.rotation}
+                renderOrder={zIndexes.renderOrder.timelineArrows + 1}
+              >
+                <coneGeometry args={[25 * scale, 60 * scale, 8]} />
+                <meshBasicMaterial color={color} transparent opacity={0.9} />
+              </mesh>
+            ))}
+          </group>
+        );
       })}
     </>
   );
