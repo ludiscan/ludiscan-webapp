@@ -1,6 +1,6 @@
 ---
 name: design-implementation-guide
-description: 公開ガイドライン（Material Design 3、Apple HIG、Fluent 2、GOV.UK、WCAG 2.2）に基づき、デザイントークンから実装までをキーボード操作・コントラスト・流体スケール・多言語対応で検証可能な形で提供する。
+description: アクセシビリティ（WCAG/ARIA/コントラスト比）やデザイントークンを実装する際に使用。フォーム・エラー表示・キーボード操作の実装時に参照。
 ---
 
 ## Overview

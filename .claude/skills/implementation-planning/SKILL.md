@@ -1,6 +1,6 @@
 ---
-name: Implementation Planning Skill
-description: 実装タスクを計画的に進めるためのスキルです。複雑な実装や複数ステップを要するタスクの場合、まず計画を立ててから実装を進めます。
+name: implementation-planning
+description: 複雑なタスク（3ステップ以上・複数ファイル変更）の実装前に使用。計画ファイルを作成し進捗を追跡。
 ---
 
 ## Overview
