@@ -1,6 +1,6 @@
 ---
 name: ui-guidelines
-description: You are helping with UI development for the ludiscan-webapp project. Follow these guidelines strictly to maintain consistency and code quality.
+description: UIコンポーネントを新規作成・編集する際に使用。Emotion styled/テーマトークン/Atomic Designのルールを確認。
 ---
 
 ## Overview
