@@ -137,8 +137,8 @@ const DetailBlock = styled(DetailBlockInternal)`
     transition: all 0.15s ease;
 
     &:hover {
-      text-decoration: underline;
       color: ${({ theme }) => theme.colors.text.linkHover};
+      text-decoration: underline;
     }
   }
 `;
