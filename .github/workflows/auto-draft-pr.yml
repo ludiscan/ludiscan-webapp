@@ -6,14 +6,23 @@ on:
       - 'claude/**'
       - 'work/**'
 
-permissions:
-  contents: read
-  pull-requests: write
+# Note: Using GitHub App token to trigger CI on created PRs
+# Setup required:
+#   1. Create a GitHub App with "Pull requests: Read & write" permission
+#   2. Install the App on this repository
+#   3. Add secrets: APP_ID and APP_PRIVATE_KEY
 
 jobs:
   create-draft-pr:
     runs-on: ubuntu-22.04
     steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -32,7 +41,7 @@ jobs:
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
 
       - name: Determine base branch
         id: base-branch
@@ -84,4 +93,4 @@ jobs:
           EOF
           )"
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
