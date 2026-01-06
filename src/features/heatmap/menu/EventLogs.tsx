@@ -11,6 +11,7 @@ import { Text } from '@src/component/atoms/Text';
 import { Selector } from '@src/component/molecules/Selector';
 import { InputRow } from '@src/features/heatmap/menu/InputRow';
 import { useEventLogPatch, useEventLogSelect } from '@src/hooks/useEventLog';
+import { useLocale } from '@src/hooks/useLocale';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { getRandomPrimitiveColor } from '@src/utils/color';
 import { availableIcons } from '@src/utils/heatmapIconMap';
@@ -20,13 +21,14 @@ const HAND_CHANGE_ITEM_HVQL = `
 map status.hand {
   rock     -> player-current-point-icon: hand-rock;
   paper    -> player-current-point-icon: hand-paper;
-  scissor  -> player-current-point-icon: hand-scissor;
+  scissors  -> player-current-point-icon: hand-scissor;
   *        -> player-current-point-icon: target;
 }
 `;
 
 const Component: FC<HeatmapMenuProps> = ({ eventLogKeys }) => {
   const { theme } = useSharedTheme();
+  const { t } = useLocale();
   const logs = useEventLogSelect((s) => s.logs);
   const setEventLogs = useEventLogPatch();
 
@@ -81,17 +83,17 @@ const Component: FC<HeatmapMenuProps> = ({ eventLogKeys }) => {
   return (
     <InlineFlexColumn gap={8}>
       <InlineFlexRow align={'center'} gap={4}>
-        <Text text={'Event Log'} fontSize={theme.typography.fontSize.lg} fontWeight={theme.typography.fontWeight.bold} />
+        <Text text={t('heatmap.eventLog.title')} fontSize={theme.typography.fontSize.lg} fontWeight={theme.typography.fontWeight.bold} />
       </InlineFlexRow>
       <InlineFlexRow align={'center'} gap={4}>
-        <Text text={'filter'} fontSize={theme.typography.fontSize.sm} />
+        <Text text={t('heatmap.eventLog.filter')} fontSize={theme.typography.fontSize.sm} />
       </InlineFlexRow>
-      <InputRow label={'player'}>
+      <InputRow label={t('heatmap.eventLog.player')}>
         <Selector options={['all', '0', '1', '2', '3']} onChange={handleFilterPlayer} />
       </InputRow>
       <Divider orientation={'horizontal'} />
       <InlineFlexRow align={'center'} gap={4}>
-        <Text text={'Event Log Keys'} fontSize={theme.typography.fontSize.sm} />
+        <Text text={t('heatmap.eventLog.keys')} fontSize={theme.typography.fontSize.sm} />
       </InlineFlexRow>
       <InlineFlexColumn align={'center'} gap={4}>
         {eventLogKeys?.map((key) => {

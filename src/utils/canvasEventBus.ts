@@ -25,6 +25,7 @@ export interface HeatMapEventMap {
   'camera:reset-3d': object;
   'focus:ping': { position: { x: number; y: number; z: number } };
   'route-selected': { route: RouteEdgeData | null };
+  'session-modal:open': object;
 }
 
 class EventBus<T> extends EventTarget {

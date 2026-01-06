@@ -86,7 +86,7 @@ export const MoreMenuContent: FC<HeatmapMenuProps> = () => {
 
   return (
     <FlexColumn gap={16} align={'flex-start'} style={{ width: '100%', alignItems: 'stretch' }}>
-      <Text text={'All Features'} fontSize={theme.typography.fontSize.lg} fontWeight={theme.typography.fontWeight.bold} />
+      <Text text={t('heatmap.more.allFeatures')} fontSize={theme.typography.fontSize.lg} fontWeight={theme.typography.fontWeight.bold} />
       <GridContainer>
         {availableMenus.map((menu) => (
           <MenuItem key={menu.id} name={getMenuDisplayName(menu.id, t)} icon={menu.icon!} onClick={() => handleMenuClick(menu.id)} />

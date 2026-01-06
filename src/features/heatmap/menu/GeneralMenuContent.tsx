@@ -213,8 +213,10 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
                 </Button>
               ) : (
                 <Button onClick={handleFilterBySession} scheme={'primary'} fontSize={'sm'}>
-                  <FiFilter size={14} />
-                  <Text text={t('heatmap.general.filterBySession').replace('{id}', String(targetSessionId))} fontSize={theme.typography.fontSize.sm} />
+                  <FlexRow align={'center'} gap={4}>
+                    <FiFilter size={18} />
+                    <Text text={t('heatmap.general.filterBySession').replace('{id}', String(targetSessionId))} fontSize={theme.typography.fontSize.sm} />
+                  </FlexRow>
                 </Button>
               )}
             </>

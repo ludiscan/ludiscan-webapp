@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
-import { memo, useMemo } from 'react';
-import { IoGameController, IoPlay, IoStop, IoTime, IoPhonePortrait, IoCodeSlash, IoFingerPrint } from 'react-icons/io5';
+import { memo, useMemo, useState } from 'react';
+import { IoPlay, IoStop, IoPhonePortrait, IoCodeSlash, IoTime, IoFingerPrint, IoChevronDown, IoChevronForward } from 'react-icons/io5';
 
 import type { Session } from '@src/modeles/session';
 import type { FC, ReactNode } from 'react';
@@ -13,235 +13,402 @@ export type SessionDetailProps = {
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  width: 100%;
-  height: 100%;
-  padding: 16px;
+  gap: 12px;
+  padding: 12px;
   overflow-y: auto;
-
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: ${({ theme }) => theme.colors.border.default};
-    border-radius: 3px;
-
-    &:hover {
-      background: ${({ theme }) => theme.colors.border.strong};
-    }
-  }
 `;
 
 const EmptyState = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  font-size: 14px;
+  padding: 24px;
+  font-size: 13px;
   color: ${({ theme }) => theme.colors.text.tertiary};
   text-align: center;
 `;
 
-const EmptyIcon = styled.div`
-  font-size: 48px;
-  opacity: 0.3;
-`;
-
 const Header = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  align-items: center;
 `;
 
-const SessionName = styled.h3`
-  margin: 0;
-  font-family: 'JetBrains Mono', 'SF Mono', monospace;
-  font-size: 18px;
+const SessionName = styled.span`
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
   font-weight: 600;
   color: ${({ theme }) => theme.colors.text.primary};
 `;
 
-const SessionIdBadge = styled.span`
+const Badge = styled.span<{ variant?: 'default' | 'success' }>`
   display: inline-flex;
-  gap: 4px;
+  gap: 3px;
   align-items: center;
-  width: fit-content;
-  padding: 4px 8px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  font-weight: 500;
-  color: ${({ theme }) => theme.colors.text.secondary};
-  background: ${({ theme }) => theme.colors.surface.base};
-  border-radius: 6px;
-`;
-
-const StatusBadge = styled.span<{ isPlaying: boolean }>`
-  display: inline-flex;
-  gap: 4px;
-  align-items: center;
-  width: fit-content;
-  padding: 4px 10px;
-  font-size: 12px;
-  font-weight: 600;
-  color: ${({ theme, isPlaying }) => (isPlaying ? theme.colors.semantic.success.contrast : theme.colors.text.secondary)};
-  background: ${({ theme, isPlaying }) => (isPlaying ? theme.colors.semantic.success.main : theme.colors.surface.base)};
-  border-radius: 12px;
-`;
-
-const Section = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-`;
-
-const SectionTitle = styled.h4`
-  margin: 0;
+  padding: 2px 6px;
   font-size: 11px;
-  font-weight: 600;
-  color: ${({ theme }) => theme.colors.text.tertiary};
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  font-weight: 500;
+  color: ${({ theme, variant }) => (variant === 'success' ? theme.colors.semantic.success.contrast : theme.colors.text.secondary)};
+  background: ${({ theme, variant }) => (variant === 'success' ? theme.colors.semantic.success.main : theme.colors.surface.base)};
+  border-radius: 4px;
 `;
 
 const InfoGrid = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px 12px;
+  font-size: 12px;
 `;
 
-const InfoRow = styled.div`
+const InfoItemWrapper = styled.div`
   display: flex;
-  gap: 12px;
-  align-items: flex-start;
+  gap: 6px;
+  align-items: center;
 `;
 
 const InfoIcon = styled.span`
   display: flex;
-  flex-shrink: 0;
   align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  font-size: 14px;
-  color: ${({ theme }) => theme.colors.text.secondary};
-  background: ${({ theme }) => theme.colors.surface.base};
-  border-radius: 6px;
-`;
-
-const InfoContent = styled.div`
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 2px;
-`;
-
-const InfoLabel = styled.span`
-  font-size: 11px;
   color: ${({ theme }) => theme.colors.text.tertiary};
 `;
 
-const InfoValue = styled.span`
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
-  font-weight: 500;
-  color: ${({ theme }) => theme.colors.text.primary};
-  word-break: break-all;
-`;
-
-const MetadataContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 12px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  background: ${({ theme }) => theme.colors.surface.base};
-  border-radius: 8px;
-`;
-
-const MetadataRow = styled.div`
-  display: flex;
-  gap: 8px;
-`;
-
-const MetadataKey = styled.span`
+const InfoLabel = styled.span`
   flex-shrink: 0;
-  color: ${({ theme }) => theme.colors.text.secondary};
+  color: ${({ theme }) => theme.colors.text.tertiary};
 
   &::after {
     content: ':';
   }
 `;
 
-const MetadataValue = styled.span`
+const InfoValue = styled.span`
+  font-family: 'JetBrains Mono', monospace;
   color: ${({ theme }) => theme.colors.text.primary};
   word-break: break-all;
 `;
 
-const EmptyMetadata = styled.span`
-  font-style: italic;
+const InfoItem: FC<{ icon: ReactNode; label: string; value: string; style?: React.CSSProperties }> = ({ icon, label, value, style }) => (
+  <InfoItemWrapper style={style}>
+    <InfoIcon>{icon}</InfoIcon>
+    <InfoLabel>{label}</InfoLabel>
+    <InfoValue>{value}</InfoValue>
+  </InfoItemWrapper>
+);
+
+const MetadataSection = styled.div`
+  padding: 8px;
+  font-size: 11px;
+  background: ${({ theme }) => theme.colors.surface.base};
+  border-radius: 6px;
+`;
+
+const MetadataTitle = styled.div`
+  margin-bottom: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.text.tertiary};
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+`;
+
+const MetadataList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`;
+
+const MetadataItemRow = styled.div<{ hasNestedContent: boolean }>`
+  display: flex;
+  flex-direction: ${({ hasNestedContent }) => (hasNestedContent ? 'column' : 'row')};
+  gap: ${({ hasNestedContent }) => (hasNestedContent ? '4px' : '6px')};
+  padding: 4px 0;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle};
+
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+const MetadataKeyLabel = styled.span`
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 500;
+  color: ${({ theme }) => theme.colors.text.secondary};
+`;
+
+const MetadataSimpleValue = styled.span`
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: ${({ theme }) => theme.colors.text.primary};
+  word-break: break-all;
+`;
+
+const NestedJsonWrapper = styled.div`
+  padding: 6px 8px;
+  overflow-x: auto;
+  background: ${({ theme }) => theme.colors.surface.sunken};
+  border-radius: 4px;
+`;
+
+// Nested JSON display components
+const JsonContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+`;
+
+const JsonObjectWrapper = styled.div<{ depth: number }>`
+  display: flex;
+  flex-direction: column;
+  padding-left: ${({ depth }) => (depth > 0 ? '12px' : '0')};
+  border-left: ${({ depth, theme }) => (depth > 0 ? `1px solid ${theme.colors.border.subtle}` : 'none')};
+`;
+
+const JsonRow = styled.div`
+  display: flex;
+  gap: 4px;
+  align-items: flex-start;
+  line-height: 1.4;
+`;
+
+const JsonToggle = styled.button`
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  color: ${({ theme }) => theme.colors.text.tertiary};
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-radius: 2px;
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.text.primary};
+    background: ${({ theme }) => theme.colors.surface.hover};
+  }
+`;
+
+const JsonKeyName = styled.span`
+  flex-shrink: 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: ${({ theme }) => theme.colors.primary.main};
+`;
+
+const JsonPrimitive = styled.span<{ type: 'string' | 'number' | 'boolean' | 'null' }>`
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: ${({ theme, type }) => {
+    switch (type) {
+      case 'string':
+        return theme.colors.semantic.success.main;
+      case 'number':
+        return theme.colors.semantic.warning.main;
+      case 'boolean':
+        return theme.colors.semantic.info.main;
+      case 'null':
+        return theme.colors.text.tertiary;
+      default:
+        return theme.colors.text.primary;
+    }
+  }};
+  word-break: break-all;
+`;
+
+const JsonBracket = styled.span`
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
   color: ${({ theme }) => theme.colors.text.tertiary};
 `;
 
-type InfoItemProps = {
-  icon: ReactNode;
-  label: string;
-  value: string | null | undefined;
-};
+const JsonArrayBadge = styled.span`
+  padding: 0 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: ${({ theme }) => theme.colors.text.tertiary};
+  background: ${({ theme }) => theme.colors.surface.hover};
+  border-radius: 3px;
+`;
 
-const InfoItem: FC<InfoItemProps> = ({ icon, label, value }) => (
-  <InfoRow>
-    <InfoIcon>{icon}</InfoIcon>
-    <InfoContent>
-      <InfoLabel>{label}</InfoLabel>
-      <InfoValue>{value || '-'}</InfoValue>
-    </InfoContent>
-  </InfoRow>
-);
+// Recursive JSON value renderer
+const JsonValueRenderer: FC<{ value: unknown; depth?: number; keyName?: string }> = ({ value, depth = 0, keyName }) => {
+  const [isExpanded, setIsExpanded] = useState(depth < 2);
+
+  if (value === null) {
+    return (
+      <JsonRow>
+        {keyName && (
+          <>
+            <JsonKeyName>{keyName}</JsonKeyName>
+            <JsonBracket>:</JsonBracket>
+          </>
+        )}
+        <JsonPrimitive type='null'>null</JsonPrimitive>
+      </JsonRow>
+    );
+  }
+
+  if (typeof value === 'boolean') {
+    return (
+      <JsonRow>
+        {keyName && (
+          <>
+            <JsonKeyName>{keyName}</JsonKeyName>
+            <JsonBracket>:</JsonBracket>
+          </>
+        )}
+        <JsonPrimitive type='boolean'>{value ? 'true' : 'false'}</JsonPrimitive>
+      </JsonRow>
+    );
+  }
+
+  if (typeof value === 'number') {
+    return (
+      <JsonRow>
+        {keyName && (
+          <>
+            <JsonKeyName>{keyName}</JsonKeyName>
+            <JsonBracket>:</JsonBracket>
+          </>
+        )}
+        <JsonPrimitive type='number'>{value}</JsonPrimitive>
+      </JsonRow>
+    );
+  }
+
+  if (typeof value === 'string') {
+    return (
+      <JsonRow>
+        {keyName && (
+          <>
+            <JsonKeyName>{keyName}</JsonKeyName>
+            <JsonBracket>:</JsonBracket>
+          </>
+        )}
+        <JsonPrimitive type='string'>&quot;{value}&quot;</JsonPrimitive>
+      </JsonRow>
+    );
+  }
+
+  if (Array.isArray(value)) {
+    if (value.length === 0) {
+      return (
+        <JsonRow>
+          {keyName && (
+            <>
+              <JsonKeyName>{keyName}</JsonKeyName>
+              <JsonBracket>:</JsonBracket>
+            </>
+          )}
+          <JsonBracket>[]</JsonBracket>
+        </JsonRow>
+      );
+    }
+
+    return (
+      <JsonContainer>
+        <JsonRow>
+          <JsonToggle onClick={() => setIsExpanded(!isExpanded)}>{isExpanded ? <IoChevronDown size={10} /> : <IoChevronForward size={10} />}</JsonToggle>
+          {keyName && (
+            <>
+              <JsonKeyName>{keyName}</JsonKeyName>
+              <JsonBracket>:</JsonBracket>
+            </>
+          )}
+          <JsonBracket>[</JsonBracket>
+          {!isExpanded && <JsonArrayBadge>{value.length} items</JsonArrayBadge>}
+          {!isExpanded && <JsonBracket>]</JsonBracket>}
+        </JsonRow>
+        {isExpanded && (
+          <JsonObjectWrapper depth={depth + 1}>
+            {value.map((item, index) => (
+              <JsonValueRenderer key={index} value={item} depth={depth + 1} keyName={String(index)} />
+            ))}
+          </JsonObjectWrapper>
+        )}
+        {isExpanded && <JsonBracket>]</JsonBracket>}
+      </JsonContainer>
+    );
+  }
+
+  if (typeof value === 'object') {
+    const entries = Object.entries(value as Record<string, unknown>);
+    if (entries.length === 0) {
+      return (
+        <JsonRow>
+          {keyName && (
+            <>
+              <JsonKeyName>{keyName}</JsonKeyName>
+              <JsonBracket>:</JsonBracket>
+            </>
+          )}
+          <JsonBracket>{'{}'}</JsonBracket>
+        </JsonRow>
+      );
+    }
+
+    return (
+      <JsonContainer>
+        <JsonRow>
+          <JsonToggle onClick={() => setIsExpanded(!isExpanded)}>{isExpanded ? <IoChevronDown size={10} /> : <IoChevronForward size={10} />}</JsonToggle>
+          {keyName && (
+            <>
+              <JsonKeyName>{keyName}</JsonKeyName>
+              <JsonBracket>:</JsonBracket>
+            </>
+          )}
+          <JsonBracket>{'{'}</JsonBracket>
+          {!isExpanded && <JsonArrayBadge>{entries.length} keys</JsonArrayBadge>}
+          {!isExpanded && <JsonBracket>{'}'}</JsonBracket>}
+        </JsonRow>
+        {isExpanded && (
+          <JsonObjectWrapper depth={depth + 1}>
+            {entries.map(([k, v]) => (
+              <JsonValueRenderer key={k} value={v} depth={depth + 1} keyName={k} />
+            ))}
+          </JsonObjectWrapper>
+        )}
+        {isExpanded && <JsonBracket>{'}'}</JsonBracket>}
+      </JsonContainer>
+    );
+  }
+
+  return (
+    <JsonRow>
+      {keyName && (
+        <>
+          <JsonKeyName>{keyName}</JsonKeyName>
+          <JsonBracket>:</JsonBracket>
+        </>
+      )}
+      <JsonPrimitive type='string'>{String(value)}</JsonPrimitive>
+    </JsonRow>
+  );
+};
 
 function formatDateTime(isoString: string | null | undefined): string {
   if (!isoString) return '-';
   try {
-    const date = new Date(isoString);
-    return date.toLocaleString('ja-JP', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
+    return new Date(isoString).toLocaleString('ja-JP', {
+      month: 'short',
+      day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-      second: '2-digit',
     });
   } catch {
-    return isoString;
+    return '-';
   }
 }
 
 function calculateDuration(startTime: string | null | undefined, endTime: string | null | undefined): string {
   if (!startTime) return '-';
-  const start = new Date(startTime);
-  const end = endTime ? new Date(endTime) : new Date();
-
-  const diffMs = end.getTime() - start.getTime();
+  const diffMs = (endTime ? new Date(endTime) : new Date()).getTime() - new Date(startTime).getTime();
   if (diffMs < 0) return '-';
-
-  const hours = Math.floor(diffMs / (1000 * 60 * 60));
-  const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-  const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
-
-  if (hours > 0) {
-    return `${hours}h ${minutes}m ${seconds}s`;
-  }
-  if (minutes > 0) {
-    return `${minutes}m ${seconds}s`;
-  }
-  return `${seconds}s`;
+  const h = Math.floor(diffMs / 3600000);
+  const m = Math.floor((diffMs % 3600000) / 60000);
+  const s = Math.floor((diffMs % 60000) / 1000);
+  return h > 0 ? `${h}h${m}m` : m > 0 ? `${m}m${s}s` : `${s}s`;
 }
 
 const Component: FC<SessionDetailProps> = ({ className, session }) => {
@@ -252,74 +419,49 @@ const Component: FC<SessionDetailProps> = ({ className, session }) => {
   }, [session?.metaData]);
 
   if (!session) {
-    return (
-      <Container className={className}>
-        <EmptyState>
-          <EmptyIcon>
-            <IoGameController />
-          </EmptyIcon>
-          <span>Select a session to view details</span>
-        </EmptyState>
-      </Container>
-    );
+    return <EmptyState className={className}>No session selected</EmptyState>;
   }
-
-  const displayName = session.name || `Session #${session.sessionId}`;
-  const duration = calculateDuration(session.startTime, session.endTime);
 
   return (
     <Container className={className}>
       <Header>
-        <SessionName>{displayName}</SessionName>
-        <SessionIdBadge>
-          <IoGameController size={12} />
-          ID: {session.sessionId}
-        </SessionIdBadge>
-        <StatusBadge isPlaying={session.isPlaying}>
-          {session.isPlaying ? <IoPlay size={12} /> : <IoStop size={12} />}
+        <SessionName>{session.name || `Session #${session.sessionId}`}</SessionName>
+        <Badge>ID: {session.sessionId}</Badge>
+        <Badge variant={session.isPlaying ? 'success' : 'default'}>
+          {session.isPlaying ? <IoPlay size={10} /> : <IoStop size={10} />}
           {session.isPlaying ? 'Playing' : 'Finished'}
-        </StatusBadge>
+        </Badge>
       </Header>
 
-      <Section>
-        <SectionTitle>Device Information</SectionTitle>
-        <InfoGrid>
-          <InfoItem icon={<IoPhonePortrait />} label='Platform' value={session.platform} />
-          <InfoItem icon={<IoCodeSlash />} label='App Version' value={session.appVersion} />
-          <InfoItem icon={<IoFingerPrint />} label='Device ID' value={session.deviceId} />
-        </InfoGrid>
-      </Section>
-
-      <Section>
-        <SectionTitle>Time Information</SectionTitle>
-        <InfoGrid>
-          <InfoItem icon={<IoPlay />} label='Start Time' value={formatDateTime(session.startTime)} />
-          <InfoItem icon={<IoStop />} label='End Time' value={formatDateTime(session.endTime)} />
-          <InfoItem icon={<IoTime />} label='Duration' value={duration} />
-        </InfoGrid>
-      </Section>
+      <InfoGrid>
+        <InfoItem icon={<IoPhonePortrait size={12} />} label='Platform' value={session.platform || '-'} />
+        <InfoItem icon={<IoCodeSlash size={12} />} label='Version' value={session.appVersion || '-'} />
+        <InfoItem icon={<IoPlay size={12} />} label='Start' value={formatDateTime(session.startTime)} />
+        <InfoItem icon={<IoTime size={12} />} label='Duration' value={calculateDuration(session.startTime, session.endTime)} />
+        {session.deviceId && <InfoItem icon={<IoFingerPrint size={12} />} label='Device' value={session.deviceId} style={{ gridColumn: 'span 2' }} />}
+      </InfoGrid>
 
       {metadata && (
-        <Section>
-          <SectionTitle>Metadata</SectionTitle>
-          <MetadataContainer>
-            {metadata.map(([key, value]) => (
-              <MetadataRow key={key}>
-                <MetadataKey>{key}</MetadataKey>
-                <MetadataValue>{typeof value === 'object' ? JSON.stringify(value) : String(value)}</MetadataValue>
-              </MetadataRow>
-            ))}
-          </MetadataContainer>
-        </Section>
-      )}
-
-      {!metadata && (
-        <Section>
-          <SectionTitle>Metadata</SectionTitle>
-          <MetadataContainer>
-            <EmptyMetadata>No metadata available</EmptyMetadata>
-          </MetadataContainer>
-        </Section>
+        <MetadataSection>
+          <MetadataTitle>Metadata</MetadataTitle>
+          <MetadataList>
+            {metadata.map(([key, value]) => {
+              const isNestedObject = typeof value === 'object' && value !== null;
+              return (
+                <MetadataItemRow key={key} hasNestedContent={isNestedObject}>
+                  <MetadataKeyLabel>{key}:</MetadataKeyLabel>
+                  {isNestedObject ? (
+                    <NestedJsonWrapper>
+                      <JsonValueRenderer value={value} depth={0} />
+                    </NestedJsonWrapper>
+                  ) : (
+                    <MetadataSimpleValue>{String(value)}</MetadataSimpleValue>
+                  )}
+                </MetadataItemRow>
+              );
+            })}
+          </MetadataList>
+        </MetadataSection>
       )}
     </Container>
   );

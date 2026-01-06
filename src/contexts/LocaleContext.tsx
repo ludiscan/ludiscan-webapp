@@ -29,7 +29,7 @@ const getBrowserLocale = (): SupportedLocale => {
 };
 
 export const LocaleContext = createContext<LocaleContextValue>({
-  locale: 'ja',
+  locale: 'en',
   setLocale: () => {},
   t: (key: string) => key,
 });
@@ -39,8 +39,8 @@ interface LocaleProviderProps {
 }
 
 export const LocaleProvider: React.FC<LocaleProviderProps> = ({ children }) => {
-  // Always start with 'ja' for consistent server-side rendering
-  const [locale, setLocaleState] = useState<SupportedLocale>('ja');
+  // Always start with 'en' for consistent server-side rendering
+  const [locale, setLocaleState] = useState<SupportedLocale>('en');
 
   const setLocale = useCallback((newLocale: SupportedLocale) => {
     setLocaleState(newLocale);

@@ -229,6 +229,17 @@ function Toolbar({ className, service, dimensionality }: Props) {
     setIsSessionModalOpen(false);
   }, []);
 
+  // イベントバスからのモーダル開閉リクエストをリッスン
+  useEffect(() => {
+    const handleOpenFromEvent = () => {
+      setIsSessionModalOpen(true);
+    };
+    heatMapEventBus.on('session-modal:open', handleOpenFromEvent);
+    return () => {
+      heatMapEventBus.off('session-modal:open', handleOpenFromEvent);
+    };
+  }, []);
+
   // フィルタ変更ハンドラー
   const handleFiltersChange = useCallback((newFilters: SessionFilters) => {
     setFilters(newFilters);
