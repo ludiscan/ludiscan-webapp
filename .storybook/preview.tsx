@@ -46,11 +46,11 @@ const preview: Preview = {
         <QueryClientProvider client={queryClient}>
           <Provider store={store()}>
             <LocaleProvider>
-              <HintProvider>
-                <SharedThemeProvider initialTheme={theme}>
+              <SharedThemeProvider initialTheme={theme}>
+                <HintProvider>
                   <Story />
-                </SharedThemeProvider>
-              </HintProvider>
+                </HintProvider>
+              </SharedThemeProvider>
             </LocaleProvider>
           </Provider>
         </QueryClientProvider>
