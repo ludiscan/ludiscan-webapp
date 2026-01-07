@@ -4,13 +4,19 @@ import { memo } from 'react';
 import { IoCheckmark, IoGameController } from 'react-icons/io5';
 
 import type { Session } from '@src/modeles/session';
-import type { FC } from 'react';
+import type { FC, KeyboardEventHandler } from 'react';
 
 export type SessionListItemProps = {
   className?: string;
+  id?: string;
   session: Session;
   isSelected: boolean;
   onClick: () => void;
+  // Roving tabindex props
+  tabIndex?: number;
+  onKeyDown?: KeyboardEventHandler<HTMLButtonElement>;
+  onFocus?: () => void;
+  'data-roving-item'?: boolean;
 };
 
 const ItemContainer = styled.button<{ isSelected: boolean }>`
@@ -101,12 +107,33 @@ const CheckIcon = styled.span`
   font-size: 14px;
 `;
 
-const Component: FC<SessionListItemProps> = ({ className, session, isSelected, onClick }) => {
+const Component: FC<SessionListItemProps> = ({
+  className,
+  id,
+  session,
+  isSelected,
+  onClick,
+  tabIndex,
+  onKeyDown,
+  onFocus,
+  'data-roving-item': dataRovingItem,
+}) => {
   const displayName = session.name || `Session #${session.sessionId}`;
   const platform = session.platform || 'Unknown';
 
   return (
-    <ItemContainer className={className} isSelected={isSelected} onClick={onClick} role='option' aria-selected={isSelected}>
+    <ItemContainer
+      id={id}
+      className={className}
+      isSelected={isSelected}
+      onClick={onClick}
+      role='option'
+      aria-selected={isSelected}
+      tabIndex={tabIndex}
+      onKeyDown={onKeyDown}
+      onFocus={onFocus}
+      data-roving-item={dataRovingItem}
+    >
       <IconContainer isSelected={isSelected}>
         <IoGameController />
       </IconContainer>

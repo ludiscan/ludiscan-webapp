@@ -12,6 +12,8 @@ import type { AppProps } from 'next/app';
 
 import '@src/styles/globals.css';
 
+import { A11yAnnouncer } from '@src/component/atoms/A11yAnnouncer';
+import { SkipLink } from '@src/component/atoms/SkipLink';
 import { ToastProvider } from '@src/component/templates/ToastContext';
 import { env } from '@src/config/env';
 import { LocaleProvider } from '@src/contexts/LocaleContext';
@@ -128,6 +130,8 @@ export default function App({ Component, pageProps }: AppProps) {
         <LocaleProvider>
           <QueryClientProvider client={queryClient}>
             <SharedThemeProvider>
+              <A11yAnnouncer />
+              <SkipLink targetId='main-content' />
               {isPageLoading && (
                 <LoadingOverlay>
                   <LoadingSpinner />
@@ -141,7 +145,9 @@ export default function App({ Component, pageProps }: AppProps) {
                   style={{ height: '100vh' }}
                   data-testid={'app-content'}
                 >
-                  <Component {...pageProps} />
+                  <main id='main-content' tabIndex={-1}>
+                    <Component {...pageProps} />
+                  </main>
                 </Content>
               </ToastProvider>
             </SharedThemeProvider>

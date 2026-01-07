@@ -113,6 +113,17 @@ const ToastMessageBase = styled.div<{ $type: ToastType }>`
 
 const ToastMessage = motion(ToastMessageBase);
 
+// Get ARIA attributes based on toast type
+// Error/warning: assertive (important, interrupt)
+// Info/success: polite (non-urgent)
+function getAriaLive(type: ToastType): 'polite' | 'assertive' {
+  return type === 'error' || type === 'warning' ? 'assertive' : 'polite';
+}
+
+function getRole(type: ToastType): 'alert' | 'status' {
+  return type === 'error' || type === 'warning' ? 'alert' : 'status';
+}
+
 const ToastContainer: FC<ToastContainerProps> = ({ toasts, position }) => {
   const containerStyle: CSSProperties = getPositionStyle(position);
 
@@ -127,6 +138,9 @@ const ToastContainer: FC<ToastContainerProps> = ({ toasts, position }) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 30 }}
             transition={{ duration: 0.3 }}
+            role={getRole(toast.type)}
+            aria-live={getAriaLive(toast.type)}
+            aria-atomic='true'
           >
             {toast.message}
           </ToastMessage>

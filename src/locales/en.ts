@@ -402,4 +402,21 @@ export const en = {
     eventDetail: 'Event Detail',
     aiSummary: 'AI Summary',
   },
+
+  // Accessibility
+  accessibility: {
+    skipToMainContent: 'Skip to main content',
+    mainNavigation: 'Main navigation',
+    siteHeader: 'Site header',
+    mainContent: 'Main content',
+    closeDialog: 'Close dialog',
+    loadingComplete: 'Loading complete',
+    errorOccurred: 'An error occurred',
+    openMenu: 'Open menu',
+    heatmapCanvas: '3D heatmap visualization. Use mouse to rotate, scroll to zoom, drag to pan.',
+    heatmapCanvas2D: '2D heatmap visualization. Scroll to zoom, drag to pan.',
+    heatmapKeyboardShortcuts: 'Keyboard shortcuts: Arrow keys to move waypoints, Escape to deselect.',
+    dataLoaded: 'Heatmap data loaded successfully',
+    modeChanged: 'View mode changed to {mode}',
+  },
 };

@@ -21,6 +21,7 @@ import { DesktopLayout, MobileLayout } from '@src/component/molecules/responsive
 import { UpdateHistoryModal } from '@src/component/organisms/UpdateHistoryModal';
 import { useAuth } from '@src/hooks/useAuth';
 import { useIsDesktop } from '@src/hooks/useIsDesktop';
+import { useLocale } from '@src/hooks/useLocale';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { dimensions, zIndexes } from '@src/styles/style';
 
@@ -37,6 +38,7 @@ export type HeaderProps = {
 
 const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, iconEnd, isOffline = false }) => {
   const { theme, toggleTheme } = useSharedTheme();
+  const { t } = useLocale();
 
   const { isAuthorized, logout } = useAuth();
   const router = useRouter();
@@ -125,7 +127,7 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
     setIsUpdateModalOpen(false);
   }, []);
   return (
-    <PanelCard className={`${className} ${isVisible ? 'visible' : 'hidden'}`} padding={'0px 16px'}>
+    <PanelCard className={`${className} ${isVisible ? 'visible' : 'hidden'}`} padding={'0px 16px'} aria-label={t('accessibility.siteHeader')} role='banner'>
       <FlexRow align={'center'} gap={12} className={`${className}__innerHeader`} wrap={'nowrap'}>
         {onClick && (
           <Button fontSize={'xl'} onClick={backIconHandle} scheme={'none'}>

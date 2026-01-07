@@ -19,6 +19,10 @@ export type SliderProps = {
   sideLabel?: boolean;
   textField?: boolean; // テキストフィールドを表示するかどうか
   disabled?: boolean;
+  /** Accessible label for screen readers */
+  'aria-label'?: string;
+  /** ID of element that labels this slider */
+  'aria-labelledby'?: string;
 };
 
 const calculateTooltipPosition = (inputElement: HTMLInputElement, value: number, min: number, max: number): number => {
@@ -41,7 +45,19 @@ const calculateTooltipPosition = (inputElement: HTMLInputElement, value: number,
 };
 
 const SliderComponent: FC<SliderProps> = (args) => {
-  const { className, value, onChange, min = 0, max = 100, step = 1, disabled = false, sideLabel = false, textField } = args;
+  const {
+    className,
+    value,
+    onChange,
+    min = 0,
+    max = 100,
+    step = 1,
+    disabled = false,
+    sideLabel = false,
+    textField,
+    'aria-label': ariaLabel,
+    'aria-labelledby': ariaLabelledby,
+  } = args;
   const { theme } = useSharedTheme();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [sliderValue, setSliderValue] = useState<number>(value || min); // 初期値は min または value
@@ -136,6 +152,11 @@ const SliderComponent: FC<SliderProps> = (args) => {
           onMouseUp={handleDragEnd}
           onTouchEnd={handleDragEnd}
           onBlur={handleDragEnd}
+          aria-label={ariaLabel}
+          aria-labelledby={ariaLabelledby}
+          aria-valuemin={min}
+          aria-valuemax={max}
+          aria-valuenow={sliderValue}
         />
         {showTooltip && (
           <div
