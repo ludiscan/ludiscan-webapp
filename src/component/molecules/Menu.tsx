@@ -13,6 +13,7 @@ import { Button } from '@src/component/atoms/Button';
 import { Card } from '@src/component/atoms/Card';
 import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { LabeledButton } from '@src/component/atoms/LabeledButton';
+import { useLocale } from '@src/hooks/useLocale';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { zIndexes } from '@src/styles/style';
 
@@ -23,10 +24,22 @@ export type MenuProps = Omit<LabeledButtonProps, 'onClick'> & {
   onClick?: ButtonProps['onClick'];
 };
 
-const EllipsisMenuContext = createContext<{ isOpen: boolean; onClose: () => void; anchorRef: RefObject<HTMLDivElement | null> }>({
+interface MenuContextValue {
+  isOpen: boolean;
+  onClose: () => void;
+  anchorRef: RefObject<HTMLDivElement | null>;
+  menuId: string;
+  focusedIndex: number;
+  setFocusedIndex: (index: number) => void;
+}
+
+const EllipsisMenuContext = createContext<MenuContextValue>({
   isOpen: false,
   onClose: () => {},
   anchorRef: { current: null },
+  menuId: '',
+  focusedIndex: -1,
+  setFocusedIndex: () => {},
 });
 
 const useEllipsisMenuContext = () => useContext(EllipsisMenuContext);
@@ -111,20 +124,34 @@ const Floating: FC<FloatingProps> = ({ className, children, align = 'left', plac
 
 const Component: FC<MenuProps> = (props) => {
   const { className, icon, children, onClick } = props;
+  const { t } = useLocale();
   const [isOpen, setIsOpen] = useState(false);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
   const anchorRef = useRef<HTMLDivElement>(null);
+
+  // Generate unique menu ID
+  const menuIdRef = useRef(`menu-${Math.random().toString(36).substring(2, 9)}`);
+  const menuId = menuIdRef.current;
+
   const closeMenu = useCallback(() => {
     setIsOpen(false);
+    setFocusedIndex(-1);
+    // Return focus to trigger button (find the button within anchorRef)
+    const button = anchorRef.current?.querySelector('button');
+    button?.focus();
   }, []);
+
   const openMenu = useCallback(() => {
     setIsOpen(true);
+    setFocusedIndex(0);
   }, []);
+
   useEffect(() => {
     // 画面外タップで閉じる
     const handleClickOutside = () => {
       closeMenu();
     };
-    const handleKeyDown = (event: KeyboardEvent) => {
+    const handleKeyDown = (event: globalThis.KeyboardEvent) => {
       if (event.key === 'Escape') {
         closeMenu();
       }
@@ -136,6 +163,7 @@ const Component: FC<MenuProps> = (props) => {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [closeMenu]);
+
   const handleClick = useCallback(
     (event: MouseEvent<HTMLButtonElement>) => {
       event.stopPropagation();
@@ -150,12 +178,22 @@ const Component: FC<MenuProps> = (props) => {
     },
     [closeMenu, isOpen, onClick, openMenu],
   );
+
   return (
     <div className={className} ref={anchorRef}>
-      <LabeledButton {...props} onClick={handleClick}>
+      <LabeledButton
+        {...props}
+        onClick={handleClick}
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
+        aria-controls={isOpen ? menuId : undefined}
+        aria-label={props['aria-label'] ?? t('accessibility.openMenu')}
+      >
         {icon}
       </LabeledButton>
-      <EllipsisMenuContext.Provider value={{ isOpen, onClose: closeMenu, anchorRef }}>{children}</EllipsisMenuContext.Provider>
+      <EllipsisMenuContext.Provider value={{ isOpen, onClose: closeMenu, anchorRef, menuId, focusedIndex, setFocusedIndex }}>
+        {children}
+      </EllipsisMenuContext.Provider>
     </div>
   );
 };
@@ -171,11 +209,21 @@ export type EllipsisMenuContentProps = CardProps & {
 
 const ContentRowComponent: FC<EllipsisMenuContentProps> = (props) => {
   const { theme } = useSharedTheme();
-  const { isOpen } = useEllipsisMenuContext();
+  const { isOpen, menuId } = useEllipsisMenuContext();
   const { className, gap, children, shadow = 'medium', border = theme.colors.border.strong, padding = '8px', stopPropagate = true } = props;
   return (
     <Floating className={`${className} ${isOpen ? 'open' : ''}`} align={props.align} placement={props['placement'] || 'bottom'}>
-      <Card {...props} className={`${className} ${isOpen ? 'open' : ''}`} shadow={shadow} border={border} padding={padding} stopPropagate={stopPropagate}>
+      <Card
+        {...props}
+        className={`${className} ${isOpen ? 'open' : ''}`}
+        shadow={shadow}
+        border={border}
+        padding={padding}
+        stopPropagate={stopPropagate}
+        role="menu"
+        id={menuId}
+        aria-orientation="horizontal"
+      >
         <FlexRow align={'center'} gap={gap} wrap={'nowrap'}>
           {children}
         </FlexRow>
@@ -186,11 +234,21 @@ const ContentRowComponent: FC<EllipsisMenuContentProps> = (props) => {
 
 const ContentColumnComponent: FC<EllipsisMenuContentProps> = (props) => {
   const { theme } = useSharedTheme();
-  const { isOpen } = useEllipsisMenuContext();
+  const { isOpen, menuId } = useEllipsisMenuContext();
   const { className, gap, children, shadow = 'medium', border = theme.colors.border.strong, padding = '8px', stopPropagate = true } = props;
   return (
     <Floating className={`${className} ${isOpen ? 'open' : ''}`} align={props.align} placement={props['placement'] || 'bottom'} offset={props.offset}>
-      <Card {...props} className={`${className} ${isOpen ? 'open' : ''}`} shadow={shadow} border={border} padding={padding} stopPropagate={stopPropagate}>
+      <Card
+        {...props}
+        className={`${className} ${isOpen ? 'open' : ''}`}
+        shadow={shadow}
+        border={border}
+        padding={padding}
+        stopPropagate={stopPropagate}
+        role="menu"
+        id={menuId}
+        aria-orientation="vertical"
+      >
         <FlexColumn align={'flex-start'} gap={gap} wrap={'nowrap'}>
           {children}
         </FlexColumn>
@@ -212,7 +270,7 @@ const ContentButton: FC<ButtonProps> = (props) => {
     },
     [onClose, onClick],
   );
-  return <Button {...props} onClick={handleClick} />;
+  return <Button {...props} onClick={handleClick} role="menuitem" />;
 };
 
 const ContentRow = styled(ContentRowComponent)`

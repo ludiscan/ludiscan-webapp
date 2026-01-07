@@ -416,6 +416,7 @@ export const ja = {
     closeDialog: 'ダイアログを閉じる',
     loadingComplete: '読み込み完了',
     errorOccurred: 'エラーが発生しました',
+    openMenu: 'メニューを開く',
   },
 };
 

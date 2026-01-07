@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import React, { useCallback } from 'react';
 import { IconContext } from 'react-icons';
 
-import type { MouseEventHandler, ReactNode, FC } from 'react';
+import type { AriaRole, MouseEventHandler, ReactNode, FC } from 'react';
 
 import { commonTypography } from '@src/styles/commonTheme';
 
@@ -18,6 +18,13 @@ export type ButtonProps = {
   disabled?: boolean | undefined;
   title?: string;
   type?: 'button' | 'submit' | 'reset';
+  // Accessibility props
+  'aria-label'?: string;
+  'aria-haspopup'?: boolean | 'dialog' | 'menu' | 'listbox' | 'tree' | 'grid';
+  'aria-expanded'?: boolean;
+  'aria-controls'?: string;
+  'aria-disabled'?: boolean;
+  role?: AriaRole;
 };
 
 export const ButtonIconSize = (props: Pick<ButtonProps, 'fontSize'>) => {
@@ -51,7 +58,21 @@ export const ButtonIconSize = (props: Pick<ButtonProps, 'fontSize'>) => {
 };
 
 const Component: FC<ButtonProps> = (props) => {
-  const { className, onClick, scheme, children, disabled = false, title, type = 'button' } = props;
+  const {
+    className,
+    onClick,
+    scheme,
+    children,
+    disabled = false,
+    title,
+    type = 'button',
+    'aria-label': ariaLabel,
+    'aria-haspopup': ariaHaspopup,
+    'aria-expanded': ariaExpanded,
+    'aria-controls': ariaControls,
+    'aria-disabled': ariaDisabled,
+    role,
+  } = props;
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       // stopping propagation to prevent parent click event by default
@@ -65,7 +86,19 @@ const Component: FC<ButtonProps> = (props) => {
   );
   return (
     <IconContext.Provider value={{ size: ButtonIconSize(props) }}>
-      <button className={`${className} ${scheme}`} onClick={handleClick} disabled={disabled} title={title} type={type}>
+      <button
+        className={`${className} ${scheme}`}
+        onClick={handleClick}
+        disabled={disabled}
+        title={title}
+        type={type}
+        aria-label={ariaLabel}
+        aria-haspopup={ariaHaspopup}
+        aria-expanded={ariaExpanded}
+        aria-controls={ariaControls}
+        aria-disabled={ariaDisabled}
+        role={role}
+      >
         {children}
       </button>
     </IconContext.Provider>

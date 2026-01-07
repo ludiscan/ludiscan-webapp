@@ -412,5 +412,6 @@ export const en = {
     closeDialog: 'Close dialog',
     loadingComplete: 'Loading complete',
     errorOccurred: 'An error occurred',
+    openMenu: 'Open menu',
   },
 };
