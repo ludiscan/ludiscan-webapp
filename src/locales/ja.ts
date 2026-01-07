@@ -417,6 +417,11 @@ export const ja = {
     loadingComplete: '読み込み完了',
     errorOccurred: 'エラーが発生しました',
     openMenu: 'メニューを開く',
+    heatmapCanvas: '3Dヒートマップビジュアライゼーション。マウスで回転、スクロールでズーム、ドラッグで移動。',
+    heatmapCanvas2D: '2Dヒートマップビジュアライゼーション。スクロールでズーム、ドラッグで移動。',
+    heatmapKeyboardShortcuts: 'キーボードショートカット: 矢印キーでウェイポイント移動、Escで選択解除。',
+    dataLoaded: 'ヒートマップデータを読み込みました',
+    modeChanged: '表示モードを{mode}に変更しました',
   },
 };
 

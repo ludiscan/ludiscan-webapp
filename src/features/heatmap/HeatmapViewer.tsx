@@ -16,6 +16,7 @@ import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC } from 'react';
 
 import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
+import { VisuallyHidden } from '@src/component/atoms/VisuallyHidden';
 import { useToast } from '@src/component/templates/ToastContext';
 import { EventLogPanel } from '@src/features/heatmap/EventLogPanel';
 import { HeatMapCanvas } from '@src/features/heatmap/HeatmapCanvas';
@@ -28,10 +29,12 @@ import { exportHeatmap } from '@src/features/heatmap/export-heatmap';
 import { HintProvider } from '@src/features/heatmap/hints';
 import { FocusLinkBridge } from '@src/features/heatmap/selection/FocusLinkBridge';
 import { InspectorModal } from '@src/features/heatmap/selection/InspectorModal';
+import { useA11yAnnounce } from '@src/hooks/useA11yAnnounce';
 import { useEventLogPatch, useEventLogSelect } from '@src/hooks/useEventLog';
 import { useFieldObjectPatch, useFieldObjectSelect } from '@src/hooks/useFieldObject';
 import { useGeneralPatch, useGeneralPick } from '@src/hooks/useGeneral';
 import { useGetApi } from '@src/hooks/useGetApi';
+import { useLocale } from '@src/hooks/useLocale';
 import { usePlayerTimelinePatch } from '@src/hooks/usePlayerTimeline';
 import { useFieldObjectTypes } from '@src/modeles/heatmapView';
 import { DefaultStaleTime } from '@src/modeles/qeury';
@@ -68,6 +71,8 @@ export type HeatmapViewerProps = {
 
 const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false }) => {
   const toast = useToast();
+  const { t } = useLocale();
+  const { announceStatus } = useA11yAnnounce();
   const [map, setMap] = useState<string | ArrayBuffer | null>(null);
   const [modelType, setModelType] = useState<'gltf' | 'glb' | 'obj' | 'server' | null>(null);
   const [serverModelFileType, setServerModelFileType] = useState<ModelFileType | null>(null);
@@ -298,6 +303,15 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
     );
   }, [task]);
 
+  // Announce when heatmap data is loaded (for screen readers)
+  const prevPointListLengthRef = useRef(0);
+  useEffect(() => {
+    if (pointList.length > 0 && prevPointListLengthRef.current === 0) {
+      announceStatus(t('accessibility.dataLoaded'));
+    }
+    prevPointListLengthRef.current = pointList.length;
+  }, [pointList.length, announceStatus, t]);
+
   const handleOnPerformance = useCallback((api: PerformanceMonitorApi) => {
     setDpr(Math.floor(0.5 + 1.5 * api.factor));
     // setPerformance(api);
@@ -403,36 +417,44 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
     };
   }, [backgroundImage, backgroundScale, backgroundOffsetX, backgroundOffsetY]);
 
+  const canvasAriaLabel = dimensionality === '2d' ? t('accessibility.heatmapCanvas2D') : t('accessibility.heatmapCanvas');
+
   const renderCanvas = useCallback(
     (paneId?: string) => (
-      <Canvas
-        key={paneId}
-        style={{ flex: 1, position: 'relative', zIndex: 1 }}
-        camera={
-          dimensionality === '2d'
-            ? { position: [0, 5000, 0], up: [0, 0, -1], near: 10, far: 20000 } // 2D: 真上から俯瞰
-            : { position: [2500, 5000, -2500], fov: 50, near: 10, far: 10000 } // 3D: 斜め視点
-        }
-        orthographic={dimensionality === '2d'} // 2Dは正投影カメラ
-        ref={canvasRef}
-        dpr={dpr}
-        shadows // シャドウマップを有効化
-        gl={{ alpha: true }} // 背景を透明にして後ろの画像が見えるようにする
-      >
-        <PerformanceMonitor factor={1} onChange={handleOnPerformance} />
-        <HeatMapCanvas
-          service={service}
-          pointList={pointList}
-          map={map}
-          modelType={modelType}
-          model={model}
-          visibleTimelineRange={visibleTimelineRange}
-          dimensionality={dimensionality}
-          fieldObjectLogs={fieldObjectLogs}
-          hasLocalModel={!!localModel}
-        />
-        {statsReady && showStats && <Stats parent={divRef} className={`${className}__stats`} />}
-      </Canvas>
+      <>
+        {/* Keyboard shortcut instructions for screen readers */}
+        <VisuallyHidden>{t('accessibility.heatmapKeyboardShortcuts')}</VisuallyHidden>
+        <Canvas
+          key={paneId}
+          style={{ flex: 1, position: 'relative', zIndex: 1 }}
+          camera={
+            dimensionality === '2d'
+              ? { position: [0, 5000, 0], up: [0, 0, -1], near: 10, far: 20000 } // 2D: 真上から俯瞰
+              : { position: [2500, 5000, -2500], fov: 50, near: 10, far: 10000 } // 3D: 斜め視点
+          }
+          orthographic={dimensionality === '2d'} // 2Dは正投影カメラ
+          ref={canvasRef}
+          dpr={dpr}
+          shadows // シャドウマップを有効化
+          gl={{ alpha: true }} // 背景を透明にして後ろの画像が見えるようにする
+          role="application"
+          aria-label={canvasAriaLabel}
+        >
+          <PerformanceMonitor factor={1} onChange={handleOnPerformance} />
+          <HeatMapCanvas
+            service={service}
+            pointList={pointList}
+            map={map}
+            modelType={modelType}
+            model={model}
+            visibleTimelineRange={visibleTimelineRange}
+            dimensionality={dimensionality}
+            fieldObjectLogs={fieldObjectLogs}
+            hasLocalModel={!!localModel}
+          />
+          {statsReady && showStats && <Stats parent={divRef} className={`${className}__stats`} />}
+        </Canvas>
+      </>
     ),
     [
       dimensionality,
@@ -449,6 +471,8 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
       className,
       fieldObjectLogs,
       localModel,
+      canvasAriaLabel,
+      t,
     ],
   );
 
