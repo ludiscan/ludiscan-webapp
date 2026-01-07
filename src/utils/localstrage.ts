@@ -189,3 +189,82 @@ export function getRecentMenus(): string[] {
   }
   return [];
 }
+
+/**
+ * Get viewed hints from localStorage
+ */
+export function getViewedHints(): string[] {
+  // SSR safety check - localStorage is only available in browser
+  if (typeof window === 'undefined') return [];
+
+  const storage = localStorage.getItem(STORAGE_KEY);
+  if (storage) {
+    const data = JSON.parse(storage);
+    return data.viewedHints || [];
+  }
+  return [];
+}
+
+/**
+ * Mark a hint as viewed in localStorage
+ */
+export function markHintAsViewed(hintId: string): void {
+  // SSR safety check - localStorage is only available in browser
+  if (typeof window === 'undefined') return;
+
+  const storage = localStorage.getItem(STORAGE_KEY);
+  const data = storage ? JSON.parse(storage) : {};
+  const viewedHints: string[] = data.viewedHints || [];
+
+  // Add hint if not already viewed
+  if (!viewedHints.includes(hintId)) {
+    viewedHints.push(hintId);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...data, viewedHints }));
+  }
+}
+
+/**
+ * Get disabled hints (hints user chose to never show again)
+ */
+export function getDisabledHints(): string[] {
+  // SSR safety check - localStorage is only available in browser
+  if (typeof window === 'undefined') return [];
+
+  const storage = localStorage.getItem(STORAGE_KEY);
+  if (storage) {
+    const data = JSON.parse(storage);
+    return data.disabledHints || [];
+  }
+  return [];
+}
+
+/**
+ * Disable a hint permanently (user chose "don't show again")
+ */
+export function disableHint(hintId: string): void {
+  // SSR safety check - localStorage is only available in browser
+  if (typeof window === 'undefined') return;
+
+  const storage = localStorage.getItem(STORAGE_KEY);
+  const data = storage ? JSON.parse(storage) : {};
+  const disabledHints: string[] = data.disabledHints || [];
+
+  // Add hint if not already disabled
+  if (!disabledHints.includes(hintId)) {
+    disabledHints.push(hintId);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...data, disabledHints }));
+  }
+}
+
+/**
+ * Check if a hint should be shown (not viewed and not disabled)
+ */
+export function shouldShowHint(hintId: string): boolean {
+  // SSR safety check - localStorage is only available in browser
+  if (typeof window === 'undefined') return false;
+
+  const viewedHints = getViewedHints();
+  const disabledHints = getDisabledHints();
+
+  return !viewedHints.includes(hintId) && !disabledHints.includes(hintId);
+}

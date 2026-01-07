@@ -189,7 +189,7 @@ export const en = {
       showHeatmap: 'Heatmap',
       opacity: 'Opacity',
       type: 'Type',
-      minThreshold: 'Min Density',
+      minThreshold: 'Display Threshold',
       colorScale: 'Color Scale',
       reload: 'Reload',
     },
@@ -335,15 +335,67 @@ export const en = {
     last: 'Go to last page',
   },
 
+  // Hints
+  hints: {
+    welcome: {
+      title: 'Welcome to Heatmap Viewer',
+      selectLanguage: 'Select your language',
+      description: 'This tool allows you to visualize gameplay data as heatmaps. Access various features from the menu on the left.',
+      tips: ['Drag to rotate camera, scroll to zoom', 'Click menu icons on the left to access settings', 'Toggle between 2D/3D modes using the toolbar'],
+    },
+    menuHeatmap: {
+      title: 'Heatmap Settings',
+      description: 'Adjust heatmap display settings.',
+      tips: ['Use display threshold to hide low-density cells', 'Use opacity slider to adjust heatmap transparency', 'Change color range with color scale'],
+    },
+    menuHotspot: {
+      title: 'Hotspot',
+      description: 'Display player concentration areas as hotspots.',
+      tips: ['Adjust hotspot size with cell radius', 'Set how many top spots to display', 'Skip duplication to exclude nearby hotspots'],
+    },
+    menuEventlog: {
+      title: 'Event Log',
+      description: 'Display in-game events as markers on the map.',
+      tips: ['Customize colors and icons for each event type', 'Use HVQL scripts for detailed filtering', 'Click markers to view detailed information'],
+    },
+    menuRoutecoach: {
+      title: 'Route Coach',
+      description: 'AI analyzes player movements and suggests improvement routes.',
+      tips: ['Click generate to start AI analysis', 'Review improvement points per cluster', 'Suggested routes are displayed on the map'],
+    },
+    menuTimeline: {
+      title: 'Replay',
+      description: 'Replay player movement trajectories over time.',
+      tips: ['Select a session to add players', 'Press play to animate movements', 'Display multiple players to compare'],
+    },
+    menuMap: {
+      title: 'Map Settings',
+      description: 'Manage 3D model and map display settings.',
+      tips: ['Upload GLB/GLTF/OBJ format models', 'Adjust model position and rotation', 'Add waypoints as map landmarks'],
+    },
+    menuFieldObject: {
+      title: 'Field Objects',
+      description: 'Display in-game objects on the map.',
+      tips: ['Toggle visibility by object type', 'Customize colors and icons', 'Use HVQL for filtering conditions'],
+    },
+    menuAggregation: {
+      title: 'Aggregation',
+      description: 'Aggregate session data to display statistics.',
+      tips: ['Filter by platform or version', 'Calculate sum, average, max, min for numeric fields', 'Use query filter for detailed conditions'],
+    },
+    dontShowAgain: "Don't show again",
+    gotIt: 'Got it',
+  },
+
   // Menu names (display text)
   menus: {
     info: 'Info',
-    general: 'General',
+    general: 'Heatmap',
     map: 'Map',
     hotspot: 'Hotspot',
     eventlog: 'Event Log',
     fieldObject: 'Objects',
-    timeline: 'Timeline',
+    timeline: 'Replay',
     routecoach: 'Route Coach',
     aggregation: 'Aggregation',
     more: 'More',

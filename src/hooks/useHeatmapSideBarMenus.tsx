@@ -5,7 +5,7 @@ import { CiMap, CiMapPin, CiStreamOn } from 'react-icons/ci';
 import { FaCube } from 'react-icons/fa';
 import { GiPathDistance } from 'react-icons/gi';
 import { IoIosInformationCircleOutline } from 'react-icons/io';
-import { SiSvgtrace } from 'react-icons/si';
+import { MdReplay } from 'react-icons/md';
 
 import type { HeatmapMenuProps } from '@src/features/heatmap/HeatmapMenuContent';
 import type { HeatmapDataState } from '@src/modeles/heatmapView';
@@ -92,7 +92,7 @@ export const MenuContents: MenuType[] = [
   },
   {
     id: 'timeline',
-    icon: <SiSvgtrace />,
+    icon: <MdReplay />,
     Component: PlayerTimeline,
   },
   {

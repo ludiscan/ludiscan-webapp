@@ -5,6 +5,7 @@ import { Provider } from 'react-redux';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import themes from '@src/modeles/theme';
 import { LocaleProvider } from '@src/contexts/LocaleContext';
+import { HintProvider } from '@src/features/heatmap/hints';
 
 const preview: Preview = {
   parameters: {
@@ -46,7 +47,9 @@ const preview: Preview = {
           <Provider store={store()}>
             <LocaleProvider>
               <SharedThemeProvider initialTheme={theme}>
-                <Story />
+                <HintProvider>
+                  <Story />
+                </HintProvider>
               </SharedThemeProvider>
             </LocaleProvider>
           </Provider>

@@ -46,7 +46,7 @@ function defaultStyle(theme: Theme): Styles {
       boxSizing: 'border-box',
       width: 'fit-content',
       minWidth: '40%',
-      maxWidth: '80%',
+      maxWidth: '95%',
       maxHeight: '90vh',
       height: 'fit-content',
       position: 'relative',

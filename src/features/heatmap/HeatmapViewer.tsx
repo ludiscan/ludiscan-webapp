@@ -25,6 +25,7 @@ import { SettingsButton } from '@src/features/heatmap/SettingsButton';
 import { TimelineControlWrapper } from '@src/features/heatmap/TimelineControlWrapper';
 import { ZoomControls } from '@src/features/heatmap/ZoomControls';
 import { exportHeatmap } from '@src/features/heatmap/export-heatmap';
+import { HintProvider } from '@src/features/heatmap/hints';
 import { FocusLinkBridge } from '@src/features/heatmap/selection/FocusLinkBridge';
 import { InspectorModal } from '@src/features/heatmap/selection/InspectorModal';
 import { useEventLogPatch, useEventLogSelect } from '@src/hooks/useEventLog';
@@ -452,69 +453,72 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
   );
 
   return (
-    <div className={`${className}__view ${isEmbed ? `${className}--embed` : ''}`}>
-      <FlexRow style={{ width: '100%', height: '100%' }} align={'center'} wrap={'nowrap'}>
-        {splitMode.enabled ? (
-          <FlexRow className={`${className}__splitContainer`} style={{ flex: 1, flexDirection: splitMode.direction === 'horizontal' ? 'row' : 'column' }}>
-            <FlexColumn className={`${className}__canvasBox ${className}__canvasBox--split`}>
+    <HintProvider>
+      <div className={`${className}__view ${isEmbed ? `${className}--embed` : ''}`}>
+        <FlexRow style={{ width: '100%', height: '100%' }} align={'center'} wrap={'nowrap'}>
+          {splitMode.enabled ? (
+            <FlexRow className={`${className}__splitContainer`} style={{ flex: 1, flexDirection: splitMode.direction === 'horizontal' ? 'row' : 'column' }}>
+              <FlexColumn className={`${className}__canvasBox ${className}__canvasBox--split`}>
+                {backgroundStyle && <div style={backgroundStyle} />}
+                {renderCanvas('left')}
+              </FlexColumn>
+              <FlexColumn className={`${className}__canvasBox ${className}__canvasBox--split`}>
+                {backgroundStyle && <div style={backgroundStyle} />}
+                {renderCanvas('right')}
+              </FlexColumn>
+            </FlexRow>
+          ) : (
+            <FlexColumn className={`${className}__canvasBox`}>
               {backgroundStyle && <div style={backgroundStyle} />}
-              {renderCanvas('left')}
+              {renderCanvas()}
+              {/*{performance && <PerformanceList api={performance} className={`${className}__performance`} />}*/}
             </FlexColumn>
-            <FlexColumn className={`${className}__canvasBox ${className}__canvasBox--split`}>
-              {backgroundStyle && <div style={backgroundStyle} />}
-              {renderCanvas('right')}
-            </FlexColumn>
-          </FlexRow>
-        ) : (
-          <FlexColumn className={`${className}__canvasBox`}>
-            {backgroundStyle && <div style={backgroundStyle} />}
-            {renderCanvas()}
-            {/*{performance && <PerformanceList api={performance} className={`${className}__performance`} />}*/}
-          </FlexColumn>
+          )}
+          <div className={`${className}__player`}>
+            <TimelineControlWrapper setVisibleTimelineRange={setVisibleTimelineRange} visibleTimelineRange={visibleTimelineRange} />
+          </div>
+        </FlexRow>
+        <div className={`${className}__canvasMenuBox`}>
+          <HeatmapMenuContent
+            mapOptions={useMemo(() => mapList ?? [], [mapList])}
+            model={model}
+            handleExportView={handleExportView}
+            eventLogKeys={generalLogKeys ?? undefined}
+            service={service}
+            dimensionality={dimensionality}
+            localModel={localModel}
+            onLocalModelChange={handleLocalModelChange}
+            mapActiveOnly={mapActiveOnly}
+            onMapActiveOnlyChange={setMapActiveOnly}
+            isEmbed={isEmbed}
+          />
+        </div>
+
+        {/* EventLogパネル（セッション選択時に表示） */}
+        {service.sessionId && (
+          <div className={`${className}__eventLogPanel`}>
+            <EventLogPanel service={service} eventLogKeys={generalLogKeys ?? null} />
+          </div>
         )}
-        <div className={`${className}__player`}>
-          <TimelineControlWrapper setVisibleTimelineRange={setVisibleTimelineRange} visibleTimelineRange={visibleTimelineRange} />
+
+        <div className={`${className}__selectionInspector`}>
+          <InspectorModal />
         </div>
-      </FlexRow>
-      <div className={`${className}__canvasMenuBox`}>
-        <HeatmapMenuContent
-          mapOptions={useMemo(() => mapList ?? [], [mapList])}
-          model={model}
-          handleExportView={handleExportView}
-          eventLogKeys={generalLogKeys ?? undefined}
-          service={service}
-          dimensionality={dimensionality}
-          localModel={localModel}
-          onLocalModelChange={handleLocalModelChange}
-          mapActiveOnly={mapActiveOnly}
-          onMapActiveOnlyChange={setMapActiveOnly}
-        />
-      </div>
 
-      {/* EventLogパネル（セッション選択時に表示） */}
-      {service.sessionId && (
-        <div className={`${className}__eventLogPanel`}>
-          <EventLogPanel service={service} eventLogKeys={generalLogKeys ?? null} />
+        {/* ズームコントロール（キャンバス右下） */}
+        <div className={`${className}__zoomControls`}>
+          <ZoomControls />
         </div>
-      )}
 
-      <div className={`${className}__selectionInspector`}>
-        <InspectorModal />
+        {/* 設定ボタン（キャンバス左下） */}
+        <div className={`${className}__settingsButton`}>
+          <SettingsButton />
+        </div>
+
+        {/* AIリンク/外部postMessage→focus */}
+        <FocusLinkBridge />
       </div>
-
-      {/* ズームコントロール（キャンバス右下） */}
-      <div className={`${className}__zoomControls`}>
-        <ZoomControls />
-      </div>
-
-      {/* 設定ボタン（キャンバス左下） */}
-      <div className={`${className}__settingsButton`}>
-        <SettingsButton />
-      </div>
-
-      {/* AIリンク/外部postMessage→focus */}
-      <FocusLinkBridge />
-    </div>
+    </HintProvider>
   );
 };
 

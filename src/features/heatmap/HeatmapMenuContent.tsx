@@ -4,6 +4,7 @@ import { IoChevronDown, IoChevronUp } from 'react-icons/io5';
 import { useDispatch, useSelector } from 'react-redux';
 
 import type { ModelFileType } from '@src/features/heatmap/ModelLoader';
+import type { HintId } from '@src/features/heatmap/hints';
 import type { MenuKey } from '@src/hooks/useHeatmapSideBarMenus';
 import type { RootState } from '@src/store';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
@@ -12,12 +13,15 @@ import type { Group } from 'three';
 
 import { Button } from '@src/component/atoms/Button';
 import { PanelCard } from '@src/component/atoms/Card';
-import { Flex, FlexColumn } from '@src/component/atoms/Flex';
+import { Flex, FlexColumn, FlexRow } from '@src/component/atoms/Flex';
+import { Text } from '@src/component/atoms/Text';
 import { Tooltip } from '@src/component/atoms/Tooltip';
 import { HeatmapMenuListRow } from '@src/component/organisms/HeatmapMenuListRow';
 import { QuickToolbar } from '@src/features/heatmap/QuickToolbar';
+import { HintButton, menuHintMap, useHintContext } from '@src/features/heatmap/hints';
 import { useGeneralPatch, useGeneralSelect } from '@src/hooks/useGeneral';
-import { MenuContents, useHeatmapSideBarMenus } from '@src/hooks/useHeatmapSideBarMenus';
+import { getMenuDisplayName, MenuContents, useHeatmapSideBarMenus } from '@src/hooks/useHeatmapSideBarMenus';
+import { useLocale } from '@src/hooks/useLocale';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { setMenuPanelCollapsed, setMenuPanelWidth, toggleMenuPanelCollapsed } from '@src/slices/uiSlice';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
@@ -46,6 +50,8 @@ export type HeatmapMenuProps = {
   // マップリストのactiveOnlyフィルター
   mapActiveOnly?: boolean;
   onMapActiveOnlyChange?: (value: boolean) => void;
+  // Embedモード（メニューの初期状態に影響）
+  isEmbed?: boolean;
 };
 
 const MIN_WIDTH = 300;
@@ -53,29 +59,48 @@ const MAX_WIDTH = 800;
 const SMALL_SCREEN_BREAKPOINT = 768;
 
 const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
-  const { className, mapOptions, service, dimensionality, name } = props;
+  const { className, mapOptions, service, dimensionality, name, isEmbed = false } = props;
   const mapName = useGeneralSelect((s) => s.mapName);
   const setGeneral = useGeneralPatch();
   const dispatch = useDispatch();
   const menuPanelWidth = useSelector((s: RootState) => s.ui.menuPanelWidth);
   const menuPanelCollapsed = useSelector((s: RootState) => s.ui.menuPanelCollapsed);
   const { theme } = useSharedTheme();
+  const { t } = useLocale();
   const menus = useHeatmapSideBarMenus();
 
-  const [openMenu, setOpenMenu] = useState<MenuKey | undefined>(name);
+  // embedモードの場合はtimelineをデフォルトで開く
+  const initialMenu = name ?? (isEmbed ? 'timeline' : undefined);
+  const [openMenu, setOpenMenu] = useState<MenuKey | undefined>(initialMenu);
   const [menuExtra, setMenuExtra] = useState<object | undefined>(undefined);
   const [isResizing, setIsResizing] = useState(false);
   const resizeRef = useRef<{ startX: number; startWidth: number } | null>(null);
   const initialCollapseRef = useRef(false);
 
-  // Auto-collapse on small screens (initial load only)
+  // メニューが開かれた時にヒントをキューに追加
+  const { addHintForMenu } = useHintContext();
+  useEffect(() => {
+    if (openMenu) {
+      addHintForMenu(openMenu);
+    }
+  }, [openMenu, addHintForMenu]);
+
+  // Auto-collapse on small screens or when no menu is selected (initial load only)
   useLayoutEffect(() => {
     if (initialCollapseRef.current) return;
     initialCollapseRef.current = true;
 
-    if (typeof window !== 'undefined' && window.innerWidth < SMALL_SCREEN_BREAKPOINT) {
-      dispatch(setMenuPanelCollapsed(true));
+    if (typeof window !== 'undefined') {
+      // 小さい画面の場合は常に折りたたむ
+      if (window.innerWidth < SMALL_SCREEN_BREAKPOINT) {
+        dispatch(setMenuPanelCollapsed(true));
+      }
+      // メニュー選択がない場合も折りたたむ（embedはtimelineが選択されるので展開される）
+      else if (!openMenu) {
+        dispatch(setMenuPanelCollapsed(true));
+      }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- openMenuの初期値のみで判断
   }, [dispatch]);
 
   const handleMenuClose = useCallback(() => {
@@ -168,6 +193,9 @@ const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
     dispatch(toggleMenuPanelCollapsed());
   }, [dispatch]);
 
+  // Get hint ID for current menu
+  const currentMenuHintId = openMenu ? (menuHintMap[openMenu] as HintId | undefined) : undefined;
+
   // Handle menu click when collapsed - expand and open menu
   const handleCollapsedMenuClick = useCallback(
     (menuId: MenuKey) => {
@@ -231,6 +259,13 @@ const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
 
           {/* Menu content - scrollable */}
           <FlexColumn gap={8} align={'flex-start'} wrap='nowrap' className={`${className}__content`}>
+            {/* Menu header with title and help button */}
+            {openMenu && (
+              <FlexRow className={`${className}__menuHeader`} align='center' gap={8}>
+                <Text text={getMenuDisplayName(openMenu, t)} fontSize={theme.typography.fontSize.base} fontWeight='bold' color={theme.colors.text.primary} />
+                {currentMenuHintId && <HintButton hintId={currentMenuHintId} />}
+              </FlexRow>
+            )}
             {content && <content.Component {...menuProps} />}
           </FlexColumn>
 
@@ -360,6 +395,13 @@ export const HeatmapMenuContent = memo(
       min-height: 0;
       padding: 16px;
       overflow: hidden auto;
+    }
+
+    &__menuHeader {
+      width: 100%;
+      padding-bottom: ${({ theme }) => theme.spacing.sm};
+      margin-bottom: ${({ theme }) => theme.spacing.xs};
+      border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle};
     }
 
     &__toolbar {
