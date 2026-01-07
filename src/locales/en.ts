@@ -402,4 +402,15 @@ export const en = {
     eventDetail: 'Event Detail',
     aiSummary: 'AI Summary',
   },
+
+  // Accessibility
+  accessibility: {
+    skipToMainContent: 'Skip to main content',
+    mainNavigation: 'Main navigation',
+    siteHeader: 'Site header',
+    mainContent: 'Main content',
+    closeDialog: 'Close dialog',
+    loadingComplete: 'Loading complete',
+    errorOccurred: 'An error occurred',
+  },
 };

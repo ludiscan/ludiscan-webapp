@@ -406,6 +406,17 @@ export const ja = {
     eventDetail: 'イベント詳細',
     aiSummary: 'AI要約',
   },
+
+  // Accessibility
+  accessibility: {
+    skipToMainContent: 'メインコンテンツへスキップ',
+    mainNavigation: 'メインナビゲーション',
+    siteHeader: 'サイトヘッダー',
+    mainContent: 'メインコンテンツ',
+    closeDialog: 'ダイアログを閉じる',
+    loadingComplete: '読み込み完了',
+    errorOccurred: 'エラーが発生しました',
+  },
 };
 
 export type TranslationKeys = typeof ja;
