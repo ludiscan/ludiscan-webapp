@@ -9,6 +9,7 @@ import type { FC } from 'react';
 
 import { useGeneralPick } from '@src/hooks/useGeneral';
 import { usePlayerTimelinePick } from '@src/hooks/usePlayerTimeline';
+import { zIndexes } from '@src/styles/style';
 import { getIconPath } from '@src/utils/heatmapIconMap';
 import { compileHVQL, type ViewContext } from '@src/utils/vql';
 
@@ -45,7 +46,11 @@ const IconMarker: FC<{
   }, [texture]);
 
   return (
-    <Billboard position={position} follow>
+    <Billboard
+      position={position}
+      follow
+      renderOrder={zIndexes.renderOrder.fieldObjectMarkers}
+    >
       <Center>
         {}
         <sprite
@@ -54,7 +59,7 @@ const IconMarker: FC<{
           onPointerOut={() => (gl.domElement.style.cursor = 'auto')}
         >
           {/* eslint-disable-next-line react/no-unknown-property */}
-          <spriteMaterial map={texture} transparent />
+          <spriteMaterial map={texture} transparent depthTest={false} />
         </sprite>
       </Center>
     </Billboard>
@@ -75,7 +80,7 @@ const FieldObjectMarker: FC<{
   const markerScale = Math.max(scale * 30, 30);
 
   return (
-    <Billboard position={position} follow>
+    <Billboard position={position} follow renderOrder={zIndexes.renderOrder.fieldObjectMarkers}>
       <Center>
         <mesh
           geometry={geometry} /* eslint-disable-line react/no-unknown-property */
@@ -83,7 +88,8 @@ const FieldObjectMarker: FC<{
           onPointerOver={() => (gl.domElement.style.cursor = 'pointer')}
           onPointerOut={() => (gl.domElement.style.cursor = 'auto')}
         >
-          <meshBasicMaterial color={color} />
+          {/* eslint-disable-next-line react/no-unknown-property */}
+          <meshBasicMaterial color={color} depthTest={false} />
         </mesh>
       </Center>
     </Billboard>
