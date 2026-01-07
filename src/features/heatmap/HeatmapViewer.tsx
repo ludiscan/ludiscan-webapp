@@ -437,7 +437,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
           dpr={dpr}
           shadows // シャドウマップを有効化
           gl={{ alpha: true }} // 背景を透明にして後ろの画像が見えるようにする
-          role="application"
+          role='application'
           aria-label={canvasAriaLabel}
         >
           <PerformanceMonitor factor={1} onChange={handleOnPerformance} />

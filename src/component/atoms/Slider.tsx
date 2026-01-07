@@ -45,7 +45,19 @@ const calculateTooltipPosition = (inputElement: HTMLInputElement, value: number,
 };
 
 const SliderComponent: FC<SliderProps> = (args) => {
-  const { className, value, onChange, min = 0, max = 100, step = 1, disabled = false, sideLabel = false, textField, 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby } = args;
+  const {
+    className,
+    value,
+    onChange,
+    min = 0,
+    max = 100,
+    step = 1,
+    disabled = false,
+    sideLabel = false,
+    textField,
+    'aria-label': ariaLabel,
+    'aria-labelledby': ariaLabelledby,
+  } = args;
   const { theme } = useSharedTheme();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [sliderValue, setSliderValue] = useState<number>(value || min); // 初期値は min または value

@@ -186,7 +186,7 @@ const Component: FC<MenuProps> = (props) => {
       <LabeledButton
         {...props}
         onClick={handleClick}
-        aria-haspopup="menu"
+        aria-haspopup='menu'
         aria-expanded={isOpen}
         aria-controls={isOpen ? menuId : undefined}
         aria-label={props['aria-label'] ?? t('accessibility.openMenu')}
@@ -249,9 +249,9 @@ const ContentRowComponent: FC<EllipsisMenuContentProps> = (props) => {
         border={border}
         padding={padding}
         stopPropagate={stopPropagate}
-        role="menu"
+        role='menu'
         id={menuId}
-        aria-orientation="horizontal"
+        aria-orientation='horizontal'
       >
         <FlexRow ref={containerRef} align={'center'} gap={gap} wrap={'nowrap'}>
           {childrenWithProps}
@@ -301,9 +301,9 @@ const ContentColumnComponent: FC<EllipsisMenuContentProps> = (props) => {
         border={border}
         padding={padding}
         stopPropagate={stopPropagate}
-        role="menu"
+        role='menu'
         id={menuId}
-        aria-orientation="vertical"
+        aria-orientation='vertical'
       >
         <FlexColumn ref={containerRef} align={'flex-start'} gap={gap} wrap={'nowrap'}>
           {childrenWithProps}
@@ -352,7 +352,7 @@ const ContentButton: FC<ContentButtonProps> = (props) => {
     <Button
       {...rest}
       onClick={handleClick}
-      role="menuitem"
+      role='menuitem'
       tabIndex={_rovingProps?.tabIndex ?? 0}
       onKeyDown={handleKeyDown}
       onFocus={_rovingProps?.onFocus}

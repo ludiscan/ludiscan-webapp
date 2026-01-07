@@ -65,18 +65,8 @@ export interface RovingItemProps {
  * );
  * ```
  */
-export function useRovingTabIndex<T extends HTMLElement>(
-  options: UseRovingTabIndexOptions = {}
-): UseRovingTabIndexReturn<T> {
-  const {
-    enabled = true,
-    loop = true,
-    orientation = 'vertical',
-    homeEndKeys = true,
-    initialIndex = 0,
-    onFocusChange,
-    onSelect,
-  } = options;
+export function useRovingTabIndex<T extends HTMLElement>(options: UseRovingTabIndexOptions = {}): UseRovingTabIndexReturn<T> {
+  const { enabled = true, loop = true, orientation = 'vertical', homeEndKeys = true, initialIndex = 0, onFocusChange, onSelect } = options;
 
   const containerRef = useRef<T>(null);
   const [focusedIndex, setFocusedIndexState] = useState(initialIndex);
@@ -114,7 +104,7 @@ export function useRovingTabIndex<T extends HTMLElement>(
         items[newIndex]?.focus();
       }
     },
-    [enabled, loop, onFocusChange, updateItemCount]
+    [enabled, loop, onFocusChange, updateItemCount],
   );
 
   // キーボードハンドラ
@@ -186,28 +176,29 @@ export function useRovingTabIndex<T extends HTMLElement>(
         event.stopPropagation();
       }
     },
-    [enabled, orientation, homeEndKeys, setFocusedIndex, onSelect, updateItemCount]
+    [enabled, orientation, homeEndKeys, setFocusedIndex, onSelect, updateItemCount],
   );
 
   // 各アイテムに適用するpropsを生成
   const getItemProps = useCallback(
-    (index: number): RovingItemProps => ({
-      tabIndex: focusedIndex === index ? 0 : -1,
-      'aria-selected': focusedIndex === index,
-      'data-roving-item': true,
-      onKeyDown: (event: React.KeyboardEvent) => handleKeyDown(event, index),
-      onFocus: () => {
-        if (focusedIndex !== index) {
-          setFocusedIndexState(index);
-          onFocusChange?.(index);
-        }
-      },
-      onClick: () => {
-        setFocusedIndex(index);
-        onSelect?.(index);
-      },
-    } as RovingItemProps),
-    [focusedIndex, handleKeyDown, setFocusedIndex, onFocusChange, onSelect]
+    (index: number): RovingItemProps =>
+      ({
+        tabIndex: focusedIndex === index ? 0 : -1,
+        'aria-selected': focusedIndex === index,
+        'data-roving-item': true,
+        onKeyDown: (event: React.KeyboardEvent) => handleKeyDown(event, index),
+        onFocus: () => {
+          if (focusedIndex !== index) {
+            setFocusedIndexState(index);
+            onFocusChange?.(index);
+          }
+        },
+        onClick: () => {
+          setFocusedIndex(index);
+          onSelect?.(index);
+        },
+      }) as RovingItemProps,
+    [focusedIndex, handleKeyDown, setFocusedIndex, onFocusChange, onSelect],
   );
 
   // 初期化時にアイテム数を更新

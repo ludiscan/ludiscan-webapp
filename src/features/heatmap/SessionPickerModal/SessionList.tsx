@@ -125,7 +125,12 @@ const Component: FC<SessionListProps> = ({ className, sessions, selectedSessionI
   }
 
   return (
-    <ListContainer ref={containerRef} className={className} role='listbox' aria-activedescendant={focusedIndex >= 0 ? `session-item-${sessions[focusedIndex]?.sessionId}` : undefined}>
+    <ListContainer
+      ref={containerRef}
+      className={className}
+      role='listbox'
+      aria-activedescendant={focusedIndex >= 0 ? `session-item-${sessions[focusedIndex]?.sessionId}` : undefined}
+    >
       {sessions.map((session, index) => {
         const rovingProps = getItemProps(index);
         return (

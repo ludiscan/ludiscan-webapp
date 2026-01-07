@@ -17,8 +17,8 @@ const SwitchComponent: FC<SwitchProps> = ({ className, label, checked, size = 'm
     <label className={`${className} ${size}`} aria-label={label}>
       <input
         id={label ?? className}
-        type="checkbox"
-        role="switch"
+        type='checkbox'
+        role='switch'
         checked={checked}
         aria-checked={checked}
         onChange={(e) => onChange(e.target.checked)}
