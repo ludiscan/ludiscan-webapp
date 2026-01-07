@@ -25,6 +25,7 @@ import { SettingsButton } from '@src/features/heatmap/SettingsButton';
 import { TimelineControlWrapper } from '@src/features/heatmap/TimelineControlWrapper';
 import { ZoomControls } from '@src/features/heatmap/ZoomControls';
 import { exportHeatmap } from '@src/features/heatmap/export-heatmap';
+import { HintModal, useHintSystem } from '@src/features/heatmap/hints';
 import { FocusLinkBridge } from '@src/features/heatmap/selection/FocusLinkBridge';
 import { InspectorModal } from '@src/features/heatmap/selection/InspectorModal';
 import { useEventLogPatch, useEventLogSelect } from '@src/hooks/useEventLog';
@@ -67,6 +68,7 @@ export type HeatmapViewerProps = {
 
 const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false }) => {
   const toast = useToast();
+  const { currentHint, isHintOpen, closeHint } = useHintSystem();
   const [map, setMap] = useState<string | ArrayBuffer | null>(null);
   const [modelType, setModelType] = useState<'gltf' | 'glb' | 'obj' | 'server' | null>(null);
   const [serverModelFileType, setServerModelFileType] = useState<ModelFileType | null>(null);
@@ -514,6 +516,9 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
 
       {/* AIリンク/外部postMessage→focus */}
       <FocusLinkBridge />
+
+      {/* Hint modal for onboarding */}
+      <HintModal isOpen={isHintOpen} hint={currentHint} onClose={closeHint} />
     </div>
   );
 };
