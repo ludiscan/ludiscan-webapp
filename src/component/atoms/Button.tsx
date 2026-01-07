@@ -25,6 +25,10 @@ export type ButtonProps = {
   'aria-controls'?: string;
   'aria-disabled'?: boolean;
   role?: AriaRole;
+  tabIndex?: number;
+  onKeyDown?: React.KeyboardEventHandler<HTMLButtonElement>;
+  onFocus?: React.FocusEventHandler<HTMLButtonElement>;
+  'data-roving-item'?: boolean;
 };
 
 export const ButtonIconSize = (props: Pick<ButtonProps, 'fontSize'>) => {
@@ -72,6 +76,10 @@ const Component: FC<ButtonProps> = (props) => {
     'aria-controls': ariaControls,
     'aria-disabled': ariaDisabled,
     role,
+    tabIndex,
+    onKeyDown,
+    onFocus,
+    'data-roving-item': dataRovingItem,
   } = props;
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -98,6 +106,10 @@ const Component: FC<ButtonProps> = (props) => {
         aria-controls={ariaControls}
         aria-disabled={ariaDisabled}
         role={role}
+        tabIndex={tabIndex}
+        onKeyDown={onKeyDown}
+        onFocus={onFocus}
+        data-roving-item={dataRovingItem}
       >
         {children}
       </button>
