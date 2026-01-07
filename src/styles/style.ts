@@ -43,6 +43,8 @@ export const zIndexes = {
     heatmap: 100,
     timelinePoints: 101,
     timelineArrows: 102,
+    eventLogMarkers: 103,
+    fieldObjectMarkers: 104,
   },
 } as const;
 

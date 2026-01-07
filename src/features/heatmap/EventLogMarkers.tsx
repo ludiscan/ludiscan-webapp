@@ -15,6 +15,7 @@ import { useEventLogPick } from '@src/hooks/useEventLog';
 import { useGeneralPick } from '@src/hooks/useGeneral';
 import { usePlayerTimelinePick } from '@src/hooks/usePlayerTimeline';
 import { DefaultStaleTime } from '@src/modeles/qeury';
+import { zIndexes } from '@src/styles/style';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 import { getIconPath } from '@src/utils/heatmapIconMap';
 
@@ -65,6 +66,7 @@ const MarkerBillboard: FC<{
       onPointerOut={() => {
         gl.domElement.style.cursor = 'auto';
       }}
+      renderOrder={zIndexes.renderOrder.eventLogMarkers}
     >
       <Center>
         {geometries.map((geo, idx) => (
@@ -88,6 +90,7 @@ const MarkerBillboard: FC<{
                 color={color}
                 side={DoubleSide} /* eslint-disable-line react/no-unknown-property */
                 toneMapped={false} /* eslint-disable-line react/no-unknown-property */
+                depthTest={false} /* eslint-disable-line react/no-unknown-property */
               />
             </mesh>
           </group>

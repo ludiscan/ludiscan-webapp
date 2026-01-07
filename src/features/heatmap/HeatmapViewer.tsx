@@ -29,7 +29,7 @@ import { FocusLinkBridge } from '@src/features/heatmap/selection/FocusLinkBridge
 import { InspectorModal } from '@src/features/heatmap/selection/InspectorModal';
 import { useEventLogPatch, useEventLogSelect } from '@src/hooks/useEventLog';
 import { useFieldObjectPatch, useFieldObjectSelect } from '@src/hooks/useFieldObject';
-import { useGeneralPick } from '@src/hooks/useGeneral';
+import { useGeneralPatch, useGeneralPick } from '@src/hooks/useGeneral';
 import { useGetApi } from '@src/hooks/useGetApi';
 import { usePlayerTimelinePatch } from '@src/hooks/usePlayerTimeline';
 import { useFieldObjectTypes } from '@src/modeles/heatmapView';
@@ -321,6 +321,16 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
   }, [localModel, serverModelFileType]);
 
   const model = useModelFromArrayBuffer(activeBuffer, activeFileType);
+
+  // マップが正常にロードされた時、heatmapTypeをデフォルトで'fill'に設定
+  const setGeneral = useGeneralPatch();
+  const modelLoadedRef = useRef<boolean>(false);
+  useEffect(() => {
+    if (model && !modelLoadedRef.current) {
+      modelLoadedRef.current = true;
+      setGeneral({ heatmapType: 'fill' });
+    }
+  }, [model, setGeneral]);
 
   // ローカルモデル変更ハンドラ
   const handleLocalModelChange = useCallback((data: LocalModelData | null) => {
