@@ -189,7 +189,7 @@ export const en = {
       showHeatmap: 'Heatmap',
       opacity: 'Opacity',
       type: 'Type',
-      minThreshold: 'Min Density',
+      minThreshold: 'Display Threshold',
       colorScale: 'Color Scale',
       reload: 'Reload',
     },
@@ -339,13 +339,14 @@ export const en = {
   hints: {
     welcome: {
       title: 'Welcome to Heatmap Viewer',
+      selectLanguage: 'Select your language',
       description: 'This tool allows you to visualize gameplay data as heatmaps. Access various features from the menu on the left.',
       tips: ['Drag to rotate camera, scroll to zoom', 'Click menu icons on the left to access settings', 'Toggle between 2D/3D modes using the toolbar'],
     },
-    menuGeneral: {
-      title: 'General Settings',
+    menuHeatmap: {
+      title: 'Heatmap Settings',
       description: 'Adjust heatmap display settings.',
-      tips: ['Use opacity slider to adjust heatmap transparency', 'Change color range with color scale', 'Switch between 2D/3D modes'],
+      tips: ['Use display threshold to hide low-density cells', 'Use opacity slider to adjust heatmap transparency', 'Change color range with color scale'],
     },
     menuHotspot: {
       title: 'Hotspot',
@@ -363,7 +364,7 @@ export const en = {
       tips: ['Click generate to start AI analysis', 'Review improvement points per cluster', 'Suggested routes are displayed on the map'],
     },
     menuTimeline: {
-      title: 'Player Timeline',
+      title: 'Replay',
       description: 'Replay player movement trajectories over time.',
       tips: ['Select a session to add players', 'Press play to animate movements', 'Display multiple players to compare'],
     },
@@ -389,12 +390,12 @@ export const en = {
   // Menu names (display text)
   menus: {
     info: 'Info',
-    general: 'General',
+    general: 'Heatmap',
     map: 'Map',
     hotspot: 'Hotspot',
     eventlog: 'Event Log',
     fieldObject: 'Objects',
-    timeline: 'Timeline',
+    timeline: 'Replay',
     routecoach: 'Route Coach',
     aggregation: 'Aggregation',
     more: 'More',

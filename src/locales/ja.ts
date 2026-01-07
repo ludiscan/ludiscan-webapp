@@ -189,7 +189,7 @@ export const ja = {
       showHeatmap: 'ヒートマップを表示',
       opacity: '不透明度',
       type: 'タイプ',
-      minThreshold: '最低密度',
+      minThreshold: '表示しきい値',
       colorScale: 'カラースケール',
       reload: '再読み込み',
     },
@@ -339,6 +339,7 @@ export const ja = {
   hints: {
     welcome: {
       title: 'Heatmapビューワーへようこそ',
+      selectLanguage: '言語を選択してください',
       description: 'このツールでは、ゲームプレイデータをヒートマップとして可視化できます。左側のメニューから各機能にアクセスできます。',
       tips: [
         'マウスドラッグでカメラを回転、スクロールでズームできます',
@@ -346,10 +347,10 @@ export const ja = {
         'ツールバーで2D/3Dモードを切り替えられます',
       ],
     },
-    menuGeneral: {
-      title: '一般設定',
+    menuHeatmap: {
+      title: 'ヒートマップ設定',
       description: 'ヒートマップの表示設定を調整できます。',
-      tips: ['不透明度スライダーでヒートマップの透過度を調整', 'カラースケールで色の範囲を変更', '2D/3Dモードの切り替えが可能'],
+      tips: ['表示しきい値で低密度のセルを非表示にできます', '不透明度スライダーでヒートマップの透過度を調整', 'カラースケールで色の範囲を変更'],
     },
     menuHotspot: {
       title: 'ホットスポット',
@@ -367,7 +368,7 @@ export const ja = {
       tips: ['生成ボタンでAI分析を開始', 'クラスターごとに改善ポイントを確認', '提案されたルートはマップ上に表示されます'],
     },
     menuTimeline: {
-      title: 'プレイヤータイムライン',
+      title: 'リプレイ',
       description: 'プレイヤーの移動軌跡を時系列で再生できます。',
       tips: ['セッションを選択してプレイヤーを追加', '再生ボタンで移動をアニメーション表示', '複数プレイヤーを同時に表示して比較'],
     },
@@ -393,12 +394,12 @@ export const ja = {
   // Menu names (display text)
   menus: {
     info: '情報',
-    general: '一般',
+    general: 'ヒートマップ',
     map: 'マップ',
     hotspot: 'ホットスポット',
     eventlog: 'イベントログ',
     fieldObject: 'オブジェクト',
-    timeline: 'タイムライン',
+    timeline: 'リプレイ',
     routecoach: 'ルートコーチ',
     aggregation: '集計',
     more: 'その他',

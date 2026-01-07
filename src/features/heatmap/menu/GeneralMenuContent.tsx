@@ -9,6 +9,7 @@ import type { GeneralSettings } from '@src/modeles/heatmapView';
 import type { ChangeEvent, FC } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
+import { Card } from '@src/component/atoms/Card';
 import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { Slider } from '@src/component/atoms/Slider';
 import { Switch } from '@src/component/atoms/Switch';
@@ -246,17 +247,19 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
         </InputRow>
 
         {/* Min Density - よく使う */}
-        <InputRow label={t('heatmap.general.minThreshold')}>
-          <Slider
-            value={minThreshold}
-            onChange={(minThreshold) => setData({ minThreshold })}
-            min={0}
-            step={0.01}
-            max={1.0}
-            textField
-            aria-label={t('heatmap.general.minThreshold')}
-          />
-        </InputRow>
+        <Card>
+          <InputRow label={t('heatmap.general.minThreshold')}>
+            <Slider
+              value={minThreshold}
+              onChange={(minThreshold) => setData({ minThreshold })}
+              min={0}
+              step={0.01}
+              max={1.0}
+              textField
+              aria-label={t('heatmap.general.minThreshold')}
+            />
+          </InputRow>
+        </Card>
 
         {/* Opacity */}
         <InputRow label={t('heatmap.general.opacity')}>

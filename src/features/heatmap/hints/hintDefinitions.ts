@@ -4,7 +4,7 @@ import type { HintDefinition, HintId } from './types';
  * Map of menu IDs to hint IDs
  */
 export const menuHintMap: Record<string, HintId> = {
-  general: 'menu-general',
+  general: 'menu-heatmap',
   hotspot: 'menu-hotspot',
   eventlog: 'menu-eventlog',
   routecoach: 'menu-routecoach',
@@ -24,13 +24,16 @@ export const hintDefinitions: HintDefinition[] = [
     titleKey: 'hints.welcome.title',
     descriptionKey: 'hints.welcome.description',
     tipsKey: 'hints.welcome.tips',
+    order: 0,
   },
   {
-    id: 'menu-general',
+    id: 'menu-heatmap',
     trigger: { type: 'menu-open', menuId: 'general' },
-    titleKey: 'hints.menuGeneral.title',
-    descriptionKey: 'hints.menuGeneral.description',
-    tipsKey: 'hints.menuGeneral.tips',
+    titleKey: 'hints.menuHeatmap.title',
+    descriptionKey: 'hints.menuHeatmap.description',
+    tipsKey: 'hints.menuHeatmap.tips',
+    imagePath: '/heatmap/heatmap-menu-hint.gif',
+    order: 10,
   },
   {
     id: 'menu-hotspot',
@@ -38,6 +41,7 @@ export const hintDefinitions: HintDefinition[] = [
     titleKey: 'hints.menuHotspot.title',
     descriptionKey: 'hints.menuHotspot.description',
     tipsKey: 'hints.menuHotspot.tips',
+    order: 10,
   },
   {
     id: 'menu-eventlog',
@@ -45,6 +49,7 @@ export const hintDefinitions: HintDefinition[] = [
     titleKey: 'hints.menuEventlog.title',
     descriptionKey: 'hints.menuEventlog.description',
     tipsKey: 'hints.menuEventlog.tips',
+    order: 10,
   },
   {
     id: 'menu-routecoach',
@@ -52,6 +57,7 @@ export const hintDefinitions: HintDefinition[] = [
     titleKey: 'hints.menuRoutecoach.title',
     descriptionKey: 'hints.menuRoutecoach.description',
     tipsKey: 'hints.menuRoutecoach.tips',
+    order: 10,
   },
   {
     id: 'menu-timeline',
@@ -59,6 +65,7 @@ export const hintDefinitions: HintDefinition[] = [
     titleKey: 'hints.menuTimeline.title',
     descriptionKey: 'hints.menuTimeline.description',
     tipsKey: 'hints.menuTimeline.tips',
+    order: 10,
   },
   {
     id: 'menu-map',
@@ -66,6 +73,7 @@ export const hintDefinitions: HintDefinition[] = [
     titleKey: 'hints.menuMap.title',
     descriptionKey: 'hints.menuMap.description',
     tipsKey: 'hints.menuMap.tips',
+    order: 10,
   },
   {
     id: 'menu-fieldObject',
@@ -73,6 +81,7 @@ export const hintDefinitions: HintDefinition[] = [
     titleKey: 'hints.menuFieldObject.title',
     descriptionKey: 'hints.menuFieldObject.description',
     tipsKey: 'hints.menuFieldObject.tips',
+    order: 10,
   },
   {
     id: 'menu-aggregation',
@@ -80,6 +89,7 @@ export const hintDefinitions: HintDefinition[] = [
     titleKey: 'hints.menuAggregation.title',
     descriptionKey: 'hints.menuAggregation.description',
     tipsKey: 'hints.menuAggregation.tips',
+    order: 10,
   },
 ];
 

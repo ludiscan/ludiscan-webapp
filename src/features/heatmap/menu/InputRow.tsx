@@ -75,9 +75,9 @@ export const InputRow = styled(
       <InlineFlexRow className={className} align={align} wrap={'nowrap'} gap={4}>
         <TruncatableLabel
           label={label}
-          fontSize={theme.typography.fontSize.sm}
+          fontSize={theme.typography.fontSize.xs}
           fontWeight={theme.typography.fontWeight.medium}
-          color={theme.colors.tertiary.main}
+          color={theme.colors.text.primary}
           width='90px'
           maxLines={1}
         />

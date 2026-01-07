@@ -7,7 +7,7 @@
  */
 export type HintId =
   | 'heatmap-welcome'
-  | 'menu-general'
+  | 'menu-heatmap'
   | 'menu-hotspot'
   | 'menu-eventlog'
   | 'menu-routecoach'
@@ -33,6 +33,10 @@ export type HintDefinition = {
   descriptionKey: string;
   /** Optional i18n key for tips (array) */
   tipsKey?: string;
+  /** Optional image path (from public folder) */
+  imagePath?: string;
+  /** Display order (lower = higher priority, default: 100) */
+  order?: number;
 };
 
 /**

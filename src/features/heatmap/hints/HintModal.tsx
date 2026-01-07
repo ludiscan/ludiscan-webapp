@@ -8,6 +8,7 @@ import type { FC } from 'react';
 import { Button } from '@src/component/atoms/Button';
 import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
+import { LanguageSelector } from '@src/component/molecules/LanguageSelector';
 import { Modal } from '@src/component/molecules/Modal';
 import { useLocale } from '@src/hooks/useLocale';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
@@ -51,20 +52,30 @@ const Component: FC<HintModalProps> = ({ className, isOpen, hint, onClose }) => 
     [locale],
   );
 
-  const { title, description, tips } = useMemo(() => {
-    if (!hint) return { title: undefined, description: undefined, tips: undefined };
+  const isWelcomeHint = hint?.id === 'heatmap-welcome';
+
+  const { title, description, tips, selectLanguage } = useMemo(() => {
+    if (!hint) return { title: undefined, description: undefined, tips: undefined, selectLanguage: undefined };
     return {
       title: getNestedValue(hint.titleKey) as string | undefined,
       description: getNestedValue(hint.descriptionKey) as string | undefined,
       tips: hint.tipsKey ? (getNestedValue(hint.tipsKey) as string[] | undefined) : undefined,
+      selectLanguage: isWelcomeHint ? (getNestedValue('hints.welcome.selectLanguage') as string | undefined) : undefined,
     };
-  }, [hint, getNestedValue]);
+  }, [hint, getNestedValue, isWelcomeHint]);
 
   if (!hint) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} closeOutside={true} title={title}>
+    <Modal isOpen={isOpen} onClose={handleClose} closeOutside={false} title={title}>
       <FlexColumn className={className} gap={16}>
+        {isWelcomeHint && (
+          <FlexColumn className={`${className}__languageSection`} gap={8}>
+            <Text text={selectLanguage ?? ''} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
+            <LanguageSelector />
+          </FlexColumn>
+        )}
+
         <FlexRow className={`${className}__descriptionRow`} gap={12} align='flex-start'>
           <IoBulbOutline size={24} color={theme.colors.primary.main} />
           <Text text={description ?? ''} fontSize={theme.typography.fontSize.base} color={theme.colors.text.secondary} />
@@ -81,7 +92,14 @@ const Component: FC<HintModalProps> = ({ className, isOpen, hint, onClose }) => 
           </FlexColumn>
         )}
 
-        <FlexRow className={`${className}__footer`} gap={16} align='center'>
+        {hint.imagePath && (
+          <div className={`${className}__imageContainer`}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={hint.imagePath} alt={hint.titleKey} className={`${className}__image`} />
+          </div>
+        )}
+
+        <FlexRow className={`${className}__footer`} gap={16} align='space-between'>
           <label className={`${className}__checkboxLabel`}>
             <input type='checkbox' checked={dontShowAgain} onChange={handleCheckboxChange} className={`${className}__checkbox`} />
             <Text text={t('hints.dontShowAgain')} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.tertiary} />
@@ -99,11 +117,18 @@ const Component: FC<HintModalProps> = ({ className, isOpen, hint, onClose }) => 
 export const HintModal = styled(Component)`
   width: 100%;
   min-width: 320px;
-  max-width: 480px;
+  max-width: 900px;
   padding-top: ${({ theme }) => theme.spacing.md};
+
+  &__languageSection {
+    padding: ${({ theme }) => theme.spacing.sm};
+    background-color: ${({ theme }) => theme.colors.surface.sunken};
+    border-radius: ${({ theme }) => theme.borders.radius.md};
+  }
 
   &__descriptionRow {
     padding: ${({ theme }) => theme.spacing.sm};
+    margin: 0 auto;
     background-color: ${({ theme }) => theme.colors.surface.sunken};
     border-radius: ${({ theme }) => theme.borders.radius.md};
   }
@@ -111,6 +136,7 @@ export const HintModal = styled(Component)`
   &__tipsContainer {
     padding: ${({ theme }) => theme.spacing.sm};
     padding-left: ${({ theme }) => theme.spacing.lg};
+    margin: 0 auto;
   }
 
   &__tipRow {
@@ -121,10 +147,25 @@ export const HintModal = styled(Component)`
     flex-shrink: 0;
   }
 
+  &__imageContainer {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: ${({ theme }) => theme.borders.radius.md};
+  }
+
+  &__image {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
   &__footer {
-    display: flex;
     justify-content: space-between;
+    width: calc(100% - 48px);
     padding-top: ${({ theme }) => theme.spacing.md};
+    margin: 0 24px;
     border-top: 1px solid ${({ theme }) => theme.colors.border.default};
   }
 
