@@ -30,9 +30,9 @@ const Section = styled.section`
   border-block-end: 1px solid ${({ theme }) => theme.colors.border.subtle};
 
   &:last-of-type {
-    border-block-end: none;
-    margin-block-end: 0;
     padding-block-end: 0;
+    margin-block-end: 0;
+    border-block-end: none;
   }
 `;
 
@@ -106,29 +106,19 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
   const [isBackgroundOpen, setIsBackgroundOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const {
-    upZ,
-    scale,
-    heatmapOpacity,
-    heatmapType,
-    showHeatmap,
-    minThreshold,
-    backgroundImage,
-    backgroundScale,
-    backgroundOffsetX,
-    backgroundOffsetY,
-  } = useGeneralPick(
-    'upZ',
-    'scale',
-    'showHeatmap',
-    'heatmapOpacity',
-    'heatmapType',
-    'minThreshold',
-    'backgroundImage',
-    'backgroundScale',
-    'backgroundOffsetX',
-    'backgroundOffsetY',
-  );
+  const { upZ, scale, heatmapOpacity, heatmapType, showHeatmap, minThreshold, backgroundImage, backgroundScale, backgroundOffsetX, backgroundOffsetY } =
+    useGeneralPick(
+      'upZ',
+      'scale',
+      'showHeatmap',
+      'heatmapOpacity',
+      'heatmapType',
+      'minThreshold',
+      'backgroundImage',
+      'backgroundScale',
+      'backgroundOffsetX',
+      'backgroundOffsetY',
+    );
   const setData = useGeneralPatch();
 
   // Calculate the center position of all heatmap cells
@@ -214,12 +204,12 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
   return (
     <>
       {/* ===== Heatmap Settings - Primary Controls (常時表示) ===== */}
-      <Section role="group" aria-label={t('heatmap.general.heatmap')}>
+      <Section role='group' aria-label={t('heatmap.general.heatmap')}>
         <SectionTitle>{t('heatmap.general.heatmap')}</SectionTitle>
 
         {/* Heatmap選択 */}
         <InputRow label={t('heatmap.general.select')}>
-          <FlexRow gap={8} align="center" style={{ flex: 1 }}>
+          <FlexRow gap={8} align='center' style={{ flex: 1 }}>
             <Text
               text={currentTaskId ? `Task #${currentTaskId}` : t('heatmap.general.notSelected')}
               fontSize={theme.typography.fontSize.sm}
@@ -284,7 +274,7 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
       </Section>
 
       {/* ===== View Controls ===== */}
-      <Section role="group" aria-label={t('heatmap.general.view')}>
+      <Section role='group' aria-label={t('heatmap.general.view')}>
         <SectionTitle>{t('heatmap.general.view')}</SectionTitle>
 
         <InputRow label={t('heatmap.general.resetToInitial')}>
@@ -296,25 +286,13 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
 
       {/* ===== Advanced Display Settings (折りたたみ) ===== */}
       <CollapsibleSection>
-        <CollapsibleHeader
-          onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
-          aria-expanded={isAdvancedOpen}
-          aria-controls="advanced-display-content"
-        >
+        <CollapsibleHeader onClick={() => setIsAdvancedOpen(!isAdvancedOpen)} aria-expanded={isAdvancedOpen} aria-controls='advanced-display-content'>
           <span>{t('heatmap.general.displayOptions')}</span>
           {isAdvancedOpen ? <IoChevronUp size={16} /> : <IoChevronDown size={16} />}
         </CollapsibleHeader>
-        <CollapsibleContent isOpen={isAdvancedOpen} id="advanced-display-content">
+        <CollapsibleContent isOpen={isAdvancedOpen} id='advanced-display-content'>
           <InputRow label={t('heatmap.general.scale')}>
-            <Slider
-              value={scale}
-              onChange={(scale) => setData({ scale })}
-              min={0.1}
-              step={0.05}
-              max={1.0}
-              textField
-              aria-label={t('heatmap.general.scale')}
-            />
+            <Slider value={scale} onChange={(scale) => setData({ scale })} min={0.1} step={0.05} max={1.0} textField aria-label={t('heatmap.general.scale')} />
           </InputRow>
           <InputRow label={t('heatmap.general.upVector')}>
             <Selector
@@ -333,12 +311,12 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
         <CollapsibleHeader
           onClick={() => setIsSessionFilterOpen(!isSessionFilterOpen)}
           aria-expanded={isSessionFilterOpen}
-          aria-controls="session-filter-content"
+          aria-controls='session-filter-content'
         >
           <span>{t('heatmap.general.sessionFilter')}</span>
           {isSessionFilterOpen ? <IoChevronUp size={16} /> : <IoChevronDown size={16} />}
         </CollapsibleHeader>
-        <CollapsibleContent isOpen={isSessionFilterOpen} id="session-filter-content">
+        <CollapsibleContent isOpen={isSessionFilterOpen} id='session-filter-content'>
           <InputRow label={t('heatmap.general.sessionFilter')}>
             <FlexColumn gap={8} style={{ flex: 1 }}>
               <Button onClick={() => setIsSessionFilterModalOpen(true)} scheme={'surface'} fontSize={'sm'}>
@@ -356,10 +334,7 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
                     <Button onClick={handleFilterBySession} scheme={'primary'} fontSize={'sm'}>
                       <FlexRow align={'center'} gap={4}>
                         <FiFilter size={18} />
-                        <Text
-                          text={t('heatmap.general.filterBySession').replace('{id}', String(targetSessionId))}
-                          fontSize={theme.typography.fontSize.sm}
-                        />
+                        <Text text={t('heatmap.general.filterBySession').replace('{id}', String(targetSessionId))} fontSize={theme.typography.fontSize.sm} />
                       </FlexRow>
                     </Button>
                   )}
@@ -379,23 +354,16 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
 
       {/* ===== Background Image (折りたたみ) ===== */}
       <CollapsibleSection>
-        <CollapsibleHeader
-          onClick={() => setIsBackgroundOpen(!isBackgroundOpen)}
-          aria-expanded={isBackgroundOpen}
-          aria-controls="background-content"
-        >
+        <CollapsibleHeader onClick={() => setIsBackgroundOpen(!isBackgroundOpen)} aria-expanded={isBackgroundOpen} aria-controls='background-content'>
           <span>{t('heatmap.general.backgroundImage')}</span>
           {isBackgroundOpen ? <IoChevronUp size={16} /> : <IoChevronDown size={16} />}
         </CollapsibleHeader>
-        <CollapsibleContent isOpen={isBackgroundOpen} id="background-content">
+        <CollapsibleContent isOpen={isBackgroundOpen} id='background-content'>
           <InputRow label={t('heatmap.general.select')}>
-            <FlexRow gap={8} align="center" style={{ flex: 1 }}>
+            <FlexRow gap={8} align='center' style={{ flex: 1 }}>
               {backgroundImage && <BackgroundPreview backgroundUrl={backgroundImage} />}
               <Button onClick={() => fileInputRef.current?.click()} scheme={'surface'} fontSize={'sm'}>
-                <Text
-                  text={backgroundImage ? t('heatmap.general.change') : t('heatmap.general.select')}
-                  fontSize={theme.typography.fontSize.sm}
-                />
+                <Text text={backgroundImage ? t('heatmap.general.change') : t('heatmap.general.select')} fontSize={theme.typography.fontSize.sm} />
               </Button>
               {backgroundImage && (
                 <Button onClick={handleClearBackground} scheme={'tertiary'} fontSize={'sm'}>
@@ -403,7 +371,7 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
                 </Button>
               )}
             </FlexRow>
-            <HiddenFileInput ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} />
+            <HiddenFileInput ref={fileInputRef} type='file' accept='image/*' onChange={handleFileSelect} />
           </InputRow>
 
           {/* 背景画像の調整（画像が選択されている場合のみ表示） */}

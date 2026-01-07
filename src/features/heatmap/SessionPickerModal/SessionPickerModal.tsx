@@ -227,8 +227,7 @@ const ListWrapper = styled.div`
 const DetailWrapper = styled.div`
   flex: 1;
   min-height: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden auto;
 `;
 
 const Footer = styled.div`

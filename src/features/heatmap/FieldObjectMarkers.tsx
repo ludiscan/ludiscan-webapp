@@ -46,11 +46,7 @@ const IconMarker: FC<{
   }, [texture]);
 
   return (
-    <Billboard
-      position={position}
-      follow
-      renderOrder={zIndexes.renderOrder.fieldObjectMarkers}
-    >
+    <Billboard position={position} follow renderOrder={zIndexes.renderOrder.fieldObjectMarkers}>
       <Center>
         {}
         <sprite
