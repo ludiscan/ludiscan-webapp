@@ -149,6 +149,9 @@ const Component: FC<MenuProps> = (props) => {
   }, []);
 
   useEffect(() => {
+    // Only add listeners when menu is open
+    if (!isOpen) return;
+
     // 画面外タップで閉じる
     const handleClickOutside = () => {
       closeMenu();
@@ -164,7 +167,7 @@ const Component: FC<MenuProps> = (props) => {
       document.removeEventListener('click', handleClickOutside);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [closeMenu]);
+  }, [isOpen, closeMenu]);
 
   const handleClick = useCallback(
     (event: MouseEvent<HTMLButtonElement>) => {
