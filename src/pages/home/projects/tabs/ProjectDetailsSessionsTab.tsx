@@ -88,7 +88,8 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
     return membership?.role ?? null;
   }, [user, members]);
 
-  const isAdmin = currentUserRole === 'admin';
+  // Check if user is admin (member with admin role OR project owner)
+  const isAdmin = currentUserRole === 'admin' || project.user?.id === user?.id;
 
   // Use the new filters and aggregation hook
   const {
