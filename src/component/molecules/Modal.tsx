@@ -75,7 +75,7 @@ const Component = ({ className, isOpen, onClose, children, title, closeOutside, 
       onRequestClose={onClose}
       shouldCloseOnOverlayClick={closeOutside}
       // Accessibility props (ReactModal already handles focus trap)
-      shouldFocusAfterRender={true}
+      shouldFocusAfterRender={false}
       shouldReturnFocusAfterClose={true}
       shouldCloseOnEsc={true}
       aria={{

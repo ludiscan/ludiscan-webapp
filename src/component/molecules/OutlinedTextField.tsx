@@ -17,9 +17,22 @@ type TextFieldOutlinedProps = {
   backgroundColor?: string;
   maxLength?: number;
   disabled?: boolean;
+  onFocus?: () => void;
+  onBlur?: () => void;
 };
 
-const BaseTextFieldOutlined: FC<TextFieldOutlinedProps> = ({ className, value, onChange, placeholder, type = 'text', label, maxLength = 200, disabled }) => {
+const BaseTextFieldOutlined: FC<TextFieldOutlinedProps> = ({
+  className,
+  value,
+  onChange,
+  placeholder,
+  type = 'text',
+  label,
+  maxLength = 200,
+  disabled,
+  onFocus,
+  onBlur,
+}) => {
   return (
     <div className={className}>
       <fieldset className={`${className}__fieldset`}>
@@ -34,6 +47,8 @@ const BaseTextFieldOutlined: FC<TextFieldOutlinedProps> = ({ className, value, o
           type={type}
           maxLength={maxLength}
           disabled={disabled}
+          onFocus={onFocus}
+          onBlur={onBlur}
         />
       </fieldset>
     </div>

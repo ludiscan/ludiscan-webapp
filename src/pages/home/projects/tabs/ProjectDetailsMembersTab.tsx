@@ -677,7 +677,7 @@ export const ProjectDetailsMembersTab = styled(Component)`
     &.active {
       color: ${({ theme }) => theme.colors.primary.main};
       background: ${({ theme }) => theme.colors.primary.main}0d;
-      border-color: ${({ theme }) => theme.colors.primary.main}4d;
+      border-color: ${({ theme }) => theme.colors.border.focus}4d;
     }
   }
 
