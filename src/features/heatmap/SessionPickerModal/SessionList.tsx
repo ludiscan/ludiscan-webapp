@@ -1,12 +1,13 @@
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
-import { memo } from 'react';
+import { memo, useCallback } from 'react';
 
 import type { Session } from '@src/modeles/session';
 import type { FC } from 'react';
 
 import { Observer } from '@src/component/atoms/Observer';
 import { SessionListItem } from '@src/features/heatmap/SessionPickerModal/SessionListItem';
+import { useRovingTabIndex } from '@src/hooks/useRovingTabIndex';
 
 export type SessionListProps = {
   className?: string;
@@ -96,6 +97,23 @@ const LoadingDot = styled.span`
 `;
 
 const Component: FC<SessionListProps> = ({ className, sessions, selectedSessionId, onSelectSession, onLoadMore, isFetchingMore = false, hasMore = false }) => {
+  const handleSelect = useCallback(
+    (index: number) => {
+      const session = sessions[index];
+      if (session) {
+        onSelectSession(session);
+      }
+    },
+    [sessions, onSelectSession],
+  );
+
+  const { containerRef, getItemProps, focusedIndex } = useRovingTabIndex<HTMLDivElement>({
+    enabled: sessions.length > 0,
+    orientation: 'vertical',
+    loop: true,
+    onSelect: handleSelect,
+  });
+
   if (sessions.length === 0) {
     return (
       <ListContainer className={className}>
@@ -107,15 +125,28 @@ const Component: FC<SessionListProps> = ({ className, sessions, selectedSessionI
   }
 
   return (
-    <ListContainer className={className} role='listbox'>
-      {sessions.map((session) => (
-        <SessionListItem
-          key={session.sessionId}
-          session={session}
-          isSelected={session.sessionId === selectedSessionId}
-          onClick={() => onSelectSession(session)}
-        />
-      ))}
+    <ListContainer
+      ref={containerRef}
+      className={className}
+      role='listbox'
+      aria-activedescendant={focusedIndex >= 0 ? `session-item-${sessions[focusedIndex]?.sessionId}` : undefined}
+    >
+      {sessions.map((session, index) => {
+        const rovingProps = getItemProps(index);
+        return (
+          <SessionListItem
+            key={session.sessionId}
+            id={`session-item-${session.sessionId}`}
+            session={session}
+            isSelected={session.sessionId === selectedSessionId}
+            onClick={() => onSelectSession(session)}
+            tabIndex={rovingProps.tabIndex}
+            onKeyDown={rovingProps.onKeyDown}
+            onFocus={rovingProps.onFocus}
+            data-roving-item
+          />
+        );
+      })}
       {hasMore && onLoadMore && !isFetchingMore && <Observer callback={onLoadMore} />}
       {isFetchingMore && (
         <LoadingIndicator>

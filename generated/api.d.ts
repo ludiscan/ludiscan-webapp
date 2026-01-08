@@ -1211,6 +1211,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v0/heatmap/projects/{project_id}/play_session/{session_id}/embed-url': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * ヒートマップ埋め込みページのURLを取得（JWT認証）
+     * @description セッション完了後にWebViewで直接ヒートマップを表示するための短縮URL（4時間有効）を生成します。通常のJWT tokenで実行可能です。
+     */
+    post: operations['HeatmapController_createSessionEmbedUrl'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v0.1/heatmap/projects/{project_id}/play_session/{session_id}/tasks': {
     parameters: {
       query?: never;
@@ -1306,6 +1326,26 @@ export interface paths {
      *     Does not include result data for better performance.
      */
     get: operations['HeatmapV01Controller_getProjectTasksList'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/h/{code}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 共有リンクからheatmapページにリダイレクト
+     * @description 短縮コードを検証し、有効であればwebappのheatmapページにリダイレクトします
+     */
+    get: operations['ShareLinksController_redirect'];
     put?: never;
     post?: never;
     delete?: never;
@@ -1580,29 +1620,9 @@ export interface paths {
     };
     /**
      * ヒートマップ埋め込みページのURLを取得
-     * @description セッション完了後にWebViewで直接ヒートマップを表示するための短縮URL（24時間有効）を生成します
+     * @description セッション完了後にWebViewで直接ヒートマップを表示するための短縮URL（4時間有効）を生成します
      */
     get: operations['GameController_getHeatmapEmbedUrl'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v0/h/{code}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * 共有リンクからheatmapページにリダイレクト
-     * @description 短縮コードを検証し、有効であればwebappのheatmapページにリダイレクトします
-     */
-    get: operations['ShareLinksController_redirect'];
     put?: never;
     post?: never;
     delete?: never;
@@ -2765,6 +2785,18 @@ export interface components {
        */
       offset: number;
     };
+    HeatmapEmbedUrlResponseDto: {
+      /**
+       * @description ヒートマップ埋め込みページのURL（トークン付き）
+       * @example https://ludiscan.com/heatmap/embed/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+       */
+      url: string;
+      /**
+       * @description トークンの有効期限（ISO 8601形式）
+       * @example 2024-01-01T12:00:00.000Z
+       */
+      expiresAt: string;
+    };
     NormalizedHeatmapPointDto: {
       /**
        * @description X coordinate
@@ -3056,18 +3088,6 @@ export interface components {
        *     ]
        */
       projectIds: number[];
-    };
-    HeatmapEmbedUrlResponseDto: {
-      /**
-       * @description ヒートマップ埋め込みページのURL（トークン付き）
-       * @example https://ludiscan.com/heatmap/embed/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-       */
-      url: string;
-      /**
-       * @description トークンの有効期限（ISO 8601形式）
-       * @example 2024-01-01T12:00:00.000Z
-       */
-      expiresAt: string;
     };
     EventRawCoordinateDto: {
       /** @description X coordinate */
@@ -6251,6 +6271,40 @@ export interface operations {
       };
     };
   };
+  HeatmapController_createSessionEmbedUrl: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Project ID */
+        project_id: number;
+        /** @description Session ID */
+        session_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HeatmapEmbedUrlResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
   HeatmapV01Controller_createSessionTask: {
     parameters: {
       query?: never;
@@ -6386,6 +6440,41 @@ export interface operations {
         content: {
           'application/json': components['schemas']['DefaultErrorResponse'];
         };
+      };
+    };
+  };
+  ShareLinksController_redirect: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description 共有リンクコード（4文字-4文字） */
+        code: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description heatmapページにリダイレクト */
+      302: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description リンクが無効化されている、期限切れ、または使用回数超過 */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description リンクが見つからない */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
@@ -7169,41 +7258,6 @@ export interface operations {
         content: {
           'application/json': components['schemas']['DefaultErrorResponse'];
         };
-      };
-    };
-  };
-  ShareLinksController_redirect: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        /** @description 共有リンクコード（4文字-4文字） */
-        code: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description heatmapページにリダイレクト */
-      302: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description リンクが無効化されている、期限切れ、または使用回数超過 */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description リンクが見つからない */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
       };
     };
   };

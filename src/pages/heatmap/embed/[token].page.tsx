@@ -14,7 +14,6 @@ import { useGeneralPatch } from '@src/hooks/useGeneral';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { ApiClientProvider } from '@src/modeles/ApiClientContext';
 import { createEmbedClient } from '@src/modeles/qeury';
-import { heatMapEventBus } from '@src/utils/canvasEventBus';
 import { useEmbedHeatmapDataService } from '@src/utils/heatmap/EmbedHeatmapDataService';
 
 // SSR disabled to avoid hydration mismatch with Three.js and react-icons
@@ -176,16 +175,7 @@ const EmbedHeatmapPageContent: FC<EmbedHeatmapPageProps> = ({ className, token, 
     }
   }, [initialMapName, setGeneral]);
 
-  // Embed mode: open timeline menu by default
-  // Note: visibility is automatically enabled in PlayerTimeline component when isEmbed=true
-  useEffect(() => {
-    // Open timeline menu after a short delay to ensure HeatMapViewer is mounted
-    const timer = setTimeout(() => {
-      heatMapEventBus.emit('click-menu-icon', { name: 'timeline' });
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, []);
+  // Note: timeline menu is now opened by default in HeatmapMenuContent when isEmbed=true
 
   const service = useEmbedHeatmapDataService(verifyResult.projectId || undefined, verifyResult.sessionId || undefined, token);
 

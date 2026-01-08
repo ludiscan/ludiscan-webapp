@@ -9,6 +9,7 @@ import type { FC } from 'react';
 import { Button } from '@src/component/atoms/Button';
 import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
+import { useLocale } from '@src/hooks/useLocale';
 import { useSessionFiltersAndAggregate } from '@src/hooks/useSessionFilters';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 
@@ -25,6 +26,7 @@ type AggregationMenuContentComponentProps = HeatmapMenuProps & {
 
 const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> = ({ className, service }) => {
   const { theme } = useSharedTheme();
+  const { t } = useLocale();
   const [selectedField, setSelectedField] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
@@ -77,9 +79,9 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
       <div className={className}>
         <FlexRow gap={8} align='center'>
           <BiBarChartAlt2 size={20} />
-          <Text text='集計' fontSize={theme.typography.fontSize.lg} fontWeight='bold' />
+          <Text text={t('heatmap.aggregation.title')} fontSize={theme.typography.fontSize.lg} fontWeight='bold' />
         </FlexRow>
-        <Text text='プロジェクトが選択されていません' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
+        <Text text={t('heatmap.timeline.selectProjectAndSession')} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
       </div>
     );
   }
@@ -89,7 +91,7 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
       {/* Header */}
       <FlexRow gap={8} align='center' className={`${className}__header`}>
         <BiBarChartAlt2 size={20} />
-        <Text text='集計' fontSize={theme.typography.fontSize.lg} fontWeight='bold' />
+        <Text text={t('heatmap.aggregation.title')} fontSize={theme.typography.fontSize.lg} fontWeight='bold' />
       </FlexRow>
 
       <FlexColumn gap={16} className={`${className}__content`}>
@@ -98,7 +100,7 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
           <button type='button' className={`${className}__filterToggle`} onClick={() => setShowFilters(!showFilters)}>
             <FlexRow gap={8} align='center'>
               <BiFilter size={18} />
-              <Text text='フィルター' fontSize={theme.typography.fontSize.sm} fontWeight='bold' />
+              <Text text={t('heatmap.aggregation.filter')} fontSize={theme.typography.fontSize.sm} fontWeight='bold' />
               {activeFilterCount > 0 && <span className={`${className}__badge`}>{activeFilterCount}</span>}
             </FlexRow>
             {showFilters ? <BiChevronUp size={18} /> : <BiChevronDown size={18} />}
@@ -110,7 +112,7 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
                 <FlexRow>
                   <Button onClick={clearFilters} scheme='surface' fontSize='sm'>
                     <BiX size={14} />
-                    フィルターをクリア
+                    {t('heatmap.aggregation.clearFilter')}
                   </Button>
                 </FlexRow>
               )}
@@ -119,14 +121,14 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
               <div className={`${className}__filterGrid`}>
                 {/* Platform */}
                 <div className={`${className}__filterItem`}>
-                  <label htmlFor='agg-filter-platform'>プラットフォーム</label>
+                  <label htmlFor='agg-filter-platform'>{t('heatmap.aggregation.platform')}</label>
                   <select
                     id='agg-filter-platform'
                     value={filters.platform ?? ''}
                     onChange={(e) => handleUpdateFilter('platform', e.target.value || undefined)}
                     disabled={isLoadingFilterOptions}
                   >
-                    <option value=''>すべて</option>
+                    <option value=''>{t('heatmap.aggregation.all')}</option>
                     {filterOptions?.platforms.map((p) => (
                       <option key={p} value={p}>
                         {p}
@@ -137,14 +139,14 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
 
                 {/* App Version */}
                 <div className={`${className}__filterItem`}>
-                  <label htmlFor='agg-filter-app-version'>アプリバージョン</label>
+                  <label htmlFor='agg-filter-app-version'>{t('heatmap.aggregation.appVersion')}</label>
                   <select
                     id='agg-filter-app-version'
                     value={filters.appVersion ?? ''}
                     onChange={(e) => handleUpdateFilter('appVersion', e.target.value || undefined)}
                     disabled={isLoadingFilterOptions}
                   >
-                    <option value=''>すべて</option>
+                    <option value=''>{t('heatmap.aggregation.all')}</option>
                     {filterOptions?.appVersions.map((v) => (
                       <option key={v} value={v}>
                         {v}
@@ -155,7 +157,7 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
 
                 {/* Playing Status */}
                 <div className={`${className}__filterItem`}>
-                  <label htmlFor='agg-filter-status'>ステータス</label>
+                  <label htmlFor='agg-filter-status'>{t('heatmap.aggregation.status')}</label>
                   <select
                     id='agg-filter-status'
                     value={filters.isPlaying === undefined ? '' : filters.isPlaying ? 'playing' : 'finished'}
@@ -164,9 +166,9 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
                       handleUpdateFilter('isPlaying', value === '' ? undefined : value === 'playing');
                     }}
                   >
-                    <option value=''>すべて</option>
-                    <option value='playing'>プレイ中</option>
-                    <option value='finished'>終了</option>
+                    <option value=''>{t('heatmap.aggregation.all')}</option>
+                    <option value='playing'>{t('heatmap.aggregation.playing')}</option>
+                    <option value='finished'>{t('heatmap.aggregation.finished')}</option>
                   </select>
                 </div>
               </div>
@@ -174,7 +176,7 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
               {/* Advanced Filters Toggle */}
               <button type='button' className={`${className}__advancedToggle`} onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}>
                 <Text
-                  text={showAdvancedFilters ? '詳細フィルターを隠す' : '詳細フィルターを表示'}
+                  text={showAdvancedFilters ? t('heatmap.aggregation.hideAdvancedFilters') : t('heatmap.aggregation.showAdvancedFilters')}
                   fontSize={theme.typography.fontSize.sm}
                   color={theme.colors.primary.main}
                 />
@@ -186,7 +188,7 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
                   {/* Date Range */}
                   <div className={`${className}__filterGrid`}>
                     <div className={`${className}__filterItem`}>
-                      <label htmlFor='agg-filter-start-from'>開始日（From）</label>
+                      <label htmlFor='agg-filter-start-from'>{t('heatmap.aggregation.startDateFrom')}</label>
                       <input
                         id='agg-filter-start-from'
                         type='datetime-local'
@@ -195,7 +197,7 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
                       />
                     </div>
                     <div className={`${className}__filterItem`}>
-                      <label htmlFor='agg-filter-start-to'>開始日（To）</label>
+                      <label htmlFor='agg-filter-start-to'>{t('heatmap.aggregation.startDateTo')}</label>
                       <input
                         id='agg-filter-start-to'
                         type='datetime-local'
@@ -208,7 +210,7 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
                   {/* Metadata Filters */}
                   <div className={`${className}__filterGrid`}>
                     <div className={`${className}__filterItem`}>
-                      <label htmlFor='agg-filter-metadata-key'>メタデータキー</label>
+                      <label htmlFor='agg-filter-metadata-key'>{t('heatmap.aggregation.metadataKey')}</label>
                       <select
                         id='agg-filter-metadata-key'
                         value={filters.metadataKey ?? ''}
@@ -219,22 +221,22 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
                           }
                         }}
                       >
-                        <option value=''>選択してください</option>
+                        <option value=''>{t('heatmap.aggregation.selectPlaceholder')}</option>
                         {metadataKeys.map((k) => (
                           <option key={k.key} value={k.key}>
-                            {k.key} ({k.count}件)
+                            {k.key} ({k.count})
                           </option>
                         ))}
                       </select>
                     </div>
                     <div className={`${className}__filterItem`}>
-                      <label htmlFor='agg-filter-metadata-value'>メタデータ値</label>
+                      <label htmlFor='agg-filter-metadata-value'>{t('heatmap.aggregation.metadataValue')}</label>
                       <input
                         id='agg-filter-metadata-value'
                         type='text'
                         value={filters.metadataValue ?? ''}
                         onChange={(e) => handleUpdateFilter('metadataValue', e.target.value || undefined)}
-                        placeholder='値を入力...'
+                        placeholder={t('heatmap.aggregation.valuePlaceholder')}
                         disabled={!filters.metadataKey}
                       />
                     </div>
@@ -242,13 +244,13 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
 
                   {/* Query Filter */}
                   <div className={`${className}__filterItem`}>
-                    <label htmlFor='agg-filter-query'>クエリフィルター</label>
+                    <label htmlFor='agg-filter-query'>{t('heatmap.aggregation.queryFilter')}</label>
                     <input
                       id='agg-filter-query'
                       type='text'
                       value={filters.q ?? ''}
                       onChange={(e) => handleUpdateFilter('q', e.target.value || undefined)}
-                      placeholder='例: platform:Android is:finished'
+                      placeholder={t('heatmap.aggregation.queryExample')}
                     />
                   </div>
                 </FlexColumn>
@@ -260,7 +262,7 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
         {/* Field Selection */}
         {numericMetadataKeys.length > 0 ? (
           <FlexColumn gap={8}>
-            <Text text='数値フィールドを選択して集計' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
+            <Text text={t('heatmap.aggregation.selectNumericField')} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
             <FlexRow gap={8} align='center'>
               <select
                 className={`${className}__fieldSelect`}
@@ -268,38 +270,38 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
                 onChange={(e) => setSelectedField(e.target.value)}
                 disabled={availableFields.length === 0}
               >
-                <option value=''>フィールドを選択...</option>
+                <option value=''>{t('heatmap.aggregation.selectFieldPlaceholder')}</option>
                 {availableFields.map((k: MetadataKeyInfo) => (
                   <option key={k.key} value={k.key}>
-                    {k.key} ({k.count}件)
+                    {k.key} ({k.count})
                   </option>
                 ))}
               </select>
               <Button onClick={handleAddAggregation} scheme='primary' fontSize='sm' disabled={!selectedField}>
                 <BiPlus size={16} />
-                追加
+                {t('heatmap.aggregation.add')}
               </Button>
             </FlexRow>
           </FlexColumn>
         ) : (
-          <Text text='集計可能な数値フィールドがありません' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
+          <Text text={t('heatmap.aggregation.noNumericFields')} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
         )}
 
         {/* Selected Fields */}
         {aggregationConfigs.length > 0 && (
           <FlexColumn gap={8}>
             <FlexRow align='center'>
-              <Text text='集計対象フィールド' fontSize={theme.typography.fontSize.sm} fontWeight='bold' />
+              <Text text={t('heatmap.aggregation.selectedFields')} fontSize={theme.typography.fontSize.sm} fontWeight='bold' />
               <Button onClick={clearAggregations} scheme='surface' fontSize='sm'>
                 <BiX size={14} />
-                クリア
+                {t('heatmap.aggregation.clear')}
               </Button>
             </FlexRow>
             <FlexRow gap={8} className={`${className}__tags`}>
               {aggregationConfigs.map((config) => (
                 <span key={config.field} className={`${className}__tag`}>
                   {config.field}
-                  <button type='button' onClick={() => removeAggregation(config.field)} aria-label={`${config.field}を削除`}>
+                  <button type='button' onClick={() => removeAggregation(config.field)} aria-label={`${t('heatmap.aggregation.removeField')} ${config.field}`}>
                     <BiX size={14} />
                   </button>
                 </span>
@@ -311,28 +313,28 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
         {/* Run Button */}
         <Button onClick={handleRunAggregate} scheme='primary' fontSize='base' disabled={isAggregating}>
           <BiPlay size={18} />
-          {isAggregating ? '集計中...' : '集計を実行'}
+          {isAggregating ? t('heatmap.aggregation.aggregating') : t('heatmap.aggregation.runAggregation')}
         </Button>
 
-        {hasActiveFilters && <Text text='※ フィルター条件が適用されます' fontSize={theme.typography.fontSize.xs} color={theme.colors.text.secondary} />}
+        {hasActiveFilters && <Text text={t('heatmap.aggregation.filterApplied')} fontSize={theme.typography.fontSize.xs} color={theme.colors.text.secondary} />}
 
         {/* Results */}
         {aggregateResult && (
           <FlexColumn gap={16} className={`${className}__results`}>
-            <Text text='集計結果' fontSize={theme.typography.fontSize.base} fontWeight='bold' />
+            <Text text={t('heatmap.aggregation.results')} fontSize={theme.typography.fontSize.base} fontWeight='bold' />
 
             {/* Session Counts */}
             <div className={`${className}__countGrid`}>
               <div className={`${className}__countCard`}>
-                <span className={`${className}__countLabel`}>合計</span>
+                <span className={`${className}__countLabel`}>{t('heatmap.aggregation.total')}</span>
                 <span className={`${className}__countValue`}>{formatNumber(aggregateResult.totalCount)}</span>
               </div>
               <div className={`${className}__countCard`}>
-                <span className={`${className}__countLabel`}>終了</span>
+                <span className={`${className}__countLabel`}>{t('heatmap.aggregation.finished')}</span>
                 <span className={`${className}__countValue ${className}__countValue--finished`}>{formatNumber(aggregateResult.finishedCount)}</span>
               </div>
               <div className={`${className}__countCard`}>
-                <span className={`${className}__countLabel`}>プレイ中</span>
+                <span className={`${className}__countLabel`}>{t('heatmap.aggregation.playing')}</span>
                 <span className={`${className}__countValue ${className}__countValue--playing`}>{formatNumber(aggregateResult.playingCount)}</span>
               </div>
             </div>
@@ -340,17 +342,17 @@ const AggregationMenuContentComponent: FC<AggregationMenuContentComponentProps> 
             {/* Field Aggregations */}
             {aggregateResult.aggregations && aggregateResult.aggregations.length > 0 && (
               <FlexColumn gap={12}>
-                <Text text='フィールド別集計' fontSize={theme.typography.fontSize.sm} fontWeight='bold' />
+                <Text text={t('heatmap.aggregation.fieldAggregation')} fontSize={theme.typography.fontSize.sm} fontWeight='bold' />
                 <div className={`${className}__aggregationTable`}>
                   <table>
                     <thead>
                       <tr>
-                        <th>フィールド</th>
-                        <th>件数</th>
-                        <th>合計</th>
-                        <th>平均</th>
-                        <th>最小</th>
-                        <th>最大</th>
+                        <th>{t('heatmap.aggregation.field')}</th>
+                        <th>{t('heatmap.aggregation.count')}</th>
+                        <th>{t('heatmap.aggregation.sum')}</th>
+                        <th>{t('heatmap.aggregation.avg')}</th>
+                        <th>{t('heatmap.aggregation.min')}</th>
+                        <th>{t('heatmap.aggregation.max')}</th>
                       </tr>
                     </thead>
                     <tbody>

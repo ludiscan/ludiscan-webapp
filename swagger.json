@@ -4915,6 +4915,63 @@
         ]
       }
     },
+    "/api/v0/heatmap/projects/{project_id}/play_session/{session_id}/embed-url": {
+      "post": {
+        "description": "セッション完了後にWebViewで直接ヒートマップを表示するための短縮URL（4時間有効）を生成します。通常のJWT tokenで実行可能です。",
+        "operationId": "HeatmapController_createSessionEmbedUrl",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "description": "Project ID",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "session_id",
+            "required": true,
+            "in": "path",
+            "description": "Session ID",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HeatmapEmbedUrlResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "ヒートマップ埋め込みページのURLを取得（JWT認証）",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
     "/api/v0.1/heatmap/projects/{project_id}/play_session/{session_id}/tasks": {
       "post": {
         "description": "\nCreates a heatmap calculation task for a specific session.\nReturns normalized density values (0-1 range) instead of raw counts.\n\n**v0.1 Improvements:**\n- Density values are pre-normalized to 0-1 range on the server\n- Includes normalization statistics for debugging\n- Frontend only needs minThreshold slider for filtering\n        ",
@@ -5146,6 +5203,39 @@
         "summary": "Get heatmap tasks list for project (v0.1)",
         "tags": [
           "v0.1"
+        ]
+      }
+    },
+    "/api/v0/h/{code}": {
+      "get": {
+        "description": "短縮コードを検証し、有効であればwebappのheatmapページにリダイレクトします",
+        "operationId": "ShareLinksController_redirect",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "description": "共有リンクコード（4文字-4文字）",
+            "schema": {
+              "example": "ABCD-EFGH",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "heatmapページにリダイレクト"
+          },
+          "400": {
+            "description": "リンクが無効化されている、期限切れ、または使用回数超過"
+          },
+          "404": {
+            "description": "リンクが見つからない"
+          }
+        },
+        "summary": "共有リンクからheatmapページにリダイレクト",
+        "tags": [
+          "Share Links"
         ]
       }
     },
@@ -6353,7 +6443,7 @@
     },
     "/api/v0/game/projects/{project_id}/sessions/{session_id}/heatmap-embed-url": {
       "get": {
-        "description": "セッション完了後にWebViewで直接ヒートマップを表示するための短縮URL（24時間有効）を生成します",
+        "description": "セッション完了後にWebViewで直接ヒートマップを表示するための短縮URL（4時間有効）を生成します",
         "operationId": "GameController_getHeatmapEmbedUrl",
         "parameters": [
           {
@@ -6414,39 +6504,6 @@
         "summary": "ヒートマップ埋め込みページのURLを取得",
         "tags": [
           "Game Client API"
-        ]
-      }
-    },
-    "/api/v0/h/{code}": {
-      "get": {
-        "description": "短縮コードを検証し、有効であればwebappのheatmapページにリダイレクトします",
-        "operationId": "ShareLinksController_redirect",
-        "parameters": [
-          {
-            "name": "code",
-            "required": true,
-            "in": "path",
-            "description": "共有リンクコード（4文字-4文字）",
-            "schema": {
-              "example": "ABCD-EFGH",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "302": {
-            "description": "heatmapページにリダイレクト"
-          },
-          "400": {
-            "description": "リンクが無効化されている、期限切れ、または使用回数超過"
-          },
-          "404": {
-            "description": "リンクが見つからない"
-          }
-        },
-        "summary": "共有リンクからheatmapページにリダイレクト",
-        "tags": [
-          "Share Links"
         ]
       }
     },
@@ -7421,7 +7478,7 @@
   "info": {
     "title": "Ludiscan API Documentation",
     "description": "Ludiscan API for game analytics and session tracking",
-    "version": "1.22.0",
+    "version": "1.27.0",
     "contact": {}
   },
   "tags": [],
@@ -9044,6 +9101,25 @@
           "offset"
         ]
       },
+      "HeatmapEmbedUrlResponseDto": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "ヒートマップ埋め込みページのURL（トークン付き）",
+            "example": "https://ludiscan.com/heatmap/embed/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "トークンの有効期限（ISO 8601形式）",
+            "example": "2024-01-01T12:00:00.000Z"
+          }
+        },
+        "required": [
+          "url",
+          "expiresAt"
+        ]
+      },
       "NormalizedHeatmapPointDto": {
         "type": "object",
         "properties": {
@@ -9535,25 +9611,6 @@
         },
         "required": [
           "projectIds"
-        ]
-      },
-      "HeatmapEmbedUrlResponseDto": {
-        "type": "object",
-        "properties": {
-          "url": {
-            "type": "string",
-            "description": "ヒートマップ埋め込みページのURL（トークン付き）",
-            "example": "https://ludiscan.com/heatmap/embed/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-          },
-          "expiresAt": {
-            "type": "string",
-            "description": "トークンの有効期限（ISO 8601形式）",
-            "example": "2024-01-01T12:00:00.000Z"
-          }
-        },
-        "required": [
-          "url",
-          "expiresAt"
         ]
       },
       "EventRawCoordinateDto": {

@@ -1,19 +1,27 @@
 import styled from '@emotion/styled';
 import { memo } from 'react';
-import { BiTime, BiDevices, BiHash } from 'react-icons/bi';
+import { BiTime, BiDevices, BiHash, BiEdit, BiTrash, BiLink } from 'react-icons/bi';
 
 import type { Session } from '@src/modeles/session';
 import type { FC } from 'react';
 
+import { Divider } from '@src/component/atoms/Divider';
 import { FlexRow, FlexColumn } from '@src/component/atoms/Flex';
 import { Tooltip } from '@src/component/atoms/Tooltip';
 import { ClampText } from '@src/component/molecules/ClampText';
+import { IconLabelRow } from '@src/component/molecules/IconLabelRow';
+import { EllipsisMenu, Menu } from '@src/component/molecules/Menu';
+import { useLocale } from '@src/hooks/useLocale';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 
 export type SessionItemRowProps = {
   className?: string | undefined;
   session: Session;
   compact?: boolean;
+  projectId?: number;
+  onEdit?: (session: Session) => void;
+  onDelete?: (session: Session) => void;
+  onCopyEmbedUrl?: (session: Session) => void;
 };
 
 const formatDate = (dateString: string) => {
@@ -39,9 +47,12 @@ const calculateDuration = (startTime: string, endTime: string | null) => {
   return `${hours}h ${minutes}m`;
 };
 
-const Component: FC<SessionItemRowProps> = memo(({ className, session, compact = false }) => {
+const Component: FC<SessionItemRowProps> = memo(({ className, session, compact = false, projectId: _projectId, onEdit, onDelete, onCopyEmbedUrl }) => {
   const { theme } = useSharedTheme();
+  const { t } = useLocale();
   const isPlaying = session.isPlaying;
+
+  const hasActions = onEdit || onDelete || onCopyEmbedUrl;
 
   return (
     <div className={`${className} ${isPlaying ? 'playing' : ''} ${compact ? 'compact' : ''}`}>
@@ -107,6 +118,24 @@ const Component: FC<SessionItemRowProps> = memo(({ className, session, compact =
           </span>
           <span className={`${className}__duration ${isPlaying ? 'active' : ''}`}>{calculateDuration(session.startTime, session.endTime)}</span>
         </FlexColumn>
+
+        {/* Menu */}
+        {hasActions && (
+          <div className={`${className}__menuWrapper`}>
+            <EllipsisMenu fontSize={'base'} scheme={'none'}>
+              <Menu.ContentColumn gap={4} align={'right'} placement={'bottom'}>
+                {onCopyEmbedUrl && <IconLabelRow gap={8} label={t('session.copyEmbedUrl')} icon={<BiLink />} onClick={() => onCopyEmbedUrl(session)} />}
+                {onEdit && <IconLabelRow gap={8} label={t('common.edit')} icon={<BiEdit />} onClick={() => onEdit(session)} />}
+                {onDelete && (
+                  <>
+                    <Divider orientation={'horizontal'} margin={'0'} />
+                    <IconLabelRow className='danger' gap={8} label={t('common.delete')} icon={<BiTrash />} onClick={() => onDelete(session)} />
+                  </>
+                )}
+              </Menu.ContentColumn>
+            </EllipsisMenu>
+          </div>
+        )}
       </FlexRow>
     </div>
   );
@@ -315,5 +344,10 @@ export const SessionItemRow = styled(Component)`
 
   &.playing {
     background: ${({ theme }) => theme.colors.semantic.success.main}05;
+  }
+
+  &__menuWrapper {
+    flex-shrink: 0;
+    margin-left: 8px;
   }
 `;

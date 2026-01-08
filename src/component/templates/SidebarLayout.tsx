@@ -12,6 +12,7 @@ import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { ResponsiveSidebar } from '@src/component/molecules/ResponsiveSidebar';
 import { useAuth } from '@src/hooks/useAuth';
+import { useLocale } from '@src/hooks/useLocale';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { DefaultStaleTime } from '@src/modeles/qeury';
 
@@ -42,6 +43,7 @@ const Component: FC<SidebarLayoutProps> = ({ className }) => {
   const pathname = usePathname();
   const { theme } = useSharedTheme();
   const { isAuthorized } = useAuth();
+  const { t } = useLocale();
 
   // Initialize state from localStorage or default to empty Set
   const [expandedDropdowns, setExpandedDropdowns] = useState<Set<string>>(() => {
@@ -114,7 +116,7 @@ const Component: FC<SidebarLayoutProps> = ({ className }) => {
 
   return (
     <ResponsiveSidebar>
-      <div className={className}>
+      <nav className={className} aria-label={t('accessibility.mainNavigation')}>
         <FlexColumn gap={8}>
           {visibleItems.map((item) => {
             // Render dropdown menu item
@@ -188,7 +190,7 @@ const Component: FC<SidebarLayoutProps> = ({ className }) => {
             );
           })}
         </FlexColumn>
-      </div>
+      </nav>
     </ResponsiveSidebar>
   );
 };

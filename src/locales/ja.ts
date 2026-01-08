@@ -109,6 +109,33 @@ export const ja = {
     noSessions: 'セッションがありません',
   },
 
+  // Session Menu
+  session: {
+    copyEmbedUrl: 'Embed URLをコピー',
+    embedUrlCopied: 'Embed URLをコピーしました',
+    embedUrlFailed: 'Embed URLの取得に失敗しました',
+  },
+
+  // Session Form Modal
+  sessionForm: {
+    editTitle: 'セッションを編集',
+    sessionName: 'セッション名',
+    deviceId: 'デバイスID',
+    platform: 'プラットフォーム',
+    appVersion: 'アプリバージョン',
+    sessionUpdated: 'セッションを更新しました',
+    updateFailed: 'セッションの更新に失敗しました',
+  },
+
+  // Session Delete Modal
+  sessionDelete: {
+    title: 'セッションを削除',
+    confirmMessage: 'セッション「{name}」を削除してよろしいですか？',
+    warning: '削除されたセッションは復元できません。関連するすべてのデータも削除されます。',
+    sessionDeleted: 'セッションを削除しました',
+    deleteFailed: 'セッションの削除に失敗しました',
+  },
+
   // Members Tab
   members: {
     addMember: '+ メンバーを追加',
@@ -189,7 +216,7 @@ export const ja = {
       showHeatmap: 'ヒートマップを表示',
       opacity: '不透明度',
       type: 'タイプ',
-      minThreshold: '最低密度',
+      minThreshold: '表示しきい値',
       colorScale: 'カラースケール',
       reload: '再読み込み',
     },
@@ -248,6 +275,83 @@ export const ja = {
       light: 'ライト',
       dark: 'ダーク',
     },
+
+    hotspot: {
+      visible: '表示',
+      cellRadius: 'セルサイズ',
+      displayCount: '表示数',
+      duplication: '重複',
+    },
+
+    eventLog: {
+      title: 'イベントログ',
+      filter: 'フィルター',
+      player: 'プレイヤー',
+      keys: 'イベントログキー',
+    },
+
+    fieldObject: {
+      title: 'フィールドオブジェクト',
+      visible: '表示',
+      hvqlQuery: 'HVQLクエリ',
+      types: 'オブジェクトタイプ',
+    },
+
+    timeline: {
+      visibility: '表示',
+      session: 'セッション',
+      player: 'プレイヤー',
+      viewSessionDetails: 'セッション詳細を表示',
+      selectProjectAndSession: 'プロジェクトとセッションを選択してください',
+      filterQuery: 'フィルタークエリ',
+      search: '検索',
+      vqlGuideTitle: 'VQLガイド (Heatmap View Query Language)',
+    },
+
+    aggregation: {
+      title: '集計',
+      filter: 'フィルター',
+      clearFilter: 'フィルターをクリア',
+      platform: 'プラットフォーム',
+      all: 'すべて',
+      appVersion: 'アプリバージョン',
+      status: 'ステータス',
+      playing: 'プレイ中',
+      finished: '終了',
+      showAdvancedFilters: '詳細フィルターを表示',
+      hideAdvancedFilters: '詳細フィルターを隠す',
+      startDateFrom: '開始日（From）',
+      startDateTo: '開始日（To）',
+      metadataKey: 'メタデータキー',
+      selectPlaceholder: '選択してください',
+      metadataValue: 'メタデータ値',
+      valuePlaceholder: '値を入力...',
+      queryFilter: 'クエリフィルター',
+      queryExample: '例: platform:Android is:finished',
+      selectNumericField: '数値フィールドを選択して集計',
+      selectFieldPlaceholder: 'フィールドを選択...',
+      add: '追加',
+      noNumericFields: '集計可能な数値フィールドがありません',
+      selectedFields: '集計対象フィールド',
+      clear: 'クリア',
+      removeField: '削除',
+      aggregating: '集計中...',
+      runAggregation: '集計を実行',
+      filterApplied: '※ フィルター条件が適用されます',
+      results: '集計結果',
+      total: '合計',
+      fieldAggregation: 'フィールド別集計',
+      field: 'フィールド',
+      count: '件数',
+      sum: '合計',
+      avg: '平均',
+      min: '最小',
+      max: '最大',
+    },
+
+    more: {
+      allFeatures: 'すべての機能',
+    },
   },
 
   // Pagination
@@ -258,20 +362,93 @@ export const ja = {
     last: '最後のページへ',
   },
 
+  // Hints
+  hints: {
+    welcome: {
+      title: 'Heatmapビューワーへようこそ',
+      selectLanguage: '言語を選択してください',
+      description: 'このツールでは、ゲームプレイデータをヒートマップとして可視化できます。左側のメニューから各機能にアクセスできます。',
+      tips: [
+        'マウスドラッグでカメラを回転、スクロールでズームできます',
+        '左側のアイコンからメニューを開いて設定を変更できます',
+        'ツールバーで2D/3Dモードを切り替えられます',
+      ],
+    },
+    menuHeatmap: {
+      title: 'ヒートマップ設定',
+      description: 'ヒートマップの表示設定を調整できます。',
+      tips: ['表示しきい値で低密度のセルを非表示にできます', '不透明度スライダーでヒートマップの透過度を調整', 'カラースケールで色の範囲を変更'],
+    },
+    menuHotspot: {
+      title: 'ホットスポット',
+      description: 'プレイヤーの集中エリアをホットスポットとして表示します。',
+      tips: ['セルサイズでホットスポットの大きさを調整', '表示数で上位何件を表示するか設定', '重複スキップで近い位置のホットスポットを除外'],
+    },
+    menuEventlog: {
+      title: 'イベントログ',
+      description: 'ゲーム内のイベントをマップ上にマーカーとして表示します。',
+      tips: ['各イベントタイプごとに色やアイコンをカスタマイズ', 'HVQLスクリプトで詳細なフィルタリングが可能', 'マーカーをクリックして詳細情報を表示'],
+    },
+    menuRoutecoach: {
+      title: 'Route Coach',
+      description: 'AIがプレイヤーの動線を分析し、改善ルートを提案します。',
+      tips: ['生成ボタンでAI分析を開始', 'クラスターごとに改善ポイントを確認', '提案されたルートはマップ上に表示されます'],
+    },
+    menuTimeline: {
+      title: 'リプレイ',
+      description: 'プレイヤーの移動軌跡を時系列で再生できます。',
+      tips: ['セッションを選択してプレイヤーを追加', '再生ボタンで移動をアニメーション表示', '複数プレイヤーを同時に表示して比較'],
+    },
+    menuMap: {
+      title: 'マップ設定',
+      description: '3Dモデルやマップの表示設定を管理します。',
+      tips: ['GLB/GLTF/OBJフォーマットのモデルをアップロード可能', 'モデルの位置や回転を調整', 'ウェイポイントを追加してマップに目印を設置'],
+    },
+    menuFieldObject: {
+      title: 'フィールドオブジェクト',
+      description: 'ゲーム内のオブジェクトをマップ上に表示します。',
+      tips: ['オブジェクトタイプごとに表示/非表示を切り替え', '色やアイコンをカスタマイズ', 'HVQLでフィルタリング条件を指定'],
+    },
+    menuAggregation: {
+      title: '集計',
+      description: 'セッションデータを集計して統計情報を表示します。',
+      tips: ['プラットフォームやバージョンでフィルタリング', '数値フィールドの合計・平均・最大・最小を計算', 'クエリフィルターで詳細な条件を指定'],
+    },
+    dontShowAgain: '次回から表示しない',
+    gotIt: 'OK',
+  },
+
   // Menu names (display text)
   menus: {
     info: '情報',
-    general: '一般',
+    general: 'ヒートマップ',
     map: 'マップ',
     hotspot: 'ホットスポット',
     eventlog: 'イベントログ',
     fieldObject: 'オブジェクト',
-    timeline: 'タイムライン',
+    timeline: 'リプレイ',
     routecoach: 'ルートコーチ',
     aggregation: '集計',
     more: 'その他',
     eventDetail: 'イベント詳細',
     aiSummary: 'AI要約',
+  },
+
+  // Accessibility
+  accessibility: {
+    skipToMainContent: 'メインコンテンツへスキップ',
+    mainNavigation: 'メインナビゲーション',
+    siteHeader: 'サイトヘッダー',
+    mainContent: 'メインコンテンツ',
+    closeDialog: 'ダイアログを閉じる',
+    loadingComplete: '読み込み完了',
+    errorOccurred: 'エラーが発生しました',
+    openMenu: 'メニューを開く',
+    heatmapCanvas: '3Dヒートマップビジュアライゼーション。マウスで回転、スクロールでズーム、ドラッグで移動。',
+    heatmapCanvas2D: '2Dヒートマップビジュアライゼーション。スクロールでズーム、ドラッグで移動。',
+    heatmapKeyboardShortcuts: 'キーボードショートカット: 矢印キーでウェイポイント移動、Escで選択解除。',
+    dataLoaded: 'ヒートマップデータを読み込みました',
+    modeChanged: '表示モードを{mode}に変更しました',
   },
 };
 

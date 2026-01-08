@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { IoEllipsisHorizontal } from 'react-icons/io5';
 
@@ -7,12 +7,15 @@ import type { StyledComponent } from '@emotion/styled';
 import type { ButtonProps } from '@src/component/atoms/Button';
 import type { CardProps } from '@src/component/atoms/Card';
 import type { LabeledButtonProps } from '@src/component/atoms/LabeledButton';
+import type { RovingItemProps } from '@src/hooks/useRovingTabIndex';
 import type { FC, ReactNode, MouseEvent, RefObject } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
 import { Card } from '@src/component/atoms/Card';
 import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { LabeledButton } from '@src/component/atoms/LabeledButton';
+import { useLocale } from '@src/hooks/useLocale';
+import { useRovingTabIndex } from '@src/hooks/useRovingTabIndex';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { zIndexes } from '@src/styles/style';
 
@@ -23,10 +26,22 @@ export type MenuProps = Omit<LabeledButtonProps, 'onClick'> & {
   onClick?: ButtonProps['onClick'];
 };
 
-const EllipsisMenuContext = createContext<{ isOpen: boolean; onClose: () => void; anchorRef: RefObject<HTMLDivElement | null> }>({
+interface MenuContextValue {
+  isOpen: boolean;
+  onClose: () => void;
+  anchorRef: RefObject<HTMLDivElement | null>;
+  menuId: string;
+  focusedIndex: number;
+  setFocusedIndex: (index: number) => void;
+}
+
+const EllipsisMenuContext = createContext<MenuContextValue>({
   isOpen: false,
   onClose: () => {},
   anchorRef: { current: null },
+  menuId: '',
+  focusedIndex: -1,
+  setFocusedIndex: () => {},
 });
 
 const useEllipsisMenuContext = () => useContext(EllipsisMenuContext);
@@ -111,20 +126,37 @@ const Floating: FC<FloatingProps> = ({ className, children, align = 'left', plac
 
 const Component: FC<MenuProps> = (props) => {
   const { className, icon, children, onClick } = props;
+  const { t } = useLocale();
   const [isOpen, setIsOpen] = useState(false);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
   const anchorRef = useRef<HTMLDivElement>(null);
+
+  // Generate unique menu ID
+  const menuIdRef = useRef(`menu-${Math.random().toString(36).substring(2, 9)}`);
+  const menuId = menuIdRef.current;
+
   const closeMenu = useCallback(() => {
     setIsOpen(false);
+    setFocusedIndex(-1);
+    // Return focus to trigger button (find the button within anchorRef)
+    const button = anchorRef.current?.querySelector('button');
+    button?.focus();
   }, []);
+
   const openMenu = useCallback(() => {
     setIsOpen(true);
+    setFocusedIndex(0);
   }, []);
+
   useEffect(() => {
+    // Only add listeners when menu is open
+    if (!isOpen) return;
+
     // 画面外タップで閉じる
     const handleClickOutside = () => {
       closeMenu();
     };
-    const handleKeyDown = (event: KeyboardEvent) => {
+    const handleKeyDown = (event: globalThis.KeyboardEvent) => {
       if (event.key === 'Escape') {
         closeMenu();
       }
@@ -135,7 +167,8 @@ const Component: FC<MenuProps> = (props) => {
       document.removeEventListener('click', handleClickOutside);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [closeMenu]);
+  }, [isOpen, closeMenu]);
+
   const handleClick = useCallback(
     (event: MouseEvent<HTMLButtonElement>) => {
       event.stopPropagation();
@@ -150,12 +183,22 @@ const Component: FC<MenuProps> = (props) => {
     },
     [closeMenu, isOpen, onClick, openMenu],
   );
+
   return (
     <div className={className} ref={anchorRef}>
-      <LabeledButton {...props} onClick={handleClick}>
+      <LabeledButton
+        {...props}
+        onClick={handleClick}
+        aria-haspopup='menu'
+        aria-expanded={isOpen}
+        aria-controls={isOpen ? menuId : undefined}
+        aria-label={props['aria-label'] ?? t('accessibility.openMenu')}
+      >
         {icon}
       </LabeledButton>
-      <EllipsisMenuContext.Provider value={{ isOpen, onClose: closeMenu, anchorRef }}>{children}</EllipsisMenuContext.Provider>
+      <EllipsisMenuContext.Provider value={{ isOpen, onClose: closeMenu, anchorRef, menuId, focusedIndex, setFocusedIndex }}>
+        {children}
+      </EllipsisMenuContext.Provider>
     </div>
   );
 };
@@ -171,13 +214,50 @@ export type EllipsisMenuContentProps = CardProps & {
 
 const ContentRowComponent: FC<EllipsisMenuContentProps> = (props) => {
   const { theme } = useSharedTheme();
-  const { isOpen } = useEllipsisMenuContext();
+  const { isOpen, menuId } = useEllipsisMenuContext();
   const { className, gap, children, shadow = 'medium', border = theme.colors.border.strong, padding = '8px', stopPropagate = true } = props;
+
+  const { containerRef, getItemProps } = useRovingTabIndex<HTMLDivElement>({
+    enabled: isOpen,
+    orientation: 'horizontal',
+    loop: true,
+    onSelect: () => {
+      // Selection is handled by individual item click handlers
+    },
+  });
+
+  // Clone children and pass roving props
+  const childrenWithProps = React.Children.map(children, (child, index) => {
+    if (React.isValidElement<ContentButtonProps>(child)) {
+      const rovingProps = getItemProps(index);
+      return React.cloneElement(child, { _rovingProps: rovingProps });
+    }
+    return child;
+  });
+
+  // Focus first item when menu opens
+  useEffect(() => {
+    if (isOpen && containerRef.current) {
+      const firstItem = containerRef.current.querySelector<HTMLElement>('[data-roving-item]');
+      firstItem?.focus();
+    }
+  }, [isOpen, containerRef]);
+
   return (
     <Floating className={`${className} ${isOpen ? 'open' : ''}`} align={props.align} placement={props['placement'] || 'bottom'}>
-      <Card {...props} className={`${className} ${isOpen ? 'open' : ''}`} shadow={shadow} border={border} padding={padding} stopPropagate={stopPropagate}>
-        <FlexRow align={'center'} gap={gap} wrap={'nowrap'}>
-          {children}
+      <Card
+        {...props}
+        className={`${className} ${isOpen ? 'open' : ''}`}
+        shadow={shadow}
+        border={border}
+        padding={padding}
+        stopPropagate={stopPropagate}
+        role='menu'
+        id={menuId}
+        aria-orientation='horizontal'
+      >
+        <FlexRow ref={containerRef} align={'center'} gap={gap} wrap={'nowrap'}>
+          {childrenWithProps}
         </FlexRow>
       </Card>
     </Floating>
@@ -186,22 +266,65 @@ const ContentRowComponent: FC<EllipsisMenuContentProps> = (props) => {
 
 const ContentColumnComponent: FC<EllipsisMenuContentProps> = (props) => {
   const { theme } = useSharedTheme();
-  const { isOpen } = useEllipsisMenuContext();
+  const { isOpen, menuId } = useEllipsisMenuContext();
   const { className, gap, children, shadow = 'medium', border = theme.colors.border.strong, padding = '8px', stopPropagate = true } = props;
+
+  const { containerRef, getItemProps } = useRovingTabIndex<HTMLDivElement>({
+    enabled: isOpen,
+    orientation: 'vertical',
+    loop: true,
+    onSelect: () => {
+      // Selection is handled by individual item click handlers
+    },
+  });
+
+  // Clone children and pass roving props
+  const childrenWithProps = React.Children.map(children, (child, index) => {
+    if (React.isValidElement<ContentButtonProps>(child)) {
+      const rovingProps = getItemProps(index);
+      return React.cloneElement(child, { _rovingProps: rovingProps });
+    }
+    return child;
+  });
+
+  // Focus first item when menu opens
+  useEffect(() => {
+    if (isOpen && containerRef.current) {
+      const firstItem = containerRef.current.querySelector<HTMLElement>('[data-roving-item]');
+      firstItem?.focus();
+    }
+  }, [isOpen, containerRef]);
+
   return (
     <Floating className={`${className} ${isOpen ? 'open' : ''}`} align={props.align} placement={props['placement'] || 'bottom'} offset={props.offset}>
-      <Card {...props} className={`${className} ${isOpen ? 'open' : ''}`} shadow={shadow} border={border} padding={padding} stopPropagate={stopPropagate}>
-        <FlexColumn align={'flex-start'} gap={gap} wrap={'nowrap'}>
-          {children}
+      <Card
+        {...props}
+        className={`${className} ${isOpen ? 'open' : ''}`}
+        shadow={shadow}
+        border={border}
+        padding={padding}
+        stopPropagate={stopPropagate}
+        role='menu'
+        id={menuId}
+        aria-orientation='vertical'
+      >
+        <FlexColumn ref={containerRef} align={'flex-start'} gap={gap} wrap={'nowrap'}>
+          {childrenWithProps}
         </FlexColumn>
       </Card>
     </Floating>
   );
 };
 
-const ContentButton: FC<ButtonProps> = (props) => {
-  const { onClick } = props;
+type ContentButtonProps = ButtonProps & {
+  /** Internal prop for roving tabindex - passed by ContentRow/ContentColumn */
+  _rovingProps?: RovingItemProps;
+};
+
+const ContentButton: FC<ContentButtonProps> = (props) => {
+  const { onClick, _rovingProps, ...rest } = props;
   const { onClose } = useEllipsisMenuContext();
+
   const handleClick = useCallback(
     (event: MouseEvent<HTMLButtonElement>) => {
       event.stopPropagation();
@@ -212,7 +335,33 @@ const ContentButton: FC<ButtonProps> = (props) => {
     },
     [onClose, onClick],
   );
-  return <Button {...props} onClick={handleClick} />;
+
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLButtonElement>) => {
+      // Handle Enter/Space for selection
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        event.stopPropagation();
+        // Trigger click handler
+        handleClick(event as unknown as MouseEvent<HTMLButtonElement>);
+      }
+      // Pass other key events to roving handler
+      _rovingProps?.onKeyDown?.(event);
+    },
+    [_rovingProps, handleClick],
+  );
+
+  return (
+    <Button
+      {...rest}
+      onClick={handleClick}
+      role='menuitem'
+      tabIndex={_rovingProps?.tabIndex ?? 0}
+      onKeyDown={handleKeyDown}
+      onFocus={_rovingProps?.onFocus}
+      data-roving-item
+    />
+  );
 };
 
 const ContentRow = styled(ContentRowComponent)`

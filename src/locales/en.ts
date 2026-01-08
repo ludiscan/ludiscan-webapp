@@ -109,6 +109,33 @@ export const en = {
     noSessions: 'No sessions',
   },
 
+  // Session Menu
+  session: {
+    copyEmbedUrl: 'Copy Embed URL',
+    embedUrlCopied: 'Embed URL copied to clipboard',
+    embedUrlFailed: 'Failed to get Embed URL',
+  },
+
+  // Session Form Modal
+  sessionForm: {
+    editTitle: 'Edit Session',
+    sessionName: 'Session Name',
+    deviceId: 'Device ID',
+    platform: 'Platform',
+    appVersion: 'App Version',
+    sessionUpdated: 'Session updated successfully',
+    updateFailed: 'Failed to update session',
+  },
+
+  // Session Delete Modal
+  sessionDelete: {
+    title: 'Delete Session',
+    confirmMessage: 'Are you sure you want to delete session "{name}"?',
+    warning: 'Deleted sessions cannot be restored. All related data will be deleted.',
+    sessionDeleted: 'Session deleted successfully',
+    deleteFailed: 'Failed to delete session',
+  },
+
   // Members Tab
   members: {
     addMember: '+ Add Member',
@@ -172,12 +199,12 @@ export const en = {
       notSelected: 'Not selected',
       select: 'Select',
       view: 'View',
-      resetToInitial: 'Reset to initial position',
-      sessionFilter: 'Session Filter',
+      resetToInitial: 'Reset to initial',
+      sessionFilter: 'Select',
       clearFilter: 'Clear Filter',
-      filterBySession: 'Filter by Session #{id}',
-      filteringBySession: 'Filtering by Session {id}',
-      backgroundImage: 'Background Image',
+      filterBySession: 'by Session #{id}',
+      filteringBySession: 'by Session {id}',
+      backgroundImage: 'Background',
       change: 'Change',
       remove: 'Remove',
       backgroundScale: 'Background Scale',
@@ -186,10 +213,10 @@ export const en = {
       displayOptions: 'Display Options',
       upVector: 'Up Vector',
       scale: 'Scale',
-      showHeatmap: 'Show Heatmap',
+      showHeatmap: 'Heatmap',
       opacity: 'Opacity',
       type: 'Type',
-      minThreshold: 'Min Density',
+      minThreshold: 'Display Threshold',
       colorScale: 'Color Scale',
       reload: 'Reload',
     },
@@ -248,6 +275,83 @@ export const en = {
       light: 'Light',
       dark: 'Dark',
     },
+
+    hotspot: {
+      visible: 'Visible',
+      cellRadius: 'Cell Radius',
+      displayCount: 'Display Count',
+      duplication: 'Duplication',
+    },
+
+    eventLog: {
+      title: 'Event Log',
+      filter: 'Filter',
+      player: 'Player',
+      keys: 'Event Log Keys',
+    },
+
+    fieldObject: {
+      title: 'Field Objects',
+      visible: 'Visible',
+      hvqlQuery: 'HVQL Query',
+      types: 'Object Types',
+    },
+
+    timeline: {
+      visibility: 'Visibility',
+      session: 'Session',
+      player: 'Player',
+      viewSessionDetails: 'View Session Details',
+      selectProjectAndSession: 'Please select project and session',
+      filterQuery: 'Filter Query',
+      search: 'Search',
+      vqlGuideTitle: 'VQL Guide (Heatmap View Query Language)',
+    },
+
+    aggregation: {
+      title: 'Aggregation',
+      filter: 'Filter',
+      clearFilter: 'Clear Filter',
+      platform: 'Platform',
+      all: 'All',
+      appVersion: 'App Version',
+      status: 'Status',
+      playing: 'Playing',
+      finished: 'Finished',
+      showAdvancedFilters: 'Show Advanced Filters',
+      hideAdvancedFilters: 'Hide Advanced Filters',
+      startDateFrom: 'Start Date (From)',
+      startDateTo: 'Start Date (To)',
+      metadataKey: 'Metadata Key',
+      selectPlaceholder: 'Select...',
+      metadataValue: 'Metadata Value',
+      valuePlaceholder: 'Enter value...',
+      queryFilter: 'Query Filter',
+      queryExample: 'e.g., platform:Android is:finished',
+      selectNumericField: 'Select numeric field to aggregate',
+      selectFieldPlaceholder: 'Select field...',
+      add: 'Add',
+      noNumericFields: 'No numeric fields available',
+      selectedFields: 'Selected Fields',
+      clear: 'Clear',
+      removeField: 'Remove',
+      aggregating: 'Aggregating...',
+      runAggregation: 'Run Aggregation',
+      filterApplied: '* Filter conditions will be applied',
+      results: 'Results',
+      total: 'Total',
+      fieldAggregation: 'Field Aggregation',
+      field: 'Field',
+      count: 'Count',
+      sum: 'Sum',
+      avg: 'Average',
+      min: 'Min',
+      max: 'Max',
+    },
+
+    more: {
+      allFeatures: 'All Features',
+    },
   },
 
   // Pagination
@@ -258,19 +362,88 @@ export const en = {
     last: 'Go to last page',
   },
 
+  // Hints
+  hints: {
+    welcome: {
+      title: 'Welcome to Heatmap Viewer',
+      selectLanguage: 'Select your language',
+      description: 'This tool allows you to visualize gameplay data as heatmaps. Access various features from the menu on the left.',
+      tips: ['Drag to rotate camera, scroll to zoom', 'Click menu icons on the left to access settings', 'Toggle between 2D/3D modes using the toolbar'],
+    },
+    menuHeatmap: {
+      title: 'Heatmap Settings',
+      description: 'Adjust heatmap display settings.',
+      tips: ['Use display threshold to hide low-density cells', 'Use opacity slider to adjust heatmap transparency', 'Change color range with color scale'],
+    },
+    menuHotspot: {
+      title: 'Hotspot',
+      description: 'Display player concentration areas as hotspots.',
+      tips: ['Adjust hotspot size with cell radius', 'Set how many top spots to display', 'Skip duplication to exclude nearby hotspots'],
+    },
+    menuEventlog: {
+      title: 'Event Log',
+      description: 'Display in-game events as markers on the map.',
+      tips: ['Customize colors and icons for each event type', 'Use HVQL scripts for detailed filtering', 'Click markers to view detailed information'],
+    },
+    menuRoutecoach: {
+      title: 'Route Coach',
+      description: 'AI analyzes player movements and suggests improvement routes.',
+      tips: ['Click generate to start AI analysis', 'Review improvement points per cluster', 'Suggested routes are displayed on the map'],
+    },
+    menuTimeline: {
+      title: 'Replay',
+      description: 'Replay player movement trajectories over time.',
+      tips: ['Select a session to add players', 'Press play to animate movements', 'Display multiple players to compare'],
+    },
+    menuMap: {
+      title: 'Map Settings',
+      description: 'Manage 3D model and map display settings.',
+      tips: ['Upload GLB/GLTF/OBJ format models', 'Adjust model position and rotation', 'Add waypoints as map landmarks'],
+    },
+    menuFieldObject: {
+      title: 'Field Objects',
+      description: 'Display in-game objects on the map.',
+      tips: ['Toggle visibility by object type', 'Customize colors and icons', 'Use HVQL for filtering conditions'],
+    },
+    menuAggregation: {
+      title: 'Aggregation',
+      description: 'Aggregate session data to display statistics.',
+      tips: ['Filter by platform or version', 'Calculate sum, average, max, min for numeric fields', 'Use query filter for detailed conditions'],
+    },
+    dontShowAgain: "Don't show again",
+    gotIt: 'Got it',
+  },
+
   // Menu names (display text)
   menus: {
     info: 'Info',
-    general: 'General',
+    general: 'Heatmap',
     map: 'Map',
     hotspot: 'Hotspot',
     eventlog: 'Event Log',
     fieldObject: 'Objects',
-    timeline: 'Timeline',
+    timeline: 'Replay',
     routecoach: 'Route Coach',
     aggregation: 'Aggregation',
     more: 'More',
     eventDetail: 'Event Detail',
     aiSummary: 'AI Summary',
+  },
+
+  // Accessibility
+  accessibility: {
+    skipToMainContent: 'Skip to main content',
+    mainNavigation: 'Main navigation',
+    siteHeader: 'Site header',
+    mainContent: 'Main content',
+    closeDialog: 'Close dialog',
+    loadingComplete: 'Loading complete',
+    errorOccurred: 'An error occurred',
+    openMenu: 'Open menu',
+    heatmapCanvas: '3D heatmap visualization. Use mouse to rotate, scroll to zoom, drag to pan.',
+    heatmapCanvas2D: '2D heatmap visualization. Scroll to zoom, drag to pan.',
+    heatmapKeyboardShortcuts: 'Keyboard shortcuts: Arrow keys to move waypoints, Escape to deselect.',
+    dataLoaded: 'Heatmap data loaded successfully',
+    modeChanged: 'View mode changed to {mode}',
   },
 };

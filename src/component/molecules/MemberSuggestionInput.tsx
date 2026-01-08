@@ -5,9 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import type { User } from '@src/modeles/user';
 import type { FC } from 'react';
 
-import { Button } from '@src/component/atoms/Button';
 import { Text } from '@src/component/atoms/Text';
-import { OutlinedTextField } from '@src/component/molecules/OutlinedTextField';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { useApiClient } from '@src/modeles/ApiClientContext';
 import { DefaultStaleTime } from '@src/modeles/qeury';
@@ -28,16 +26,21 @@ const Component: FC<MemberSuggestionInputProps> = ({ className, value, onChange,
 
   // Click outside to close suggestions
   useEffect(() => {
+    if (!showSuggestions) return;
+
     const handleClickOutside = (event: MouseEvent) => {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
         setShowSuggestions(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
+
+    // Add listener only when suggestions are shown
+    document.addEventListener('click', handleClickOutside);
+
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('click', handleClickOutside);
     };
-  }, []);
+  }, [showSuggestions]);
 
   const { data: suggestions = [] } = useQuery({
     queryKey: ['users', 'search', value],
@@ -63,23 +66,43 @@ const Component: FC<MemberSuggestionInputProps> = ({ className, value, onChange,
   };
 
   return (
-    <div className={className} ref={wrapperRef}>
-      <OutlinedTextField
+    <div className={className} ref={wrapperRef} data-font-size={fontSize}>
+      <input
+        type='email'
+        className={`${className}__input`}
         value={value}
-        onChange={(val) => {
-          onChange(val);
-          setShowSuggestions(true);
+        onChange={(e) => {
+          onChange(e.target.value);
+          if (e.target.value.length >= 2) {
+            setShowSuggestions(true);
+          } else {
+            setShowSuggestions(false);
+          }
+        }}
+        onFocus={() => {
+          if (value.length >= 2) {
+            setShowSuggestions(true);
+          }
         }}
         placeholder={placeholder}
-        fontSize={fontSize}
+        autoComplete='email'
       />
       {showSuggestions && suggestions.length > 0 && (
         <div className={`${className}__suggestions`}>
           {suggestions.map((user) => (
-            <Button scheme={'none'} fontSize={'sm'} key={user.id} className={`${className}__suggestionItem`} onClick={() => handleSelect(user)}>
+            <button
+              type='button'
+              key={user.id}
+              className={`${className}__suggestionItem`}
+              onClick={() => handleSelect(user)}
+              onMouseDown={(e) => {
+                // Prevent input from losing focus when clicking suggestions
+                e.preventDefault();
+              }}
+            >
               <Text text={user.name} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bold} />
               <Text text={user.email} fontSize={theme.typography.fontSize.xs} color={theme.colors.text.secondary} />
-            </Button>
+            </button>
           ))}
         </div>
       )}
@@ -90,6 +113,30 @@ const Component: FC<MemberSuggestionInputProps> = ({ className, value, onChange,
 export const MemberSuggestionInput = styled(Component)`
   position: relative;
   width: 100%;
+
+  &__input {
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    font-size: ${({ fontSize, theme }) => fontSize || theme.typography.fontSize.base};
+    line-height: 1.5;
+    color: ${({ theme }) => theme.colors.text.primary};
+    outline: none;
+    background: ${({ theme }) => theme.colors.surface.sunken};
+    border: 1px solid ${({ theme }) => theme.colors.border.strong};
+    border-radius: 4px;
+    transition: all 0.2s ease;
+
+    &::placeholder {
+      color: ${({ theme }) => theme.colors.text.tertiary};
+      opacity: 1;
+    }
+
+    &:focus {
+      border-color: ${({ theme }) => theme.colors.primary.main};
+      box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary.main}1a;
+    }
+  }
 
   &__suggestions {
     position: absolute;
@@ -106,8 +153,18 @@ export const MemberSuggestionInput = styled(Component)`
   }
 
   &__suggestionItem {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    align-items: flex-start;
+    width: 100%;
     padding: 8px 12px;
+    font-size: ${({ theme }) => theme.typography.fontSize.sm};
+    color: ${({ theme }) => theme.colors.text.primary};
+    text-align: left;
     cursor: pointer;
+    background: transparent;
+    border: none;
     transition: background-color 0.2s;
 
     &:hover {

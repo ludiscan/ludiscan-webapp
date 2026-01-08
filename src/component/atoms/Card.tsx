@@ -1,11 +1,11 @@
 import styled from '@emotion/styled';
 
-import type { FC, ReactNode } from 'react';
+import type { ComponentPropsWithoutRef, FC, ReactNode } from 'react';
 
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { hexToRGBA } from '@src/styles/style';
 
-export type CardProps = {
+export type CardProps = ComponentPropsWithoutRef<'div'> & {
   className?: string;
   children: ReactNode;
   shadow?: 'none' | 'small' | 'medium' | 'large';
@@ -23,7 +23,18 @@ const toBlurValue = (blur: boolean | 'low' | 'medium' | 'high'): string | undefi
   return blur;
 };
 
-const Component = ({ className, children, stopPropagate = false, blur }: CardProps) => {
+const Component = ({
+  className,
+  children,
+  stopPropagate = false,
+  blur,
+  shadow: _shadow,
+  color: _color,
+  border: _border,
+  borderWidth: _borderWidth,
+  padding: _padding,
+  ...rest
+}: CardProps) => {
   if (stopPropagate) {
     return (
       <div
@@ -40,12 +51,17 @@ const Component = ({ className, children, stopPropagate = false, blur }: CardPro
             e.stopPropagation();
           }
         }}
+        {...rest}
       >
         {children}
       </div>
     );
   }
-  return <div className={`${className} ${blur ? `blur-${toBlurValue(blur)}` : ''}`}>{children}</div>;
+  return (
+    <div className={`${className} ${blur ? `blur-${toBlurValue(blur)}` : ''}`} {...rest}>
+      {children}
+    </div>
+  );
 };
 
 const shadowStyle = (props: CardProps) => {

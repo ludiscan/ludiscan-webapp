@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
+import { forwardRef } from 'react';
 
-import type { CSSProperties, FC, ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 
 export type FlexProps = {
   className?: string | undefined;
@@ -11,13 +12,15 @@ export type FlexProps = {
   style?: CSSProperties;
 };
 
-const Component: FC<FlexProps> = ({ className, children, style }) => {
+const Component = forwardRef<HTMLDivElement, FlexProps>(({ className, children, style }, ref) => {
   return (
-    <div className={className} style={{ ...style }}>
+    <div ref={ref} className={className} style={{ ...style }}>
       {children}
     </div>
   );
-};
+});
+
+Component.displayName = 'Flex';
 
 export const Flex = styled(Component)`
   display: flex;

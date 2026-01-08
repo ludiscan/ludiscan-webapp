@@ -2,17 +2,16 @@ import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BsInfoCircle } from 'react-icons/bs';
-import { IoClose } from 'react-icons/io5';
+import { IoClose, IoOpenOutline } from 'react-icons/io5';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 import { InputRow } from './InputRow';
 
-import type { Theme } from '@emotion/react';
 import type { HeatmapMenuProps } from '@src/features/heatmap/HeatmapMenuContent';
 import type { PlayerTimelineDetail } from '@src/modeles/heatmapView';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
-import type { FC, CSSProperties } from 'react';
+import type { FC } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
 import { Divider } from '@src/component/atoms/Divider';
@@ -22,34 +21,23 @@ import { Text } from '@src/component/atoms/Text';
 import { Toggle } from '@src/component/atoms/Toggle';
 import { Modal } from '@src/component/molecules/Modal';
 import { TextArea } from '@src/component/molecules/TextArea';
+import { SessionDetailModal } from '@src/features/heatmap/SessionPickerModal';
 import { useFieldObjectPatch } from '@src/hooks/useFieldObject';
 import { useGetApi } from '@src/hooks/useGetApi';
+import { useLocale } from '@src/hooks/useLocale';
 import { usePlayerTimelinePatch, usePlayerTimelinePick } from '@src/hooks/usePlayerTimeline';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { useApiClient } from '@src/modeles/ApiClientContext';
 import { DefaultStaleTime } from '@src/modeles/qeury';
-import { toISOAboutStringWithTimezone } from '@src/utils/locale';
 import { compileHVQL, parseHVQL } from '@src/utils/vql';
-
-function toggleButtonStyle(theme: Theme): CSSProperties {
-  return {
-    background: 'unset',
-    color: theme.colors.secondary.dark,
-    borderRadius: '8px',
-    padding: '8px 4px',
-    width: '100%',
-    height: 'fit-content',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'start',
-  };
-}
 
 const DetailBlockInternal: FC<{ className?: string; details: PlayerTimelineDetail[]; service: HeatmapDataService }> = ({ className, details }) => {
   const setData = usePlayerTimelinePatch();
   const { theme } = useSharedTheme();
+  const { t } = useLocale();
   const apiClient = useApiClient();
-  // const player = detail.player;
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
   const project_id = details[0].project_id;
   const session_id = details[0].session_id;
   const { data: session } = useQuery({
@@ -74,7 +62,7 @@ const DetailBlockInternal: FC<{ className?: string; details: PlayerTimelineDetai
     <InlineFlexColumn gap={4} className={className}>
       <Divider />
       <FlexRow className={`${className}__row`} wrap={'nowrap'} align={'center'}>
-        <Text text={`Session: ${session_id}`} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
+        <Text text={`${t('heatmap.timeline.session')}: ${session_id}`} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
         <div style={{ flex: 1 }} />
         <Button
           fontSize={'base'}
@@ -91,7 +79,7 @@ const DetailBlockInternal: FC<{ className?: string; details: PlayerTimelineDetai
       </FlexRow>
       {details.map((detail, index) => (
         <InlineFlexRow key={index} wrap={'nowrap'} align={'center'} className={`${className}__row`} gap={4}>
-          <Text text={`Player: ${detail.player}`} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
+          <Text text={`${t('heatmap.timeline.player')}: ${detail.player}`} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
           <Switch
             checked={detail.visible}
             onChange={() => {
@@ -114,26 +102,11 @@ const DetailBlockInternal: FC<{ className?: string; details: PlayerTimelineDetai
           />
         </InlineFlexRow>
       ))}
-      {session && session.data && (
-        <InlineFlexColumn gap={2}>
-          <Toggle buttonStyle={toggleButtonStyle(theme)} label={<Text text={'Sesssion'} />}>
-            <InputRow label={'name'}>
-              <Text text={session.data.name} fontSize={theme.typography.fontSize.sm} />
-            </InputRow>
-            <InlineFlexRow wrap={'nowrap'} align={'center'} className={`${className}__row`} gap={4}>
-              <Text text={'Start Time'} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
-              <div className={`${className}__weight1`}>
-                <Text text={toISOAboutStringWithTimezone(new Date(session.data.startTime))} fontSize={theme.typography.fontSize.sm} />
-              </div>
-              {session.data.endTime && (
-                <div className={`${className}__weight1`}>
-                  <Text text={toISOAboutStringWithTimezone(new Date(session.data.endTime))} fontSize={theme.typography.fontSize.sm} />
-                </div>
-              )}
-            </InlineFlexRow>
-          </Toggle>
-        </InlineFlexColumn>
-      )}
+      <button className={`${className}__detailLink`} onClick={() => setIsDetailModalOpen(true)} type='button'>
+        <IoOpenOutline size={12} />
+        <span>{t('heatmap.timeline.viewSessionDetails')}</span>
+      </button>
+      <SessionDetailModal isOpen={isDetailModalOpen} onClose={() => setIsDetailModalOpen(false)} session={session?.data ?? null} />
     </InlineFlexColumn>
   );
 };
@@ -150,17 +123,36 @@ const DetailBlock = styled(DetailBlockInternal)`
     width: 100%;
     padding: 4px 8px;
   }
+
+  &__detailLink {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    padding: 4px 8px;
+    font-size: ${({ theme }) => theme.typography.fontSize.sm};
+    color: ${({ theme }) => theme.colors.text.link};
+    cursor: pointer;
+    background: none;
+    border: none;
+    transition: all 0.15s ease;
+
+    &:hover {
+      color: ${({ theme }) => theme.colors.text.linkHover};
+      text-decoration: underline;
+    }
+  }
 `;
 
 const queryPlaceholder =
   'map status.hand {\n' +
   '  rock    -> player-current-point-icon: hand-rock;\n' +
   '  paper   -> player-current-point-icon: hand-paper;\n' +
-  '  scissor -> player-current-point-icon: hand-scissor;\n' +
+  '  scissors -> player-current-point-icon: hand-scissor;\n' +
   '}';
 
 const PlayerTimelineComponent: FC<HeatmapMenuProps> = ({ className, service }) => {
   const { theme } = useSharedTheme();
+  const { t } = useLocale();
   const setData = usePlayerTimelinePatch();
   const setFieldObjectData = useFieldObjectPatch();
   const { details, queryText: queryTextState, visible } = usePlayerTimelinePick('details', 'queryText', 'visible');
@@ -329,22 +321,22 @@ const PlayerTimelineComponent: FC<HeatmapMenuProps> = ({ className, service }) =
 
   return (
     <InlineFlexColumn gap={8} style={{ width: '100%' }}>
-      <InputRow label={'visibility'} align={'center'}>
-        <Switch disabled={visibilityDisabled} checked={visible} onChange={onVisibilityChange} size={'small'} label={'visibility'} />
+      <InputRow label={t('heatmap.timeline.visibility')} align={'center'}>
+        <Switch disabled={visibilityDisabled} checked={visible} onChange={onVisibilityChange} size={'small'} label={t('heatmap.timeline.visibility')} />
       </InputRow>
-      {visibilityDisabled && <Text text={'please select project and session'} fontSize={theme.typography.fontSize.sm} />}
+      {visibilityDisabled && <Text text={t('heatmap.timeline.selectProjectAndSession')} fontSize={theme.typography.fontSize.sm} />}
       {sessionByDetail.size > 0 && (
         <>
           <Toggle
             className={`${className}__queryTextFieldContainer`}
-            label={'filter query'}
+            label={t('heatmap.timeline.filterQuery')}
             maxHeight={600}
             trailingIcon={<BsInfoCircle size={12} />}
             onTrailingIconClick={() => setIsOpenQueryInfo(true)}
           >
             <TextArea placeholder={queryPlaceholder} className={`${className}__queryTextField`} value={queryText} onChange={setQueryText} />
             <Button fontSize={'sm'} scheme={'primary'} onClick={onApplyQuery} disabled={queryDisable}>
-              <Text text={'search'} />
+              <Text text={t('heatmap.timeline.search')} />
             </Button>
           </Toggle>
           {Array.from(sessionByDetail.values()).map((details, index) => (
@@ -353,7 +345,7 @@ const PlayerTimelineComponent: FC<HeatmapMenuProps> = ({ className, service }) =
         </>
       )}
       {isOpenQueryInfo && (
-        <Modal isOpen={isOpenQueryInfo} title={'VQL ガイド (Heatmap View Query Language)'} onClose={() => setIsOpenQueryInfo(false)} closeOutside={true}>
+        <Modal isOpen={isOpenQueryInfo} title={t('heatmap.timeline.vqlGuideTitle')} onClose={() => setIsOpenQueryInfo(false)} closeOutside={true}>
           <Markdown remarkPlugins={[remarkGfm]}>{queryReadme}</Markdown>
         </Modal>
       )}

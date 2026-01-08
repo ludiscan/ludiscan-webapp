@@ -15,7 +15,16 @@ export type SwitchProps = {
 const SwitchComponent: FC<SwitchProps> = ({ className, label, checked, size = 'medium', onChange, disabled = false }: SwitchProps) => {
   return (
     <label className={`${className} ${size}`} aria-label={label}>
-      <input id={label ?? className} type='checkbox' checked={checked} onChange={(e) => onChange(e.target.checked)} disabled={disabled} />
+      <input
+        id={label ?? className}
+        type='checkbox'
+        role='switch'
+        checked={checked}
+        aria-checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        disabled={disabled}
+        aria-disabled={disabled}
+      />
       <span className={`${className}__slider ${disabled && 'disabled'}`} />
     </label>
   );
