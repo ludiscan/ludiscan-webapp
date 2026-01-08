@@ -109,6 +109,33 @@ export const en = {
     noSessions: 'No sessions',
   },
 
+  // Session Menu
+  session: {
+    copyEmbedUrl: 'Copy Embed URL',
+    embedUrlCopied: 'Embed URL copied to clipboard',
+    embedUrlFailed: 'Failed to get Embed URL',
+  },
+
+  // Session Form Modal
+  sessionForm: {
+    editTitle: 'Edit Session',
+    sessionName: 'Session Name',
+    deviceId: 'Device ID',
+    platform: 'Platform',
+    appVersion: 'App Version',
+    sessionUpdated: 'Session updated successfully',
+    updateFailed: 'Failed to update session',
+  },
+
+  // Session Delete Modal
+  sessionDelete: {
+    title: 'Delete Session',
+    confirmMessage: 'Are you sure you want to delete session "{name}"?',
+    warning: 'Deleted sessions cannot be restored. All related data will be deleted.',
+    sessionDeleted: 'Session deleted successfully',
+    deleteFailed: 'Failed to delete session',
+  },
+
   // Members Tab
   members: {
     addMember: '+ Add Member',

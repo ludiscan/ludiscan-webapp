@@ -109,6 +109,33 @@ export const ja = {
     noSessions: 'セッションがありません',
   },
 
+  // Session Menu
+  session: {
+    copyEmbedUrl: 'Embed URLをコピー',
+    embedUrlCopied: 'Embed URLをコピーしました',
+    embedUrlFailed: 'Embed URLの取得に失敗しました',
+  },
+
+  // Session Form Modal
+  sessionForm: {
+    editTitle: 'セッションを編集',
+    sessionName: 'セッション名',
+    deviceId: 'デバイスID',
+    platform: 'プラットフォーム',
+    appVersion: 'アプリバージョン',
+    sessionUpdated: 'セッションを更新しました',
+    updateFailed: 'セッションの更新に失敗しました',
+  },
+
+  // Session Delete Modal
+  sessionDelete: {
+    title: 'セッションを削除',
+    confirmMessage: 'セッション「{name}」を削除してよろしいですか？',
+    warning: '削除されたセッションは復元できません。関連するすべてのデータも削除されます。',
+    sessionDeleted: 'セッションを削除しました',
+    deleteFailed: 'セッションの削除に失敗しました',
+  },
+
   // Members Tab
   members: {
     addMember: '+ メンバーを追加',

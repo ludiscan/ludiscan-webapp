@@ -1,19 +1,24 @@
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState, useMemo } from 'react';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
+import { useState, useMemo, useCallback } from 'react';
 import { BiRefresh, BiSearch, BiChevronDown, BiChevronUp, BiFilter, BiExpand, BiCollapse } from 'react-icons/bi';
 
 import type { Project } from '@src/modeles/project';
+import type { Session } from '@src/modeles/session';
 import type { FC } from 'react';
 
 import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { VerticalSpacer } from '@src/component/atoms/Spacer';
 import { Text } from '@src/component/atoms/Text';
 import { Pagination } from '@src/component/molecules/Pagination';
+import { SessionDeleteConfirmModal } from '@src/component/organisms/SessionDeleteConfirmModal';
+import { SessionFormModal } from '@src/component/organisms/SessionFormModal';
 import { useToast } from '@src/component/templates/ToastContext';
 import { SessionAggregationPanel } from '@src/features/session/SessionAggregationPanel';
 import { SessionFilterPanel } from '@src/features/session/SessionFilterPanel';
+import { useAuth } from '@src/hooks/useAuth';
+import { useLocale } from '@src/hooks/useLocale';
 import { useSessionFiltersAndAggregate } from '@src/hooks/useSessionFilters';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { useApiClient } from '@src/modeles/ApiClientContext';
@@ -41,6 +46,8 @@ const sortOptionToApiParams: Record<SortOption, { sortBy: ApiSortBy; sortOrder: 
 
 const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) => {
   const { theme } = useSharedTheme();
+  const { t } = useLocale();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const { showToast } = useToast();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -51,6 +58,38 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
   const [showAggregation, setShowAggregation] = useState(false);
   const [compactMode, setCompactMode] = useState(false);
   const apiClient = useApiClient();
+
+  // Modal states
+  const [editingSession, setEditingSession] = useState<Session | null>(null);
+  const [deletingSession, setDeletingSession] = useState<Session | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Fetch project members to determine current user's role
+  const { data: members = [] } = useQuery({
+    queryKey: ['members', project.id],
+    queryFn: async () => {
+      const { data, error } = await apiClient.GET('/api/v0.1/projects/{project_id}/members', {
+        params: {
+          path: {
+            project_id: project.id,
+          },
+        },
+      });
+      if (error) return [];
+      return data;
+    },
+    staleTime: DefaultStaleTime,
+  });
+
+  // Determine current user's role
+  const currentUserRole = useMemo(() => {
+    if (!user) return null;
+    const membership = members.find((m) => m.user_id === user.id);
+    return membership?.role ?? null;
+  }, [user, members]);
+
+  // Check if user is admin (member with admin role OR project owner)
+  const isAdmin = currentUserRole === 'admin' || project.user?.id === user?.id;
 
   // Use the new filters and aggregation hook
   const {
@@ -122,6 +161,73 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
       showToast('集計に失敗しました', 3, 'error');
     }
   };
+
+  // Session actions
+  const handleEdit = useCallback((session: Session) => {
+    setEditingSession(session);
+  }, []);
+
+  const handleDelete = useCallback((session: Session) => {
+    setDeletingSession(session);
+  }, []);
+
+  const handleCopyEmbedUrl = useCallback(
+    async (session: Session) => {
+      try {
+        const { data, error } = await apiClient.POST('/api/v0/heatmap/projects/{project_id}/play_session/{session_id}/embed-url', {
+          params: {
+            path: {
+              project_id: project.id,
+              session_id: session.sessionId,
+            },
+          },
+        });
+        if (error) {
+          showToast(t('session.embedUrlFailed'), 3, 'error');
+          return;
+        }
+        await navigator.clipboard.writeText(data.url);
+        showToast(t('session.embedUrlCopied'), 2, 'success');
+      } catch {
+        showToast(t('session.embedUrlFailed'), 3, 'error');
+      }
+    },
+    [apiClient, project.id, showToast, t],
+  );
+
+  // Delete mutation
+  const { mutateAsync: deleteSession } = useMutation({
+    mutationFn: async (session: Session) => {
+      const { error } = await apiClient.DELETE('/api/v0/projects/{project_id}/play_session/{session_id}', {
+        params: {
+          path: {
+            project_id: project.id,
+            session_id: session.sessionId,
+          },
+        },
+      });
+      if (error) {
+        throw new Error(t('sessionDelete.deleteFailed'));
+      }
+    },
+    onSuccess: () => {
+      showToast(t('sessionDelete.sessionDeleted'), 2, 'success');
+      queryClient.invalidateQueries({ queryKey: ['sessions', project.id] });
+      queryClient.invalidateQueries({ queryKey: ['project', project.id] });
+      setDeletingSession(null);
+      setIsDeleting(false);
+    },
+    onError: (error: Error) => {
+      showToast(error.message, 3, 'error');
+      setIsDeleting(false);
+    },
+  });
+
+  const handleConfirmDelete = useCallback(async () => {
+    if (!deletingSession) return;
+    setIsDeleting(true);
+    await deleteSession(deletingSession);
+  }, [deletingSession, deleteSession]);
 
   // Filter sessions by search query (sorting is done server-side)
   const filteredSessions = useMemo(() => {
@@ -264,7 +370,14 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
             <FlexColumn gap={0}>
               {filteredSessions.map((session) => (
                 <div key={session.sessionId} className={`${className}__sessionItem`}>
-                  <SessionItemRow session={session} compact={compactMode} />
+                  <SessionItemRow
+                    session={session}
+                    compact={compactMode}
+                    projectId={project.id}
+                    onEdit={isAdmin ? handleEdit : undefined}
+                    onDelete={isAdmin ? handleDelete : undefined}
+                    onCopyEmbedUrl={handleCopyEmbedUrl}
+                  />
                 </div>
               ))}
             </FlexColumn>
@@ -303,6 +416,16 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
         )}
       </div>
       <VerticalSpacer size={42} />
+
+      {/* Modals */}
+      <SessionFormModal isOpen={!!editingSession} onClose={() => setEditingSession(null)} session={editingSession} projectId={project.id} />
+      <SessionDeleteConfirmModal
+        isOpen={!!deletingSession}
+        session={deletingSession}
+        isDeleting={isDeleting}
+        onClose={() => setDeletingSession(null)}
+        onConfirmDelete={handleConfirmDelete}
+      />
     </div>
   );
 };
