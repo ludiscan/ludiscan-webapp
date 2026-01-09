@@ -15,7 +15,8 @@ const fs = require('fs');
 const path = require('path');
 
 const DOCS_DIR = path.join(__dirname, '..', 'src', 'docs');
-const OUTPUT_FILE = path.join(__dirname, '..', 'generated', 'docs-groups.json');
+const OUTPUT_GROUPS_FILE = path.join(__dirname, '..', 'generated', 'docs-groups.json');
+const OUTPUT_PAGES_FILE = path.join(__dirname, '..', 'generated', 'docs-pages.json');
 const FRONTMATTER_DELIMITER = '---';
 
 /**
@@ -86,11 +87,15 @@ function parseMarkdownFile(filePath, slug) {
       public: rawFrontmatter.public !== 'false',
     };
 
+    // Extract content (everything after frontmatter)
+    const content = lines.slice(frontmatterEnd + 1).join('\n').trim();
+
     return {
       success: true,
       data: {
         slug,
         frontmatter,
+        content,
       },
     };
   } catch (error) {
@@ -135,7 +140,7 @@ function walkDir(dir, prefix = '') {
 }
 
 /**
- * Create DocGroup array from pages
+ * Create DocGroup array from pages (for sidebar navigation - without content)
  */
 function createDocGroups(pages) {
   // Filter to only public pages
@@ -149,7 +154,11 @@ function createDocGroups(pages) {
     if (!groupMap.has(group)) {
       groupMap.set(group, []);
     }
-    groupMap.get(group).push(page);
+    // Create a copy without content for sidebar (to keep file size small)
+    groupMap.get(group).push({
+      slug: page.slug,
+      frontmatter: page.frontmatter,
+    });
   });
 
   // Sort pages within each group by order, then create groups array
@@ -161,6 +170,24 @@ function createDocGroups(pages) {
     .sort((a, b) => a.name.localeCompare(b.name));
 
   return groups;
+}
+
+/**
+ * Create pages map for static generation (with full content)
+ * Returns object keyed by slug for efficient lookup
+ */
+function createPagesMap(pages) {
+  const pagesMap = {};
+
+  pages.forEach((page) => {
+    pagesMap[page.slug] = {
+      slug: page.slug,
+      frontmatter: page.frontmatter,
+      content: page.content,
+    };
+  });
+
+  return pagesMap;
 }
 
 /**
@@ -186,19 +213,26 @@ function main() {
     });
   }
 
-  // Create doc groups
+  // Create doc groups (for sidebar, without content)
   const groups = createDocGroups(pages);
 
+  // Create pages map (for static generation, with full content)
+  const pagesMap = createPagesMap(pages);
+
   // Ensure output directory exists
-  const outputDir = path.dirname(OUTPUT_FILE);
+  const outputDir = path.dirname(OUTPUT_GROUPS_FILE);
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
   }
 
-  // Write JSON file
-  fs.writeFileSync(OUTPUT_FILE, JSON.stringify(groups, null, 2), 'utf-8');
+  // Write groups JSON file (for sidebar navigation)
+  fs.writeFileSync(OUTPUT_GROUPS_FILE, JSON.stringify(groups, null, 2), 'utf-8');
+  console.log(`[generate-docs-json] Generated ${OUTPUT_GROUPS_FILE}`);
 
-  console.log(`[generate-docs-json] Generated ${OUTPUT_FILE}`);
+  // Write pages JSON file (for static page generation)
+  fs.writeFileSync(OUTPUT_PAGES_FILE, JSON.stringify(pagesMap, null, 2), 'utf-8');
+  console.log(`[generate-docs-json] Generated ${OUTPUT_PAGES_FILE}`);
+
   console.log(`[generate-docs-json] Total groups: ${groups.length}, Total pages: ${pages.length}`);
 }
 
