@@ -61,7 +61,11 @@ const Component: FC<SidebarLayoutProps> = ({ className }) => {
   });
 
   // Fetch docs groups for the dropdown (available to all users)
-  const { data: docsGroups = [] } = useQuery<DocGroup[]>({
+  const {
+    data: docsGroups = [],
+    isLoading: isDocsLoading,
+    isError: isDocsError,
+  } = useQuery<DocGroup[]>({
     queryKey: ['docs-groups'],
     queryFn: async () => {
       const response = await fetch('/api/docs/groups');
@@ -140,30 +144,42 @@ const Component: FC<SidebarLayoutProps> = ({ className }) => {
                   {/* Dropdown content */}
                   {isExpanded && (
                     <div className={`${className}__dropdown`}>
-                      {docsGroups.map((group) => (
-                        <div key={group.name} className={`${className}__dropdownGroup`}>
-                          <div className={`${className}__dropdownGroupTitle`}>
-                            <Text
-                              text={group.name}
-                              fontSize={theme.typography.fontSize.sm}
-                              fontWeight={theme.typography.fontWeight.bold}
-                              color={theme.colors.text.tertiary}
-                            />
-                          </div>
-                          {group.items.map((doc) => (
-                            <Link key={doc.slug} href={`/heatmap/docs/${doc.slug}`}>
-                              <div className={`${className}__dropdownItem ${isActive(`/heatmap/docs/${doc.slug}`) ? 'active' : ''}`}>
-                                <Text
-                                  text={doc.frontmatter.title}
-                                  fontSize={theme.typography.fontSize.sm}
-                                  fontWeight={isActive(`/heatmap/docs/${doc.slug}`) ? theme.typography.fontWeight.bold : theme.typography.fontWeight.medium}
-                                  color={theme.colors.text.primary}
-                                />
-                              </div>
-                            </Link>
-                          ))}
+                      {isDocsLoading && (
+                        <div className={`${className}__dropdownLoading`}>
+                          <Text text={t('common.loading')} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
                         </div>
-                      ))}
+                      )}
+                      {isDocsError && (
+                        <div className={`${className}__dropdownError`}>
+                          <Text text={t('accessibility.errorOccurred')} fontSize={theme.typography.fontSize.sm} color={theme.colors.semantic.error.main} />
+                        </div>
+                      )}
+                      {!isDocsLoading &&
+                        !isDocsError &&
+                        docsGroups.map((group) => (
+                          <div key={group.name} className={`${className}__dropdownGroup`}>
+                            <div className={`${className}__dropdownGroupTitle`}>
+                              <Text
+                                text={group.name}
+                                fontSize={theme.typography.fontSize.sm}
+                                fontWeight={theme.typography.fontWeight.bold}
+                                color={theme.colors.text.tertiary}
+                              />
+                            </div>
+                            {group.items.map((doc) => (
+                              <Link key={doc.slug} href={`/heatmap/docs/${doc.slug}`}>
+                                <div className={`${className}__dropdownItem ${isActive(`/heatmap/docs/${doc.slug}`) ? 'active' : ''}`}>
+                                  <Text
+                                    text={doc.frontmatter.title}
+                                    fontSize={theme.typography.fontSize.sm}
+                                    fontWeight={isActive(`/heatmap/docs/${doc.slug}`) ? theme.typography.fontWeight.bold : theme.typography.fontWeight.medium}
+                                    color={theme.colors.text.primary}
+                                  />
+                                </div>
+                              </Link>
+                            ))}
+                          </div>
+                        ))}
                     </div>
                   )}
                 </div>
@@ -258,6 +274,11 @@ export const SidebarLayout = styled(Component)`
 
   &__dropdownGroup {
     margin-block-end: var(--spacing-sm);
+  }
+
+  &__dropdownLoading,
+  &__dropdownError {
+    padding: var(--spacing-sm) var(--spacing-xs);
   }
 
   &__dropdownGroupTitle {
