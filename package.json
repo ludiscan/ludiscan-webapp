@@ -35,7 +35,8 @@
     "generate:api-schemes": "bunx openapi-typescript swagger.json --output generated/api.d.ts",
     "generate:api-schemes:local-fetch": "bunx openapi-typescript http://localhost:3211/swagger/api/v0/json --output generated/api.d.ts && eslint generated/api.d.ts --fix && prettier --write generated/api.d.ts",
     "build:heatmap-bundle": "bun scripts/create-heatmap-bundle.js",
-    "prebuild:prod": "bun run build:heatmap-bundle",
+    "generate:docs-json": "node scripts/generate-docs-json.js",
+    "prebuild:prod": "bun run generate:docs-json && bun run build:heatmap-bundle",
     "tokens:build": "style-dictionary build --config style-dictionary.config.js",
     "tokens:watch": "style-dictionary build --config style-dictionary.config.js --watch"
   },

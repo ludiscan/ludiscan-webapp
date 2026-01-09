@@ -1,0 +1,142 @@
+[
+  {
+    "name": "general",
+    "items": [
+      {
+        "slug": "index",
+        "frontmatter": {
+          "group": "general",
+          "title": "ドキュメント",
+          "order": 0,
+          "description": "ludiscan-webappのドキュメントへようこそ",
+          "public": true
+        }
+      },
+      {
+        "slug": "general/quick-start",
+        "frontmatter": {
+          "group": "general",
+          "title": "クイックスタート",
+          "order": 1,
+          "description": "5分でludiscan-webappの基本操作を習得",
+          "public": true
+        }
+      },
+      {
+        "slug": "general/account-settings",
+        "frontmatter": {
+          "group": "general",
+          "title": "アカウント設定",
+          "order": 2,
+          "description": "プロフィール、セキュリティ、APIキーの管理方法",
+          "public": true
+        }
+      },
+      {
+        "slug": "general/glossary",
+        "frontmatter": {
+          "group": "general",
+          "title": "用語集",
+          "order": 3,
+          "description": "ludiscan-webappで使用される専門用語の説明",
+          "public": true
+        }
+      }
+    ]
+  },
+  {
+    "name": "heatmap",
+    "items": [
+      {
+        "slug": "heatmap/getting-started",
+        "frontmatter": {
+          "group": "heatmap",
+          "title": "はじめに",
+          "order": 1,
+          "description": "ヒートマップビューアーの基本的な使い方を学ぶ",
+          "public": true
+        }
+      },
+      {
+        "slug": "heatmap/basic-usage",
+        "frontmatter": {
+          "group": "heatmap",
+          "title": "基本操作",
+          "order": 2,
+          "description": "プロジェクトとセッションの基本的な操作方法",
+          "public": true
+        }
+      },
+      {
+        "slug": "heatmap/viewer",
+        "frontmatter": {
+          "group": "heatmap",
+          "title": "ヒートマップビューアー",
+          "order": 3,
+          "description": "ヒートマップビューアーの詳細な使い方",
+          "public": true
+        }
+      },
+      {
+        "slug": "heatmap/controls",
+        "frontmatter": {
+          "group": "heatmap",
+          "title": "カメラ操作",
+          "order": 4,
+          "description": "ヒートマップビューアーのカメラ操作をマスターする",
+          "public": true
+        }
+      },
+      {
+        "slug": "heatmap/visualization",
+        "frontmatter": {
+          "group": "heatmap",
+          "title": "表示モード",
+          "order": 5,
+          "description": "2D/3Dモードの違いと切り替え方法を理解する",
+          "public": true
+        }
+      },
+      {
+        "slug": "heatmap/timeline",
+        "frontmatter": {
+          "group": "heatmap",
+          "title": "タイムライン機能",
+          "order": 6,
+          "description": "タイムラインを使った時系列データの操作方法",
+          "public": true
+        }
+      },
+      {
+        "slug": "heatmap/export",
+        "frontmatter": {
+          "group": "heatmap",
+          "title": "データエクスポート",
+          "order": 7,
+          "description": "分析結果をエクスポートして共有・保存する",
+          "public": true
+        }
+      },
+      {
+        "slug": "heatmap/faq",
+        "frontmatter": {
+          "group": "heatmap",
+          "title": "よくある質問",
+          "order": 8,
+          "description": "トラブルシューティングとよくある質問",
+          "public": true
+        }
+      },
+      {
+        "slug": "heatmap/route-coach",
+        "frontmatter": {
+          "group": "heatmap",
+          "title": "Route Coach",
+          "order": 9,
+          "description": "AIによるゲームプレイ改善提案機能",
+          "public": true
+        }
+      }
+    ]
+  }
+]
