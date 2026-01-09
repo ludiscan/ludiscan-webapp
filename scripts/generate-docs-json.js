@@ -15,7 +15,8 @@ const fs = require('fs');
 const path = require('path');
 
 const DOCS_DIR = path.join(__dirname, '..', 'src', 'docs');
-const OUTPUT_FILE = path.join(__dirname, '..', 'generated', 'docs-groups.json');
+const OUTPUT_GROUPS_FILE = path.join(__dirname, '..', 'generated', 'docs-groups.json');
+const OUTPUT_PAGES_FILE = path.join(__dirname, '..', 'generated', 'docs-pages.json');
 const FRONTMATTER_DELIMITER = '---';
 
 /**
@@ -44,7 +45,7 @@ function parseYamlFrontmatter(yaml) {
 }
 
 /**
- * Parse a markdown file and extract frontmatter
+ * Parse a markdown file and extract frontmatter and content
  */
 function parseMarkdownFile(filePath, slug) {
   try {
@@ -86,11 +87,15 @@ function parseMarkdownFile(filePath, slug) {
       public: rawFrontmatter.public !== 'false',
     };
 
+    // Extract markdown content (everything after the closing frontmatter delimiter)
+    const content = lines.slice(frontmatterEnd + 1).join('\n').trim();
+
     return {
       success: true,
       data: {
         slug,
         frontmatter,
+        content,
       },
     };
   } catch (error) {
@@ -164,6 +169,17 @@ function createDocGroups(pages) {
 }
 
 /**
+ * Create pages object (slug -> page data map)
+ */
+function createPagesObject(pages) {
+  const pagesObj = {};
+  pages.forEach((page) => {
+    pagesObj[page.slug] = page;
+  });
+  return pagesObj;
+}
+
+/**
  * Main function
  */
 function main() {
@@ -186,19 +202,26 @@ function main() {
     });
   }
 
-  // Create doc groups
+  // Create doc groups (for sidebar navigation)
   const groups = createDocGroups(pages);
 
+  // Create pages object (for page content lookup)
+  const pagesObj = createPagesObject(pages);
+
   // Ensure output directory exists
-  const outputDir = path.dirname(OUTPUT_FILE);
+  const outputDir = path.dirname(OUTPUT_GROUPS_FILE);
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
   }
 
-  // Write JSON file
-  fs.writeFileSync(OUTPUT_FILE, JSON.stringify(groups, null, 2), 'utf-8');
+  // Write groups JSON file (sidebar navigation)
+  fs.writeFileSync(OUTPUT_GROUPS_FILE, JSON.stringify(groups, null, 2), 'utf-8');
 
-  console.log(`[generate-docs-json] Generated ${OUTPUT_FILE}`);
+  // Write pages JSON file (full page content)
+  fs.writeFileSync(OUTPUT_PAGES_FILE, JSON.stringify(pagesObj, null, 2), 'utf-8');
+
+  console.log(`[generate-docs-json] Generated ${OUTPUT_GROUPS_FILE}`);
+  console.log(`[generate-docs-json] Generated ${OUTPUT_PAGES_FILE}`);
   console.log(`[generate-docs-json] Total groups: ${groups.length}, Total pages: ${pages.length}`);
 }
 
