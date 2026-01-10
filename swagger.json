@@ -4917,7 +4917,7 @@
     },
     "/api/v0/heatmap/projects/{project_id}/play_session/{session_id}/embed-url": {
       "post": {
-        "description": "セッション完了後にWebViewで直接ヒートマップを表示するための短縮URL（4時間有効）を生成します。通常のJWT tokenで実行可能です。",
+        "description": "セッション完了後にWebViewで直接ヒートマップを表示するための短縮URLを生成します。有効期限は0.5〜8760時間（30分〜365日）の範囲で指定可能（デフォルト: 4時間）。通常のJWT tokenで実行可能です。",
         "operationId": "HeatmapController_createSessionEmbedUrl",
         "parameters": [
           {
@@ -4939,6 +4939,16 @@
             }
           }
         ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEmbedUrlDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": "Success",
@@ -5748,6 +5758,53 @@
         "summary": "APIキーがアクセス可能なプロジェクト一覧を取得",
         "tags": [
           "v0"
+        ]
+      }
+    },
+    "/api/v0/game/screenshot-storage-status": {
+      "get": {
+        "operationId": "GameController_getScreenshotStorageStatus",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "ゲームクライアント用APIキー",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScreenshotStorageStatusDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "X-API-Key": []
+          }
+        ],
+        "summary": "スクリーンショットストレージの有効状態を取得",
+        "tags": [
+          "Game Client API"
         ]
       }
     },
@@ -7478,7 +7535,7 @@
   "info": {
     "title": "Ludiscan API Documentation",
     "description": "Ludiscan API for game analytics and session tracking",
-    "version": "1.27.0",
+    "version": "1.28.0",
     "contact": {}
   },
   "tags": [],
@@ -9101,6 +9158,19 @@
           "offset"
         ]
       },
+      "CreateEmbedUrlDto": {
+        "type": "object",
+        "properties": {
+          "expiresInHours": {
+            "type": "number",
+            "minimum": 0.5,
+            "maximum": 8760,
+            "default": 4,
+            "example": 4,
+            "description": "有効期限（時間単位）。0.5〜8760の範囲で指定可能。デフォルト: 4時間"
+          }
+        }
+      },
       "HeatmapEmbedUrlResponseDto": {
         "type": "object",
         "properties": {
@@ -9611,6 +9681,19 @@
         },
         "required": [
           "projectIds"
+        ]
+      },
+      "ScreenshotStorageStatusDto": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether screenshot storage is enabled",
+            "example": true
+          }
+        },
+        "required": [
+          "enabled"
         ]
       },
       "EventRawCoordinateDto": {
