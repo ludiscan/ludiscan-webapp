@@ -1222,7 +1222,7 @@ export interface paths {
     put?: never;
     /**
      * ヒートマップ埋め込みページのURLを取得（JWT認証）
-     * @description セッション完了後にWebViewで直接ヒートマップを表示するための短縮URL（4時間有効）を生成します。通常のJWT tokenで実行可能です。
+     * @description セッション完了後にWebViewで直接ヒートマップを表示するための短縮URLを生成します。有効期限は0.5〜8760時間（30分〜365日）の範囲で指定可能（デフォルト: 4時間）。通常のJWT tokenで実行可能です。
      */
     post: operations['HeatmapController_createSessionEmbedUrl'];
     delete?: never;
@@ -1451,6 +1451,23 @@ export interface paths {
      * @description このAPIキーがアクセス可能なプロジェクトを更新します。
      */
     put: operations['GameApiKeysController_updateProjects'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/game/screenshot-storage-status': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** スクリーンショットストレージの有効状態を取得 */
+    get: operations['GameController_getScreenshotStorageStatus'];
+    put?: never;
     post?: never;
     delete?: never;
     options?: never;
@@ -2785,6 +2802,14 @@ export interface components {
        */
       offset: number;
     };
+    CreateEmbedUrlDto: {
+      /**
+       * @description 有効期限（時間単位）。0.5〜8760の範囲で指定可能。デフォルト: 4時間
+       * @default 4
+       * @example 4
+       */
+      expiresInHours: number;
+    };
     HeatmapEmbedUrlResponseDto: {
       /**
        * @description ヒートマップ埋め込みページのURL（トークン付き）
@@ -3088,6 +3113,13 @@ export interface components {
        *     ]
        */
       projectIds: number[];
+    };
+    ScreenshotStorageStatusDto: {
+      /**
+       * @description Whether screenshot storage is enabled
+       * @example true
+       */
+      enabled: boolean;
     };
     EventRawCoordinateDto: {
       /** @description X coordinate */
@@ -6283,7 +6315,11 @@ export interface operations {
       };
       cookie?: never;
     };
-    requestBody?: never;
+    requestBody?: {
+      content: {
+        'application/json': components['schemas']['CreateEmbedUrlDto'];
+      };
+    };
     responses: {
       /** @description Success */
       201: {
@@ -6846,6 +6882,38 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  GameController_getScreenshotStorageStatus: {
+    parameters: {
+      query?: never;
+      header: {
+        /** @description ゲームクライアント用APIキー */
+        'X-API-Key': string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ScreenshotStorageStatusDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
       };
     };
   };
