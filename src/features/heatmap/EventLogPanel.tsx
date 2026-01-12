@@ -24,6 +24,8 @@ const formatTimestamp = (ms: number): string => {
 type EventLogPanelProps = {
   service: HeatmapDataService;
   eventLogKeys: string[] | null;
+  collapsed?: boolean;
+  onCollapsedChange?: (collapsed: boolean) => void;
 };
 
 type EventLogTypeSectionProps = {
@@ -199,11 +201,20 @@ const EventLogTypeSection: FC<EventLogTypeSectionProps> = memo(({ logName, servi
 
 EventLogTypeSection.displayName = 'EventLogTypeSection';
 
-const EventLogPanelComponent: FC<EventLogPanelProps> = ({ service, eventLogKeys }) => {
+const EventLogPanelComponent: FC<EventLogPanelProps> = ({
+  service,
+  eventLogKeys,
+  collapsed: controlledCollapsed,
+  onCollapsedChange,
+}) => {
   const { theme } = useSharedTheme();
   const logs = useEventLogSelect((s) => s.logs);
   const setTimelineState = usePlayerTimelinePatch();
-  const [collapsed, setCollapsed] = useState(false);
+  const [internalCollapsed, setInternalCollapsed] = useState(false);
+
+  // controlled/uncontrolled両対応
+  const isControlled = controlledCollapsed !== undefined;
+  const collapsed = isControlled ? controlledCollapsed : internalCollapsed;
 
   const handleEventClick = useCallback(
     (event: PositionEventLog) => {
@@ -224,8 +235,13 @@ const EventLogPanelComponent: FC<EventLogPanelProps> = ({ service, eventLogKeys 
   );
 
   const handleToggle = useCallback(() => {
-    setCollapsed((prev) => !prev);
-  }, []);
+    const newValue = !collapsed;
+    if (isControlled) {
+      onCollapsedChange?.(newValue);
+    } else {
+      setInternalCollapsed(newValue);
+    }
+  }, [collapsed, isControlled, onCollapsedChange]);
 
   if (!eventLogKeys || eventLogKeys.length === 0) {
     return null;

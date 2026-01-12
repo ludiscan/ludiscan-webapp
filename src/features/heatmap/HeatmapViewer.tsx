@@ -118,6 +118,9 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
   // マップリストのactiveOnlyフィルター（デフォルトtrue: アップロード済みのマップのみ表示）
   const [mapActiveOnly, setMapActiveOnly] = useState(true);
 
+  // EventLogPanelのcollapsed状態（スマホ時のキャンバスタップで閉じるため外部管理）
+  const [eventLogPanelCollapsed, setEventLogPanelCollapsed] = useState(false);
+
   const { data: mapList } = useQuery({
     queryKey: ['mapList', service.projectId, mapActiveOnly],
     queryFn: async () => {
@@ -422,13 +425,18 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
 
   const canvasAriaLabel = dimensionality === '2d' ? t('accessibility.heatmapCanvas2D') : t('accessibility.heatmapCanvas');
 
-  // スマホ縦向き時にキャンバスをタップしたらメニューを閉じる
+  // スマホ時にキャンバスをタップしたらメニューとEventLogPanelを閉じる（縦向き・横向き両対応）
   const handleCanvasClick = useCallback(() => {
-    const isSmallScreenPortrait = window.innerWidth < SMALL_SCREEN_BREAKPOINT && window.matchMedia('(orientation: portrait)').matches;
-    if (isSmallScreenPortrait && !menuPanelCollapsed) {
-      dispatch(setMenuPanelCollapsed(true));
+    const isSmallScreen = window.innerWidth < SMALL_SCREEN_BREAKPOINT;
+    if (isSmallScreen) {
+      if (!menuPanelCollapsed) {
+        dispatch(setMenuPanelCollapsed(true));
+      }
+      if (!eventLogPanelCollapsed) {
+        setEventLogPanelCollapsed(true);
+      }
     }
-  }, [menuPanelCollapsed, dispatch]);
+  }, [menuPanelCollapsed, eventLogPanelCollapsed, dispatch]);
 
   const renderCanvas = useCallback(
     (paneId?: string) => (
@@ -535,7 +543,12 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
         {/* EventLogパネル（セッション選択時に表示） */}
         {service.sessionId && (
           <div className={`${className}__eventLogPanel`}>
-            <EventLogPanel service={service} eventLogKeys={generalLogKeys ?? null} />
+            <EventLogPanel
+              service={service}
+              eventLogKeys={generalLogKeys ?? null}
+              collapsed={eventLogPanelCollapsed}
+              onCollapsedChange={setEventLogPanelCollapsed}
+            />
           </div>
         )}
 
@@ -650,7 +663,7 @@ export const HeatMapViewer = memo(
 
     &__player {
       position: absolute;
-      bottom: 40px;
+      bottom: var(--spacing-2xl);
       left: 50%;
       width: max-content;
       z-index: ${zIndexes.content + 2};
