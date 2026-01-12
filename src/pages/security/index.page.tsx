@@ -14,6 +14,7 @@ import { Header } from '@src/component/templates/Header';
 import { SidebarLayout } from '@src/component/templates/SidebarLayout';
 import { useAuth } from '@src/hooks/useAuth';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
+import { useSidebar } from '@src/hooks/useSidebar';
 import { InnerContent } from '@src/pages/_app.page';
 
 export type SecurityPageProps = {
@@ -25,15 +26,13 @@ const Component: FC<SecurityPageProps> = ({ className }) => {
   const router = useRouter();
   const { theme } = useSharedTheme();
 
+  const { toggle: toggleSidebar } = useSidebar();
+
   useEffect(() => {
     if (!isAuthorized && !isLoading && ready) {
       router.replace('/');
     }
   }, [isAuthorized, isLoading, ready, router]);
-
-  const handleBack = () => {
-    router.back();
-  };
 
   if (!ready || isLoading) {
     return (
@@ -55,7 +54,7 @@ const Component: FC<SecurityPageProps> = ({ className }) => {
       <DashboardBackgroundCanvas className='visible' />
       <SidebarLayout />
       <InnerContent>
-        <Header title='Security Settings' onClick={handleBack} />
+        <Header title='Security Settings' onToggleSidebar={toggleSidebar} />
 
         <div className={`${className}__container`}>
           <Card blur color={theme.colors.surface.base} className={`${className}__card`}>

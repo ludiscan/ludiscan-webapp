@@ -4,8 +4,10 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { CiUser, CiLight, CiDark, CiBellOn } from 'react-icons/ci';
-import { FiChevronLeft } from 'react-icons/fi';
 import { MdLogout } from 'react-icons/md';
+import { RiMenuLine } from 'react-icons/ri';
+
+import packageJson from '../../../package.json';
 
 import type { ReleaseResponse } from '@src/pages/api/releases.api';
 import type { FC, ReactNode } from 'react';
@@ -33,10 +35,11 @@ export type HeaderProps = {
   title: string;
   iconEnd?: ReactNode;
   isOffline?: boolean;
-  onClick?: () => void | Promise<void>;
+  /** サイドバーを開くためのコールバック（モバイル時にハンバーガーメニューとして表示） */
+  onToggleSidebar?: () => void;
 };
 
-const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, iconEnd, isOffline = false }) => {
+const Component: FC<HeaderProps> = ({ className, title, onToggleSidebar, iconTitleEnd, iconEnd, isOffline = false }) => {
   const { theme, toggleTheme } = useSharedTheme();
   const { t } = useLocale();
 
@@ -52,6 +55,7 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
   const isDesktop = useIsDesktop();
 
   const isLoginPage = pathname === '/login';
+  const version = packageJson.version;
 
   // Scroll-based header visibility
   useEffect(() => {
@@ -107,12 +111,6 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
     }
   }, [releaseData]);
 
-  const backIconHandle = useCallback(() => {
-    if (onClick) {
-      onClick();
-    }
-  }, [onClick]);
-
   const handleLogout = useCallback(async () => {
     await logout();
     router.push('/login');
@@ -129,25 +127,30 @@ const Component: FC<HeaderProps> = ({ className, title, onClick, iconTitleEnd, i
   return (
     <PanelCard className={`${className} ${isVisible ? 'visible' : 'hidden'}`} padding={'0px 16px'} aria-label={t('accessibility.siteHeader')} role='banner'>
       <FlexRow align={'center'} gap={12} className={`${className}__innerHeader`} wrap={'nowrap'}>
-        {onClick && (
-          <Button fontSize={'xl'} onClick={backIconHandle} scheme={'none'}>
-            <FiChevronLeft />
-          </Button>
+        {/* モバイル時のみハンバーガーメニューを表示 */}
+        {onToggleSidebar && (
+          <MobileLayout>
+            <Button fontSize={'xl'} onClick={onToggleSidebar} scheme={'none'} aria-label='メニューを開く'>
+              <RiMenuLine size={24} color={theme.colors.text.primary} />
+            </Button>
+          </MobileLayout>
         )}
         <a href={'/'} target={'_self'}>
-          <Image
-            className={`${className}__logo ${theme.mode === 'light' && 'light'}`}
-            src={'/favicon/favicon.svg'}
-            alt={'ludiscan'}
-            width={onClick ? 28 : 32}
-            height={onClick ? 28 : 32}
-          />
+          <Image className={`${className}__logo ${theme.mode === 'light' && 'light'}`} src={'/favicon/favicon.svg'} alt={'ludiscan'} width={28} height={28} />
         </a>
-        {isDesktop && (
+        {isDesktop ? (
           <>
             <Text text={'Ludiscan'} href={'/'} target={'_self'} fontSize={theme.typography.fontSize.xl} fontWeight={theme.typography.fontWeight.bold} />
+            <Text
+              text={`v${version}`}
+              fontSize={theme.typography.fontSize.sm}
+              fontWeight={theme.typography.fontWeight.bold}
+              color={theme.colors.text.tertiary}
+            />
             <Text text={title} fontSize={theme.typography.fontSize.base} fontWeight={theme.typography.fontWeight.bold} color={theme.colors.text.secondary} />
           </>
+        ) : (
+          <Text text={`v${version}`} fontSize={theme.typography.fontSize.sm} fontWeight={theme.typography.fontWeight.bold} color={theme.colors.text.tertiary} />
         )}
         {iconTitleEnd && <>{iconTitleEnd}</>}
         <div style={{ flex: 1 }} />
@@ -298,8 +301,8 @@ export const Header = styled(Component)<{ showSidebar?: boolean }>`
   }
 
   &__logo {
-    width: ${({ onClick }) => (onClick ? '28px' : '32px')};
-    height: ${({ onClick }) => (onClick ? '28px' : '32px')};
+    width: 28px;
+    height: 28px;
     filter: invert(100%);
   }
 

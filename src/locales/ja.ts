@@ -123,11 +123,15 @@ export const ja = {
     embedUrlPreset7d: '7日間',
     embedUrlCustomLabel: 'カスタム',
     embedUrlCustomHelper: '最大: 今から1年後まで',
-    embedUrlGenerate: '生成してコピー',
+    embedUrlGenerate: '生成',
     embedUrlGenerating: '生成中...',
     embedUrlValidationRequired: '日時を選択してください',
     embedUrlValidationFuture: '有効期限は未来の日時を指定してください',
     embedUrlValidationMaxYear: '有効期限は最大1年後までです',
+    embedUrlGeneratedLabel: '生成されたURL',
+    embedUrlCopyButton: 'コピー',
+    embedUrlCopyHint: 'URLをタップして選択するか、コピーボタンを押してください',
+    embedUrlCopyFallback: 'URLを選択して手動でコピーしてください',
   },
 
   // Session Form Modal

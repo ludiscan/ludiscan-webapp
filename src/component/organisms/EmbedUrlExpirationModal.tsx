@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
-import { useCallback, useState, useMemo } from 'react';
-import { BiChevronDown } from 'react-icons/bi';
+import { useCallback, useState, useMemo, useRef, useEffect } from 'react';
+import { BiChevronDown, BiCopy, BiCheck } from 'react-icons/bi';
 
 import type { FC } from 'react';
 
@@ -8,6 +8,7 @@ import { Button } from '@src/component/atoms/Button';
 import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { VerticalSpacer } from '@src/component/atoms/Spacer';
 import { Text } from '@src/component/atoms/Text';
+import { VisuallyHidden } from '@src/component/atoms/VisuallyHidden';
 import { Modal } from '@src/component/molecules/Modal';
 import { useToast } from '@src/component/templates/ToastContext';
 import { useLocale } from '@src/hooks/useLocale';
@@ -35,6 +36,19 @@ const Component: FC<EmbedUrlExpirationModalProps> = ({ className, isOpen, onClos
   const [customDateTime, setCustomDateTime] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedUrl, setGeneratedUrl] = useState<string | null>(null);
+  const [isCopied, setIsCopied] = useState(false);
+  const urlInputRef = useRef<HTMLInputElement>(null);
+  const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Calculate min and max date for the input
   const { minDate, maxDate } = useMemo(() => {
@@ -115,7 +129,53 @@ const Component: FC<EmbedUrlExpirationModalProps> = ({ className, isOpen, onClos
     [selectedPreset, validateCustomDate],
   );
 
-  // Generate and copy embed URL
+  // Clipboard copy with fallback for mobile browsers
+  const copyToClipboard = useCallback(async (text: string): Promise<boolean> => {
+    // Try modern clipboard API first
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch {
+        // Fall through to fallback
+      }
+    }
+
+    // Fallback: use hidden input and execCommand
+    try {
+      const input = urlInputRef.current;
+      if (input) {
+        input.select();
+        input.setSelectionRange(0, text.length); // For mobile
+        const success = document.execCommand('copy');
+        if (success) return true;
+      }
+    } catch {
+      // Fall through
+    }
+
+    return false;
+  }, []);
+
+  // Copy the generated URL
+  const handleCopyUrl = useCallback(async () => {
+    if (!generatedUrl) return;
+
+    const success = await copyToClipboard(generatedUrl);
+    if (success) {
+      setIsCopied(true);
+      showToast(t('session.embedUrlCopied'), 2, 'success');
+      // Clear any existing timeout before setting a new one
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+      copyTimeoutRef.current = setTimeout(() => setIsCopied(false), 2000);
+    } else {
+      showToast(t('session.embedUrlCopyFallback'), 3, 'info');
+    }
+  }, [generatedUrl, copyToClipboard, showToast, t]);
+
+  // Generate embed URL (without auto-copy)
   const handleGenerate = useCallback(async () => {
     const error = validateCustomDate(customDateTime, selectedPreset);
     if (error) {
@@ -138,26 +198,32 @@ const Component: FC<EmbedUrlExpirationModalProps> = ({ className, isOpen, onClos
         },
       });
 
-      if (error) {
+      if (error || !data?.url) {
         showToast(t('session.embedUrlFailed'), 3, 'error');
         return;
       }
 
-      await navigator.clipboard.writeText(data.url);
-      showToast(t('session.embedUrlCopied'), 2, 'success');
-      onClose();
+      // Show URL in modal instead of auto-copying (mobile-friendly)
+      setGeneratedUrl(data.url);
     } catch {
       showToast(t('session.embedUrlFailed'), 3, 'error');
     } finally {
       setIsGenerating(false);
     }
-  }, [customDateTime, selectedPreset, validateCustomDate, calculateExpiresInHours, apiClient, projectId, sessionId, showToast, t, onClose]);
+  }, [customDateTime, selectedPreset, validateCustomDate, calculateExpiresInHours, apiClient, projectId, sessionId, showToast, t]);
 
   const handleClose = useCallback(() => {
     if (!isGenerating) {
+      // Clear copy timeout to prevent memory leak
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+        copyTimeoutRef.current = null;
+      }
       setSelectedPreset('4h');
       setCustomDateTime('');
       setValidationError(null);
+      setGeneratedUrl(null);
+      setIsCopied(false);
       onClose();
     }
   }, [isGenerating, onClose]);
@@ -175,62 +241,121 @@ const Component: FC<EmbedUrlExpirationModalProps> = ({ className, isOpen, onClos
 
         <VerticalSpacer size={4} />
 
-        {/* Expiration Dropdown */}
-        <FlexColumn gap={8}>
-          <Text text={t('session.embedUrlExpirationLabel')} fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} fontWeight={'bold'} />
-
-          <div className={`${className}__selectWrapper`}>
-            <select
-              value={selectedPreset}
-              onChange={(e) => handlePresetClick(e.target.value as PresetOption)}
-              disabled={isGenerating}
-              className={`${className}__select`}
-            >
-              <option value='1h'>{t('session.embedUrlPreset1h')}</option>
-              <option value='4h'>{t('session.embedUrlPreset4h')}</option>
-              <option value='24h'>{t('session.embedUrlPreset24h')}</option>
-              <option value='7d'>{t('session.embedUrlPreset7d')}</option>
-              <option value='custom'>{t('session.embedUrlCustomLabel')}</option>
-            </select>
-            <BiChevronDown size={16} className={`${className}__selectChevron`} />
-          </div>
-
-          {/* Custom Date Picker (only shown when Custom is selected) */}
-          {selectedPreset === 'custom' && (
+        {generatedUrl ? (
+          <>
+            {/* Generated URL Display */}
             <FlexColumn gap={8}>
-              <Text text={t('session.embedUrlCustomHelper')} fontSize={theme.typography.fontSize.xs} color={theme.colors.text.tertiary} />
-              <div className={`${className}__customInputWrapper`}>
+              <VisuallyHidden as='label' htmlFor='embed-url-input'>
+                {t('session.embedUrlGeneratedLabel')}
+              </VisuallyHidden>
+              <Text
+                text={t('session.embedUrlGeneratedLabel')}
+                fontSize={theme.typography.fontSize.base}
+                color={theme.colors.text.primary}
+                fontWeight={'bold'}
+                aria-hidden='true'
+              />
+              <div className={`${className}__urlContainer`}>
                 <input
-                  type='date'
-                  value={customDateTime}
-                  onChange={(e) => handleCustomDateChange(e.target.value)}
-                  min={minDate}
-                  max={maxDate}
-                  className={`${className}__customInput ${validationError ? 'error' : ''}`}
-                  disabled={isGenerating}
-                  aria-describedby={validationError ? `${className}__error` : undefined}
+                  id='embed-url-input'
+                  ref={urlInputRef}
+                  type='text'
+                  value={generatedUrl}
+                  readOnly
+                  className={`${className}__urlInput`}
+                  onClick={(e) => (e.target as HTMLInputElement).select()}
                 />
+                <button
+                  type='button'
+                  onClick={handleCopyUrl}
+                  className={`${className}__copyButton ${isCopied ? 'copied' : ''}`}
+                  aria-label={t('session.embedUrlCopyButton')}
+                >
+                  {isCopied ? <BiCheck size={20} /> : <BiCopy size={20} />}
+                </button>
               </div>
-              {validationError && (
-                <div id={`${className}__error`}>
-                  <Text text={validationError} fontSize={theme.typography.fontSize.sm} color={theme.colors.semantic.error.main} />
-                </div>
+              <Text text={t('session.embedUrlCopyHint')} fontSize={theme.typography.fontSize.xs} color={theme.colors.text.tertiary} />
+            </FlexColumn>
+
+            <VerticalSpacer size={8} />
+
+            {/* Done Button */}
+            <FlexRow gap={12} align={'flex-end'}>
+              <Button onClick={handleClose} scheme={'primary'} fontSize={'base'}>
+                {t('common.done')}
+              </Button>
+            </FlexRow>
+          </>
+        ) : (
+          <>
+            {/* Expiration Dropdown */}
+            <FlexColumn gap={8}>
+              <Text
+                text={t('session.embedUrlExpirationLabel')}
+                fontSize={theme.typography.fontSize.base}
+                color={theme.colors.text.primary}
+                fontWeight={'bold'}
+              />
+
+              <div className={`${className}__selectWrapper`}>
+                <select
+                  value={selectedPreset}
+                  onChange={(e) => handlePresetClick(e.target.value as PresetOption)}
+                  disabled={isGenerating}
+                  className={`${className}__select`}
+                >
+                  <option value='1h'>{t('session.embedUrlPreset1h')}</option>
+                  <option value='4h'>{t('session.embedUrlPreset4h')}</option>
+                  <option value='24h'>{t('session.embedUrlPreset24h')}</option>
+                  <option value='7d'>{t('session.embedUrlPreset7d')}</option>
+                  <option value='custom'>{t('session.embedUrlCustomLabel')}</option>
+                </select>
+                <BiChevronDown size={16} className={`${className}__selectChevron`} />
+              </div>
+
+              {/* Custom Date Picker (only shown when Custom is selected) */}
+              {selectedPreset === 'custom' && (
+                <FlexColumn gap={8}>
+                  <Text text={t('session.embedUrlCustomHelper')} fontSize={theme.typography.fontSize.xs} color={theme.colors.text.tertiary} />
+                  <div className={`${className}__customInputWrapper`}>
+                    <input
+                      type='date'
+                      value={customDateTime}
+                      onChange={(e) => handleCustomDateChange(e.target.value)}
+                      min={minDate}
+                      max={maxDate}
+                      className={`${className}__customInput ${validationError ? 'error' : ''}`}
+                      disabled={isGenerating}
+                      aria-describedby={validationError ? `${className}__error` : undefined}
+                    />
+                  </div>
+                  {validationError && (
+                    <div id={`${className}__error`}>
+                      <Text text={validationError} fontSize={theme.typography.fontSize.sm} color={theme.colors.semantic.error.main} />
+                    </div>
+                  )}
+                </FlexColumn>
               )}
             </FlexColumn>
-          )}
-        </FlexColumn>
 
-        <VerticalSpacer size={8} />
+            <VerticalSpacer size={8} />
 
-        {/* Action Buttons */}
-        <FlexRow gap={12} align={'flex-end'}>
-          <Button onClick={handleClose} scheme={'surface'} fontSize={'base'} disabled={isGenerating}>
-            {t('common.cancel')}
-          </Button>
-          <Button onClick={handleGenerate} scheme={'primary'} fontSize={'base'} disabled={isGenerating || (selectedPreset === 'custom' && !!validationError)}>
-            {isGenerating ? t('session.embedUrlGenerating') : t('session.embedUrlGenerate')}
-          </Button>
-        </FlexRow>
+            {/* Action Buttons */}
+            <FlexRow gap={12} align={'flex-end'}>
+              <Button onClick={handleClose} scheme={'surface'} fontSize={'base'} disabled={isGenerating}>
+                {t('common.cancel')}
+              </Button>
+              <Button
+                onClick={handleGenerate}
+                scheme={'primary'}
+                fontSize={'base'}
+                disabled={isGenerating || (selectedPreset === 'custom' && !!validationError)}
+              >
+                {isGenerating ? t('session.embedUrlGenerating') : t('session.embedUrlGenerate')}
+              </Button>
+            </FlexRow>
+          </>
+        )}
       </FlexColumn>
     </Modal>
   );
@@ -321,6 +446,63 @@ export const EmbedUrlExpirationModal = styled(Component)`
     &::-webkit-calendar-picker-indicator {
       cursor: pointer;
       filter: ${({ theme }) => (theme.mode === 'dark' ? 'invert(1)' : 'none')};
+    }
+  }
+
+  &__urlContainer {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+  }
+
+  &__urlInput {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 12px;
+    font-family: ${({ theme }) => theme.typography.fontFamily.monospace};
+    font-size: ${({ theme }) => theme.typography.fontSize.sm};
+    color: ${({ theme }) => theme.colors.text.primary};
+    word-break: break-all;
+    background: ${({ theme }) => theme.colors.surface.sunken};
+    border: 1px solid ${({ theme }) => theme.colors.border.default};
+    border-radius: ${({ theme }) => theme.borders.radius.md};
+
+    &:focus {
+      outline: none;
+      border-color: ${({ theme }) => theme.colors.primary.main}80;
+      box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary.main}1a;
+    }
+  }
+
+  &__copyButton {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    color: ${({ theme }) => theme.colors.text.secondary};
+    cursor: pointer;
+    background: ${({ theme }) => theme.colors.surface.sunken};
+    border: 1px solid ${({ theme }) => theme.colors.border.default};
+    border-radius: ${({ theme }) => theme.borders.radius.md};
+    transition: all 0.2s ease;
+
+    &:hover {
+      color: ${({ theme }) => theme.colors.text.primary};
+      background: ${({ theme }) => theme.colors.surface.hover};
+      border-color: ${({ theme }) => theme.colors.border.strong};
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    &.copied {
+      color: ${({ theme }) => theme.colors.semantic.success.main};
+      background: ${({ theme }) => theme.colors.semantic.success.main}15;
+      border-color: ${({ theme }) => theme.colors.semantic.success.main}40;
     }
   }
 `;

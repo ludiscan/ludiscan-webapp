@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 
-import type { ElementType, HTMLAttributes, ReactNode } from 'react';
+import type { ComponentPropsWithoutRef, ElementType, ReactNode } from 'react';
 
 const HiddenElement = styled.span`
   position: absolute;
@@ -14,12 +14,17 @@ const HiddenElement = styled.span`
   clip: rect(0, 0, 0, 0);
 `;
 
-export interface VisuallyHiddenProps extends HTMLAttributes<HTMLElement> {
+/** コンポーネント固有のProps */
+interface VisuallyHiddenOwnProps<T extends ElementType = 'span'> {
   /** レンダリングする要素のタグ */
-  as?: ElementType;
+  as?: T;
   /** 子要素 */
   children: ReactNode;
 }
+
+/** asに指定した要素の型に応じてpropsを推論する */
+export type VisuallyHiddenProps<T extends ElementType = 'span'> = VisuallyHiddenOwnProps<T> &
+  Omit<ComponentPropsWithoutRef<T>, keyof VisuallyHiddenOwnProps<T>>;
 
 /**
  * スクリーンリーダー専用テキスト
@@ -31,9 +36,13 @@ export interface VisuallyHiddenProps extends HTMLAttributes<HTMLElement> {
  *   <Icon />
  *   <VisuallyHidden>メニューを開く</VisuallyHidden>
  * </button>
+ *
+ * // as="label"の場合、htmlForが使える
+ * <VisuallyHidden as="label" htmlFor="input-id">ラベル</VisuallyHidden>
  * ```
  */
-export const VisuallyHidden = ({ as: Component = 'span', children, ...props }: VisuallyHiddenProps) => {
+export const VisuallyHidden = <T extends ElementType = 'span'>({ as, children, ...props }: VisuallyHiddenProps<T>) => {
+  const Component = as ?? 'span';
   return (
     <HiddenElement as={Component} {...props}>
       {children}

@@ -2,7 +2,7 @@ import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BiBarChart, BiUser, BiKey, BiLineChart, BiChevronRight } from 'react-icons/bi';
 
 import { ProjectDetailsApiKeysTab } from './tabs/ProjectDetailsApiKeysTab';
@@ -21,6 +21,7 @@ import { SidebarLayout } from '@src/component/templates/SidebarLayout';
 import { env } from '@src/config/env';
 import { useAuth } from '@src/hooks/useAuth';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
+import { useSidebar } from '@src/hooks/useSidebar';
 import { InnerContent } from '@src/pages/_app.page';
 import { getCookie, COOKIE_NAMES } from '@src/utils/security/cookies';
 
@@ -100,15 +101,13 @@ const Component: FC<ProjectDetailsPageProps> = ({ className, project }) => {
     return () => clearTimeout(timer);
   }, []);
 
+  const { toggle: toggleSidebar } = useSidebar();
+
   useEffect(() => {
     if (!isAuthorized && !isLoading && ready) {
       router.replace('/');
     }
   }, [isAuthorized, isLoading, ready, router]);
-
-  const handleBack = useCallback(() => {
-    router.back();
-  }, [router]);
 
   if (!ready || isLoading) {
     return (
@@ -132,7 +131,7 @@ const Component: FC<ProjectDetailsPageProps> = ({ className, project }) => {
 
       <SidebarLayout />
       <InnerContent>
-        <Header title='Project Details' onClick={handleBack} />
+        <Header title='Project Details' onToggleSidebar={toggleSidebar} />
 
         <div className={`${className}__mainContent`}>
           {/* Project Header Card */}

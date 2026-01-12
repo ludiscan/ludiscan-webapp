@@ -18,6 +18,7 @@ import { useToast } from '@src/component/templates/ToastContext';
 import { useAuth } from '@src/hooks/useAuth';
 import { useGameApiKeys } from '@src/hooks/useGameApiKeys';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
+import { useSidebar } from '@src/hooks/useSidebar';
 import { InnerContent } from '@src/pages/_app.page';
 
 export type ApiKeysPageProps = {
@@ -43,15 +44,13 @@ const Component: FC<ApiKeysPageProps> = ({ className }) => {
 
   const { allApiKeys, isLoadingKeys, isErrorKeys, userProjects, handleCreateKey, handleDeleteKey, handleUpdateKeyProjects } = useGameApiKeys();
 
+  const { toggle: toggleSidebar } = useSidebar();
+
   useEffect(() => {
     if (!isAuthorized && !isLoading && ready) {
       router.replace('/');
     }
   }, [isAuthorized, isLoading, ready, router]);
-
-  const handleBack = () => {
-    router.back();
-  };
 
   const handleCreateKeyClick = useCallback(() => {
     setIsCreateModalOpen(true);
@@ -138,7 +137,7 @@ const Component: FC<ApiKeysPageProps> = ({ className }) => {
       <DashboardBackgroundCanvas className='visible' />
       <SidebarLayout />
       <InnerContent>
-        <Header title='API Keys' onClick={handleBack} />
+        <Header title='API Keys' onToggleSidebar={toggleSidebar} />
 
         <div className={`${className}__container`}>
           <GameApiKeyList

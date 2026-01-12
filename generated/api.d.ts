@@ -1966,6 +1966,77 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v0/admin/feature-flags': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get all feature flags */
+    get: operations['FeatureFlagsController_getAll'];
+    put?: never;
+    /** Create a new feature flag */
+    post: operations['FeatureFlagsController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/admin/feature-flags/{key}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get feature flag by key */
+    get: operations['FeatureFlagsController_getByKey'];
+    put?: never;
+    post?: never;
+    /** Delete a feature flag */
+    delete: operations['FeatureFlagsController_delete'];
+    options?: never;
+    head?: never;
+    /** Update a feature flag */
+    patch: operations['FeatureFlagsController_update'];
+    trace?: never;
+  };
+  '/api/v0/admin/feature-flags/{key}/toggle': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** Toggle feature flag enabled/disabled */
+    patch: operations['FeatureFlagsController_toggle'];
+    trace?: never;
+  };
+  '/api/v0/admin/feature-flags/refresh-cache': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Force refresh the feature flag cache */
+    post: operations['FeatureFlagsController_refreshCache'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -3361,6 +3432,90 @@ export interface components {
        * @example 89
        */
       total_users: number;
+    };
+    FeatureFlagResponseDto: {
+      id: number;
+      key: string;
+      name?: Record<string, never>;
+      description?: Record<string, never>;
+      enabled: boolean;
+      /** @enum {string} */
+      scope: 'global' | 'project' | 'user';
+      /** @enum {string} */
+      type: 'boolean' | 'number' | 'string' | 'json';
+      value?: Record<string, never>;
+      metadata?: Record<string, never>;
+      updated_by?: Record<string, never>;
+      /** Format: date-time */
+      created_at: string;
+      /** Format: date-time */
+      updated_at: string;
+    };
+    CreateFeatureFlagDto: {
+      /** @example ai.new_feature */
+      key: string;
+      /** @example New AI Feature */
+      name?: string;
+      /** @example Description of the new feature */
+      description?: string;
+      /**
+       * @default true
+       * @example true
+       */
+      enabled: boolean;
+      /**
+       * @default global
+       * @enum {string}
+       */
+      scope: 'global' | 'project' | 'user';
+      /**
+       * @default boolean
+       * @enum {string}
+       */
+      type: 'boolean' | 'number' | 'string' | 'json';
+      value?: Record<string, never>;
+      /**
+       * @example {
+       *       "category": "ai",
+       *       "costImpact": "high",
+       *       "apiProvider": "openai"
+       *     }
+       */
+      metadata?: Record<string, never>;
+    };
+    UpdateFeatureFlagDto: {
+      /** @example New AI Feature */
+      name?: string;
+      /** @example Description of the new feature */
+      description?: string;
+      /**
+       * @default true
+       * @example true
+       */
+      enabled: boolean;
+      /**
+       * @default global
+       * @enum {string}
+       */
+      scope: 'global' | 'project' | 'user';
+      /**
+       * @default boolean
+       * @enum {string}
+       */
+      type: 'boolean' | 'number' | 'string' | 'json';
+      value?: Record<string, never>;
+      /**
+       * @example {
+       *       "category": "ai",
+       *       "costImpact": "high",
+       *       "apiProvider": "openai"
+       *     }
+       */
+      metadata?: Record<string, never>;
+    };
+    ToggleFeatureFlagDto: {
+      /** @example true */
+      enabled: boolean;
     };
     DefaultErrorResponse: {
       /** @example 400 */
@@ -7937,6 +8092,228 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  FeatureFlagsController_getAll: {
+    parameters: {
+      query?: {
+        /** @description Filter by category (e.g., "ai") */
+        category?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of feature flags */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['FeatureFlagResponseDto'][];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  FeatureFlagsController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateFeatureFlagDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['FeatureFlagResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  FeatureFlagsController_getByKey: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Feature flag key (e.g., "ai.openai_summarizer") */
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['FeatureFlagResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  FeatureFlagsController_delete: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Feature flag key */
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Feature flag deleted */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  FeatureFlagsController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Feature flag key */
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateFeatureFlagDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['FeatureFlagResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  FeatureFlagsController_toggle: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Feature flag key */
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ToggleFeatureFlagDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['FeatureFlagResponseDto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  FeatureFlagsController_refreshCache: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Cache refreshed successfully */
       200: {
         headers: {
           [name: string]: unknown;

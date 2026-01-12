@@ -1,5 +1,4 @@
-import { useRouter } from 'next/navigation';
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 
 import { HeatmapIdPageLayout } from './index.page';
 
@@ -32,20 +31,14 @@ export const getServerSideProps: GetServerSideProps<HeatMapTaskIdMockPageProps> 
 };
 
 // ApiClientProvider内でサービスを使用するコンポーネント
-const MockHeatMapTaskIdPageContent: FC<{ className?: string; project_id: number; onBackClick: () => void }> = ({ className, project_id, onBackClick }) => {
+const MockHeatMapTaskIdPageContent: FC<{ className?: string; project_id: number }> = ({ className, project_id }) => {
   // sessionHeatmapはfalseに設定（プロジェクト全体のheatmapを表示）
   const service = useOnlineHeatmapDataService(project_id, null, false);
 
-  return <HeatmapIdPageLayout className={className} service={service} onBackClick={onBackClick} />;
+  return <HeatmapIdPageLayout className={className} service={service} />;
 };
 
 const MockHeatMapTaskIdPage: FC<HeatMapTaskIdMockPageProps> = ({ className, project_id, mockDataDir = '/mocks/heatmap' }) => {
-  const router = useRouter();
-
-  const handleBackClick = useCallback(() => {
-    router.back();
-  }, [router]);
-
   // Mock APIクライアントを作成（useMemoで再作成を防ぐ）
   const mockApiClient = useMemo(() => createMockApiClient(mockDataDir), [mockDataDir]);
 
@@ -56,7 +49,7 @@ const MockHeatMapTaskIdPage: FC<HeatMapTaskIdMockPageProps> = ({ className, proj
   // ApiClientProvider内でserviceを作成する必要がある
   return (
     <ApiClientProvider createClient={() => mockApiClient}>
-      <MockHeatMapTaskIdPageContent className={className} project_id={project_id} onBackClick={handleBackClick} />
+      <MockHeatMapTaskIdPageContent className={className} project_id={project_id} />
     </ApiClientProvider>
   );
 };
