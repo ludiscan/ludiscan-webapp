@@ -180,7 +180,12 @@ const Component: FC<EmbedUrlExpirationModalProps> = ({ className, isOpen, onClos
           <Text text={t('session.embedUrlExpirationLabel')} fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} fontWeight={'bold'} />
 
           <div className={`${className}__selectWrapper`}>
-            <select value={selectedPreset} onChange={(e) => handlePresetClick(e.target.value as PresetOption)} disabled={isGenerating} className={`${className}__select`}>
+            <select
+              value={selectedPreset}
+              onChange={(e) => handlePresetClick(e.target.value as PresetOption)}
+              disabled={isGenerating}
+              className={`${className}__select`}
+            >
               <option value='1h'>{t('session.embedUrlPreset1h')}</option>
               <option value='4h'>{t('session.embedUrlPreset4h')}</option>
               <option value='24h'>{t('session.embedUrlPreset24h')}</option>

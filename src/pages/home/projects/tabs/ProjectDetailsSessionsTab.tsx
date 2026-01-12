@@ -173,12 +173,9 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
     setDeletingSession(session);
   }, []);
 
-  const handleCopyEmbedUrl = useCallback(
-    (session: Session) => {
-      setEmbedUrlModalSession(session);
-    },
-    [],
-  );
+  const handleCopyEmbedUrl = useCallback((session: Session) => {
+    setEmbedUrlModalSession(session);
+  }, []);
 
   // Delete mutation
   const { mutateAsync: deleteSession } = useMutation({
