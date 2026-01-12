@@ -41,11 +41,7 @@ export type VisuallyHiddenProps<T extends ElementType = 'span'> = VisuallyHidden
  * <VisuallyHidden as="label" htmlFor="input-id">ラベル</VisuallyHidden>
  * ```
  */
-export const VisuallyHidden = <T extends ElementType = 'span'>({
-  as,
-  children,
-  ...props
-}: VisuallyHiddenProps<T>) => {
+export const VisuallyHidden = <T extends ElementType = 'span'>({ as, children, ...props }: VisuallyHiddenProps<T>) => {
   const Component = as ?? 'span';
   return (
     <HiddenElement as={Component} {...props}>
