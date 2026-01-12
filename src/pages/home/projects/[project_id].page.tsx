@@ -223,6 +223,7 @@ const spin = keyframes`
 const ProjectDetailsPage = styled(Component)`
   position: relative;
   min-height: 100vh;
+  min-height: 100dvh;
   overflow: hidden;
 
   &__mainContent {

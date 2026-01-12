@@ -62,6 +62,7 @@ const SidebarContent = styled(PanelCard)`
   /* Use logical properties for sizing */
   inline-size: calc(${dimensions.sidebarWidth}px - 6px);
   block-size: calc(100vh - var(--spacing-xs) * 2);
+  block-size: calc(100dvh - var(--spacing-xs) * 2);
 
   /* Use logical properties for padding */
   padding-block: var(--spacing-md);

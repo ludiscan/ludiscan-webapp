@@ -105,6 +105,7 @@ export const HeatmapIdPageLayoutComponent: FC<HeatmapIdPageLayoutProps> = ({ cla
 
 export const HeatmapIdPageLayout = styled(HeatmapIdPageLayoutComponent)`
   height: 100vh;
+  height: 100dvh;
   background: ${({ theme }) => theme.colors.surface.raised};
 
   &__headerV {

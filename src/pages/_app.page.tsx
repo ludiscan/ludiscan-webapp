@@ -42,6 +42,11 @@ const fadeIn = keyframes`
 `;
 
 const Content = styled.div`
+  /* Mobile browser viewport fix: 100vh includes browser UI (tabs, address bar) */
+
+  /* dvh = dynamic viewport height, adjusts when browser UI shows/hides */
+  height: 100vh; /* Fallback for older browsers */
+  height: 100dvh; /* Modern browsers - excludes browser UI */
   overflow: hidden auto;
   color: ${({ theme }) => theme.colors.text.primary};
   background: ${({ theme }) => theme.colors.background.default};
@@ -141,12 +146,7 @@ export default function App({ Component, pageProps }: AppProps) {
                   </LoadingOverlay>
                 )}
                 <ToastProvider position={'top-right'}>
-                  <Content
-                    id='app-scroll-container'
-                    className={isDesktop === undefined ? '' : isDesktop ? 'desktop' : 'mobile'}
-                    style={{ height: '100vh' }}
-                    data-testid={'app-content'}
-                  >
+                  <Content id='app-scroll-container' className={isDesktop === undefined ? '' : isDesktop ? 'desktop' : 'mobile'} data-testid={'app-content'}>
                     <main id='main-content' tabIndex={-1}>
                       <Component {...pageProps} />
                     </main>
