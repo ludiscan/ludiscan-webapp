@@ -382,7 +382,7 @@ export const en = {
       title: 'Welcome to Heatmap Viewer',
       selectLanguage: 'Select your language',
       description: 'This tool allows you to visualize gameplay data as heatmaps. Access various features from the menu on the left.',
-      tips: ['Drag to rotate camera, scroll to zoom', 'Click menu icons on the left to access settings', 'Toggle between 2D/3D modes using the toolbar'],
+      tips: ['Drag to rotate camera, scroll to zoom', 'Access display settings and data analysis features from the left menu'],
     },
     menuHeatmap: {
       title: 'Heatmap Settings',

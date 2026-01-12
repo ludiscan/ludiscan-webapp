@@ -53,6 +53,7 @@ const IconMarker: FC<{
           scale={[markerScale, markerScale, 1]}
           onPointerOver={() => (gl.domElement.style.cursor = 'pointer')}
           onPointerOut={() => (gl.domElement.style.cursor = 'auto')}
+          renderOrder={zIndexes.renderOrder.fieldObjectMarkers} /* eslint-disable-line react/no-unknown-property */
         >
           {/* eslint-disable-next-line react/no-unknown-property */}
           <spriteMaterial map={texture} transparent depthTest={false} />
@@ -83,6 +84,7 @@ const FieldObjectMarker: FC<{
           scale={markerScale}
           onPointerOver={() => (gl.domElement.style.cursor = 'pointer')}
           onPointerOut={() => (gl.domElement.style.cursor = 'auto')}
+          renderOrder={zIndexes.renderOrder.fieldObjectMarkers} /* eslint-disable-line react/no-unknown-property */
         >
           {/* eslint-disable-next-line react/no-unknown-property */}
           <meshBasicMaterial color={color} depthTest={false} />

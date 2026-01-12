@@ -253,6 +253,11 @@ export function compileHVQL(input: string, baseEnv: Document = {}) {
         if (/^'.*'$|^".*"$/.test(v)) v = v.slice(1, -1); // クォート除去
         v = expandTemplate(v, env); // テンプレ展開
 
+        // 単純な識別子がパレットに存在する場合は展開（${...}なしでも展開可能に）
+        if (/^[a-zA-Z_][a-zA-Z0-9_-]*$/.test(v) && env.palette && v in env.palette) {
+          v = env.palette[v];
+        }
+
         if (mapped === 'opacity' || mapped === 'pointSize') {
           const n = Number(v);
           if (!Number.isNaN(n)) out[mapped] = n;

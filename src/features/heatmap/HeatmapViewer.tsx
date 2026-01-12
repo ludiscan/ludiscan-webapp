@@ -3,7 +3,7 @@ import { PerformanceMonitor, Stats } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { useQuery } from '@tanstack/react-query';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useSelector, useStore } from 'react-redux';
+import { useDispatch, useSelector, useStore } from 'react-redux';
 
 import type { PerformanceMonitorApi } from '@react-three/drei';
 import type { LocalModelData } from '@src/features/heatmap/HeatmapMenuContent';
@@ -20,7 +20,7 @@ import { VisuallyHidden } from '@src/component/atoms/VisuallyHidden';
 import { useToast } from '@src/component/templates/ToastContext';
 import { EventLogPanel } from '@src/features/heatmap/EventLogPanel';
 import { HeatMapCanvas } from '@src/features/heatmap/HeatmapCanvas';
-import { HeatmapMenuContent } from '@src/features/heatmap/HeatmapMenuContent';
+import { SMALL_SCREEN_BREAKPOINT, HeatmapMenuContent } from '@src/features/heatmap/HeatmapMenuContent';
 import { useModelFromArrayBuffer } from '@src/features/heatmap/ModelLoader';
 import { SettingsButton } from '@src/features/heatmap/SettingsButton';
 import { TimelineControlWrapper } from '@src/features/heatmap/TimelineControlWrapper';
@@ -38,6 +38,7 @@ import { useLocale } from '@src/hooks/useLocale';
 import { usePlayerTimelinePatch } from '@src/hooks/usePlayerTimeline';
 import { useFieldObjectTypes } from '@src/modeles/heatmapView';
 import { DefaultStaleTime } from '@src/modeles/qeury';
+import { setMenuPanelCollapsed } from '@src/slices/uiSlice';
 import { dimensions, zIndexes } from '@src/styles/style';
 import { getRandomPrimitiveColor } from '@src/utils/color';
 import { detectDimensionality } from '@src/utils/heatmap/detectDimensionality';
@@ -61,6 +62,10 @@ const DEFAULT_PLAYER_TIMELINE_HVQL = `map status.hand {
   scissors  -> player-icon: hand-scissor;
   *        -> player-icon: target;
 }
+map status.team {
+  yellow -> player-color: yellow;
+  blue   -> player-color: blue;
+}
 `;
 
 export type HeatmapViewerProps = {
@@ -73,6 +78,8 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
   const toast = useToast();
   const { t } = useLocale();
   const { announceStatus } = useA11yAnnounce();
+  const dispatch = useDispatch();
+  const menuPanelCollapsed = useSelector((s: RootState) => s.ui.menuPanelCollapsed);
   const [map, setMap] = useState<string | ArrayBuffer | null>(null);
   const [modelType, setModelType] = useState<'gltf' | 'glb' | 'obj' | 'server' | null>(null);
   const [serverModelFileType, setServerModelFileType] = useState<ModelFileType | null>(null);
@@ -114,6 +121,9 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
 
   // マップリストのactiveOnlyフィルター（デフォルトtrue: アップロード済みのマップのみ表示）
   const [mapActiveOnly, setMapActiveOnly] = useState(true);
+
+  // EventLogPanelのcollapsed状態（スマホ時のキャンバスタップで閉じるため外部管理、デフォルトは閉じた状態）
+  const [eventLogPanelCollapsed, setEventLogPanelCollapsed] = useState(true);
 
   const { data: mapList } = useQuery({
     queryKey: ['mapList', service.projectId, mapActiveOnly],
@@ -419,6 +429,19 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
 
   const canvasAriaLabel = dimensionality === '2d' ? t('accessibility.heatmapCanvas2D') : t('accessibility.heatmapCanvas');
 
+  // スマホ時にキャンバスをタップしたらメニューとEventLogPanelを閉じる（縦向き・横向き両対応）
+  const handleCanvasClick = useCallback(() => {
+    const isSmallScreen = window.innerWidth < SMALL_SCREEN_BREAKPOINT;
+    if (isSmallScreen) {
+      if (!menuPanelCollapsed) {
+        dispatch(setMenuPanelCollapsed(true));
+      }
+      if (!eventLogPanelCollapsed) {
+        setEventLogPanelCollapsed(true);
+      }
+    }
+  }, [menuPanelCollapsed, eventLogPanelCollapsed, dispatch]);
+
   const renderCanvas = useCallback(
     (paneId?: string) => (
       <>
@@ -480,24 +503,27 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
     <HintProvider>
       <div className={`${className}__view ${isEmbed ? `${className}--embed` : ''}`}>
         <FlexRow style={{ width: '100%', height: '100%' }} align={'center'} wrap={'nowrap'}>
-          {splitMode.enabled ? (
-            <FlexRow className={`${className}__splitContainer`} style={{ flex: 1, flexDirection: splitMode.direction === 'horizontal' ? 'row' : 'column' }}>
-              <FlexColumn className={`${className}__canvasBox ${className}__canvasBox--split`}>
+          {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+          <div onClick={handleCanvasClick} style={{ display: 'contents' }}>
+            {splitMode.enabled ? (
+              <FlexRow className={`${className}__splitContainer`} style={{ flex: 1, flexDirection: splitMode.direction === 'horizontal' ? 'row' : 'column' }}>
+                <FlexColumn className={`${className}__canvasBox ${className}__canvasBox--split`}>
+                  {backgroundStyle && <div style={backgroundStyle} />}
+                  {renderCanvas('left')}
+                </FlexColumn>
+                <FlexColumn className={`${className}__canvasBox ${className}__canvasBox--split`}>
+                  {backgroundStyle && <div style={backgroundStyle} />}
+                  {renderCanvas('right')}
+                </FlexColumn>
+              </FlexRow>
+            ) : (
+              <FlexColumn className={`${className}__canvasBox`}>
                 {backgroundStyle && <div style={backgroundStyle} />}
-                {renderCanvas('left')}
+                {renderCanvas()}
+                {/*{performance && <PerformanceList api={performance} className={`${className}__performance`} />}*/}
               </FlexColumn>
-              <FlexColumn className={`${className}__canvasBox ${className}__canvasBox--split`}>
-                {backgroundStyle && <div style={backgroundStyle} />}
-                {renderCanvas('right')}
-              </FlexColumn>
-            </FlexRow>
-          ) : (
-            <FlexColumn className={`${className}__canvasBox`}>
-              {backgroundStyle && <div style={backgroundStyle} />}
-              {renderCanvas()}
-              {/*{performance && <PerformanceList api={performance} className={`${className}__performance`} />}*/}
-            </FlexColumn>
-          )}
+            )}
+          </div>
           <div className={`${className}__player`}>
             <TimelineControlWrapper setVisibleTimelineRange={setVisibleTimelineRange} visibleTimelineRange={visibleTimelineRange} />
           </div>
@@ -521,7 +547,12 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
         {/* EventLogパネル（セッション選択時に表示） */}
         {service.sessionId && (
           <div className={`${className}__eventLogPanel`}>
-            <EventLogPanel service={service} eventLogKeys={generalLogKeys ?? null} />
+            <EventLogPanel
+              service={service}
+              eventLogKeys={generalLogKeys ?? null}
+              collapsed={eventLogPanelCollapsed}
+              onCollapsedChange={setEventLogPanelCollapsed}
+            />
           </div>
         )}
 
@@ -575,6 +606,12 @@ export const HeatMapViewer = memo(
       width: max-content;
       height: 100%;
       padding-top: var(--header-offset);
+
+      /* スマホ縦向き時は高さを60%に制限 */
+      @media (width <= 768px) and (orientation: portrait) {
+        height: 60%;
+        max-height: 60vh;
+      }
     }
 
     &__eventLogPanel {
@@ -630,10 +667,15 @@ export const HeatMapViewer = memo(
 
     &__player {
       position: absolute;
-      bottom: 40px;
+      bottom: var(--spacing-2xl);
       left: 50%;
       z-index: ${zIndexes.content + 2};
+      width: max-content;
       transform: translateX(-50%);
+
+      @media (width <= 920px) and (orientation: landscape) {
+        bottom: 5px;
+      }
     }
 
     &__zoomControls {
