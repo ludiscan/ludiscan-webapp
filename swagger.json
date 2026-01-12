@@ -7530,12 +7530,334 @@
           "Admin"
         ]
       }
+    },
+    "/api/v0/admin/feature-flags": {
+      "get": {
+        "operationId": "FeatureFlagsController_getAll",
+        "parameters": [
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "description": "Filter by category (e.g., \"ai\")",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of feature flags",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FeatureFlagResponseDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all feature flags",
+        "tags": [
+          "Admin - Feature Flags"
+        ]
+      },
+      "post": {
+        "operationId": "FeatureFlagsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFeatureFlagDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeatureFlagResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new feature flag",
+        "tags": [
+          "Admin - Feature Flags"
+        ]
+      }
+    },
+    "/api/v0/admin/feature-flags/{key}": {
+      "get": {
+        "operationId": "FeatureFlagsController_getByKey",
+        "parameters": [
+          {
+            "name": "key",
+            "required": true,
+            "in": "path",
+            "description": "Feature flag key (e.g., \"ai.openai_summarizer\")",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeatureFlagResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get feature flag by key",
+        "tags": [
+          "Admin - Feature Flags"
+        ]
+      },
+      "patch": {
+        "operationId": "FeatureFlagsController_update",
+        "parameters": [
+          {
+            "name": "key",
+            "required": true,
+            "in": "path",
+            "description": "Feature flag key",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFeatureFlagDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeatureFlagResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a feature flag",
+        "tags": [
+          "Admin - Feature Flags"
+        ]
+      },
+      "delete": {
+        "operationId": "FeatureFlagsController_delete",
+        "parameters": [
+          {
+            "name": "key",
+            "required": true,
+            "in": "path",
+            "description": "Feature flag key",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Feature flag deleted"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a feature flag",
+        "tags": [
+          "Admin - Feature Flags"
+        ]
+      }
+    },
+    "/api/v0/admin/feature-flags/{key}/toggle": {
+      "patch": {
+        "operationId": "FeatureFlagsController_toggle",
+        "parameters": [
+          {
+            "name": "key",
+            "required": true,
+            "in": "path",
+            "description": "Feature flag key",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ToggleFeatureFlagDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeatureFlagResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Toggle feature flag enabled/disabled",
+        "tags": [
+          "Admin - Feature Flags"
+        ]
+      }
+    },
+    "/api/v0/admin/feature-flags/refresh-cache": {
+      "post": {
+        "operationId": "FeatureFlagsController_refreshCache",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Cache refreshed successfully"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Force refresh the feature flag cache",
+        "tags": [
+          "Admin - Feature Flags"
+        ]
+      }
     }
   },
   "info": {
     "title": "Ludiscan API Documentation",
     "description": "Ludiscan API for game analytics and session tracking",
-    "version": "1.29.0",
+    "version": "1.30.0",
     "contact": {}
   },
   "tags": [],
@@ -10204,6 +10526,188 @@
           "total_events",
           "active_sessions_7d",
           "total_users"
+        ]
+      },
+      "FeatureFlagResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "object"
+          },
+          "description": {
+            "type": "object"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "global",
+              "project",
+              "user"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "boolean",
+              "number",
+              "string",
+              "json"
+            ]
+          },
+          "value": {
+            "type": "object"
+          },
+          "metadata": {
+            "type": "object"
+          },
+          "updated_by": {
+            "type": "object"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "enabled",
+          "scope",
+          "type",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "CreateFeatureFlagDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "example": "ai.new_feature",
+            "maxLength": 100
+          },
+          "name": {
+            "type": "string",
+            "example": "New AI Feature",
+            "maxLength": 255
+          },
+          "description": {
+            "type": "string",
+            "example": "Description of the new feature"
+          },
+          "enabled": {
+            "type": "boolean",
+            "example": true,
+            "default": true
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "global",
+              "project",
+              "user"
+            ],
+            "default": "global"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "boolean",
+              "number",
+              "string",
+              "json"
+            ],
+            "default": "boolean"
+          },
+          "value": {
+            "type": "object"
+          },
+          "metadata": {
+            "type": "object",
+            "example": {
+              "category": "ai",
+              "costImpact": "high",
+              "apiProvider": "openai"
+            }
+          }
+        },
+        "required": [
+          "key",
+          "enabled"
+        ]
+      },
+      "UpdateFeatureFlagDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "New AI Feature",
+            "maxLength": 255
+          },
+          "description": {
+            "type": "string",
+            "example": "Description of the new feature"
+          },
+          "enabled": {
+            "type": "boolean",
+            "example": true,
+            "default": true
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "global",
+              "project",
+              "user"
+            ],
+            "default": "global"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "boolean",
+              "number",
+              "string",
+              "json"
+            ],
+            "default": "boolean"
+          },
+          "value": {
+            "type": "object"
+          },
+          "metadata": {
+            "type": "object",
+            "example": {
+              "category": "ai",
+              "costImpact": "high",
+              "apiProvider": "openai"
+            }
+          }
+        }
+      },
+      "ToggleFeatureFlagDto": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": [
+          "enabled"
         ]
       },
       "DefaultErrorResponse": {
