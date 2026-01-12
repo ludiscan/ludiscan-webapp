@@ -56,7 +56,7 @@ export type HeatmapMenuProps = {
 
 const MIN_WIDTH = 300;
 const MAX_WIDTH = 800;
-const SMALL_SCREEN_BREAKPOINT = 768;
+export const SMALL_SCREEN_BREAKPOINT = 768;
 
 const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
   const { className, mapOptions, service, dimensionality, name, isEmbed = false } = props;
@@ -76,6 +76,8 @@ const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
   const [isResizing, setIsResizing] = useState(false);
   const resizeRef = useRef<{ startX: number; startWidth: number } | null>(null);
   const initialCollapseRef = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
 
   // メニューが開かれた時にヒントをキューに追加
   const { addHintForMenu } = useHintContext();
@@ -246,7 +248,7 @@ const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
 
   // Expanded view - full menu panel
   return (
-    <div className={className} style={{ width: menuPanelWidth }}>
+    <div ref={containerRef} className={className} style={{ width: menuPanelWidth }}>
       <PanelCard className={`${className}__card`} padding={'2px'} color={theme.colors.surface.raised}>
         <FlexColumn className={`${className}__container`}>
           {/* Menu icons row with collapse button */}

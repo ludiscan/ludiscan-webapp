@@ -24,6 +24,7 @@ export const hintDefinitions: HintDefinition[] = [
     titleKey: 'hints.welcome.title',
     descriptionKey: 'hints.welcome.description',
     tipsKey: 'hints.welcome.tips',
+    imagePath: '/heatmap/heatmap-welcome-hint.gif',
     order: 0,
   },
   {
