@@ -155,6 +155,7 @@ const EmbedLayoutComponent: FC<EmbedLayoutProps> = ({ className, service, error 
 const EmbedLayout = styled(EmbedLayoutComponent)`
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   background: ${({ theme }) => theme.colors.surface.raised};
 

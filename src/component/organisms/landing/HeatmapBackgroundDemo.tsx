@@ -312,6 +312,7 @@ export const HeatmapBackgroundDemo = styled(Component)`
   z-index: 0;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   pointer-events: none;
   opacity: 0.5;
 

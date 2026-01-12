@@ -101,6 +101,7 @@ const loadingProgress = keyframes`
 const IndexPage = styled(Component)`
   position: relative;
   min-height: 100vh;
+  min-height: 100dvh;
   overflow-x: hidden;
   background: ${({ theme }) => theme.colors.background.default};
 
@@ -111,6 +112,7 @@ const IndexPage = styled(Component)`
     position: relative;
     z-index: 1;
     height: 100vh;
+    height: 100dvh;
     overflow: hidden auto;
   }
 
@@ -119,6 +121,7 @@ const IndexPage = styled(Component)`
     align-items: center;
     justify-content: center;
     min-height: 100vh;
+    min-height: 100dvh;
     background: ${({ theme }) => theme.colors.background.default};
   }
 

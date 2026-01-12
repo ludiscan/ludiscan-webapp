@@ -173,6 +173,7 @@ const Component: FC<ProfilePageProps> = ({ className }) => {
 const ProfilePage = styled(Component)`
   position: relative;
   height: 100vh;
+  height: 100dvh;
 
   &__container {
     display: flex;

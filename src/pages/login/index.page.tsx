@@ -167,6 +167,7 @@ const hexToRgba = (hex: string, alpha: number) => {
 const IndexPage = styled(Component)`
   position: relative;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   color: ${({ theme }) => theme.colors.text.primary};
   background: #ffeaea;

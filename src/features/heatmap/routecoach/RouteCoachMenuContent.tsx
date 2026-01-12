@@ -86,6 +86,7 @@ const ScrollableClusterSection = styled(ScrollableClusterSectionComponent)`
   flex: 1;
   min-height: 0;
   max-height: calc(100vh - 320px);
+  max-height: calc(100dvh - 320px);
   padding-right: 4px;
   overflow-y: auto;
 
