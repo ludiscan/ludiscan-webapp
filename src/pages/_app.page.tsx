@@ -146,11 +146,7 @@ export default function App({ Component, pageProps }: AppProps) {
                   </LoadingOverlay>
                 )}
                 <ToastProvider position={'top-right'}>
-                  <Content
-                    id='app-scroll-container'
-                    className={isDesktop === undefined ? '' : isDesktop ? 'desktop' : 'mobile'}
-                    data-testid={'app-content'}
-                  >
+                  <Content id='app-scroll-container' className={isDesktop === undefined ? '' : isDesktop ? 'desktop' : 'mobile'} data-testid={'app-content'}>
                     <main id='main-content' tabIndex={-1}>
                       <Component {...pageProps} />
                     </main>
