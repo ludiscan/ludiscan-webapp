@@ -119,35 +119,32 @@ const Component: FC<EmbedUrlExpirationModalProps> = ({ className, isOpen, onClos
   );
 
   // Clipboard copy with fallback for mobile browsers
-  const copyToClipboard = useCallback(
-    async (text: string): Promise<boolean> => {
-      // Try modern clipboard API first
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        try {
-          await navigator.clipboard.writeText(text);
-          return true;
-        } catch {
-          // Fall through to fallback
-        }
-      }
-
-      // Fallback: use hidden input and execCommand
+  const copyToClipboard = useCallback(async (text: string): Promise<boolean> => {
+    // Try modern clipboard API first
+    if (navigator.clipboard && navigator.clipboard.writeText) {
       try {
-        const input = urlInputRef.current;
-        if (input) {
-          input.select();
-          input.setSelectionRange(0, text.length); // For mobile
-          const success = document.execCommand('copy');
-          if (success) return true;
-        }
+        await navigator.clipboard.writeText(text);
+        return true;
       } catch {
-        // Fall through
+        // Fall through to fallback
       }
+    }
 
-      return false;
-    },
-    [],
-  );
+    // Fallback: use hidden input and execCommand
+    try {
+      const input = urlInputRef.current;
+      if (input) {
+        input.select();
+        input.setSelectionRange(0, text.length); // For mobile
+        const success = document.execCommand('copy');
+        if (success) return true;
+      }
+    } catch {
+      // Fall through
+    }
+
+    return false;
+  }, []);
 
   // Copy the generated URL
   const handleCopyUrl = useCallback(async () => {
@@ -228,7 +225,12 @@ const Component: FC<EmbedUrlExpirationModalProps> = ({ className, isOpen, onClos
           <>
             {/* Generated URL Display */}
             <FlexColumn gap={8}>
-              <Text text={t('session.embedUrlGeneratedLabel')} fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} fontWeight={'bold'} />
+              <Text
+                text={t('session.embedUrlGeneratedLabel')}
+                fontSize={theme.typography.fontSize.base}
+                color={theme.colors.text.primary}
+                fontWeight={'bold'}
+              />
               <div className={`${className}__urlContainer`}>
                 <input
                   ref={urlInputRef}
@@ -238,7 +240,12 @@ const Component: FC<EmbedUrlExpirationModalProps> = ({ className, isOpen, onClos
                   className={`${className}__urlInput`}
                   onClick={(e) => (e.target as HTMLInputElement).select()}
                 />
-                <button type='button' onClick={handleCopyUrl} className={`${className}__copyButton ${isCopied ? 'copied' : ''}`} aria-label={t('session.embedUrlCopyButton')}>
+                <button
+                  type='button'
+                  onClick={handleCopyUrl}
+                  className={`${className}__copyButton ${isCopied ? 'copied' : ''}`}
+                  aria-label={t('session.embedUrlCopyButton')}
+                >
                   {isCopied ? <BiCheck size={20} /> : <BiCopy size={20} />}
                 </button>
               </div>
@@ -258,7 +265,12 @@ const Component: FC<EmbedUrlExpirationModalProps> = ({ className, isOpen, onClos
           <>
             {/* Expiration Dropdown */}
             <FlexColumn gap={8}>
-              <Text text={t('session.embedUrlExpirationLabel')} fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} fontWeight={'bold'} />
+              <Text
+                text={t('session.embedUrlExpirationLabel')}
+                fontSize={theme.typography.fontSize.base}
+                color={theme.colors.text.primary}
+                fontWeight={'bold'}
+              />
 
               <div className={`${className}__selectWrapper`}>
                 <select
@@ -308,7 +320,12 @@ const Component: FC<EmbedUrlExpirationModalProps> = ({ className, isOpen, onClos
               <Button onClick={handleClose} scheme={'surface'} fontSize={'base'} disabled={isGenerating}>
                 {t('common.cancel')}
               </Button>
-              <Button onClick={handleGenerate} scheme={'primary'} fontSize={'base'} disabled={isGenerating || (selectedPreset === 'custom' && !!validationError)}>
+              <Button
+                onClick={handleGenerate}
+                scheme={'primary'}
+                fontSize={'base'}
+                disabled={isGenerating || (selectedPreset === 'custom' && !!validationError)}
+              >
                 {isGenerating ? t('session.embedUrlGenerating') : t('session.embedUrlGenerate')}
               </Button>
             </FlexRow>
