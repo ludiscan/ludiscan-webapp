@@ -66,6 +66,7 @@ export const hintDefinitions: HintDefinition[] = [
     titleKey: 'hints.menuTimeline.title',
     descriptionKey: 'hints.menuTimeline.description',
     tipsKey: 'hints.menuTimeline.tips',
+    imagePath: '/heatmap/heatmap-replay-hint.gif',
     order: 10,
   },
   {
