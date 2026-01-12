@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { useCallback, useState, useMemo, useRef } from 'react';
+import { useCallback, useState, useMemo, useRef, useEffect } from 'react';
 import { BiChevronDown, BiCopy, BiCheck } from 'react-icons/bi';
 
 import type { FC } from 'react';
@@ -8,6 +8,7 @@ import { Button } from '@src/component/atoms/Button';
 import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { VerticalSpacer } from '@src/component/atoms/Spacer';
 import { Text } from '@src/component/atoms/Text';
+import { VisuallyHidden } from '@src/component/atoms/VisuallyHidden';
 import { Modal } from '@src/component/molecules/Modal';
 import { useToast } from '@src/component/templates/ToastContext';
 import { useLocale } from '@src/hooks/useLocale';
@@ -38,6 +39,16 @@ const Component: FC<EmbedUrlExpirationModalProps> = ({ className, isOpen, onClos
   const [generatedUrl, setGeneratedUrl] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
   const urlInputRef = useRef<HTMLInputElement>(null);
+  const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Calculate min and max date for the input
   const { minDate, maxDate } = useMemo(() => {
@@ -154,7 +165,11 @@ const Component: FC<EmbedUrlExpirationModalProps> = ({ className, isOpen, onClos
     if (success) {
       setIsCopied(true);
       showToast(t('session.embedUrlCopied'), 2, 'success');
-      setTimeout(() => setIsCopied(false), 2000);
+      // Clear any existing timeout before setting a new one
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+      copyTimeoutRef.current = setTimeout(() => setIsCopied(false), 2000);
     } else {
       showToast(t('session.embedUrlCopyFallback'), 3, 'info');
     }
@@ -183,7 +198,7 @@ const Component: FC<EmbedUrlExpirationModalProps> = ({ className, isOpen, onClos
         },
       });
 
-      if (error) {
+      if (error || !data?.url) {
         showToast(t('session.embedUrlFailed'), 3, 'error');
         return;
       }
@@ -199,6 +214,11 @@ const Component: FC<EmbedUrlExpirationModalProps> = ({ className, isOpen, onClos
 
   const handleClose = useCallback(() => {
     if (!isGenerating) {
+      // Clear copy timeout to prevent memory leak
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+        copyTimeoutRef.current = null;
+      }
       setSelectedPreset('4h');
       setCustomDateTime('');
       setValidationError(null);
@@ -225,14 +245,19 @@ const Component: FC<EmbedUrlExpirationModalProps> = ({ className, isOpen, onClos
           <>
             {/* Generated URL Display */}
             <FlexColumn gap={8}>
+              <VisuallyHidden as='label' htmlFor='embed-url-input'>
+                {t('session.embedUrlGeneratedLabel')}
+              </VisuallyHidden>
               <Text
                 text={t('session.embedUrlGeneratedLabel')}
                 fontSize={theme.typography.fontSize.base}
                 color={theme.colors.text.primary}
                 fontWeight={'bold'}
+                aria-hidden='true'
               />
               <div className={`${className}__urlContainer`}>
                 <input
+                  id='embed-url-input'
                   ref={urlInputRef}
                   type='text'
                   value={generatedUrl}
