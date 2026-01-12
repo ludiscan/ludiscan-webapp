@@ -22,9 +22,9 @@ export const Default: Story = {
   name: 'default style',
   args: {
     title: 'Page1',
-    onClick: () => {
+    onToggleSidebar: () => {
       /* eslint-disable-next-line no-console */
-      console.log('onClick');
+      console.log('onToggleSidebar');
     },
   },
 };
@@ -34,9 +34,9 @@ export const AddIconTitleEnd: Story = {
   name: 'icon title end style',
   args: {
     title: 'Page1',
-    onClick: () => {
+    onToggleSidebar: () => {
       /* eslint-disable-next-line no-console */
-      console.log('onClick');
+      console.log('onToggleSidebar');
     },
   },
   render: (args) => {

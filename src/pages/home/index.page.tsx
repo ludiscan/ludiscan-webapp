@@ -25,6 +25,7 @@ import { useToast } from '@src/component/templates/ToastContext';
 import { useAuth } from '@src/hooks/useAuth';
 import { useLocale } from '@src/hooks/useLocale';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
+import { useSidebar } from '@src/hooks/useSidebar';
 import { useApiClient } from '@src/modeles/ApiClientContext';
 import { DefaultStaleTime } from '@src/modeles/qeury';
 import { InnerContent } from '@src/pages/_app.page';
@@ -109,10 +110,7 @@ const Component: FC<HomePageProps> = ({ className }) => {
   }, [isErrorProjects, projectsError, showToast, t]);
 
   const { theme } = useSharedTheme();
-
-  const handleBack = useCallback(() => {
-    router.back();
-  }, [router]);
+  const { toggle: toggleSidebar } = useSidebar();
 
   const handleRefresh = useCallback(() => {
     toastShownRef.current = false;
@@ -175,7 +173,7 @@ const Component: FC<HomePageProps> = ({ className }) => {
 
       <SidebarLayout />
       <InnerContent>
-        <Header title={t('home.title')} onClick={handleBack} />
+        <Header title={t('home.title')} onToggleSidebar={toggleSidebar} />
 
         <div className={`${className}__mainContent`}>
           {/* Hero Section */}

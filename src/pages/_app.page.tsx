@@ -19,6 +19,7 @@ import { env } from '@src/config/env';
 import { LocaleProvider } from '@src/contexts/LocaleContext';
 import { useIsDesktop } from '@src/hooks/useIsDesktop';
 import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
+import { SidebarProvider } from '@src/hooks/useSidebar';
 import { store } from '@src/store';
 import { dimensions, zIndexes } from '@src/styles/style';
 
@@ -130,26 +131,28 @@ export default function App({ Component, pageProps }: AppProps) {
         <LocaleProvider>
           <QueryClientProvider client={queryClient}>
             <SharedThemeProvider>
-              <A11yAnnouncer />
-              <SkipLink targetId='main-content' />
-              {isPageLoading && (
-                <LoadingOverlay>
-                  <LoadingSpinner />
-                  <LoadingText>Loading...</LoadingText>
-                </LoadingOverlay>
-              )}
-              <ToastProvider position={'top-right'}>
-                <Content
-                  id='app-scroll-container'
-                  className={isDesktop === undefined ? '' : isDesktop ? 'desktop' : 'mobile'}
-                  style={{ height: '100vh' }}
-                  data-testid={'app-content'}
-                >
-                  <main id='main-content' tabIndex={-1}>
-                    <Component {...pageProps} />
-                  </main>
-                </Content>
-              </ToastProvider>
+              <SidebarProvider>
+                <A11yAnnouncer />
+                <SkipLink targetId='main-content' />
+                {isPageLoading && (
+                  <LoadingOverlay>
+                    <LoadingSpinner />
+                    <LoadingText>Loading...</LoadingText>
+                  </LoadingOverlay>
+                )}
+                <ToastProvider position={'top-right'}>
+                  <Content
+                    id='app-scroll-container'
+                    className={isDesktop === undefined ? '' : isDesktop ? 'desktop' : 'mobile'}
+                    style={{ height: '100vh' }}
+                    data-testid={'app-content'}
+                  >
+                    <main id='main-content' tabIndex={-1}>
+                      <Component {...pageProps} />
+                    </main>
+                  </Content>
+                </ToastProvider>
+              </SidebarProvider>
             </SharedThemeProvider>
           </QueryClientProvider>
         </LocaleProvider>

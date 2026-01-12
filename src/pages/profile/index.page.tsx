@@ -15,6 +15,7 @@ import { Header } from '@src/component/templates/Header';
 import { SidebarLayout } from '@src/component/templates/SidebarLayout';
 import { useAuth } from '@src/hooks/useAuth';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
+import { useSidebar } from '@src/hooks/useSidebar';
 import themes from '@src/modeles/theme';
 import { InnerContent } from '@src/pages/_app.page';
 
@@ -53,15 +54,13 @@ const Component: FC<ProfilePageProps> = ({ className }) => {
     setIsLoadingProfile(false);
   }, [user]);
 
+  const { toggle: toggleSidebar } = useSidebar();
+
   useEffect(() => {
     if (!isAuthorized && !isLoading && ready) {
       router.replace('/');
     }
   }, [isAuthorized, isLoading, ready, router]);
-
-  const handleBack = () => {
-    router.back();
-  };
 
   if (!ready || isLoading) {
     return (
@@ -83,7 +82,7 @@ const Component: FC<ProfilePageProps> = ({ className }) => {
       <DashboardBackgroundCanvas className='visible' />
       <SidebarLayout />
       <InnerContent>
-        <Header title='Profile' onClick={handleBack} />
+        <Header title='Profile' onToggleSidebar={toggleSidebar} />
 
         <div className={`${className}__container`}>
           <PanelCard color={theme.colors.surface.base} className={`${className}__card`}>

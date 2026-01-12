@@ -6,7 +6,6 @@
 /* eslint-disable import/order */
 import styled from '@emotion/styled';
 import type { GetStaticPaths, GetStaticProps } from 'next';
-import { useRouter } from 'next/navigation';
 import React from 'react';
 import type { FC } from 'react';
 
@@ -18,6 +17,7 @@ import { Header } from '@src/component/templates/Header';
 import { SidebarLayout } from '@src/component/templates/SidebarLayout';
 import { DocsContent } from '@src/features/docs/components/DocsContent';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
+import { useSidebar } from '@src/hooks/useSidebar';
 import { InnerContent } from '@src/pages/_app.page';
 import { getDocBySlug, getDocSlugs } from '@src/utils/docs/loader';
 /* eslint-enable import/order */
@@ -33,12 +33,8 @@ interface DocsPageProps {
  * Displays documentation with sidebar navigation
  */
 const Component: FC<DocsPageProps> = ({ currentDoc, error, className }) => {
-  const router = useRouter();
   const { theme } = useSharedTheme();
-
-  const handleBack = () => {
-    router.back();
-  };
+  const { toggle: toggleSidebar } = useSidebar();
 
   // Handle error state
   if (error) {
@@ -66,7 +62,7 @@ const Component: FC<DocsPageProps> = ({ currentDoc, error, className }) => {
       <DashboardBackgroundCanvas />
       <SidebarLayout />
       <InnerContent>
-        <Header title='Documentation' onClick={handleBack} />
+        <Header title='Documentation' onToggleSidebar={toggleSidebar} />
         <div className={`${className}__contentContainer`}>
           <DocsContent doc={currentDoc} />
         </div>

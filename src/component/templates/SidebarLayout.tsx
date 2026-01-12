@@ -14,6 +14,7 @@ import { ResponsiveSidebar } from '@src/component/molecules/ResponsiveSidebar';
 import { useAuth } from '@src/hooks/useAuth';
 import { useLocale } from '@src/hooks/useLocale';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
+import { useSidebar } from '@src/hooks/useSidebar';
 import { DefaultStaleTime } from '@src/modeles/qeury';
 
 export type SidebarLayoutProps = {
@@ -44,6 +45,7 @@ const Component: FC<SidebarLayoutProps> = ({ className }) => {
   const { theme } = useSharedTheme();
   const { isAuthorized } = useAuth();
   const { t } = useLocale();
+  const { isOpen, close, closeIfMobile } = useSidebar();
 
   // Initialize state from localStorage or default to empty Set
   const [expandedDropdowns, setExpandedDropdowns] = useState<Set<string>>(() => {
@@ -119,7 +121,7 @@ const Component: FC<SidebarLayoutProps> = ({ className }) => {
   const isDocsActive = pathname?.startsWith('/heatmap/docs');
 
   return (
-    <ResponsiveSidebar>
+    <ResponsiveSidebar isOpen={isOpen} onClose={close}>
       <nav className={className} aria-label={t('accessibility.mainNavigation')}>
         <FlexColumn gap={8}>
           {visibleItems.map((item) => {
@@ -167,7 +169,7 @@ const Component: FC<SidebarLayoutProps> = ({ className }) => {
                               />
                             </div>
                             {group.items.map((doc) => (
-                              <Link key={doc.slug} href={`/heatmap/docs/${doc.slug}`}>
+                              <Link key={doc.slug} href={`/heatmap/docs/${doc.slug}`} onClick={closeIfMobile}>
                                 <div className={`${className}__dropdownItem ${isActive(`/heatmap/docs/${doc.slug}`) ? 'active' : ''}`}>
                                   <Text
                                     text={doc.frontmatter.title}
@@ -190,7 +192,7 @@ const Component: FC<SidebarLayoutProps> = ({ className }) => {
             if (!item.href) return null;
 
             return (
-              <Link key={item.href} href={item.href}>
+              <Link key={item.href} href={item.href} onClick={closeIfMobile}>
                 <div className={`${className}__menuItem ${isActive(item.href) ? 'active' : ''}`}>
                   <FlexRow gap={12} align={'center'} className={`${className}__menuContent`}>
                     <div className={`${className}__menuIcon`}>{item.icon}</div>
