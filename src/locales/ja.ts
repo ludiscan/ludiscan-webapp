@@ -114,6 +114,20 @@ export const ja = {
     copyEmbedUrl: 'Embed URLをコピー',
     embedUrlCopied: 'Embed URLをコピーしました',
     embedUrlFailed: 'Embed URLの取得に失敗しました',
+    embedUrlModalTitle: 'Embed URLを生成',
+    embedUrlSessionLabel: 'セッション',
+    embedUrlExpirationLabel: '有効期限を選択',
+    embedUrlPreset1h: '1時間',
+    embedUrlPreset4h: '4時間',
+    embedUrlPreset24h: '24時間',
+    embedUrlPreset7d: '7日間',
+    embedUrlCustomLabel: 'カスタム',
+    embedUrlCustomHelper: '最大: 今から1年後まで',
+    embedUrlGenerate: '生成してコピー',
+    embedUrlGenerating: '生成中...',
+    embedUrlValidationRequired: '日時を選択してください',
+    embedUrlValidationFuture: '有効期限は未来の日時を指定してください',
+    embedUrlValidationMaxYear: '有効期限は最大1年後までです',
   },
 
   // Session Form Modal
@@ -365,14 +379,10 @@ export const ja = {
   // Hints
   hints: {
     welcome: {
-      title: 'Heatmapビューワーへようこそ',
+      title: 'ようこそ',
       selectLanguage: '言語を選択してください',
       description: 'このツールでは、ゲームプレイデータをヒートマップとして可視化できます。左側のメニューから各機能にアクセスできます。',
-      tips: [
-        'マウスドラッグでカメラを回転、スクロールでズームできます',
-        '左側のアイコンからメニューを開いて設定を変更できます',
-        'ツールバーで2D/3Dモードを切り替えられます',
-      ],
+      tips: ['マウスやドラッグでカメラを回転、ズームできます', '左側のメニューから表示設定の変更やデータ分析機能にアクセスできます'],
     },
     menuHeatmap: {
       title: 'ヒートマップ設定',

@@ -24,6 +24,7 @@ export const hintDefinitions: HintDefinition[] = [
     titleKey: 'hints.welcome.title',
     descriptionKey: 'hints.welcome.description',
     tipsKey: 'hints.welcome.tips',
+    imagePath: '/heatmap/heatmap-welcome-hint.gif',
     order: 0,
   },
   {
@@ -65,6 +66,7 @@ export const hintDefinitions: HintDefinition[] = [
     titleKey: 'hints.menuTimeline.title',
     descriptionKey: 'hints.menuTimeline.description',
     tipsKey: 'hints.menuTimeline.tips',
+    imagePath: '/heatmap/heatmap-replay-hint.gif',
     order: 10,
   },
   {

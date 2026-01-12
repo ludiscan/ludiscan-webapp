@@ -186,4 +186,50 @@ describe('HVQL - parse & compile', () => {
 
     expect(() => parseHVQL(script)).toThrow(/Unknown statement/i);
   });
+
+  // ---- 単純識別子でのパレット展開 ----
+
+  test('compileHVQL: ${...}なしでもパレットから展開される', () => {
+    const script = [
+      'palette {',
+      '  yellow: #FFD400;',
+      '  blue:   #0057FF;',
+      '}',
+      '',
+      'map status.team {',
+      '  yellow -> player-color: yellow;',
+      '  blue   -> player-color: blue;',
+      '  *      -> player-color: #888;',
+      '}',
+    ].join('\n');
+
+    const apply = compileHVQL(script);
+
+    // yellow -> #FFD400
+    const styleYellow = apply(baseCtx);
+    expect(styleYellow.color).toBe('#FFD400');
+
+    // blue -> #0057FF
+    const styleBlue = apply({ ...baseCtx, status: { ...baseCtx.status, team: 'blue' } });
+    expect(styleBlue.color).toBe('#0057FF');
+  });
+
+  test('compileHVQL: パレットに存在しない識別子はそのまま', () => {
+    const script = [
+      'palette {',
+      '  yellow: #FFD400;',
+      '}',
+      '',
+      'map status.team {',
+      '  yellow -> player-color: yellow;',
+      '  *      -> player-color: red;',
+      '}',
+    ].join('\n');
+
+    const apply = compileHVQL(script);
+
+    // "red"はパレットに存在しないので、CSSカラー名としてそのまま返る
+    const style = apply({ ...baseCtx, status: { ...baseCtx.status, team: 'green' } });
+    expect(style.color).toBe('red');
+  });
 });
