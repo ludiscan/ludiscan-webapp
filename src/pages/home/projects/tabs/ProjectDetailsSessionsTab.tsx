@@ -12,6 +12,7 @@ import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { VerticalSpacer } from '@src/component/atoms/Spacer';
 import { Text } from '@src/component/atoms/Text';
 import { Pagination } from '@src/component/molecules/Pagination';
+import { EmbedUrlExpirationModal } from '@src/component/organisms/EmbedUrlExpirationModal';
 import { SessionDeleteConfirmModal } from '@src/component/organisms/SessionDeleteConfirmModal';
 import { SessionFormModal } from '@src/component/organisms/SessionFormModal';
 import { useToast } from '@src/component/templates/ToastContext';
@@ -62,6 +63,7 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
   // Modal states
   const [editingSession, setEditingSession] = useState<Session | null>(null);
   const [deletingSession, setDeletingSession] = useState<Session | null>(null);
+  const [embedUrlModalSession, setEmbedUrlModalSession] = useState<Session | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Fetch project members to determine current user's role
@@ -172,27 +174,10 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
   }, []);
 
   const handleCopyEmbedUrl = useCallback(
-    async (session: Session) => {
-      try {
-        const { data, error } = await apiClient.POST('/api/v0/heatmap/projects/{project_id}/play_session/{session_id}/embed-url', {
-          params: {
-            path: {
-              project_id: project.id,
-              session_id: session.sessionId,
-            },
-          },
-        });
-        if (error) {
-          showToast(t('session.embedUrlFailed'), 3, 'error');
-          return;
-        }
-        await navigator.clipboard.writeText(data.url);
-        showToast(t('session.embedUrlCopied'), 2, 'success');
-      } catch {
-        showToast(t('session.embedUrlFailed'), 3, 'error');
-      }
+    (session: Session) => {
+      setEmbedUrlModalSession(session);
     },
-    [apiClient, project.id, showToast, t],
+    [],
   );
 
   // Delete mutation
@@ -425,6 +410,13 @@ const Component: FC<ProjectDetailsSessionsTabProps> = ({ className, project }) =
         isDeleting={isDeleting}
         onClose={() => setDeletingSession(null)}
         onConfirmDelete={handleConfirmDelete}
+      />
+      <EmbedUrlExpirationModal
+        isOpen={!!embedUrlModalSession}
+        onClose={() => setEmbedUrlModalSession(null)}
+        projectId={project.id}
+        sessionId={embedUrlModalSession?.sessionId ?? 0}
+        sessionName={embedUrlModalSession?.name ?? ''}
       />
     </div>
   );
