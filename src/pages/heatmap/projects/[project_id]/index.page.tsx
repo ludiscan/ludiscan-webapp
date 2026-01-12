@@ -9,14 +9,12 @@ import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { GetStaticPaths, GetStaticProps } from 'next';
 import type { FC } from 'react';
 
-import { Button } from '@src/component/atoms/Button';
 import { Seo } from '@src/component/atoms/Seo';
 import { Text } from '@src/component/atoms/Text';
 import { StatusContent } from '@src/component/molecules/StatusContent';
 import { Header } from '@src/component/templates/Header';
 import { useAuth } from '@src/hooks/useAuth';
 import { useGeneralSelect } from '@src/hooks/useGeneral';
-import { useHeatmapState } from '@src/hooks/useHeatmapState';
 import { useIsDesktop } from '@src/hooks/useIsDesktop';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { useOnlineHeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
@@ -68,23 +66,8 @@ export type HeatmapIdPageLayoutProps = {
 const HeaderWrapper = memo(
   ({ className }: { className?: string }) => {
     const { theme } = useSharedTheme();
-    const { apply, hasDiff, discard } = useHeatmapState();
     const version = useSelector((s: RootState) => s.heatmapCanvas.version);
     const isDesktop = useIsDesktop();
-    // const splitMode = useSelector((s: RootState) => s.heatmapCanvas.splitMode);
-    // const dispatch = useDispatch();
-
-    // const handleSplitHorizontal = useCallback(() => {
-    //   dispatch(patchSplitMode({ enabled: true, direction: 'horizontal' }));
-    // }, [dispatch]);
-    //
-    // const handleSplitVertical = useCallback(() => {
-    //   dispatch(patchSplitMode({ enabled: true, direction: 'vertical' }));
-    // }, [dispatch]);
-    //
-    // const handleSingleView = useCallback(() => {
-    //   dispatch(patchSplitMode({ enabled: false }));
-    // }, [dispatch]);
 
     return (
       <Header
@@ -94,30 +77,6 @@ const HeaderWrapper = memo(
           isDesktop ? (
             <Text className={`${className}__headerV`} text={`${version || 'debug'}`} fontSize={theme.typography.fontSize.sm} fontWeight={'bold'} />
           ) : undefined
-        }
-        iconEnd={
-          <>
-            {/*<Button fontSize={'sm'} onClick={handleSplitHorizontal} scheme={splitMode.enabled && splitMode.direction === 'horizontal' ? 'primary' : 'surface'}>*/}
-            {/*  <Text text={'Split ↔'} fontWeight={'bold'} />*/}
-            {/*</Button>*/}
-            {/*<Button fontSize={'sm'} onClick={handleSplitVertical} scheme={splitMode.enabled && splitMode.direction === 'vertical' ? 'primary' : 'surface'}>*/}
-            {/*  <Text text={'Split ↕'} fontWeight={'bold'} />*/}
-            {/*</Button>*/}
-            {/*{splitMode.enabled && (*/}
-            {/*  <Button fontSize={'sm'} onClick={handleSingleView} scheme={'surface'}>*/}
-            {/*    <Text text={'Single'} fontWeight={'bold'} />*/}
-            {/*  </Button>*/}
-            {/*)}*/}
-            <Button fontSize={'sm'} onClick={discard} scheme={'surface'} disabled={!hasDiff}>
-              <Text text={'Discard'} fontWeight={'bold'} />
-            </Button>
-            <Button fontSize={'sm'} onClick={apply} scheme={'surface'} className={`${className}__badgeButton ${hasDiff ? 'badge' : ''}`}>
-              <Text text={'Save'} fontWeight={'bold'} />
-            </Button>
-            <Button fontSize={'sm'} onClick={() => {}} scheme={'tertiary'}>
-              <Text text={'Export'} fontWeight={'bold'} />
-            </Button>
-          </>
         }
       />
     );
@@ -153,22 +112,6 @@ export const HeatmapIdPageLayout = styled(HeatmapIdPageLayoutComponent)`
     color: ${({ theme }) => theme.colors.primary.main};
     border: 1px solid ${({ theme }) => theme.colors.primary.main};
     border-radius: 16px;
-  }
-
-  &__badgeButton {
-    position: relative;
-  }
-
-  &__badgeButton.badge::after {
-    position: absolute;
-    top: -4px;
-    right: -4px;
-    width: 10px;
-    height: 10px;
-    content: '';
-    background-color: ${({ theme }) => theme.colors.primary.main};
-    border-radius: 50%;
-    box-shadow: 2px 2px 12px ${({ theme }) => theme.colors.border.strong};
   }
 `;
 
