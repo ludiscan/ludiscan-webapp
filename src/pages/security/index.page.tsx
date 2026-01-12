@@ -182,6 +182,7 @@ const Component: FC<SecurityPageProps> = ({ className }) => {
 const SecurityPage = styled(Component)`
   position: relative;
   height: 100vh;
+  height: 100dvh;
 
   &__container {
     padding: 0 24px;

@@ -231,6 +231,7 @@ const Component: FC<HealthPageProps> = ({ className }) => {
 
 const HealthPage = styled(Component)`
   height: 100vh;
+  height: 100dvh;
 
   &__container {
     max-width: 800px;

@@ -23,18 +23,23 @@ const ModalContent = styled.div`
   max-width: calc(100vw - 32px);
   height: 500px;
   max-height: calc(100vh - 120px);
+  max-height: calc(100dvh - 120px);
   overflow: hidden;
 
   @media (width <= 768px) {
     width: calc(100vw - 32px);
     height: calc(100vh - 100px);
+    height: calc(100dvh - 100px);
     max-height: calc(100vh - 100px);
+    max-height: calc(100dvh - 100px);
   }
 
   @media (width <= 480px) {
     width: calc(100vw - 16px);
     height: calc(100vh - 80px);
+    height: calc(100dvh - 80px);
     max-height: calc(100vh - 80px);
+    max-height: calc(100dvh - 80px);
   }
 `;
 
