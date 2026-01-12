@@ -1,15 +1,13 @@
 import styled from '@emotion/styled';
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { GrContract, GrExpand } from 'react-icons/gr';
 import { IoMenu, IoPause, IoPlay, IoPlayBackSharp, IoPlayForwardSharp } from 'react-icons/io5';
-import { RiPlayMiniFill, RiPlayReverseMiniFill } from 'react-icons/ri';
 
-import type { Theme } from '@emotion/react';
 import type { FC, ChangeEventHandler } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
 import { Card } from '@src/component/atoms/Card';
-import { FlexRow, InlineFlexColumn, InlineFlexRow } from '@src/component/atoms/Flex';
+import { InlineFlexColumn, InlineFlexRow } from '@src/component/atoms/Flex';
 import { Text } from '@src/component/atoms/Text';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 
@@ -51,32 +49,21 @@ const Component: FC<TimelineControllerBlockProps> = ({
   onChangePlaySpeed = () => {},
 }) => {
   const { theme } = useSharedTheme();
-  const trackRef = useRef<HTMLDivElement>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const gradEle = useRef<'min' | 'max' | null>(null);
-  const draggingElement = useRef<(EventTarget & HTMLElement) | null>(null);
 
   const handleSeek = useCallback<ChangeEventHandler<HTMLInputElement>>(
     (e) => {
       const newTime = Number(e.currentTarget.value);
-      if (newTime < currentMinTime || newTime > currentMaxTime) {
-        return; // Seek outside the min-max range
-      }
       onSeek(newTime);
     },
-    [currentMaxTime, currentMinTime, onSeek],
+    [onSeek],
   );
-
-  // thumb の left を計算
-  const minPct = currentMinTime / maxTime;
-  const maxPct = currentMaxTime / maxTime;
 
   const currentTimeLabel = useMemo(() => {
     if (maxTime <= 0) return '00:00';
     const sec = currentTime / 1000;
     const m = Math.floor(sec / 60);
     const s = Math.floor(sec % 60);
-    // const cs = Math.floor((sec % 1) * 100);
     return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
   }, [currentTime, maxTime]);
 
@@ -85,57 +72,20 @@ const Component: FC<TimelineControllerBlockProps> = ({
     const sec = maxTime / 1000;
     const m = Math.floor(sec / 60);
     const s = Math.floor(sec % 60);
-    // const cs = Math.floor((sec % 1) * 100);
     return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
   }, [maxTime]);
 
-  const handleMinDown = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
-    gradEle.current = 'min';
-    draggingElement.current = event.currentTarget;
-  }, []);
+  // 進捗割合を計算
+  const progressPercent = maxTime > 0 ? (currentTime / maxTime) * 100 : 0;
 
-  const handleMaxDown = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
-    gradEle.current = 'max';
-    draggingElement.current = event.currentTarget;
-  }, []);
-
-  const handleMove = useCallback(
-    (e: MouseEvent): void => {
-      if (!draggingElement.current) return;
-      const trackRect = trackRef.current?.getBoundingClientRect();
-      if (!trackRect) return;
-      e.preventDefault();
-
-      const offsetX = e.clientX - trackRect.left;
-      const newTime = Math.max(0, Math.min(maxTime, (offsetX / trackRect.width) * maxTime));
-      if (gradEle.current === 'min' && newTime < currentTime - 500) {
-        onChangeMinTime(newTime);
-      } else if (gradEle.current === 'max' && newTime > currentTime + 500) {
-        onChangeMaxTime(newTime);
-      }
-    },
-    [maxTime, currentTime, onChangeMinTime, onChangeMaxTime],
+  // シークバーの進捗表示用グラデーション
+  // thumbの中心位置に合わせる: CSS calc()で動的に計算
+  const seekBarStyle = useMemo(
+    () => ({
+      background: `linear-gradient(to right, ${theme.colors.primary.main} ${progressPercent}%, ${theme.colors.background.default} ${progressPercent}%)`,
+    }),
+    [progressPercent, theme.colors.primary.main, theme.colors.background.default],
   );
-
-  // mouseupが発生したときに実行する関数
-  const handleUp = useCallback((_: MouseEvent): void => {
-    if (!draggingElement.current) return;
-
-    draggingElement.current = null;
-    gradEle.current = null;
-  }, []);
-
-  useEffect(() => {
-    document.body.addEventListener('mousemove', handleMove);
-    document.body.addEventListener('mouseup', handleUp);
-    document.body.addEventListener('mouseleave', handleUp);
-
-    return () => {
-      document.body.removeEventListener('mousemove', handleMove);
-      document.body.removeEventListener('mouseup', handleUp);
-      document.body.removeEventListener('mouseleave', handleUp);
-    };
-  }, [handleMove, handleUp]);
 
   return (
     <Card
@@ -146,222 +96,166 @@ const Component: FC<TimelineControllerBlockProps> = ({
       stopPropagate
       blur
     >
-      <FlexRow style={{ width: '100%' }} wrap={'nowrap'} gap={8}>
-        <InlineFlexColumn style={{ width: '100%' }}>
-          {isDetailOpen && (
-            <InlineFlexRow align={'center'} gap={12} style={{ width: '100%' }} wrap={'nowrap'}>
-              <InlineFlexRow align={'center'} gap={4}>
-                <Button onClick={onClickBackFrame} scheme={'none'} fontSize={'base'}>
-                  <IoPlayBackSharp />
-                </Button>
-                <Button className={`${className}__playButton`} onClick={onClickPlay} scheme={'none'} fontSize={'2xl'}>
-                  {isPlaying ? <IoPause /> : <IoPlay />}
-                </Button>
-                <Button onClick={onClickForwardFrame} scheme={'none'} fontSize={'base'}>
-                  <IoPlayForwardSharp />
-                </Button>
-              </InlineFlexRow>
-              <div style={{ flex: 1 }} />
-              {/* Play Speed Selector */}
-              <InlineFlexRow align={'center'} gap={4}>
-                {PlaySpeed.map((value) => (
-                  <Button key={value} onClick={() => onChangePlaySpeed(value)} scheme={'none'} fontSize={'sm'}>
-                    <Text
-                      className={`${className}__playSpeedText`}
-                      text={`${value}x`}
-                      fontSize={'sm'}
-                      color={playSpeed === value ? theme.colors.text.primary : theme.colors.text.secondary}
-                    />
-                  </Button>
-                ))}
-              </InlineFlexRow>
-              <Button onClick={onClickMenu} scheme={'none'} fontSize={'lg'}>
-                <IoMenu />
-              </Button>
-            </InlineFlexRow>
-          )}
-          <InlineFlexRow align={'center'} gap={12} style={{ width: '100%' }} wrap={'nowrap'}>
-            {!isDetailOpen && (
-              <InlineFlexRow align={'center'} gap={4}>
-                <Button onClick={onClickBackFrame} scheme={'none'} fontSize={'sm'}>
-                  <IoPlayBackSharp />
-                </Button>
-                <Button className={`${className}__playButton`} onClick={onClickPlay} scheme={'none'} fontSize={'xl'}>
-                  {isPlaying ? <IoPause /> : <IoPlay />}
-                </Button>
-                <Button onClick={onClickForwardFrame} scheme={'none'} fontSize={'sm'}>
-                  <IoPlayForwardSharp />
-                </Button>
-              </InlineFlexRow>
-            )}
-
-            <div className={`${className}__sliderWrapper`} ref={trackRef}>
-              {!isDetailOpen && (
-                <>
-                  <Text
-                    className={`${className}__speedLabel`}
-                    text={`${playSpeed}x`}
-                    fontSize={theme.typography.fontSize.xs}
-                    color={theme.colors.text.secondary}
-                  />
-                  <Text className={`${className}__label`} text={`${currentTimeLabel}/${maxTimeLabel}`} fontSize={theme.typography.fontSize.xs} />
-                </>
-              )}
-              <div className={`${className}__sliderBackground`} />
-
-              {/* min-thumnb */}
-              <div
-                role='button'
-                tabIndex={0}
-                id={'min-thumb'}
-                className={`${className}__thumb ${className}__thumb--min min-thumb draggable`}
-                style={{ left: `${minPct * 100}%` }}
-                onMouseDown={handleMinDown}
-              >
-                <RiPlayMiniFill color={theme.colors.primary.main} size={20} />
-              </div>
-
-              {/* 現在位置スライダー */}
-              <input type='range' className={`${className}__seekBarInput`} min={0} max={maxTime} value={currentTime} onChange={handleSeek} />
-              {/* max-thumb */}
-              <div
-                role='button'
-                tabIndex={0}
-                id={'max-thumb'}
-                className={`${className}__thumb ${className}__thumb--max max-thumb draggable`}
-                style={{ left: `${maxPct * 100}%` }}
-                onMouseDown={handleMaxDown}
-              >
-                <RiPlayReverseMiniFill color={theme.colors.primary.main} size={20} />
-              </div>
-            </div>
-            {isDetailOpen && <Text className={`${className}__label open`} text={`${currentTimeLabel}/${maxTimeLabel}`} fontSize={'xs'} />}
-            <Button
-              className={`${className}__toggleButton ${isDetailOpen ? 'open' : ''}`}
-              onClick={() => setIsDetailOpen(!isDetailOpen)}
-              scheme={'none'}
-              fontSize={'base'}
-            >
-              {!isDetailOpen ? (
-                <span className='icon-expand'>
-                  <GrExpand size={16} />
-                </span>
-              ) : (
-                <span className='icon-contract'>
-                  <GrContract size={16} />
-                </span>
-              )}
-            </Button>
+      <InlineFlexColumn style={{ width: '100%' }} gap={8}>
+        {/* 1行目: シークバー */}
+        <div className={`${className}__sliderWrapper`}>
+          <div className={`${className}__seekBarTrack`} style={seekBarStyle} />
+          <input type='range' className={`${className}__seekBarInput`} min={0} max={maxTime} value={currentTime} onChange={handleSeek} />
+          {/* 2行目: 時間表示（左右に小さく） */}
+          <InlineFlexRow className={`${className}__seekTimes`} align={'center'} wrap={'nowrap'}>
+            <Text className={`${className}__timeLabel`} text={currentTimeLabel} fontSize={theme.typography.fontSize.xs} color={theme.colors.text.secondary} />
+            <div style={{ flex: 1 }} />
+            <Text className={`${className}__timeLabel`} text={maxTimeLabel} fontSize={theme.typography.fontSize.xs} color={theme.colors.text.secondary} />
           </InlineFlexRow>
-        </InlineFlexColumn>
-      </FlexRow>
+        </div>
+
+        {/* 3行目: 再生コントロール（中央・大きく） */}
+        <InlineFlexRow className={`${className}__controlButtons`} align={'center'} gap={16} style={{ width: '100%', justifyContent: 'center' }} wrap={'nowrap'}>
+          <Button className={`${className}__controlButton`} onClick={onClickBackFrame} scheme={'none'} fontSize={'lg'}>
+            <IoPlayBackSharp />
+          </Button>
+          <Button className={`${className}__playButton`} onClick={onClickPlay} scheme={'none'} fontSize={'3xl'}>
+            {isPlaying ? <IoPause size={36} /> : <IoPlay size={36} />}
+          </Button>
+          <Button className={`${className}__controlButton`} onClick={onClickForwardFrame} scheme={'none'} fontSize={'lg'}>
+            <IoPlayForwardSharp />
+          </Button>
+        </InlineFlexRow>
+
+        {/* 4行目: サブコントロール（中央） */}
+        <InlineFlexRow align={'center'} gap={12} style={{ width: '100%', justifyContent: 'center' }} wrap={'nowrap'}>
+          {/* 速度表示/選択 */}
+          {isDetailOpen ? (
+            <InlineFlexRow className={`${className}__speedButtons`} align={'center'} gap={4}>
+              {PlaySpeed.map((value) => (
+                <Button className={`${className}__speedButton`} key={value} onClick={() => onChangePlaySpeed(value)} scheme={'none'} fontSize={'sm'}>
+                  <Text
+                    className={`${className}__playSpeedText`}
+                    text={`${value}x`}
+                    fontSize={'sm'}
+                    color={playSpeed === value ? theme.colors.text.primary : theme.colors.text.secondary}
+                  />
+                </Button>
+              ))}
+            </InlineFlexRow>
+          ) : (
+            <Text className={`${className}__speedLabel`} text={`${playSpeed}x`} fontSize={theme.typography.fontSize.xs} color={theme.colors.text.secondary} />
+          )}
+
+          {/* 展開/折りたたみボタン */}
+          <Button
+            className={`${className}__toggleButton ${isDetailOpen ? 'open' : ''}`}
+            onClick={() => setIsDetailOpen(!isDetailOpen)}
+            scheme={'none'}
+            fontSize={'base'}
+          >
+            {!isDetailOpen ? (
+              <span className='icon-expand'>
+                <GrExpand size={16} />
+              </span>
+            ) : (
+              <span className='icon-contract'>
+                <GrContract size={16} />
+              </span>
+            )}
+          </Button>
+
+          {/* メニューボタン（展開時のみ） */}
+          {isDetailOpen && (
+            <Button className={`${className}__menuButton`} onClick={onClickMenu} scheme={'none'} fontSize={'lg'}>
+              <IoMenu />
+            </Button>
+          )}
+        </InlineFlexRow>
+      </InlineFlexColumn>
     </Card>
   );
 };
 
-const createBackgroundGradient = (theme: Theme, currentMinTime: number, currentMaxTime: number, maxTime: number) => {
-  const minPct = (currentMinTime / maxTime) * 100;
-  const maxPct = (currentMaxTime / maxTime) * 100;
-  const activeColor = theme.colors.primary.main;
-  const inactiveColor = theme.colors.secondary.light;
-  return `linear-gradient(
-    to right,
-    ${inactiveColor} 0%,
-    ${inactiveColor} ${minPct}%,
-    ${activeColor} ${minPct}%,
-    ${activeColor} ${maxPct}%,
-    ${inactiveColor} ${maxPct}%,
-    ${inactiveColor} 100%
-  )`;
-};
-
 export const TimelineControllerBlock = memo(
   styled(Component)`
-    max-width: 90vw;
-    padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.md};
+    max-width: 95vw;
+    padding: ${({ theme }) => theme.spacing.lg} ${({ theme }) => theme.spacing.md};
     color: ${({ theme }) => theme.colors.text.primary};
     border-radius: ${({ theme }) => theme.borders.radius.xl};
     transition: all 0.2s ease-in-out;
 
+    /* スマホ縦向き時はより広く、タップしやすく */
+    @media (max-width: 500px) and (orientation: portrait) {
+      width: 95vw;
+      max-width: 95vw;
+      padding: ${({ theme }) => theme.spacing.lg} ${({ theme }) => theme.spacing.lg};
+    }
+
     @media (width >= 500px) {
-      max-width: 450px;
+      width: 600px;
+      max-width: 600px;
     }
 
     &__sliderWrapper {
       position: relative;
-      flex: 1;
-      min-width: 150px;
+      width: 100%;
       height: ${({ theme }) => theme.spacing.lg};
     }
 
-    &__sliderBackground {
+    &__seekTimes {
+      position: absolute;
+      bottom: -15px;
+      left: 0;
+      width: 100%;
+    }
+
+    /* シークバーのトラック背景 */
+    &__seekBarTrack {
       position: absolute;
       top: 50%;
-      width: 100%;
-      height: ${({ theme }) => theme.spacing.xs};
-      background: ${({ theme, currentMinTime, currentMaxTime, maxTime }) => createBackgroundGradient(theme, currentMinTime, currentMaxTime, maxTime)};
-      border-radius: ${({ theme }) => theme.borders.radius.sm};
+      left: 10px;
+      width: calc(100% - 20px);
+      height: 4px;
+      border-radius: 2px;
       transform: translateY(-50%);
     }
 
-    /* thumb 共通 */
-    &__thumb {
-      position: absolute;
-      top: 50%;
-      z-index: 5;
-      display: flex;
-      align-content: center;
-      cursor: pointer;
-      transform: translate(-50%, -50%);
-
-      &:focus {
-        outline: 2px solid ${({ theme }) => theme.colors.border.focus};
-        outline-offset: 2px;
-      }
-
-      &:focus:not(:focus-visible) {
-        outline: none;
-      }
-    }
-
-    &__thumb--min {
-      /* 追加スタイリングがあれば */
-    }
-
-    &__thumb--max {
-      /* 追加スタイリングがあれば */
-    }
-
-    /* 現在位置スライダーは最前面 */
+    /* シークバースライダー */
     &__seekBarInput {
       position: absolute;
-      top: 0;
+      top: 50%;
       left: 0;
-      z-index: 4;
       width: 100%;
-      height: 100%;
+      height: 20px;
       appearance: none;
       background: transparent;
       border: none;
+      transform: translateY(-50%);
+
+      &::-webkit-slider-runnable-track {
+        height: 4px;
+        background: transparent;
+      }
 
       &::-webkit-slider-thumb {
-        /* English comment: taller thumb for current */
-        width: 6px;
-        height: ${({ theme }) => theme.spacing.lg};
+        width: 12px;
+        height: 12px;
+        margin-top: -4px;
         appearance: none;
         cursor: pointer;
-        background: ${({ theme }) => theme.colors.surface.base};
-        border: ${({ theme }) => theme.borders.width.thin} solid ${({ theme }) => theme.colors.primary.main};
-        border-radius: ${({ theme }) => theme.borders.radius.md};
+        background: ${({ theme }) => theme.colors.primary.main};
+        border: none;
+        border-radius: 50%;
+      }
+
+      &::-moz-range-track {
+        height: 4px;
+        background: transparent;
       }
 
       &::-moz-range-thumb {
-        width: 6px;
-        height: ${({ theme }) => theme.spacing.lg};
+        width: 12px;
+        height: 12px;
         cursor: pointer;
-        background: ${({ theme }) => theme.colors.surface.base};
-        border: ${({ theme }) => theme.borders.width.thin} solid ${({ theme }) => theme.colors.primary.main};
-        border-radius: ${({ theme }) => theme.borders.radius.md};
+        background: ${({ theme }) => theme.colors.primary.main};
+        border: none;
+        border-radius: 50%;
       }
 
       &:focus {
@@ -403,25 +297,68 @@ export const TimelineControllerBlock = memo(
       }
     }
 
-    &__label {
-      position: absolute;
-      right: 0;
-      bottom: calc(-1 * ${({ theme }) => theme.spacing.md});
-      transition: all 0.2s ease-in-out;
-
-      &.open {
-        position: unset;
-      }
+    &__timeLabel {
+      white-space: nowrap;
     }
 
     &__speedLabel {
-      position: absolute;
-      right: 0;
-      bottom: ${({ theme }) => theme.spacing.sm};
+      white-space: nowrap;
     }
 
     &__playSpeedText {
       transition: all 0.2s ease-in-out;
+    }
+
+    /* スマホ縦向き時のタップ領域改善 */
+    @media (max-width: 500px) and (orientation: portrait) {
+      &__controlButtons {
+        gap: ${({ theme }) => theme.spacing.sm};
+      }
+
+      &__controlButton {
+        min-width: 44px;
+        min-height: 44px;
+        padding: ${({ theme }) => theme.spacing.sm};
+      }
+
+      &__playButton {
+        min-width: 48px;
+        min-height: 48px;
+        padding: ${({ theme }) => theme.spacing.sm};
+      }
+
+      &__speedButtons {
+        gap: ${({ theme }) => theme.spacing.xs};
+      }
+
+      &__speedButton {
+        min-width: 36px;
+        min-height: 36px;
+        padding: ${({ theme }) => theme.spacing.xs};
+      }
+
+      &__menuButton {
+        min-width: 44px;
+        min-height: 44px;
+        padding: ${({ theme }) => theme.spacing.sm};
+      }
+
+      &__sliderWrapper {
+        //min-height: 44px;
+      }
+
+      &__seekBarInput {
+        &::-webkit-slider-thumb {
+          width: 20px;
+          height: 20px;
+          margin-top: -8px;
+        }
+
+        &::-moz-range-thumb {
+          width: 20px;
+          height: 20px;
+        }
+      }
     }
   `,
   (prev, next) => {
