@@ -123,11 +123,15 @@ export const en = {
     embedUrlPreset7d: '7 Days',
     embedUrlCustomLabel: 'Custom...',
     embedUrlCustomHelper: 'Maximum: 1 year from now',
-    embedUrlGenerate: 'Generate & Copy',
+    embedUrlGenerate: 'Generate',
     embedUrlGenerating: 'Generating...',
     embedUrlValidationRequired: 'Please select a date and time',
     embedUrlValidationFuture: 'Expiration must be in the future',
     embedUrlValidationMaxYear: 'Maximum expiration is 1 year from now',
+    embedUrlGeneratedLabel: 'Generated URL',
+    embedUrlCopyButton: 'Copy',
+    embedUrlCopyHint: 'Tap URL to select or press copy button',
+    embedUrlCopyFallback: 'Please select the URL and copy manually',
   },
 
   // Session Form Modal
