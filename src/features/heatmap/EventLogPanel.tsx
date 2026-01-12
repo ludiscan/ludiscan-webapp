@@ -201,12 +201,7 @@ const EventLogTypeSection: FC<EventLogTypeSectionProps> = memo(({ logName, servi
 
 EventLogTypeSection.displayName = 'EventLogTypeSection';
 
-const EventLogPanelComponent: FC<EventLogPanelProps> = ({
-  service,
-  eventLogKeys,
-  collapsed: controlledCollapsed,
-  onCollapsedChange,
-}) => {
+const EventLogPanelComponent: FC<EventLogPanelProps> = ({ service, eventLogKeys, collapsed: controlledCollapsed, onCollapsedChange }) => {
   const { theme } = useSharedTheme();
   const logs = useEventLogSelect((s) => s.logs);
   const setTimelineState = usePlayerTimelinePatch();

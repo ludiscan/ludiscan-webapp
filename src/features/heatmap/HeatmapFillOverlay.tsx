@@ -33,7 +33,7 @@ function lerpColor(t01: number) {
 }
 
 // v0.1 API: normalizedDensity is already 0-1 range (server-side normalization)
-const HeatmapFillOverlayComponent: FC<Props> = ({ group, points, cellSize, offset = 0.08, opacity, targetLayer }) => {
+const HeatmapFillOverlayComponent: FC<Props> = ({ group, points, cellSize, offset = 10, opacity, targetLayer }) => {
   const {
     upZ,
     scale,
@@ -188,7 +188,7 @@ const HeatmapFillOverlayComponent: FC<Props> = ({ group, points, cellSize, offse
         opacity={opacity ?? heatmapOpacity}
         side={THREE.DoubleSide} /* eslint-disable-line react/no-unknown-property */
         depthWrite={false} /* eslint-disable-line react/no-unknown-property */
-        depthTest={false} /* eslint-disable-line react/no-unknown-property */
+        depthTest={true} /* eslint-disable-line react/no-unknown-property */
         toneMapped={false} /* eslint-disable-line react/no-unknown-property */
         color={0xffffff} // vertexColors と掛け算する基色は白
       />

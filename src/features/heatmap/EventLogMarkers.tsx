@@ -72,12 +72,17 @@ const MarkerBillboard: FC<{
         {geometries.map((geo, idx) => (
           <group key={idx}>
             {selected && (
-              <mesh geometry={geo} /* eslint-disable-line react/no-unknown-property */ scale={[1.1, 1.1, 1.1]}>
+              <mesh
+                geometry={geo} /* eslint-disable-line react/no-unknown-property */
+                scale={[1.1, 1.1, 1.1]}
+                renderOrder={zIndexes.renderOrder.eventLogMarkers} /* eslint-disable-line react/no-unknown-property */
+              >
                 <meshBasicMaterial
                   side={BackSide} /* eslint-disable-line react/no-unknown-property */
                   toneMapped={false} /* eslint-disable-line react/no-unknown-property */
                   transparent /* eslint-disable-line react/no-unknown-property */
                   opacity={1}
+                  depthTest={false} /* eslint-disable-line react/no-unknown-property */
                 />
               </mesh>
             )}
@@ -85,6 +90,7 @@ const MarkerBillboard: FC<{
               geometry={geo} /* eslint-disable-line react/no-unknown-property */
               castShadow={false} /* eslint-disable-line react/no-unknown-property */
               receiveShadow={false} /* eslint-disable-line react/no-unknown-property */
+              renderOrder={zIndexes.renderOrder.eventLogMarkers} /* eslint-disable-line react/no-unknown-property */
             >
               <meshBasicMaterial
                 color={color}

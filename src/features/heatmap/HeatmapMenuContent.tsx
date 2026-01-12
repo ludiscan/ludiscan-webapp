@@ -57,6 +57,7 @@ export type HeatmapMenuProps = {
 const MIN_WIDTH = 300;
 const MAX_WIDTH = 800;
 export const SMALL_SCREEN_BREAKPOINT = 768;
+export const SMALL_SCREEN_LANDSCAPE_BREAKPOINT = 920; // 横向きスマホ対応（915px端末を含む）
 
 const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
   const { className, mapOptions, service, dimensionality, name, isEmbed = false } = props;
@@ -77,7 +78,6 @@ const HeatmapMenuContentComponent: FC<HeatmapMenuProps> = (props) => {
   const resizeRef = useRef<{ startX: number; startWidth: number } | null>(null);
   const initialCollapseRef = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
-
 
   // メニューが開かれた時にヒントをキューに追加
   const { addHintForMenu } = useHintContext();

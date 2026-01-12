@@ -118,8 +118,8 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
   // マップリストのactiveOnlyフィルター（デフォルトtrue: アップロード済みのマップのみ表示）
   const [mapActiveOnly, setMapActiveOnly] = useState(true);
 
-  // EventLogPanelのcollapsed状態（スマホ時のキャンバスタップで閉じるため外部管理）
-  const [eventLogPanelCollapsed, setEventLogPanelCollapsed] = useState(false);
+  // EventLogPanelのcollapsed状態（スマホ時のキャンバスタップで閉じるため外部管理、デフォルトは閉じた状態）
+  const [eventLogPanelCollapsed, setEventLogPanelCollapsed] = useState(true);
 
   const { data: mapList } = useQuery({
     queryKey: ['mapList', service.projectId, mapActiveOnly],
@@ -604,7 +604,7 @@ export const HeatMapViewer = memo(
       padding-top: var(--header-offset);
 
       /* スマホ縦向き時は高さを60%に制限 */
-      @media (max-width: ${SMALL_SCREEN_BREAKPOINT}px) and (orientation: portrait) {
+      @media (width <= 768px) and (orientation: portrait) {
         height: 60%;
         max-height: 60vh;
       }
@@ -665,9 +665,13 @@ export const HeatMapViewer = memo(
       position: absolute;
       bottom: var(--spacing-2xl);
       left: 50%;
-      width: max-content;
       z-index: ${zIndexes.content + 2};
+      width: max-content;
       transform: translateX(-50%);
+
+      @media (width <= 920px) and (orientation: landscape) {
+        bottom: 5px;
+      }
     }
 
     &__zoomControls {
