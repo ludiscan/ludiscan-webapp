@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { memo, useCallback, useEffect, useMemo } from 'react';
+import { memo, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
 import type { RootState } from '@src/store';
@@ -62,12 +62,11 @@ export const getStaticProps: GetStaticProps<HeatMapTaskIdPageProps> = async ({ p
 
 export type HeatmapIdPageLayoutProps = {
   className?: string;
-  onBackClick?: () => void;
   service: HeatmapDataService;
 };
 
 const HeaderWrapper = memo(
-  ({ className, onBackClick }: { className?: string; onBackClick?: () => void }) => {
+  ({ className }: { className?: string }) => {
     const { theme } = useSharedTheme();
     const { apply, hasDiff, discard } = useHeatmapState();
     const version = useSelector((s: RootState) => s.heatmapCanvas.version);
@@ -91,7 +90,6 @@ const HeaderWrapper = memo(
       <Header
         showSidebar={false}
         title={'Heatmap'}
-        onClick={onBackClick}
         iconTitleEnd={
           isDesktop ? (
             <Text className={`${className}__headerV`} text={`${version || 'debug'}`} fontSize={theme.typography.fontSize.sm} fontWeight={'bold'} />
@@ -125,12 +123,12 @@ const HeaderWrapper = memo(
     );
   },
   (prev, next) => {
-    return prev.className === next.className && prev.onBackClick === next.onBackClick;
+    return prev.className === next.className;
   },
 );
 HeaderWrapper.displayName = 'HeaderWrapper';
 
-export const HeatmapIdPageLayoutComponent: FC<HeatmapIdPageLayoutProps> = ({ className, service, onBackClick }) => {
+export const HeatmapIdPageLayoutComponent: FC<HeatmapIdPageLayoutProps> = ({ className, service }) => {
   const statusContentStatus = useMemo(() => {
     if (!service.task) return 'success';
     if (service.task.status === 'pending' || service.task.status === 'processing') return 'loading';
@@ -138,7 +136,7 @@ export const HeatmapIdPageLayoutComponent: FC<HeatmapIdPageLayoutProps> = ({ cla
   }, [service.task]);
   return (
     <>
-      <HeaderWrapper className={className} onBackClick={onBackClick} />
+      <HeaderWrapper className={className} />
       <div className={className}>
         <StatusContent status={statusContentStatus}>{service && service.isInitialized && <HeatMapViewer service={service} />}</StatusContent>
       </div>
@@ -178,10 +176,6 @@ const HeatMapTaskIdPage: FC<HeatMapTaskIdPageProps> = ({ className, project_id }
   const router = useRouter();
   const { isAuthorized, isLoading, ready } = useAuth();
 
-  const handleBackClick = useCallback(() => {
-    router.back();
-  }, [router]);
-
   const sessionHeatmap = useGeneralSelect((s) => s.sessionHeatmap);
 
   const service = useOnlineHeatmapDataService(project_id, null, sessionHeatmap);
@@ -199,7 +193,7 @@ const HeatMapTaskIdPage: FC<HeatMapTaskIdPageProps> = ({ className, project_id }
   return (
     <>
       <Seo title={`Heatmap - Project ${project_id}`} path={`/heatmap/projects/${project_id}`} noIndex={true} />
-      <HeatmapIdPageLayout className={className} service={service} onBackClick={handleBackClick} />
+      <HeatmapIdPageLayout className={className} service={service} />
     </>
   );
 };

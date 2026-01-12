@@ -113,7 +113,6 @@ export const Component: FC<OfflineHeatmapProviderProps> = ({ className }) => {
             </Modal>
             <Header
               title={'Heatmap'}
-              onClick={() => {}}
               isOffline={true}
               iconTitleEnd={<Text className={`${className}__headerV`} text={'offline'} fontSize={currentTheme.typography.fontSize.sm} fontWeight={'bold'} />}
               iconEnd={

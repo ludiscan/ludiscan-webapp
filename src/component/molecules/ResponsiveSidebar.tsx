@@ -1,16 +1,15 @@
 /**
  * ResponsiveSidebar.tsx
  *
- * モバイル環境で自動的に折りたたまれ、トグルボタンで横からスライド表示／非表示を切り替えるサイドバーのサンプル実装です。
- * 詳細なスタイルや画面サイズの閾値等は必要に応じてご調整ください。
+ * モバイル環境で自動的に折りたたまれ、外部からの制御で表示/非表示を切り替えるサイドバー
+ * Headerのハンバーガーメニューと連携して動作する
  */
 
 import styled from '@emotion/styled';
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { RiMenu2Fill, RiMenu3Fill } from 'react-icons/ri';
+import { RiCloseLine } from 'react-icons/ri';
 
-import type { ButtonProps } from '@src/component/atoms/Button';
 import type { FC, ReactNode } from 'react';
 
 import { Button } from '@src/component/atoms/Button';
@@ -20,74 +19,15 @@ import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { dimensions, zIndexes } from '@src/styles/style';
 
 export type ResponsiveSidebarProps = {
-  /** 外部からスタイルを上書きするための className（必要に応じてご利用ください） */
+  /** 外部からスタイルを上書きするための className */
   className?: string;
-  /** サイドバー内に表示する内容。指定がなければデフォルトで「Sidebar」と表示します。 */
+  /** サイドバー内に表示する内容 */
   children: ReactNode;
-
-  onChange?: (isOpen: boolean) => void;
-};
-
-export type ToggleButtonProps = {
-  className?: string;
-  onClick: ButtonProps['onClick'];
+  /** サイドバーの開閉状態（外部制御） */
   isOpen: boolean;
+  /** 閉じるボタンが押された時のコールバック */
+  onClose: () => void;
 };
-/**
- * トグルボタンのスタイルコンポーネント
- *
- * ・position: fixed により画面上部左側に配置
- * ・モバイル環境でのみ表示するため、@media クエリでデスクトップでは非表示にしています
- */
-const ToggleButtonComponent: FC<ToggleButtonProps> = ({ className, onClick, isOpen }) => {
-  const { theme } = useSharedTheme();
-  return (
-    <FlexRow className={`${className} ${isOpen ? '' : 'closed'}`} align={'center'}>
-      <Button className={`${className}__button`} onClick={onClick} scheme={'none'} fontSize={'base'} width={'full'}>
-        {isOpen ? <RiMenu3Fill size={28} color={theme.colors.text.primary} /> : <RiMenu2Fill size={28} color={theme.colors.text.primary} />}
-      </Button>
-    </FlexRow>
-  );
-};
-const ToggleButton = styled(ToggleButtonComponent)`
-  /* Fixed positioning to stay visible when sidebar is closed */
-  position: fixed;
-  inset-block-start: var(--spacing-md); /* 16px from top */
-
-  /* Use logical properties (Design Implementation Guide Rule 4) */
-  inset-inline-start: 0; /* Start from left edge */
-  z-index: ${zIndexes.sidebar + 1};
-
-  /* Ensure minimum touch target size (Design Guide Rule 10) */
-  inline-size: 56px; /* Increased from 46px to accommodate touch target */
-  block-size: 44px; /* Increased from 32px for WCAG 2.2 SC 2.5.8 */
-  pointer-events: auto; /* Enable click events (parent FixedWrapper has pointer-events: none) */
-  background: ${({ theme }) => theme.colors.surface.base};
-  border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
-  box-shadow: 2px 0 4px rgb(0 0 0 / 20%);
-  transition: all 0.3s ease-in-out;
-
-  &.closed {
-    /* When closed, button is at left edge */
-    inset-inline-start: 0;
-  }
-
-  &:not(.closed) {
-    /* When open, button moves with sidebar */
-    inset-inline-start: ${dimensions.sidebarWidth}px;
-  }
-
-  &__button {
-    inline-size: 100%;
-    block-size: 100%;
-  }
-
-  /* Hide toggle button on desktop */
-  /* stylelint-disable-next-line */
-  @media (min-width: ${dimensions.mobileWidth}px) {
-    display: none;
-  }
-`;
 
 /** position: fixedだけを担当する親ラッパー */
 const FixedWrapper = styled.div`
@@ -98,8 +38,23 @@ const FixedWrapper = styled.div`
   pointer-events: none;
 `;
 
+/** 閉じるボタンのコンテナ */
+const CloseButtonWrapper = styled(FlexRow)`
+  position: absolute;
+  inset-block-start: var(--spacing-sm);
+  inset-inline-end: var(--spacing-sm);
+  z-index: 1;
+
+  /* デスクトップでは非表示 */
+  /* stylelint-disable-next-line media-query-no-invalid */
+  @media (min-width: ${dimensions.mobileWidth}px) {
+    display: none;
+  }
+`;
+
 /** コンテンツ用のスタイル（backdrop-filter, transformなど） */
 const SidebarContent = styled(PanelCard)`
+  position: relative;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -146,27 +101,31 @@ const SidebarContent = styled(PanelCard)`
   }
 `;
 
-type SidebarContentProps = {
+type SidebarPortalContentProps = {
   className?: string;
   children: ReactNode;
   isOpen: boolean;
-  toggleSidebar: () => void;
+  onClose: () => void;
   surfaceColor: string;
 };
 
-const SidebarPortalContent: FC<SidebarContentProps> = ({ className, children, isOpen, toggleSidebar, surfaceColor }) => {
+const SidebarPortalContent: FC<SidebarPortalContentProps> = ({ className, children, isOpen, onClose, surfaceColor }) => {
+  const { theme } = useSharedTheme();
   return (
     <FixedWrapper>
-      <ToggleButton onClick={toggleSidebar} isOpen={isOpen} />
       <SidebarContent className={`${className} ${isOpen ? 'visible' : ''}`} color={surfaceColor}>
+        <CloseButtonWrapper>
+          <Button onClick={onClose} scheme={'none'} fontSize={'xl'} aria-label='メニューを閉じる'>
+            <RiCloseLine size={24} color={theme.colors.text.primary} />
+          </Button>
+        </CloseButtonWrapper>
         {children}
       </SidebarContent>
     </FixedWrapper>
   );
 };
 
-export const ResponsiveSidebar: FC<ResponsiveSidebarProps> = ({ className, children, onChange }) => {
-  const [isOpen, setIsOpen] = useState<boolean | undefined>(undefined);
+export const ResponsiveSidebar: FC<ResponsiveSidebarProps> = ({ className, children, isOpen, onClose }) => {
   const [mounted, setMounted] = useState(false);
   const { theme } = useSharedTheme();
 
@@ -175,44 +134,14 @@ export const ResponsiveSidebar: FC<ResponsiveSidebarProps> = ({ className, child
     setMounted(true);
   }, []);
 
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= dimensions.mobileWidth) {
-        setIsOpen(true);
-      } else {
-        setIsOpen(false);
-      }
-    };
-    handleResize();
-
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (onChange && isOpen !== undefined) {
-      onChange(isOpen);
-    }
-  }, [isOpen, onChange]);
-
-  /**
-   * トグルボタンのクリックイベントハンドラ
-   * ・クリック時に isOpen の状態を反転させ、SidebarWrapper の transform を変更
-   */
-  const toggleSidebar = useCallback(() => {
-    setIsOpen(!isOpen);
-  }, [isOpen]);
-
   // SSRまたは初期化前は何も表示しない
-  if (!mounted || isOpen === undefined) {
+  if (!mounted) {
     return null;
   }
 
   // ポータルを使ってbody直下にレンダリング（親要素のblur/transformの影響を回避）
   return createPortal(
-    <SidebarPortalContent className={className} isOpen={isOpen} toggleSidebar={toggleSidebar} surfaceColor={theme.colors.surface.base}>
+    <SidebarPortalContent className={className} isOpen={isOpen} onClose={onClose} surfaceColor={theme.colors.surface.base}>
       {children}
     </SidebarPortalContent>,
     document.body,

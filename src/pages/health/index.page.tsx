@@ -1,5 +1,4 @@
 import styled from '@emotion/styled';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import type { FC } from 'react';
@@ -14,6 +13,7 @@ import { Header } from '@src/component/templates/Header';
 import { SidebarLayout } from '@src/component/templates/SidebarLayout';
 import { useHealthCheck } from '@src/hooks/useHealthCheck';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
+import { useSidebar } from '@src/hooks/useSidebar';
 import { InnerContent } from '@src/pages/_app.page';
 
 export type HealthPageProps = {
@@ -21,7 +21,6 @@ export type HealthPageProps = {
 };
 
 const Component: FC<HealthPageProps> = ({ className }) => {
-  const router = useRouter();
   const { theme } = useSharedTheme();
   const [autoRefresh, setAutoRefresh] = useState(true);
 
@@ -36,9 +35,7 @@ const Component: FC<HealthPageProps> = ({ className }) => {
     enabled: autoRefresh,
   });
 
-  const handleBack = () => {
-    router.back();
-  };
+  const { toggle: toggleSidebar } = useSidebar();
 
   const handleRefresh = () => {
     refetch();
@@ -78,7 +75,7 @@ const Component: FC<HealthPageProps> = ({ className }) => {
       <DashboardBackgroundCanvas />
       <SidebarLayout />
       <InnerContent>
-        <Header title='System Health Check' onClick={handleBack} />
+        <Header title='System Health Check' onToggleSidebar={toggleSidebar} />
 
         <div className={`${className}__container`}>
           {/* Overall Status Card */}
