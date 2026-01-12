@@ -38,7 +38,8 @@ const MarkerBillboard: FC<{
   selected?: boolean;
   geometries: ShapeGeometry[];
   onClick: (e: ThreeEvent<MouseEvent>, id: number) => void;
-}> = ({ pos, id, color, geometries, onClick, selected }) => {
+  tooltipLabel: string;
+}> = ({ pos, id, color, geometries, onClick, selected, tooltipLabel }) => {
   const ref = useRef<Group>(null);
   const { camera, gl } = useThree();
 
@@ -51,6 +52,34 @@ const MarkerBillboard: FC<{
     }
   });
 
+  const handlePointerOver = (e: ThreeEvent<PointerEvent>) => {
+    gl.domElement.style.cursor = 'pointer';
+    const rect = gl.domElement.getBoundingClientRect();
+    const screenX = e.clientX - rect.left;
+    const screenY = e.clientY - rect.top;
+    heatMapEventBus.emit('canvas-tooltip:show', {
+      content: tooltipLabel,
+      screenX,
+      screenY,
+    });
+  };
+
+  const handlePointerOut = () => {
+    gl.domElement.style.cursor = 'auto';
+    heatMapEventBus.emit('canvas-tooltip:hide', {});
+  };
+
+  const handlePointerMove = (e: ThreeEvent<PointerEvent>) => {
+    const rect = gl.domElement.getBoundingClientRect();
+    const screenX = e.clientX - rect.left;
+    const screenY = e.clientY - rect.top;
+    heatMapEventBus.emit('canvas-tooltip:show', {
+      content: tooltipLabel,
+      screenX,
+      screenY,
+    });
+  };
+
   return (
     <Billboard
       ref={ref}
@@ -60,12 +89,9 @@ const MarkerBillboard: FC<{
       lockY={false}
       lockZ={false}
       onClick={(e) => onClick(e, id)}
-      onPointerOver={() => {
-        gl.domElement.style.cursor = 'pointer';
-      }}
-      onPointerOut={() => {
-        gl.domElement.style.cursor = 'auto';
-      }}
+      onPointerOver={handlePointerOver}
+      onPointerOut={handlePointerOut}
+      onPointerMove={handlePointerMove}
       renderOrder={zIndexes.renderOrder.eventLogMarkers}
     >
       <Center>
@@ -346,8 +372,7 @@ const EventLogMarkers: FC<EventLogMarkersProps> = ({ logName, service, pref }) =
           color={color}
           geometries={geometries}
           onClick={handlePointClick}
-          // iconName={getIconNameForMarker(d.metadata)}
-          // metadata={d.metadata}
+          tooltipLabel={`${logName}(event-log)`}
         />
       ))}
       {/* アイコン表示 */}
