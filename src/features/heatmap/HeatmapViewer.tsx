@@ -62,6 +62,10 @@ const DEFAULT_PLAYER_TIMELINE_HVQL = `map status.hand {
   scissors  -> player-icon: hand-scissor;
   *        -> player-icon: target;
 }
+map status.team {
+  yellow -> player-color: yellow;
+  blue   -> player-color: blue;
+}
 `;
 
 export type HeatmapViewerProps = {
