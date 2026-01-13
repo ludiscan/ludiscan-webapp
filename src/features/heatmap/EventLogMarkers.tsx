@@ -52,8 +52,7 @@ const MarkerBillboard: FC<{
     }
   });
 
-  const handlePointerOver = (e: ThreeEvent<PointerEvent>) => {
-    gl.domElement.style.cursor = 'pointer';
+  const showTooltip = (e: ThreeEvent<PointerEvent> | ThreeEvent<MouseEvent>) => {
     const rect = gl.domElement.getBoundingClientRect();
     const screenX = e.clientX - rect.left;
     const screenY = e.clientY - rect.top;
@@ -62,6 +61,11 @@ const MarkerBillboard: FC<{
       screenX,
       screenY,
     });
+  };
+
+  const handlePointerOver = (e: ThreeEvent<PointerEvent>) => {
+    gl.domElement.style.cursor = 'pointer';
+    showTooltip(e);
   };
 
   const handlePointerOut = () => {
@@ -70,14 +74,13 @@ const MarkerBillboard: FC<{
   };
 
   const handlePointerMove = (e: ThreeEvent<PointerEvent>) => {
-    const rect = gl.domElement.getBoundingClientRect();
-    const screenX = e.clientX - rect.left;
-    const screenY = e.clientY - rect.top;
-    heatMapEventBus.emit('canvas-tooltip:show', {
-      content: tooltipLabel,
-      screenX,
-      screenY,
-    });
+    showTooltip(e);
+  };
+
+  // モバイルタップ対応：tooltipを表示しつつ既存のonClickも実行
+  const handleClick = (e: ThreeEvent<MouseEvent>) => {
+    showTooltip(e);
+    onClick(e, id);
   };
 
   return (
@@ -88,7 +91,7 @@ const MarkerBillboard: FC<{
       lockX={false}
       lockY={false}
       lockZ={false}
-      onClick={(e) => onClick(e, id)}
+      onClick={handleClick}
       onPointerOver={handlePointerOver}
       onPointerOut={handlePointerOut}
       onPointerMove={handlePointerMove}

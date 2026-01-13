@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { memo, useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 
 import type { CanvasTooltipData } from '@src/utils/canvasEventBus';
 import type { FC } from 'react';
@@ -7,6 +7,12 @@ import type { FC } from 'react';
 import { Text } from '@src/component/atoms/Text';
 import { zIndexes } from '@src/styles/style';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
+
+// モバイルデバイス判定
+const isTouchDevice = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+// モバイルでのtooltip自動非表示時間（ミリ秒）
+const MOBILE_TOOLTIP_AUTO_HIDE_MS = 2500;
 
 const TooltipContainer = styled.div<{ x: number; y: number }>`
   position: absolute;
@@ -37,20 +43,40 @@ const CanvasTooltipComponent: FC = () => {
     screenX: 0,
     screenY: 0,
   });
+  const autoHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleShow = useCallback((event: CustomEvent<CanvasTooltipData>) => {
-    const { content, screenX, screenY } = event.detail;
-    setTooltip({
-      visible: true,
-      content,
-      screenX,
-      screenY,
-    });
+  const clearAutoHideTimer = useCallback(() => {
+    if (autoHideTimerRef.current) {
+      clearTimeout(autoHideTimerRef.current);
+      autoHideTimerRef.current = null;
+    }
   }, []);
 
   const handleHide = useCallback(() => {
+    clearAutoHideTimer();
     setTooltip((prev) => ({ ...prev, visible: false }));
-  }, []);
+  }, [clearAutoHideTimer]);
+
+  const handleShow = useCallback(
+    (event: CustomEvent<CanvasTooltipData>) => {
+      const { content, screenX, screenY } = event.detail;
+      setTooltip({
+        visible: true,
+        content,
+        screenX,
+        screenY,
+      });
+
+      // モバイルデバイスの場合、自動非表示タイマーを設定
+      clearAutoHideTimer();
+      if (isTouchDevice()) {
+        autoHideTimerRef.current = setTimeout(() => {
+          handleHide();
+        }, MOBILE_TOOLTIP_AUTO_HIDE_MS);
+      }
+    },
+    [clearAutoHideTimer, handleHide],
+  );
 
   useEffect(() => {
     heatMapEventBus.on('canvas-tooltip:show', handleShow);
@@ -58,8 +84,9 @@ const CanvasTooltipComponent: FC = () => {
     return () => {
       heatMapEventBus.off('canvas-tooltip:show', handleShow);
       heatMapEventBus.off('canvas-tooltip:hide', handleHide);
+      clearAutoHideTimer();
     };
-  }, [handleShow, handleHide]);
+  }, [handleShow, handleHide, clearAutoHideTimer]);
 
   if (!tooltip.visible || !tooltip.content) {
     return null;
