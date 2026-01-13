@@ -18,6 +18,7 @@ import type { FC } from 'react';
 import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { VisuallyHidden } from '@src/component/atoms/VisuallyHidden';
 import { useToast } from '@src/component/templates/ToastContext';
+import { CanvasTooltip } from '@src/features/heatmap/CanvasTooltip';
 import { EventLogPanel } from '@src/features/heatmap/EventLogPanel';
 import { HeatMapCanvas } from '@src/features/heatmap/HeatmapCanvas';
 import { SMALL_SCREEN_BREAKPOINT, HeatmapMenuContent } from '@src/features/heatmap/HeatmapMenuContent';
@@ -510,17 +511,19 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
                 <FlexColumn className={`${className}__canvasBox ${className}__canvasBox--split`}>
                   {backgroundStyle && <div style={backgroundStyle} />}
                   {renderCanvas('left')}
+                  <CanvasTooltip />
                 </FlexColumn>
                 <FlexColumn className={`${className}__canvasBox ${className}__canvasBox--split`}>
                   {backgroundStyle && <div style={backgroundStyle} />}
                   {renderCanvas('right')}
+                  <CanvasTooltip />
                 </FlexColumn>
               </FlexRow>
             ) : (
               <FlexColumn className={`${className}__canvasBox`}>
                 {backgroundStyle && <div style={backgroundStyle} />}
                 {renderCanvas()}
-                {/*{performance && <PerformanceList api={performance} className={`${className}__performance`} />}*/}
+                <CanvasTooltip />
               </FlexColumn>
             )}
           </div>

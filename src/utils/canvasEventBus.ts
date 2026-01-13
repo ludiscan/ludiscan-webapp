@@ -12,6 +12,12 @@ export interface RouteEdgeData {
   avg_time_to_success_ms: number | null;
 }
 
+export interface CanvasTooltipData {
+  content: string;
+  screenX: number;
+  screenY: number;
+}
+
 export interface HeatMapEventMap {
   'click-menu-icon': { name: Menus };
   'close-menu': object;
@@ -26,6 +32,8 @@ export interface HeatMapEventMap {
   'focus:ping': { position: { x: number; y: number; z: number } };
   'route-selected': { route: RouteEdgeData | null };
   'session-modal:open': object;
+  'canvas-tooltip:show': CanvasTooltipData;
+  'canvas-tooltip:hide': object;
 }
 
 class EventBus<T> extends EventTarget {
