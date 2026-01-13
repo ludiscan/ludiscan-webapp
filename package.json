@@ -10,7 +10,7 @@
   "repository": {
     "url": "https://github.com/ludiscan/ludiscan-webapp"
   },
-  "version": "1.7.0",
+  "version": "1.7.1",
   "scripts": {
     "dev": "next dev --turbopack -p 5173",
     "build:dev": "next build --turbopack",
