@@ -4,7 +4,7 @@ import { Color, Sprite, SpriteMaterial, TextureLoader, Vector3 } from 'three';
 import { Line2, LineGeometry, LineMaterial } from 'three-stdlib';
 
 import type { PlayerArrowExtra } from '@src/features/heatmap/selection/hooks';
-import type { PlayerPositionLog, PlayerTimelineDetail } from '@src/modeles/heatmapView';
+import type { PlayerTimelineDetail } from '@src/modeles/heatmapView';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { ViewContext } from '@src/utils/vql';
 import type { FC } from 'react';
@@ -46,18 +46,15 @@ const Component: FC<PlayerTimelinePointsProps> = ({ state, visibleTimeRange }) =
 
   const logs = useMemo(() => {
     if (!fetchLogs || !fetchLogs.data || fetchLogs.data.length === 0) return null;
-    const points: Map<number, PlayerPositionLog> = new Map();
-    fetchLogs.data.forEach((pt) => {
-      points.set(pt.offset_timestamp, {
-        player: pt.player,
-        x: pt.x * scale,
-        y: (upZ ? (pt.z ?? 0) : pt.y) * scale + 10,
-        z: (upZ ? pt.y : (pt.z ?? 0)) * scale,
-        offset_timestamp: pt.offset_timestamp,
-        status: pt.status,
-      });
-    });
-    return points.values().toArray();
+    // Map上書きを回避するため配列を直接使用（同じタイムスタンプの重複データも保持）
+    return fetchLogs.data.map((pt) => ({
+      player: pt.player,
+      x: pt.x * scale,
+      y: (upZ ? (pt.z ?? 0) : pt.y) * scale + 10,
+      z: (upZ ? pt.y : (pt.z ?? 0)) * scale,
+      offset_timestamp: pt.offset_timestamp,
+      status: pt.status,
+    }));
   }, [fetchLogs, scale, upZ]);
 
   const partialPathPoints = useMemo(() => {
