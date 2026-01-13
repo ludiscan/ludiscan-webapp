@@ -46,18 +46,15 @@ const Component: FC<PlayerTimelinePointsProps> = ({ state, visibleTimeRange }) =
 
   const logs = useMemo(() => {
     if (!fetchLogs || !fetchLogs.data || fetchLogs.data.length === 0) return null;
-    const points: Map<number, PlayerPositionLog> = new Map();
-    fetchLogs.data.forEach((pt) => {
-      points.set(pt.offset_timestamp, {
-        player: pt.player,
-        x: pt.x * scale,
-        y: (upZ ? (pt.z ?? 0) : pt.y) * scale + 10,
-        z: (upZ ? pt.y : (pt.z ?? 0)) * scale,
-        offset_timestamp: pt.offset_timestamp,
-        status: pt.status,
-      });
-    });
-    return points.values().toArray();
+    // Map上書きを回避するため配列を直接使用（同じタイムスタンプの重複データも保持）
+    return fetchLogs.data.map((pt) => ({
+      player: pt.player,
+      x: pt.x * scale,
+      y: (upZ ? (pt.z ?? 0) : pt.y) * scale + 10,
+      z: (upZ ? pt.y : (pt.z ?? 0)) * scale,
+      offset_timestamp: pt.offset_timestamp,
+      status: pt.status,
+    }));
   }, [fetchLogs, scale, upZ]);
 
   const partialPathPoints = useMemo(() => {

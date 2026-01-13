@@ -44,10 +44,14 @@ export const FocusPingLayer: FC<{
     };
   }, [ttlMs]);
 
-  // 経過で掃除
+  // 経過で掃除（変更がある場合のみ更新）
   useFrame(() => {
     const now = performance.now();
-    setPings((prev) => prev.filter((p) => now - p.t0 < p.ttl));
+    setPings((prev) => {
+      const filtered = prev.filter((p) => now - p.t0 < p.ttl);
+      // 長さが変わらない場合は同じ参照を返す（再レンダリング防止）
+      return filtered.length === prev.length ? prev : filtered;
+    });
   });
 
   const ringGeo = useMemo(() => {
