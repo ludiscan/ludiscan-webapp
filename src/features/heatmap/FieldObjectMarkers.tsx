@@ -4,12 +4,14 @@ import { memo, useCallback, useMemo } from 'react';
 import { Vector3, SphereGeometry, BoxGeometry, TextureLoader, SRGBColorSpace } from 'three';
 
 import type { components } from '@generated/api';
+import type { ThreeEvent } from '@react-three/fiber';
 import type { FieldObjectData } from '@src/modeles/heatmapView';
 import type { FC } from 'react';
 
 import { useGeneralPick } from '@src/hooks/useGeneral';
 import { usePlayerTimelinePick } from '@src/hooks/usePlayerTimeline';
 import { zIndexes } from '@src/styles/style';
+import { heatMapEventBus } from '@src/utils/canvasEventBus';
 import { getIconPath } from '@src/utils/heatmapIconMap';
 import { compileHVQL, type ViewContext } from '@src/utils/vql';
 
@@ -35,7 +37,8 @@ const IconMarker: FC<{
   position: [number, number, number];
   iconPath: string;
   scale: number;
-}> = memo(({ position, iconPath, scale }) => {
+  tooltipLabel: string;
+}> = memo(({ position, iconPath, scale, tooltipLabel }) => {
   const { gl } = useThree();
   const texture = useLoader(TextureLoader, iconPath);
   const markerScale = Math.max(scale * 70, 70);
@@ -45,14 +48,43 @@ const IconMarker: FC<{
     texture.colorSpace = SRGBColorSpace;
   }, [texture]);
 
+  const handlePointerOver = (e: ThreeEvent<PointerEvent>) => {
+    gl.domElement.style.cursor = 'pointer';
+    const rect = gl.domElement.getBoundingClientRect();
+    const screenX = e.clientX - rect.left;
+    const screenY = e.clientY - rect.top;
+    heatMapEventBus.emit('canvas-tooltip:show', {
+      content: tooltipLabel,
+      screenX,
+      screenY,
+    });
+  };
+
+  const handlePointerOut = () => {
+    gl.domElement.style.cursor = 'auto';
+    heatMapEventBus.emit('canvas-tooltip:hide', {});
+  };
+
+  const handlePointerMove = (e: ThreeEvent<PointerEvent>) => {
+    const rect = gl.domElement.getBoundingClientRect();
+    const screenX = e.clientX - rect.left;
+    const screenY = e.clientY - rect.top;
+    heatMapEventBus.emit('canvas-tooltip:show', {
+      content: tooltipLabel,
+      screenX,
+      screenY,
+    });
+  };
+
   return (
     <Billboard position={position} follow renderOrder={zIndexes.renderOrder.fieldObjectMarkers}>
       <Center>
         {}
         <sprite
           scale={[markerScale, markerScale, 1]}
-          onPointerOver={() => (gl.domElement.style.cursor = 'pointer')}
-          onPointerOut={() => (gl.domElement.style.cursor = 'auto')}
+          onPointerOver={handlePointerOver}
+          onPointerOut={handlePointerOut}
+          onPointerMove={handlePointerMove}
           renderOrder={zIndexes.renderOrder.fieldObjectMarkers} /* eslint-disable-line react/no-unknown-property */
         >
           {/* eslint-disable-next-line react/no-unknown-property */}
@@ -71,10 +103,39 @@ const FieldObjectMarker: FC<{
   color: string;
   eventType: EventType;
   scale: number;
-}> = memo(({ position, color, eventType, scale }) => {
+  tooltipLabel: string;
+}> = memo(({ position, color, eventType, scale, tooltipLabel }) => {
   const { gl } = useThree();
   const geometry = geometryCache[eventType];
   const markerScale = Math.max(scale * 30, 30);
+
+  const handlePointerOver = (e: ThreeEvent<PointerEvent>) => {
+    gl.domElement.style.cursor = 'pointer';
+    const rect = gl.domElement.getBoundingClientRect();
+    const screenX = e.clientX - rect.left;
+    const screenY = e.clientY - rect.top;
+    heatMapEventBus.emit('canvas-tooltip:show', {
+      content: tooltipLabel,
+      screenX,
+      screenY,
+    });
+  };
+
+  const handlePointerOut = () => {
+    gl.domElement.style.cursor = 'auto';
+    heatMapEventBus.emit('canvas-tooltip:hide', {});
+  };
+
+  const handlePointerMove = (e: ThreeEvent<PointerEvent>) => {
+    const rect = gl.domElement.getBoundingClientRect();
+    const screenX = e.clientX - rect.left;
+    const screenY = e.clientY - rect.top;
+    heatMapEventBus.emit('canvas-tooltip:show', {
+      content: tooltipLabel,
+      screenX,
+      screenY,
+    });
+  };
 
   return (
     <Billboard position={position} follow renderOrder={zIndexes.renderOrder.fieldObjectMarkers}>
@@ -82,8 +143,9 @@ const FieldObjectMarker: FC<{
         <mesh
           geometry={geometry} /* eslint-disable-line react/no-unknown-property */
           scale={markerScale}
-          onPointerOver={() => (gl.domElement.style.cursor = 'pointer')}
-          onPointerOut={() => (gl.domElement.style.cursor = 'auto')}
+          onPointerOver={handlePointerOver}
+          onPointerOut={handlePointerOut}
+          onPointerMove={handlePointerMove}
           renderOrder={zIndexes.renderOrder.fieldObjectMarkers} /* eslint-disable-line react/no-unknown-property */
         >
           {/* eslint-disable-next-line react/no-unknown-property */}
@@ -232,6 +294,8 @@ const FieldObjectMarkersComponent: FC<FieldObjectMarkersProps> = ({ logs, object
     return Array.from(paths);
   }, [styledMarkers]);
 
+  const tooltipLabel = `${objectType}(field-object)`;
+
   // アイコンがない場合はフォールバックマーカーを表示
   if (iconPaths.length === 0) {
     return (
@@ -243,6 +307,7 @@ const FieldObjectMarkersComponent: FC<FieldObjectMarkersProps> = ({ logs, object
             color={marker.style.color}
             eventType={marker.eventType}
             scale={scale}
+            tooltipLabel={tooltipLabel}
           />
         ))}
       </>
@@ -259,6 +324,7 @@ const FieldObjectMarkersComponent: FC<FieldObjectMarkersProps> = ({ logs, object
             position={[marker.position.x, marker.position.y + 20, marker.position.z]}
             iconPath={getIconPath(marker.style.icon)}
             scale={scale}
+            tooltipLabel={tooltipLabel}
           />
         ) : (
           <FieldObjectMarker
@@ -267,6 +333,7 @@ const FieldObjectMarkersComponent: FC<FieldObjectMarkersProps> = ({ logs, object
             color={marker.style.color}
             eventType={marker.eventType}
             scale={scale}
+            tooltipLabel={tooltipLabel}
           />
         ),
       )}
