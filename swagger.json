@@ -4796,6 +4796,7 @@
     },
     "/api/v0/heatmap/map_data/{map_name}": {
       "get": {
+        "description": "マップデータを取得します。認証不要で誰でもアクセス可能です。",
         "operationId": "HeatmapController_getMapData",
         "parameters": [
           {
@@ -8155,7 +8156,7 @@
   "info": {
     "title": "Ludiscan API Documentation",
     "description": "Ludiscan API for game analytics and session tracking",
-    "version": "1.31.0",
+    "version": "1.31.1",
     "contact": {}
   },
   "tags": [],

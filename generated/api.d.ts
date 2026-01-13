@@ -1200,7 +1200,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** Get heatmap map data */
+    /**
+     * Get heatmap map data
+     * @description マップデータを取得します。認証不要で誰でもアクセス可能です。
+     */
     get: operations['HeatmapController_getMapData'];
     put?: never;
     /** ファイルアップロードエンドポイント */
