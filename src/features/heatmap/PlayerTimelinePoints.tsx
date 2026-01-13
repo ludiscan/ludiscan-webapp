@@ -4,7 +4,7 @@ import { Color, Sprite, SpriteMaterial, TextureLoader, Vector3 } from 'three';
 import { Line2, LineGeometry, LineMaterial } from 'three-stdlib';
 
 import type { PlayerArrowExtra } from '@src/features/heatmap/selection/hooks';
-import type { PlayerPositionLog, PlayerTimelineDetail } from '@src/modeles/heatmapView';
+import type { PlayerTimelineDetail } from '@src/modeles/heatmapView';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { ViewContext } from '@src/utils/vql';
 import type { FC } from 'react';
