@@ -2,21 +2,16 @@ import styled from '@emotion/styled';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { memo, useEffect, useMemo } from 'react';
-import { useSelector } from 'react-redux';
 
-import type { RootState } from '@src/store';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { GetStaticPaths, GetStaticProps } from 'next';
 import type { FC } from 'react';
 
 import { Seo } from '@src/component/atoms/Seo';
-import { Text } from '@src/component/atoms/Text';
 import { StatusContent } from '@src/component/molecules/StatusContent';
 import { Header } from '@src/component/templates/Header';
 import { useAuth } from '@src/hooks/useAuth';
 import { useGeneralSelect } from '@src/hooks/useGeneral';
-import { useIsDesktop } from '@src/hooks/useIsDesktop';
-import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { useOnlineHeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 
 // Three.jsを使うHeatMapViewerはSSRを無効にして動的インポート
@@ -63,28 +58,9 @@ export type HeatmapIdPageLayoutProps = {
   service: HeatmapDataService;
 };
 
-const HeaderWrapper = memo(
-  ({ className }: { className?: string }) => {
-    const { theme } = useSharedTheme();
-    const version = useSelector((s: RootState) => s.heatmapCanvas.version);
-    const isDesktop = useIsDesktop();
-
-    return (
-      <Header
-        showSidebar={false}
-        title={'Heatmap'}
-        iconTitleEnd={
-          isDesktop ? (
-            <Text className={`${className}__headerV`} text={`${version || 'debug'}`} fontSize={theme.typography.fontSize.sm} fontWeight={'bold'} />
-          ) : undefined
-        }
-      />
-    );
-  },
-  (prev, next) => {
-    return prev.className === next.className;
-  },
-);
+const HeaderWrapper = memo(() => {
+  return <Header showSidebar={false} title={'Heatmap'} />;
+});
 HeaderWrapper.displayName = 'HeaderWrapper';
 
 export const HeatmapIdPageLayoutComponent: FC<HeatmapIdPageLayoutProps> = ({ className, service }) => {
@@ -95,7 +71,7 @@ export const HeatmapIdPageLayoutComponent: FC<HeatmapIdPageLayoutProps> = ({ cla
   }, [service.task]);
   return (
     <>
-      <HeaderWrapper className={className} />
+      <HeaderWrapper />
       <div className={className}>
         <StatusContent status={statusContentStatus}>{service && service.isInitialized && <HeatMapViewer service={service} />}</StatusContent>
       </div>
