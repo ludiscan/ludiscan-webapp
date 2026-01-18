@@ -1,16 +1,10 @@
 import { memo, useCallback, useEffect, useState } from 'react';
 
-import type { PlayerTimelinePointsTimeRange } from '@src/features/heatmap/PlayerTimelinePoints';
-import type { Dispatch, SetStateAction, FC, ComponentProps } from 'react';
+import type { FC, ComponentProps } from 'react';
 
 import { type PlaySpeedType, TimelineControllerBlock } from '@src/component/templates/TimelineControllerBlock';
 import { usePlayerTimelinePatch, usePlayerTimelinePick, usePlayerTimelineSelect } from '@src/hooks/usePlayerTimeline';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
-
-export type TimelineControlWrapperProps = {
-  setVisibleTimelineRange: Dispatch<SetStateAction<PlayerTimelinePointsTimeRange>>;
-  visibleTimelineRange: PlayerTimelinePointsTimeRange;
-};
 
 type ViewProps = Omit<ComponentProps<typeof TimelineControllerBlock>, 'currentTime'>;
 
@@ -36,7 +30,7 @@ const TimelineControllerView = memo(
 );
 TimelineControllerView.displayName = 'TimelineControllerView';
 
-export const TimelineControlWrapper: FC<TimelineControlWrapperProps> = ({ setVisibleTimelineRange, visibleTimelineRange }) => {
+export const TimelineControlWrapper: FC = () => {
   const { isPlaying, visible, maxTime } = usePlayerTimelinePick('isPlaying', 'visible', 'maxTime');
   const setTimelineState = usePlayerTimelinePatch();
   const [timelinePlaySpeed, setTimelinePlaySpeed] = useState<PlaySpeedType>(1);
@@ -52,19 +46,15 @@ export const TimelineControlWrapper: FC<TimelineControlWrapperProps> = ({ setVis
 
   const onClickBackFrame = useCallback(() => {
     setTimelineState((prev) => ({
-      currentTimelineSeek: Math.max(prev.currentTimelineSeek - 200 * timelinePlaySpeed, visibleTimelineRange.start),
+      currentTimelineSeek: Math.max(prev.currentTimelineSeek - 200 * timelinePlaySpeed, 0),
     }));
-  }, [setTimelineState, timelinePlaySpeed, visibleTimelineRange.start]);
+  }, [setTimelineState, timelinePlaySpeed]);
 
   const onClickForwardFrame = useCallback(() => {
     setTimelineState((prev) => ({
-      currentTimelineSeek: Math.min(prev.currentTimelineSeek + 200 * timelinePlaySpeed, visibleTimelineRange.end),
+      currentTimelineSeek: Math.min(prev.currentTimelineSeek + 200 * timelinePlaySpeed, prev.maxTime),
     }));
-  }, [setTimelineState, timelinePlaySpeed, visibleTimelineRange.end]);
-
-  useEffect(() => {
-    setVisibleTimelineRange({ start: 0, end: maxTime });
-  }, [maxTime, setVisibleTimelineRange]);
+  }, [setTimelineState, timelinePlaySpeed]);
 
   useEffect(() => {
     if (isPlaying) {
@@ -72,27 +62,27 @@ export const TimelineControlWrapper: FC<TimelineControlWrapperProps> = ({ setVis
         setTimelineState((prev) => {
           const prevSeek = prev.currentTimelineSeek;
           let seek: number;
-          if (prevSeek < visibleTimelineRange.start || prevSeek >= visibleTimelineRange.end) {
+          if (prevSeek < 0 || prevSeek >= prev.maxTime) {
             return {
-              currentTimelineSeek: visibleTimelineRange.start,
+              currentTimelineSeek: 0,
             };
           }
           const nextSeek = prevSeek + timelinePlaySpeed * 100; // 1秒ごとに進める
-          if (nextSeek > visibleTimelineRange.end) {
+          if (nextSeek > prev.maxTime) {
             clearInterval(interval);
-            seek = visibleTimelineRange.start;
+            seek = 0;
           } else {
             seek = nextSeek;
           }
           return {
             currentTimelineSeek: seek,
-            isPlaying: nextSeek <= visibleTimelineRange.end,
+            isPlaying: nextSeek <= prev.maxTime,
           };
         });
       }, 100);
       return () => clearInterval(interval);
     }
-  }, [setTimelineState, timelinePlaySpeed, isPlaying, visibleTimelineRange]);
+  }, [setTimelineState, timelinePlaySpeed, isPlaying]);
 
   if (!visible) {
     return null;
@@ -101,22 +91,12 @@ export const TimelineControlWrapper: FC<TimelineControlWrapperProps> = ({ setVis
     <TimelineControllerView
       isPlaying={isPlaying}
       maxTime={maxTime}
-      currentMinTime={visibleTimelineRange.start}
-      currentMaxTime={visibleTimelineRange.end}
+      currentMinTime={0}
+      currentMaxTime={maxTime}
       playSpeed={timelinePlaySpeed}
       onChangePlaySpeed={setTimelinePlaySpeed}
-      onChangeMinTime={(minTime) => {
-        setVisibleTimelineRange((prev) => ({
-          ...prev,
-          start: minTime,
-        }));
-      }}
-      onChangeMaxTime={(maxTime) => {
-        setVisibleTimelineRange((prev) => ({
-          ...prev,
-          end: maxTime,
-        }));
-      }}
+      onChangeMinTime={() => {}}
+      onChangeMaxTime={() => {}}
       onClickMenu={() => {
         heatMapEventBus.emit('click-menu-icon', { name: 'timeline' });
       }}
