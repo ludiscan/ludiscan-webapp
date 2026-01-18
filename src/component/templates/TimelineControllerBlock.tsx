@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import { memo, useCallback, useMemo, useState } from 'react';
+import { GoGraph } from 'react-icons/go';
 import { GrContract, GrExpand } from 'react-icons/gr';
 import { IoMenu, IoPause, IoPlay, IoPlayBackSharp, IoPlayForwardSharp } from 'react-icons/io5';
 
@@ -80,10 +81,6 @@ const Component: FC<TimelineControllerBlockProps> = ({
 
   const progressPercent = maxTime > 0 ? (currentTime / maxTime) * 100 : 0;
 
-  const opacityLabel = useMemo(() => {
-    return `${Math.round(heatmapOpacity * 100)}%`;
-  }, [heatmapOpacity]);
-
   return (
     <Card
       color={theme.colors.surface.base}
@@ -128,6 +125,15 @@ const Component: FC<TimelineControllerBlockProps> = ({
 
         {/* サブコントロール */}
         <div className={`${className}__subControls`}>
+          {/* 左側: ヒートマップ不透明度トグル */}
+          <Button onClick={onToggleHeatmapOpacity} scheme={'none'} fontSize={'sm'} className={`${className}__heatmapToggle`}>
+            <GoGraph size={18} style={{ opacity: heatmapOpacity === 0 ? 0.3 : heatmapOpacity === 0.5 ? 0.6 : 1 }} />
+          </Button>
+
+          {/* 中央: スペーサー */}
+          <div style={{ flex: 1 }} />
+
+          {/* 右側: 速度選択と他のコントロール */}
           {isDetailOpen ? (
             <InlineFlexRow align={'center'} gap={4}>
               {PlaySpeed.map((value) => (
@@ -139,11 +145,6 @@ const Component: FC<TimelineControllerBlockProps> = ({
           ) : (
             <Text text={`${playSpeed}x`} fontSize={theme.typography.fontSize.xs} color={theme.colors.text.secondary} />
           )}
-
-          {/* Opacity トグルボタン - 常に表示 */}
-          <Button onClick={onToggleHeatmapOpacity} scheme={'none'} fontSize={'sm'}>
-            <Text text={opacityLabel} fontSize={'sm'} color={theme.colors.text.secondary} />
-          </Button>
 
           <Button onClick={() => setIsDetailOpen(!isDetailOpen)} scheme={'none'} fontSize={'base'}>
             {isDetailOpen ? <GrContract size={16} /> : <GrExpand size={16} />}
@@ -225,10 +226,19 @@ export const TimelineControllerBlock = memo(
       display: flex;
       gap: 12px;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
+      width: 100%;
 
       @media (width <= 920px) and (orientation: landscape) {
         display: none;
+      }
+    }
+
+    &__heatmapToggle {
+      color: ${({ theme }) => theme.colors.text.secondary};
+
+      &:hover {
+        color: ${({ theme }) => theme.colors.text.primary};
       }
     }
 
