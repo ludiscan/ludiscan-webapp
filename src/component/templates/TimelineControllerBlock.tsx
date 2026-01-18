@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import { memo, useCallback, useMemo, useState } from 'react';
+import { GoGraph } from 'react-icons/go';
 import { GrContract, GrExpand } from 'react-icons/gr';
 import { IoMenu, IoPause, IoPlay, IoPlayBackSharp, IoPlayForwardSharp } from 'react-icons/io5';
 
@@ -13,6 +14,9 @@ import { useSharedTheme } from '@src/hooks/useSharedTheme';
 
 export const PlaySpeed = [0.25, 0.5, 1, 2, 4] as const;
 export type PlaySpeedType = (typeof PlaySpeed)[number];
+
+export const HeatmapOpacityOptions = [0, 0.5, 1] as const;
+export type HeatmapOpacityType = (typeof HeatmapOpacityOptions)[number];
 export type TimelineControllerBlockProps = {
   className?: string;
   isPlaying: boolean;
@@ -21,6 +25,7 @@ export type TimelineControllerBlockProps = {
   currentMaxTime: number;
   maxTime: number;
   playSpeed?: PlaySpeedType;
+  heatmapOpacity?: HeatmapOpacityType;
   onClickMenu: () => void;
   onClickPlay: () => void;
   onChangeMinTime: (time: number) => void;
@@ -29,6 +34,7 @@ export type TimelineControllerBlockProps = {
   onClickBackFrame: () => void;
   onClickForwardFrame: () => void;
   onChangePlaySpeed?: (speed: PlaySpeedType) => void;
+  onToggleHeatmapOpacity?: () => void;
 };
 
 const Component: FC<TimelineControllerBlockProps> = ({
@@ -37,12 +43,14 @@ const Component: FC<TimelineControllerBlockProps> = ({
   currentTime,
   maxTime,
   playSpeed = 1,
+  heatmapOpacity = 1,
   onClickPlay,
   onClickMenu,
   onSeek,
   onClickBackFrame,
   onClickForwardFrame,
   onChangePlaySpeed = () => {},
+  onToggleHeatmapOpacity,
 }) => {
   const { theme } = useSharedTheme();
   const [isDetailOpen, setIsDetailOpen] = useState(false);
@@ -117,6 +125,15 @@ const Component: FC<TimelineControllerBlockProps> = ({
 
         {/* サブコントロール */}
         <div className={`${className}__subControls`}>
+          {/* 左側: ヒートマップ不透明度トグル */}
+          <Button onClick={onToggleHeatmapOpacity} scheme={'none'} fontSize={'sm'} className={`${className}__heatmapToggle`}>
+            <GoGraph size={18} style={{ opacity: heatmapOpacity === 0 ? 0.3 : heatmapOpacity === 0.5 ? 0.6 : 1 }} />
+          </Button>
+
+          {/* 中央: スペーサー */}
+          <div style={{ flex: 1 }} />
+
+          {/* 右側: 速度選択と他のコントロール */}
           {isDetailOpen ? (
             <InlineFlexRow align={'center'} gap={4}>
               {PlaySpeed.map((value) => (
@@ -209,10 +226,19 @@ export const TimelineControllerBlock = memo(
       display: flex;
       gap: 12px;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
+      width: 100%;
 
       @media (width <= 920px) and (orientation: landscape) {
         display: none;
+      }
+    }
+
+    &__heatmapToggle {
+      color: ${({ theme }) => theme.colors.text.secondary};
+
+      &:hover {
+        color: ${({ theme }) => theme.colors.text.primary};
       }
     }
 
@@ -308,7 +334,8 @@ export const TimelineControllerBlock = memo(
       prev.currentMinTime === next.currentMinTime &&
       prev.currentMaxTime === next.currentMaxTime &&
       prev.maxTime === next.maxTime &&
-      prev.playSpeed === next.playSpeed
+      prev.playSpeed === next.playSpeed &&
+      prev.heatmapOpacity === next.heatmapOpacity
     );
   },
 );

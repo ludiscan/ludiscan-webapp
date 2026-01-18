@@ -19,7 +19,6 @@ import { HeatmapObjectOverlay } from './HeatmapObjectOverlay';
 import { FocusController } from './selection/FocusController';
 
 import type { components } from '@generated/api';
-import type { PlayerTimelinePointsTimeRange } from '@src/features/heatmap/PlayerTimelinePoints';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC } from 'react';
 import type { Group, PerspectiveCamera, OrthographicCamera } from 'three';
@@ -49,7 +48,6 @@ type HeatmapCanvasProps = {
   modelType?: 'gltf' | 'glb' | 'obj' | 'server' | null;
   // v0.1 API: normalizedDensity is already 0-1 range
   pointList: { x: number; y: number; z?: number; normalizedDensity: number }[];
-  visibleTimelineRange: PlayerTimelinePointsTimeRange;
   dimensionality: '2d' | '3d';
   fieldObjectLogs?: components['schemas']['FieldObjectLogDto'][];
   projectId?: number;
@@ -113,20 +111,16 @@ const FieldObjects = memo(
 FieldObjects.displayName = 'FieldObjects';
 
 const TimelinePoints = memo(
-  ({ service, visibleTimelineRange }: { service: HeatmapDataService; visibleTimelineRange: PlayerTimelinePointsTimeRange }) => {
+  ({ service }: { service: HeatmapDataService }) => {
     const { visible, details } = usePlayerTimelinePick('visible', 'details');
     return (
       <>
-        {service &&
-          visible &&
-          details &&
-          details.length > 0 &&
-          details.map((tl, index) => <PlayerTimelinePoints key={index} service={service} state={tl} visibleTimeRange={visibleTimelineRange} />)}
+        {service && visible && details && details.length > 0 && details.map((tl, index) => <PlayerTimelinePoints key={index} service={service} state={tl} />)}
       </>
     );
   },
   (prev, next) => {
-    return prev.service === next.service && prev.visibleTimelineRange === next.visibleTimelineRange;
+    return prev.service === next.service;
   },
 );
 TimelinePoints.displayName = 'TimelinePoints';
@@ -137,7 +131,6 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
   modelType,
   pointList,
   service,
-  visibleTimelineRange,
   dimensionality,
   fieldObjectLogs = [],
   playerId,
@@ -591,7 +584,7 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
         {pointList && showHeatmap && <HotspotCircles points={pointList} />}
         <EventLogs service={service} />
         {fieldObjectLogs && fieldObjectLogs.length > 0 && <FieldObjects logs={fieldObjectLogs} />}
-        <TimelinePoints service={service} visibleTimelineRange={visibleTimelineRange} />
+        <TimelinePoints service={service} />
         {/* --- 追加：ウェイポイントを map して表示 --- */}
         {waypoints.map((wp) => (
           <WaypointMarker
@@ -643,7 +636,6 @@ export const HeatMapCanvas = memo(
     prev.map === next.map &&
     prev.modelType === next.modelType &&
     prev.pointList === next.pointList &&
-    prev.visibleTimelineRange === next.visibleTimelineRange &&
     prev.service.task == next.service.task &&
     prev.dimensionality === next.dimensionality &&
     prev.fieldObjectLogs === next.fieldObjectLogs &&

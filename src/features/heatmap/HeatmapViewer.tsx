@@ -8,7 +8,6 @@ import { useDispatch, useSelector, useStore } from 'react-redux';
 import type { PerformanceMonitorApi } from '@react-three/drei';
 import type { LocalModelData } from '@src/features/heatmap/HeatmapMenuContent';
 import type { ModelFileType } from '@src/features/heatmap/ModelLoader';
-import type { PlayerTimelinePointsTimeRange } from '@src/features/heatmap/PlayerTimelinePoints';
 import type { EventLogData, FieldObjectData, PlayerTimelineDetail } from '@src/modeles/heatmapView';
 import type { PositionEventLog } from '@src/modeles/heatmaptask';
 import type { RootState } from '@src/store';
@@ -104,8 +103,6 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
     'showStats',
   );
   const splitMode = useSelector((s: RootState) => s.heatmapCanvas.splitMode);
-
-  const [visibleTimelineRange, setVisibleTimelineRange] = useState<PlayerTimelinePointsTimeRange>({ start: 0, end: 0 });
 
   const task = useMemo(() => service.task, [service.task]);
 
@@ -471,7 +468,6 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
             map={map}
             modelType={modelType}
             model={model}
-            visibleTimelineRange={visibleTimelineRange}
             dimensionality={dimensionality}
             fieldObjectLogs={fieldObjectLogs}
             hasLocalModel={!!localModel}
@@ -489,7 +485,6 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
       map,
       modelType,
       model,
-      visibleTimelineRange,
       statsReady,
       showStats,
       className,
@@ -528,7 +523,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
             )}
           </div>
           <div className={`${className}__player`}>
-            <TimelineControlWrapper setVisibleTimelineRange={setVisibleTimelineRange} visibleTimelineRange={visibleTimelineRange} />
+            <TimelineControlWrapper />
           </div>
         </FlexRow>
         <div className={`${className}__canvasMenuBox`}>
@@ -670,7 +665,7 @@ export const HeatMapViewer = memo(
 
     &__player {
       position: absolute;
-      bottom: var(--spacing-2xl);
+      bottom: var(--spacing-xl);
       left: 50%;
       z-index: ${zIndexes.content + 2};
       width: max-content;
