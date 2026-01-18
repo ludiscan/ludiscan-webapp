@@ -13,6 +13,9 @@ import { useSharedTheme } from '@src/hooks/useSharedTheme';
 
 export const PlaySpeed = [0.25, 0.5, 1, 2, 4] as const;
 export type PlaySpeedType = (typeof PlaySpeed)[number];
+
+export const HeatmapOpacityOptions = [0, 0.5, 1] as const;
+export type HeatmapOpacityType = (typeof HeatmapOpacityOptions)[number];
 export type TimelineControllerBlockProps = {
   className?: string;
   isPlaying: boolean;
@@ -21,6 +24,7 @@ export type TimelineControllerBlockProps = {
   currentMaxTime: number;
   maxTime: number;
   playSpeed?: PlaySpeedType;
+  heatmapOpacity?: HeatmapOpacityType;
   onClickMenu: () => void;
   onClickPlay: () => void;
   onChangeMinTime: (time: number) => void;
@@ -29,6 +33,7 @@ export type TimelineControllerBlockProps = {
   onClickBackFrame: () => void;
   onClickForwardFrame: () => void;
   onChangePlaySpeed?: (speed: PlaySpeedType) => void;
+  onToggleHeatmapOpacity?: () => void;
 };
 
 const Component: FC<TimelineControllerBlockProps> = ({
@@ -37,12 +42,14 @@ const Component: FC<TimelineControllerBlockProps> = ({
   currentTime,
   maxTime,
   playSpeed = 1,
+  heatmapOpacity = 1,
   onClickPlay,
   onClickMenu,
   onSeek,
   onClickBackFrame,
   onClickForwardFrame,
   onChangePlaySpeed = () => {},
+  onToggleHeatmapOpacity,
 }) => {
   const { theme } = useSharedTheme();
   const [isDetailOpen, setIsDetailOpen] = useState(false);
@@ -72,6 +79,10 @@ const Component: FC<TimelineControllerBlockProps> = ({
   }, [maxTime]);
 
   const progressPercent = maxTime > 0 ? (currentTime / maxTime) * 100 : 0;
+
+  const opacityLabel = useMemo(() => {
+    return `${Math.round(heatmapOpacity * 100)}%`;
+  }, [heatmapOpacity]);
 
   return (
     <Card
@@ -128,6 +139,11 @@ const Component: FC<TimelineControllerBlockProps> = ({
           ) : (
             <Text text={`${playSpeed}x`} fontSize={theme.typography.fontSize.xs} color={theme.colors.text.secondary} />
           )}
+
+          {/* Opacity トグルボタン - 常に表示 */}
+          <Button onClick={onToggleHeatmapOpacity} scheme={'none'} fontSize={'sm'}>
+            <Text text={opacityLabel} fontSize={'sm'} color={theme.colors.text.secondary} />
+          </Button>
 
           <Button onClick={() => setIsDetailOpen(!isDetailOpen)} scheme={'none'} fontSize={'base'}>
             {isDetailOpen ? <GrContract size={16} /> : <GrExpand size={16} />}
@@ -308,7 +324,8 @@ export const TimelineControllerBlock = memo(
       prev.currentMinTime === next.currentMinTime &&
       prev.currentMaxTime === next.currentMaxTime &&
       prev.maxTime === next.maxTime &&
-      prev.playSpeed === next.playSpeed
+      prev.playSpeed === next.playSpeed &&
+      prev.heatmapOpacity === next.heatmapOpacity
     );
   },
 );

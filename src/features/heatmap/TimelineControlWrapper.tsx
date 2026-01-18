@@ -1,8 +1,9 @@
-import { memo, useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { FC, ComponentProps } from 'react';
 
-import { type PlaySpeedType, TimelineControllerBlock } from '@src/component/templates/TimelineControllerBlock';
+import { type HeatmapOpacityType, type PlaySpeedType, TimelineControllerBlock } from '@src/component/templates/TimelineControllerBlock';
+import { useGeneralPatch, useGeneralPick } from '@src/hooks/useGeneral';
 import { usePlayerTimelinePatch, usePlayerTimelinePick, usePlayerTimelineSelect } from '@src/hooks/usePlayerTimeline';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
@@ -19,6 +20,7 @@ const TimelineControllerView = memo(
     prev.currentMinTime === next.currentMinTime &&
     prev.currentMaxTime === next.currentMaxTime &&
     prev.playSpeed === next.playSpeed &&
+    prev.heatmapOpacity === next.heatmapOpacity &&
     prev.onChangePlaySpeed === next.onChangePlaySpeed &&
     prev.onChangeMinTime === next.onChangeMinTime &&
     prev.onChangeMaxTime === next.onChangeMaxTime &&
@@ -26,7 +28,8 @@ const TimelineControllerView = memo(
     prev.onClickPlay === next.onClickPlay &&
     prev.onSeek === next.onSeek &&
     prev.onClickBackFrame === next.onClickBackFrame &&
-    prev.onClickForwardFrame === next.onClickForwardFrame,
+    prev.onClickForwardFrame === next.onClickForwardFrame &&
+    prev.onToggleHeatmapOpacity === next.onToggleHeatmapOpacity,
 );
 TimelineControllerView.displayName = 'TimelineControllerView';
 
@@ -34,6 +37,30 @@ export const TimelineControlWrapper: FC = () => {
   const { isPlaying, visible, maxTime } = usePlayerTimelinePick('isPlaying', 'visible', 'maxTime');
   const setTimelineState = usePlayerTimelinePatch();
   const [timelinePlaySpeed, setTimelinePlaySpeed] = useState<PlaySpeedType>(1);
+
+  // Opacity状態の取得・更新
+  const { heatmapOpacity } = useGeneralPick('heatmapOpacity');
+  const setGeneral = useGeneralPatch();
+
+  // タイムラインが表示されるときにopacityを0.5に設定
+  useEffect(() => {
+    if (visible) {
+      setGeneral({ heatmapOpacity: 0.5 });
+    }
+  }, [visible, setGeneral]);
+
+  // スライダーで中間値が設定された場合の正規化
+  const normalizedOpacity = useMemo((): HeatmapOpacityType => {
+    if (heatmapOpacity <= 0.25) return 0;
+    if (heatmapOpacity <= 0.75) return 0.5;
+    return 1;
+  }, [heatmapOpacity]);
+
+  // Opacityトグルハンドラ: 0 → 0.5 → 1 → 0 の順でトグル
+  const handleToggleOpacity = useCallback(() => {
+    const nextOpacity = normalizedOpacity === 0 ? 0.5 : normalizedOpacity === 0.5 ? 1 : 0;
+    setGeneral({ heatmapOpacity: nextOpacity });
+  }, [normalizedOpacity, setGeneral]);
 
   const setCurrentTimelineSeek = useCallback(
     (seek: number) => {
@@ -94,6 +121,7 @@ export const TimelineControlWrapper: FC = () => {
       currentMinTime={0}
       currentMaxTime={maxTime}
       playSpeed={timelinePlaySpeed}
+      heatmapOpacity={normalizedOpacity}
       onChangePlaySpeed={setTimelinePlaySpeed}
       onChangeMinTime={() => {}}
       onChangeMaxTime={() => {}}
@@ -109,6 +137,7 @@ export const TimelineControlWrapper: FC = () => {
       onSeek={setCurrentTimelineSeek}
       onClickBackFrame={onClickBackFrame}
       onClickForwardFrame={onClickForwardFrame}
+      onToggleHeatmapOpacity={handleToggleOpacity}
     />
   );
 };
