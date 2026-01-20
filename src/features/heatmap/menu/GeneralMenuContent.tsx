@@ -25,6 +25,9 @@ import { focusByCoord } from '@src/slices/selectionSlice';
 
 // Section wrapper with visual separation
 const Section = styled.section`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   width: 100%;
   padding-block-end: ${({ theme }) => theme.spacing.sm};
   margin-block-end: ${({ theme }) => theme.spacing.sm};
@@ -280,11 +283,9 @@ export const GeneralMenuContent: FC<HeatmapMenuProps> = ({ service }) => {
       <Section role='group' aria-label={t('heatmap.general.view')}>
         <SectionTitle>{t('heatmap.general.view')}</SectionTitle>
 
-        <InputRow label={t('heatmap.general.resetToInitial')}>
-          <Button onClick={handleResetView} scheme={'secondary'} fontSize={'sm'} disabled={!centerPosition}>
-            <Text text={t('heatmap.general.resetToInitial')} fontSize={theme.typography.fontSize.sm} />
-          </Button>
-        </InputRow>
+        <Button onClick={handleResetView} scheme={'secondary'} fontSize={'sm'} disabled={!centerPosition}>
+          <Text text={t('heatmap.general.resetToInitial')} fontSize={theme.typography.fontSize.sm} />
+        </Button>
       </Section>
 
       {/* ===== Advanced Display Settings (折りたたみ) ===== */}
