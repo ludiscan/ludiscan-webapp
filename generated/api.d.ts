@@ -265,6 +265,46 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v0/auth/google/login': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Google OAuth開始（ログイン専用）
+     * @description 既存ユーザーのみログインを許可します。未登録ユーザーはUSER_NOT_FOUNDエラーになります。
+     */
+    get: operations['AuthController_googleLogin'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/auth/google/signup': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Google OAuth開始（サインアップ専用）
+     * @description 新規ユーザー登録専用です。既存アカウントがある場合はACCOUNT_ALREADY_EXISTSエラーになります。Feature Flagで無効化されている場合はSIGNUP_DISABLEDエラーになります。
+     */
+    get: operations['AuthController_googleSignup'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v0/auth/google/callback': {
     parameters: {
       query?: never;
@@ -274,7 +314,7 @@ export interface paths {
     };
     /**
      * Google OAuth コールバック
-     * @description Passportが `req.user` にGoogleプロフィールをセット。`state` がリンクモードならリンク、そうでなければログイン/サインアップ。最後にフロントへ302（?token=... か ?code=...）。
+     * @description Passportが `req.user` にGoogleプロフィールをセット。`state` のmodeに応じて処理を分岐: link=リンク、login=ログイン専用、signup=サインアップ専用、auth/未指定=従来の両対応。最後にフロントへ302（?token=... か ?code=...）。
      */
     get: operations['AuthController_googleCallback'];
     put?: never;
@@ -4508,6 +4548,73 @@ export interface operations {
         content: {
           'application/json': components['schemas']['DefaultErrorResponse'];
         };
+      };
+    };
+  };
+  AuthController_googleLogin: {
+    parameters: {
+      query?: {
+        /** @description 認証完了後に戻る先（フロントのURL） */
+        returnTo?: components['schemas']['GoogleAuthWithReturnQueryDto'];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Redirect to /api/v0/auth/google with signed state */
+      302: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  AuthController_googleSignup: {
+    parameters: {
+      query?: {
+        /** @description 認証完了後に戻る先（フロントのURL） */
+        returnTo?: components['schemas']['GoogleAuthWithReturnQueryDto'];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Redirect to /api/v0/auth/google with signed state */
+      302: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+      /** @description Signup is disabled by feature flag */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };

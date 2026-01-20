@@ -1127,9 +1127,84 @@
         ]
       }
     },
+    "/api/v0/auth/google/login": {
+      "get": {
+        "description": "既存ユーザーのみログインを許可します。未登録ユーザーはUSER_NOT_FOUNDエラーになります。",
+        "operationId": "AuthController_googleLogin",
+        "parameters": [
+          {
+            "name": "returnTo",
+            "required": false,
+            "in": "query",
+            "description": "認証完了後に戻る先（フロントのURL）",
+            "schema": {
+              "$ref": "#/components/schemas/GoogleAuthWithReturnQueryDto"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect to /api/v0/auth/google with signed state"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Google OAuth開始（ログイン専用）",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v0/auth/google/signup": {
+      "get": {
+        "description": "新規ユーザー登録専用です。既存アカウントがある場合はACCOUNT_ALREADY_EXISTSエラーになります。Feature Flagで無効化されている場合はSIGNUP_DISABLEDエラーになります。",
+        "operationId": "AuthController_googleSignup",
+        "parameters": [
+          {
+            "name": "returnTo",
+            "required": false,
+            "in": "query",
+            "description": "認証完了後に戻る先（フロントのURL）",
+            "schema": {
+              "$ref": "#/components/schemas/GoogleAuthWithReturnQueryDto"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect to /api/v0/auth/google with signed state"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Signup is disabled by feature flag"
+          }
+        },
+        "summary": "Google OAuth開始（サインアップ専用）",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
     "/api/v0/auth/google/callback": {
       "get": {
-        "description": "Passportが `req.user` にGoogleプロフィールをセット。`state` がリンクモードならリンク、そうでなければログイン/サインアップ。最後にフロントへ302（?token=... か ?code=...）。",
+        "description": "Passportが `req.user` にGoogleプロフィールをセット。`state` のmodeに応じて処理を分岐: link=リンク、login=ログイン専用、signup=サインアップ専用、auth/未指定=従来の両対応。最後にフロントへ302（?token=... か ?code=...）。",
         "operationId": "AuthController_googleCallback",
         "parameters": [
           {
@@ -8156,7 +8231,7 @@
   "info": {
     "title": "Ludiscan API Documentation",
     "description": "Ludiscan API for game analytics and session tracking",
-    "version": "1.32.0",
+    "version": "1.34.0",
     "contact": {}
   },
   "tags": [],
