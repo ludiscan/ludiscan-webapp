@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unknown-property */
 import { useQuery } from '@tanstack/react-query';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Color, Sprite, SpriteMaterial, TextureLoader, Vector3 } from 'three';
+import { Sprite, SpriteMaterial, TextureLoader, Vector3 } from 'three';
 import { Line2, LineGeometry, LineMaterial } from 'three-stdlib';
 
 import type { PlayerArrowExtra } from '@src/features/heatmap/selection/hooks';
@@ -243,25 +243,6 @@ const Component: FC<PlayerTimelinePointsProps> = ({ state }) => {
   if (isLoading || !logs || !isSuccess || !state?.visible) return <></>;
   return (
     <>
-      {logs
-        .filter((pt) => pt.offset_timestamp >= 0 && pt.offset_timestamp <= maxTime)
-        .map((pt, idx) => (
-          <mesh key={idx} position={new Vector3(pt.x, pt.y, pt.z)} renderOrder={zIndexes.renderOrder.timelinePoints}>
-            <sphereGeometry args={[10 * scale, 16, 16]} />
-            <meshStandardMaterial color={new Color(161 / 255, 198 / 255, 255 / 255)} transparent />
-          </mesh>
-        ))}
-      {/*{fullPathPoints.length > 1 && (*/}
-      {/*  <primitive*/}
-      {/*    object={*/}
-      {/*      new Line(*/}
-      {/*        new BufferGeometry().setFromPoints(new CatmullRomCurve3(fullPathPoints).getPoints(200)),*/}
-      {/*        new LineBasicMaterial({ color: '#888888' }), // 全体：薄いグレー*/}
-      {/*      )*/}
-      {/*    }*/}
-      {/*  />*/}
-      {/*)}*/}
-
       {/* アイコン表示 */}
       {queryIcon &&
         partialPathPoints.length > 0 &&
