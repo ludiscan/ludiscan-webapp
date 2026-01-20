@@ -7,6 +7,7 @@ import { useDispatch, useSelector, useStore } from 'react-redux';
 
 import type { PerformanceMonitorApi } from '@react-three/drei';
 import type { LocalModelData } from '@src/features/heatmap/HeatmapMenuContent';
+import type { MapObjectContextMenuData, OpacityLevel } from '@src/features/heatmap/MapObjectContextMenu';
 import type { ModelFileType } from '@src/features/heatmap/ModelLoader';
 import type { EventLogData, FieldObjectData, PlayerTimelineDetail } from '@src/modeles/heatmapView';
 import type { PositionEventLog } from '@src/modeles/heatmaptask';
@@ -21,6 +22,7 @@ import { CanvasTooltip } from '@src/features/heatmap/CanvasTooltip';
 import { EventLogPanel } from '@src/features/heatmap/EventLogPanel';
 import { HeatMapCanvas } from '@src/features/heatmap/HeatmapCanvas';
 import { SMALL_SCREEN_BREAKPOINT, HeatmapMenuContent } from '@src/features/heatmap/HeatmapMenuContent';
+import { MapObjectContextMenu } from '@src/features/heatmap/MapObjectContextMenu';
 import { useModelFromArrayBuffer } from '@src/features/heatmap/ModelLoader';
 import { SettingsButton } from '@src/features/heatmap/SettingsButton';
 import { TimelineControlWrapper } from '@src/features/heatmap/TimelineControlWrapper';
@@ -40,6 +42,7 @@ import { useFieldObjectTypes } from '@src/modeles/heatmapView';
 import { DefaultStaleTime } from '@src/modeles/qeury';
 import { setMenuPanelCollapsed } from '@src/slices/uiSlice';
 import { dimensions, zIndexes } from '@src/styles/style';
+import { heatMapEventBus } from '@src/utils/canvasEventBus';
 import { getRandomPrimitiveColor } from '@src/utils/color';
 import { detectDimensionality } from '@src/utils/heatmap/detectDimensionality';
 
@@ -122,6 +125,9 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
 
   // EventLogPanelのcollapsed状態（スマホ時のキャンバスタップで閉じるため外部管理、デフォルトは閉じた状態）
   const [eventLogPanelCollapsed, setEventLogPanelCollapsed] = useState(true);
+
+  // コンテキストメニューの状態
+  const [contextMenuData, setContextMenuData] = useState<MapObjectContextMenuData | null>(null);
 
   const { data: mapList } = useQuery({
     queryKey: ['mapList', service.projectId, mapActiveOnly],
@@ -360,6 +366,117 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
     setLocalModel(data);
   }, []);
 
+  // コンテキストメニューのイベントリスナー
+  useEffect(() => {
+    const handleContextMenuEvent = (event: CustomEvent<MapObjectContextMenuData>) => {
+      setContextMenuData(event.detail);
+    };
+
+    heatMapEventBus.on('map-object:context-menu', handleContextMenuEvent);
+    return () => {
+      heatMapEventBus.off('map-object:context-menu', handleContextMenuEvent);
+    };
+  }, []);
+
+  // コンテキストメニューを閉じる
+  const handleCloseContextMenu = useCallback(() => {
+    setContextMenuData(null);
+  }, []);
+
+  // オブジェクトの表示/非表示を切り替え
+  const handleToggleObjectVisible = useCallback(
+    (uuid: string) => {
+      if (!model || !mapName) return;
+
+      // localStorageから現在の状態を取得して更新
+      const storageKey = `ObjectToggleList:${mapName}:${model.name ?? 'Model'}`;
+      const saved = typeof window !== 'undefined' ? window.localStorage.getItem(storageKey) : null;
+      let state: Record<string, { visible: boolean; opacity: OpacityLevel }> = {};
+
+      if (saved) {
+        try {
+          state = JSON.parse(saved);
+        } catch {
+          // Ignore
+        }
+      }
+
+      // 状態がない場合は初期化
+      if (!state[uuid]) {
+        state[uuid] = { visible: true, opacity: 1.0 };
+      }
+
+      // 表示状態を反転
+      state[uuid].visible = !state[uuid].visible;
+
+      // localStorageに保存
+      window.localStorage.setItem(storageKey, JSON.stringify(state));
+
+      // Three.jsオブジェクトを直接更新
+      const child = model.children.find((c) => c.uuid === uuid);
+      if (child) {
+        child.visible = state[uuid].visible && state[uuid].opacity > 0;
+      }
+
+      // コンテキストメニューの状態を更新
+      setContextMenuData((prev) => (prev ? { ...prev, visible: state[uuid].visible } : null));
+    },
+    [model, mapName],
+  );
+
+  // オブジェクトの透明度を設定
+  const handleSetObjectOpacity = useCallback(
+    (uuid: string, opacity: OpacityLevel) => {
+      if (!model || !mapName) return;
+
+      // localStorageから現在の状態を取得して更新
+      const storageKey = `ObjectToggleList:${mapName}:${model.name ?? 'Model'}`;
+      const saved = typeof window !== 'undefined' ? window.localStorage.getItem(storageKey) : null;
+      let state: Record<string, { visible: boolean; opacity: OpacityLevel }> = {};
+
+      if (saved) {
+        try {
+          state = JSON.parse(saved);
+        } catch {
+          // Ignore
+        }
+      }
+
+      // 状態がない場合は初期化
+      if (!state[uuid]) {
+        state[uuid] = { visible: true, opacity: 1.0 };
+      }
+
+      // 透明度を更新
+      state[uuid].opacity = opacity;
+
+      // localStorageに保存
+      window.localStorage.setItem(storageKey, JSON.stringify(state));
+
+      // Three.jsオブジェクトを直接更新
+      const child = model.children.find((c) => c.uuid === uuid);
+      if (child) {
+        child.visible = state[uuid].visible && opacity > 0;
+        // マテリアルの透明度を更新
+        if ('material' in child) {
+          const mesh = child as { material: { transparent: boolean; opacity: number; needsUpdate: boolean } | Array<{ transparent: boolean; opacity: number; needsUpdate: boolean }> };
+          if (Array.isArray(mesh.material)) {
+            mesh.material.forEach((mat) => {
+              mat.transparent = opacity < 1.0;
+              mat.opacity = opacity;
+              mat.needsUpdate = true;
+            });
+          } else if (mesh.material) {
+            mesh.material.transparent = opacity < 1.0;
+            mesh.material.opacity = opacity;
+            mesh.material.needsUpdate = true;
+          }
+        }
+      }
+    },
+    [model, mapName],
+  );
+
   const store = useStore<RootState>();
   const handleExportView = useCallback(async () => {
     try {
@@ -570,6 +687,14 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
 
         {/* AIリンク/外部postMessage→focus */}
         <FocusLinkBridge />
+
+        {/* マップオブジェクトの右クリックコンテキストメニュー */}
+        <MapObjectContextMenu
+          data={contextMenuData}
+          onClose={handleCloseContextMenu}
+          onToggleVisible={handleToggleObjectVisible}
+          onSetOpacity={handleSetObjectOpacity}
+        />
       </div>
     </HintProvider>
   );
