@@ -1,5 +1,5 @@
 import { useLoader } from '@react-three/fiber';
-import { Suspense, useState, useEffect, memo, useMemo, useCallback } from 'react';
+import { Suspense, useState, useEffect, memo, useMemo, useCallback, useRef } from 'react';
 import { Color, MathUtils, MeshLambertMaterial, MeshPhongMaterial, MeshStandardMaterial } from 'three';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -280,18 +280,15 @@ const StreamModelLoaderComponent: FC<StreamModelLoaderProps> = ({ model, ref }) 
     [modelRotationX, modelRotationY, modelRotationZ],
   );
 
-  // 右クリックハンドラ
-  const handleContextMenu = useCallback(
-    (event: ThreeEvent<MouseEvent>) => {
-      event.stopPropagation();
+  // 長押し検出用の状態
+  const longPressTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressDataRef = useRef<{ object: Object3D; x: number; y: number } | null>(null);
+  const LONG_PRESS_DURATION = 500; // 500ms で長押し判定
 
-      // ネイティブのコンテキストメニューを無効化
-      const nativeEvent = event.nativeEvent;
-      nativeEvent.preventDefault();
-
-      // クリックされたオブジェクトを特定
-      const intersectedObject = event.object;
-      if (!intersectedObject || !model) return;
+  // コンテキストメニューを表示する共通処理
+  const showContextMenu = useCallback(
+    (intersectedObject: Object3D, screenX: number, screenY: number) => {
+      if (!model) return;
 
       // モデルの直接の子オブジェクトを見つける
       const directChild = findDirectChild(model, intersectedObject);
@@ -299,10 +296,6 @@ const StreamModelLoaderComponent: FC<StreamModelLoaderProps> = ({ model, ref }) 
 
       // 現在の表示状態をlocalStorageから取得
       const displayState = getObjectDisplayState(mapName ?? '', model.name, directChild.uuid);
-
-      // スクリーン座標を取得
-      const screenX = nativeEvent.clientX;
-      const screenY = nativeEvent.clientY;
 
       // コンテキストメニューイベントを発行
       heatMapEventBus.emit('map-object:context-menu', {
@@ -316,6 +309,80 @@ const StreamModelLoaderComponent: FC<StreamModelLoaderProps> = ({ model, ref }) 
     [model, mapName],
   );
 
+  // 右クリックハンドラ（デスクトップ用）
+  const handleContextMenu = useCallback(
+    (event: ThreeEvent<MouseEvent>) => {
+      event.stopPropagation();
+      const nativeEvent = event.nativeEvent;
+      nativeEvent.preventDefault();
+
+      const intersectedObject = event.object;
+      if (!intersectedObject) return;
+
+      showContextMenu(intersectedObject, nativeEvent.clientX, nativeEvent.clientY);
+    },
+    [showContextMenu],
+  );
+
+  // ポインターダウンハンドラ（長押し開始）
+  const handlePointerDown = useCallback(
+    (event: ThreeEvent<PointerEvent>) => {
+      // 左クリック/タッチのみ対象
+      if (event.nativeEvent.button !== 0) return;
+
+      const intersectedObject = event.object;
+      if (!intersectedObject) return;
+
+      // 長押しデータを保存
+      longPressDataRef.current = {
+        object: intersectedObject,
+        x: event.nativeEvent.clientX,
+        y: event.nativeEvent.clientY,
+      };
+
+      // 長押しタイマーを開始
+      longPressTimeoutRef.current = setTimeout(() => {
+        if (longPressDataRef.current) {
+          showContextMenu(longPressDataRef.current.object, longPressDataRef.current.x, longPressDataRef.current.y);
+          longPressDataRef.current = null;
+        }
+      }, LONG_PRESS_DURATION);
+    },
+    [showContextMenu],
+  );
+
+  // ポインターアップハンドラ（長押しキャンセル）
+  const handlePointerUp = useCallback(() => {
+    if (longPressTimeoutRef.current) {
+      clearTimeout(longPressTimeoutRef.current);
+      longPressTimeoutRef.current = null;
+    }
+    longPressDataRef.current = null;
+  }, []);
+
+  // ポインター移動ハンドラ（長押しキャンセル - 指が動いた場合）
+  const handlePointerMove = useCallback((event: ThreeEvent<PointerEvent>) => {
+    if (!longPressDataRef.current || !longPressTimeoutRef.current) return;
+
+    // 移動距離が10px以上なら長押しをキャンセル
+    const dx = event.nativeEvent.clientX - longPressDataRef.current.x;
+    const dy = event.nativeEvent.clientY - longPressDataRef.current.y;
+    if (Math.sqrt(dx * dx + dy * dy) > 10) {
+      clearTimeout(longPressTimeoutRef.current);
+      longPressTimeoutRef.current = null;
+      longPressDataRef.current = null;
+    }
+  }, []);
+
+  // クリーンアップ
+  useEffect(() => {
+    return () => {
+      if (longPressTimeoutRef.current) {
+        clearTimeout(longPressTimeoutRef.current);
+      }
+    };
+  }, []);
+
   return (
     <Suspense fallback={null}>
       <group
@@ -325,6 +392,9 @@ const StreamModelLoaderComponent: FC<StreamModelLoaderProps> = ({ model, ref }) 
         rotation={userRotation} // eslint-disable-line react/no-unknown-property
         scale={[scale, scale, scale]}
         onContextMenu={handleContextMenu}
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
+        onPointerMove={handlePointerMove}
       >
         {/* primitiveにはposition/rotation/scaleを設定せず、FBXの元の変換を保持 */}
         {model && (
