@@ -25,10 +25,10 @@ import { focusByCoord } from '@src/slices/selectionSlice';
 
 // Section wrapper with visual separation
 const Section = styled.section`
-  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 2px;
+  width: 100%;
   padding-block-end: ${({ theme }) => theme.spacing.sm};
   margin-block-end: ${({ theme }) => theme.spacing.sm};
   border-block-end: 1px solid ${({ theme }) => theme.colors.border.subtle};
