@@ -80,11 +80,7 @@ function applyShadowSettings(object: Group, receiveShadow: boolean): void {
 /**
  * LocalStorageからオブジェクトの表示状態を取得する
  */
-function getObjectDisplayState(
-  mapName: string,
-  modelName: string | undefined,
-  uuid: string,
-): { visible: boolean; opacity: OpacityLevel } {
+function getObjectDisplayState(mapName: string, modelName: string | undefined, uuid: string): { visible: boolean; opacity: OpacityLevel } {
   const storageKey = `ObjectToggleList:${mapName}:${modelName ?? 'Model'}`;
   const saved = typeof window !== 'undefined' ? window.localStorage.getItem(storageKey) : null;
   if (saved) {

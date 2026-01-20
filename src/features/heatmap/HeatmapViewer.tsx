@@ -459,7 +459,9 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
         child.visible = state[uuid].visible && opacity > 0;
         // マテリアルの透明度を更新
         if ('material' in child) {
-          const mesh = child as { material: { transparent: boolean; opacity: number; needsUpdate: boolean } | Array<{ transparent: boolean; opacity: number; needsUpdate: boolean }> };
+          const mesh = child as {
+            material: { transparent: boolean; opacity: number; needsUpdate: boolean } | Array<{ transparent: boolean; opacity: number; needsUpdate: boolean }>;
+          };
           if (Array.isArray(mesh.material)) {
             mesh.material.forEach((mat) => {
               mat.transparent = opacity < 1.0;
