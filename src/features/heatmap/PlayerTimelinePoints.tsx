@@ -1,4 +1,5 @@
 /* eslint-disable react/no-unknown-property */
+import { useQuery } from '@tanstack/react-query';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Color, Sprite, SpriteMaterial, TextureLoader, Vector3 } from 'three';
 import { Line2, LineGeometry, LineMaterial } from 'three-stdlib';
@@ -15,24 +16,27 @@ import { registerLiveObject } from '@src/features/heatmap/selection/liveObjectRe
 import { useGeneralPick } from '@src/hooks/useGeneral';
 import { useHVQL } from '@src/hooks/useHVQuery';
 import { usePlayerTimelinePatch, usePlayerTimelinePick } from '@src/hooks/usePlayerTimeline';
+import { useApiClient } from '@src/modeles/ApiClientContext';
 import { usePlayerPositionLogs } from '@src/modeles/heatmapView';
+import { DefaultStaleTime } from '@src/modeles/qeury';
 import { zIndexes } from '@src/styles/style';
 import { getIconPath } from '@src/utils/heatmapIconMap';
 
-export type PlayerTimelinePointsTimeRange = {
-  start: number; // 開始時刻（ミリ秒）
-  end: number; // 終了時刻（ミリ秒）
-};
+// 2026-01-16以前のデータに対するmaxTimeの制限値（90秒 = 90000ms）
+const LEGACY_MAX_TIME_LIMIT = 90_000;
+// 制限適用の基準日
+const LEGACY_CUTOFF_DATE = new Date('2026-01-16T00:00:00Z');
+
 export type PlayerTimelinePointsProps = {
   service: HeatmapDataService;
   state: PlayerTimelineDetail | null;
-  visibleTimeRange: PlayerTimelinePointsTimeRange;
 };
 
-const Component: FC<PlayerTimelinePointsProps> = ({ state, visibleTimeRange }) => {
+const Component: FC<PlayerTimelinePointsProps> = ({ state }) => {
   const { upZ, scale } = useGeneralPick('upZ', 'scale');
   const { currentTimelineSeek, maxTime, queryText } = usePlayerTimelinePick('currentTimelineSeek', 'maxTime', 'queryText');
   const setTimelineState = usePlayerTimelinePatch();
+  const apiClient = useApiClient();
   const [queryColor, setQueryColor] = useState<number | null>(null);
   const [queryIcon, setQueryIcon] = useState<string | null>(null);
   const [currentIconPath, setCurrentIconPath] = useState<string | null>(null);
@@ -41,6 +45,32 @@ const Component: FC<PlayerTimelinePointsProps> = ({ state, visibleTimeRange }) =
   const textureCache = useRef<Map<string, Texture>>(new Map());
   const spriteRef = useRef<Sprite | null>(null);
   const materialRef = useRef<SpriteMaterial | null>(null);
+
+  // セッション情報を取得してstartTimeを判定するために使用
+  const { data: sessionData } = useQuery({
+    queryKey: [state?.project_id, state?.session_id, apiClient],
+    queryFn: async () => {
+      if (!state?.project_id || !state?.session_id) return null;
+      const res = await apiClient.GET('/api/v0/projects/{project_id}/play_session/{session_id}', {
+        params: {
+          path: {
+            project_id: state.project_id,
+            session_id: state.session_id,
+          },
+        },
+      });
+      return res.data ?? null;
+    },
+    staleTime: DefaultStaleTime,
+    enabled: !!state?.project_id && !!state?.session_id,
+  });
+
+  // セッションのstartTimeが2026-01-16以前かどうかを判定
+  const isLegacySession = useMemo(() => {
+    if (!sessionData?.startTime) return false;
+    const sessionStart = new Date(sessionData.startTime);
+    return sessionStart < LEGACY_CUTOFF_DATE;
+  }, [sessionData?.startTime]);
 
   const { data: fetchLogs, isLoading, isSuccess } = usePlayerPositionLogs(state?.player, state?.project_id, state?.session_id);
 
@@ -60,7 +90,7 @@ const Component: FC<PlayerTimelinePointsProps> = ({ state, visibleTimeRange }) =
   const partialPathPoints = useMemo(() => {
     if (!logs) return [];
     return Array.from(logs)
-      .filter((pt) => pt.offset_timestamp >= visibleTimeRange.start && pt.offset_timestamp <= currentTimelineSeek)
+      .filter((pt) => pt.offset_timestamp >= 0 && pt.offset_timestamp <= currentTimelineSeek)
       .sort((a, b) => a.offset_timestamp - b.offset_timestamp)
       .map((pt) => {
         return {
@@ -68,7 +98,7 @@ const Component: FC<PlayerTimelinePointsProps> = ({ state, visibleTimeRange }) =
           data: pt,
         };
       });
-  }, [logs, visibleTimeRange, currentTimelineSeek]);
+  }, [logs, currentTimelineSeek]);
 
   const { compile, setDocument } = useHVQL();
 
@@ -121,15 +151,19 @@ const Component: FC<PlayerTimelinePointsProps> = ({ state, visibleTimeRange }) =
 
   useEffect(() => {
     if (!logs || logs.length === 0) return;
-    const max = logs ? Math.max(...logs.map((pt) => pt.offset_timestamp)) : 0;
-    if (max > (maxTime || 0)) {
+    let max = logs ? Math.max(...logs.map((pt) => pt.offset_timestamp)) : 0;
+    // 2026-01-16以前のセッションの場合、maxTimeを90秒に制限
+    if (isLegacySession) {
+      max = Math.min(max, LEGACY_MAX_TIME_LIMIT);
+    }
+    if (max > (maxTime || 0) || (isLegacySession && (maxTime || 0) > LEGACY_MAX_TIME_LIMIT)) {
       setTimelineState((prev) => ({
         ...prev,
         currantTime: 0,
         maxTime: max,
       }));
     }
-  }, [logs, maxTime, setTimelineState]);
+  }, [logs, maxTime, setTimelineState, isLegacySession]);
 
   useEffect(() => {
     setDocument({
@@ -210,7 +244,7 @@ const Component: FC<PlayerTimelinePointsProps> = ({ state, visibleTimeRange }) =
   return (
     <>
       {logs
-        .filter((pt) => pt.offset_timestamp >= visibleTimeRange.start && pt.offset_timestamp <= visibleTimeRange.end)
+        .filter((pt) => pt.offset_timestamp >= 0 && pt.offset_timestamp <= maxTime)
         .map((pt, idx) => (
           <mesh key={idx} position={new Vector3(pt.x, pt.y, pt.z)} renderOrder={zIndexes.renderOrder.timelinePoints}>
             <sphereGeometry args={[10 * scale, 16, 16]} />
@@ -323,4 +357,4 @@ const Component: FC<PlayerTimelinePointsProps> = ({ state, visibleTimeRange }) =
   );
 };
 
-export const PlayerTimelinePoints = memo(Component, (prev, next) => prev.state === next.state && prev.visibleTimeRange === next.visibleTimeRange);
+export const PlayerTimelinePoints = memo(Component, (prev, next) => prev.state === next.state);
