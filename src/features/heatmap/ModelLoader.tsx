@@ -1,18 +1,21 @@
 import { useLoader } from '@react-three/fiber';
-import { Suspense, useState, useEffect, memo, useMemo } from 'react';
+import { Suspense, useState, useEffect, memo, useMemo, useCallback, useRef } from 'react';
 import { Color, MathUtils, MeshLambertMaterial, MeshPhongMaterial, MeshStandardMaterial } from 'three';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 
+import type { ThreeEvent } from '@react-three/fiber';
+import type { OpacityLevel } from '@src/features/heatmap/MapObjectContextMenu';
 import type { FC, RefObject } from 'react';
-import type { Group, Mesh, Material } from 'three';
+import type { Group, Mesh, Material, Object3D } from 'three';
 
 export type ModelFileType = 'obj' | 'fbx' | 'gltf' | 'glb';
 
 import { setRaycastLayerRecursive } from '@src/features/heatmap/ObjectToggleList';
 import { useSelectable } from '@src/features/heatmap/selection/hooks';
-import { useGeneralPick } from '@src/hooks/useGeneral';
+import { useGeneralPick, useGeneralSelect } from '@src/hooks/useGeneral';
+import { heatMapEventBus } from '@src/utils/canvasEventBus';
 
 /**
  * FBXモデルのマテリアルを修正する
@@ -72,6 +75,39 @@ function applyShadowSettings(object: Group, receiveShadow: boolean): void {
       mesh.receiveShadow = receiveShadow;
     }
   });
+}
+
+/**
+ * LocalStorageからオブジェクトの表示状態を取得する
+ */
+function getObjectDisplayState(mapName: string, modelName: string | undefined, uuid: string): { visible: boolean; opacity: OpacityLevel } {
+  const storageKey = `ObjectToggleList:${mapName}:${modelName ?? 'Model'}`;
+  const saved = typeof window !== 'undefined' ? window.localStorage.getItem(storageKey) : null;
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved) as Record<string, { visible: boolean; opacity: OpacityLevel }>;
+      if (parsed[uuid]) {
+        return parsed[uuid];
+      }
+    } catch {
+      // Ignore corrupted data
+    }
+  }
+  return { visible: true, opacity: 1.0 };
+}
+
+/**
+ * 親オブジェクトを辿って直接の子オブジェクトを見つける
+ */
+function findDirectChild(model: Group, intersectedObject: Object3D): Object3D | null {
+  let current: Object3D | null = intersectedObject;
+  while (current) {
+    if (current.parent === model) {
+      return current;
+    }
+    current = current.parent;
+  }
+  return null;
 }
 
 type LocalModelLoaderProps = {
@@ -225,6 +261,7 @@ const StreamModelLoaderComponent: FC<StreamModelLoaderProps> = ({ model, ref }) 
     'modelRotationZ',
     'showShadow',
   );
+  const mapName = useGeneralSelect((s) => s.mapName);
 
   // モデルにシャドウ設定を適用
   useEffect(() => {
@@ -239,6 +276,109 @@ const StreamModelLoaderComponent: FC<StreamModelLoaderProps> = ({ model, ref }) 
     [modelRotationX, modelRotationY, modelRotationZ],
   );
 
+  // 長押し検出用の状態
+  const longPressTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressDataRef = useRef<{ object: Object3D; x: number; y: number } | null>(null);
+  const LONG_PRESS_DURATION = 500; // 500ms で長押し判定
+
+  // コンテキストメニューを表示する共通処理
+  const showContextMenu = useCallback(
+    (intersectedObject: Object3D, screenX: number, screenY: number) => {
+      if (!model) return;
+
+      // モデルの直接の子オブジェクトを見つける
+      const directChild = findDirectChild(model, intersectedObject);
+      if (!directChild) return;
+
+      // 現在の表示状態をlocalStorageから取得
+      const displayState = getObjectDisplayState(mapName ?? '', model.name, directChild.uuid);
+
+      // コンテキストメニューイベントを発行
+      heatMapEventBus.emit('map-object:context-menu', {
+        uuid: directChild.uuid,
+        name: directChild.name || directChild.type,
+        visible: displayState.visible,
+        opacity: displayState.opacity,
+        position: { x: screenX, y: screenY },
+      });
+    },
+    [model, mapName],
+  );
+
+  // 右クリックハンドラ（デスクトップ用）
+  const handleContextMenu = useCallback(
+    (event: ThreeEvent<MouseEvent>) => {
+      event.stopPropagation();
+      const nativeEvent = event.nativeEvent;
+      nativeEvent.preventDefault();
+
+      const intersectedObject = event.object;
+      if (!intersectedObject) return;
+
+      showContextMenu(intersectedObject, nativeEvent.clientX, nativeEvent.clientY);
+    },
+    [showContextMenu],
+  );
+
+  // ポインターダウンハンドラ（長押し開始）
+  const handlePointerDown = useCallback(
+    (event: ThreeEvent<PointerEvent>) => {
+      // 左クリック/タッチのみ対象
+      if (event.nativeEvent.button !== 0) return;
+
+      const intersectedObject = event.object;
+      if (!intersectedObject) return;
+
+      // 長押しデータを保存
+      longPressDataRef.current = {
+        object: intersectedObject,
+        x: event.nativeEvent.clientX,
+        y: event.nativeEvent.clientY,
+      };
+
+      // 長押しタイマーを開始
+      longPressTimeoutRef.current = setTimeout(() => {
+        if (longPressDataRef.current) {
+          showContextMenu(longPressDataRef.current.object, longPressDataRef.current.x, longPressDataRef.current.y);
+          longPressDataRef.current = null;
+        }
+      }, LONG_PRESS_DURATION);
+    },
+    [showContextMenu],
+  );
+
+  // ポインターアップハンドラ（長押しキャンセル）
+  const handlePointerUp = useCallback(() => {
+    if (longPressTimeoutRef.current) {
+      clearTimeout(longPressTimeoutRef.current);
+      longPressTimeoutRef.current = null;
+    }
+    longPressDataRef.current = null;
+  }, []);
+
+  // ポインター移動ハンドラ（長押しキャンセル - 指が動いた場合）
+  const handlePointerMove = useCallback((event: ThreeEvent<PointerEvent>) => {
+    if (!longPressDataRef.current || !longPressTimeoutRef.current) return;
+
+    // 移動距離が10px以上なら長押しをキャンセル
+    const dx = event.nativeEvent.clientX - longPressDataRef.current.x;
+    const dy = event.nativeEvent.clientY - longPressDataRef.current.y;
+    if (Math.sqrt(dx * dx + dy * dy) > 10) {
+      clearTimeout(longPressTimeoutRef.current);
+      longPressTimeoutRef.current = null;
+      longPressDataRef.current = null;
+    }
+  }, []);
+
+  // クリーンアップ
+  useEffect(() => {
+    return () => {
+      if (longPressTimeoutRef.current) {
+        clearTimeout(longPressTimeoutRef.current);
+      }
+    };
+  }, []);
+
   return (
     <Suspense fallback={null}>
       <group
@@ -247,6 +387,10 @@ const StreamModelLoaderComponent: FC<StreamModelLoaderProps> = ({ model, ref }) 
         position={[modelPositionX, modelPositionY, modelPositionZ]} // eslint-disable-line react/no-unknown-property
         rotation={userRotation} // eslint-disable-line react/no-unknown-property
         scale={[scale, scale, scale]}
+        onContextMenu={handleContextMenu}
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
+        onPointerMove={handlePointerMove}
       >
         {/* primitiveにはposition/rotation/scaleを設定せず、FBXの元の変換を保持 */}
         {model && (

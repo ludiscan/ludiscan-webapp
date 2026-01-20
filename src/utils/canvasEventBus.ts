@@ -1,3 +1,4 @@
+import type { OpacityLevel } from '@src/features/heatmap/MapObjectContextMenu';
 import type { Menus } from '@src/hooks/useHeatmapSideBarMenus';
 
 export interface RouteEdgeData {
@@ -18,6 +19,14 @@ export interface CanvasTooltipData {
   screenY: number;
 }
 
+export interface MapObjectContextMenuEventData {
+  uuid: string;
+  name: string;
+  visible: boolean;
+  opacity: OpacityLevel;
+  position: { x: number; y: number };
+}
+
 export interface HeatMapEventMap {
   'click-menu-icon': { name: Menus };
   'close-menu': object;
@@ -34,6 +43,9 @@ export interface HeatMapEventMap {
   'session-modal:open': object;
   'canvas-tooltip:show': CanvasTooltipData;
   'canvas-tooltip:hide': object;
+  'map-object:context-menu': MapObjectContextMenuEventData;
+  'map-object:toggle-visible': { uuid: string };
+  'map-object:set-opacity': { uuid: string; opacity: OpacityLevel };
 }
 
 class EventBus<T> extends EventTarget {
