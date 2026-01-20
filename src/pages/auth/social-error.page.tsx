@@ -81,7 +81,9 @@ export default function SocialErrorPage() {
     INVALID_TOKEN: {
       title: locale === 'ja' ? '認証エラー' : 'Authentication Error',
       message:
-        locale === 'ja' ? '認証トークンが無効または期限切れです。もう一度お試しください。' : 'The authentication token is invalid or expired. Please try again.',
+        locale === 'ja'
+          ? '認証トークンが無効または期限切れです。もう一度お試しください。'
+          : 'The authentication token is invalid or expired. Please try again.',
     },
     PROVIDER_ERROR: {
       title: locale === 'ja' ? 'プロバイダーエラー' : 'Provider Error',
@@ -92,10 +94,7 @@ export default function SocialErrorPage() {
     },
     UNKNOWN: {
       title: locale === 'ja' ? 'エラーが発生しました' : 'An Error Occurred',
-      message:
-        locale === 'ja'
-          ? '認証中にエラーが発生しました。もう一度お試しください。'
-          : 'An error occurred during authentication. Please try again.',
+      message: locale === 'ja' ? '認証中にエラーが発生しました。もう一度お試しください。' : 'An error occurred during authentication. Please try again.',
     },
   };
 
@@ -110,7 +109,7 @@ export default function SocialErrorPage() {
       <ErrorIcon>&#x26A0;</ErrorIcon>
       <Title>{title}</Title>
       <Message>{customMessage || message}</Message>
-      <Button onClick={handleBackToLogin} scheme="primary" fontSize="base">
+      <Button onClick={handleBackToLogin} scheme='primary' fontSize='base'>
         {locale === 'ja' ? 'ログインページに戻る' : 'Back to Login'}
       </Button>
       {errorCode !== 'UNKNOWN' && <ErrorCodeText>Error Code: {errorCode}</ErrorCodeText>}
