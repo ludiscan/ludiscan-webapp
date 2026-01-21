@@ -2113,6 +2113,42 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v0/admin/blocked-ips': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List all blocked IPs */
+    get: operations['AdminController_getBlockedIps'];
+    put?: never;
+    /** Block an IP address manually */
+    post: operations['AdminController_blockIp'];
+    /** Unblock all IP addresses */
+    delete: operations['AdminController_unblockAllIps'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/admin/blocked-ips/{ip}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Unblock a specific IP address */
+    delete: operations['AdminController_unblockIp'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v0/admin/feature-flags': {
     parameters: {
       query?: never;
@@ -8522,6 +8558,112 @@ export interface operations {
       header?: never;
       path: {
         fileId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  AdminController_getBlockedIps: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  AdminController_blockIp: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  AdminController_unblockAllIps: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  AdminController_unblockIp: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        ip: string;
       };
       cookie?: never;
     };
