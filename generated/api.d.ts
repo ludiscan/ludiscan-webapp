@@ -1872,6 +1872,23 @@ export interface paths {
     patch: operations['AdminController_updateUser'];
     trace?: never;
   };
+  '/api/v0/admin/users/{id}/password': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** Update user password or clear it */
+    patch: operations['AdminController_updateUserPassword'];
+    trace?: never;
+  };
   '/api/v0/admin/projects': {
     parameters: {
       query?: never;
@@ -2108,6 +2125,42 @@ export interface paths {
     post?: never;
     /** Delete Google Drive file */
     delete: operations['AdminController_deleteGoogleDriveFile'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/admin/blocked-ips': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List all blocked IPs */
+    get: operations['AdminController_getBlockedIps'];
+    put?: never;
+    /** Block an IP address manually */
+    post: operations['AdminController_blockIp'];
+    /** Unblock all IP addresses */
+    delete: operations['AdminController_unblockAllIps'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/admin/blocked-ips/{ip}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Unblock a specific IP address */
+    delete: operations['AdminController_unblockIp'];
     options?: never;
     head?: never;
     patch?: never;
@@ -3579,6 +3632,18 @@ export interface components {
        * @example 89
        */
       total_users: number;
+    };
+    UpdateUserPasswordDto: {
+      /**
+       * @description 新しいパスワード（6文字以上）
+       * @example newPassword123
+       */
+      password?: string;
+      /**
+       * @description trueの場合、パスワードをクリア（OAuth専用ユーザーにする）
+       * @example false
+       */
+      clearPassword?: boolean;
     };
     FeatureFlagResponseDto: {
       id: number;
@@ -8067,6 +8132,38 @@ export interface operations {
       };
     };
   };
+  AdminController_updateUserPassword: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateUserPasswordDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
   AdminController_getProjects: {
     parameters: {
       query: {
@@ -8522,6 +8619,112 @@ export interface operations {
       header?: never;
       path: {
         fileId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  AdminController_getBlockedIps: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  AdminController_blockIp: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  AdminController_unblockAllIps: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  AdminController_unblockIp: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        ip: string;
       };
       cookie?: never;
     };
