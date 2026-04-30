@@ -113,7 +113,8 @@ export interface paths {
     /** Get list of blocked IPs */
     get: operations['BlockedIpsController_getBlockedIps'];
     put?: never;
-    post?: never;
+    /** Block an IP manually (durationMs omitted = permanent) */
+    post: operations['BlockedIpsController_blockIp'];
     /** Unblock all blocked IPs */
     delete: operations['BlockedIpsController_unblockAll'];
     options?: never;
@@ -3548,7 +3549,7 @@ export interface components {
     SubmitImprovementRouteFeedbackRequestDto: {
       /**
        * @description Rating: 1=Bad (👎), 2=Neutral (😐), 3=Good (👍)
-       * @enum {number}
+       * @enum {integer}
        */
       rating: 1 | 2 | 3;
       /** @description Optional comment about the improvement */
@@ -3561,7 +3562,7 @@ export interface components {
       player_id: string;
       /**
        * @description Rating: 1=Bad, 2=Neutral, 3=Good
-       * @enum {number}
+       * @enum {integer}
        */
       rating: 1 | 2 | 3;
       /** @description Comment from the player */
@@ -3838,7 +3839,11 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description The Health Check is successful */
+      /**
+       * @description アプリケーションが正常に動作している
+       *
+       *     The Health Check is successful
+       */
       200: {
         headers: {
           [name: string]: unknown;
@@ -3895,7 +3900,11 @@ export interface operations {
           'application/json': components['schemas']['DefaultErrorResponse'];
         };
       };
-      /** @description The Health Check is not successful */
+      /**
+       * @description アプリケーションに問題がある
+       *
+       *     The Health Check is not successful
+       */
       503: {
         headers: {
           [name: string]: unknown;
@@ -3965,7 +3974,11 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description The Health Check is successful */
+      /**
+       * @description アプリケーションが稼働中
+       *
+       *     The Health Check is successful
+       */
       200: {
         headers: {
           [name: string]: unknown;
@@ -4092,7 +4105,11 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description The Health Check is successful */
+      /**
+       * @description リクエストを受け付けられる
+       *
+       *     The Health Check is successful
+       */
       200: {
         headers: {
           [name: string]: unknown;
@@ -4149,7 +4166,11 @@ export interface operations {
           'application/json': components['schemas']['DefaultErrorResponse'];
         };
       };
-      /** @description The Health Check is not successful */
+      /**
+       * @description まだリクエストを受け付けられない
+       *
+       *     The Health Check is not successful
+       */
       503: {
         headers: {
           [name: string]: unknown;
@@ -4221,6 +4242,40 @@ export interface operations {
     responses: {
       /** @description List of blocked IPs */
       200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+      /** @description Admin role required */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  BlockedIpsController_blockIp: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description IP blocked successfully */
+      201: {
         headers: {
           [name: string]: unknown;
         };
