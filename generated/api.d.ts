@@ -2284,6 +2284,7 @@ export interface components {
       authuser?: string;
       prompt?: string;
       hd?: string;
+      iss?: string;
     };
     LoginUserDto: {
       /** @example password */
@@ -4750,6 +4751,7 @@ export interface operations {
         authuser?: string;
         prompt?: string;
         hd?: string;
+        iss?: string;
       };
       header?: never;
       path?: never;
