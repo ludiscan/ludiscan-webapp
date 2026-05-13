@@ -52,14 +52,12 @@ This is the content.
       const result = parseMarkdownFile(validContent, 'intro');
 
       expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.slug).toBe('intro');
-        expect(result.data.content).toBe('# Introduction\n\nThis is the content.');
-        expect(result.data.frontmatter.group).toBe('Getting Started');
-        expect(result.data.frontmatter.title).toBe('Introduction');
-        expect(result.data.frontmatter.order).toBe(1);
-        expect(result.data.frontmatter.description).toBe('A getting started guide');
-      }
+      expect(result.data?.slug).toBe('intro');
+      expect(result.data?.content).toBe('# Introduction\n\nThis is the content.');
+      expect(result.data?.frontmatter.group).toBe('Getting Started');
+      expect(result.data?.frontmatter.title).toBe('Introduction');
+      expect(result.data?.frontmatter.order).toBe(1);
+      expect(result.data?.frontmatter.description).toBe('A getting started guide');
     });
 
     test('uses default order when missing', () => {
@@ -71,9 +69,7 @@ Content
 `;
       const result = parseMarkdownFile(content, 'basic');
       expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.frontmatter.order).toBe(0);
-      }
+      expect(result.data?.frontmatter.order).toBe(0);
     });
 
     test('removes quotes from frontmatter values', () => {
@@ -85,19 +81,15 @@ Content
 `;
       const result = parseMarkdownFile(content, 'adv');
       expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.frontmatter.group).toBe('Guide');
-        expect(result.data.frontmatter.title).toBe('Advanced');
-      }
+      expect(result.data?.frontmatter.group).toBe('Guide');
+      expect(result.data?.frontmatter.title).toBe('Advanced');
     });
 
     test('returns error if missing frontmatter starting delimiter', () => {
       const content = `# Title\n\nNo frontmatter`;
       const result = parseMarkdownFile(content, 'test');
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toContain('must start with frontmatter delimiter');
-      }
+      expect(result.error).toContain('must start with frontmatter delimiter');
     });
 
     test('returns error if missing frontmatter closing delimiter', () => {
@@ -108,9 +100,7 @@ Content
 `;
       const result = parseMarkdownFile(content, 'test');
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toContain('closing delimiter (---) not found');
-      }
+      expect(result.error).toContain('closing delimiter (---) not found');
     });
 
     test('returns error if missing required group field', () => {
@@ -121,9 +111,7 @@ Content
 `;
       const result = parseMarkdownFile(content, 'test');
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toContain('Missing required field: group');
-      }
+      expect(result.error).toContain('Missing required field: group');
     });
 
     test('returns error if missing required title field', () => {
@@ -134,9 +122,7 @@ Content
 `;
       const result = parseMarkdownFile(content, 'test');
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toContain('Missing required field: title');
-      }
+      expect(result.error).toContain('Missing required field: title');
     });
 
     test('returns error if group field is empty', () => {
@@ -148,9 +134,7 @@ Content
 `;
       const result = parseMarkdownFile(content, 'test');
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toContain('Missing required field: group');
-      }
+      expect(result.error).toContain('Missing required field: group');
     });
 
     test('returns error if title field is empty', () => {
@@ -162,9 +146,7 @@ Content
 `;
       const result = parseMarkdownFile(content, 'test');
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toContain('Missing required field: title');
-      }
+      expect(result.error).toContain('Missing required field: title');
     });
 
     test('returns error if order field is not a number', () => {
@@ -177,9 +159,7 @@ Content
 `;
       const result = parseMarkdownFile(content, 'test');
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toContain('Field "order" must be a number');
-      }
+      expect(result.error).toContain('Field "order" must be a number');
     });
 
   });
