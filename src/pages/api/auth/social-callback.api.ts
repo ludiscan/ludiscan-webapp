@@ -92,7 +92,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     setCsrfToken(res, csrfToken);
 
     // Determine redirect URL (default to callback success page)
-    const redirectUrl = typeof redirect === 'string' && redirect.startsWith('/') ? redirect : '/auth/social-callback';
+    // Prevent open redirects by ensuring the redirect URL is an absolute path but not a protocol-relative URL
+    const redirectUrl = typeof redirect === 'string' && redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : '/auth/social-callback';
     // eslint-disable-next-line no-console
     console.log('[Auth] Social callback - Cookies set, redirecting to:', redirectUrl);
 

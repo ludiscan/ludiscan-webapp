@@ -35,13 +35,27 @@ export default function SocialCallback() {
         const { token } = router.query;
 
         if (token && typeof token === 'string') {
+          // Validate token format to prevent injection attacks
+          if (!/^[A-Za-z0-9\-_.+~=/]+$/.test(token)) {
+            setError('無効なトークン形式です。');
+            setIsValidating(false);
+
+            setTimeout(() => {
+              router.replace('/login');
+            }, 3000);
+            return;
+          }
+
           // Legacy flow: Backend redirected here with token in URL
           // Redirect to API route to set httpOnly cookie
           // eslint-disable-next-line no-console
           console.log('[Social Callback] Token in URL detected, redirecting to API route');
 
           // Redirect to API route which will set cookie and redirect back
-          window.location.href = `/api/auth/social-callback?token=${encodeURIComponent(token)}`;
+          // Use URL object to construct a safe URL and prevent Open Redirect / Injection
+          const targetUrl = new URL('/api/auth/social-callback', window.location.origin);
+          targetUrl.searchParams.set('token', token);
+          window.location.href = targetUrl.toString();
           return;
         }
 
