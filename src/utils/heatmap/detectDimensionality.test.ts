@@ -1,4 +1,5 @@
 import { detectDimensionality, hasNonZeroZ } from './detectDimensionality';
+
 import type { HeatmapTask } from '@src/modeles/heatmaptask';
 
 describe('detectDimensionality', () => {
