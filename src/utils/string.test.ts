@@ -1,4 +1,4 @@
-import { capitalize } from '@src/utils/string';
+import { capitalize, escapeHtml } from '@src/utils/string';
 
 describe(`${capitalize.name}`, () => {
   test('通常の文字列を正しく大文字化できること', () => {
@@ -27,5 +27,25 @@ describe(`${capitalize.name}`, () => {
   test('日本語の文字列も大文字化できること', () => {
     expect(capitalize('あいうえお')).toBe('あいうえお');
     expect(capitalize('ａｂｃ')).toBe('Ａｂｃ');
+  });
+});
+
+describe(`${escapeHtml.name}`, () => {
+  test('エスケープが必要な文字が含まれていない場合はそのまま返すこと', () => {
+    expect(escapeHtml('hello world')).toBe('hello world');
+  });
+
+  test('HTMLエンティティをエスケープできること', () => {
+    expect(escapeHtml('<script>alert("XSS & LFI")</script>')).toBe(
+      '&lt;script&gt;alert(&quot;XSS &amp; LFI&quot;)&lt;/script&gt;'
+    );
+  });
+
+  test('シングルクォートをエスケープできること', () => {
+    expect(escapeHtml("'hello'")).toBe('&#039;hello&#039;');
+  });
+
+  test('空文字の場合は空文字を返すこと', () => {
+    expect(escapeHtml('')).toBe('');
   });
 });
