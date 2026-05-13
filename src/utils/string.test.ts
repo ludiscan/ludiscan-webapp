@@ -36,9 +36,7 @@ describe(`${escapeHtml.name}`, () => {
   });
 
   test('HTMLエンティティをエスケープできること', () => {
-    expect(escapeHtml('<script>alert("XSS & LFI")</script>')).toBe(
-      '&lt;script&gt;alert(&quot;XSS &amp; LFI&quot;)&lt;/script&gt;'
-    );
+    expect(escapeHtml('<script>alert("XSS & LFI")</script>')).toBe('&lt;script&gt;alert(&quot;XSS &amp; LFI&quot;)&lt;/script&gt;');
   });
 
   test('シングルクォートをエスケープできること', () => {
