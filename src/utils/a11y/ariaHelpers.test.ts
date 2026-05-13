@@ -11,7 +11,7 @@ import {
   getAriaPressed,
   getAriaCurrent,
   getMenuItemAriaProps,
-  getListboxOptionAriaProps
+  getListboxOptionAriaProps,
 } from './ariaHelpers';
 
 describe('ariaHelpers', () => {
