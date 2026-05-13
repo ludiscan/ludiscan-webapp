@@ -54,7 +54,7 @@ describe('hasNonZeroZ', () => {
   });
 
   test('すべての要素にzが未定義の場合はfalseを返すこと', () => {
-    expect(hasNonZeroZ([{}, { x: 1, y: 2 }])).toBe(false);
+    expect(hasNonZeroZ([{}, {} as { z?: number }])).toBe(false);
   });
 
   test('一部の要素のzが0以外の場合はtrueを返すこと', () => {
