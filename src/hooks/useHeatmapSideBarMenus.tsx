@@ -121,9 +121,7 @@ export const MenuContents: MenuType[] = [
   },
 ] as const;
 
-export const MenuContentsMap = new Map<MenuKey, MenuType>(
-  MenuContents.map((content) => [content.id, content]),
-);
+export const MenuContentsMap = new Map<MenuKey, MenuType>(MenuContents.map((content) => [content.id, content]));
 
 /**
  * Helper to get display name for a menu key
