@@ -8,6 +8,11 @@ import type { Meta, StoryObj } from '@storybook/nextjs';
 export default {
   component: Modal,
   controls: { hideNoControlsWarning: true },
+  argTypes: {
+    onClose: {
+      action: 'onClose',
+    },
+  },
 } as Meta;
 type Story = StoryObj<typeof Modal>;
 
@@ -28,9 +33,5 @@ export const Default: Story = {
   name: 'default style',
   args: {
     isOpen: true,
-    onClose: () => {
-      /* eslint-disable-next-line no-console */
-      console.log('onClose');
-    },
   },
 };
