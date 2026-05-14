@@ -221,12 +221,19 @@ const EventLogPanelComponent: FC<EventLogPanelProps> = ({ service, eventLogKeys,
     [setTimelineState],
   );
 
+  const logColorsMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const log of logs) {
+      map.set(log.key, log.color);
+    }
+    return map;
+  }, [logs]);
+
   const getColorForLog = useCallback(
     (logName: string): string => {
-      const logData = logs.find((l) => l.key === logName);
-      return logData?.color || '#666666';
+      return logColorsMap.get(logName) || '#666666';
     },
-    [logs],
+    [logColorsMap],
   );
 
   const handleToggle = useCallback(() => {
