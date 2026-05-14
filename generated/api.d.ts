@@ -174,6 +174,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v0/users/me/password': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** 自分のパスワードを更新 */
+    patch: operations['UsersController_updateMyPassword'];
+    trace?: never;
+  };
   '/api/v0/users/{id}': {
     parameters: {
       query?: never;
@@ -2247,6 +2264,18 @@ export interface components {
       email: string;
       name: string;
       role: string;
+    };
+    UpdatePasswordDto: {
+      /**
+       * @description 現在のパスワード
+       * @example currentPassword123
+       */
+      currentPassword: string;
+      /**
+       * @description 新しいパスワード（8文字以上）
+       * @example newPassword123
+       */
+      newPassword: string;
     };
     CreateUserDto: {
       /** @example name */
@@ -4469,6 +4498,44 @@ export interface operations {
         content: {
           'application/json': components['schemas']['DefaultErrorResponse'];
         };
+      };
+    };
+  };
+  UsersController_updateMyPassword: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdatePasswordDto'];
+      };
+    };
+    responses: {
+      /** @description 成功 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+      /** @description 現在のパスワードが正しくない、またはパスワード更新不可 */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
