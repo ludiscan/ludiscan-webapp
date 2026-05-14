@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Cleanup old caches
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const caches = await github.rest.actions.getActionsCacheList({
