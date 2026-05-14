@@ -900,6 +900,49 @@
         ]
       }
     },
+    "/api/v0/users/me/password": {
+      "patch": {
+        "operationId": "UsersController_updateMyPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "現在のパスワードが正しくない、またはパスワード更新不可"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "自分のパスワードを更新",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
     "/api/v0/users/{id}": {
       "get": {
         "operationId": "UsersController_findOne",
@@ -8444,7 +8487,7 @@
   "info": {
     "title": "Ludiscan API Documentation",
     "description": "Ludiscan API for game analytics and session tracking",
-    "version": "1.35.1",
+    "version": "1.36.0",
     "contact": {}
   },
   "tags": [],
@@ -8479,6 +8522,26 @@
           "email",
           "name",
           "role"
+        ]
+      },
+      "UpdatePasswordDto": {
+        "type": "object",
+        "properties": {
+          "currentPassword": {
+            "type": "string",
+            "description": "現在のパスワード",
+            "example": "currentPassword123"
+          },
+          "newPassword": {
+            "type": "string",
+            "description": "新しいパスワード（8文字以上）",
+            "example": "newPassword123",
+            "minLength": 8
+          }
+        },
+        "required": [
+          "currentPassword",
+          "newPassword"
         ]
       },
       "CreateUserDto": {
