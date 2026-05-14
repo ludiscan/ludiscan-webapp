@@ -64,6 +64,20 @@ export const en = {
     loadingUser: 'Loading user information...',
     userNotAvailable: 'User information not available',
     userId: 'User ID',
+    passwordUpdate: {
+      title: 'Change Password',
+      currentPassword: 'Current Password',
+      newPassword: 'New Password',
+      confirmPassword: 'Confirm New Password',
+      submit: 'Update Password',
+      hint: 'New password must be at least 8 characters.',
+      success: 'Password updated',
+      errorRequired: 'Please fill in all fields',
+      errorMismatch: 'New passwords do not match',
+      errorTooShort: 'New password must be at least 8 characters',
+      errorUnauthorized: 'Current password is incorrect',
+      errorGeneric: 'Failed to update password',
+    },
   },
 
   // Security page

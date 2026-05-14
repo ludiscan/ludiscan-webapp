@@ -64,6 +64,20 @@ export const ja = {
     loadingUser: 'ユーザー情報を読み込み中...',
     userNotAvailable: 'ユーザー情報が利用できません',
     userId: 'ユーザーID',
+    passwordUpdate: {
+      title: 'パスワード変更',
+      currentPassword: '現在のパスワード',
+      newPassword: '新しいパスワード',
+      confirmPassword: '新しいパスワード（確認）',
+      submit: 'パスワードを更新',
+      hint: '新しいパスワードは8文字以上で入力してください。',
+      success: 'パスワードを更新しました',
+      errorRequired: 'すべての項目を入力してください',
+      errorMismatch: '新しいパスワードが一致しません',
+      errorTooShort: '新しいパスワードは8文字以上で入力してください',
+      errorUnauthorized: '現在のパスワードが正しくありません',
+      errorGeneric: 'パスワードの更新に失敗しました',
+    },
   },
 
   // Security page
