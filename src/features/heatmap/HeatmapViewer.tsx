@@ -14,6 +14,7 @@ import type { PositionEventLog } from '@src/modeles/heatmaptask';
 import type { RootState } from '@src/store';
 import type { HeatmapDataService } from '@src/utils/heatmap/HeatmapDataService';
 import type { FC } from 'react';
+import type { Object3D } from 'three';
 
 import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { VisuallyHidden } from '@src/component/atoms/VisuallyHidden';
@@ -378,6 +379,15 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
     };
   }, []);
 
+  // Object lookup map for performance
+  const childrenMap = useMemo(() => {
+    const map = new Map<string, Object3D>();
+    if (model) {
+      model.children.forEach((c) => map.set(c.uuid, c));
+    }
+    return map;
+  }, [model]);
+
   // コンテキストメニューを閉じる
   const handleCloseContextMenu = useCallback(() => {
     setContextMenuData(null);
@@ -413,7 +423,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
       window.localStorage.setItem(storageKey, JSON.stringify(state));
 
       // Three.jsオブジェクトを直接更新
-      const child = model.children.find((c) => c.uuid === uuid);
+      const child = childrenMap.get(uuid);
       if (child) {
         child.visible = state[uuid].visible && state[uuid].opacity > 0;
       }
@@ -421,7 +431,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
       // コンテキストメニューの状態を更新
       setContextMenuData((prev) => (prev ? { ...prev, visible: state[uuid].visible } : null));
     },
-    [model, mapName],
+    [model, mapName, childrenMap],
   );
 
   // オブジェクトの透明度を設定
@@ -454,7 +464,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
       window.localStorage.setItem(storageKey, JSON.stringify(state));
 
       // Three.jsオブジェクトを直接更新
-      const child = model.children.find((c) => c.uuid === uuid);
+      const child = childrenMap.get(uuid);
       if (child) {
         child.visible = state[uuid].visible && opacity > 0;
         // マテリアルの透明度を更新
@@ -476,7 +486,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
         }
       }
     },
-    [model, mapName],
+    [model, mapName, childrenMap],
   );
 
   const store = useStore<RootState>();
