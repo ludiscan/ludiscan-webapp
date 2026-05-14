@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout with full history
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -32,7 +32,7 @@ jobs:
         run: cat STATS.md >> $GITHUB_STEP_SUMMARY
 
       - name: Upload stats artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: git-stats-${{ github.run_number }}
           path: STATS.md
