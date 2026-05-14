@@ -61,8 +61,17 @@ export function verifyCsrfToken(token: string, signature: string, secret: string
 
 /**
  * CSRF secret key (should be set in environment variables)
- * Falls back to a default value for development
+ * Falls back to a default value for development, throws in production if not set
  */
 export function getCsrfSecret(): string {
-  return process.env.CSRF_SECRET || 'default-csrf-secret-please-change-in-production-min-32-chars';
+  const secret = process.env.CSRF_SECRET;
+
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('CSRF_SECRET environment variable is missing and is required in production.');
+    }
+    return 'default-csrf-secret-please-change-in-production-min-32-chars';
+  }
+
+  return secret;
 }
