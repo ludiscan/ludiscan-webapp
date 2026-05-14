@@ -148,16 +148,6 @@ const EventLogMarkers: FC<EventLogMarkersProps> = ({ logName, service, pref }) =
   // Timeline state for time-based filtering
   const { visible: isTimelineActive, currentTimelineSeek } = usePlayerTimelinePick('visible', 'currentTimelineSeek');
 
-  // Compile HVQL script if provided
-  // const hvqlCompiler = useMemo(() => {
-  //   if (!hvqlScript) return null;
-  //   try {
-  //     return compileHVQL(hvqlScript);
-  //   } catch {
-  //     return null;
-  //   }
-  // }, [hvqlScript]);
-
   // テクスチャキャッシュ
   const textureCache = useRef<Map<string, Texture>>(new Map());
   const spriteRef = useRef<Sprite | null>(null);

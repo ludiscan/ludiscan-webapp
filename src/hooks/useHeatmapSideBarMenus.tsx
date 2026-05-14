@@ -121,6 +121,8 @@ export const MenuContents: MenuType[] = [
   },
 ] as const;
 
+export const MenuContentsMap = new Map<MenuKey, MenuType>(MenuContents.map((content) => [content.id, content]));
+
 /**
  * Helper to get display name for a menu key
  */
@@ -155,7 +157,7 @@ export function useHeatmapSideBarMenus(): SideBarMenuType[] {
       recentMenus
         .filter((menuId) => !ALWAYS_SHOW_MENUS.includes(menuId as MenuKey))
         .slice(0, 5)
-        .map((menuId) => MenuContents.find((content) => content.id === menuId))
+        .map((menuId) => MenuContentsMap.get(menuId as MenuKey))
         .filter((content) => content != null && content.icon != null),
     [recentMenus],
   );
@@ -165,7 +167,7 @@ export function useHeatmapSideBarMenus(): SideBarMenuType[] {
     const sidebarMenus: SideBarMenuType[] = [];
 
     // Add general menu
-    const generalMenu = MenuContents.find((content) => content.id === 'general');
+    const generalMenu = MenuContentsMap.get('general');
     if (generalMenu && generalMenu.icon) {
       sidebarMenus.push({
         id: generalMenu.id,
@@ -188,7 +190,7 @@ export function useHeatmapSideBarMenus(): SideBarMenuType[] {
     });
 
     // Add more menu
-    const moreMenu = MenuContents.find((content) => content.id === 'more');
+    const moreMenu = MenuContentsMap.get('more');
     if (moreMenu && moreMenu.icon) {
       sidebarMenus.push({
         id: moreMenu.id,

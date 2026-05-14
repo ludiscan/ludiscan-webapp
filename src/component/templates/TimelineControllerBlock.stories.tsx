@@ -8,6 +8,10 @@ import { TimelineControllerBlock } from '@src/component/templates/TimelineContro
 export default {
   component: TimelineControllerBlock,
   controls: { hideNoControlsWarning: true },
+  argTypes: {
+    onClickMenu: { action: 'onClickMenu' },
+    onClickPlay: { action: 'onClickPlay' },
+  },
 } as Meta;
 
 type Story = StoryObj<typeof TimelineControllerBlock>;
@@ -44,14 +48,5 @@ export const Default: Story = {
   name: 'default style',
   args: {
     isPlaying: false,
-
-    onClickMenu: () => {
-      /* eslint-disable-next-line no-console */
-      console.log('Menu clicked');
-    },
-    onClickPlay: () => {
-      /* eslint-disable-next-line no-console */
-      console.log('Play/Pause clicked');
-    },
   },
 };

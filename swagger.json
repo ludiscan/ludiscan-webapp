@@ -93,7 +93,7 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "The Health Check is successful",
+            "description": "アプリケーションが正常に動作している\n\nThe Health Check is successful",
             "content": {
               "application/json": {
                 "schema": {
@@ -177,7 +177,7 @@
             }
           },
           "503": {
-            "description": "The Health Check is not successful",
+            "description": "アプリケーションに問題がある\n\nThe Health Check is not successful",
             "content": {
               "application/json": {
                 "schema": {
@@ -272,7 +272,7 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "The Health Check is successful",
+            "description": "アプリケーションが稼働中\n\nThe Health Check is successful",
             "content": {
               "application/json": {
                 "schema": {
@@ -451,7 +451,7 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "The Health Check is successful",
+            "description": "リクエストを受け付けられる\n\nThe Health Check is successful",
             "content": {
               "application/json": {
                 "schema": {
@@ -535,7 +535,7 @@
             }
           },
           "503": {
-            "description": "The Health Check is not successful",
+            "description": "まだリクエストを受け付けられない\n\nThe Health Check is not successful",
             "content": {
               "application/json": {
                 "schema": {
@@ -652,6 +652,37 @@
           }
         ],
         "summary": "Get list of blocked IPs",
+        "tags": [
+          "Admin - Blocked IPs"
+        ]
+      },
+      "post": {
+        "operationId": "BlockedIpsController_blockIp",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "IP blocked successfully"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Admin role required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Block an IP manually (durationMs omitted = permanent)",
         "tags": [
           "Admin - Blocked IPs"
         ]
@@ -1259,6 +1290,14 @@
           },
           {
             "name": "hd",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "iss",
             "required": false,
             "in": "query",
             "schema": {
@@ -8405,7 +8444,7 @@
   "info": {
     "title": "Ludiscan API Documentation",
     "description": "Ludiscan API for game analytics and session tracking",
-    "version": "1.34.2",
+    "version": "1.35.1",
     "contact": {}
   },
   "tags": [],
@@ -8527,6 +8566,9 @@
           },
           "hd": {
             "type": "string"
+          },
+          "iss": {
+            "type": "string"
           }
         }
       },
@@ -8582,6 +8624,7 @@
           },
           "user": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/UserResponseDto"
@@ -8844,6 +8887,7 @@
           },
           "user": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/UserResponseDto"
@@ -9127,6 +9171,7 @@
           "position_data": {
             "description": "位置データ",
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/Position"
@@ -9926,6 +9971,7 @@
           "session": {
             "description": "Session",
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/PlaySessionResponseDto"
@@ -10159,6 +10205,7 @@
           "session": {
             "description": "Session (if task is for a specific session)",
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/PlaySessionResponseDto"
@@ -10917,7 +10964,7 @@
         "type": "object",
         "properties": {
           "rating": {
-            "type": "number",
+            "type": "integer",
             "enum": [
               1,
               2,
@@ -10946,7 +10993,7 @@
             "description": "Player ID who gave the feedback"
           },
           "rating": {
-            "type": "number",
+            "type": "integer",
             "enum": [
               1,
               2,

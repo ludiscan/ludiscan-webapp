@@ -110,17 +110,6 @@ const ThemeSection = styled.div`
   margin-bottom: 48px;
 `;
 
-// const SectionTitle = styled.h2`
-//   font-size: 24px;
-//   font-weight: 700;
-//   margin-bottom: 16px;
-//   margin-top: 32px;
-//
-//   &:first-of-type {
-//     margin-top: 0;
-//   }
-// `;
-
 const SubsectionTitle = styled.h3`
   margin-bottom: 12px;
   font-size: 18px;

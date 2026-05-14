@@ -4,6 +4,7 @@ import { env } from '@src/config/env';
 import { setAuthToken, setCsrfToken } from '@src/utils/security/cookies';
 import { generateCsrfToken } from '@src/utils/security/csrf';
 import { rateLimitMiddleware, RATE_LIMITS } from '@src/utils/security/rateLimit';
+import { escapeHtml } from '@src/utils/string';
 
 /**
  * Social Login Callback API Route
@@ -92,7 +93,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     setCsrfToken(res, csrfToken);
 
     // Determine redirect URL (default to callback success page)
-    const redirectUrl = typeof redirect === 'string' && redirect.startsWith('/') ? redirect : '/auth/social-callback';
+    const isValidRedirect = typeof redirect === 'string' && redirect.startsWith('/') && !redirect.startsWith('//') && !redirect.startsWith('/\\');
+    const redirectUrl = isValidRedirect ? redirect : '/auth/social-callback';
     // eslint-disable-next-line no-console
     console.log('[Auth] Social callback - Cookies set, redirecting to:', redirectUrl);
 
@@ -108,10 +110,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         </head>
         <body>
           <p>Authenticating... Please wait.</p>
+          <meta id="redirect-data" data-url="${escapeHtml(redirectUrl)}">
           <script>
             // Wait a moment to ensure cookies are set, then redirect
             setTimeout(function() {
-              window.location.href = '${redirectUrl}';
+              var redirectUrl = document.getElementById('redirect-data').getAttribute('data-url');
+              window.location.href = redirectUrl;
             }, 100);
           </script>
         </body>

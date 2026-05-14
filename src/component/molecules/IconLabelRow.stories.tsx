@@ -7,6 +7,9 @@ import { IconLabelRow } from '@src/component/molecules/IconLabelRow';
 export default {
   component: IconLabelRow,
   controls: { hideNoControlsWarning: true },
+  argTypes: {
+    onClick: { action: 'onClick' },
+  },
 } as Meta;
 
 type Story = StoryObj<typeof IconLabelRow>;
@@ -26,10 +29,6 @@ export const DefaultButton: Story = {
   args: {
     icon: <IoCut />,
     label: 'Cut',
-    onClick: () => {
-      /* eslint-disable-next-line no-console */
-      console.log('IconLabelRow clicked');
-    },
   },
 };
 
