@@ -2,8 +2,6 @@ import type { HeatmapDataState } from '@src/modeles/heatmapView';
 import type { ThemeType } from '@src/modeles/theme';
 import type { User } from '@src/modeles/user';
 
-import { initializeValues } from '@src/modeles/heatmapView';
-
 const STORAGE_KEY = 'ludiscan';
 
 /**
@@ -98,8 +96,9 @@ export function saveCanvasPartial<T>(key: keyof HeatmapDataState, value: T) {
   // SSR safety check - localStorage is only available in browser
   if (typeof window === 'undefined') return;
 
-  const storage = getCanvasValues() ?? initializeValues;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...storage, [key]: value }));
+  const current = getCanvasValues() || {};
+  const updated = { ...current, [key]: value };
+  saveCanvasValues(updated as HeatmapDataState);
 }
 
 export function loadCanvasPartial<T>(key: keyof HeatmapDataState): T {
