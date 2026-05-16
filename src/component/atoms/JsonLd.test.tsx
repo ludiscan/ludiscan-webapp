@@ -1,17 +1,4 @@
-import { render } from '@testing-library/react';
-import React from 'react';
-
 import { JsonLd } from './JsonLd';
-
-// Mock Next.js Head component so that it renders its children into the DOM
-jest.mock('next/head', () => {
-  return {
-    __esModule: true,
-    default: ({ children }: { children: React.ReactNode }) => {
-      return <>{children}</>;
-    },
-  };
-});
 
 describe('JsonLd', () => {
   it('escapes `<` characters to prevent XSS', () => {
@@ -21,23 +8,22 @@ describe('JsonLd', () => {
       url: 'https://example.com',
     };
 
-    const { container } = render(<JsonLd schema={maliciousSchema} />);
+    const element = JsonLd({ schema: maliciousSchema });
 
-    // Find the script tag
-    const scriptTag = container.querySelector('script[type="application/ld+json"]');
-    expect(scriptTag).not.toBeNull();
+    // element is <Head><script .../></Head>
+    const scriptElement = element.props.children;
+    expect(scriptElement.type).toBe('script');
 
-    const scriptContent = scriptTag?.innerHTML;
-    expect(scriptContent).toBeDefined();
+    const htmlContent = scriptElement.props.dangerouslySetInnerHTML.__html;
 
     // Verify the output doesn't contain unescaped `<`
-    expect(scriptContent).not.toContain('<');
+    expect(htmlContent).not.toContain('<');
 
     // Verify it contains the escaped version
-    expect(scriptContent).toContain('\\u003c/script>\\u003cscript>alert(1)\\u003c/script>');
+    expect(htmlContent).toContain('\\u003c/script>\\u003cscript>alert(1)\\u003c/script>');
 
     // Verify it's still valid JSON
-    const parsed = JSON.parse(scriptContent as string);
+    const parsed = JSON.parse(htmlContent as string);
     expect(parsed.name).toBe('Malicious </script><script>alert(1)</script>');
   });
 
@@ -48,11 +34,12 @@ describe('JsonLd', () => {
       url: 'https://example.com',
     };
 
-    const { container } = render(<JsonLd schema={schema} />);
-    const scriptContent = container.querySelector('script[type="application/ld+json"]')?.innerHTML;
+    const element = JsonLd({ schema });
+    const scriptElement = element.props.children;
+    const htmlContent = scriptElement.props.dangerouslySetInnerHTML.__html;
 
-    expect(scriptContent).toBeDefined();
-    const parsed = JSON.parse(scriptContent as string);
+    expect(htmlContent).toBeDefined();
+    const parsed = JSON.parse(htmlContent as string);
     expect(parsed['@type']).toBe('WebSite');
     expect(parsed.name).toBe('Test Site');
     expect(parsed.url).toBe('https://example.com');
