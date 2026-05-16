@@ -21,28 +21,19 @@ function parseModelFileType(fileTypeStr: string | null): ModelFileType | null {
   return null;
 }
 
-/**
- * Embed用のHeatmapDataService
- * x-embed-tokenヘッダーを使用して認証し、通常のAPIクライアントを使用
- */
+type ApiClientType = ReturnType<typeof createEmbedClient> | null;
 
-export function useEmbedHeatmapDataService(projectId: number | undefined, sessionId: number | undefined, token: string | undefined): HeatmapDataService {
+function useEmbedProjectTask(
+  projectId: number | undefined,
+  apiClient: ApiClientType,
+  isReady: boolean,
+  sessionHeatmapIds: number[] | undefined,
+  token: string | undefined,
+) {
+  const queryClient = useQueryClient();
   const timer = useRef<NodeJS.Timeout>(undefined);
   const [taskId, setTaskId] = useState<number | null>(null);
-  const [currentSessionId, setCurrentSessionId] = useState<number | null>(sessionId ?? null);
-  const [sessionHeatmapIds, setSessionHeatmapIds] = useState<number[] | undefined>(undefined);
   const [stepSize] = useState<number>(50);
-
-  const queryClient = useQueryClient();
-
-  // sessionIdはオプション（タイムライン等で使用）、heatmapはproject全体をデフォルト
-  const isReady = !!token && projectId !== undefined;
-
-  // Embed用のAPIクライアントを作成（tokenが変わったら再作成）
-  const apiClient = useMemo(() => {
-    if (!token) return null;
-    return createEmbedClient(token);
-  }, [token]);
 
   // プロジェクトデータを取得してis2Dフラグを取得
   const { data: project } = useQuery({
@@ -126,6 +117,10 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
     };
   }, [queryClient, task]);
 
+  return { task: task || createdTask || undefined, loadTask: setTaskId };
+}
+
+function useEmbedMapQueries(projectId: number | undefined, apiClient: ApiClientType) {
   const getMapList = useCallback(
     async (activeOnly?: boolean) => {
       try {
@@ -176,6 +171,12 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
     },
     [apiClient],
   );
+
+  return { getMapList, getMapContent };
+}
+
+function useEmbedLogQueries(projectId: number | undefined, currentSessionId: number | null, apiClient: ApiClientType) {
+  const queryClient = useQueryClient();
 
   const getGeneralLogKeys = useCallback(async () => {
     try {
@@ -239,6 +240,10 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
     [projectId, currentSessionId, queryClient],
   );
 
+  return { getGeneralLogKeys, getEventLog, getEventLogSnapshot };
+}
+
+function useEmbedSessionQueries(projectId: number | undefined, currentSessionId: number | null, apiClient: ApiClientType) {
   const getProject = useCallback(async (): Promise<Project | null> => {
     if (!projectId || !apiClient) return null;
     const res = await apiClient.GET('/api/v0/projects/{id}', {
@@ -303,6 +308,31 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
     return (res.data as unknown as FieldObjectLog[]) ?? [];
   }, [projectId, currentSessionId, apiClient]);
 
+  return { getProject, getSession, getSessions, searchSessions, getPlayers, getFieldObjectLogs };
+}
+
+/**
+ * Embed用のHeatmapDataService
+ * x-embed-tokenヘッダーを使用して認証し、通常のAPIクライアントを使用
+ */
+export function useEmbedHeatmapDataService(projectId: number | undefined, sessionId: number | undefined, token: string | undefined): HeatmapDataService {
+  const [currentSessionId, setCurrentSessionId] = useState<number | null>(sessionId ?? null);
+  const [sessionHeatmapIds, setSessionHeatmapIds] = useState<number[] | undefined>(undefined);
+
+  // sessionIdはオプション（タイムライン等で使用）、heatmapはproject全体をデフォルト
+  const isReady = !!token && projectId !== undefined;
+
+  // Embed用のAPIクライアントを作成（tokenが変わったら再作成）
+  const apiClient = useMemo(() => {
+    if (!token) return null;
+    return createEmbedClient(token);
+  }, [token]);
+
+  const { task, loadTask: setTaskId } = useEmbedProjectTask(projectId, apiClient, isReady, sessionHeatmapIds, token);
+  const { getMapList, getMapContent } = useEmbedMapQueries(projectId, apiClient);
+  const { getGeneralLogKeys, getEventLog, getEventLogSnapshot } = useEmbedLogQueries(projectId, currentSessionId, apiClient);
+  const { getProject, getSession, getSessions, searchSessions, getPlayers, getFieldObjectLogs } = useEmbedSessionQueries(projectId, currentSessionId, apiClient);
+
   const loadTask = useCallback(
     (newTaskId: number) => {
       setTaskId(newTaskId);
@@ -318,7 +348,7 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
     getMapList,
     getMapContent,
     getGeneralLogKeys,
-    task: task || createdTask || undefined,
+    task,
     getEventLog,
     getEventLogSnapshot,
     projectId,
