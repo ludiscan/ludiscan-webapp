@@ -1,9 +1,6 @@
 /**
  * @jest-environment jsdom
  */
-import { GlobalRegistrator } from '@happy-dom/global-registrator';
-GlobalRegistrator.register();
-
 import {
   getFocusableElements,
   getFirstFocusable,
