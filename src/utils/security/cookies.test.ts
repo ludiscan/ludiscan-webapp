@@ -15,7 +15,6 @@ describe('Cookies Security Utilities', () => {
         return mockRes as NextApiResponse;
       }),
     };
-
   });
 
   afterEach(() => {
