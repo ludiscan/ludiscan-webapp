@@ -4,19 +4,18 @@ import type { NextApiResponse } from 'next';
 
 describe('Cookies Security Utilities', () => {
   let mockRes: Partial<NextApiResponse>;
-  let headers: Record<string, string | string[]>;
+  let headers: Record<string, string | number | readonly string[]>;
 
   beforeEach(() => {
     headers = {};
     mockRes = {
-      getHeader: jest.fn((name: string) => headers[name.toLowerCase()]),
-      setHeader: jest.fn((name: string, value: string | string[]) => {
+      getHeader: jest.fn((name: string) => headers[name.toLowerCase()] as string | string[]),
+      setHeader: jest.fn((name: string, value: string | number | readonly string[]) => {
         headers[name.toLowerCase()] = value;
+        return mockRes as NextApiResponse;
       }),
     };
 
-    // Default environment to development to avoid https/domain specifics unless tested
-    process.env.NODE_ENV = 'development';
   });
 
   afterEach(() => {
@@ -41,7 +40,7 @@ describe('Cookies Security Utilities', () => {
 
       setSecureCookie(mockRes as NextApiResponse, 'test_cookie', 'test_value');
 
-      const setCookieHeader = headers['set-cookie'] as string[];
+      const setCookieHeader = headers['set-cookie'] as unknown as string[];
       expect(setCookieHeader).toHaveLength(2);
       expect(setCookieHeader[0]).toBe('existing_cookie=existing_value');
       expect(setCookieHeader[1]).toMatch(/^test_cookie=test_value;/);
@@ -52,7 +51,7 @@ describe('Cookies Security Utilities', () => {
 
       setSecureCookie(mockRes as NextApiResponse, 'test_cookie', 'test_value');
 
-      const setCookieHeader = headers['set-cookie'] as string[];
+      const setCookieHeader = headers['set-cookie'] as unknown as string[];
       expect(setCookieHeader).toHaveLength(2);
       expect(setCookieHeader[0]).toBe('existing_cookie=existing_value');
       expect(setCookieHeader[1]).toMatch(/^test_cookie=test_value;/);
