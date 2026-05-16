@@ -46,7 +46,7 @@ jobs:
         run: bun run format:check
 
       - name: Test
-        run: bun test
+        run: npm run test
         env:
           CI: true
 
