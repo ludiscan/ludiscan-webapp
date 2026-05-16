@@ -1,6 +1,16 @@
 import { saveCanvasPartial } from './localstrage';
 
-import { initializeValues } from '@src/modeles/heatmapView';
+// Instead of importing from heatmapView directly which causes TSX parsing issues in the jest test environment
+// because jest is configured to transform `.tsx?` with `ts-jest` but something goes wrong with Next.js imports.
+// The `initializeValues` is only used to create mock objects for tests.
+const initializeValues = {
+  general: {
+    showHeatmap: true,
+  },
+  hotspotMode: {
+    visible: false,
+  },
+};
 
 const STORAGE_KEY = 'ludiscan';
 
@@ -108,7 +118,6 @@ describe('saveCanvasPartial', () => {
     try {
       Object.defineProperty(global, 'window', { value: originalWindow, writable: true });
     } catch {
-      // @ts-expect-error Bun globals fallback
       global.window = originalWindow;
     }
   });
