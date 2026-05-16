@@ -331,7 +331,11 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
   const { task, loadTask: setTaskId } = useEmbedProjectTask(projectId, apiClient, isReady, sessionHeatmapIds, token);
   const { getMapList, getMapContent } = useEmbedMapQueries(projectId, apiClient);
   const { getGeneralLogKeys, getEventLog, getEventLogSnapshot } = useEmbedLogQueries(projectId, currentSessionId, apiClient);
-  const { getProject, getSession, getSessions, searchSessions, getPlayers, getFieldObjectLogs } = useEmbedSessionQueries(projectId, currentSessionId, apiClient);
+  const { getProject, getSession, getSessions, searchSessions, getPlayers, getFieldObjectLogs } = useEmbedSessionQueries(
+    projectId,
+    currentSessionId,
+    apiClient,
+  );
 
   const loadTask = useCallback(
     (newTaskId: number) => {
