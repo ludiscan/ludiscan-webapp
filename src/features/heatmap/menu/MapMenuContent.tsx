@@ -362,10 +362,6 @@ export const MapMenuContent: FC<HeatmapMenuProps> = ({
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // const handleAddWaypoint = useCallback(() => {
-  //   heatMapEventBus.emit('add-waypoint');
-  // }, []);
-
   const handleFileSelect = useCallback((file: File | null) => {
     setSelectedFile(file);
     setStatusMessage(null);
@@ -570,9 +566,6 @@ export const MapMenuContent: FC<HeatmapMenuProps> = ({
       {/* マップ表示がONの場合のみ、以下の機能を表示 */}
       {showMapEnabled && (
         <>
-          {/*<Button scheme={'surface'} fontSize={'base'} onClick={handleAddWaypoint}>*/}
-          {/*  <Text text={'add waypoint'} />*/}
-          {/*</Button>*/}
           <VerticalSpacer size={12} />
           {model && mapName && (
             <CollapsibleSection>
