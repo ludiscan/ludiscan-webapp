@@ -57,13 +57,10 @@ describe('saveCanvasPartial', () => {
       canvas: {
         ...mockState,
         general: newGeneralState,
-      }
+      },
     };
 
-    expect(setItemMock).toHaveBeenCalledWith(
-      STORAGE_KEY,
-      JSON.stringify(expectedStoredData)
-    );
+    expect(setItemMock).toHaveBeenCalledWith(STORAGE_KEY, JSON.stringify(expectedStoredData));
   });
 
   test('should fallback to empty object when localStorage is empty', () => {
@@ -84,13 +81,10 @@ describe('saveCanvasPartial', () => {
     const expectedStoredData = {
       canvas: {
         hotspotMode: newHotspotMode,
-      }
+      },
     };
 
-    expect(setItemMock).toHaveBeenCalledWith(
-      STORAGE_KEY,
-      JSON.stringify(expectedStoredData)
-    );
+    expect(setItemMock).toHaveBeenCalledWith(STORAGE_KEY, JSON.stringify(expectedStoredData));
   });
 
   test('should return early without throwing in SSR environment', () => {
@@ -99,11 +93,11 @@ describe('saveCanvasPartial', () => {
     const originalWindow = global.window;
 
     try {
-        Object.defineProperty(global, 'window', { value: undefined, writable: true });
+      Object.defineProperty(global, 'window', { value: undefined, writable: true });
     } catch {
-        // Fallback for Bun test runner which might have strict globals
-        // @ts-expect-error Bun globals fallback
-        global.window = undefined;
+      // Fallback for Bun test runner which might have strict globals
+      // @ts-expect-error Bun globals fallback
+      global.window = undefined;
     }
 
     expect(() => saveCanvasPartial('general', initializeValues.general)).not.toThrow();
@@ -112,10 +106,10 @@ describe('saveCanvasPartial', () => {
     expect(setItemMock).not.toHaveBeenCalled();
 
     try {
-        Object.defineProperty(global, 'window', { value: originalWindow, writable: true });
+      Object.defineProperty(global, 'window', { value: originalWindow, writable: true });
     } catch {
-        // @ts-expect-error Bun globals fallback
-        global.window = originalWindow;
+      // @ts-expect-error Bun globals fallback
+      global.window = originalWindow;
     }
   });
 });
