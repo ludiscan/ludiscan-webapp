@@ -38,7 +38,7 @@ export function renderExportedHeatmap() {
       const errorContainer = document.createElement('div');
       errorContainer.setAttribute(
         'style',
-        'display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; padding: 20px; text-align: center;'
+        'display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; padding: 20px; text-align: center;',
       );
 
       const title = document.createElement('h1');
