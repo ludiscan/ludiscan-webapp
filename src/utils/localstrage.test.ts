@@ -66,19 +66,13 @@ describe('localstrage', () => {
     describe('saveToken', () => {
       test('should save a token to localStorage', () => {
         saveToken('my-token');
-        expect(localStorage.setItem).toHaveBeenCalledWith(
-          STORAGE_KEY,
-          JSON.stringify({ token: 'my-token' })
-        );
+        expect(localStorage.setItem).toHaveBeenCalledWith(STORAGE_KEY, JSON.stringify({ token: 'my-token' }));
       });
 
       test('should preserve existing data when saving a token', () => {
         mockStorage[STORAGE_KEY] = JSON.stringify({ otherData: 'value' });
         saveToken('my-token');
-        expect(localStorage.setItem).toHaveBeenCalledWith(
-          STORAGE_KEY,
-          JSON.stringify({ otherData: 'value', token: 'my-token' })
-        );
+        expect(localStorage.setItem).toHaveBeenCalledWith(STORAGE_KEY, JSON.stringify({ otherData: 'value', token: 'my-token' }));
       });
     });
 
@@ -100,19 +94,13 @@ describe('localstrage', () => {
     describe('saveUser', () => {
       test('should save a user to localStorage', () => {
         saveUser(mockUser);
-        expect(localStorage.setItem).toHaveBeenCalledWith(
-          STORAGE_KEY,
-          JSON.stringify({ user: mockUser })
-        );
+        expect(localStorage.setItem).toHaveBeenCalledWith(STORAGE_KEY, JSON.stringify({ user: mockUser }));
       });
 
       test('should preserve existing data when saving a user', () => {
         mockStorage[STORAGE_KEY] = JSON.stringify({ token: 'my-token' });
         saveUser(mockUser);
-        expect(localStorage.setItem).toHaveBeenCalledWith(
-          STORAGE_KEY,
-          JSON.stringify({ token: 'my-token', user: mockUser })
-        );
+        expect(localStorage.setItem).toHaveBeenCalledWith(STORAGE_KEY, JSON.stringify({ token: 'my-token', user: mockUser }));
       });
     });
 
@@ -137,19 +125,13 @@ describe('localstrage', () => {
     describe('saveCanvasValues', () => {
       test('should save canvas values to localStorage', () => {
         saveCanvasValues(mockCanvasValues);
-        expect(localStorage.setItem).toHaveBeenCalledWith(
-          STORAGE_KEY,
-          JSON.stringify({ canvas: mockCanvasValues })
-        );
+        expect(localStorage.setItem).toHaveBeenCalledWith(STORAGE_KEY, JSON.stringify({ canvas: mockCanvasValues }));
       });
 
       test('should preserve existing data when saving canvas values', () => {
         mockStorage[STORAGE_KEY] = JSON.stringify({ token: 'my-token' });
         saveCanvasValues(mockCanvasValues);
-        expect(localStorage.setItem).toHaveBeenCalledWith(
-          STORAGE_KEY,
-          JSON.stringify({ token: 'my-token', canvas: mockCanvasValues })
-        );
+        expect(localStorage.setItem).toHaveBeenCalledWith(STORAGE_KEY, JSON.stringify({ token: 'my-token', canvas: mockCanvasValues }));
       });
     });
 
@@ -166,31 +148,29 @@ describe('localstrage', () => {
 
     describe('saveCanvasPartial', () => {
       test('should update a specific canvas property when storage is empty using initializeValues', () => {
-        saveCanvasPartial('version', '2.0');
-        expect(localStorage.setItem).toHaveBeenCalledWith(
-          STORAGE_KEY,
-          JSON.stringify({ ...initializeValues, version: '2.0' })
-        );
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        saveCanvasPartial('version' as any, '2.0');
+        expect(localStorage.setItem).toHaveBeenCalledWith(STORAGE_KEY, JSON.stringify({ ...initializeValues, version: '2.0' }));
       });
 
       test('should update a specific canvas property when storage exists', () => {
         mockStorage[STORAGE_KEY] = JSON.stringify({ canvas: { ...initializeValues, version: '1.0' } });
-        saveCanvasPartial('version', '2.0');
-        expect(localStorage.setItem).toHaveBeenCalledWith(
-          STORAGE_KEY,
-          JSON.stringify({ ...initializeValues, version: '2.0' })
-        );
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        saveCanvasPartial('version' as any, '2.0');
+        expect(localStorage.setItem).toHaveBeenCalledWith(STORAGE_KEY, JSON.stringify({ ...initializeValues, version: '2.0' }));
       });
     });
 
     describe('loadCanvasPartial', () => {
       test('should throw an error when no data exists', () => {
-        expect(() => loadCanvasPartial('version')).toThrow('No data for key: version');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        expect(() => loadCanvasPartial('version' as any)).toThrow('No data for key: version');
       });
 
       test('should return the specific canvas property when data exists', () => {
         mockStorage[STORAGE_KEY] = JSON.stringify({ canvas: { ...initializeValues, version: '2.0' } });
-        expect(loadCanvasPartial('version')).toBe('2.0');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        expect(loadCanvasPartial('version' as any)).toBe('2.0');
       });
     });
   });
@@ -199,19 +179,13 @@ describe('localstrage', () => {
     describe('saveThemeName', () => {
       test('should save a theme name to localStorage', () => {
         saveThemeName('dark');
-        expect(localStorage.setItem).toHaveBeenCalledWith(
-          STORAGE_KEY,
-          JSON.stringify({ theme: 'dark' })
-        );
+        expect(localStorage.setItem).toHaveBeenCalledWith(STORAGE_KEY, JSON.stringify({ theme: 'dark' }));
       });
 
       test('should preserve existing data when saving a theme name', () => {
         mockStorage[STORAGE_KEY] = JSON.stringify({ token: 'my-token' });
         saveThemeName('light');
-        expect(localStorage.setItem).toHaveBeenCalledWith(
-          STORAGE_KEY,
-          JSON.stringify({ token: 'my-token', theme: 'light' })
-        );
+        expect(localStorage.setItem).toHaveBeenCalledWith(STORAGE_KEY, JSON.stringify({ token: 'my-token', theme: 'light' }));
       });
     });
 
@@ -230,20 +204,14 @@ describe('localstrage', () => {
       test('should save a theme type to localStorage', () => {
         const themeType = { palette: { primary: '#000' } } as unknown as ThemeType;
         saveThemeType(themeType);
-        expect(localStorage.setItem).toHaveBeenCalledWith(
-          STORAGE_KEY,
-          JSON.stringify({ themeType })
-        );
+        expect(localStorage.setItem).toHaveBeenCalledWith(STORAGE_KEY, JSON.stringify({ themeType }));
       });
 
       test('should preserve existing data when saving a theme type', () => {
         mockStorage[STORAGE_KEY] = JSON.stringify({ token: 'my-token' });
         const themeType = { palette: { primary: '#fff' } } as unknown as ThemeType;
         saveThemeType(themeType);
-        expect(localStorage.setItem).toHaveBeenCalledWith(
-          STORAGE_KEY,
-          JSON.stringify({ token: 'my-token', themeType })
-        );
+        expect(localStorage.setItem).toHaveBeenCalledWith(STORAGE_KEY, JSON.stringify({ token: 'my-token', themeType }));
       });
     });
 
@@ -268,25 +236,16 @@ describe('localstrage', () => {
 
       test('should save a recent menu to localStorage', () => {
         saveRecentMenu('menu1');
-        expect(localStorage.setItem).toHaveBeenCalledWith(
-          STORAGE_KEY,
-          JSON.stringify({ recentMenus: ['menu1'] })
-        );
+        expect(localStorage.setItem).toHaveBeenCalledWith(STORAGE_KEY, JSON.stringify({ recentMenus: ['menu1'] }));
       });
 
       test('should preserve existing data and remove duplicates, keeping max 5 items', () => {
         mockStorage[STORAGE_KEY] = JSON.stringify({ recentMenus: ['menu1', 'menu2', 'menu3', 'menu4', 'menu5'] });
         saveRecentMenu('menu2'); // duplicate, should move to front
-        expect(localStorage.setItem).toHaveBeenCalledWith(
-          STORAGE_KEY,
-          JSON.stringify({ recentMenus: ['menu2', 'menu1', 'menu3', 'menu4', 'menu5'] })
-        );
+        expect(localStorage.setItem).toHaveBeenCalledWith(STORAGE_KEY, JSON.stringify({ recentMenus: ['menu2', 'menu1', 'menu3', 'menu4', 'menu5'] }));
 
         saveRecentMenu('menu6'); // new, should evict last
-        expect(localStorage.setItem).toHaveBeenCalledWith(
-          STORAGE_KEY,
-          JSON.stringify({ recentMenus: ['menu6', 'menu2', 'menu1', 'menu3', 'menu4'] })
-        );
+        expect(localStorage.setItem).toHaveBeenCalledWith(STORAGE_KEY, JSON.stringify({ recentMenus: ['menu6', 'menu2', 'menu1', 'menu3', 'menu4'] }));
       });
 
       test('should retrieve recent menus from localStorage', () => {
@@ -302,19 +261,13 @@ describe('localstrage', () => {
 
       test('markHintAsViewed should save a hint to viewedHints', () => {
         markHintAsViewed('hint1');
-        expect(localStorage.setItem).toHaveBeenCalledWith(
-          STORAGE_KEY,
-          JSON.stringify({ viewedHints: ['hint1'] })
-        );
+        expect(localStorage.setItem).toHaveBeenCalledWith(STORAGE_KEY, JSON.stringify({ viewedHints: ['hint1'] }));
       });
 
       test('markHintAsViewed should not save duplicate hints', () => {
         mockStorage[STORAGE_KEY] = JSON.stringify({ viewedHints: ['hint1'] });
         markHintAsViewed('hint1');
-        expect(localStorage.setItem).not.toHaveBeenCalledWith(
-          STORAGE_KEY,
-          JSON.stringify({ viewedHints: ['hint1', 'hint1'] })
-        );
+        expect(localStorage.setItem).not.toHaveBeenCalledWith(STORAGE_KEY, JSON.stringify({ viewedHints: ['hint1', 'hint1'] }));
       });
 
       test('getViewedHints should retrieve viewed hints', () => {
@@ -328,19 +281,13 @@ describe('localstrage', () => {
 
       test('disableHint should save a hint to disabledHints', () => {
         disableHint('hint1');
-        expect(localStorage.setItem).toHaveBeenCalledWith(
-          STORAGE_KEY,
-          JSON.stringify({ disabledHints: ['hint1'] })
-        );
+        expect(localStorage.setItem).toHaveBeenCalledWith(STORAGE_KEY, JSON.stringify({ disabledHints: ['hint1'] }));
       });
 
       test('disableHint should not save duplicate hints', () => {
         mockStorage[STORAGE_KEY] = JSON.stringify({ disabledHints: ['hint1'] });
         disableHint('hint1');
-        expect(localStorage.setItem).not.toHaveBeenCalledWith(
-          STORAGE_KEY,
-          JSON.stringify({ disabledHints: ['hint1', 'hint1'] })
-        );
+        expect(localStorage.setItem).not.toHaveBeenCalledWith(STORAGE_KEY, JSON.stringify({ disabledHints: ['hint1', 'hint1'] }));
       });
 
       test('getDisabledHints should retrieve disabled hints', () => {
