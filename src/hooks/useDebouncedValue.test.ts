@@ -20,10 +20,7 @@ describe('useDebouncedValue', () => {
   });
 
   test('should update value after delay', () => {
-    const { result, rerender } = renderHook(
-      ({ value, delay }) => useDebouncedValue(value, delay),
-      { initialProps: { value: 'initial', delay: 500 } }
-    );
+    const { result, rerender } = renderHook(({ value, delay }) => useDebouncedValue(value, delay), { initialProps: { value: 'initial', delay: 500 } });
 
     // Initial state
     expect(result.current).toBe('initial');
@@ -44,10 +41,7 @@ describe('useDebouncedValue', () => {
   });
 
   test('should not update value before delay', () => {
-    const { result, rerender } = renderHook(
-      ({ value, delay }) => useDebouncedValue(value, delay),
-      { initialProps: { value: 'initial', delay: 500 } }
-    );
+    const { result, rerender } = renderHook(({ value, delay }) => useDebouncedValue(value, delay), { initialProps: { value: 'initial', delay: 500 } });
 
     // Update value
     rerender({ value: 'updated', delay: 500 });
@@ -62,10 +56,7 @@ describe('useDebouncedValue', () => {
   });
 
   test('should debounce multiple updates', () => {
-    const { result, rerender } = renderHook(
-      ({ value, delay }) => useDebouncedValue(value, delay),
-      { initialProps: { value: 'initial', delay: 500 } }
-    );
+    const { result, rerender } = renderHook(({ value, delay }) => useDebouncedValue(value, delay), { initialProps: { value: 'initial', delay: 500 } });
 
     // Update value first time
     rerender({ value: 'update 1', delay: 500 });
