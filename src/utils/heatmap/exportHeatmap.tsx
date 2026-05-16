@@ -23,7 +23,7 @@ body, html {
 export function renderExportedHeatmap() {
   // スタイル要素を追加
   const styleEl = document.createElement('style');
-  styleEl.innerHTML = styles;
+  styleEl.textContent = styles;
   document.head.appendChild(styleEl);
 
   // rootエレメントを取得し、Reactコンポーネントをレンダリング
@@ -35,13 +35,23 @@ export function renderExportedHeatmap() {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('レンダリングに失敗しました:', error);
-      rootElement.innerHTML = `
-        <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; padding: 20px; text-align: center;">
-          <h1>エラーが発生しました</h1>
-          <p>レンダリングに失敗しました。</p>
-          <p>エラー詳細: ${error instanceof Error ? error.message : '不明なエラー'}</p>
-        </div>
-      `;
+      const errorContainer = document.createElement('div');
+      errorContainer.setAttribute(
+        'style',
+        'display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; padding: 20px; text-align: center;'
+      );
+
+      const title = document.createElement('h1');
+      title.textContent = 'エラーが発生しました';
+
+      const description = document.createElement('p');
+      description.textContent = 'レンダリングに失敗しました。';
+
+      const detail = document.createElement('p');
+      detail.textContent = `エラー詳細: ${error instanceof Error ? error.message : '不明なエラー'}`;
+
+      errorContainer.append(title, description, detail);
+      rootElement.replaceChildren(errorContainer);
     }
   }
 }
