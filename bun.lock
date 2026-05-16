@@ -1,6 +1,5 @@
 {
   "lockfileVersion": 1,
-  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "ludiscan-webapp",
@@ -50,6 +49,7 @@
         "@svgr/webpack": "^8.1.0",
         "@swc/core": "^1.15.8",
         "@tanstack/eslint-plugin-query": "^5.91.2",
+        "@types/bun": "^1.3.14",
         "@types/cookie": "^1.0.0",
         "@types/file-saver": "^2.0.7",
         "@types/jest": "^29.5.14",
@@ -813,6 +813,8 @@
 
     "@types/babel__traverse": ["@types/babel__traverse@7.28.0", "", { "dependencies": { "@babel/types": "^7.28.2" } }, "sha512-8PvcXf70gTDZBgt9ptxJ8elBeBjcLOAcOtoO/mPJjtji1+CdGbHgm77om1GrsPxsiE+uXIpNSK64UYaIwQXd4Q=="],
 
+    "@types/bun": ["@types/bun@1.3.14", "", { "dependencies": { "bun-types": "1.3.14" } }, "sha512-h1hFqFVcvAvD9j9K7ZW7vd82aSA+rTdznZa+5bwvCwqSB1jmmfLcbIWhOLx1/+boy/xmjgCs/OMUL8hRJSmnPw=="],
+
     "@types/chai": ["@types/chai@5.2.2", "", { "dependencies": { "@types/deep-eql": "*" } }, "sha512-8kB30R7Hwqf40JPiKhVzodJs2Qc1ZJ5zuT3uzw5Hq/dhNCl3G3l83jfpdI1e20BP348+fV7VIL/+FxaXkqBmWg=="],
 
     "@types/cookie": ["@types/cookie@1.0.0", "", { "dependencies": { "cookie": "*" } }, "sha512-mGFXbkDQJ6kAXByHS7QAggRXgols0mAdP4MuXgloGY1tXokvzaFFM4SMqWvf7AH0oafI7zlFJwoGWzmhDqTZ9w=="],
@@ -1172,6 +1174,8 @@
     "buffer-xor": ["buffer-xor@1.0.3", "", {}, "sha512-571s0T7nZWK6vB67HI5dyUF7wXiNcfaPPPTl6zYCNApANjIvYJTg7hlud/+cJpdAhS7dVzqMLmfhfHR3rAcOjQ=="],
 
     "builtin-status-codes": ["builtin-status-codes@3.0.0", "", {}, "sha512-HpGFw18DgFWlncDfjTa2rcQ4W88O1mC8e8yZ2AvQY5KDaktSTwo+KRf6nHK6FRI5FyRyb/5T6+TSxfP7QyGsmQ=="],
+
+    "bun-types": ["bun-types@1.3.14", "", { "dependencies": { "@types/node": "*" } }, "sha512-4N0ig0fEomHt5R0KCFWjovxow98rIoRwKolrYdCcknNwMekCXRnWEUvgu5soYV8QXtVsrUD8B95MBOZGPvr6KQ=="],
 
     "cacheable": ["cacheable@2.3.0", "", { "dependencies": { "@cacheable/memory": "^2.0.6", "@cacheable/utils": "^2.3.2", "hookified": "^1.13.0", "keyv": "^5.5.4", "qified": "^0.5.2" } }, "sha512-HHiAvOBmlcR2f3SQ7kdlYD8+AUJG+wlFZ/Ze8tl1Vzvz0MdOh8IYA/EFU4ve8t1/sZ0j4MGi7ST5MoTwHessQA=="],
 
