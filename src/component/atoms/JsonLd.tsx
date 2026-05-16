@@ -111,7 +111,7 @@ export const JsonLd = ({ schema }: JsonLdProps) => {
 
   return (
     <Head>
-      <script type='application/ld+json' dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type='application/ld+json' dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }} />
     </Head>
   );
 };
