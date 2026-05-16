@@ -1,9 +1,4 @@
-import {
-  generateCsrfToken,
-  signCsrfToken,
-  verifyCsrfToken,
-  getCsrfSecret,
-} from './csrf';
+import { generateCsrfToken, signCsrfToken, verifyCsrfToken, getCsrfSecret } from './csrf';
 
 describe('CSRF Utilities', () => {
   describe('generateCsrfToken', () => {
