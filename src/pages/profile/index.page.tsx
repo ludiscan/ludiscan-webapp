@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -17,13 +17,46 @@ import { DashboardBackgroundCanvas } from '@src/component/templates/DashboardBac
 import { Header } from '@src/component/templates/Header';
 import { SidebarLayout } from '@src/component/templates/SidebarLayout';
 import { useToast } from '@src/component/templates/ToastContext';
+import { env } from '@src/config/env';
 import { useAuth } from '@src/hooks/useAuth';
 import { useLocale } from '@src/hooks/useLocale';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { useSidebar } from '@src/hooks/useSidebar';
-import { createClient } from '@src/modeles/qeury';
 import themes from '@src/modeles/theme';
 import { InnerContent } from '@src/pages/_app.page';
+
+type UserMeV01 = {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  hasPassword: boolean;
+};
+
+const fetchMeV01 = async (): Promise<UserMeV01> => {
+  const res = await fetch(`${env.NEXT_PUBLIC_API_BASE_URL}/api/v0.1/users/me`, {
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to fetch user (${res.status})`);
+  }
+  return res.json();
+};
+
+const submitPasswordV01 = async (body: { currentPassword?: string; newPassword: string }): Promise<void> => {
+  const res = await fetch(`${env.NEXT_PUBLIC_API_BASE_URL}/api/v0.1/users/me/password`, {
+    method: 'PATCH',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const err = new Error(`status:${res.status}`) as Error & { status?: number };
+    err.status = res.status;
+    throw err;
+  }
+};
 
 const MIN_PASSWORD_LENGTH = 8;
 
@@ -88,6 +121,15 @@ const Component: FC<ProfilePageProps> = ({ className }) => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
+  const queryClient = useQueryClient();
+  const { data: meV01 } = useQuery({
+    queryKey: ['users', 'me', 'v0.1'],
+    queryFn: fetchMeV01,
+    enabled: isAuthorized,
+  });
+  const hasPassword = meV01?.hasPassword ?? true;
+  const isInitialSetup = meV01 !== undefined && !hasPassword;
+
   const themeTypeOptions = useMemo(() => Object.keys(themes) as ThemeType[], []);
 
   const handleThemeTypeChange = useCallback(
@@ -105,22 +147,24 @@ const Component: FC<ProfilePageProps> = ({ className }) => {
 
   const { mutate: updatePassword, isPending: isUpdatingPassword } = useMutation({
     mutationFn: async () => {
-      const { error, response } = await createClient().PATCH('/api/v0/users/me/password', {
-        body: {
-          currentPassword,
+      try {
+        await submitPasswordV01({
+          currentPassword: isInitialSetup ? undefined : currentPassword,
           newPassword,
-        },
-      });
-      if (error) {
-        if (response?.status === 401) {
+        });
+      } catch (e) {
+        const status = (e as { status?: number }).status;
+        if (status === 401) {
           throw new Error(t('profile.passwordUpdate.errorUnauthorized'));
         }
         throw new Error(t('profile.passwordUpdate.errorGeneric'));
       }
     },
     onSuccess: () => {
-      showToast(t('profile.passwordUpdate.success'), 2, 'success');
+      const successMsg = isInitialSetup ? t('profile.passwordSetup.success') : t('profile.passwordUpdate.success');
+      showToast(successMsg, 2, 'success');
       resetPasswordFields();
+      queryClient.invalidateQueries({ queryKey: ['users', 'me', 'v0.1'] });
     },
     onError: (error: Error) => {
       showToast(error.message, 3, 'error');
@@ -128,7 +172,8 @@ const Component: FC<ProfilePageProps> = ({ className }) => {
   });
 
   const handlePasswordSubmit = useCallback(() => {
-    if (!currentPassword || !newPassword || !confirmPassword) {
+    const missingRequired = isInitialSetup ? !newPassword || !confirmPassword : !currentPassword || !newPassword || !confirmPassword;
+    if (missingRequired) {
       showToast(t('profile.passwordUpdate.errorRequired'), 2, 'error');
       return;
     }
@@ -141,7 +186,7 @@ const Component: FC<ProfilePageProps> = ({ className }) => {
       return;
     }
     updatePassword();
-  }, [currentPassword, newPassword, confirmPassword, showToast, t, updatePassword]);
+  }, [isInitialSetup, currentPassword, newPassword, confirmPassword, showToast, t, updatePassword]);
 
   useEffect(() => {
     if (user) {
@@ -260,17 +305,22 @@ const Component: FC<ProfilePageProps> = ({ className }) => {
             </div>
           </Section>
 
-          {/* Password Change */}
-          <Section title={t('profile.passwordUpdate.title')} description={t('profile.passwordUpdate.hint')}>
+          {/* Password Change / Initial Setup */}
+          <Section
+            title={isInitialSetup ? t('profile.passwordSetup.title') : t('profile.passwordUpdate.title')}
+            description={isInitialSetup ? t('profile.passwordSetup.hint') : t('profile.passwordUpdate.hint')}
+          >
             <FlexColumn gap={12}>
-              <OutlinedTextField
-                label={t('profile.passwordUpdate.currentPassword')}
-                value={currentPassword}
-                onChange={setCurrentPassword}
-                type='password'
-                fontSize={theme.typography.fontSize.base}
-                disabled={isUpdatingPassword}
-              />
+              {!isInitialSetup && (
+                <OutlinedTextField
+                  label={t('profile.passwordUpdate.currentPassword')}
+                  value={currentPassword}
+                  onChange={setCurrentPassword}
+                  type='password'
+                  fontSize={theme.typography.fontSize.base}
+                  disabled={isUpdatingPassword}
+                />
+              )}
               <OutlinedTextField
                 label={t('profile.passwordUpdate.newPassword')}
                 value={newPassword}
@@ -291,7 +341,7 @@ const Component: FC<ProfilePageProps> = ({ className }) => {
 
             <FlexRow gap={12} align={'center'} className={`${className}__submitRow`}>
               <Button onClick={handlePasswordSubmit} scheme={'primary'} fontSize={'base'} disabled={isUpdatingPassword}>
-                {isUpdatingPassword ? t('common.processing') : t('profile.passwordUpdate.submit')}
+                {isUpdatingPassword ? t('common.processing') : isInitialSetup ? t('profile.passwordSetup.submit') : t('profile.passwordUpdate.submit')}
               </Button>
             </FlexRow>
           </Section>

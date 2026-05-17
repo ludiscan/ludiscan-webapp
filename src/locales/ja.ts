@@ -78,6 +78,12 @@ export const ja = {
       errorUnauthorized: '現在のパスワードが正しくありません',
       errorGeneric: 'パスワードの更新に失敗しました',
     },
+    passwordSetup: {
+      title: 'パスワードを設定',
+      hint: 'OAuth でログインしているため、現在パスワードは未設定です。8文字以上で初回のパスワードを設定できます。',
+      submit: 'パスワードを設定',
+      success: 'パスワードを設定しました',
+    },
   },
 
   // Security page

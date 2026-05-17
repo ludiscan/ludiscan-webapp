@@ -78,6 +78,12 @@ export const en = {
       errorUnauthorized: 'Current password is incorrect',
       errorGeneric: 'Failed to update password',
     },
+    passwordSetup: {
+      title: 'Set Password',
+      hint: 'You signed in with OAuth and have no password set yet. You can set your initial password (8+ characters).',
+      submit: 'Set Password',
+      success: 'Password set',
+    },
   },
 
   // Security page
