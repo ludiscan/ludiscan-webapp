@@ -226,6 +226,43 @@ export interface paths {
     patch: operations['UsersController_updateRole'];
     trace?: never;
   };
+  '/api/v0.1/users/me': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** 自分のユーザー情報を取得（hasPassword 含む） */
+    get: operations['UsersV01Controller_getMe'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0.1/users/me/password': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * 自分のパスワードを設定 / 更新
+     * @description パスワード未設定（OAuth登録のみ）のユーザーは currentPassword なしで初回設定可能。設定済みの場合は currentPassword 必須。
+     */
+    patch: operations['UsersV01Controller_updateMyPassword'];
+    trace?: never;
+  };
   '/api/v0/auth/google': {
     parameters: {
       query?: never;
@@ -373,6 +410,46 @@ export interface paths {
     get: operations['AuthController_health'];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0.1/auth/password-reset/request': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * パスワード再設定リクエスト
+     * @description 指定メアドにリセットリンクを送信。メアド存在の有無にかかわらず常に 200 を返す（ユーザー列挙対策）。
+     */
+    post: operations['AuthV01Controller_requestReset'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0.1/auth/password-reset/confirm': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * パスワード再設定確定
+     * @description メール内のリンクから取得したトークンと新パスワードで確定。
+     */
+    post: operations['AuthV01Controller_confirmReset'];
     delete?: never;
     options?: never;
     head?: never;
@@ -2291,6 +2368,26 @@ export interface components {
        */
       role: string;
     };
+    UserMeResponseV01Dto: {
+      id: string;
+      email: string;
+      name: string;
+      role: string;
+      /** @description パスワードが設定済みか。false の場合は currentPassword なしで設定可能（OAuth登録ユーザーなど） */
+      hasPassword: boolean;
+    };
+    UpdatePasswordV01Dto: {
+      /**
+       * @description 現在のパスワード。OAuth等でまだパスワード未設定のユーザーは省略可
+       * @example currentPassword123
+       */
+      currentPassword?: string;
+      /**
+       * @description 新しいパスワード（8文字以上）
+       * @example newPassword123
+       */
+      newPassword: string;
+    };
     GoogleStartQueryDto: {
       /** @description 署名付きのstate（CSRF防止やモード伝播用）。リンク時はAuthControllerが自動生成。 */
       state?: string;
@@ -2314,6 +2411,22 @@ export interface components {
       prompt?: string;
       hd?: string;
       iss?: string;
+    };
+    PasswordResetRequestDto: {
+      /**
+       * @description パスワード再設定リンクを送るメールアドレス
+       * @example user@example.com
+       */
+      email: string;
+    };
+    PasswordResetConfirmDto: {
+      /** @description メールに記載されたリセットトークン */
+      token: string;
+      /**
+       * @description 新しいパスワード（8文字以上）
+       * @example newPassword123
+       */
+      newPassword: string;
     };
     LoginUserDto: {
       /** @example password */
@@ -4650,6 +4763,71 @@ export interface operations {
       };
     };
   };
+  UsersV01Controller_getMe: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description 成功 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['UserMeResponseV01Dto'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  UsersV01Controller_updateMyPassword: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdatePasswordV01Dto'];
+      };
+    };
+    responses: {
+      /** @description 成功 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description currentPassword が必要（パスワード既設定の場合）または newPassword が不正 */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 現在のパスワードが正しくない */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   AuthController_googleStart: {
     parameters: {
       query?: {
@@ -4894,6 +5072,66 @@ export interface operations {
         content: {
           'application/json': components['schemas']['DefaultErrorResponse'];
         };
+      };
+    };
+  };
+  AuthV01Controller_requestReset: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PasswordResetRequestDto'];
+      };
+    };
+    responses: {
+      /** @description 受付完了 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  AuthV01Controller_confirmReset: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PasswordResetConfirmDto'];
+      };
+    };
+    responses: {
+      /** @description パスワード再設定成功 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description トークン無効・期限切れ・使用済み */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
