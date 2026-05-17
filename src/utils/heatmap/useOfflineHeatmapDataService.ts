@@ -23,9 +23,6 @@ export function useOfflineHeatmapDataService(offlineData: OfflineHeatmapData | n
 
       try {
         // Base64エンコードされたデータをデコード
-        // eslint-disable-next-line no-console
-        console.log('Base64エンコードされたモデルデータを処理中...');
-
         // Base64文字列をバイナリデータに変換
         const binaryString = atob(data.mapContentBase64);
         const len = binaryString.length;

@@ -1090,6 +1090,80 @@
         ]
       }
     },
+    "/api/v0.1/users/me": {
+      "get": {
+        "operationId": "UsersV01Controller_getMe",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserMeResponseV01Dto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "自分のユーザー情報を取得（hasPassword 含む）",
+        "tags": [
+          "v0.1"
+        ]
+      }
+    },
+    "/api/v0.1/users/me/password": {
+      "patch": {
+        "description": "パスワード未設定（OAuth登録のみ）のユーザーは currentPassword なしで初回設定可能。設定済みの場合は currentPassword 必須。",
+        "operationId": "UsersV01Controller_updateMyPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePasswordV01Dto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "description": "currentPassword が必要（パスワード既設定の場合）または newPassword が不正"
+          },
+          "401": {
+            "description": "現在のパスワードが正しくない"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "自分のパスワードを設定 / 更新",
+        "tags": [
+          "v0.1"
+        ]
+      }
+    },
     "/api/v0/auth/google": {
       "get": {
         "operationId": "AuthController_googleStart",
@@ -1421,6 +1495,71 @@
         },
         "tags": [
           "Auth"
+        ]
+      }
+    },
+    "/api/v0.1/auth/password-reset/request": {
+      "post": {
+        "description": "指定メアドにリセットリンクを送信。メアド存在の有無にかかわらず常に 200 を返す（ユーザー列挙対策）。",
+        "operationId": "AuthV01Controller_requestReset",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordResetRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "受付完了"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "パスワード再設定リクエスト",
+        "tags": [
+          "v0.1"
+        ]
+      }
+    },
+    "/api/v0.1/auth/password-reset/confirm": {
+      "post": {
+        "description": "メール内のリンクから取得したトークンと新パスワードで確定。",
+        "operationId": "AuthV01Controller_confirmReset",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordResetConfirmDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "パスワード再設定成功"
+          },
+          "400": {
+            "description": "トークン無効・期限切れ・使用済み"
+          }
+        },
+        "summary": "パスワード再設定確定",
+        "tags": [
+          "v0.1"
         ]
       }
     },
@@ -8487,7 +8626,7 @@
   "info": {
     "title": "Ludiscan API Documentation",
     "description": "Ludiscan API for game analytics and session tracking",
-    "version": "1.36.0",
+    "version": "1.38.0",
     "contact": {}
   },
   "tags": [],
@@ -8577,6 +8716,53 @@
           "role"
         ]
       },
+      "UserMeResponseV01Dto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "hasPassword": {
+            "type": "boolean",
+            "description": "パスワードが設定済みか。false の場合は currentPassword なしで設定可能（OAuth登録ユーザーなど）"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "name",
+          "role",
+          "hasPassword"
+        ]
+      },
+      "UpdatePasswordV01Dto": {
+        "type": "object",
+        "properties": {
+          "currentPassword": {
+            "type": "string",
+            "description": "現在のパスワード。OAuth等でまだパスワード未設定のユーザーは省略可",
+            "example": "currentPassword123"
+          },
+          "newPassword": {
+            "type": "string",
+            "description": "新しいパスワード（8文字以上）",
+            "example": "newPassword123",
+            "minLength": 8
+          }
+        },
+        "required": [
+          "newPassword"
+        ]
+      },
       "GoogleStartQueryDto": {
         "type": "object",
         "properties": {
@@ -8634,6 +8820,38 @@
             "type": "string"
           }
         }
+      },
+      "PasswordResetRequestDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "パスワード再設定リンクを送るメールアドレス",
+            "example": "user@example.com"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "PasswordResetConfirmDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "メールに記載されたリセットトークン"
+          },
+          "newPassword": {
+            "type": "string",
+            "description": "新しいパスワード（8文字以上）",
+            "example": "newPassword123",
+            "minLength": 8
+          }
+        },
+        "required": [
+          "token",
+          "newPassword"
+        ]
       },
       "LoginUserDto": {
         "type": "object",

@@ -7,19 +7,14 @@ import type { Meta, StoryObj } from '@storybook/nextjs';
 export default {
   component: Slider,
   controls: { hideNoControlsWarning: true },
+  argTypes: { onChange: { action: 'onChange' } },
 } as Meta;
 type Story = StoryObj<typeof Slider>;
 
 const Template: Story = {
   render: (args) => (
     <div style={{ width: '300px', padding: '16px' }}>
-      <Slider
-        {...args}
-        onChange={(value) => {
-          /* eslint-disable-next-line no-console */
-          console.log('Slider value:', value);
-        }}
-      />
+      <Slider {...args} />
       <Text text={`Value: ${args.value}`} />
     </div>
   ),
