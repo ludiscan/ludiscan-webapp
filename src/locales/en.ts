@@ -103,6 +103,7 @@ export const en = {
       submit: 'Update Password',
       hint: 'New password must be at least 8 characters.',
       success: 'Password updated',
+      forgotPassword: 'Forgot your current password? Send a reset link instead.',
       errorRequired: 'Please fill in all fields',
       errorMismatch: 'New passwords do not match',
       errorTooShort: 'New password must be at least 8 characters',

@@ -103,6 +103,7 @@ export const ja = {
       submit: 'パスワードを更新',
       hint: '新しいパスワードは8文字以上で入力してください。',
       success: 'パスワードを更新しました',
+      forgotPassword: '現在のパスワードを忘れた場合はこちら（再設定リンクを送ります）',
       errorRequired: 'すべての項目を入力してください',
       errorMismatch: '新しいパスワードが一致しません',
       errorTooShort: '新しいパスワードは8文字以上で入力してください',
