@@ -33,6 +33,37 @@ export const en = {
     passwordPlaceholder: 'password',
     success: 'Login success',
     errorEmptyFields: 'Please enter email and password',
+    forgotPassword: 'Forgot your password?',
+  },
+
+  // Password Reset
+  passwordReset: {
+    request: {
+      title: 'Reset your password',
+      description: "Enter your account email and we'll send you a link to set a new password.",
+      submit: 'Send reset link',
+      sending: 'Sending...',
+      sent: "If an account exists for that address, we've sent a reset link. Please check your inbox.",
+      backToLogin: 'Back to sign in',
+      errorRequired: 'Please enter your email',
+      errorGeneric: 'Failed to send reset email',
+    },
+    confirm: {
+      title: 'Set a new password',
+      description: 'Enter and confirm your new password.',
+      newPassword: 'New password',
+      confirmPassword: 'Confirm new password',
+      submit: 'Update password',
+      submitting: 'Updating...',
+      success: 'Password updated. Please sign in with your new password.',
+      backToLogin: 'Back to sign in',
+      errorRequired: 'Please fill in all fields',
+      errorMismatch: 'Passwords do not match',
+      errorTooShort: 'Password must be at least 8 characters',
+      errorInvalidToken: 'This reset link is invalid or has expired. Please request a new one.',
+      errorGeneric: 'Failed to update password',
+      missingToken: 'Reset token is missing from the URL. Please open the link from the email again.',
+    },
   },
 
   // Home/Dashboard page
@@ -64,6 +95,26 @@ export const en = {
     loadingUser: 'Loading user information...',
     userNotAvailable: 'User information not available',
     userId: 'User ID',
+    passwordUpdate: {
+      title: 'Change Password',
+      currentPassword: 'Current Password',
+      newPassword: 'New Password',
+      confirmPassword: 'Confirm New Password',
+      submit: 'Update Password',
+      hint: 'New password must be at least 8 characters.',
+      success: 'Password updated',
+      errorRequired: 'Please fill in all fields',
+      errorMismatch: 'New passwords do not match',
+      errorTooShort: 'New password must be at least 8 characters',
+      errorUnauthorized: 'Current password is incorrect',
+      errorGeneric: 'Failed to update password',
+    },
+    passwordSetup: {
+      title: 'Set Password',
+      hint: 'You signed in with OAuth and have no password set yet. You can set your initial password (8+ characters).',
+      submit: 'Set Password',
+      success: 'Password set',
+    },
   },
 
   // Security page

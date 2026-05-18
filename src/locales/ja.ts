@@ -33,6 +33,37 @@ export const ja = {
     passwordPlaceholder: 'パスワード',
     success: 'ログインしました',
     errorEmptyFields: 'メールアドレスとパスワードを入力してください',
+    forgotPassword: 'パスワードを忘れた場合',
+  },
+
+  // Password Reset
+  passwordReset: {
+    request: {
+      title: 'パスワードを再設定',
+      description: 'アカウントのメールアドレスを入力してください。新しいパスワード設定用のリンクを送信します。',
+      submit: '再設定リンクを送る',
+      sending: '送信中...',
+      sent: 'メールアドレスが登録済みの場合、再設定リンクを送信しました。受信トレイをご確認ください。',
+      backToLogin: 'サインインに戻る',
+      errorRequired: 'メールアドレスを入力してください',
+      errorGeneric: '再設定メールの送信に失敗しました',
+    },
+    confirm: {
+      title: '新しいパスワードを設定',
+      description: '新しいパスワードを入力して確認してください。',
+      newPassword: '新しいパスワード',
+      confirmPassword: '新しいパスワード（確認）',
+      submit: 'パスワードを更新',
+      submitting: '更新中...',
+      success: 'パスワードを更新しました。新しいパスワードでサインインしてください。',
+      backToLogin: 'サインインに戻る',
+      errorRequired: 'すべての項目を入力してください',
+      errorMismatch: 'パスワードが一致しません',
+      errorTooShort: 'パスワードは8文字以上で入力してください',
+      errorInvalidToken: 'リセットリンクが無効か期限切れです。もう一度リクエストしてください。',
+      errorGeneric: 'パスワードの更新に失敗しました',
+      missingToken: 'URL からトークンを取得できませんでした。メールに記載のリンクからアクセスしてください。',
+    },
   },
 
   // Home/Dashboard page
@@ -64,6 +95,26 @@ export const ja = {
     loadingUser: 'ユーザー情報を読み込み中...',
     userNotAvailable: 'ユーザー情報が利用できません',
     userId: 'ユーザーID',
+    passwordUpdate: {
+      title: 'パスワード変更',
+      currentPassword: '現在のパスワード',
+      newPassword: '新しいパスワード',
+      confirmPassword: '新しいパスワード（確認）',
+      submit: 'パスワードを更新',
+      hint: '新しいパスワードは8文字以上で入力してください。',
+      success: 'パスワードを更新しました',
+      errorRequired: 'すべての項目を入力してください',
+      errorMismatch: '新しいパスワードが一致しません',
+      errorTooShort: '新しいパスワードは8文字以上で入力してください',
+      errorUnauthorized: '現在のパスワードが正しくありません',
+      errorGeneric: 'パスワードの更新に失敗しました',
+    },
+    passwordSetup: {
+      title: 'パスワードを設定',
+      hint: 'OAuth でログインしているため、現在パスワードは未設定です。8文字以上で初回のパスワードを設定できます。',
+      submit: 'パスワードを設定',
+      success: 'パスワードを設定しました',
+    },
   },
 
   // Security page

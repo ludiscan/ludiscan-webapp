@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
 
@@ -134,6 +135,9 @@ const Content: FC<LoginPageProps> = ({ className }) => {
             <Button onClick={handleLogin} scheme={'primary'} radius={'default'} fontSize={'lg'} width={'full'} disabled={loginDisabled}>
               <Text text={t('login.signIn')} />
             </Button>
+            <Link href='/password-reset/request' className={`${className}__forgotPassword`}>
+              {t('login.forgotPassword')}
+            </Link>
           </InlineFlexColumn>
         </Card>
       </InnerContent>
@@ -229,6 +233,17 @@ const IndexPage = styled(Component)`
   &__buttonText {
     width: 100%;
     text-align: center;
+  }
+
+  &__forgotPassword {
+    font-size: ${({ theme }) => theme.typography.fontSize.sm};
+    color: ${({ theme }) => theme.colors.text.secondary};
+    text-decoration: underline;
+    text-underline-offset: 2px;
+
+    &:hover {
+      color: ${({ theme }) => theme.colors.text.primary};
+    }
   }
 `;
 
