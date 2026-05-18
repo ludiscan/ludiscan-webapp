@@ -103,11 +103,7 @@ const Content: FC<PasswordResetConfirmPageProps> = ({ className }) => {
             </InlineFlexColumn>
 
             {!token && (
-              <Text
-                text={t('passwordReset.confirm.missingToken')}
-                fontSize={theme.typography.fontSize.base}
-                color={theme.colors.semantic.error.main}
-              />
+              <Text text={t('passwordReset.confirm.missingToken')} fontSize={theme.typography.fontSize.base} color={theme.colors.semantic.error.main} />
             )}
 
             {token && !done && (
