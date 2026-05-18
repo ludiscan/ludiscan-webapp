@@ -33,6 +33,37 @@ export const ja = {
     passwordPlaceholder: 'パスワード',
     success: 'ログインしました',
     errorEmptyFields: 'メールアドレスとパスワードを入力してください',
+    forgotPassword: 'パスワードを忘れた場合',
+  },
+
+  // Password Reset
+  passwordReset: {
+    request: {
+      title: 'パスワードを再設定',
+      description: 'アカウントのメールアドレスを入力してください。新しいパスワード設定用のリンクを送信します。',
+      submit: '再設定リンクを送る',
+      sending: '送信中...',
+      sent: 'メールアドレスが登録済みの場合、再設定リンクを送信しました。受信トレイをご確認ください。',
+      backToLogin: 'サインインに戻る',
+      errorRequired: 'メールアドレスを入力してください',
+      errorGeneric: '再設定メールの送信に失敗しました',
+    },
+    confirm: {
+      title: '新しいパスワードを設定',
+      description: '新しいパスワードを入力して確認してください。',
+      newPassword: '新しいパスワード',
+      confirmPassword: '新しいパスワード（確認）',
+      submit: 'パスワードを更新',
+      submitting: '更新中...',
+      success: 'パスワードを更新しました。新しいパスワードでサインインしてください。',
+      backToLogin: 'サインインに戻る',
+      errorRequired: 'すべての項目を入力してください',
+      errorMismatch: 'パスワードが一致しません',
+      errorTooShort: 'パスワードは8文字以上で入力してください',
+      errorInvalidToken: 'リセットリンクが無効か期限切れです。もう一度リクエストしてください。',
+      errorGeneric: 'パスワードの更新に失敗しました',
+      missingToken: 'URL からトークンを取得できませんでした。メールに記載のリンクからアクセスしてください。',
+    },
   },
 
   // Home/Dashboard page
