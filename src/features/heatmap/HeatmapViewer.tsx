@@ -88,7 +88,6 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
   const [modelType, setModelType] = useState<'gltf' | 'glb' | 'obj' | 'server' | null>(null);
   const [serverModelFileType, setServerModelFileType] = useState<ModelFileType | null>(null);
   const [dpr, setDpr] = useState(2);
-  // const [performance, setPerformance] = useState<PerformanceMonitorApi>();
 
   // ローカルファイルの一時表示用状態
   const [localModel, setLocalModel] = useState<LocalModelData | null>(null);

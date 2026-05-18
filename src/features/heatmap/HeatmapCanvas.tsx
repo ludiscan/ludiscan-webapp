@@ -136,7 +136,6 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
   playerId,
   hasLocalModel = false,
 }) => {
-  // const { invalidate } = useThree();
   const fitInfoRef = useRef<{ dist: number; center: Vector3 }>({ dist: 1000, center: new Vector3() });
   const { showHeatmap, heatmapOpacity, heatmapType, showMapIn2D, showShadow } = useGeneralPick(
     'showHeatmap',

@@ -7,6 +7,9 @@ import { Header } from '@src/component/templates/Header';
 export default {
   component: Header,
   controls: { hideNoControlsWarning: true },
+  argTypes: {
+    onToggleSidebar: { action: 'onToggleSidebar' },
+  },
 } as Meta;
 
 type Story = StoryObj<typeof Header>;
@@ -22,10 +25,6 @@ export const Default: Story = {
   name: 'default style',
   args: {
     title: 'Page1',
-    onToggleSidebar: () => {
-      /* eslint-disable-next-line no-console */
-      console.log('onToggleSidebar');
-    },
   },
 };
 
@@ -34,10 +33,6 @@ export const AddIconTitleEnd: Story = {
   name: 'icon title end style',
   args: {
     title: 'Page1',
-    onToggleSidebar: () => {
-      /* eslint-disable-next-line no-console */
-      console.log('onToggleSidebar');
-    },
   },
   render: (args) => {
     return (

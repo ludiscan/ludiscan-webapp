@@ -328,32 +328,6 @@ const EventLogMarkers: FC<EventLogMarkersProps> = ({ logName, service, pref }) =
     };
   }, [logName]);
 
-  // Helper function to get icon name based on HVQL or fallback
-  // const getIconNameForMarker = useCallback(
-  //   (metadata: Record<string, any> | undefined): string | undefined => {
-  //     if (!metadata) return iconName;
-  //
-  //     if (hvqlCompiler) {
-  //       try {
-  //         const ctx: ViewContext = {
-  //           player: 0,
-  //           status: metadata,
-  //           pos: { x: 0, y: 0, z: 0 },
-  //           t: 0,
-  //         };
-  //         const style = hvqlCompiler(ctx);
-  //         return style.icon || iconName;
-  //       } catch (e) {
-  //         console.error('Error applying HVQL:', e);
-  //         return iconName;
-  //       }
-  //     }
-  //
-  //     return iconName;
-  //   },
-  //   [hvqlCompiler, iconName],
-  // );
-
   return (
     <>
       {visibleWorldPositions.map((d) => (

@@ -1,12 +1,8 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} **/
 module.exports = {
-  testEnvironment: 'jsdom',
+  testEnvironment: 'node',
   transform: {
-    '^.+.tsx?$': ['ts-jest', {
-      tsconfig: {
-        jsx: 'react-jsx'
-      }
-    }],
+    '^.+\\.tsx?$': ['ts-jest', { tsconfig: { jsx: 'react-jsx' } }],
   },
   moduleNameMapper: {
     '^@src/(.*)$': '<rootDir>/src/$1',
