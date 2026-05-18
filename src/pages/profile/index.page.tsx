@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -312,14 +313,19 @@ const Component: FC<ProfilePageProps> = ({ className }) => {
           >
             <FlexColumn gap={12}>
               {!isInitialSetup && (
-                <OutlinedTextField
-                  label={t('profile.passwordUpdate.currentPassword')}
-                  value={currentPassword}
-                  onChange={setCurrentPassword}
-                  type='password'
-                  fontSize={theme.typography.fontSize.base}
-                  disabled={isUpdatingPassword}
-                />
+                <>
+                  <OutlinedTextField
+                    label={t('profile.passwordUpdate.currentPassword')}
+                    value={currentPassword}
+                    onChange={setCurrentPassword}
+                    type='password'
+                    fontSize={theme.typography.fontSize.base}
+                    disabled={isUpdatingPassword}
+                  />
+                  <Link href='/password-reset/request' className={`${className}__forgotPassword`}>
+                    {t('profile.passwordUpdate.forgotPassword')}
+                  </Link>
+                </>
               )}
               <OutlinedTextField
                 label={t('profile.passwordUpdate.newPassword')}
@@ -486,6 +492,18 @@ const ProfilePage = styled(Component)`
   &__submitRow {
     justify-content: flex-end;
     margin-top: ${({ theme }) => theme.spacing.sm};
+  }
+
+  &__forgotPassword {
+    align-self: flex-start;
+    font-size: ${({ theme }) => theme.typography.fontSize.sm};
+    color: ${({ theme }) => theme.colors.text.secondary};
+    text-decoration: underline;
+    text-underline-offset: 2px;
+
+    &:hover {
+      color: ${({ theme }) => theme.colors.text.primary};
+    }
   }
 
   &__centerContent {
