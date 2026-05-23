@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
 
 import type { FC } from 'react';
@@ -29,8 +29,21 @@ export type LoginPageProps = {
   className?: string | undefined;
 };
 
+/**
+ * Accepts only same-origin relative paths to avoid open-redirect via ?returnTo=.
+ * Allows "/foo" / "/foo?x=1" / "/foo#bar" but rejects "//evil.com" and absolute URLs.
+ */
+const sanitizeReturnTo = (raw: string | null | undefined): string | null => {
+  if (!raw) return null;
+  if (!raw.startsWith('/')) return null;
+  if (raw.startsWith('//')) return null;
+  return raw;
+};
+
 const Content: FC<LoginPageProps> = ({ className }) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnTo = sanitizeReturnTo(searchParams?.get('returnTo'));
   const isDesktop = useIsDesktop();
   const { theme } = useSharedTheme();
   const { t } = useLocale();
@@ -38,8 +51,12 @@ const Content: FC<LoginPageProps> = ({ className }) => {
   const [password, setPassword] = useState('');
   const { showToast } = useToast();
   const onClose = useCallback(() => {
+    if (returnTo) {
+      router.replace(returnTo);
+      return;
+    }
     router.back();
-  }, [router]);
+  }, [returnTo, router]);
   const handleInputEmail = useCallback((e: string) => {
     setEmail(e);
   }, []);

@@ -56,7 +56,7 @@ const Content: FC<PasswordResetConfirmPageProps> = ({ className }) => {
     onSuccess: () => {
       setDone(true);
       showToast(t('passwordReset.confirm.success'), 3, 'success');
-      setTimeout(() => router.replace('/login'), 1500);
+      setTimeout(() => router.replace('/login?returnTo=/'), 1500);
     },
     onError: (error: Error) => {
       showToast(error.message, 3, 'error');
@@ -141,7 +141,7 @@ const Content: FC<PasswordResetConfirmPageProps> = ({ className }) => {
                 <Text text={isPending ? t('passwordReset.confirm.submitting') : t('passwordReset.confirm.submit')} />
               </Button>
             )}
-            <Link href='/login' className={`${className}__back`}>
+            <Link href='/login?returnTo=/' className={`${className}__back`}>
               {t('passwordReset.confirm.backToLogin')}
             </Link>
           </InlineFlexColumn>
