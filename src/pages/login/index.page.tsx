@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
 
 import type { FC } from 'react';
@@ -28,8 +29,21 @@ export type LoginPageProps = {
   className?: string | undefined;
 };
 
+/**
+ * Accepts only same-origin relative paths to avoid open-redirect via ?returnTo=.
+ * Allows "/foo" / "/foo?x=1" / "/foo#bar" but rejects "//evil.com" and absolute URLs.
+ */
+const sanitizeReturnTo = (raw: string | null | undefined): string | null => {
+  if (!raw) return null;
+  if (!raw.startsWith('/')) return null;
+  if (raw.startsWith('//')) return null;
+  return raw;
+};
+
 const Content: FC<LoginPageProps> = ({ className }) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnTo = sanitizeReturnTo(searchParams?.get('returnTo'));
   const isDesktop = useIsDesktop();
   const { theme } = useSharedTheme();
   const { t } = useLocale();
@@ -37,8 +51,12 @@ const Content: FC<LoginPageProps> = ({ className }) => {
   const [password, setPassword] = useState('');
   const { showToast } = useToast();
   const onClose = useCallback(() => {
+    if (returnTo) {
+      router.replace(returnTo);
+      return;
+    }
     router.back();
-  }, [router]);
+  }, [returnTo, router]);
   const handleInputEmail = useCallback((e: string) => {
     setEmail(e);
   }, []);
@@ -134,6 +152,9 @@ const Content: FC<LoginPageProps> = ({ className }) => {
             <Button onClick={handleLogin} scheme={'primary'} radius={'default'} fontSize={'lg'} width={'full'} disabled={loginDisabled}>
               <Text text={t('login.signIn')} />
             </Button>
+            <Link href='/password-reset/request' className={`${className}__forgotPassword`}>
+              {t('login.forgotPassword')}
+            </Link>
           </InlineFlexColumn>
         </Card>
       </InnerContent>
@@ -229,6 +250,17 @@ const IndexPage = styled(Component)`
   &__buttonText {
     width: 100%;
     text-align: center;
+  }
+
+  &__forgotPassword {
+    font-size: ${({ theme }) => theme.typography.fontSize.sm};
+    color: ${({ theme }) => theme.colors.text.secondary};
+    text-decoration: underline;
+    text-underline-offset: 2px;
+
+    &:hover {
+      color: ${({ theme }) => theme.colors.text.primary};
+    }
   }
 `;
 

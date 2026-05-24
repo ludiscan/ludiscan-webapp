@@ -1,23 +1,65 @@
 import styled from '@emotion/styled';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { ThemeType } from '@src/modeles/theme';
-import type { FC } from 'react';
+import type { FC, ReactNode } from 'react';
 
+import { Button } from '@src/component/atoms/Button';
 import { PanelCard } from '@src/component/atoms/Card';
 import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
 import { Seo } from '@src/component/atoms/Seo';
 import { Text } from '@src/component/atoms/Text';
+import { OutlinedTextField } from '@src/component/molecules/OutlinedTextField';
 import { Selector } from '@src/component/molecules/Selector';
 import { DashboardBackgroundCanvas } from '@src/component/templates/DashboardBackgroundCanvas';
 import { Header } from '@src/component/templates/Header';
 import { SidebarLayout } from '@src/component/templates/SidebarLayout';
+import { useToast } from '@src/component/templates/ToastContext';
+import { env } from '@src/config/env';
 import { useAuth } from '@src/hooks/useAuth';
+import { useLocale } from '@src/hooks/useLocale';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { useSidebar } from '@src/hooks/useSidebar';
 import themes from '@src/modeles/theme';
 import { InnerContent } from '@src/pages/_app.page';
+
+type UserMeV01 = {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  hasPassword: boolean;
+};
+
+const fetchMeV01 = async (): Promise<UserMeV01> => {
+  const res = await fetch(`${env.NEXT_PUBLIC_API_BASE_URL}/api/v0.1/users/me`, {
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to fetch user (${res.status})`);
+  }
+  return res.json();
+};
+
+const submitPasswordV01 = async (body: { currentPassword?: string; newPassword: string }): Promise<void> => {
+  const res = await fetch(`${env.NEXT_PUBLIC_API_BASE_URL}/api/v0.1/users/me/password`, {
+    method: 'PATCH',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const err = new Error(`status:${res.status}`) as Error & { status?: number };
+    err.status = res.status;
+    throw err;
+  }
+};
+
+const MIN_PASSWORD_LENGTH = 8;
 
 export type ProfilePageProps = {
   className?: string;
@@ -27,15 +69,67 @@ interface UserProfile {
   id: string;
   email: string;
   name: string;
+  role?: string;
 }
+
+const getInitials = (name: string, email: string): string => {
+  const source = name?.trim() || email?.trim() || '';
+  if (!source) return '?';
+  const parts = source.split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  return source.slice(0, 2).toUpperCase();
+};
+
+type SectionProps = {
+  className?: string;
+  title: string;
+  description?: string;
+  children: ReactNode;
+};
+
+const SectionBase: FC<SectionProps> = ({ className, title, description, children }) => {
+  const { theme } = useSharedTheme();
+  return (
+    <PanelCard color={theme.colors.surface.base} className={className}>
+      <FlexColumn gap={20}>
+        <FlexColumn gap={4}>
+          <Text text={title} fontSize={theme.typography.fontSize.lg} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bold} />
+          {description && <Text text={description} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} fontWeight={'lighter'} />}
+        </FlexColumn>
+        {children}
+      </FlexColumn>
+    </PanelCard>
+  );
+};
+
+const Section = styled(SectionBase)`
+  padding: ${({ theme }) => theme.spacing.lg};
+`;
 
 const Component: FC<ProfilePageProps> = ({ className }) => {
   const { isAuthorized, isLoading, ready, user } = useAuth();
   const router = useRouter();
   const { theme, themeType, setThemeType } = useSharedTheme();
+  const { t } = useLocale();
+  const { showToast } = useToast();
 
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  const queryClient = useQueryClient();
+  const { data: meV01 } = useQuery({
+    queryKey: ['users', 'me', 'v0.1'],
+    queryFn: fetchMeV01,
+    enabled: isAuthorized,
+  });
+  const hasPassword = meV01?.hasPassword ?? true;
+  const isInitialSetup = meV01 !== undefined && !hasPassword;
 
   const themeTypeOptions = useMemo(() => Object.keys(themes) as ThemeType[], []);
 
@@ -46,7 +140,55 @@ const Component: FC<ProfilePageProps> = ({ className }) => {
     [setThemeType],
   );
 
-  // ユーザー情報をセット
+  const resetPasswordFields = useCallback(() => {
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+  }, []);
+
+  const { mutate: updatePassword, isPending: isUpdatingPassword } = useMutation({
+    mutationFn: async () => {
+      try {
+        await submitPasswordV01({
+          currentPassword: isInitialSetup ? undefined : currentPassword,
+          newPassword,
+        });
+      } catch (e) {
+        const status = (e as { status?: number }).status;
+        if (status === 401) {
+          throw new Error(t('profile.passwordUpdate.errorUnauthorized'));
+        }
+        throw new Error(t('profile.passwordUpdate.errorGeneric'));
+      }
+    },
+    onSuccess: () => {
+      const successMsg = isInitialSetup ? t('profile.passwordSetup.success') : t('profile.passwordUpdate.success');
+      showToast(successMsg, 2, 'success');
+      resetPasswordFields();
+      queryClient.invalidateQueries({ queryKey: ['users', 'me', 'v0.1'] });
+    },
+    onError: (error: Error) => {
+      showToast(error.message, 3, 'error');
+    },
+  });
+
+  const handlePasswordSubmit = useCallback(() => {
+    const missingRequired = isInitialSetup ? !newPassword || !confirmPassword : !currentPassword || !newPassword || !confirmPassword;
+    if (missingRequired) {
+      showToast(t('profile.passwordUpdate.errorRequired'), 2, 'error');
+      return;
+    }
+    if (newPassword.length < MIN_PASSWORD_LENGTH) {
+      showToast(t('profile.passwordUpdate.errorTooShort'), 2, 'error');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      showToast(t('profile.passwordUpdate.errorMismatch'), 2, 'error');
+      return;
+    }
+    updatePassword();
+  }, [isInitialSetup, currentPassword, newPassword, confirmPassword, showToast, t, updatePassword]);
+
   useEffect(() => {
     if (user) {
       setUserProfile(user as UserProfile);
@@ -76,94 +218,139 @@ const Component: FC<ProfilePageProps> = ({ className }) => {
     );
   }
 
+  const initials = userProfile ? getInitials(userProfile.name || '', userProfile.email || '') : '?';
+
   return (
     <div className={className}>
       <Seo title='Profile' path='/profile' noIndex={true} />
       <DashboardBackgroundCanvas className='visible' />
       <SidebarLayout />
       <InnerContent>
-        <Header title='Profile' onToggleSidebar={toggleSidebar} />
+        <Header title={t('profile.title')} onToggleSidebar={toggleSidebar} />
 
         <div className={`${className}__container`}>
-          <PanelCard color={theme.colors.surface.base} className={`${className}__card`}>
-            <FlexColumn gap={16}>
-              <div>
-                <Text
-                  text='Basic Information'
-                  fontSize={theme.typography.fontSize.lg}
-                  color={theme.colors.text.primary}
-                  fontWeight={theme.typography.fontWeight.bold}
-                />
-              </div>
-
-              {isLoadingProfile ? (
-                <Text text='Loading user information...' fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} />
-              ) : userProfile ? (
-                <FlexColumn gap={16}>
-                  <div className={`${className}__infoField`}>
-                    <Text
-                      text='Name'
-                      fontSize={theme.typography.fontSize.sm}
-                      color={theme.colors.text.secondary}
-                      fontWeight={theme.typography.fontWeight.bold}
-                    />
-                    <Text text={userProfile.name || '-'} fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} />
-                  </div>
-
-                  <div className={`${className}__infoField`}>
-                    <Text
-                      text='Email'
-                      fontSize={theme.typography.fontSize.sm}
-                      color={theme.colors.text.secondary}
-                      fontWeight={theme.typography.fontWeight.bold}
-                    />
-                    <Text text={userProfile.email || '-'} fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} />
-                  </div>
-
-                  <div className={`${className}__infoField`}>
-                    <Text
-                      text='User ID'
-                      fontSize={theme.typography.fontSize.sm}
-                      color={theme.colors.text.secondary}
-                      fontWeight={theme.typography.fontWeight.bold}
-                    />
-                    <Text text={userProfile.id || '-'} fontSize={theme.typography.fontSize.xs} color={theme.colors.text.secondary} fontWeight='lighter' />
-                  </div>
-                </FlexColumn>
-              ) : (
-                <Text text='User information not available' fontSize={theme.typography.fontSize.base} color={theme.colors.semantic.error.main} />
-              )}
-            </FlexColumn>
-          </PanelCard>
-
-          <PanelCard color={theme.colors.surface.base} className={`${className}__card`}>
-            <FlexColumn gap={16}>
-              <div>
-                <Text
-                  text='Appearance'
-                  fontSize={theme.typography.fontSize.lg}
-                  color={theme.colors.text.primary}
-                  fontWeight={theme.typography.fontWeight.bold}
-                />
-              </div>
-
-              <div className={`${className}__infoField`}>
-                <Text text='Theme' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} fontWeight={theme.typography.fontWeight.bold} />
-                <FlexRow align={'center'} gap={8}>
-                  <Selector
-                    options={themeTypeOptions}
-                    value={themeType}
-                    onChange={handleThemeTypeChange}
-                    fontSize={'base'}
-                    scheme={'none'}
-                    border={false}
-                    placement={'bottom'}
-                    align={'left'}
+          {/* Identity header */}
+          <PanelCard color={theme.colors.surface.base} className={`${className}__identityCard`}>
+            {isLoadingProfile ? (
+              <Text text={t('profile.loadingUser')} fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} />
+            ) : userProfile ? (
+              <FlexRow gap={20} align={'center'} className={`${className}__identityRow`}>
+                <div className={`${className}__avatar`} aria-hidden='true'>
+                  {initials}
+                </div>
+                <FlexColumn gap={4} className={`${className}__identityText`}>
+                  <Text
+                    text={userProfile.name || userProfile.email || '-'}
+                    fontSize={theme.typography.fontSize.xl}
+                    color={theme.colors.text.primary}
+                    fontWeight={theme.typography.fontWeight.bold}
                   />
-                </FlexRow>
-              </div>
-            </FlexColumn>
+                  <Text text={userProfile.email || '-'} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} fontWeight={'lighter'} />
+                  {userProfile.role && (
+                    <div className={`${className}__roleBadge`}>
+                      <Text
+                        text={userProfile.role}
+                        fontSize={theme.typography.fontSize.xs}
+                        color={theme.colors.primary.contrast}
+                        fontWeight={theme.typography.fontWeight.bold}
+                      />
+                    </div>
+                  )}
+                </FlexColumn>
+              </FlexRow>
+            ) : (
+              <Text text={t('profile.userNotAvailable')} fontSize={theme.typography.fontSize.base} color={theme.colors.semantic.error.main} />
+            )}
           </PanelCard>
+
+          {/* Basic Information */}
+          <Section title={t('profile.basicInfo')}>
+            {isLoadingProfile ? (
+              <Text text={t('profile.loadingUser')} fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} />
+            ) : userProfile ? (
+              <dl className={`${className}__infoList`}>
+                <div className={`${className}__infoRow`}>
+                  <dt className={`${className}__infoLabel`}>{t('common.name')}</dt>
+                  <dd className={`${className}__infoValue`}>{userProfile.name || '-'}</dd>
+                </div>
+                <div className={`${className}__infoRow`}>
+                  <dt className={`${className}__infoLabel`}>{t('common.email')}</dt>
+                  <dd className={`${className}__infoValue`}>{userProfile.email || '-'}</dd>
+                </div>
+                <div className={`${className}__infoRow`}>
+                  <dt className={`${className}__infoLabel`}>{t('profile.userId')}</dt>
+                  <dd className={`${className}__infoValue ${className}__infoValue--mono`}>{userProfile.id || '-'}</dd>
+                </div>
+              </dl>
+            ) : (
+              <Text text={t('profile.userNotAvailable')} fontSize={theme.typography.fontSize.base} color={theme.colors.semantic.error.main} />
+            )}
+          </Section>
+
+          {/* Appearance */}
+          <Section title='Appearance'>
+            <div className={`${className}__settingRow`}>
+              <Text text='Theme' fontSize={theme.typography.fontSize.base} color={theme.colors.text.primary} fontWeight={theme.typography.fontWeight.bold} />
+              <div className={`${className}__selectorWrapper`}>
+                <Selector
+                  options={themeTypeOptions}
+                  value={themeType}
+                  onChange={handleThemeTypeChange}
+                  fontSize={'base'}
+                  scheme={'surface'}
+                  border={true}
+                  placement={'bottom'}
+                  align={'left'}
+                />
+              </div>
+            </div>
+          </Section>
+
+          {/* Password Change / Initial Setup */}
+          <Section
+            title={isInitialSetup ? t('profile.passwordSetup.title') : t('profile.passwordUpdate.title')}
+            description={isInitialSetup ? t('profile.passwordSetup.hint') : t('profile.passwordUpdate.hint')}
+          >
+            <FlexColumn gap={12}>
+              {!isInitialSetup && (
+                <>
+                  <OutlinedTextField
+                    label={t('profile.passwordUpdate.currentPassword')}
+                    value={currentPassword}
+                    onChange={setCurrentPassword}
+                    type='password'
+                    fontSize={theme.typography.fontSize.base}
+                    disabled={isUpdatingPassword}
+                  />
+                  <Link href='/password-reset/request' className={`${className}__forgotPassword`}>
+                    {t('profile.passwordUpdate.forgotPassword')}
+                  </Link>
+                </>
+              )}
+              <OutlinedTextField
+                label={t('profile.passwordUpdate.newPassword')}
+                value={newPassword}
+                onChange={setNewPassword}
+                type='password'
+                fontSize={theme.typography.fontSize.base}
+                disabled={isUpdatingPassword}
+              />
+              <OutlinedTextField
+                label={t('profile.passwordUpdate.confirmPassword')}
+                value={confirmPassword}
+                onChange={setConfirmPassword}
+                type='password'
+                fontSize={theme.typography.fontSize.base}
+                disabled={isUpdatingPassword}
+              />
+            </FlexColumn>
+
+            <FlexRow gap={12} align={'center'} className={`${className}__submitRow`}>
+              <Button onClick={handlePasswordSubmit} scheme={'primary'} fontSize={'base'} disabled={isUpdatingPassword}>
+                {isUpdatingPassword ? t('common.processing') : isInitialSetup ? t('profile.passwordSetup.submit') : t('profile.passwordUpdate.submit')}
+              </Button>
+            </FlexRow>
+          </Section>
         </div>
       </InnerContent>
     </div>
@@ -178,22 +365,144 @@ const ProfilePage = styled(Component)`
   &__container {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    padding: 12px 6px;
-    margin-bottom: 24px;
+    gap: ${({ theme }) => theme.spacing.md};
+    width: 100%;
+    max-width: 800px;
+    padding: ${({ theme }) => `${theme.spacing.lg} ${theme.spacing.lg} ${theme.spacing['2xl']}`};
+    margin: 0 auto;
+
+    @media (width <= 768px) {
+      padding: ${({ theme }) => `${theme.spacing.md} ${theme.spacing.sm} ${theme.spacing.xl}`};
+    }
   }
 
-  &__card {
-    padding: 24px;
+  &__identityCard {
+    padding: ${({ theme }) => theme.spacing.lg};
   }
 
-  &__infoField {
-    padding-bottom: 16px;
+  &__identityRow {
+    flex-wrap: wrap;
+  }
+
+  &__identityText {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__avatar {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    font-size: ${({ theme }) => theme.typography.fontSize.xl};
+    font-weight: ${({ theme }) => theme.typography.fontWeight.bold};
+    color: ${({ theme }) => theme.colors.primary.contrast};
+    text-transform: uppercase;
+    user-select: none;
+    background: linear-gradient(135deg, ${({ theme }) => theme.colors.primary.main}, ${({ theme }) => theme.colors.secondary.main});
+    border-radius: ${({ theme }) => theme.borders.radius.full};
+  }
+
+  &__roleBadge {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    padding: ${({ theme }) => `${theme.spacing.xs} ${theme.spacing.sm}`};
+    margin-top: ${({ theme }) => theme.spacing.xs};
+    text-transform: capitalize;
+    background-color: ${({ theme }) => theme.colors.primary.main};
+    border-radius: ${({ theme }) => theme.borders.radius.full};
+  }
+
+  &__infoList {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 0;
+  }
+
+  &__infoRow {
+    display: flex;
+    gap: ${({ theme }) => theme.spacing.md};
+    align-items: center;
+    justify-content: space-between;
+    padding: ${({ theme }) => `${theme.spacing.sm} 0`};
     border-bottom: 1px solid ${({ theme }) => theme.colors.border.default};
 
-    &:last-child {
+    &:first-of-type {
+      padding-top: 0;
+    }
+
+    &:last-of-type {
       padding-bottom: 0;
       border-bottom: none;
+    }
+
+    @media (width <= 480px) {
+      flex-direction: column;
+      gap: ${({ theme }) => theme.spacing.xs};
+      align-items: flex-start;
+    }
+  }
+
+  &__infoLabel {
+    flex-shrink: 0;
+    margin: 0;
+    font-size: ${({ theme }) => theme.typography.fontSize.sm};
+    font-weight: ${({ theme }) => theme.typography.fontWeight.bold};
+    color: ${({ theme }) => theme.colors.text.secondary};
+  }
+
+  &__infoValue {
+    margin: 0;
+    font-size: ${({ theme }) => theme.typography.fontSize.base};
+    color: ${({ theme }) => theme.colors.text.primary};
+    text-align: right;
+    overflow-wrap: anywhere;
+
+    @media (width <= 480px) {
+      text-align: left;
+    }
+  }
+
+  &__infoValue--mono {
+    font-family: ${({ theme }) => theme.typography.fontFamily.monospace};
+    font-size: ${({ theme }) => theme.typography.fontSize.xs};
+    color: ${({ theme }) => theme.colors.text.secondary};
+  }
+
+  &__settingRow {
+    display: flex;
+    gap: ${({ theme }) => theme.spacing.md};
+    align-items: center;
+    justify-content: space-between;
+
+    @media (width <= 480px) {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+
+  &__selectorWrapper {
+    min-width: 200px;
+  }
+
+  &__submitRow {
+    justify-content: flex-end;
+    margin-top: ${({ theme }) => theme.spacing.sm};
+  }
+
+  &__forgotPassword {
+    align-self: flex-start;
+    font-size: ${({ theme }) => theme.typography.fontSize.sm};
+    color: ${({ theme }) => theme.colors.text.secondary};
+    text-decoration: underline;
+    text-underline-offset: 2px;
+
+    &:hover {
+      color: ${({ theme }) => theme.colors.text.primary};
     }
   }
 
