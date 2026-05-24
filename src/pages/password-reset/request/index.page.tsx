@@ -105,7 +105,7 @@ const Content: FC<PasswordResetRequestPageProps> = ({ className }) => {
                 <Text text={isPending ? t('passwordReset.request.sending') : t('passwordReset.request.submit')} />
               </Button>
             )}
-            <Link href='/login' className={`${className}__back`}>
+            <Link href='/login?returnTo=/' className={`${className}__back`}>
               {t('passwordReset.request.backToLogin')}
             </Link>
           </InlineFlexColumn>
