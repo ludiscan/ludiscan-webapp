@@ -20,6 +20,7 @@ import { LocaleProvider } from '@src/contexts/LocaleContext';
 import { useIsDesktop } from '@src/hooks/useIsDesktop';
 import { SharedThemeProvider } from '@src/hooks/useSharedTheme';
 import { SidebarProvider } from '@src/hooks/useSidebar';
+import { DefaultStaleTime } from '@src/modeles/qeury';
 import { store } from '@src/store';
 import { dimensions, zIndexes } from '@src/styles/style';
 
@@ -97,7 +98,21 @@ export default function App({ Component, pageProps }: AppProps) {
   const isDesktop = useIsDesktop();
   const [isPageLoading, setIsPageLoading] = useState(false);
   ReactModal.setAppElement('#__next');
-  const queryClient = useMemo(() => new QueryClient(), []);
+  const queryClient = useMemo(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            // 既定では毎回 stale + フォーカス毎 refetch で無駄なリクエストが出るため明示設定
+            staleTime: DefaultStaleTime, // 15分
+            gcTime: 1000 * 60 * 30, // 30分（既定5分だとキャッシュがすぐ破棄される）
+            refetchOnWindowFocus: false, // フォーカス毎の全クエリ refetch を抑制
+            retry: 1, // 失敗時のリトライを 3→1 に抑え、バックエンド負荷を軽減
+          },
+        },
+      }),
+    [],
+  );
   const storeRef = useRef<AppStore>(undefined);
   if (!storeRef.current) {
     storeRef.current = store();
