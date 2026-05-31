@@ -228,6 +228,8 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
     },
     initialData: null,
     enabled: taskId !== null && isAuthorized,
+    // 完了タスクは task_id 単位で不変なので再fetchしない（pending/processing中は下のポーリングで更新）
+    staleTime: (query) => (query.state.data?.status === 'completed' ? Infinity : 0),
     // apiClientは関数なので、依存配列に含めない（Contextから毎回取得されるため）
   });
 

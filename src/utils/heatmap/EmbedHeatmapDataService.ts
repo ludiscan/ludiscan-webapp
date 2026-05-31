@@ -109,6 +109,8 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
     },
     initialData: null,
     enabled: taskId !== null && !!apiClient,
+    // 完了タスクは task_id 単位で不変なので再fetchしない（pending/processing中は下のポーリングで更新）
+    staleTime: (query) => (query.state.data?.status === 'completed' ? Infinity : 0),
   });
 
   useEffect(() => {
