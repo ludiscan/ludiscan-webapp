@@ -8626,7 +8626,7 @@
   "info": {
     "title": "Ludiscan API Documentation",
     "description": "Ludiscan API for game analytics and session tracking",
-    "version": "1.38.1",
+    "version": "1.39.0",
     "contact": {}
   },
   "tags": [],
