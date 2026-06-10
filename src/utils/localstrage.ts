@@ -6,46 +6,6 @@ import { initializeValues } from '@src/modeles/heatmapView';
 
 const STORAGE_KEY = 'ludiscan';
 
-/**
- * @deprecated Authentication tokens are now stored in httpOnly cookies for security.
- * This function is kept for backward compatibility but should not be used for new code.
- * Use the authentication API routes (/api/auth/login) instead.
- *
- * Security note: Storing tokens in localStorage is vulnerable to XSS attacks.
- * httpOnly cookies provide better protection.
- */
-export function saveToken(token: string): void {
-  // SSR safety check - localStorage is only available in browser
-  if (typeof window === 'undefined') return;
-
-  const storage = localStorage.getItem(STORAGE_KEY);
-  if (storage) {
-    const data = JSON.parse(storage);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...data, token }));
-  } else {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ token }));
-  }
-}
-
-/**
- * @deprecated Authentication tokens are now stored in httpOnly cookies for security.
- * This function is kept for backward compatibility but should not be used for new code.
- * Use the authentication API routes (/api/auth/session) instead.
- *
- * Security note: Storing tokens in localStorage is vulnerable to XSS attacks.
- * httpOnly cookies provide better protection.
- */
-export function getToken(): string | null {
-  // SSR safety check - localStorage is only available in browser
-  if (typeof window === 'undefined') return null;
-
-  const storage = localStorage.getItem(STORAGE_KEY);
-  if (storage) {
-    return JSON.parse(storage).token || null;
-  }
-  return null;
-}
-
 export function saveUser(user: User | null): void {
   // SSR safety check - localStorage is only available in browser
   if (typeof window === 'undefined') return;
