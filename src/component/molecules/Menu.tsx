@@ -132,7 +132,7 @@ const Component: FC<MenuProps> = (props) => {
   const anchorRef = useRef<HTMLDivElement>(null);
 
   // Generate unique menu ID
-  const menuIdRef = useRef(`menu-${Math.random().toString(36).substring(2, 9)}`);
+  const menuIdRef = useRef(`menu-${crypto.randomUUID()}`);
   const menuId = menuIdRef.current;
 
   const closeMenu = useCallback(() => {
