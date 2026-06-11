@@ -210,14 +210,20 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
       const isSameSet = setA.size === setB.size && [...setA].every((k) => setB.has(k));
       if (isSameSet) return;
 
+      // O(1) lookup for better performance
+      const eventLogMap = new Map();
+      for (const log of eventLogs) {
+        eventLogMap.set(log.key, log);
+      }
+
       const eventLogDatas: EventLogData[] = generalLogKeys.map((key) => {
-        const index = eventLogs.findIndex((e) => e.key === key);
+        const eventLog = eventLogMap.get(key);
         return {
           key,
-          visible: index !== -1 ? eventLogs[index].visible : false,
-          color: eventLogs[index]?.color || getRandomPrimitiveColor(),
-          iconName: eventLogs[index]?.iconName || 'CiStreamOn',
-          hvqlScript: eventLogs[index]?.hvqlScript,
+          visible: eventLog ? eventLog.visible : false,
+          color: eventLog?.color || getRandomPrimitiveColor(),
+          iconName: eventLog?.iconName || 'CiStreamOn',
+          hvqlScript: eventLog?.hvqlScript,
         };
       });
 
