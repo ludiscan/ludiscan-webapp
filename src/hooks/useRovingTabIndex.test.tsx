@@ -35,7 +35,7 @@ const DummyComponent = ({ options, itemsCount = 3 }: { options?: UseRovingTabInd
         {items.map((item, index) => {
           const itemProps = getItemProps(index);
           return (
-            <li key={item} role="option" aria-selected={itemProps['aria-selected'] ?? false} {...itemProps}>
+            <li key={item} role='option' aria-selected={itemProps['aria-selected'] ?? false} {...itemProps}>
               {item}
             </li>
           );
@@ -58,7 +58,7 @@ const DynamicComponent = () => {
         {items.map((item, index) => {
           const itemProps = getItemProps(index);
           return (
-            <li key={item} role="option" aria-selected={itemProps['aria-selected'] ?? false} {...itemProps}>
+            <li key={item} role='option' aria-selected={itemProps['aria-selected'] ?? false} {...itemProps}>
               {item}
             </li>
           );
