@@ -36,11 +36,6 @@ export function createMockApiClient(mockDataDir: string = '/mocks/heatmap'): Api
     if (parseAs === 'arrayBuffer') {
       const filePath = `${mockDataDir}/maps/${mapName}.obj`;
       const buffer = await loadMockArrayBuffer(filePath);
-      // if (buffer) {
-      //   console.log(`[Mock] Successfully loaded ArrayBuffer (size: ${buffer.byteLength} bytes)`);
-      // } else {
-      //   console.warn(`[Mock] Failed to load ArrayBuffer from: ${filePath}`);
-      // }
       return buffer;
     }
 
