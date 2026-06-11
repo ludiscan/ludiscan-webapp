@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import type { HeatmapMenuProps } from '@src/features/heatmap/HeatmapMenuContent';
 import type { FieldObjectData } from '@src/modeles/heatmapView';
@@ -36,6 +36,8 @@ const Component: FC<HeatmapMenuProps> = ({ service }) => {
 
   const { data: objectTypes } = useFieldObjectTypes(service.projectId ?? undefined, service.sessionId ?? undefined);
 
+  const objectIndexMap = useMemo(() => new Map(objects.map((e, i) => [e.objectType, i])), [objects]);
+
   useEffect(() => {
     if (objectTypes && Array.isArray(objectTypes.data)) {
       // 現在のオブジェクトタイプ列を取り出す
@@ -48,7 +50,7 @@ const Component: FC<HeatmapMenuProps> = ({ service }) => {
         return;
       }
       const fieldObjectDatas: FieldObjectData[] = (objectTypes.data as string[]).map((type) => {
-        const index = objects.findIndex((e) => e.objectType === type);
+        const index = objectIndexMap.get(type) ?? -1;
 
         // Auto-assign HVQL script for HandChangeItem objects
         let hvqlScript = objects[index]?.hvqlScript;
@@ -66,7 +68,7 @@ const Component: FC<HeatmapMenuProps> = ({ service }) => {
       });
       setFieldObjects({ objects: fieldObjectDatas });
     }
-  }, [objectTypes, objects, setFieldObjects]);
+  }, [objectTypes, objects, setFieldObjects, objectIndexMap]);
 
   return (
     <InlineFlexColumn gap={8}>
@@ -102,7 +104,7 @@ const Component: FC<HeatmapMenuProps> = ({ service }) => {
         {objectTypes?.data &&
           Array.isArray(objectTypes.data) &&
           (objectTypes.data as string[]).map((type) => {
-            const index = objects.findIndex((e) => e.objectType === type);
+            const index = objectIndexMap.get(type) ?? -1;
             return (
               <InputRow key={type} label={type}>
                 <Switch
