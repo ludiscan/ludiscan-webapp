@@ -172,7 +172,7 @@ export default function App({ Component, pageProps }: AppProps) {
           </QueryClientProvider>
         </LocaleProvider>
       </Provider>
-      <GoogleTagManager gtmId={env.NEXT_PUBLIC_GTM_ID} />
+      {env.NEXT_PUBLIC_GTM_ID && <GoogleTagManager gtmId={env.NEXT_PUBLIC_GTM_ID} />}
     </>
   );
 }
