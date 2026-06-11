@@ -52,9 +52,7 @@ describe(`${flattenObject.name}`, () => {
       },
     };
 
-    expect(flattenObject(obj)).toEqual([
-      { name: 'a', value: 'value a' },
-    ]);
+    expect(flattenObject(obj)).toEqual([{ name: 'a', value: 'value a' }]);
   });
 
   test('数値や真偽値などの文字列以外の値は無視される', () => {
@@ -68,9 +66,7 @@ describe(`${flattenObject.name}`, () => {
       },
     };
 
-    expect(flattenObject(obj)).toEqual([
-      { name: 'a', value: 'value a' },
-    ]);
+    expect(flattenObject(obj)).toEqual([{ name: 'a', value: 'value a' }]);
   });
 
   test('空のネストされたオブジェクトはキーを生成しない', () => {
@@ -82,8 +78,6 @@ describe(`${flattenObject.name}`, () => {
       },
     };
 
-    expect(flattenObject(obj)).toEqual([
-      { name: 'a', value: 'value a' },
-    ]);
+    expect(flattenObject(obj)).toEqual([{ name: 'a', value: 'value a' }]);
   });
 });
