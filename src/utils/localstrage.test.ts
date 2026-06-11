@@ -3,8 +3,6 @@ import type { User } from '@src/modeles/user';
 
 import { initializeValues, type HeatmapDataState } from '@src/modeles/heatmapView';
 import {
-  saveToken,
-  getToken,
   saveUser,
   getUser,
   saveCanvasValues,
@@ -60,32 +58,6 @@ describe('localstrage', () => {
   beforeEach(() => {
     mockStorage = {};
     jest.clearAllMocks();
-  });
-
-  describe('Token functions', () => {
-    describe('saveToken', () => {
-      test('should save a token to localStorage', () => {
-        saveToken('my-token');
-        expect(localStorage.setItem).toHaveBeenCalledWith(STORAGE_KEY, JSON.stringify({ token: 'my-token' }));
-      });
-
-      test('should preserve existing data when saving a token', () => {
-        mockStorage[STORAGE_KEY] = JSON.stringify({ otherData: 'value' });
-        saveToken('my-token');
-        expect(localStorage.setItem).toHaveBeenCalledWith(STORAGE_KEY, JSON.stringify({ otherData: 'value', token: 'my-token' }));
-      });
-    });
-
-    describe('getToken', () => {
-      test('should return null when there is no token in localStorage', () => {
-        expect(getToken()).toBeNull();
-      });
-
-      test('should retrieve the token from localStorage', () => {
-        mockStorage[STORAGE_KEY] = JSON.stringify({ token: 'my-token' });
-        expect(getToken()).toBe('my-token');
-      });
-    });
   });
 
   describe('User functions', () => {
