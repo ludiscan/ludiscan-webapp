@@ -14,9 +14,7 @@ describe('useRouteCoach hooks', () => {
     appStore = store();
   });
 
-  const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <Provider store={appStore}>{children}</Provider>
-  );
+  const wrapper = ({ children }: { children: React.ReactNode }) => <Provider store={appStore}>{children}</Provider>;
 
   describe('useRouteCoachSelect', () => {
     it('should return the correct initial value', () => {
@@ -32,7 +30,7 @@ describe('useRouteCoach hooks', () => {
           patch: useRouteCoachPatch(),
           selectedClusterId: useRouteCoachSelect((s) => s.selectedClusterId),
         }),
-        { wrapper }
+        { wrapper },
       );
 
       expect(result.current.selectedClusterId).toBeNull();
