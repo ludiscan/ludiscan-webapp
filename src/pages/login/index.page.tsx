@@ -155,6 +155,13 @@ const Content: FC<LoginPageProps> = ({ className }) => {
             <Link href='/password-reset/request' className={`${className}__forgotPassword`}>
               {t('login.forgotPassword')}
             </Link>
+            <div className={`${className}__signupRow`}>
+              <Text text={t('login.noAccount')} fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
+              {' '}
+              <Link href='/signup' className={`${className}__signupLink`}>
+                {t('login.signUpHere')}
+              </Link>
+            </div>
           </InlineFlexColumn>
         </Card>
       </InnerContent>
@@ -260,6 +267,25 @@ const IndexPage = styled(Component)`
 
     &:hover {
       color: ${({ theme }) => theme.colors.text.primary};
+    }
+  }
+
+  &__signupRow {
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    align-items: center;
+  }
+
+  &__signupLink {
+    font-size: ${({ theme }) => theme.typography.fontSize.sm};
+    font-weight: bold;
+    color: ${({ theme }) => theme.colors.primary.main};
+    text-decoration: underline;
+    text-underline-offset: 2px;
+
+    &:hover {
+      opacity: 0.7;
     }
   }
 `;

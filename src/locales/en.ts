@@ -34,6 +34,42 @@ export const en = {
     success: 'Login success',
     errorEmptyFields: 'Please enter email and password',
     forgotPassword: 'Forgot your password?',
+    noAccount: "Don't have an account?",
+    signUpHere: 'Sign up',
+  },
+
+  // Signup page
+  signup: {
+    title: 'Create an account',
+    description: 'Join Ludiscan to start tracking and analyzing your game data.',
+    signUpWithGoogle: 'Sign up with Google',
+    emailStep: {
+      title: 'Enter your email',
+      submit: 'Send verification code',
+      sending: 'Sending...',
+      sent: 'Verification code sent. Please check your inbox.',
+      alreadyRegistered: 'This email is already registered.',
+      errorRequired: 'Please enter your email',
+      errorGeneric: 'Failed to send verification code',
+    },
+    codeStep: {
+      title: 'Verify your email',
+      codeLabel: 'Verification code (6 digits)',
+      codePlaceholder: '123456',
+      passwordLabel: 'Password',
+      passwordPlaceholder: 'password (8+ characters)',
+      confirmPasswordLabel: 'Confirm password',
+      confirmPasswordPlaceholder: 'confirm password',
+      submit: 'Create account',
+      submitting: 'Creating...',
+      errorRequired: 'Please fill in all fields',
+      errorMismatch: 'Passwords do not match',
+      errorTooShort: 'Password must be at least 8 characters',
+      errorInvalidCode: 'Invalid or expired verification code',
+      errorGeneric: 'Failed to create account',
+    },
+    backToLogin: 'Already have an account? Sign in',
+    success: 'Account created successfully',
   },
 
   // Password Reset
