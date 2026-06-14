@@ -11,20 +11,22 @@ import type { NextApiResponse } from 'next';
  * Default cookie options for secure cookies
  *
  * Development vs Production settings:
- * - Development: Works with HTTP, sameSite 'lax' for local testing
- * - Production: Enforces HTTPS, sameSite 'none' for cross-subdomain requests
+ * - Development: Works with HTTP, sameSite 'lax'
+ * - Production: Enforces HTTPS, sameSite 'lax'
  *
  * Cross-subdomain support:
- * - Frontend: ludiapp.matuyuhi.com
- * - API: matuyuhi.com
- * - Explicit domain: '.matuyuhi.com' allows cookies to be sent across both subdomains
- * - sameSite 'none' is required for fetch requests across subdomains in production
- * - sameSite 'none' requires secure: true (enforced in production)
+ * - Frontend: ludiapp.matuyuhi.com / API: matuyuhi.com
+ * - これらは同一の登録可能ドメイン (eTLD+1 = matuyuhi.com) のため "same-site"。
+ *   domain '.matuyuhi.com' を指定すれば、sameSite 'lax' でもサブドメイン間の
+ *   fetch に Cookie は送信される。
+ * - sameSite 'lax' は true cross-site（別ドメイン）からの非ナビゲーション
+ *   リクエストでは Cookie を送らないため、CSRF 攻撃面を縮小する。'none' は不要で、
+ *   不必要にクロスサイト送信を許してしまうため使用しない。
  */
 const DEFAULT_COOKIE_OPTIONS: SerializeOptions = {
   httpOnly: true, // Prevent JavaScript access (XSS protection)
   secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-subdomain requests in production, 'lax' for local testing
+  sameSite: 'lax', // same-site (matuyuhi.com) なので lax で十分。CSRF 面を縮小
   domain: process.env.NODE_ENV === 'production' ? '.matuyuhi.com' : undefined, // Cross-subdomain cookie sharing in production
   path: '/',
   maxAge: 60 * 60 * 24 * 7, // 7 days
