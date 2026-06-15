@@ -7,6 +7,7 @@ import type { HeatmapTask, PositionEventLog } from '@src/modeles/heatmaptask';
 import type { Project } from '@src/modeles/project';
 import type { createClient } from '@src/modeles/qeury';
 import type { Session } from '@src/modeles/session';
+import type { ModelTransform } from '@src/utils/heatmap/modelTransform';
 
 // セッション検索パラメータ
 export type SessionSearchParams = {
@@ -20,6 +21,7 @@ export type SessionSearchParams = {
 
 import { useAuth } from '@src/hooks/useAuth';
 import { useApiClient } from '@src/modeles/ApiClientContext';
+import { parseTransformHeader } from '@src/utils/heatmap/modelTransform';
 
 // Field object log type (matches API response)
 export type FieldObjectLog = {
@@ -43,6 +45,8 @@ export type Player = {
 export type MapContentResult = {
   data: ArrayBuffer;
   fileType: ModelFileType | null;
+  // モデルの配置情報（位置・回転・スケール）。未設定の場合は null。
+  transform: ModelTransform | null;
 };
 
 // HeatmapViewer用のデータ取得インターフェース
@@ -290,7 +294,10 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
         const fileTypeHeader = response.headers.get('X-Model-File-Type');
         const fileType = parseModelFileType(fileTypeHeader);
 
-        return { data, fileType };
+        const transformHeader = response.headers.get('X-Model-Transform');
+        const transform = parseTransformHeader(transformHeader);
+
+        return { data, fileType, transform };
       } catch {
         return null;
       }

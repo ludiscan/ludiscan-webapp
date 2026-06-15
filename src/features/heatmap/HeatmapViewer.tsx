@@ -39,6 +39,7 @@ import { useGeneralPatch, useGeneralPick } from '@src/hooks/useGeneral';
 import { useGetApi } from '@src/hooks/useGetApi';
 import { useLocale } from '@src/hooks/useLocale';
 import { usePlayerTimelinePatch } from '@src/hooks/usePlayerTimeline';
+import { useMapTransform } from '@src/hooks/useUploadMapData';
 import { useFieldObjectTypes } from '@src/modeles/heatmapView';
 import { DefaultStaleTime } from '@src/modeles/qeury';
 import { setMenuPanelCollapsed } from '@src/slices/uiSlice';
@@ -46,6 +47,7 @@ import { dimensions, zIndexes } from '@src/styles/style';
 import { heatMapEventBus } from '@src/utils/canvasEventBus';
 import { getRandomPrimitiveColor } from '@src/utils/color';
 import { detectDimensionality } from '@src/utils/heatmap/detectDimensionality';
+import { transformToAlignmentPatch } from '@src/utils/heatmap/modelTransform';
 
 // デフォルトのHVQLクエリ（FieldObject用）
 const DEFAULT_FIELD_OBJECT_HVQL = `map status.hand {
@@ -147,6 +149,9 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
     staleTime: 1000 * 60 * 20,
     enabled: !!mapName && service.isInitialized,
   });
+
+  // モデルの配置情報（位置・回転・スケール）をキャッシュなしで取得
+  const { data: mapTransform } = useMapTransform(mapName ?? undefined, !!mapName && service.isInitialized);
 
   const { data: generalLogKeys } = useQuery({
     queryKey: ['generalLogKeys', service.projectId, service.sessionId],
@@ -360,6 +365,19 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
       setGeneral({ heatmapType: 'fill' });
     }
   }, [model, setGeneral]);
+
+  // サーバーに保存された配置情報（transform）をマップごとに1回 general state へ反映
+  // （バイナリと別のキャッシュなしエンドポイントから取得し、リフェッチでは上書きしない）
+  const appliedTransformMapRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!mapName) return;
+    if (mapTransform === undefined) return; // 取得前
+    if (appliedTransformMapRef.current === mapName) return; // このマップは適用済み
+    appliedTransformMapRef.current = mapName;
+    if (mapTransform) {
+      setGeneral(transformToAlignmentPatch(mapTransform));
+    }
+  }, [mapName, mapTransform, setGeneral]);
 
   // ローカルモデル変更ハンドラ
   const handleLocalModelChange = useCallback((data: LocalModelData | null) => {
