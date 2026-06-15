@@ -53,22 +53,29 @@ function isVec3(value: unknown): value is [number, number, number] {
 }
 
 /**
+ * パース済みの値を ModelTransform に検証・正規化する。不正な場合は null を返す。
+ */
+export function toModelTransform(value: unknown): ModelTransform | null {
+  if (!value || typeof value !== 'object') return null;
+  const obj = value as Record<string, unknown>;
+  if (!isVec3(obj.position) || !isVec3(obj.rotation) || !isVec3(obj.scale)) {
+    return null;
+  }
+  return {
+    position: obj.position,
+    rotation: obj.rotation,
+    scale: obj.scale,
+  };
+}
+
+/**
  * GET レスポンスの X-Model-Transform ヘッダー（JSON 文字列）を ModelTransform にパースする。
  * 不正な場合は null を返す。
  */
 export function parseTransformHeader(header: string | null): ModelTransform | null {
   if (!header) return null;
   try {
-    const parsed = JSON.parse(header) as Record<string, unknown>;
-    if (!parsed || typeof parsed !== 'object') return null;
-    if (!isVec3(parsed.position) || !isVec3(parsed.rotation) || !isVec3(parsed.scale)) {
-      return null;
-    }
-    return {
-      position: parsed.position,
-      rotation: parsed.rotation,
-      scale: parsed.scale,
-    };
+    return toModelTransform(JSON.parse(header));
   } catch {
     return null;
   }

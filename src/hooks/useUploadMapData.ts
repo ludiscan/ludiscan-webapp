@@ -3,7 +3,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ModelTransform } from '@src/utils/heatmap/modelTransform';
 
 import { env } from '@src/config/env';
-import { parseTransformHeader } from '@src/utils/heatmap/modelTransform';
+import { createClient } from '@src/modeles/qeury';
+import { toModelTransform } from '@src/utils/heatmap/modelTransform';
 
 interface UploadMapDataParams {
   mapName: string;
@@ -69,18 +70,12 @@ export function useMapTransform(mapName: string | undefined, enabled: boolean) {
     queryKey: ['mapTransform', mapName],
     queryFn: async (): Promise<ModelTransform | null> => {
       if (!mapName) return null;
-      const baseUrl = env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost';
-      const url = `${baseUrl}/api/v0/heatmap/map_data/${encodeURIComponent(mapName)}/transform`;
-      const response = await fetch(url, {
-        method: 'GET',
-        credentials: 'include',
-        mode: 'cors',
-        cache: 'no-store',
+      const { data, error } = await createClient().GET('/api/v0/heatmap/map_data/{map_name}/transform', {
+        params: { path: { map_name: mapName } },
       });
-      if (!response.ok) return null;
-      const data = (await response.json().catch(() => null)) as { transform?: unknown } | null;
-      // 保存済みの値を共通バリデーションで検証して返す
-      return parseTransformHeader(data?.transform != null ? JSON.stringify(data.transform) : null);
+      if (error) return null;
+      // サーバー側で検証済みだが、tuple 型へ正規化して返す
+      return toModelTransform(data?.transform ?? null);
     },
     enabled: enabled && !!mapName,
     staleTime: 0,
@@ -96,27 +91,20 @@ export function useUpdateMapTransform() {
 
   return useMutation({
     mutationFn: async ({ mapName, transform }: UpdateMapTransformParams) => {
-      const baseUrl = env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost';
-      const url = `${baseUrl}/api/v0/heatmap/map_data/${encodeURIComponent(mapName)}/transform`;
-
-      const response = await fetch(url, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(transform),
-        credentials: 'include',
-        mode: 'cors',
+      const { error } = await createClient().PATCH('/api/v0/heatmap/map_data/{map_name}/transform', {
+        params: { path: { map_name: mapName } },
+        body: transform,
       });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`Failed to update transform: ${errorData.message || response.statusText}`);
+      if (error) {
+        throw new Error(`Failed to update transform: ${error.message ?? 'Unknown error'}`);
       }
-
-      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['mapData'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['mapTransform'],
       });
     },
   });
