@@ -20,7 +20,8 @@ import { InputRow } from '@src/features/heatmap/menu/InputRow';
 import { useGeneralPatch, useGeneralPick, useGeneralSelect } from '@src/hooks/useGeneral';
 import { useLocale } from '@src/hooks/useLocale';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { useUploadMapData } from '@src/hooks/useUploadMapData';
+import { useUpdateMapTransform, useUploadMapData } from '@src/hooks/useUploadMapData';
+import { alignmentToTransform } from '@src/utils/heatmap/modelTransform';
 
 const UploadSection = styled.div`
   display: flex;
@@ -341,17 +342,19 @@ export const MapMenuContent: FC<HeatmapMenuProps> = ({
   const { theme } = useSharedTheme();
   const { t } = useLocale();
   const mapName = useGeneralSelect((s) => s.mapName);
-  const { modelPositionX, modelPositionY, modelPositionZ, modelRotationX, modelRotationY, modelRotationZ, showMapIn2D } = useGeneralPick(
+  const { modelPositionX, modelPositionY, modelPositionZ, modelRotationX, modelRotationY, modelRotationZ, scale, showMapIn2D } = useGeneralPick(
     'modelPositionX',
     'modelPositionY',
     'modelPositionZ',
     'modelRotationX',
     'modelRotationY',
     'modelRotationZ',
+    'scale',
     'showMapIn2D',
   );
   const setData = useGeneralPatch();
   const uploadMapData = useUploadMapData();
+  const updateMapTransform = useUpdateMapTransform();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [statusMessage, setStatusMessage] = useState<{ text: string; status: 'success' | 'error' | 'info' } | null>(null);
   const [isAlignmentOpen, setIsAlignmentOpen] = useState(false);
@@ -463,6 +466,8 @@ export const MapMenuContent: FC<HeatmapMenuProps> = ({
       await uploadMapData.mutateAsync({
         mapName: mapName,
         file: selectedFile,
+        // 現在の配置情報（位置・回転・スケール）を一緒に保存
+        transform: alignmentToTransform({ modelPositionX, modelPositionY, modelPositionZ, modelRotationX, modelRotationY, modelRotationZ, scale }),
       });
       setStatusMessage({ text: 'Upload successful!', status: 'success' });
       setSelectedFile(null);
@@ -472,7 +477,25 @@ export const MapMenuContent: FC<HeatmapMenuProps> = ({
         status: 'error',
       });
     }
-  }, [selectedFile, mapName, uploadMapData]);
+  }, [selectedFile, mapName, uploadMapData, modelPositionX, modelPositionY, modelPositionZ, modelRotationX, modelRotationY, modelRotationZ, scale]);
+
+  // 配置情報のみをサーバーに保存（ファイル再アップロード不要）
+  const handleSaveAlignment = useCallback(async () => {
+    if (!mapName) return;
+    setStatusMessage({ text: 'Saving alignment...', status: 'info' });
+    try {
+      await updateMapTransform.mutateAsync({
+        mapName,
+        transform: alignmentToTransform({ modelPositionX, modelPositionY, modelPositionZ, modelRotationX, modelRotationY, modelRotationZ, scale }),
+      });
+      setStatusMessage({ text: 'Alignment saved!', status: 'success' });
+    } catch (error) {
+      setStatusMessage({
+        text: `Failed to save alignment: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        status: 'error',
+      });
+    }
+  }, [mapName, updateMapTransform, modelPositionX, modelPositionY, modelPositionZ, modelRotationX, modelRotationY, modelRotationZ, scale]);
 
   const is2DMode = dimensionality === '2d';
 
@@ -625,23 +648,35 @@ export const MapMenuContent: FC<HeatmapMenuProps> = ({
                     />
                   </FlexRow>
                 </InputRow>
+                <InputRow label={'Scale'}>
+                  <FlexRow gap={4} align='center'>
+                    <DraggableNumberInput label='S' value={scale} onChange={(v) => setData({ scale: v })} min={0.01} step={0.1} precision={2} />
+                  </FlexRow>
+                </InputRow>
                 <InputRow label={''}>
-                  <Button
-                    scheme={'tertiary'}
-                    fontSize={'sm'}
-                    onClick={() =>
-                      setData({
-                        modelPositionX: 0,
-                        modelPositionY: 0,
-                        modelPositionZ: 0,
-                        modelRotationX: 0,
-                        modelRotationY: 0,
-                        modelRotationZ: 0,
-                      })
-                    }
-                  >
-                    <Text text={'Reset'} fontSize={theme.typography.fontSize.sm} />
-                  </Button>
+                  <FlexRow gap={8} align='center'>
+                    <Button
+                      scheme={'tertiary'}
+                      fontSize={'sm'}
+                      onClick={() =>
+                        setData({
+                          modelPositionX: 0,
+                          modelPositionY: 0,
+                          modelPositionZ: 0,
+                          modelRotationX: 0,
+                          modelRotationY: 0,
+                          modelRotationZ: 0,
+                        })
+                      }
+                    >
+                      <Text text={'Reset'} fontSize={theme.typography.fontSize.sm} />
+                    </Button>
+                    {mapName && !service.isEmbed && (
+                      <Button scheme={'primary'} fontSize={'sm'} onClick={handleSaveAlignment} disabled={updateMapTransform.isPending}>
+                        <Text text={updateMapTransform.isPending ? 'Saving...' : 'Save alignment'} fontSize={theme.typography.fontSize.sm} />
+                      </Button>
+                    )}
+                  </FlexRow>
                 </InputRow>
               </CollapsibleContent>
             </CollapsibleSection>

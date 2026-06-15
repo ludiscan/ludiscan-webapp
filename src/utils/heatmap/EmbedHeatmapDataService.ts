@@ -8,6 +8,7 @@ import type { Project } from '@src/modeles/project';
 import type { Session } from '@src/modeles/session';
 
 import { createEmbedClient } from '@src/modeles/qeury';
+import { parseTransformHeader } from '@src/utils/heatmap/modelTransform';
 
 /**
  * ファイル形式文字列をModelFileTypeに変換
@@ -171,7 +172,11 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
         const fileTypeHeader = response.headers.get('X-Model-File-Type');
         const fileType = parseModelFileType(fileTypeHeader);
 
-        return { data, fileType };
+        // レスポンスヘッダーから配置情報を取得
+        const transformHeader = response.headers.get('X-Model-Transform');
+        const transform = parseTransformHeader(transformHeader);
+
+        return { data, fileType, transform };
       } catch {
         return null;
       }
