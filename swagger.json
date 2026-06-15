@@ -5159,6 +5159,12 @@
                     "glb"
                   ]
                 }
+              },
+              "X-Model-Transform": {
+                "description": "モデルの配置情報 { position, rotation, scale } の JSON。未設定の場合はヘッダーなし。",
+                "schema": {
+                  "type": "string"
+                }
               }
             }
           },
@@ -5205,6 +5211,10 @@
                   "file": {
                     "type": "string",
                     "format": "binary"
+                  },
+                  "transform": {
+                    "type": "string",
+                    "description": "モデルの配置情報 { position, rotation, scale } の JSON 文字列（任意）"
                   }
                 }
               }
@@ -5239,6 +5249,101 @@
           }
         ],
         "summary": "ファイルアップロードエンドポイント",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/heatmap/map_data/{map_name}/transform": {
+      "patch": {
+        "description": "ファイルを再アップロードせずに、アップロード済みマップの transform のみを更新します。",
+        "operationId": "HeatmapController_patchMapTransform",
+        "parameters": [
+          {
+            "name": "map_name",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModelTransformDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Transform updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "マップモデルの配置情報（位置・回転・スケール）を更新",
+        "tags": [
+          "v0"
+        ]
+      },
+      "get": {
+        "description": "モデルの配置情報を返します。バイナリ（map_data）とは別にキャッシュされない軽量エンドポイントで、認証不要。",
+        "operationId": "HeatmapController_getMapTransform",
+        "parameters": [
+          {
+            "name": "map_name",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Model transform (null if unset)"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "マップモデルの配置情報（位置・回転・スケール）を取得",
         "tags": [
           "v0"
         ]
@@ -8658,7 +8763,7 @@
   "info": {
     "title": "Ludiscan API Documentation",
     "description": "Ludiscan API for game analytics and session tracking",
-    "version": "1.42.0",
+    "version": "1.42.1",
     "contact": {}
   },
   "tags": [],
@@ -10406,6 +10511,52 @@
           "total",
           "limit",
           "offset"
+        ]
+      },
+      "ModelTransformDto": {
+        "type": "object",
+        "properties": {
+          "position": {
+            "example": [
+              0,
+              0,
+              0
+            ],
+            "description": "位置 [x, y, z]",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "rotation": {
+            "example": [
+              0,
+              0,
+              0
+            ],
+            "description": "回転 [x, y, z]（Euler ラジアン）",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "scale": {
+            "example": [
+              1,
+              1,
+              1
+            ],
+            "description": "スケール [x, y, z]（各成分は 0 より大きい有限数）",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "position",
+          "rotation",
+          "scale"
         ]
       },
       "CreateEmbedUrlDto": {
