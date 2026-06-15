@@ -1,4 +1,4 @@
-import { alignmentToTransform, parseTransformHeader, transformToAlignmentPatch } from '@src/utils/heatmap/modelTransform';
+import { alignmentToTransform, parseTransformHeader, toModelTransform, transformToAlignmentPatch } from '@src/utils/heatmap/modelTransform';
 
 describe('alignmentToTransform', () => {
   it('converts degrees to radians and expands uniform scale', () => {
@@ -50,6 +50,23 @@ describe('transformToAlignmentPatch', () => {
     expect(patch.modelRotationX).toBeCloseTo(original.modelRotationX);
     expect(patch.modelRotationZ).toBeCloseTo(original.modelRotationZ);
     expect(patch.scale).toBeCloseTo(original.scale);
+  });
+});
+
+describe('toModelTransform', () => {
+  it('accepts a valid parsed object', () => {
+    expect(toModelTransform({ position: [1, 2, 3], rotation: [0, 0, 0], scale: [1, 1, 1] })).toEqual({
+      position: [1, 2, 3],
+      rotation: [0, 0, 0],
+      scale: [1, 1, 1],
+    });
+  });
+
+  it('returns null for null / non-object / wrong shape', () => {
+    expect(toModelTransform(null)).toBeNull();
+    expect(toModelTransform(42)).toBeNull();
+    expect(toModelTransform({ position: [1, 2], rotation: [0, 0, 0], scale: [1, 1, 1] })).toBeNull();
+    expect(toModelTransform({ position: [1, 2, 3], rotation: [0, 0, 0] })).toBeNull();
   });
 });
 
