@@ -70,6 +70,7 @@ export const en = {
     },
     backToLogin: 'Already have an account? Sign in',
     success: 'Account created successfully',
+    disabled: 'New sign-ups are currently not being accepted.',
   },
 
   // Password Reset

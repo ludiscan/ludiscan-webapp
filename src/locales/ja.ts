@@ -70,6 +70,7 @@ export const ja = {
     },
     backToLogin: 'すでにアカウントをお持ちの方はサインイン',
     success: 'アカウントを作成しました',
+    disabled: '現在、新規登録は受け付けていません。',
   },
 
   // Password Reset
