@@ -7,7 +7,7 @@ import { z } from 'zod';
 const envSchema = z.object({
   NEXT_PUBLIC_HOSTNAME: z.string().default('http://localhost:5173'),
   NEXT_PUBLIC_API_BASE_URL: z.string().default('http://localhost:3211'),
-  NEXT_PUBLIC_GTM_ID: z.string().default('GTM-XXXXXXX'),
+  NEXT_PUBLIC_GTM_ID: z.string().optional(),
   // Server-side only env vars
   SESSION_SECRET: z.string().optional(),
   CSRF_SECRET: z.string().optional(),
@@ -20,7 +20,7 @@ const envSchema = z.object({
 const runtimeSchema = z.object({
   NEXT_PUBLIC_HOSTNAME: z.string().url('Invalid HOSTNAME URL'),
   NEXT_PUBLIC_API_BASE_URL: z.string().url('Invalid API_BASE_URL'),
-  NEXT_PUBLIC_GTM_ID: z.string().min(1, 'GTM_ID is required'),
+  NEXT_PUBLIC_GTM_ID: z.string().min(1, 'GTM_ID is required').optional(),
   SESSION_SECRET: z.string().min(32, 'SESSION_SECRET must be at least 32 characters').optional(),
   CSRF_SECRET: z.string().min(32, 'CSRF_SECRET must be at least 32 characters').optional(),
 });

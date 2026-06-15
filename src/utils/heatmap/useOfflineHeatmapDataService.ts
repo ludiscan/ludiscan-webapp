@@ -33,7 +33,8 @@ export function useOfflineHeatmapDataService(offlineData: OfflineHeatmapData | n
         }
 
         // オフラインモードではファイル形式をデータから取得できないため、デフォルトでobjとして扱う
-        return { data: bytes.buffer, fileType: 'obj' };
+        // 配置情報（transform）もオフラインでは取得できないため null
+        return { data: bytes.buffer, fileType: 'obj', transform: null };
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('モデルデータのデコードに失敗しました:', error);

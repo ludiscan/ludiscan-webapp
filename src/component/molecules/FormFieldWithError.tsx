@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { cloneElement, isValidElement, useId } from 'react';
+import React, { cloneElement, isValidElement, useId } from 'react';
 
 import type { FC, ReactElement } from 'react';
 
@@ -186,8 +186,7 @@ export const FormFieldWithError: FC<FormFieldWithErrorProps> = ({ label, fieldId
         'aria-describedby': describedBy || undefined,
         'aria-invalid': error ? 'true' : 'false',
         'aria-required': required ? 'true' : undefined,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      } as React.HTMLAttributes<HTMLElement>)
     : children;
 
   return (

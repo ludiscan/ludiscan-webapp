@@ -803,51 +803,6 @@
         "tags": [
           "v0"
         ]
-      },
-      "post": {
-        "operationId": "UsersController_create",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateUserDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserResponseDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DefaultErrorResponse"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "ユーザーを作成",
-        "tags": [
-          "v0"
-        ]
       }
     },
     "/api/v0/users/search": {
@@ -1558,6 +1513,83 @@
           }
         },
         "summary": "パスワード再設定確定",
+        "tags": [
+          "v0.1"
+        ]
+      }
+    },
+    "/api/v0.1/auth/signup/request": {
+      "post": {
+        "description": "指定メアドに6桁の認証コードを送信する。メアドが既に登録済みの場合は 409 を返す。レート制限: 設定した interval 内は再送しない（クライアントへは 200 を返す）。",
+        "operationId": "AuthV01Controller_signupRequest",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignupRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "認証コード送信完了（またはレート制限中）"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "サインアップがFeature Flagで無効化されている (SIGNUP_DISABLED)"
+          },
+          "409": {
+            "description": "メアドが既に登録済み"
+          }
+        },
+        "summary": "Email サインアップ: 認証コード送信",
+        "tags": [
+          "v0.1"
+        ]
+      }
+    },
+    "/api/v0.1/auth/signup/complete": {
+      "post": {
+        "description": "認証コードを検証し、ユーザーを作成して JWT トークンを返す。",
+        "operationId": "AuthV01Controller_signupComplete",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignupCompleteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "サインアップ成功。JWT トークンを返す。"
+          },
+          "400": {
+            "description": "認証コード無効・期限切れ"
+          },
+          "403": {
+            "description": "サインアップがFeature Flagで無効化されている (SIGNUP_DISABLED)"
+          },
+          "409": {
+            "description": "メアドが既に登録済み"
+          }
+        },
+        "summary": "Email サインアップ: 認証コード検証 & ユーザー作成",
         "tags": [
           "v0.1"
         ]
@@ -8626,7 +8658,7 @@
   "info": {
     "title": "Ludiscan API Documentation",
     "description": "Ludiscan API for game analytics and session tracking",
-    "version": "1.38.1",
+    "version": "1.42.0",
     "contact": {}
   },
   "tags": [],
@@ -8681,26 +8713,6 @@
         "required": [
           "currentPassword",
           "newPassword"
-        ]
-      },
-      "CreateUserDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "example": "name"
-          },
-          "password": {
-            "type": "string",
-            "example": "password"
-          },
-          "email": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "password",
-          "email"
         ]
       },
       "UpdateRoleDto": {
@@ -8851,6 +8863,47 @@
         "required": [
           "token",
           "newPassword"
+        ]
+      },
+      "SignupRequestDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "認証コードを送るメールアドレス",
+            "example": "user@example.com"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "SignupCompleteDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "認証コードを送ったメールアドレス",
+            "example": "user@example.com"
+          },
+          "code": {
+            "type": "string",
+            "description": "メールに記載された6桁の認証コード",
+            "example": "123456",
+            "minLength": 6,
+            "maxLength": 6
+          },
+          "password": {
+            "type": "string",
+            "description": "設定するパスワード（8文字以上）",
+            "example": "myPassword123",
+            "minLength": 8
+          }
+        },
+        "required": [
+          "email",
+          "code",
+          "password"
         ]
       },
       "LoginUserDto": {

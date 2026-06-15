@@ -34,6 +34,43 @@ export const ja = {
     success: 'ログインしました',
     errorEmptyFields: 'メールアドレスとパスワードを入力してください',
     forgotPassword: 'パスワードを忘れた場合',
+    noAccount: 'アカウントをお持ちでない方は',
+    signUpHere: '新規登録',
+  },
+
+  // Signup page
+  signup: {
+    title: 'アカウントを作成',
+    description: 'Ludiscanに参加してゲームデータのトラッキングと分析を始めましょう。',
+    signUpWithGoogle: 'Googleで新規登録',
+    emailStep: {
+      title: 'メールアドレスを入力',
+      submit: '認証コードを送る',
+      sending: '送信中...',
+      sent: '認証コードを送信しました。メールをご確認ください。',
+      alreadyRegistered: 'このメールアドレスは既に登録されています。',
+      errorRequired: 'メールアドレスを入力してください',
+      errorGeneric: '認証コードの送信に失敗しました',
+    },
+    codeStep: {
+      title: 'メールアドレスを確認',
+      codeLabel: '認証コード（6桁）',
+      codePlaceholder: '123456',
+      passwordLabel: 'パスワード',
+      passwordPlaceholder: 'パスワード（8文字以上）',
+      confirmPasswordLabel: 'パスワード（確認）',
+      confirmPasswordPlaceholder: 'パスワードを再入力',
+      submit: 'アカウントを作成',
+      submitting: '作成中...',
+      errorRequired: 'すべての項目を入力してください',
+      errorMismatch: 'パスワードが一致しません',
+      errorTooShort: 'パスワードは8文字以上で入力してください',
+      errorInvalidCode: '認証コードが無効か期限切れです',
+      errorGeneric: 'アカウントの作成に失敗しました',
+    },
+    backToLogin: 'すでにアカウントをお持ちの方はサインイン',
+    success: 'アカウントを作成しました',
+    disabled: '現在、新規登録は受け付けていません。',
   },
 
   // Password Reset

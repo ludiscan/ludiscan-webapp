@@ -31,6 +31,8 @@ setInterval(() => {
  * Rate limit configuration
  */
 export interface RateLimitConfig {
+  /** Bucket identifier — isolates this endpoint group's counter from others sharing the same IP */
+  name: string;
   /** Maximum number of requests allowed in the time window */
   maxRequests: number;
   /** Time window in seconds */
@@ -44,11 +46,11 @@ export interface RateLimitConfig {
  */
 export const RATE_LIMITS = {
   /** Strict limit for authentication endpoints (5 requests per minute) */
-  AUTH: { maxRequests: 5, windowSeconds: 60 },
+  AUTH: { name: 'auth', maxRequests: 5, windowSeconds: 60 },
   /** Moderate limit for API endpoints (30 requests per minute) */
-  API: { maxRequests: 30, windowSeconds: 60 },
+  API: { name: 'api', maxRequests: 30, windowSeconds: 60 },
   /** Generous limit for read-only endpoints (100 requests per minute) */
-  READ_ONLY: { maxRequests: 100, windowSeconds: 60 },
+  READ_ONLY: { name: 'read_only', maxRequests: 100, windowSeconds: 60 },
 } as const;
 
 /**
@@ -58,20 +60,26 @@ export const RATE_LIMITS = {
  * @returns Client IP address
  */
 function getClientIp(req: NextApiRequest): string {
-  // Check proxy headers first
+  // Amplify/CloudFront forwards the chain as `client, proxy1, proxy2, ...` in X-Forwarded-For,
+  // so the first non-empty entry is the original client IP. Skip blank segments defensively.
   const forwarded = req.headers['x-forwarded-for'];
   if (forwarded) {
-    const ip = typeof forwarded === 'string' ? forwarded.split(',')[0] : forwarded[0];
-    return ip.trim();
+    const raw = Array.isArray(forwarded) ? forwarded[0] : forwarded;
+    const first = raw
+      .split(',')
+      .map((part) => part.trim())
+      .find((part) => part.length > 0);
+    if (first) return first;
   }
 
   const realIp = req.headers['x-real-ip'];
   if (realIp) {
-    return typeof realIp === 'string' ? realIp : realIp[0];
+    const ip = (Array.isArray(realIp) ? realIp[0] : realIp).trim();
+    if (ip) return ip;
   }
 
   // Fallback to socket address
-  return req.socket.remoteAddress || 'unknown';
+  return req.socket?.remoteAddress || 'unknown';
 }
 
 /**
@@ -89,7 +97,11 @@ export function checkRateLimit(
   resetTime: number;
   retryAfter?: number;
 } {
-  const key = config.keyGenerator ? config.keyGenerator(req) : getClientIp(req);
+  // Prefix the key with the bucket name so endpoints with different limits don't share one
+  // counter — otherwise a login (limit 5) gets rejected because read-only/API routes from the
+  // same IP already filled the window.
+  const identity = config.keyGenerator ? config.keyGenerator(req) : getClientIp(req);
+  const key = `${config.name}:${identity}`;
   const now = Date.now();
   const windowMs = config.windowSeconds * 1000;
 

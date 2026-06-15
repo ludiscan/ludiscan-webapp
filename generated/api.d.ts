@@ -149,8 +149,7 @@ export interface paths {
     /** すべてのユーザーを取得 */
     get: operations['UsersController_findAll'];
     put?: never;
-    /** ユーザーを作成 */
-    post: operations['UsersController_create'];
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -450,6 +449,46 @@ export interface paths {
      * @description メール内のリンクから取得したトークンと新パスワードで確定。
      */
     post: operations['AuthV01Controller_confirmReset'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0.1/auth/signup/request': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Email サインアップ: 認証コード送信
+     * @description 指定メアドに6桁の認証コードを送信する。メアドが既に登録済みの場合は 409 を返す。レート制限: 設定した interval 内は再送しない（クライアントへは 200 を返す）。
+     */
+    post: operations['AuthV01Controller_signupRequest'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0.1/auth/signup/complete': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Email サインアップ: 認証コード検証 & ユーザー作成
+     * @description 認証コードを検証し、ユーザーを作成して JWT トークンを返す。
+     */
+    post: operations['AuthV01Controller_signupComplete'];
     delete?: never;
     options?: never;
     head?: never;
@@ -2354,13 +2393,6 @@ export interface components {
        */
       newPassword: string;
     };
-    CreateUserDto: {
-      /** @example name */
-      name?: string;
-      /** @example password */
-      password: string;
-      email: string;
-    };
     UpdateRoleDto: {
       /**
        * @description ユーザーの新しいロール (例: user, admin)
@@ -2427,6 +2459,30 @@ export interface components {
        * @example newPassword123
        */
       newPassword: string;
+    };
+    SignupRequestDto: {
+      /**
+       * @description 認証コードを送るメールアドレス
+       * @example user@example.com
+       */
+      email: string;
+    };
+    SignupCompleteDto: {
+      /**
+       * @description 認証コードを送ったメールアドレス
+       * @example user@example.com
+       */
+      email: string;
+      /**
+       * @description メールに記載された6桁の認証コード
+       * @example 123456
+       */
+      code: string;
+      /**
+       * @description 設定するパスワード（8文字以上）
+       * @example myPassword123
+       */
+      password: string;
     };
     LoginUserDto: {
       /** @example password */
@@ -4549,39 +4605,6 @@ export interface operations {
       };
     };
   };
-  UsersController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['CreateUserDto'];
-      };
-    };
-    responses: {
-      /** @description 成功 */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['UserResponseDto'];
-        };
-      };
-      /** @description Bad Request */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['DefaultErrorResponse'];
-        };
-      };
-    };
-  };
   UsersController_search: {
     parameters: {
       query: {
@@ -5128,6 +5151,94 @@ export interface operations {
       };
       /** @description トークン無効・期限切れ・使用済み */
       400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AuthV01Controller_signupRequest: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['SignupRequestDto'];
+      };
+    };
+    responses: {
+      /** @description 認証コード送信完了（またはレート制限中） */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+      /** @description サインアップがFeature Flagで無効化されている (SIGNUP_DISABLED) */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description メアドが既に登録済み */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AuthV01Controller_signupComplete: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['SignupCompleteDto'];
+      };
+    };
+    responses: {
+      /** @description サインアップ成功。JWT トークンを返す。 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 認証コード無効・期限切れ */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description サインアップがFeature Flagで無効化されている (SIGNUP_DISABLED) */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description メアドが既に登録済み */
+      409: {
         headers: {
           [name: string]: unknown;
         };
