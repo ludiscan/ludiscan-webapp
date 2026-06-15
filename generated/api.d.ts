@@ -1388,6 +1388,30 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v0/heatmap/map_data/{map_name}/transform': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * マップモデルの配置情報（位置・回転・スケール）を取得
+     * @description モデルの配置情報を返します。バイナリ（map_data）とは別にキャッシュされない軽量エンドポイントで、認証不要。
+     */
+    get: operations['HeatmapController_getMapTransform'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * マップモデルの配置情報（位置・回転・スケール）を更新
+     * @description ファイルを再アップロードせずに、アップロード済みマップの transform のみを更新します。
+     */
+    patch: operations['HeatmapController_patchMapTransform'];
+    trace?: never;
+  };
   '/api/v0/heatmap/projects/{project_id}/play_session/{session_id}/embed-url': {
     parameters: {
       query?: never;
@@ -3272,6 +3296,35 @@ export interface components {
        * @example 0
        */
       offset: number;
+    };
+    ModelTransformDto: {
+      /**
+       * @description 位置 [x, y, z]
+       * @example [
+       *       0,
+       *       0,
+       *       0
+       *     ]
+       */
+      position: number[];
+      /**
+       * @description 回転 [x, y, z]（Euler ラジアン）
+       * @example [
+       *       0,
+       *       0,
+       *       0
+       *     ]
+       */
+      rotation: number[];
+      /**
+       * @description スケール [x, y, z]（各成分は 0 より大きい有限数）
+       * @example [
+       *       1,
+       *       1,
+       *       1
+       *     ]
+       */
+      scale: number[];
     };
     CreateEmbedUrlDto: {
       /**
@@ -7155,6 +7208,8 @@ export interface operations {
         headers: {
           /** @description The file type of the 3D model (obj, fbx, gltf, glb) */
           'X-Model-File-Type'?: 'obj' | 'fbx' | 'gltf' | 'glb';
+          /** @description モデルの配置情報 { position, rotation, scale } の JSON。未設定の場合はヘッダーなし。 */
+          'X-Model-Transform'?: string;
           [name: string]: unknown;
         };
         content: {
@@ -7186,12 +7241,78 @@ export interface operations {
         'multipart/form-data': {
           /** Format: binary */
           file?: string;
+          /** @description モデルの配置情報 { position, rotation, scale } の JSON 文字列（任意） */
+          transform?: string;
         };
       };
     };
     responses: {
       /** @description Map data uploaded */
       201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultSuccessResponse'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  HeatmapController_getMapTransform: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        map_name: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Model transform (null if unset) */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
+  HeatmapController_patchMapTransform: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        map_name: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ModelTransformDto'];
+      };
+    };
+    responses: {
+      /** @description Transform updated */
+      200: {
         headers: {
           [name: string]: unknown;
         };
