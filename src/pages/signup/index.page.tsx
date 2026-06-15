@@ -60,6 +60,10 @@ const Content: FC<SignupPageProps> = ({ className }) => {
       const { error, response } = await createClient().POST('/api/v0.1/auth/signup/request', {
         body: { email },
       });
+      if (response.status === 403) {
+        showToast(t('signup.disabled'), 3, 'error');
+        return;
+      }
       if (response.status === 409) {
         showToast(t('signup.emailStep.alreadyRegistered'), 3, 'error');
         return;
@@ -98,6 +102,10 @@ const Content: FC<SignupPageProps> = ({ className }) => {
         credentials: 'include',
         body: JSON.stringify({ email, code, password }),
       });
+      if (res.status === 403) {
+        showToast(t('signup.disabled'), 3, 'error');
+        return;
+      }
       if (res.status === 400) {
         showToast(t('signup.codeStep.errorInvalidCode'), 3, 'error');
         return;
