@@ -803,51 +803,6 @@
         "tags": [
           "v0"
         ]
-      },
-      "post": {
-        "operationId": "UsersController_create",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateUserDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserResponseDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DefaultErrorResponse"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "ユーザーを作成",
-        "tags": [
-          "v0"
-        ]
       }
     },
     "/api/v0/users/search": {
@@ -1592,6 +1547,9 @@
               }
             }
           },
+          "403": {
+            "description": "サインアップがFeature Flagで無効化されている (SIGNUP_DISABLED)"
+          },
           "409": {
             "description": "メアドが既に登録済み"
           }
@@ -1623,6 +1581,9 @@
           },
           "400": {
             "description": "認証コード無効・期限切れ"
+          },
+          "403": {
+            "description": "サインアップがFeature Flagで無効化されている (SIGNUP_DISABLED)"
           },
           "409": {
             "description": "メアドが既に登録済み"
@@ -8697,7 +8658,7 @@
   "info": {
     "title": "Ludiscan API Documentation",
     "description": "Ludiscan API for game analytics and session tracking",
-    "version": "1.41.0",
+    "version": "1.42.0",
     "contact": {}
   },
   "tags": [],
@@ -8752,26 +8713,6 @@
         "required": [
           "currentPassword",
           "newPassword"
-        ]
-      },
-      "CreateUserDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "example": "name"
-          },
-          "password": {
-            "type": "string",
-            "example": "password"
-          },
-          "email": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "password",
-          "email"
         ]
       },
       "UpdateRoleDto": {
