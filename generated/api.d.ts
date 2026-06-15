@@ -149,8 +149,7 @@ export interface paths {
     /** すべてのユーザーを取得 */
     get: operations['UsersController_findAll'];
     put?: never;
-    /** ユーザーを作成 */
-    post: operations['UsersController_create'];
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -2394,13 +2393,6 @@ export interface components {
        */
       newPassword: string;
     };
-    CreateUserDto: {
-      /** @example name */
-      name?: string;
-      /** @example password */
-      password: string;
-      email: string;
-    };
     UpdateRoleDto: {
       /**
        * @description ユーザーの新しいロール (例: user, admin)
@@ -4613,39 +4605,6 @@ export interface operations {
       };
     };
   };
-  UsersController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['CreateUserDto'];
-      };
-    };
-    responses: {
-      /** @description 成功 */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['UserResponseDto'];
-        };
-      };
-      /** @description Bad Request */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['DefaultErrorResponse'];
-        };
-      };
-    };
-  };
   UsersController_search: {
     parameters: {
       query: {
@@ -5228,6 +5187,13 @@ export interface operations {
           'application/json': components['schemas']['DefaultErrorResponse'];
         };
       };
+      /** @description サインアップがFeature Flagで無効化されている (SIGNUP_DISABLED) */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
       /** @description メアドが既に登録済み */
       409: {
         headers: {
@@ -5259,6 +5225,13 @@ export interface operations {
       };
       /** @description 認証コード無効・期限切れ */
       400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description サインアップがFeature Flagで無効化されている (SIGNUP_DISABLED) */
+      403: {
         headers: {
           [name: string]: unknown;
         };
