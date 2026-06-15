@@ -5325,7 +5325,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Model transform (null if unset)"
+            "description": "Model transform (null if unset)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelTransformResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad Request",
@@ -8763,7 +8770,7 @@
   "info": {
     "title": "Ludiscan API Documentation",
     "description": "Ludiscan API for game analytics and session tracking",
-    "version": "1.42.1",
+    "version": "1.42.2",
     "contact": {}
   },
   "tags": [],
@@ -10557,6 +10564,24 @@
           "position",
           "rotation",
           "scale"
+        ]
+      },
+      "ModelTransformResponseDto": {
+        "type": "object",
+        "properties": {
+          "transform": {
+            "nullable": true,
+            "description": "モデルの配置情報（未設定の場合は null）",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ModelTransformDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "transform"
         ]
       },
       "CreateEmbedUrlDto": {

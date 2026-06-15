@@ -3326,6 +3326,10 @@ export interface components {
        */
       scale: number[];
     };
+    ModelTransformResponseDto: {
+      /** @description モデルの配置情報（未設定の場合は null） */
+      transform: components['schemas']['ModelTransformDto'] | null;
+    };
     CreateEmbedUrlDto: {
       /**
        * @description 有効期限（時間単位）。0.5〜8760の範囲で指定可能。デフォルト: 4時間
@@ -7283,7 +7287,9 @@ export interface operations {
         headers: {
           [name: string]: unknown;
         };
-        content?: never;
+        content: {
+          'application/json': components['schemas']['ModelTransformResponseDto'];
+        };
       };
       /** @description Bad Request */
       400: {
