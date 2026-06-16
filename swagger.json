@@ -5122,11 +5122,19 @@
         ]
       }
     },
-    "/api/v0/heatmap/map_data/{map_name}": {
+    "/api/v0/heatmap/projects/{project_id}/map_data/{map_name}": {
       "get": {
-        "description": "マップデータを取得します。認証不要で誰でもアクセス可能です。",
+        "description": "指定プロジェクトのマップデータを取得します。閲覧権限（または一致する embed トークン）が必要です。",
         "operationId": "HeatmapController_getMapData",
         "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
           {
             "name": "map_name",
             "required": true,
@@ -5193,6 +5201,14 @@
         "operationId": "HeatmapController_postMapData",
         "parameters": [
           {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
             "name": "map_name",
             "required": true,
             "in": "path",
@@ -5254,11 +5270,84 @@
         ]
       }
     },
-    "/api/v0/heatmap/map_data/{map_name}/transform": {
+    "/api/v0/heatmap/projects/{project_id}/map_data/{map_name}/import": {
+      "post": {
+        "description": "取り込み元プロジェクト（閲覧権限が必要）の同名マップのモデルを、対象プロジェクト（管理権限が必要）にコピーします。",
+        "operationId": "HeatmapController_importMapData",
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "map_name",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportMapDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Model imported",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "別プロジェクトのモデルを取り込む（コピー）",
+        "tags": [
+          "v0"
+        ]
+      }
+    },
+    "/api/v0/heatmap/projects/{project_id}/map_data/{map_name}/transform": {
       "patch": {
         "description": "ファイルを再アップロードせずに、アップロード済みマップの transform のみを更新します。",
         "operationId": "HeatmapController_patchMapTransform",
         "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
           {
             "name": "map_name",
             "required": true,
@@ -5311,9 +5400,17 @@
         ]
       },
       "get": {
-        "description": "モデルの配置情報を返します。バイナリ（map_data）とは別にキャッシュされない軽量エンドポイントで、認証不要。",
+        "description": "モデルの配置情報を返します。バイナリ（map_data）とは別にキャッシュされない軽量エンドポイント。閲覧権限（または一致する embed トークン）が必要です。",
         "operationId": "HeatmapController_getMapTransform",
         "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
           {
             "name": "map_name",
             "required": true,
@@ -8770,7 +8867,7 @@
   "info": {
     "title": "Ludiscan API Documentation",
     "description": "Ludiscan API for game analytics and session tracking",
-    "version": "1.42.2",
+    "version": "1.43.0",
     "contact": {}
   },
   "tags": [],
@@ -10518,6 +10615,19 @@
           "total",
           "limit",
           "offset"
+        ]
+      },
+      "ImportMapDto": {
+        "type": "object",
+        "properties": {
+          "sourceProjectId": {
+            "type": "number",
+            "description": "取り込み元プロジェクトID（閲覧権限が必要）",
+            "example": 1
+          }
+        },
+        "required": [
+          "sourceProjectId"
         ]
       },
       "ModelTransformDto": {
