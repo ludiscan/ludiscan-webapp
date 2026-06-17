@@ -3,9 +3,10 @@ import styled from '@emotion/styled';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { BiBarChart, BiUser, BiKey, BiLineChart, BiChevronRight } from 'react-icons/bi';
+import { BiBarChart, BiUser, BiKey, BiLineChart, BiChevronRight, BiCube } from 'react-icons/bi';
 
 import { ProjectDetailsApiKeysTab } from './tabs/ProjectDetailsApiKeysTab';
+import { ProjectDetailsMapsTab } from './tabs/ProjectDetailsMapsTab';
 import { ProjectDetailsMembersTab } from './tabs/ProjectDetailsMembersTab';
 import { ProjectDetailsSessionsTab } from './tabs/ProjectDetailsSessionsTab';
 
@@ -25,7 +26,7 @@ import { useSidebar } from '@src/hooks/useSidebar';
 import { InnerContent } from '@src/pages/_app.page';
 import { getCookie, COOKIE_NAMES } from '@src/utils/security/cookies';
 
-type TabType = 'sessions' | 'members' | 'api-keys';
+type TabType = 'sessions' | 'members' | 'api-keys' | 'maps';
 
 export type ProjectDetailsPageProps = {
   className?: string;
@@ -84,6 +85,7 @@ export const getServerSideProps: GetServerSideProps<ProjectDetailsPageProps> = a
 
 const TABS: { id: TabType; label: string; icon: React.ReactNode }[] = [
   { id: 'sessions', label: 'Sessions', icon: <BiBarChart size={18} /> },
+  { id: 'maps', label: 'Maps', icon: <BiCube size={18} /> },
   { id: 'members', label: 'Members', icon: <BiUser size={18} /> },
   { id: 'api-keys', label: 'API Keys', icon: <BiKey size={18} /> },
 ];
@@ -191,6 +193,7 @@ const Component: FC<ProjectDetailsPageProps> = ({ className, project }) => {
           {/* Tab Content */}
           <div className={`${className}__tabContent`}>
             {activeTab === 'sessions' && <ProjectDetailsSessionsTab project={project} />}
+            {activeTab === 'maps' && <ProjectDetailsMapsTab project={project} />}
             {activeTab === 'members' && <ProjectDetailsMembersTab project={project} />}
             {activeTab === 'api-keys' && <ProjectDetailsApiKeysTab project={project} />}
           </div>
