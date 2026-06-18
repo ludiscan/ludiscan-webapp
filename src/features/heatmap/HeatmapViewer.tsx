@@ -151,7 +151,7 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
   });
 
   // モデルの配置情報（位置・回転・スケール）をキャッシュなしで取得
-  const { data: mapTransform } = useMapTransform(mapName ?? undefined, !!mapName && service.isInitialized);
+  const { data: mapTransform } = useMapTransform(service.projectId, mapName ?? undefined, !!mapName && service.isInitialized);
 
   const { data: generalLogKeys } = useQuery({
     queryKey: ['generalLogKeys', service.projectId, service.sessionId],

@@ -30,7 +30,7 @@ export function createMockApiClient(mockDataDir: string = '/mocks/heatmap'): Api
   });
 
   // Heatmap Map Data (Binary or JSON)
-  router.registerGet('/api/v0/heatmap/map_data/{map_name}', async (params, query, _body, parseAs) => {
+  router.registerGet('/api/v0/heatmap/projects/{project_id}/map_data/{map_name}', async (params, query, _body, parseAs) => {
     const mapName = params.map_name;
 
     if (parseAs === 'arrayBuffer') {
