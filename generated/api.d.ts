@@ -1367,7 +1367,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/api/v0/heatmap/map_data/{map_name}': {
+  '/api/v0/heatmap/projects/{project_id}/map_data/{map_name}': {
     parameters: {
       query?: never;
       header?: never;
@@ -1376,7 +1376,7 @@ export interface paths {
     };
     /**
      * Get heatmap map data
-     * @description マップデータを取得します。認証不要で誰でもアクセス可能です。
+     * @description 指定プロジェクトのマップデータを取得します。閲覧権限（または一致する embed トークン）が必要です。
      */
     get: operations['HeatmapController_getMapData'];
     put?: never;
@@ -1388,7 +1388,27 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/api/v0/heatmap/map_data/{map_name}/transform': {
+  '/api/v0/heatmap/projects/{project_id}/map_data/{map_name}/import': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * 別プロジェクトのモデルを取り込む（コピー）
+     * @description 取り込み元プロジェクト（閲覧権限が必要）の同名マップのモデルを、対象プロジェクト（管理権限が必要）にコピーします。
+     */
+    post: operations['HeatmapController_importMapData'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v0/heatmap/projects/{project_id}/map_data/{map_name}/transform': {
     parameters: {
       query?: never;
       header?: never;
@@ -1397,7 +1417,7 @@ export interface paths {
     };
     /**
      * マップモデルの配置情報（位置・回転・スケール）を取得
-     * @description モデルの配置情報を返します。バイナリ（map_data）とは別にキャッシュされない軽量エンドポイントで、認証不要。
+     * @description モデルの配置情報を返します。バイナリ（map_data）とは別にキャッシュされない軽量エンドポイント。閲覧権限（または一致する embed トークン）が必要です。
      */
     get: operations['HeatmapController_getMapTransform'];
     put?: never;
@@ -3296,6 +3316,13 @@ export interface components {
        * @example 0
        */
       offset: number;
+    };
+    ImportMapDto: {
+      /**
+       * @description 取り込み元プロジェクトID（閲覧権限が必要）
+       * @example 1
+       */
+      sourceProjectId: number;
     };
     ModelTransformDto: {
       /**
@@ -7201,6 +7228,7 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
+        project_id: number;
         map_name: string;
       };
       cookie?: never;
@@ -7236,6 +7264,7 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
+        project_id: number;
         map_name: string;
       };
       cookie?: never;
@@ -7271,11 +7300,48 @@ export interface operations {
       };
     };
   };
+  HeatmapController_importMapData: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        project_id: number;
+        map_name: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ImportMapDto'];
+      };
+    };
+    responses: {
+      /** @description Model imported */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultSuccessResponse'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DefaultErrorResponse'];
+        };
+      };
+    };
+  };
   HeatmapController_getMapTransform: {
     parameters: {
       query?: never;
       header?: never;
       path: {
+        project_id: number;
         map_name: string;
       };
       cookie?: never;
@@ -7307,6 +7373,7 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
+        project_id: number;
         map_name: string;
       };
       cookie?: never;
