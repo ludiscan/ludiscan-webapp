@@ -280,10 +280,11 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
   const getMapContent = useCallback(
     async (mapName: string): Promise<MapContentResult | null> => {
       try {
-        if (!mapName || mapName === '') return null;
-        const { data, error, response } = await apiClient.GET('/api/v0/heatmap/map_data/{map_name}', {
+        if (!mapName || mapName === '' || projectId === undefined) return null;
+        const { data, error, response } = await apiClient.GET('/api/v0/heatmap/projects/{project_id}/map_data/{map_name}', {
           params: {
             path: {
+              project_id: projectId,
               map_name: mapName,
             },
           },
@@ -302,7 +303,7 @@ export function useOnlineHeatmapDataService(projectId: number | undefined, initi
         return null;
       }
     },
-    [apiClient],
+    [apiClient, projectId],
   );
 
   const getGeneralLogKeys = useCallback(async () => {

@@ -1,6 +1,7 @@
 import { css, keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
-import { useCallback, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { IoChevronDown, IoChevronUp, IoClose, IoCubeOutline, IoCloudUploadOutline } from 'react-icons/io5';
 
 import type { HeatmapMenuProps, LocalModelData } from '@src/features/heatmap/HeatmapMenuContent';
@@ -20,7 +21,8 @@ import { InputRow } from '@src/features/heatmap/menu/InputRow';
 import { useGeneralPatch, useGeneralPick, useGeneralSelect } from '@src/hooks/useGeneral';
 import { useLocale } from '@src/hooks/useLocale';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
-import { useUpdateMapTransform, useUploadMapData } from '@src/hooks/useUploadMapData';
+import { useImportMap, useUpdateMapTransform, useUploadMapData } from '@src/hooks/useUploadMapData';
+import { createClient } from '@src/modeles/qeury';
 import { alignmentToTransform } from '@src/utils/heatmap/modelTransform';
 
 const UploadSection = styled.div`
@@ -355,6 +357,8 @@ export const MapMenuContent: FC<HeatmapMenuProps> = ({
   const setData = useGeneralPatch();
   const uploadMapData = useUploadMapData();
   const updateMapTransform = useUpdateMapTransform();
+  const importMap = useImportMap();
+  const [importSourceLabel, setImportSourceLabel] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [statusMessage, setStatusMessage] = useState<{ text: string; status: 'success' | 'error' | 'info' } | null>(null);
   const [isAlignmentOpen, setIsAlignmentOpen] = useState(false);
@@ -455,7 +459,7 @@ export const MapMenuContent: FC<HeatmapMenuProps> = ({
   );
 
   const handleUpload = useCallback(async () => {
-    if (!selectedFile || !mapName) {
+    if (!selectedFile || !mapName || service.projectId === undefined) {
       setStatusMessage({ text: 'Please select a file and a map name', status: 'error' });
       return;
     }
@@ -464,6 +468,7 @@ export const MapMenuContent: FC<HeatmapMenuProps> = ({
 
     try {
       await uploadMapData.mutateAsync({
+        projectId: service.projectId,
         mapName: mapName,
         file: selectedFile,
         // 現在の配置情報（位置・回転・スケール）を一緒に保存
@@ -477,14 +482,27 @@ export const MapMenuContent: FC<HeatmapMenuProps> = ({
         status: 'error',
       });
     }
-  }, [selectedFile, mapName, uploadMapData, modelPositionX, modelPositionY, modelPositionZ, modelRotationX, modelRotationY, modelRotationZ, scale]);
+  }, [
+    selectedFile,
+    mapName,
+    service.projectId,
+    uploadMapData,
+    modelPositionX,
+    modelPositionY,
+    modelPositionZ,
+    modelRotationX,
+    modelRotationY,
+    modelRotationZ,
+    scale,
+  ]);
 
   // 配置情報のみをサーバーに保存（ファイル再アップロード不要）
   const handleSaveAlignment = useCallback(async () => {
-    if (!mapName) return;
+    if (!mapName || service.projectId === undefined) return;
     setStatusMessage({ text: 'Saving alignment...', status: 'info' });
     try {
       await updateMapTransform.mutateAsync({
+        projectId: service.projectId,
         mapName,
         transform: alignmentToTransform({ modelPositionX, modelPositionY, modelPositionZ, modelRotationX, modelRotationY, modelRotationZ, scale }),
       });
@@ -495,7 +513,41 @@ export const MapMenuContent: FC<HeatmapMenuProps> = ({
         status: 'error',
       });
     }
-  }, [mapName, updateMapTransform, modelPositionX, modelPositionY, modelPositionZ, modelRotationX, modelRotationY, modelRotationZ, scale]);
+  }, [mapName, service.projectId, updateMapTransform, modelPositionX, modelPositionY, modelPositionZ, modelRotationX, modelRotationY, modelRotationZ, scale]);
+
+  // インポート元として選べるプロジェクト一覧（現在のプロジェクトを除く）
+  const { data: allProjects } = useQuery({
+    queryKey: ['projects'],
+    queryFn: async () => {
+      const { data, error } = await createClient().GET('/api/v0/projects');
+      if (error) return [];
+      return data ?? [];
+    },
+    enabled: !service.isEmbed && !!mapName,
+  });
+
+  // ラベル（"<name> (#<id>)"）→ projectId の対応。同名プロジェクト衝突を避けるため id を含める。
+  const importSourceOptions = useMemo(() => {
+    const map = new Map<string, number>();
+    (allProjects ?? []).filter((p) => p.id !== service.projectId).forEach((p) => map.set(`${p.name} (#${p.id})`, p.id));
+    return map;
+  }, [allProjects, service.projectId]);
+
+  const handleImport = useCallback(async () => {
+    const sourceProjectId = importSourceOptions.get(importSourceLabel);
+    if (!mapName || service.projectId === undefined || sourceProjectId === undefined) return;
+    setStatusMessage({ text: 'Importing...', status: 'info' });
+    try {
+      await importMap.mutateAsync({ projectId: service.projectId, mapName, sourceProjectId });
+      setStatusMessage({ text: 'Import successful!', status: 'success' });
+      setImportSourceLabel('');
+    } catch (error) {
+      setStatusMessage({
+        text: `Import failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        status: 'error',
+      });
+    }
+  }, [importSourceOptions, importSourceLabel, mapName, service.projectId, importMap]);
 
   const is2DMode = dimensionality === '2d';
 
@@ -693,6 +745,23 @@ export const MapMenuContent: FC<HeatmapMenuProps> = ({
                 <Text text={uploadMapData.isPending ? 'Uploading...' : 'Upload'} />
               </Button>
               {statusMessage && <StatusMessage status={statusMessage.status}>{statusMessage.text}</StatusMessage>}
+            </UploadSection>
+          )}
+
+          {/* 別プロジェクトから同名マップのモデルを取り込む（要・取り込み先の管理権限） */}
+          {!service.isEmbed && mapName && importSourceOptions.size > 0 && (
+            <UploadSection>
+              <Text text={`Import "${mapName}" from another project`} fontSize={theme.typography.fontSize.base} />
+              <Selector
+                onChange={setImportSourceLabel}
+                options={Array.from(importSourceOptions.keys())}
+                value={importSourceLabel}
+                fontSize={'sm'}
+                disabled={importMap.isPending}
+              />
+              <Button scheme={'secondary'} fontSize={'base'} onClick={handleImport} disabled={!importSourceLabel || importMap.isPending}>
+                <Text text={importMap.isPending ? 'Importing...' : 'Import'} />
+              </Button>
             </UploadSection>
           )}
         </>
