@@ -40,6 +40,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
   // Return cached data if valid
   if (isCacheValid && cachedData) {
+    // メモリキャッシュはサーバーインスタンスごとなので、CDN 側でもキャッシュさせる
+    res.setHeader('Cache-Control', `public, s-maxage=${CACHE_DURATION}, stale-while-revalidate=${CACHE_DURATION * 2}`);
     return res.status(200).json({
       releases: cachedData.data,
       cached: true,
