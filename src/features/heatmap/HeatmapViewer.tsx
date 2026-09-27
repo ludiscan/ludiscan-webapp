@@ -531,11 +531,11 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
         );
       await exportHeatmap(task, d, generalLogKeys, mapContent, mapList, store.getState().heatmapCanvas);
       // 成功メッセージ
-      toast.showToast('Export completed successfully', 3000, 'success');
+      toast.showToast('Export completed successfully', 3, 'success');
     } catch (error) {
       // eslint-disable-next-line
       console.error('エクスポート中にエラーが発生しました:', error);
-      toast.showToast('Export failed', 3000, 'error');
+      toast.showToast('Export failed', 3, 'error');
     }
   }, [generalLogKeys, mapContent, mapList, service, store, task, toast]);
 
