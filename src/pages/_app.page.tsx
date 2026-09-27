@@ -122,6 +122,8 @@ export default function App({ Component, pageProps }: AppProps) {
     let timeout: NodeJS.Timeout | null = null;
 
     const handleStart = () => {
+      // 遷移が重なると先の timer が参照を失って残り、オーバーレイが消えなくなる
+      if (timeout) clearTimeout(timeout);
       // 200ms以上かかる遷移のみローディングを表示（チラつき防止）
       timeout = setTimeout(() => setIsPageLoading(true), 200);
     };
