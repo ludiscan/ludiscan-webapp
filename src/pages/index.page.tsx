@@ -1,7 +1,8 @@
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { Suspense, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import type { FC } from 'react';
 
@@ -9,11 +10,15 @@ import { JsonLd, LudiscanOrganization, LudiscanWebSite } from '@src/component/at
 import { Seo } from '@src/component/atoms/Seo';
 import { CTASection } from '@src/component/organisms/landing/CTASection';
 import { Footer } from '@src/component/organisms/landing/Footer';
-import { HeatmapBackgroundDemo } from '@src/component/organisms/landing/HeatmapBackgroundDemo';
 import { HeroSection } from '@src/component/organisms/landing/HeroSection';
 import { ProductVisualization } from '@src/component/organisms/landing/ProductVisualization';
 import { TrustSection } from '@src/component/organisms/landing/TrustSection';
 import { useAuth } from '@src/hooks/useAuth';
+
+// three / r3f を LP の初期 JS から外し、hydration 後に別 chunk で読む
+const HeatmapBackgroundDemo = dynamic(() => import('@src/component/organisms/landing/HeatmapBackgroundDemo').then((mod) => mod.HeatmapBackgroundDemo), {
+  ssr: false,
+});
 
 export type IndexPageProps = {
   className?: string;
@@ -22,16 +27,22 @@ export type IndexPageProps = {
 const Component: FC<IndexPageProps> = ({ className }) => {
   const router = useRouter();
   const { isAuthorized, ready } = useAuth();
+  const [showBackground, setShowBackground] = useState(false);
 
   useEffect(() => {
-    // When user is authorized, redirect to home
     if (ready && isAuthorized) {
-      router.push('/home');
+      router.replace('/home');
     }
   }, [isAuthorized, ready, router]);
 
-  // Show loading state while checking auth
-  if (!ready) {
+  // 動きを減らす設定のユーザーには常時アニメーションする背景ごと読み込まない
+  useEffect(() => {
+    setShowBackground(!window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }, []);
+
+  // セッション確認の API 応答を待たずに LP を出す（SSR にも LP が載る）。
+  // localStorage からログイン済みと分かる場合だけ、LP のチラつきを避けてローディングを出す
+  if (isAuthorized) {
     return (
       <div className={`${className}__loading`}>
         <div className={`${className}__loading-content`}>
@@ -44,11 +55,6 @@ const Component: FC<IndexPageProps> = ({ className }) => {
     );
   }
 
-  // Don't render landing page for authorized users (they'll be redirected)
-  if (isAuthorized) {
-    return null;
-  }
-
   return (
     <div className={className}>
       <Seo path='/' />
@@ -56,9 +62,7 @@ const Component: FC<IndexPageProps> = ({ className }) => {
       <JsonLd schema={LudiscanWebSite} />
 
       {/* Three.js animated background */}
-      <Suspense fallback={null}>
-        <HeatmapBackgroundDemo />
-      </Suspense>
+      {showBackground && <HeatmapBackgroundDemo />}
 
       {/* Main content */}
       <div className={`${className}__content`}>
