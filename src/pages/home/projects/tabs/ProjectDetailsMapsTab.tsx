@@ -10,11 +10,13 @@ import { Button } from '@src/component/atoms/Button';
 import { DraggableNumberInput } from '@src/component/atoms/DraggableNumberInput';
 import { FileInput } from '@src/component/atoms/FileInput';
 import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
+import { Switch } from '@src/component/atoms/Switch';
 import { Text } from '@src/component/atoms/Text';
 import { Selector } from '@src/component/molecules/Selector';
 import { useToast } from '@src/component/templates/ToastContext';
 import { MapModelPreview } from '@src/features/heatmap/MapModelPreview';
 import { getModelFileType } from '@src/features/heatmap/ModelLoader';
+import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { useImportMap, useMapTransform, useUpdateMapTransform, useUploadMapData } from '@src/hooks/useUploadMapData';
 import { createClient } from '@src/modeles/qeury';
 import { alignmentToTransform, transformToAlignmentPatch } from '@src/utils/heatmap/modelTransform';
@@ -46,8 +48,9 @@ const IDENTITY: Alignment = {
 
 const Component: FC<ProjectDetailsMapsTabProps> = ({ className, project }) => {
   const { showToast } = useToast();
+  const { theme } = useSharedTheme();
 
-  const [selectedMap, setSelectedMap] = useState('');
+  const [pickedMap, setPickedMap] = useState('');
   const [align, setAlign] = useState<Alignment>(IDENTITY);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [localBuffer, setLocalBuffer] = useState<ArrayBuffer | null>(null);
@@ -58,17 +61,24 @@ const Component: FC<ProjectDetailsMapsTabProps> = ({ className, project }) => {
   const updateMapTransform = useUpdateMapTransform();
   const importMap = useImportMap();
 
+  // このタブは未アップロードのマップへモデルを上げる場でもあるため、既定は全件表示
+  const [uploadedOnly, setUploadedOnly] = useState(false);
+
   // プロジェクトのマップ名一覧
   const { data: maps } = useQuery({
-    queryKey: ['projectMaps', project.id],
+    queryKey: ['projectMaps', project.id, uploadedOnly],
     queryFn: async () => {
       const { data, error } = await createClient().GET('/api/v0.1/projects/{project_id}/maps', {
-        params: { path: { project_id: project.id }, query: { activeOnly: false } },
+        params: { path: { project_id: project.id }, query: { activeOnly: uploadedOnly } },
       });
       if (error) return [];
       return data?.maps ?? [];
     },
   });
+
+  // 未選択のままだと Selector の表示（先頭マップ）と中身がずれるので、先頭マップを既定の選択とする。
+  // フィルタで選択中のマップが一覧から外れた場合も先頭に戻す
+  const selectedMap = maps?.includes(pickedMap) ? pickedMap : (maps?.[0] ?? '');
 
   // 選択マップのサーバーモデル（バイナリ）
   const { data: serverModel } = useQuery({
@@ -113,7 +123,7 @@ const Component: FC<ProjectDetailsMapsTabProps> = ({ className, project }) => {
   }, [allProjects, project.id]);
 
   const handleSelectMap = useCallback((mapName: string) => {
-    setSelectedMap(mapName);
+    setPickedMap(mapName);
     setSelectedFile(null);
     setLocalBuffer(null);
     setLocalFileType(null);
@@ -175,10 +185,24 @@ const Component: FC<ProjectDetailsMapsTabProps> = ({ className, project }) => {
   return (
     <div className={className}>
       <FlexColumn gap={16} align='flex-start'>
-        <FlexColumn gap={4} align='flex-start'>
-          <Text text='Map' />
-          <Selector onChange={handleSelectMap} options={maps ?? []} value={selectedMap} fontSize='sm' disabled={(maps ?? []).length === 0} />
-        </FlexColumn>
+        <FlexRow gap={24} align='flex-end' wrap='wrap'>
+          <FlexColumn gap={4} align='flex-start'>
+            <Text text='Map' />
+            {/* Selector は表示値をマウント時にしか取り込まないため、一覧の取得後に作り直す */}
+            <Selector
+              key={`${uploadedOnly}-${maps === undefined ? 'loading' : 'ready'}`}
+              onChange={handleSelectMap}
+              options={maps ?? []}
+              value={selectedMap}
+              fontSize='sm'
+              disabled={(maps ?? []).length === 0}
+            />
+          </FlexColumn>
+          <FlexRow gap={8} align='center' className={`${className}__filter`}>
+            <Switch label='Show only maps with uploaded data' checked={uploadedOnly} onChange={setUploadedOnly} size='small' />
+            <Text text='Uploaded only' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
+          </FlexRow>
+        </FlexRow>
 
         {selectedMap && (
           <>
@@ -282,6 +306,11 @@ const Component: FC<ProjectDetailsMapsTabProps> = ({ className, project }) => {
 
 export const ProjectDetailsMapsTab = styled(Component)`
   width: 100%;
+
+  /* Switch(20px) を Selector の行の高さに合わせ、縦中央を揃える */
+  &__filter {
+    min-height: 32px;
+  }
 
   &__preview {
     width: 100%;
