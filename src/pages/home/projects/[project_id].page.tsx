@@ -1,12 +1,12 @@
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { BiBarChart, BiUser, BiKey, BiLineChart, BiChevronRight, BiCube } from 'react-icons/bi';
 
 import { ProjectDetailsApiKeysTab } from './tabs/ProjectDetailsApiKeysTab';
-import { ProjectDetailsMapsTab } from './tabs/ProjectDetailsMapsTab';
 import { ProjectDetailsMembersTab } from './tabs/ProjectDetailsMembersTab';
 import { ProjectDetailsSessionsTab } from './tabs/ProjectDetailsSessionsTab';
 
@@ -25,6 +25,11 @@ import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { useSidebar } from '@src/hooks/useSidebar';
 import { InnerContent } from '@src/pages/_app.page';
 import { getCookie, COOKIE_NAMES } from '@src/utils/security/cookies';
+
+// Maps タブは three と 3D モデルローダーに依存するため、開かれるまで読み込まない
+const ProjectDetailsMapsTab = dynamic(() => import('./tabs/ProjectDetailsMapsTab').then((mod) => mod.ProjectDetailsMapsTab), {
+  ssr: false,
+});
 
 type TabType = 'sessions' | 'members' | 'api-keys' | 'maps';
 
