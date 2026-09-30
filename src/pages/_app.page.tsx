@@ -120,28 +120,36 @@ export default function App({ Component, pageProps }: AppProps) {
 
   useEffect(() => {
     let timeout: NodeJS.Timeout | null = null;
+    // 遷移が重なるとキャンセルされた側の routeChangeError が後続の遷移開始より後に届くため、
+    // 最後に始まった遷移の URL 以外の完了・エラーは無視する
+    let activeUrl: string | null = null;
 
-    const handleStart = () => {
+    const handleStart = (url: string) => {
+      if (timeout) clearTimeout(timeout);
+      activeUrl = url;
       // 200ms以上かかる遷移のみローディングを表示（チラつき防止）
       timeout = setTimeout(() => setIsPageLoading(true), 200);
     };
-    const handleComplete = () => {
+    const handleComplete = (url: string) => {
+      if (url !== activeUrl) return;
       if (timeout) {
         clearTimeout(timeout);
         timeout = null;
       }
+      activeUrl = null;
       setIsPageLoading(false);
     };
+    const handleError = (_err: unknown, url: string) => handleComplete(url);
 
     Router.events.on('routeChangeStart', handleStart);
     Router.events.on('routeChangeComplete', handleComplete);
-    Router.events.on('routeChangeError', handleComplete);
+    Router.events.on('routeChangeError', handleError);
 
     return () => {
       if (timeout) clearTimeout(timeout);
       Router.events.off('routeChangeStart', handleStart);
       Router.events.off('routeChangeComplete', handleComplete);
-      Router.events.off('routeChangeError', handleComplete);
+      Router.events.off('routeChangeError', handleError);
     };
   }, []);
 

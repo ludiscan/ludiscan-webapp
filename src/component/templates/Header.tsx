@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
+import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -20,12 +21,16 @@ import { Text } from '@src/component/atoms/Text';
 import { IconLabelRow } from '@src/component/molecules/IconLabelRow';
 import { EllipsisMenu, Menu } from '@src/component/molecules/Menu';
 import { DesktopLayout, MobileLayout } from '@src/component/molecules/responsive';
-import { UpdateHistoryModal } from '@src/component/organisms/UpdateHistoryModal';
 import { useAuth } from '@src/hooks/useAuth';
 import { useIsDesktop } from '@src/hooks/useIsDesktop';
 import { useLocale } from '@src/hooks/useLocale';
 import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { dimensions, zIndexes } from '@src/styles/style';
+
+// react-markdown / remark-gfm を Header を使う全ページの初期 JS から外す
+const UpdateHistoryModal = dynamic(() => import('@src/component/organisms/UpdateHistoryModal').then((mod) => mod.UpdateHistoryModal), {
+  ssr: false,
+});
 
 const LAST_VIEWED_VERSION_KEY = 'ludiscan-last-viewed-version';
 
@@ -48,6 +53,8 @@ const Component: FC<HeaderProps> = ({ className, title, onToggleSidebar, iconTit
   const pathname = usePathname();
 
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  // 一度開いたら閉じてもマウントを残し、閉じるアニメーションを残し、2 回目以降はすぐ開けるようにする
+  const [hasOpenedUpdateModal, setHasOpenedUpdateModal] = useState(false);
   const [hasUnreadUpdates, setHasUnreadUpdates] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const lastScrollY = useRef(0);
@@ -118,6 +125,7 @@ const Component: FC<HeaderProps> = ({ className, title, onToggleSidebar, iconTit
 
   const handleOpenUpdateModal = useCallback(() => {
     setIsUpdateModalOpen(true);
+    setHasOpenedUpdateModal(true);
     setHasUnreadUpdates(false);
   }, []);
 
@@ -249,7 +257,7 @@ const Component: FC<HeaderProps> = ({ className, title, onToggleSidebar, iconTit
           </EllipsisMenu>
         </MobileLayout>
       </FlexRow>
-      <UpdateHistoryModal isOpen={isUpdateModalOpen} onClose={handleCloseUpdateModal} />
+      {hasOpenedUpdateModal && <UpdateHistoryModal isOpen={isUpdateModalOpen} onClose={handleCloseUpdateModal} />}
     </PanelCard>
   );
 };

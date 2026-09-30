@@ -89,7 +89,9 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
   const [map, setMap] = useState<string | ArrayBuffer | null>(null);
   const [modelType, setModelType] = useState<'gltf' | 'glb' | 'obj' | 'server' | null>(null);
   const [serverModelFileType, setServerModelFileType] = useState<ModelFileType | null>(null);
-  const [dpr, setDpr] = useState(2);
+  // 端末の DPR を超えて描いても見た目は変わらずピクセル数だけ増えるので、端末値（上限 2）までにする
+  const [maxDpr] = useState(() => (typeof window === 'undefined' ? 1 : Math.min(2, window.devicePixelRatio || 1)));
+  const [dpr, setDpr] = useState(maxDpr);
 
   // ローカルファイルの一時表示用状態
   const [localModel, setLocalModel] = useState<LocalModelData | null>(null);
@@ -331,10 +333,15 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
     prevPointListLengthRef.current = pointList.length;
   }, [pointList.length, announceStatus, t]);
 
-  const handleOnPerformance = useCallback((api: PerformanceMonitorApi) => {
-    setDpr(Math.floor(0.5 + 1.5 * api.factor));
-    // setPerformance(api);
-  }, []);
+  const handleOnPerformance = useCallback(
+    (api: PerformanceMonitorApi) => {
+      // 0.5 刻みに丸めて、factor が少し変わるたびに再レンダーしないようにする。
+      // 下限 1 が無いと factor < 1/3 で dpr が 0 になり canvas が描画されなくなる
+      const next = Math.round((0.5 + 1.5 * api.factor) * 2) / 2;
+      setDpr(Math.min(maxDpr, Math.max(1, next)));
+    },
+    [maxDpr],
+  );
 
   // ローカルモデルが設定されている場合はそれを使用、なければサーバーモデルを使用
   const activeBuffer = useMemo(() => {
@@ -524,11 +531,11 @@ const Component: FC<HeatmapViewerProps> = ({ className, service, isEmbed = false
         );
       await exportHeatmap(task, d, generalLogKeys, mapContent, mapList, store.getState().heatmapCanvas);
       // 成功メッセージ
-      toast.showToast('Export completed successfully', 3000, 'success');
+      toast.showToast('Export completed successfully', 3, 'success');
     } catch (error) {
       // eslint-disable-next-line
       console.error('エクスポート中にエラーが発生しました:', error);
-      toast.showToast('Export failed', 3000, 'error');
+      toast.showToast('Export failed', 3, 'error');
     }
   }, [generalLogKeys, mapContent, mapList, service, store, task, toast]);
 

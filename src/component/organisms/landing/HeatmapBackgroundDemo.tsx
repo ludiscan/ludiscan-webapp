@@ -21,11 +21,13 @@ const HeatmapGrid: FC = () => {
   const hotspots = useRef<{ x: number; z: number; intensity: number; decay: number }[]>([]);
 
   const dummy = useMemo(() => new THREE.Object3D(), []);
+  // 毎フレーム cellCount 回の Color 生成で GC が走らないよう 1 つを使い回す
+  const color = useMemo(() => new THREE.Color(), []);
+  const waveX = useRef<Float32Array>(new Float32Array(gridSize));
+  const waveZ = useRef<Float32Array>(new Float32Array(gridSize));
 
   // Heatmap color function: blue -> cyan -> green -> yellow -> red
-  const getHeatmapColor = (intensity: number): THREE.Color => {
-    const color = new THREE.Color();
-
+  const setHeatmapColor = (intensity: number) => {
     if (intensity < 0.25) {
       // Blue to Cyan
       const t = intensity / 0.25;
@@ -43,8 +45,6 @@ const HeatmapGrid: FC = () => {
       const t = (intensity - 0.75) / 0.25;
       color.setRGB(1, 1 - t * 0.8, 0);
     }
-
-    return color;
   };
 
   // Initialize positions
@@ -78,9 +78,13 @@ const HeatmapGrid: FC = () => {
 
       if (hotspot.intensity <= 0) return false;
 
-      // Apply hotspot influence to nearby cells
-      for (let x = 0; x < gridSize; x++) {
-        for (let z = 0; z < gridSize; z++) {
+      // 距離 4 以上は influence が 0 なので、半径 3 の範囲だけ見れば結果は同じ
+      const minX = Math.max(0, hotspot.x - 3);
+      const maxX = Math.min(gridSize - 1, hotspot.x + 3);
+      const minZ = Math.max(0, hotspot.z - 3);
+      const maxZ = Math.min(gridSize - 1, hotspot.z + 3);
+      for (let x = minX; x <= maxX; x++) {
+        for (let z = minZ; z <= maxZ; z++) {
           const dx = x - hotspot.x;
           const dz = z - hotspot.z;
           const distance = Math.sqrt(dx * dx + dz * dz);
@@ -93,11 +97,15 @@ const HeatmapGrid: FC = () => {
       return true;
     });
 
-    // Add base wave pattern
+    // Add base wave pattern（sin は x、cos は z だけに依存するので軸ごとに 1 回ずつ計算）
+    for (let i = 0; i < gridSize; i++) {
+      waveX.current[i] = Math.sin(i * 0.3 + time * 0.5);
+      waveZ.current[i] = Math.cos(i * 0.3 + time * 0.3);
+    }
     for (let x = 0; x < gridSize; x++) {
       for (let z = 0; z < gridSize; z++) {
         const idx = z * gridSize + x;
-        const wave = Math.sin(x * 0.3 + time * 0.5) * Math.cos(z * 0.3 + time * 0.3) * 0.15 + 0.15;
+        const wave = waveX.current[x] * waveZ.current[z] * 0.15 + 0.15;
         targetIntensities.current[idx] = Math.min(1, targetIntensities.current[idx] + wave);
       }
     }
@@ -124,7 +132,7 @@ const HeatmapGrid: FC = () => {
       meshRef.current.setMatrixAt(i, dummy.matrix);
 
       // Color based on intensity
-      const color = getHeatmapColor(intensity);
+      setHeatmapColor(intensity);
       meshRef.current.setColorAt(i, color);
     }
 

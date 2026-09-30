@@ -19,11 +19,6 @@ export default function Document() {
         <link rel='shortcut icon' href='/favicon/favicon.ico' />
         <link rel='apple-touch-icon' sizes='180x180' href='/favicon/apple-touch-icon.png' />
         <link rel='manifest' href='/favicon/site.webmanifest' />
-
-        {/* Fonts */}
-        <link rel='preconnect' href='https://fonts.googleapis.com' />
-        <link rel='preconnect' href='https://fonts.gstatic.com' crossOrigin='anonymous' />
-        <link href='https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap' rel='stylesheet' />
       </Head>
       <body style={{ padding: 0, margin: 0 }} suppressHydrationWarning>
         <Main />

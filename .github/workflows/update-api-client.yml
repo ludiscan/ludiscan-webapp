@@ -1,17 +1,15 @@
 name: Update API Client
 
 on:
-  repository_dispatch:
-    types: [swagger_updated]
   workflow_dispatch:
     inputs:
       version:
-        description: 'API version'
+        description: 'API version (e.g., 1.7.0)'
         required: true
         type: string
       swagger_url:
-        description: 'Swagger JSON URL'
-        required: true
+        description: 'Swagger JSON URL (defaults to versions/v<version>/swagger.json in ludiscan-api-specs)'
+        required: false
         type: string
 
 permissions:
@@ -46,12 +44,10 @@ jobs:
       - name: Get version and URL
         id: get-params
         run: |
-          if [ "${{ github.event_name }}" == "repository_dispatch" ]; then
-            VERSION="${{ github.event.client_payload.version }}"
-            SWAGGER_URL="${{ github.event.client_payload.swagger_url }}"
-          else
-            VERSION="${{ inputs.version }}"
-            SWAGGER_URL="${{ inputs.swagger_url }}"
+          VERSION="${{ inputs.version }}"
+          SWAGGER_URL="${{ inputs.swagger_url }}"
+          if [ -z "$SWAGGER_URL" ]; then
+            SWAGGER_URL="https://raw.githubusercontent.com/ludiscan/ludiscan-api-specs/refs/heads/main/versions/v${VERSION}/swagger.json"
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "swagger_url=$SWAGGER_URL" >> $GITHUB_OUTPUT
@@ -60,7 +56,7 @@ jobs:
 
       - name: Download swagger.json
         run: |
-          curl -L -o swagger.json "${{ steps.get-params.outputs.swagger_url }}"
+          curl -fL -o swagger.json "${{ steps.get-params.outputs.swagger_url }}"
           echo "Downloaded swagger.json from ${{ steps.get-params.outputs.swagger_url }}"
 
       - name: Generate API types

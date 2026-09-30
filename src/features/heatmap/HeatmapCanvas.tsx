@@ -241,7 +241,6 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
       const defaultZ = DEFAULT_WAYPOINT_Z;
       const hit = getHeightOnModel(defaultX, defaultZ);
       if (!hit) {
-        // console.warn('モデル表面の交差点が見つかりませんでした');
         return;
       }
 
@@ -249,7 +248,6 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
         id: crypto.randomUUID(), // または任意の一意な文字列生成
         position: hit.clone(),
       };
-      // console.log('新しいウェイポイントを追加:', newWp, '位置:', newWp.position);
       setWaypoints((prev) => [...prev, newWp]);
       setSelectedWaypointId(newWp.id); // 追加後に自動で選択状態にする
     };
@@ -424,7 +422,6 @@ const HeatMapCanvasComponent: FC<HeatmapCanvasProps> = ({
       const max = controls.maxDistance ?? fitDist * MAX_DISTANCE_MULTIPLIER;
 
       const targetDist = clamp(fitDist * (ZOOM_BASE_VALUE / clamp(percent, ZOOM_MIN_PERCENT, ZOOM_MAX_PERCENT)), min, max);
-      // console.log('targetDist', targetDist, 'min', min, 'max', max, 'percent', percent);
 
       const cam = camera as PerspectiveCamera;
       const dir = cam.position.clone().sub(controls.target).normalize();
