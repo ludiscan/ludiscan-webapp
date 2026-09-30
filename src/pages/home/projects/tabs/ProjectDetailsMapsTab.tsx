@@ -10,11 +10,13 @@ import { Button } from '@src/component/atoms/Button';
 import { DraggableNumberInput } from '@src/component/atoms/DraggableNumberInput';
 import { FileInput } from '@src/component/atoms/FileInput';
 import { FlexColumn, FlexRow } from '@src/component/atoms/Flex';
+import { Switch } from '@src/component/atoms/Switch';
 import { Text } from '@src/component/atoms/Text';
 import { Selector } from '@src/component/molecules/Selector';
 import { useToast } from '@src/component/templates/ToastContext';
 import { MapModelPreview } from '@src/features/heatmap/MapModelPreview';
 import { getModelFileType } from '@src/features/heatmap/ModelLoader';
+import { useSharedTheme } from '@src/hooks/useSharedTheme';
 import { useImportMap, useMapTransform, useUpdateMapTransform, useUploadMapData } from '@src/hooks/useUploadMapData';
 import { createClient } from '@src/modeles/qeury';
 import { alignmentToTransform, transformToAlignmentPatch } from '@src/utils/heatmap/modelTransform';
@@ -22,6 +24,15 @@ import { alignmentToTransform, transformToAlignmentPatch } from '@src/utils/heat
 export type ProjectDetailsMapsTabProps = {
   className?: string;
   project: Project;
+};
+
+const UPLOADED_ONLY_SWITCH_LABEL = 'Show only maps with uploaded data';
+
+type LocalModel = {
+  mapName: string;
+  file: File;
+  fileType: ModelFileType;
+  buffer: ArrayBuffer;
 };
 
 type Alignment = {
@@ -46,29 +57,37 @@ const IDENTITY: Alignment = {
 
 const Component: FC<ProjectDetailsMapsTabProps> = ({ className, project }) => {
   const { showToast } = useToast();
+  const { theme } = useSharedTheme();
 
-  const [selectedMap, setSelectedMap] = useState('');
+  const [pickedMap, setPickedMap] = useState('');
   const [align, setAlign] = useState<Alignment>(IDENTITY);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [localBuffer, setLocalBuffer] = useState<ArrayBuffer | null>(null);
-  const [localFileType, setLocalFileType] = useState<ModelFileType | null>(null);
+  const [localModel, setLocalModel] = useState<LocalModel | null>(null);
   const [importSourceLabel, setImportSourceLabel] = useState('');
 
   const uploadMapData = useUploadMapData();
   const updateMapTransform = useUpdateMapTransform();
   const importMap = useImportMap();
 
+  // このタブは未アップロードのマップへモデルを上げる場でもあるため、既定は全件表示
+  const [uploadedOnly, setUploadedOnly] = useState(false);
+
   // プロジェクトのマップ名一覧
   const { data: maps } = useQuery({
-    queryKey: ['projectMaps', project.id],
+    queryKey: ['projectMaps', project.id, uploadedOnly],
     queryFn: async () => {
       const { data, error } = await createClient().GET('/api/v0.1/projects/{project_id}/maps', {
-        params: { path: { project_id: project.id }, query: { activeOnly: false } },
+        params: { path: { project_id: project.id }, query: { activeOnly: uploadedOnly } },
       });
       if (error) return [];
       return data?.maps ?? [];
     },
   });
+
+  // 未選択のままだと Selector の表示（先頭マップ）と中身がずれるので、先頭マップを既定の選択とする。
+  // フィルタで選択中のマップが一覧から外れた場合も先頭に戻す
+  const selectedMap = maps?.includes(pickedMap) ? pickedMap : (maps?.[0] ?? '');
+  // 選択マップがフィルタや一覧の更新で切り替わっても、別マップ向けに選んだファイルを使わない
+  const local = localModel?.mapName === selectedMap ? localModel : null;
 
   // 選択マップのサーバーモデル（バイナリ）
   const { data: serverModel } = useQuery({
@@ -92,10 +111,10 @@ const Component: FC<ProjectDetailsMapsTabProps> = ({ className, project }) => {
 
   // サーバーの配置でエディタを初期化（ローカルファイル編集中は触らない）
   useEffect(() => {
-    if (selectedFile) return;
+    if (local) return;
     if (serverTransform === undefined) return;
     setAlign(serverTransform ? { ...IDENTITY, ...transformToAlignmentPatch(serverTransform) } : IDENTITY);
-  }, [serverTransform, selectedFile]);
+  }, [serverTransform, local]);
 
   // インポート元プロジェクト一覧（現在のプロジェクトを除く）
   const { data: allProjects } = useQuery({
@@ -113,38 +132,33 @@ const Component: FC<ProjectDetailsMapsTabProps> = ({ className, project }) => {
   }, [allProjects, project.id]);
 
   const handleSelectMap = useCallback((mapName: string) => {
-    setSelectedMap(mapName);
-    setSelectedFile(null);
-    setLocalBuffer(null);
-    setLocalFileType(null);
+    setPickedMap(mapName);
+    setLocalModel(null);
   }, []);
 
-  const handleFileSelect = useCallback(async (file: File | null) => {
-    if (!file) return;
-    const fileType = getModelFileType(file.name);
-    if (!fileType) {
-      setSelectedFile(null);
-      setLocalBuffer(null);
-      setLocalFileType(null);
-      return;
-    }
-    setSelectedFile(file);
-    setLocalFileType(fileType);
-    setLocalBuffer(await file.arrayBuffer());
-  }, []);
+  const handleFileSelect = useCallback(
+    async (file: File | null) => {
+      if (!file) return;
+      const fileType = getModelFileType(file.name);
+      if (!fileType) {
+        setLocalModel(null);
+        return;
+      }
+      setLocalModel({ mapName: selectedMap, file, fileType, buffer: await file.arrayBuffer() });
+    },
+    [selectedMap],
+  );
 
   const handleUpload = useCallback(async () => {
-    if (!selectedFile || !selectedMap) return;
+    if (!local) return;
     try {
-      await uploadMapData.mutateAsync({ projectId: project.id, mapName: selectedMap, file: selectedFile, transform: alignmentToTransform(align) });
+      await uploadMapData.mutateAsync({ projectId: project.id, mapName: local.mapName, file: local.file, transform: alignmentToTransform(align) });
       showToast('Upload successful', 2, 'success');
-      setSelectedFile(null);
-      setLocalBuffer(null);
-      setLocalFileType(null);
+      setLocalModel(null);
     } catch (error) {
       showToast(error instanceof Error ? error.message : 'Upload failed', 3, 'error');
     }
-  }, [selectedFile, selectedMap, uploadMapData, project.id, align, showToast]);
+  }, [local, uploadMapData, project.id, align, showToast]);
 
   const handleSave = useCallback(async () => {
     if (!selectedMap) return;
@@ -168,17 +182,34 @@ const Component: FC<ProjectDetailsMapsTabProps> = ({ className, project }) => {
     }
   }, [importSourceOptions, importSourceLabel, selectedMap, importMap, project.id, showToast]);
 
-  const previewBuffer = localBuffer ?? serverModel?.buffer ?? null;
-  const previewFileType = localBuffer ? localFileType : (serverModel?.fileType ?? null);
+  const previewBuffer = local?.buffer ?? serverModel?.buffer ?? null;
+  const previewFileType = local ? local.fileType : (serverModel?.fileType ?? null);
   const patch = (p: Partial<Alignment>) => setAlign((prev) => ({ ...prev, ...p }));
 
   return (
     <div className={className}>
       <FlexColumn gap={16} align='flex-start'>
-        <FlexColumn gap={4} align='flex-start'>
-          <Text text='Map' />
-          <Selector onChange={handleSelectMap} options={maps ?? []} value={selectedMap} fontSize='sm' disabled={(maps ?? []).length === 0} />
-        </FlexColumn>
+        <FlexRow gap={24} align='flex-end' wrap='wrap'>
+          <FlexColumn gap={4} align='flex-start'>
+            <Text text='Map' />
+            {/* Selector は表示値をマウント時にしか取り込まないため、実際の選択が変わるたびに作り直す */}
+            <Selector
+              key={selectedMap}
+              onChange={handleSelectMap}
+              options={maps ?? []}
+              value={selectedMap}
+              fontSize='sm'
+              disabled={(maps ?? []).length === 0}
+            />
+          </FlexColumn>
+          <FlexRow gap={8} align='center' className={`${className}__filter`}>
+            <Switch label={UPLOADED_ONLY_SWITCH_LABEL} checked={uploadedOnly} onChange={setUploadedOnly} size='small' />
+            {/* Switch は label をそのまま input の id に使うので、文言側からも切り替えられるよう htmlFor で結ぶ */}
+            <label htmlFor={UPLOADED_ONLY_SWITCH_LABEL} className={`${className}__filterLabel`}>
+              <Text text='Uploaded only' fontSize={theme.typography.fontSize.sm} color={theme.colors.text.secondary} />
+            </label>
+          </FlexRow>
+        </FlexRow>
 
         {selectedMap && (
           <>
@@ -251,9 +282,9 @@ const Component: FC<ProjectDetailsMapsTabProps> = ({ className, project }) => {
               <Text text={`Upload 3D model for "${selectedMap}"`} />
               <FlexRow gap={8} align='center'>
                 <FileInput accept='.obj,.fbx' onChange={handleFileSelect} buttonText='Select OBJ/FBX File' fontSize='sm' />
-                {selectedFile && <Text text={selectedFile.name} />}
+                {local && <Text text={local.file.name} />}
               </FlexRow>
-              <Button scheme='primary' fontSize='sm' onClick={handleUpload} disabled={!selectedFile || uploadMapData.isPending}>
+              <Button scheme='primary' fontSize='sm' onClick={handleUpload} disabled={!local || uploadMapData.isPending}>
                 <Text text={uploadMapData.isPending ? 'Uploading...' : 'Upload'} />
               </Button>
             </FlexColumn>
@@ -282,6 +313,29 @@ const Component: FC<ProjectDetailsMapsTabProps> = ({ className, project }) => {
 
 export const ProjectDetailsMapsTab = styled(Component)`
   width: 100%;
+
+  /* Switch(20px) を Selector の行の高さに合わせ、縦中央を揃える */
+  &__filter {
+    min-height: 32px;
+  }
+
+  /* Switch(40×20) と文言の label の見た目は変えず、タッチ範囲だけ 44px に広げる（Button と同じ方式） */
+  &__filter > label {
+    position: relative;
+    cursor: pointer;
+  }
+
+  &__filter > label::before {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    inline-size: 100%;
+    min-inline-size: var(--touch-target-min-size-mobile);
+    block-size: 100%;
+    min-block-size: var(--touch-target-min-size-mobile);
+    content: '';
+    transform: translate(-50%, -50%);
+  }
 
   &__preview {
     width: 100%;

@@ -5,7 +5,7 @@
  * HeaderのハンバーガーメニューとResponsiveSidebarの連携に使用
  */
 
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import type { FC, ReactNode } from 'react';
 
@@ -62,7 +62,10 @@ export const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
     }
   }, []);
 
-  return <SidebarContext.Provider value={{ isOpen, toggle, open, close, closeIfMobile }}>{children}</SidebarContext.Provider>;
+  // _app の再レンダー（ページ遷移ごとのローディング表示切り替え等）で useSidebar の利用側まで再レンダーされないようにする
+  const value = useMemo(() => ({ isOpen, toggle, open, close, closeIfMobile }), [isOpen, toggle, open, close, closeIfMobile]);
+
+  return <SidebarContext.Provider value={value}>{children}</SidebarContext.Provider>;
 };
 
 export const useSidebar = (): SidebarContextValue => {

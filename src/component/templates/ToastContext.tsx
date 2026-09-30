@@ -1,8 +1,8 @@
 // ToastContext.tsx
 
+import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
-import { motion, AnimatePresence } from 'framer-motion';
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo } from 'react';
 
 import type { Theme } from '@emotion/react';
 import type { ReactNode, FC, CSSProperties } from 'react';
@@ -19,6 +19,7 @@ export interface ToastItem {
   message: string;
   type: ToastType;
   duration: number; // 表示時間(秒)
+  leaving: boolean;
 }
 
 export interface ToastContextValue {
@@ -101,7 +102,32 @@ function getTextColor(theme: Theme, type: ToastType): string {
   return theme.colors.semantic.info.contrast;
 }
 
-const ToastMessageBase = styled.div<{ $type: ToastType }>`
+const TOAST_ANIMATION_MS = 300;
+const MIN_TOAST_SECONDS = 4;
+
+const toastIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
+const toastOut = keyframes`
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+`;
+
+const ToastMessage = styled.div<{ $type: ToastType; $leaving: boolean }>`
   padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.md};
   margin-top: ${({ theme }) => theme.spacing.sm};
   font-size: ${({ theme }) => theme.typography.fontSize.sm};
@@ -109,9 +135,8 @@ const ToastMessageBase = styled.div<{ $type: ToastType }>`
   background-color: ${({ theme, $type }) => getBackgroundColor(theme, $type)};
   border-radius: ${({ theme }) => theme.borders.radius.sm};
   box-shadow: ${({ theme }) => theme.shadows.md};
+  animation: ${({ $leaving }) => ($leaving ? toastOut : toastIn)} ${TOAST_ANIMATION_MS}ms ease forwards;
 `;
-
-const ToastMessage = motion(ToastMessageBase);
 
 // Get ARIA attributes based on toast type
 // Error/warning: assertive (important, interrupt)
@@ -129,23 +154,18 @@ const ToastContainer: FC<ToastContainerProps> = ({ toasts, position }) => {
 
   return (
     <div style={containerStyle}>
-      <AnimatePresence>
-        {toasts.map((toast) => (
-          <ToastMessage
-            key={toast.id}
-            $type={toast.type}
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 30 }}
-            transition={{ duration: 0.3 }}
-            role={getRole(toast.type)}
-            aria-live={getAriaLive(toast.type)}
-            aria-atomic='true'
-          >
-            {toast.message}
-          </ToastMessage>
-        ))}
-      </AnimatePresence>
+      {toasts.map((toast) => (
+        <ToastMessage
+          key={toast.id}
+          $type={toast.type}
+          $leaving={toast.leaving}
+          role={getRole(toast.type)}
+          aria-live={getAriaLive(toast.type)}
+          aria-atomic='true'
+        >
+          {toast.message}
+        </ToastMessage>
+      ))}
     </div>
   );
 };
@@ -154,28 +174,33 @@ export const ToastProvider: FC<ToastProviderProps> = ({ children, position = 'bo
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
   // showToast関数
-  const showToast = useCallback((message: string, duration: number = 2, type: ToastType = 'info', delay: number = 0) => {
+  const showToast = useCallback((message: string, requestedDuration: number = MIN_TOAST_SECONDS, type: ToastType = 'info', delay: number = 0) => {
+    // 呼び出し側の 1〜2 秒指定では読む前に消えるため下限を設ける
+    const duration = Math.max(requestedDuration, MIN_TOAST_SECONDS);
     const id = toastIdCounter++;
     const newToast: ToastItem = {
       id,
       message,
       type,
       duration,
+      leaving: false,
     };
 
     // delay後に追加
     setTimeout(() => {
       setToasts((prev) => [...prev, newToast]);
-      // duration後に自動削除
+      // duration後に消えるアニメーションを始め、終わってから削除
       setTimeout(() => {
-        setToasts((prev) => prev.filter((t) => t.id !== id));
+        setToasts((prev) => prev.map((t) => (t.id === id ? { ...t, leaving: true } : t)));
+        setTimeout(() => {
+          setToasts((prev) => prev.filter((t) => t.id !== id));
+        }, TOAST_ANIMATION_MS);
       }, duration * 1000);
     }, delay * 1000);
   }, []);
 
-  const value: ToastContextValue = {
-    showToast,
-  };
+  // トーストの増減で useToast を使う全コンポーネントが再レンダーされないよう参照を固定する
+  const value: ToastContextValue = useMemo(() => ({ showToast }), [showToast]);
 
   return (
     <ToastContext.Provider value={value}>

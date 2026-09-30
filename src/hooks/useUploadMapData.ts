@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import type { ModelTransform } from '@src/utils/heatmap/modelTransform';
+import type { QueryClient } from '@tanstack/react-query';
 
 import { env } from '@src/config/env';
 import { createClient } from '@src/modeles/qeury';
@@ -26,6 +27,13 @@ interface ImportMapParams {
   mapName: string;
   // 取り込み元プロジェクト（閲覧権限が必要）
   sourceProjectId: number;
+}
+
+// モデル本体が変わると、バイナリ・配置情報に加えて「アップロード済みのみ」のマップ一覧も変わる
+function invalidateMapModelQueries(queryClient: QueryClient) {
+  ['mapData', 'mapModelBinary', 'mapTransform', 'mapList', 'projectMaps'].forEach((key) => {
+    queryClient.invalidateQueries({ queryKey: [key] });
+  });
 }
 
 /**
@@ -63,10 +71,7 @@ export function useUploadMapData() {
       return response.json();
     },
     onSuccess: () => {
-      // Invalidate map data queries to refresh available maps
-      queryClient.invalidateQueries({
-        queryKey: ['mapData'],
-      });
+      invalidateMapModelQueries(queryClient);
     },
   });
 }
@@ -138,12 +143,7 @@ export function useImportMap() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['mapData'],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ['mapTransform'],
-      });
+      invalidateMapModelQueries(queryClient);
     },
   });
 }
