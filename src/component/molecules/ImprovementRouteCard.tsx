@@ -491,20 +491,6 @@ export const ImprovementRouteCard = styled(Component)`
     border-radius: ${({ theme }) => theme.borders.radius.sm};
     transition: background-color 0.2s ease;
 
-    &--small {
-      padding: 4px 8px;
-      font-size: 10px;
-    }
-
-    &--secondary {
-      color: ${({ theme }) => theme.colors.text.primary};
-      background-color: ${({ theme }) => theme.colors.surface.interactive};
-
-      &:hover:not(:disabled) {
-        background-color: ${({ theme }) => theme.colors.surface.hover};
-      }
-    }
-
     &:disabled {
       color: ${({ theme }) => theme.colors.text.disabled};
       cursor: not-allowed;
@@ -514,24 +500,38 @@ export const ImprovementRouteCard = styled(Component)`
     &:hover:not(:disabled) {
       background-color: ${({ theme }) => theme.colors.primary.dark};
     }
+  }
 
-    &--cancel {
-      color: ${({ theme }) => theme.colors.text.primary};
-      background-color: ${({ theme }) => theme.colors.surface.interactive};
+  &__actionButton--small {
+    padding: 4px 8px;
+    font-size: 10px;
+  }
 
-      &:hover:not(:disabled) {
-        background-color: ${({ theme }) => theme.colors.surface.hover};
-      }
+  &__actionButton--secondary {
+    color: ${({ theme }) => theme.colors.text.primary};
+    background-color: ${({ theme }) => theme.colors.surface.interactive};
+
+    &:hover:not(:disabled) {
+      background-color: ${({ theme }) => theme.colors.surface.hover};
     }
+  }
 
-    &--visualize {
-      margin-top: ${({ theme }) => theme.spacing.sm};
-      color: ${({ theme }) => theme.colors.secondary.contrast};
-      background-color: ${({ theme }) => theme.colors.secondary.main};
+  &__actionButton--cancel {
+    color: ${({ theme }) => theme.colors.text.primary};
+    background-color: ${({ theme }) => theme.colors.surface.interactive};
 
-      &:hover {
-        background-color: ${({ theme }) => theme.colors.secondary.dark};
-      }
+    &:hover:not(:disabled) {
+      background-color: ${({ theme }) => theme.colors.surface.hover};
+    }
+  }
+
+  &__actionButton--visualize {
+    margin-top: ${({ theme }) => theme.spacing.sm};
+    color: ${({ theme }) => theme.colors.secondary.contrast};
+    background-color: ${({ theme }) => theme.colors.secondary.main};
+
+    &:hover:not(:disabled) {
+      background-color: ${({ theme }) => theme.colors.secondary.dark};
     }
   }
 `;

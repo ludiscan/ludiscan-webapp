@@ -123,7 +123,7 @@
     "style-dictionary": "^5.1.4",
     "stylelint": "^17.16.0",
     "stylelint-config-recess-order": "^6.1.0",
-    "stylelint-config-standard": "^38.0.0",
+    "stylelint-config-standard": "^40.0.0",
     "ts-jest": "^29.4.15",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",

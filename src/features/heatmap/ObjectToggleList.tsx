@@ -304,11 +304,11 @@ export const ObjectToggleList = styled(Component)`
     &:active:not(:disabled) {
       background: ${({ theme }) => theme.colors.surface.pressed};
     }
+  }
 
-    &--disabled {
-      cursor: not-allowed;
-      opacity: 0.3;
-    }
+  &__bulk-btn--disabled {
+    cursor: not-allowed;
+    opacity: 0.3;
   }
 
   /* レイヤーリスト */

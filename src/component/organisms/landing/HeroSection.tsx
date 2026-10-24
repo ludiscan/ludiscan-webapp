@@ -233,16 +233,16 @@ export const HeroSection = styled(Component)`
     &:nth-of-type(1) {
       animation-delay: 0.3s;
     }
+  }
 
-    &--accent {
-      background: linear-gradient(135deg, #00f5ff 0%, #a890d3 50%, #ffb800 100%);
-      background-clip: text;
-      background-size: 200% 200%;
-      animation:
-        ${slideUp} 0.8s ease-out 0.4s forwards,
-        ${gradientMove} 6s ease-in-out infinite;
-      -webkit-text-fill-color: transparent;
-    }
+  &__title-line--accent {
+    background: linear-gradient(135deg, #00f5ff 0%, #a890d3 50%, #ffb800 100%);
+    background-clip: text;
+    background-size: 200% 200%;
+    animation:
+      ${slideUp} 0.8s ease-out 0.4s forwards,
+      ${gradientMove} 6s ease-in-out infinite;
+    -webkit-text-fill-color: transparent;
   }
 
   &__subtitle {
