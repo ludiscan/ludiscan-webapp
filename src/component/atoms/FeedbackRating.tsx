@@ -65,10 +65,10 @@ export const FeedbackRating = styled(Component)`
       border-color: #999;
       transform: scale(1.1);
     }
+  }
 
-    &--selected {
-      background-color: #e3f2fd;
-      border-color: #2196f3;
-    }
+  &__button--selected {
+    background-color: #e3f2fd;
+    border-color: #2196f3;
   }
 `;

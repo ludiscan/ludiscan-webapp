@@ -69,7 +69,7 @@ const RequiredIndicator = styled.span`
     white-space: nowrap;
     content: ' (required)';
     border-width: 0;
-    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
   }
 `;
 

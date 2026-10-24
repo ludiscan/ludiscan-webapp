@@ -238,30 +238,30 @@ export const Pagination = styled(Component)`
       background-color: ${({ theme }) => theme.colors.surface.hover};
       border-color: ${({ theme }) => theme.colors.primary.main};
     }
+  }
 
-    &--active {
-      color: ${({ theme }) => theme.colors.primary.contrast};
-      cursor: default;
+  &__pageButton--active {
+    color: ${({ theme }) => theme.colors.primary.contrast};
+    cursor: default;
+    background-color: ${({ theme }) => theme.colors.primary.main};
+    border-color: ${({ theme }) => theme.colors.primary.main};
+
+    &:hover:not(:disabled) {
       background-color: ${({ theme }) => theme.colors.primary.main};
       border-color: ${({ theme }) => theme.colors.primary.main};
-
-      &:hover {
-        background-color: ${({ theme }) => theme.colors.primary.main};
-        border-color: ${({ theme }) => theme.colors.primary.main};
-      }
     }
+  }
 
-    &--ellipsis {
-      padding: 0 ${({ theme }) => theme.spacing.xs};
-      font-weight: ${({ theme }) => theme.typography.fontWeight.regular};
-      cursor: default;
+  &__pageButton--ellipsis {
+    padding: 0 ${({ theme }) => theme.spacing.xs};
+    font-weight: ${({ theme }) => theme.typography.fontWeight.regular};
+    cursor: default;
+    background-color: transparent;
+    border: none;
+
+    &:hover {
       background-color: transparent;
       border: none;
-
-      &:hover {
-        background-color: transparent;
-        border: none;
-      }
     }
   }
 
