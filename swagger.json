@@ -7378,7 +7378,23 @@
                     },
                     "result": {
                       "type": "object",
-                      "nullable": true
+                      "nullable": true,
+                      "properties": {
+                        "clusters_generated": {
+                          "type": "number"
+                        },
+                        "improvements_generated": {
+                          "type": "number"
+                        },
+                        "duration_ms": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "clusters_generated",
+                        "improvements_generated",
+                        "duration_ms"
+                      ]
                     },
                     "error_message": {
                       "type": "string",
@@ -7663,9 +7679,6 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": ""
-          },
           "400": {
             "description": "Bad Request",
             "content": {
@@ -7675,6 +7688,12 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "409": {
+            "description": "Related records prevent user deletion"
           }
         },
         "security": [
@@ -8867,7 +8886,7 @@
   "info": {
     "title": "Ludiscan API Documentation",
     "description": "Ludiscan API for game analytics and session tracking",
-    "version": "1.44.0",
+    "version": "1.49.0",
     "contact": {}
   },
   "tags": [],
