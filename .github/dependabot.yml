@@ -1,0 +1,139 @@
+version: 2
+
+updates:
+  # ---------------------------------------------------------------------------
+  # Bun (package.json / bun.lock)
+  # ---------------------------------------------------------------------------
+  - package-ecosystem: bun
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Tokyo
+    # 公開直後の悪意あるバージョン（サプライチェーン攻撃）を避けるため少し寝かせる
+    cooldown:
+      default-days: 3
+      semver-major-days: 14
+      semver-minor-days: 7
+      semver-patch-days: 3
+    open-pull-requests-limit: 10
+    labels:
+      - dependencies
+    commit-message:
+      prefix: chore(deps)
+      prefix-development: chore(deps-dev)
+    ignore:
+      # Next.js / eslint-config-next はメジャーアップデートを手動で行う
+      - dependency-name: next
+        update-types: [version-update:semver-major]
+      - dependency-name: eslint-config-next
+        update-types: [version-update:semver-major]
+      # three と @types/three はバージョンを揃えて手動で上げる
+      - dependency-name: three
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: "@types/three"
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      # Node.js ランタイム (24.x) に合わせる
+      - dependency-name: "@types/node"
+        update-types: [version-update:semver-major]
+    groups:
+      # セキュリティアップデートは 1 PR にまとめる
+      security:
+        applies-to: security-updates
+        patterns: ["*"]
+      react:
+        patterns:
+          - react
+          - react-dom
+          - "@types/react"
+          - "@types/react-dom"
+        update-types: [minor, patch]
+      nextjs:
+        patterns:
+          - next
+          - "@next/*"
+          - eslint-config-next
+        update-types: [minor, patch]
+      three:
+        patterns:
+          - three
+          - "@types/three"
+          - "@react-three/*"
+        update-types: [minor, patch]
+      storybook:
+        patterns:
+          - storybook
+          - "@storybook/*"
+          - eslint-plugin-storybook
+          - "@chromatic-com/storybook"
+          - "@argos-ci/*"
+        update-types: [minor, patch]
+      lint:
+        patterns:
+          - eslint
+          - "eslint-*"
+          - "@eslint/*"
+          - "@typescript-eslint/*"
+          - typescript-eslint
+          - "@tanstack/eslint-plugin-query"
+          - "@react-three/eslint-plugin"
+          - prettier
+          - stylelint
+          - "stylelint-*"
+          - postcss-styled-syntax
+        update-types: [minor, patch]
+      testing:
+        patterns:
+          - jest
+          - "jest-*"
+          - ts-jest
+          - "@jest/*"
+          - "@types/jest"
+          - "@testing-library/*"
+          - happy-dom
+          - "@happy-dom/*"
+          - jsdom
+          - "@types/jsdom"
+        update-types: [minor, patch]
+      # 上記以外の minor / patch はまとめて 1 PR
+      dependencies:
+        dependency-type: production
+        update-types: [minor, patch]
+      dev-dependencies:
+        dependency-type: development
+        update-types: [minor, patch]
+
+  # ---------------------------------------------------------------------------
+  # GitHub Actions
+  # ---------------------------------------------------------------------------
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Tokyo
+    cooldown:
+      default-days: 7
+    labels:
+      - dependencies
+      - area:ci
+    commit-message:
+      prefix: chore(ci)
+    groups:
+      github-actions:
+        patterns: ["*"]
+
+  # ---------------------------------------------------------------------------
+  # Docker (docker/Dockerfile)
+  # ---------------------------------------------------------------------------
+  - package-ecosystem: docker
+    directory: /docker
+    schedule:
+      interval: monthly
+      timezone: Asia/Tokyo
+    labels:
+      - dependencies
+    commit-message:
+      prefix: chore(docker)

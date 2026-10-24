@@ -8571,7 +8571,11 @@ export interface operations {
             id?: number;
             /** @enum {string} */
             status?: 'pending' | 'processing' | 'completed' | 'failed';
-            result?: Record<string, never> | null;
+            result?: {
+              clusters_generated: number;
+              improvements_generated: number;
+              duration_ms: number;
+            } | null;
             error_message?: string | null;
             /** Format: date-time */
             created_at?: string;
@@ -8754,12 +8758,6 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
       /** @description Bad Request */
       400: {
         headers: {
@@ -8768,6 +8766,20 @@ export interface operations {
         content: {
           'application/json': components['schemas']['DefaultErrorResponse'];
         };
+      };
+      /** @description User not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Related records prevent user deletion */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
