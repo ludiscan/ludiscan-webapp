@@ -46,8 +46,8 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
   }, [token]);
 
   // プロジェクトデータを取得してis2Dフラグを取得
+  // eslint-disable-next-line @tanstack/query/exhaustive-deps
   const { data: project } = useQuery({
-    // eslint-disable-next-line @tanstack/query/exhaustive-deps
     queryKey: ['embed-project', projectId, token],
     queryFn: async () => {
       if (!projectId || !apiClient) return null;
@@ -62,8 +62,8 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
 
   const zVisible = !(project?.is2D ?? false);
 
+  // eslint-disable-next-line @tanstack/query/exhaustive-deps
   const { data: createdTask } = useQuery({
-    // eslint-disable-next-line @tanstack/query/exhaustive-deps
     queryKey: ['embed-create-task', projectId, stepSize, zVisible, sessionHeatmapIds, token],
     queryFn: async (): Promise<HeatmapTask | null> => {
       if (!projectId || !apiClient) {
@@ -97,8 +97,8 @@ export function useEmbedHeatmapDataService(projectId: number | undefined, sessio
   }, [createdTask]);
 
   // v0.1 API - normalized density (0-1 range)
+  // eslint-disable-next-line @tanstack/query/exhaustive-deps
   const { data: task } = useQuery({
-    // eslint-disable-next-line @tanstack/query/exhaustive-deps
     queryKey: ['embed-heatmap', taskId, token],
     queryFn: async (): Promise<HeatmapTask | null> => {
       if (!taskId || isNaN(Number(taskId)) || !apiClient) return null;

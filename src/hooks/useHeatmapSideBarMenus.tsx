@@ -32,18 +32,7 @@ import { getRecentMenus } from '@src/utils/localstrage';
  * Must match keys in locales menus object
  */
 export type MenuKey =
-  | 'info'
-  | 'general'
-  | 'map'
-  | 'hotspot'
-  | 'eventlog'
-  | 'fieldObject'
-  | 'timeline'
-  | 'routecoach'
-  | 'aggregation'
-  | 'more'
-  | 'eventDetail'
-  | 'aiSummary';
+  'info' | 'general' | 'map' | 'hotspot' | 'eventlog' | 'fieldObject' | 'timeline' | 'routecoach' | 'aggregation' | 'more' | 'eventDetail' | 'aiSummary';
 
 export type SideBarMenuType = {
   id: MenuKey;
