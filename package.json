@@ -2,7 +2,7 @@
   "name": "ludiscan-webapp",
   "private": false,
   "engines": {
-    "bun": "1.3.x"
+    "bun": "^1.4.4"
   },
   "author": "matuyuhi",
   "description": "",

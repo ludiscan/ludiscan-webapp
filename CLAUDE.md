@@ -69,4 +69,4 @@ Located in `.claude/skills/`:
 
 - **develop** → dev environment (manual)
 - **main** → production (auto via AWS Amplify)
-- Runtime: Node.js 24.9.x, Bun 1.3.x
+- Runtime: Node.js 24.9.x, Bun 1.4.4+
