@@ -29,6 +29,11 @@ updates:
         update-types: [version-update:semver-major]
       - dependency-name: eslint-config-next
         update-types: [version-update:semver-major]
+      # eslint-config-next や eslint-plugin-react 等が新メジャーに追従してから手動で上げる
+      - dependency-name: eslint
+        update-types: [version-update:semver-major]
+      - dependency-name: "@eslint/js"
+        update-types: [version-update:semver-major]
       # three と @types/three はバージョンを揃えて手動で上げる
       - dependency-name: three
         update-types: [version-update:semver-major, version-update:semver-minor]
