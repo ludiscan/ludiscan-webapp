@@ -1,4 +1,4 @@
-import { serialize, parse, type SerializeOptions } from 'cookie';
+import { parseCookie, stringifySetCookie, type SerializeOptions } from 'cookie';
 
 import type { NextApiResponse } from 'next';
 
@@ -54,7 +54,7 @@ export function setSecureCookie(res: NextApiResponse, name: string, value: strin
     ...options,
   };
 
-  const cookie = serialize(name, value, cookieOptions);
+  const cookie = stringifySetCookie({ name, value, ...cookieOptions });
 
   // Handle multiple Set-Cookie headers
   const existingCookies = res.getHeader('Set-Cookie') || [];
@@ -82,7 +82,7 @@ export function clearCookie(res: NextApiResponse, name: string): void {
  */
 export function parseCookies(cookieHeader: string | undefined): Record<string, string | undefined> {
   if (!cookieHeader) return {};
-  return parse(cookieHeader);
+  return parseCookie(cookieHeader);
 }
 
 /**
