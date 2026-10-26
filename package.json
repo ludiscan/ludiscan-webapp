@@ -84,7 +84,7 @@
     "@storybook/nextjs": "^9.1.21",
     "@storybook/test-runner": "^0.26.0",
     "@svgr/webpack": "^8.1.0",
-    "@swc/core": "^1.16.18",
+    "@swc/core": "^1.16.20",
     "@tanstack/eslint-plugin-query": "^5.104.5",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.3",
