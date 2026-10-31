@@ -79,7 +79,7 @@
     "@react-three/eslint-plugin": "^0.1.2",
     "@storybook/addon-docs": "^9.1.21",
     "@storybook/addon-onboarding": "^9.1.21",
-    "@storybook/addon-vitest": "^9.1.21",
+    "@storybook/addon-vitest": "^10.6.1",
     "@storybook/jest": "0.2.3",
     "@storybook/nextjs": "^9.1.21",
     "@storybook/test-runner": "^0.26.0",
